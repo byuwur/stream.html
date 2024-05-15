@@ -1,29 +1,8 @@
-const config = new URLSearchParams(window.location.search).get("mode") ?? "right";
+const config = new URLSearchParams(window.location.search).get("mode") || "right";
 console.log("config=", config);
 document.getElementById("socialHolder").classList.add(config);
 document.getElementById("holder").classList.add(config);
 document.getElementById("iconBox").classList.add(config);
-// Default values ============
-let settings = {
-	options: {
-		pauseTime: "5",
-		inbetweenPauseTime: "5"
-	},
-	colors: {
-		iconBoxColor: "rgba(16, 0, 0, 1)",
-		textBoxColor: "rgba(255, 255, 255, 1)",
-		iconColor: "rgba(255, 255, 255, 1)",
-		fontColor: "rgba(8, 0, 0, 1)"
-	},
-	fonts: {
-		primaryFont: "Courier New",
-		fontWeight: "700",
-		fontSize: "48",
-		textYOffset: "0"
-	}
-};
-
-let values = { values: ["@byUwUr", "/byUwUr", "@byUwUr", "/byUwUr", "@byUwUr"] };
 
 // Appearence values ============
 

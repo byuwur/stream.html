@@ -8,7 +8,7 @@
 		<script src="_TweenMax.min.js" defer></script>
 		<script src="main.settings.js" defer></script>
 		<script defer>
-			const config = new URLSearchParams(window.location.search).get("mode") ?? "start";
+			const config = new URLSearchParams(window.location.search).get("mode") || "start";
 			console.log("config=", config);
 			const configScript = document.createElement("script");
 			configScript.defer = true;
