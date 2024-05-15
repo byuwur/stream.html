@@ -1,24 +1,23 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 	<head>
 		<meta charset="utf-8" />
 		<title>Mateus [byUwUr]</title>
-		<script src="settings-starting.js"></script>
-		<script src="https://ajax.googleapis.com/ajax/libs/webfont/1.6.26/webfont.js"></script>
-		<script src="https://code.jquery.com/jquery-3.0.0.min.js" integrity="sha256-JmvOoLtYsmqlsWxa7mDSLMwa6dZ9rrIdtrrVYRnDRH0=" crossorigin="anonymous"></script>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/1.18.5/TweenMax.min.js"></script>
-		<script src="main.js"></script>
-		<link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet" />
 		<link rel="stylesheet" href="main.css" />
-		<script>
-			function loadWebFont(fontToLoad) {
-			  WebFont.load({ google: { families: [fontToLoad] } });
-			}
-			loadWebFont(settings.fonts.primaryFont);
-			loadWebFont(settings.fonts.subFont);
+		<script src="https://code.jquery.com/jquery-3.0.0.min.js" defer integrity="sha256-JmvOoLtYsmqlsWxa7mDSLMwa6dZ9rrIdtrrVYRnDRH0=" crossorigin="anonymous"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/1.18.5/TweenMax.min.js" defer></script>
+		<script defer>
+			const config = new URLSearchParams(window.location.search).get("mode") ?? "starting";
+			const configScript = document.createElement("script");
+			configScript.defer = true;
+			configScript.src = "settings-" + config + ".js";
+			document.head.appendChild(configScript);
+			const mainScript = document.createElement("script");
+			mainScript.defer = true;
+			mainScript.src = "main.js";
+			document.head.appendChild(mainScript);
 		</script>
 	</head>
-
 	<body>
 		<div id="scene">
 			<div id="bg">

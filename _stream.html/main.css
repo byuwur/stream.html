@@ -50,7 +50,7 @@ body {
 	width: 1920px;
 	top: 0;
 	left: 0;
-	background: url("logo.png") center center no-repeat;
+	background: url("main.png") center center no-repeat;
 	background-size: contain !important;
 	z-index: 1;
 }
