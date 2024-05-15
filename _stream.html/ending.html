@@ -1,0 +1,215 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Mateus [byUwUr]</title>
+		<script src="settings-ending.js"></script>
+		<script src="https://ajax.googleapis.com/ajax/libs/webfont/1.6.26/webfont.js"></script>
+		<script>
+			function loadWebFont(fontToLoad) {
+			  WebFont.load({
+			    google: {
+			      families: [fontToLoad]
+			    }
+			  });
+			}
+
+			loadWebFont(settings.fonts.primaryFont);
+			loadWebFont(settings.fonts.subFont);
+		</script>
+		<link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
+		<link rel="stylesheet" href="main.css">
+	</head>
+	
+	<body>
+		<div id="scene">
+			<div id="bg">
+				<div id="image">
+					<img src="bg.png" onError="this.style.display='none';">
+					<img src="bg.jpg" onError="this.style.display='none';">
+				</div>
+				<div id="video">
+					<video width="1920" height="1080" autoplay loop muted>
+				  		<source src="" type="video/mp4">
+					</video>
+				</div>
+				<div id="overlay"></div>
+				<div id="frame" class="bg-accent"></div>
+			</div>
+
+			<div id="branding">
+				<div id="brandImg">
+				</div>
+				<span id="title" class="primaryFont"></span>
+				<span id="subtitle" class="secondaryFont"></span>
+			</div>
+
+			<div id="updates">
+
+				<div id="social">
+					<div id="tw" class="item">
+						<div class="network">
+							<div class="borderTop"></div>
+							<div class="icon"><i class="fa fa-twitter" aria-hidden="true"></i></div>
+							<div class="inner">
+								<div id="twitterHeader" class="socialHead primaryFont"></div>
+								<div id="twitter" class="socialName primaryFont"></div>
+							</div>
+						</div>
+					</div>
+					<div id="fb" class="item">
+						<div class="network">
+							<div class="borderTop"></div>
+							<div class="icon"><i class="fa fa-facebook" aria-hidden="true"></i></div>
+							<div class="inner">
+								<div id="facebookHeader" class="socialHead primaryFont"></div>
+								<div id="facebook" class="socialName primaryFont"></div>
+							</div>
+						</div>
+					</div>
+					<div id="in" class="item">
+						<div class="network">
+							<div class="borderTop"></div>
+							<div class="icon"><i class="fa fa-instagram" aria-hidden="true"></i></div>
+							<div class="inner">
+								<div id="instagramHeader" class="socialHead primaryFont"></div>
+								<div id="instagram" class="socialName primaryFont"></div>
+							</div>
+						</div>
+					</div>
+					<div id="yt" class="item">
+						<div class="network">
+							<div class="borderTop"></div>
+							<div class="icon"><i class="fa fa-youtube" aria-hidden="true"></i></div>
+							<div class="inner">
+								<div id="youtubeHeader" class="socialHead primaryFont"></div>
+								<div id="youtube" class="socialName primaryFont"></div>
+							</div>
+						</div>
+					</div>
+				</div>
+		
+				<div id="schedule">
+					<div id="week" class="item">
+						<!--div class="day">
+							<div class="borderTop"></div>
+							<div class="inner">
+								<div class="scheduleHead primaryFont">Lunes</div>
+								<div id="mon" class="scheduleTime primaryFont"></div>
+							</div>
+						</div-->
+						<div class="day">
+							<div class="borderTop"></div>
+							<div class="inner">
+								<div class="scheduleHead primaryFont">Martes</div>
+								<div id="tue" class="scheduleTime primaryFont"></div>
+							</div>
+						</div>
+						<div class="day">
+							<div class="borderTop"></div>
+							<div class="inner">
+								<div class="scheduleHead primaryFont">Miércoles</div>
+								<div id="wed" class="scheduleTime primaryFont"></div>
+							</div>
+						</div>
+						<div class="day">
+							<div class="borderTop"></div>
+							<div class="inner">
+								<div class="scheduleHead primaryFont">Jueves</div>
+								<div id="thu" class="scheduleTime primaryFont"></div>
+							</div>
+						</div>
+						<div class="day">
+							<div class="borderTop"></div>
+							<div class="inner">
+								<div class="scheduleHead primaryFont">Viernes</div>
+								<div id="fri" class="scheduleTime primaryFont"></div>
+							</div>
+						</div>
+						<div class="day">
+							<div class="borderTop"></div>
+							<div class="inner">
+								<div class="scheduleHead primaryFont">Sábado</div>
+								<div id="sat" class="scheduleTime primaryFont"></div>
+							</div>
+						</div>
+						<!--div class="day">
+							<div class="borderTop"></div>
+							<div class="inner">
+								<div class="scheduleHead primaryFont">Domingo</div>
+								<div id="sun" class="scheduleTime primaryFont"></div>
+							</div>
+						</div-->
+					</div>
+				</div>
+
+			</div>
+
+			<div id="list">
+				<div id="one" class="event">
+					<div class="borderLeft"></div>
+					<div id="followName" class="name primaryFont">&nbsp;</div>
+					<div id="followLine" class="type secondaryFont"></div>
+				</div>
+
+				<div id="two" class="event">
+					<div class="borderLeft"></div>
+					<div id="tipName" class="name primaryFont">&nbsp;</div>
+					<div id="tipLine" class="type secondaryFont"></div>
+				</div>
+				
+				<div id="three" class="event">
+					<div class="borderLeft"></div>
+					<div id="bigTipName" class="name primaryFont">&nbsp;</div>
+					<div id="bigTipLine" class="type secondaryFont"></div>
+				</div>
+
+				<div id="four" class="event">
+					<div class="borderLeft"></div>
+					<div id="subName" class="name primaryFont">&nbsp;</div>
+					<div id="subLine" class="type secondaryFont"></div>
+				</div>
+
+			</div>
+
+			<div id="countdown">
+				<div id="timer">
+					<div id="time" class="primaryFont"></div>
+					<div id="message" class="secondaryFont"></div>
+					<div id="endMessage" class="primaryFont"></div>
+				</div>
+			</div>
+		</div>
+		<script src="https://code.jquery.com/jquery-3.0.0.min.js" integrity="sha256-JmvOoLtYsmqlsWxa7mDSLMwa6dZ9rrIdtrrVYRnDRH0=" crossorigin="anonymous"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/1.18.5/TweenMax.min.js"></script>
+		<script src="main.js"></script>
+		<script type="text/javascript">
+			function startTimer(duration, display) {
+			    var timer = duration, minutes, seconds;
+			    setInterval(function () {
+			        minutes = parseInt(timer / 60, 10);
+			        seconds = parseInt(timer % 60, 10);
+
+			        minutes = minutes < 10 ? "" + minutes : minutes;
+			        seconds = seconds < 10 ? "0" + seconds : seconds;
+
+			        display.text(minutes + ":" + seconds);
+
+			        if (--timer < 0) {
+			            timer = 0;
+			            $('#time').hide();
+                        $('#message').hide();
+			            $('#endMessage').html(settings.countdown.countdownOverMessage);
+			            $('#endMessage').css("display", "block");
+			        }
+			    }, 1000);
+			}
+			jQuery(function ($) {
+			    var timeOfCountdown = 60 * minutes,
+			        display = $('#time');
+			    startTimer(timeOfCountdown, display);
+			});
+			$("video").attr("loop","loop");
+	</script>
+	</body>
+</html>

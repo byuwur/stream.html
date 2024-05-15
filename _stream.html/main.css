@@ -1,0 +1,412 @@
+@import url(https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css);
+/* Normal Styles */
+* {
+	box-sizing: border-box;
+}
+html, body {
+	font-family: 'Courier New', Courier, monospace;
+	margin: 0;
+	padding: 0;
+	width: 1920px;
+	height: 1080px;
+	overflow: hidden;
+}
+.bg {
+	width: 1920px;
+	height: 1080px;
+}
+#scene {
+	width: 1920px;
+	height: 1080px;
+	position: absolute;
+	top: 0;
+	left: 0;
+	overflow: hidden;
+}
+#frame {
+	position: absolute;
+	width: 1840px;
+	height: 1000px;
+	left: 40px;
+	top: 40px;
+	border-style: solid;
+}
+#branding {
+	position: absolute;
+	top: 50%;
+	margin-top: -250px;
+	text-align: center;
+	display: block;
+	width: 1920px;
+	height: 500px;
+}
+#brandImg {
+	position: absolute;
+	height: 500px;
+	width: 1920px;
+	top: 0;
+	left: 0;
+	background: url("logo.png") center center no-repeat;
+	background-size: contain !important;
+	z-index: 1;
+}
+#title {
+	width: 1920px;
+	display: block;
+	font-size: 124px;
+	margin-top: 142px;
+	z-index: 2;
+	position: absolute;
+}
+#subtitle {
+	width: 1920px;
+	display: block;
+	font-size: 32px;
+	z-index: 2;
+	top: 290px;
+	position: absolute;
+}
+#updates {
+	position: absolute;
+	left: 80px;
+	top: 80px;
+}
+#social {
+	position: absolute;
+	left: 0;
+	top: 0;
+	white-space: nowrap;
+}
+.network {
+	padding-right: 40px;
+}
+.icon {
+	position: absolute;
+	top: 10px;
+	left: 10px;
+	width: 40px;
+	height: 50px;
+	font-size: 40px;
+	overflow: hidden;
+}
+.socialHead, .socialName {
+	padding: 0;
+	position: relative;
+}
+.socialHead {
+	padding-top: 10px;
+	font-size: 14px;
+	line-height: 14px;
+}
+.socialName{
+	font-size: 24px;
+	line-height: 24px;
+	padding-top: 2px;
+}
+#list {
+	position: absolute;
+	bottom: 80px;
+	left: 80px;
+	text-align: left;
+	white-space: nowrap;
+	transform-origin: left bottom;
+}
+.borderTop {
+	position: absolute;
+	height: 2px;
+	width: 100%;
+	top: -2px;
+	left: 0;
+}
+.borderRight {
+	position: absolute;
+	width: 2px;
+	top: 0;
+	right: -2px;
+	height: 100%;
+}
+.borderLeft {
+	position: absolute;
+	width: 2px;
+	top: 0;
+	left: 0;
+	height: 100%;
+}
+.event {
+    position: relative;
+    padding: 0px 40px 20px 20px;
+    margin-top: 20px;
+}
+#list .name, #list .type {
+	padding-right: 10px;
+}
+#list .name {
+	padding-top: 14px;
+	font-size: 20px;
+	line-height: 20px;
+}
+#list .type {
+	padding-top: 2px;
+	font-size: 12px;
+	line-height: 12px;
+}
+.inner {
+	overflow: hidden;
+}
+#social, #schedule {
+	transform-origin: left top;
+}
+#social .inner {
+	margin-left: 60px;
+	padding: 0 0 10px;
+}
+#social .item {
+	position: absolute;
+	top: 0;
+	left: 0;
+}
+#schedule {
+	max-width: 1900px;
+	position: relative;
+	top: -20px;
+}
+.day {
+	float: left;
+	position: relative;
+	margin-right: 20px;
+	margin-top: 20px;
+}
+.day:nth-child(7){
+	margin-right: 0;
+}
+#week .day {
+	padding: 0 10px 10px 10px;
+}
+.scheduleHead, .scheduleTime {
+	position: relative;
+}
+.scheduleHead {
+	padding-top: 10px;
+	font-size: 12px;
+	font-weight: bold;
+	text-align: center;
+}
+.scheduleTime {
+    font-size: 14px;
+    padding-top: 2px;
+    text-align: center;
+}
+/* ------------------- Animations ------------------- */
+/* Social Networks ---------------------------------- */
+#social .borderTop{
+	width: 0;
+}
+.network {
+	width: 0; padding-right: 0;
+}
+.icon {
+	text-indent: -40px;
+}
+.socialHead,.socialName {
+	left: -200px;
+}
+
+#social .animated .borderTop {
+	animation: soBorderTop 14s forwards;
+}
+@keyframes soBorderTop {
+  0% { width: 0;}
+  5% {width: 100%;}
+  95% {width: 100%;}
+  100% {width: 0;}
+}
+#social .animated .network {
+	animation: network 14s forwards;
+}
+@keyframes network {
+  0% { width: 0; padding-right: 0;}
+  1% { width: 0; padding-right: 0;}
+  6% {width: 100%; padding-right: 40px;}
+  94% {width: 100%;padding-right: 40px;}
+  99% {width: 0;padding-right: 0;}
+  100% {width: 0;padding-right: 0;}
+}
+.animated .icon {
+	animation: icon 14s forwards;
+}
+@keyframes icon {
+  0% { text-indent: -40px;}
+  4% { text-indent: -40px;}
+  10% {text-indent: 0px;}
+  90% { text-indent: 0px;}
+  96% { text-indent: -40px;}
+  100% { text-indent: -40px;}
+}
+.animated .socialHead {
+	animation: socialHead 14s forwards;
+}
+@keyframes socialHead {
+  0% { left: -400px;}
+  4% { left: -400px;}
+  11% { left: 0;}
+  89% {left: 0px;}
+  96% {left: -400px;}
+  100% { left: -400px;}
+}
+.animated .socialName {
+	animation: socialName 14s forwards;
+}
+@keyframes socialName {
+  0% { left: -400px;}
+  6% { left: -400px;}
+  13% { left: 0;}
+  87% {left: 0px;}
+  94% {left: -400px;}
+  100% { left: -400px;}
+}
+/* Schedule ---------------------------------- */
+#schedule .item {
+	opacity: 0;
+}
+#schedule .borderTop {
+	top: 60px;
+}
+#schedule .day {
+	top: 20px;
+}
+#schedule .scheduleHead {
+	opacity: 0;
+	left: -60px;
+}
+#schedule .scheduleTime {
+	opacity: 0;
+	left: -60px;
+}
+#schedule .animated {
+	animation: scAnimated 14s forwards;
+}
+@keyframes scAnimated {
+  0% { opacity: 0;}
+  2% { opacity: 0;}
+  6% { opacity: 1;}
+  92% { opacity: 1;}
+  98% { opacity: 0;}
+  100% { opacity: 0;}
+}
+#schedule .animated .borderTop {
+	animation: scBorderTop 14s forwards;
+}
+@keyframes scBorderTop {
+  0% { top: 60px;}
+  8% { top: 0px;}
+  92% { top: 0px;}
+  100% { top: 60px;}
+}
+#schedule .animated .day {
+	animation: day 14s forwards;
+}
+@keyframes day {
+  0% {  top: 20px;}
+  10% { top: 0px;}
+  90% { top: 0px;}
+  100% {top: 20px;}
+}
+#schedule .animated .scheduleHead {
+	animation: scheduleHead 14s forwards
+}
+@keyframes scheduleHead {
+  0% {  opacity: 0; left: -60px;}
+  7% { opacity: 0; left: -60px;}
+  14% { opacity: 1; left: 0px;}
+  86% { opacity: 1; left: 0px;}
+  93% { opacity: 0; left: -60px;}
+  100% {opacity: 0; left: -60px;}
+}
+#schedule .animated .scheduleTime {
+	animation: scheduleTime 14s forwards;
+}
+@keyframes scheduleTime {
+  0% {  opacity: 0; left: -60px;}
+  9% { opacity: 0; left: -60px;}
+  16% { opacity: 1; left: 0px;}
+  84% { opacity: 1; left: 0px;}
+  91% { opacity: 0; left: -60px;}
+  100% {opacity: 0; left: -60px;}
+}
+#countdown {
+	text-align: right;
+	position: absolute;
+	bottom: 80px;
+	right: 80px;
+	font-size: 60px;
+	transform-origin: right bottom;
+	z-index: 999;
+}
+#message {
+	font-size: 24px;
+}
+#endMessage {
+	text-align: right;
+	position: absolute;
+	bottom: 0;
+	right: 0;
+	font-size: 60px;
+	white-space: nowrap;
+	display: none;
+}
+#video video, #image img {
+	position: absolute;
+	left: 0;
+	right: 0;
+	min-width: 1920px;
+	min-height: 1080px;
+}
+#overlay {
+	width: 1920px;
+	height: 1080px;
+	position: absolute;
+	top: 0;
+	left: 0;
+}
+.primaryFont {
+	color: #FFF;
+}
+.secondaryFont {
+	color: #eadc04;
+}
+/* Variable Styles (backup values) - Gets Override in JS 
+#overlay {
+	background: rgba(54, 53, 58, .5);
+}
+.bg-accent {
+	border-color: rgba(20,187,189, 1);
+}
+#frame {
+	border-width: 20px;
+}
+.primaryFont {
+	color: #FFF;
+	font-family: 'Montserrat', sans-serif;
+}
+.secondaryFont {
+	color: #eadc04;
+	font-family: 'Montserrat', sans-serif;
+}
+.borderTop {
+	background: #eadc04;
+}
+.borderRight {
+	background: #eadc04;
+}
+#social {
+	background: rgba(255,255,255, .1);
+}
+.icon {
+	color: #eadc04;;
+}
+.event {
+	background: rgba(255,255,255, .1);
+}
+#brandImg {
+	opacity: .1;
+}
