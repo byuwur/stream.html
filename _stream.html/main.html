@@ -6,17 +6,16 @@
 		<link rel="stylesheet" href="main.css" />
 		<script src="https://code.jquery.com/jquery-3.0.0.min.js" defer integrity="sha256-JmvOoLtYsmqlsWxa7mDSLMwa6dZ9rrIdtrrVYRnDRH0=" crossorigin="anonymous"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/1.18.5/TweenMax.min.js" defer></script>
+		<script src="main.settings.js" defer></script>
 		<script defer>
-			const config = new URLSearchParams(window.location.search).get("mode") ?? "starting";
+			const config = new URLSearchParams(window.location.search).get("mode") ?? "start";
+			console.log("config=", config);
 			const configScript = document.createElement("script");
 			configScript.defer = true;
-			configScript.src = "settings-" + config + ".js";
+			configScript.src = "main." + config + ".js";
 			document.head.appendChild(configScript);
-			const mainScript = document.createElement("script");
-			mainScript.defer = true;
-			mainScript.src = "main.js";
-			document.head.appendChild(mainScript);
 		</script>
+		<script src="main.js" defer></script>
 	</head>
 	<body>
 		<div id="scene">
