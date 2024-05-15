@@ -122,6 +122,6 @@ $(document).ready(() => {
 	// Add Animations
 	const tl = new TimelineMax({ repeat: -1 });
 	$(".item").each(function () {
-		tl.to(this, 0, { onComplete: () => $(this).addClass("animated"), delay: 1 }).to(this, 14, { onComplete: () => $(this).removeClass("animated") });
+		tl.to(this, 0, { onComplete: () => $(this).addClass("animated"), delay: 1 }).to(this, 10, { onComplete: () => $(this).removeClass("animated") });
 	});
 });

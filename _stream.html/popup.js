@@ -14,8 +14,8 @@ let canvas,
 	canvasHeight,
 	ctx;
 
-for (let i = 0; i < values.values.length; i++) {
-	$("#nameHolder").append('<span class="name">' + values.values[i] + "</span>");
+for (let i = 0; i < values.length; i++) {
+	$("#nameHolder").append('<span class="name">' + values[i] + "</span>");
 }
 
 let boxTime = 0.4;
@@ -58,7 +58,7 @@ function animate() {
 	tl.to(square, 0.2, { morphSVG: "#square" });
 
 	// Move Up and Down
-	for (let i = 0; i < values.values.length - 1; i++) {
+	for (let i = 0; i < values.length - 1; i++) {
 		tl.to("#canvasHolder", 0.1, { y: "-=20", delay: settings.options.pauseTime });
 		tl.to(square, 0.2, { morphSVG: "#bigUp" }, "-=.1");
 		tl.to("#iconBox", 0.2, { y: "-=20" }, "-=.2");

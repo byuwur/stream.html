@@ -220,7 +220,7 @@ body {
 	left: -200px;
 }
 #social .animated .borderTop {
-	animation: soBorderTop 14s forwards;
+	animation: soBorderTop 10s forwards;
 }
 @keyframes soBorderTop {
 	0%,
@@ -233,7 +233,7 @@ body {
 	}
 }
 #social .animated .network {
-	animation: network 14s forwards;
+	animation: network 10s forwards;
 }
 @keyframes network {
 	0%,
@@ -250,7 +250,7 @@ body {
 	}
 }
 .animated .icon {
-	animation: icon 14s forwards;
+	animation: icon 10s forwards;
 }
 @keyframes icon {
 	0%,
@@ -265,7 +265,7 @@ body {
 	}
 }
 .animated .socialHead {
-	animation: socialHead 14s forwards;
+	animation: socialHead 10s forwards;
 }
 @keyframes socialHead {
 	0%,
@@ -280,7 +280,7 @@ body {
 	}
 }
 .animated .socialName {
-	animation: socialName 14s forwards;
+	animation: socialName 10s forwards;
 }
 @keyframes socialName {
 	0%,
@@ -312,7 +312,7 @@ body {
 	left: -60px;
 }
 #schedule .animated {
-	animation: scAnimated 14s forwards;
+	animation: scAnimated 10s forwards;
 }
 @keyframes scAnimated {
 	0%,
@@ -327,7 +327,7 @@ body {
 	}
 }
 #schedule .animated .borderTop {
-	animation: scBorderTop 14s forwards;
+	animation: scBorderTop 10s forwards;
 }
 @keyframes scBorderTop {
 	0%,
@@ -340,7 +340,7 @@ body {
 	}
 }
 #schedule .animated .day {
-	animation: day 14s forwards;
+	animation: day 10s forwards;
 }
 @keyframes day {
 	0%,
@@ -353,7 +353,7 @@ body {
 	}
 }
 #schedule .animated .scheduleHead {
-	animation: scheduleHead 14s forwards;
+	animation: scheduleHead 10s forwards;
 }
 @keyframes scheduleHead {
 	0%,
@@ -370,7 +370,7 @@ body {
 	}
 }
 #schedule .animated .scheduleTime {
-	animation: scheduleTime 14s forwards;
+	animation: scheduleTime 10s forwards;
 }
 @keyframes scheduleTime {
 	0%,

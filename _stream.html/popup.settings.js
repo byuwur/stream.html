@@ -1,13 +1,14 @@
+let values = ["@byUwUr", "/byUwUr", "@byUwUr", "/byUwUr", "@byUwUr"];
 let settings = {
 	options: {
 		pauseTime: "5",
 		inbetweenPauseTime: "5"
 	},
 	colors: {
-		iconBoxColor: "rgba(16, 0, 0, 1)",
+		iconBoxColor: "rgba(64, 0, 0, 1)",
 		textBoxColor: "rgba(255, 255, 255, 1)",
 		iconColor: "rgba(255, 255, 255, 1)",
-		fontColor: "rgba(8, 0, 0, 1)"
+		fontColor: "rgba(64, 0, 0, 1)"
 	},
 	fonts: {
 		primaryFont: "Courier New",
@@ -16,5 +17,3 @@ let settings = {
 		textYOffset: "0"
 	}
 };
-
-let values = { values: ["@byUwUr", "/byUwUr", "@byUwUr", "/byUwUr", "@byUwUr"] };
