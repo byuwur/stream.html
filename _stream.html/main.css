@@ -3,8 +3,12 @@
 * {
 	box-sizing: border-box;
 }
-html, body {
-	font-family: 'Courier New', Courier, monospace;
+html,
+body {
+	background: #333;
+	font-family: "Courier New", Courier, monospace;
+	font-weight: 700;
+	color: #fff;
 	margin: 0;
 	padding: 0;
 	width: 1920px;
@@ -89,7 +93,8 @@ html, body {
 	font-size: 40px;
 	overflow: hidden;
 }
-.socialHead, .socialName {
+.socialHead,
+.socialName {
 	padding: 0;
 	position: relative;
 }
@@ -98,7 +103,7 @@ html, body {
 	font-size: 14px;
 	line-height: 14px;
 }
-.socialName{
+.socialName {
 	font-size: 24px;
 	line-height: 24px;
 	padding-top: 2px;
@@ -111,33 +116,36 @@ html, body {
 	white-space: nowrap;
 	transform-origin: left bottom;
 }
-.borderTop {
+.borderTop,
+.borderRight,
+.borderLeft {
 	position: absolute;
+}
+.borderTop {
 	height: 2px;
 	width: 100%;
 	top: -2px;
 	left: 0;
 }
 .borderRight {
-	position: absolute;
 	width: 2px;
 	top: 0;
 	right: -2px;
 	height: 100%;
 }
 .borderLeft {
-	position: absolute;
 	width: 2px;
 	top: 0;
 	left: 0;
 	height: 100%;
 }
 .event {
-    position: relative;
-    padding: 0px 40px 20px 20px;
-    margin-top: 20px;
+	position: relative;
+	padding: 0 40px 20px 20px;
+	margin-top: 20px;
 }
-#list .name, #list .type {
+#list .name,
+#list .type {
 	padding-right: 10px;
 }
 #list .name {
@@ -153,7 +161,8 @@ html, body {
 .inner {
 	overflow: hidden;
 }
-#social, #schedule {
+#social,
+#schedule {
 	transform-origin: left top;
 }
 #social .inner {
@@ -176,13 +185,14 @@ html, body {
 	margin-right: 20px;
 	margin-top: 20px;
 }
-.day:nth-child(7){
+.day:nth-child(7) {
 	margin-right: 0;
 }
 #week .day {
 	padding: 0 10px 10px 10px;
 }
-.scheduleHead, .scheduleTime {
+.scheduleHead,
+.scheduleTime {
 	position: relative;
 }
 .scheduleHead {
@@ -192,79 +202,101 @@ html, body {
 	text-align: center;
 }
 .scheduleTime {
-    font-size: 14px;
-    padding-top: 2px;
-    text-align: center;
+	font-size: 14px;
+	padding-top: 2px;
+	text-align: center;
 }
-/* ------------------- Animations ------------------- */
-/* Social Networks ---------------------------------- */
-#social .borderTop{
+/* Animations */
+#social .borderTop {
 	width: 0;
 }
 .network {
-	width: 0; padding-right: 0;
+	width: 0;
+	padding-right: 0;
 }
 .icon {
 	text-indent: -40px;
 }
-.socialHead,.socialName {
+.socialHead,
+.socialName {
 	left: -200px;
 }
-
 #social .animated .borderTop {
 	animation: soBorderTop 14s forwards;
 }
 @keyframes soBorderTop {
-  0% { width: 0;}
-  5% {width: 100%;}
-  95% {width: 100%;}
-  100% {width: 0;}
+	0%,
+	100% {
+		width: 0;
+	}
+	5%,
+	95% {
+		width: 100%;
+	}
 }
 #social .animated .network {
 	animation: network 14s forwards;
 }
 @keyframes network {
-  0% { width: 0; padding-right: 0;}
-  1% { width: 0; padding-right: 0;}
-  6% {width: 100%; padding-right: 40px;}
-  94% {width: 100%;padding-right: 40px;}
-  99% {width: 0;padding-right: 0;}
-  100% {width: 0;padding-right: 0;}
+	0%,
+	1%,
+	99%,
+	100% {
+		width: 0;
+		padding-right: 0;
+	}
+	6%,
+	94% {
+		width: 100%;
+		padding-right: 40px;
+	}
 }
 .animated .icon {
 	animation: icon 14s forwards;
 }
 @keyframes icon {
-  0% { text-indent: -40px;}
-  4% { text-indent: -40px;}
-  10% {text-indent: 0px;}
-  90% { text-indent: 0px;}
-  96% { text-indent: -40px;}
-  100% { text-indent: -40px;}
+	0%,
+	4%,
+	96%,
+	100% {
+		text-indent: -40px;
+	}
+	10%,
+	90% {
+		text-indent: 0px;
+	}
 }
 .animated .socialHead {
 	animation: socialHead 14s forwards;
 }
 @keyframes socialHead {
-  0% { left: -400px;}
-  4% { left: -400px;}
-  11% { left: 0;}
-  89% {left: 0px;}
-  96% {left: -400px;}
-  100% { left: -400px;}
+	0%,
+	4%,
+	96%,
+	100% {
+		left: -400px;
+	}
+	11%,
+	89% {
+		left: 0;
+	}
 }
 .animated .socialName {
 	animation: socialName 14s forwards;
 }
 @keyframes socialName {
-  0% { left: -400px;}
-  6% { left: -400px;}
-  13% { left: 0;}
-  87% {left: 0px;}
-  94% {left: -400px;}
-  100% { left: -400px;}
+	0%,
+	6%,
+	94%,
+	100% {
+		left: -400px;
+	}
+	13%,
+	87% {
+		left: 0;
+	}
 }
-/* Schedule ---------------------------------- */
+/* Schedule */
 #schedule .item {
 	opacity: 0;
 }
@@ -286,52 +318,76 @@ html, body {
 	animation: scAnimated 14s forwards;
 }
 @keyframes scAnimated {
-  0% { opacity: 0;}
-  2% { opacity: 0;}
-  6% { opacity: 1;}
-  92% { opacity: 1;}
-  98% { opacity: 0;}
-  100% { opacity: 0;}
+	0%,
+	2%,
+	98%,
+	100% {
+		opacity: 0;
+	}
+	6%,
+	92% {
+		opacity: 1;
+	}
 }
 #schedule .animated .borderTop {
 	animation: scBorderTop 14s forwards;
 }
 @keyframes scBorderTop {
-  0% { top: 60px;}
-  8% { top: 0px;}
-  92% { top: 0px;}
-  100% { top: 60px;}
+	0%,
+	100% {
+		top: 60px;
+	}
+	8%,
+	92% {
+		top: 0;
+	}
 }
 #schedule .animated .day {
 	animation: day 14s forwards;
 }
 @keyframes day {
-  0% {  top: 20px;}
-  10% { top: 0px;}
-  90% { top: 0px;}
-  100% {top: 20px;}
+	0%,
+	100% {
+		top: 20px;
+	}
+	10%,
+	90% {
+		top: 0;
+	}
 }
 #schedule .animated .scheduleHead {
-	animation: scheduleHead 14s forwards
+	animation: scheduleHead 14s forwards;
 }
 @keyframes scheduleHead {
-  0% {  opacity: 0; left: -60px;}
-  7% { opacity: 0; left: -60px;}
-  14% { opacity: 1; left: 0px;}
-  86% { opacity: 1; left: 0px;}
-  93% { opacity: 0; left: -60px;}
-  100% {opacity: 0; left: -60px;}
+	0%,
+	7%,
+	93%,
+	100% {
+		opacity: 0;
+		left: -60px;
+	}
+	14%,
+	86% {
+		opacity: 1;
+		left: 0;
+	}
 }
 #schedule .animated .scheduleTime {
 	animation: scheduleTime 14s forwards;
 }
 @keyframes scheduleTime {
-  0% {  opacity: 0; left: -60px;}
-  9% { opacity: 0; left: -60px;}
-  16% { opacity: 1; left: 0px;}
-  84% { opacity: 1; left: 0px;}
-  91% { opacity: 0; left: -60px;}
-  100% {opacity: 0; left: -60px;}
+	0%,
+	9%,
+	91%,
+	100% {
+		opacity: 0;
+		left: -60px;
+	}
+	16%,
+	84% {
+		opacity: 1;
+		left: 0;
+	}
 }
 #countdown {
 	text-align: right;
@@ -354,7 +410,8 @@ html, body {
 	white-space: nowrap;
 	display: none;
 }
-#video video, #image img {
+#video video,
+#image img {
 	position: absolute;
 	left: 0;
 	right: 0;
@@ -368,29 +425,15 @@ html, body {
 	top: 0;
 	left: 0;
 }
-.primaryFont {
-	color: #FFF;
-}
-.secondaryFont {
-	color: #eadc04;
-}
-/* Variable Styles (backup values) - Gets Override in JS 
+/* Variable Styles (backup values) - Gets Override in JS*/
 #overlay {
-	background: rgba(54, 53, 58, .5);
+	background: rgba(54, 53, 58, 0.5);
 }
 .bg-accent {
-	border-color: rgba(20,187,189, 1);
+	border-color: rgba(20, 187, 189, 1);
 }
 #frame {
 	border-width: 20px;
-}
-.primaryFont {
-	color: #FFF;
-	font-family: 'Montserrat', sans-serif;
-}
-.secondaryFont {
-	color: #eadc04;
-	font-family: 'Montserrat', sans-serif;
 }
 .borderTop {
 	background: #eadc04;
@@ -399,14 +442,11 @@ html, body {
 	background: #eadc04;
 }
 #social {
-	background: rgba(255,255,255, .1);
-}
-.icon {
-	color: #eadc04;;
+	background: rgba(255, 255, 255, 0.1);
 }
 .event {
-	background: rgba(255,255,255, .1);
+	background: rgba(255, 255, 255, 0.1);
 }
 #brandImg {
-	opacity: .1;
+	opacity: 0.1;
 }
