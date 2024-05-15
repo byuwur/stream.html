@@ -1,5 +1,4 @@
 @import url(https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css);
-/* Normal Styles */
 * {
 	box-sizing: border-box;
 }
@@ -206,7 +205,6 @@ body {
 	padding-top: 2px;
 	text-align: center;
 }
-/* Animations */
 #social .borderTop {
 	width: 0;
 }
@@ -296,7 +294,6 @@ body {
 		left: 0;
 	}
 }
-/* Schedule */
 #schedule .item {
 	opacity: 0;
 }
@@ -425,7 +422,6 @@ body {
 	top: 0;
 	left: 0;
 }
-/* Variable Styles (backup values) - Gets Override in JS*/
 #overlay {
 	background: rgba(54, 53, 58, 0.5);
 }
@@ -435,15 +431,11 @@ body {
 #frame {
 	border-width: 20px;
 }
-.borderTop {
-	background: #eadc04;
-}
+.borderTop,
 .borderRight {
 	background: #eadc04;
 }
-#social {
-	background: rgba(255, 255, 255, 0.1);
-}
+#social,
 .event {
 	background: rgba(255, 255, 255, 0.1);
 }

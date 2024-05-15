@@ -9,7 +9,7 @@ body {
 }
 #socialHolder {
 	position: absolute;
-	top: 0px;
+	top: 0;
 }
 #socialHolder.left {
 	left: 0;
@@ -36,7 +36,7 @@ body {
 	left: 0;
 	top: 0;
 	overflow: hidden;
-	padding: 0 40px;
+	padding: 0 10px;
 	max-height: 100px;
 	white-space: nowrap;
 }
@@ -87,4 +87,7 @@ body {
 	position: absolute;
 	top: 0;
 	left: 0;
+}
+#svg {
+	enable-background: new 0 0 140 140;
 }
