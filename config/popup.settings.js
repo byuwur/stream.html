@@ -1,3 +1,4 @@
+// order: Facebook, YouTube, Instagram, Twitch, Twitter
 let values = ["@byUwUr", "/byUwUr", "@byUwUr", "/byUwUr", "@byUwUr"];
 let settings = {
 	options: {

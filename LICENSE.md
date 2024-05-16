@@ -1,4 +1,4 @@
-Copyright (c) 2023 Andrés Trujillo [Mateus] byUwUr
+Copyright (c) 2024 Andrés Trujillo [Mateus] byUwUr
 
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
@@ -8,7 +8,7 @@ Copyright (c) 2023 Andrés Trujillo [Mateus] byUwUr
 
 MIT License
 
-Copyright (c) 2023 Andrés Trujillo [Mateus] byUwUr
+Copyright (c) 2024 Andrés Trujillo [Mateus] byUwUr
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

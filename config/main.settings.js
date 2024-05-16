@@ -9,7 +9,7 @@ let commonSettings = {
 		logoScale: 1,
 		frameWidth: 20,
 		sceneTitle: "[Mateus] byUwUr",
-		tagline: "Ya casito empieza."
+		tagline: "Default"
 	},
 	colors: {
 		backgroundOverlay: "rgba(54, 53, 58, 1)",
@@ -22,13 +22,13 @@ let commonSettings = {
 	labels: {
 		displayLabels: "no",
 		labelOneHeading: "¡Suscriptor más reciente!",
-		labelOnePath: "most_recent_subscriber",
+		labelOnePath: "recent_sub", // ../txt/recent_sub.txt
 		labelTwoHeading: "¡Donación más copada!",
-		labelTwoPath: "monthly_top_donator",
+		labelTwoPath: "top_donation", // ../txt/top_donation.txt
 		labelThreeHeading: "¡Donación más reciente!",
-		labelThreePath: "most_recent_donator",
+		labelThreePath: "recent_donation", // ../txt/recent_donation.txt
 		labelFourHeading: "¡Nuevo seguidor!",
-		labelFourPath: "most_recent_follower"
+		labelFourPath: "recent_follower" // ../txt/recent_follower.txt
 	},
 	schedule: {
 		displaySchedule: "no",
@@ -66,7 +66,7 @@ let commonSettings = {
 	},
 	countdown: {
 		displayCountdown: "yes",
-		countdownTime: "3",
+		countdownTime: 3, // minutes
 		countdownMessage: "La cuenta regresiva pa' tramar.",
 		countdownOverMessage: "Vamo' a vé'."
 	},
