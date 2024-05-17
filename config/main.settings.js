@@ -7,9 +7,9 @@ let commonSettings = {
 		displayBranding: "yes",
 		logoOpacity: 0.25,
 		logoScale: 1,
-		frameWidth: 20,
-		sceneTitle: "[Mateus] byUwUr",
-		tagline: "Default"
+		frameWidth: 24,
+		sceneTitle: "",
+		tagline: "[Mateus] byUwUr"
 	},
 	colors: {
 		backgroundOverlay: "rgba(54, 53, 58, 1)",
@@ -49,7 +49,7 @@ let commonSettings = {
 	fonts: {
 		primaryFont: "Courier New",
 		subFont: "Courier New",
-		titleSize: 96,
+		titleSize: 84,
 		titleVerticalOffset: -5,
 		subtitleSize: 48,
 		subtitleVerticalOffset: 0,

@@ -14,7 +14,7 @@ let settings = {
 	fonts: {
 		primaryFont: "Courier New",
 		fontWeight: "700",
-		fontSize: "48",
+		fontSize: "64",
 		textYOffset: "0"
 	}
 };

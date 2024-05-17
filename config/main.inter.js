@@ -2,8 +2,7 @@ let settings = {
 	...commonSettings,
 	options: {
 		...commonSettings.options,
-		sceneTitle: "[Mateus] byUwUr",
-		tagline: "Ya casito empieza."
+		tagline: ""
 	},
 	colors: {
 		...commonSettings.colors,

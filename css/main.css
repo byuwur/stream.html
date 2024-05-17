@@ -1,113 +1,138 @@
 @import url(https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css);
+:root {
+	--font-family: "Courier New", Courier, monospace;
+	--font-color: #fff;
+	--bg-color: #0001;
+	--accent-color: #fff;
+	--font-weight: 700;
+	--border-width: 24px;
+	--small-font-size: 12px;
+	--medium-font-size: 16px;
+	--large-font-size: 24px;
+	--xlarge-font-size: 64px;
+	--xxlarge-font-size: 128px;
+	--padding-right: 48px;
+	--margin-top: 24px;
+	--margin-right: 24px;
+	--width: 1920px;
+	--height: 1080px;
+	--position-absolute: absolute;
+	--animation-duration: 10s;
+	--animation-direction: forwards;
+}
 * {
 	box-sizing: border-box;
 }
 html,
 body {
-	font-family: "Courier New", Courier, monospace;
-	font-weight: 700;
-	color: #fff;
+	font-family: var(--font-family);
+	font-weight: var(--font-weight);
+	color: var(--font-color);
 	margin: 0;
 	padding: 0;
-	width: 1920px;
-	height: 1080px;
+	width: var(--width);
+	height: var(--height);
 	overflow: hidden;
 }
-.bg {
-	width: 1920px;
-	height: 1080px;
-}
+.bg,
 #scene {
-	width: 1920px;
-	height: 1080px;
-	position: absolute;
+	width: var(--width);
+	height: var(--height);
+	position: var(--position-absolute);
 	top: 0;
 	left: 0;
 	overflow: hidden;
 }
 #frame {
-	position: absolute;
-	width: 1840px;
-	height: 1000px;
-	left: 40px;
-	top: 40px;
-	border-style: solid;
+	width: calc(var(--width) - 2 * var(--border-width));
+	height: calc(var(--height) - 2 * var(--border-width));
+	left: var(--border-width);
+	top: var(--border-width);
+	border: var(--border-width) solid var(--accent-color);
+	position: var(--position-absolute);
 }
 #branding {
-	position: absolute;
+	width: auto;
+	height: 500px;
+	position: var(--position-absolute);
 	top: 50%;
 	margin-top: -250px;
 	text-align: center;
-	display: block;
-	width: 1920px;
-	height: 500px;
 }
 #brandImg {
-	position: absolute;
+	width: var(--width);
 	height: 500px;
-	width: 1920px;
-	top: 0;
-	left: 0;
 	background: url("../img/main.png") center center no-repeat;
 	background-size: contain !important;
+	position: var(--position-absolute);
+	top: 0;
+	left: 0;
 	z-index: 1;
+	opacity: 0.1;
 }
 #title {
-	width: 1920px;
-	display: block;
-	font-size: 124px;
+	width: var(--width);
+	font-size: var(--xxlarge-font-size);
 	margin-top: 142px;
 	z-index: 2;
-	position: absolute;
+	position: var(--position-absolute);
 }
 #subtitle {
-	width: 1920px;
-	display: block;
-	font-size: 32px;
-	z-index: 2;
+	width: var(--width);
+	font-size: var(--large-font-size);
 	top: 290px;
-	position: absolute;
+	z-index: 2;
+	position: var(--position-absolute);
+}
+#updates,
+#social,
+#list,
+#countdown,
+#endMessage {
+	position: var(--position-absolute);
 }
 #updates {
-	position: absolute;
 	left: 80px;
 	top: 80px;
 }
 #social {
-	position: absolute;
 	left: 0;
 	top: 0;
 	white-space: nowrap;
+	transform-origin: left top;
 }
 .network {
-	padding-right: 40px;
+	padding-right: var(--padding-right);
+	width: 0;
+	padding-right: 0;
 }
 .icon {
-	position: absolute;
-	top: 10px;
-	left: 10px;
 	width: 40px;
 	height: 50px;
 	font-size: 40px;
 	overflow: hidden;
+	position: var(--position-absolute);
+	top: 10px;
+	left: 10px;
+	text-indent: -40px;
 }
 .socialHead,
 .socialName {
 	padding: 0;
 	position: relative;
+	left: -200px;
 }
 .socialHead {
+	font-size: var(--small-font-size);
+	line-height: var(--small-font-size);
 	padding-top: 10px;
-	font-size: 14px;
-	line-height: 14px;
 }
 .socialName {
-	font-size: 24px;
-	line-height: 24px;
+	font-size: var(--large-font-size);
+	line-height: var(--large-font-size);
 	padding-top: 2px;
 }
 #list {
-	position: absolute;
 	bottom: 80px;
 	left: 80px;
 	text-align: left;
@@ -117,7 +142,7 @@ body {
 .borderTop,
 .borderRight,
 .borderLeft {
-	position: absolute;
+	position: var(--position-absolute);
 }
 .borderTop {
 	height: 2px;
@@ -138,37 +163,35 @@ body {
 	height: 100%;
 }
 .event {
-	position: relative;
 	padding: 0 40px 20px 20px;
-	margin-top: 20px;
+	margin-top: var(--margin-top);
+	position: relative;
+	background: var(--bg-color);
 }
 #list .name,
 #list .type {
 	padding-right: 10px;
 }
 #list .name {
-	padding-top: 14px;
 	font-size: 20px;
 	line-height: 20px;
+	padding-top: 14px;
 }
 #list .type {
+	font-size: var(--small-font-size);
+	line-height: var(--small-font-size);
 	padding-top: 2px;
-	font-size: 12px;
-	line-height: 12px;
 }
 .inner {
 	overflow: hidden;
-}
-#social,
-#schedule {
-	transform-origin: left top;
 }
 #social .inner {
 	margin-left: 60px;
 	padding: 0 0 10px;
 }
-#social .item {
-	position: absolute;
+#social .item,
+#schedule .item {
+	position: var(--position-absolute);
 	top: 0;
 	left: 0;
 }
@@ -178,10 +201,10 @@ body {
 	top: -20px;
 }
 .day {
-	float: left;
+	margin-right: var(--margin-right);
+	margin-top: var(--margin-top);
 	position: relative;
-	margin-right: 20px;
-	margin-top: 20px;
+	float: left;
 }
 .day:nth-child(7) {
 	margin-right: 0;
@@ -192,34 +215,62 @@ body {
 .scheduleHead,
 .scheduleTime {
 	position: relative;
+	text-align: center;
 }
 .scheduleHead {
-	padding-top: 10px;
-	font-size: 12px;
+	font-size: var(--small-font-size);
 	font-weight: bold;
-	text-align: center;
+	padding-top: 10px;
 }
 .scheduleTime {
-	font-size: 14px;
+	font-size: var(--medium-font-size);
 	padding-top: 2px;
-	text-align: center;
 }
-#social .borderTop {
+#schedule .borderTop {
 	width: 0;
 }
-.network {
-	width: 0;
-	padding-right: 0;
+#schedule .day {
+	top: 20px;
 }
-.icon {
-	text-indent: -40px;
+#schedule .scheduleHead,
+#schedule .scheduleTime {
+	opacity: 0;
+	left: -60px;
 }
-.socialHead,
-.socialName {
-	left: -200px;
+#countdown {
+	text-align: right;
+	bottom: 80px;
+	right: 80px;
+	font-size: var(--xlarge-font-size);
+	transform-origin: right bottom;
+	z-index: 999;
 }
-#social .animated .borderTop {
-	animation: soBorderTop 10s forwards;
+#message {
+	font-size: var(--large-font-size);
+}
+#endMessage {
+	text-align: right;
+	bottom: 0;
+	right: 0;
+	font-size: var(--xlarge-font-size);
+	white-space: nowrap;
+	display: none;
+}
+#video video,
+#image img {
+	left: 0;
+	right: 0;
+	min-width: var(--width);
+	min-height: var(--height);
+	position: var(--position-absolute);
+}
+#overlay {
+	width: var(--width);
+	height: var(--height);
+	position: var(--position-absolute);
+	top: 0;
+	left: 0;
+	background: #0000;
 }
 @keyframes soBorderTop {
 	0%,
@@ -230,9 +281,6 @@ body {
 	95% {
 		width: 100%;
 	}
-}
-#social .animated .network {
-	animation: network 10s forwards;
 }
 @keyframes network {
 	0%,
@@ -245,11 +293,8 @@ body {
 	6%,
 	94% {
 		width: 100%;
-		padding-right: 40px;
+		padding-right: var(--padding-right);
 	}
-}
-.animated .icon {
-	animation: icon 10s forwards;
 }
 @keyframes icon {
 	0%,
@@ -263,9 +308,6 @@ body {
 		text-indent: 0px;
 	}
 }
-.animated .socialHead {
-	animation: socialHead 10s forwards;
-}
 @keyframes socialHead {
 	0%,
 	4%,
@@ -277,9 +319,6 @@ body {
 	89% {
 		left: 0;
 	}
-}
-.animated .socialName {
-	animation: socialName 10s forwards;
 }
 @keyframes socialName {
 	0%,
@@ -293,26 +332,6 @@ body {
 		left: 0;
 	}
 }
-#schedule .item {
-	opacity: 0;
-}
-#schedule .borderTop {
-	top: 60px;
-}
-#schedule .day {
-	top: 20px;
-}
-#schedule .scheduleHead {
-	opacity: 0;
-	left: -60px;
-}
-#schedule .scheduleTime {
-	opacity: 0;
-	left: -60px;
-}
-#schedule .animated {
-	animation: scAnimated 10s forwards;
-}
 @keyframes scAnimated {
 	0%,
 	2%,
@@ -325,9 +344,6 @@ body {
 		opacity: 1;
 	}
 }
-#schedule .animated .borderTop {
-	animation: scBorderTop 10s forwards;
-}
 @keyframes scBorderTop {
 	0%,
 	100% {
@@ -338,9 +354,6 @@ body {
 		top: 0;
 	}
 }
-#schedule .animated .day {
-	animation: day 10s forwards;
-}
 @keyframes day {
 	0%,
 	100% {
@@ -350,9 +363,6 @@ body {
 	90% {
 		top: 0;
 	}
-}
-#schedule .animated .scheduleHead {
-	animation: scheduleHead 10s forwards;
 }
 @keyframes scheduleHead {
 	0%,
@@ -368,9 +378,6 @@ body {
 		left: 0;
 	}
 }
-#schedule .animated .scheduleTime {
-	animation: scheduleTime 10s forwards;
-}
 @keyframes scheduleTime {
 	0%,
 	9%,
@@ -385,59 +392,33 @@ body {
 		left: 0;
 	}
 }
-#countdown {
-	text-align: right;
-	position: absolute;
-	bottom: 80px;
-	right: 80px;
-	font-size: 60px;
-	transform-origin: right bottom;
-	z-index: 999;
+#social .animated .borderTop {
+	animation: soBorderTop var(--animation-duration) var(--animation-direction);
 }
-#message {
-	font-size: 24px;
+#social .animated .network {
+	animation: network var(--animation-duration) var(--animation-direction);
 }
-#endMessage {
-	text-align: right;
-	position: absolute;
-	bottom: 0;
-	right: 0;
-	font-size: 60px;
-	white-space: nowrap;
-	display: none;
+.animated .icon {
+	animation: icon var(--animation-duration) var(--animation-direction);
 }
-#video video,
-#image img {
-	position: absolute;
-	left: 0;
-	right: 0;
-	min-width: 1920px;
-	min-height: 1080px;
+.animated .socialHead {
+	animation: socialHead var(--animation-duration) var(--animation-direction);
 }
-#overlay {
-	width: 1920px;
-	height: 1080px;
-	position: absolute;
-	top: 0;
-	left: 0;
+.animated .socialName {
+	animation: socialName var(--animation-duration) var(--animation-direction);
 }
-#overlay {
-	background: #0000;
+#schedule .animated {
+	animation: scAnimated var(--animation-duration) var(--animation-direction);
 }
-.bg-accent {
-	border-color: #FFF;
+#schedule .animated .borderTop {
+	animation: scBorderTop var(--animation-duration) var(--animation-direction);
 }
-#frame {
-	border-width: 20px;
+#schedule .animated .day {
+	animation: day var(--animation-duration) var(--animation-direction);
 }
-.borderTop,
-.borderRight {
-	background: #FFF;
+#schedule .animated .scheduleHead {
+	animation: scheduleHead var(--animation-duration) var(--animation-direction);
 }
-#social,
-.event {
-	background: #0001;
-}
-#brandImg {
-	opacity: 0.1;
+#schedule .animated .scheduleTime {
+	animation: scheduleTime var(--animation-duration) var(--animation-direction);
 }

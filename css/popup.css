@@ -2,9 +2,9 @@ html,
 body {
 	padding: 0;
 	margin: 0;
+	overflow: hidden;
 }
 body {
-	overflow: hidden;
 	opacity: 0;
 }
 #socialHolder {
@@ -33,18 +33,18 @@ body {
 }
 #nameHolder {
 	position: relative;
-	left: 0;
 	top: 0;
+	left: 0;
 	overflow: hidden;
-	padding: 0 10px;
+	margin: 0 20px;
 	max-height: 100px;
 	white-space: nowrap;
 }
 .name {
 	position: relative;
+	display: block;
 	top: 0;
 	left: 0;
-	display: block;
 }
 #iconBox {
 	width: 140px;
@@ -59,10 +59,10 @@ body {
 	left: -120px;
 }
 #iconBox svg {
-	z-index: 99;
 	position: absolute;
 	width: 140px;
 	height: auto;
+	z-index: 99;
 }
 #bigLeft,
 #littleLeft,

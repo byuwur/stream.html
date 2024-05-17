@@ -2,8 +2,7 @@ let settings = {
 	...commonSettings,
 	options: {
 		...commonSettings.options,
-		sceneTitle: "Be Right Back.",
-		tagline: "[Mateus] byUwUr"
+		sceneTitle: "Be Right Back (Ya casito vuelvo)"
 	},
 	colors: {
 		...commonSettings.colors,

@@ -17,15 +17,14 @@
 					document.head.appendChild(script);
 				});
 			}
-			async function loadScripts() {
+			window.onload = async function () {
 				try {
 					await loadScript("./config/popup.settings.js");
 					await loadScript("./js/popup.js");
 				} catch (error) {
 					console.error("Error loading scripts:", error);
 				}
-			}
-			window.onload = loadScripts;
+			};
 		</script>
 	</head>
 	<body>
