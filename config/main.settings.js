@@ -66,7 +66,7 @@ let commonSettings = {
 	},
 	countdown: {
 		displayCountdown: "yes",
-		countdownTime: 3, // minutes
+		countdownTime: 10, // minutes
 		countdownMessage: "La cuenta regresiva pa' tramar.",
 		countdownOverMessage: "Vamo' a vé'."
 	},
