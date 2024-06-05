@@ -282,16 +282,10 @@ const tester = {
 
 	processQueue: function () {
 		tester.processQueueCall += 1;
-		const myProcessQueueCall = tester.processQueueCall;
-
 		while (tester.updateQueue.peek() && tester.updateQueue.peek()[0] <= Date.now()) {
 			const [, updateFunction, args] = tester.updateQueue.dequeue();
-
-			if (updateFunction === tester.updateStick || updateFunction === tester.updateAxis) {
-				updateFunction(...args);
-			} else {
-				updateFunction(args[0], args[1], args[2]);
-			}
+			if (updateFunction === tester.updateStick || updateFunction === tester.updateAxis) updateFunction(...args);
+			else updateFunction(args[0], args[1], args[2]);
 		}
 	}
 };

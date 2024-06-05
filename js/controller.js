@@ -291,7 +291,7 @@ const allowedControllers = {
 	7: "fight-stick",
 	9: "gc"
 };
-const allowedPlayers = [1, 2, 3, 4];
+const allowedPlayers = [0, 1, 2, 3, 4]; // P1, P2, P3, P4, KB
 const skinSwitch = getParameterByName("s") !== "" ? allowedControllers[getParameterByName("s")] : "xbox";
 const pnumber = getParameterByName("p");
 const scaleSize = getParameterByName("sc");
@@ -310,8 +310,7 @@ const controllerRebinds = bindingSettings(getParameterByName("map"));
 
 if (pnumber !== "" && allowedPlayers.includes(parseInt(pnumber))) {
 	$(".hide-me").remove();
-	const playernum = pnumber - 1;
-	$("#gamepad-" + playernum).toggleClass("active");
+	$("#gamepad-" + pnumber).toggleClass("active");
 	if (skinSwitch) switchClass("#gamepads .controller", "xbox", skinSwitch);
 	$("html, body").css({
 		cssText: "background: transparent !important; overflow: hidden;"
@@ -323,15 +322,12 @@ if (pnumber !== "" && allowedPlayers.includes(parseInt(pnumber))) {
 } else {
 	$(".hide-me").removeClass("hide-me");
 	$("body").addClass("main-content");
-	if (controllerRebinds) {
-		createUIFromMapping(controllerRebinds);
-	}
+	if (controllerRebinds) createUIFromMapping(controllerRebinds);
 }
 
 if (delayTime) tester.DELAY_TIME_MS = parseInt(delayTime);
 if (deadZone) tester.ANALOGUE_STICK_THRESHOLD = parseFloat(deadZone);
 if (rotationStop) tester.ROTATE_BOUNDARY = parseFloat(rotationStop);
-
 if (skinStyle) {
 	switchClass("#gamepads .controller", skinSwitch, "custom");
 	$("#custom-css").append('@import url("' + changeCssURL(skinStyle) + '");');
@@ -341,22 +337,17 @@ if (skinEdit) {
 	$("#custom-css").append('@import url("' + changeCssURL(skinEdit) + '");');
 }
 if (skinOpacity) gpController.css("opacity", skinOpacity);
-
 if (disableCurving == 1) tester.STICK_CURVING = 0;
-
 if (setOffset) tester.STICK_OFFSET = parseInt(setOffset);
-
 if (noSurvey == 1) $(".plshalpme").remove();
 if (triggerStrength == 1) tester.TRIGGER_DISPLAY_TYPE = triggerStrength;
 
 $(".pselect .player").on("change", function () {
 	const value = $(this).val();
 	const player = $(".player option:selected").text();
-	const title = "Controller";
-
 	$(".controller").removeClass("active");
 	$(`#${value}`).addClass("active");
-	$(document).attr("title", player ? `${title} - P${player}` : title);
+	$(document).attr("title", player ? `Controller - P${player}` : "Controller");
 });
 
 const consoleSelect = $(".console");

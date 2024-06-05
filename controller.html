@@ -82,6 +82,7 @@
 			<div class="controller xbox disconnected" id="gamepad-1"></div>
 			<div class="controller xbox disconnected" id="gamepad-2"></div>
 			<div class="controller xbox disconnected" id="gamepad-3"></div>
+			<div class="controller xbox disconnected" id="gamepad-4"></div>
 		</div>
 		<div class="navbar hide-me">
 			<div class="content">
@@ -97,7 +98,7 @@
 							<option value="gamepad-1">2</option>
 							<option value="gamepad-2">3</option>
 							<option value="gamepad-3">4</option>
-							<option value="gamepad-kb">Keyboard</option>
+							<option value="gamepad-4">KB</option>
 						</select>
 					</div>
 					<div class="left skins">
@@ -154,21 +155,17 @@
 					</header>
 					<article>
 						<h2>About this tool</h2>
-						<p>Locally, offline, reliable. - [Mateus] byUwUr</p>
+						<p>Locally, offline, reliable. - <a rel="noopener" href="https://byuwur.net" target="_blank">[Mateus] byUwUr</a></p>
 						<p>
 							This is possible thanks to <a rel="noopener" href="http://aresluna.org" target="_blank">Marcin Wichary's</a> <a rel="noopener" href="https://github.com/html5rocks/www.html5rocks.com/blob/master/content/tutorials/doodles/gamepad/static/gamepad-tester/gamepad.js" target="_blank">Gamepad.js</a> and
 							<a rel="noopener" href="https://github.com/html5rocks/www.html5rocks.com/blob/master/content/tutorials/doodles/gamepad/static/gamepad-tester/tester.js" target="_blank">Tester.js</a> libraries.
 						</p>
-						<div class="info">
-							<div>
-								<h2>Chroma Key Installation with OBS</h2>
-								<ol>
-									<li>Create new window capture source, then select this window.</li>
-									<li>Enable "Color Key" in the source's filters. Set it up as you like.</li>
-									<li>By then you should be already done!</li>
-								</ol>
-							</div>
-						</div>
+						<h2>Chroma Key Installation with OBS</h2>
+						<ol>
+							<li>Create new window capture source, then select this window.</li>
+							<li>Enable "Color Key" in the source's filters. Set it up as you like.</li>
+							<li>By then you should be already done!</li>
+						</ol>
 					</article>
 				</div>
 			</div>
@@ -295,7 +292,7 @@
 						<p>
 							Please select the controller:
 							<select id="player-base" title="Player">
-								<option>-</option>
+								<option selected>-</option>
 								<option value="0" disabled>1</option>
 								<option value="1" disabled>2</option>
 								<option value="2" disabled>3</option>
@@ -377,7 +374,6 @@
 							</div>
 							<div id="mappings"></div>
 							<div class="button-group">
-								<button id="export-mapping">Export Mapping to URL Generator</button>
 								<button id="apply-mapping">Apply Mapping</button>
 								<span class="clear"></span>
 							</div>

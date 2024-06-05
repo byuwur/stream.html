@@ -22,21 +22,17 @@ const gamepadSupport = {
 	TYPICAL_AXIS_COUNT: 4,
 	ticking: false,
 	gamepads: [],
+	gamepadsRaw: [],
 	prevRawGamepadTypes: [],
 	prevTimestamps: [],
 
 	init: function () {
 		const gamepadSupportAvailable = !!navigator.getGamepads || !!navigator.webkitGetGamepads || !!navigator.webkitGamepads || navigator.userAgent.indexOf("Firefox/") !== -1;
-
-		if (!gamepadSupportAvailable) {
-			tester.showNotSupported();
-		} else {
+		if (!gamepadSupportAvailable) tester.showNotSupported();
+		else {
 			window.addEventListener("gamepadconnected", gamepadSupport.onGamepadConnect, false);
 			window.addEventListener("gamepaddisconnected", gamepadSupport.onGamepadDisconnect, false);
-
-			if (gamepadSupportAvailable) {
-				gamepadSupport.startPolling();
-			}
+			if (gamepadSupportAvailable) gamepadSupport.startPolling();
 		}
 	},
 
@@ -48,11 +44,7 @@ const gamepadSupport = {
 
 	onGamepadDisconnect: function (event) {
 		gamepadSupport.gamepads = gamepadSupport.gamepads.filter((g) => g.index !== event.gamepad.index);
-
-		if (gamepadSupport.gamepads.length === 0) {
-			gamepadSupport.stopPolling();
-		}
-
+		if (gamepadSupport.gamepads.length === 0) gamepadSupport.stopPolling();
 		tester.updateGamepads(gamepadSupport.gamepads);
 	},
 
@@ -73,21 +65,14 @@ const gamepadSupport = {
 	},
 
 	scheduleNextTick: function () {
-		if (gamepadSupport.ticking) {
-			window.requestAnimationFrame(gamepadSupport.tick);
-		}
+		if (gamepadSupport.ticking) window.requestAnimationFrame(gamepadSupport.tick);
 	},
 
 	pollStatus: function () {
 		gamepadSupport.pollGamepads();
-
 		for (const i in gamepadSupport.gamepads) {
 			const gamepad = gamepadSupport.gamepads[i];
-
-			if (gamepad.timestamp && gamepad.timestamp === gamepadSupport.prevTimestamps[i]) {
-				continue;
-			}
-
+			if (gamepad.timestamp && gamepad.timestamp === gamepadSupport.prevTimestamps[i]) continue;
 			gamepadSupport.prevTimestamps[i] = gamepad.timestamp;
 			gamepadSupport.updateDisplay(i);
 		}
@@ -95,25 +80,20 @@ const gamepadSupport = {
 
 	pollGamepads: function () {
 		const rawGamepads = navigator.getGamepads ? navigator.getGamepads() : navigator.webkitGetGamepads();
-
 		if (rawGamepads) {
 			gamepadSupport.gamepads = [];
 			gamepadSupport.gamepadsRaw = [];
 			let gamepadsChanged = false;
-
 			for (let i = 0; i < rawGamepads.length; i++) {
 				if (typeof rawGamepads[i] !== gamepadSupport.prevRawGamepadTypes[i]) {
 					gamepadsChanged = true;
 					gamepadSupport.prevRawGamepadTypes[i] = typeof rawGamepads[i];
 				}
-
 				if (rawGamepads[i] && controllerRebinds && controllerRebinds.mapping && controllerRebinds.mapping.length > 0) {
 					const remapObj = $.extend(true, {}, rawGamepads[i]);
-
 					for (let b = 0; b < remapObj.buttons.length; b++) {
 						remapObj.buttons[b] = $.extend({}, rawGamepads[i].buttons[b]);
 					}
-
 					controllerRebinds.mapping.forEach((bindmap) => {
 						if (bindmap.disabled && bindmap.targetType !== "dpad") {
 							setMapping(bindmap, 0, remapObj);
@@ -121,7 +101,6 @@ const gamepadSupport = {
 							bindWrapper(bindmap, remapObj);
 						}
 					});
-
 					gamepadSupport.gamepads.push(remapObj);
 					gamepadSupport.gamepadsRaw.push(rawGamepads[i]);
 				} else if (rawGamepads[i]) {
@@ -129,23 +108,14 @@ const gamepadSupport = {
 					gamepadSupport.gamepadsRaw.push(rawGamepads[i]);
 				}
 			}
-
-			if (gamepadsChanged) {
-				tester.updateGamepads(gamepadSupport.gamepads);
-			}
+			if (gamepadsChanged) tester.updateGamepads(gamepadSupport.gamepads);
 		}
 	},
 
 	updateDisplay: function (gamepadId) {
 		const gamepadRaw = gamepadSupport.gamepadsRaw[gamepadId];
-
-		for (const b in gamepadRaw.buttons) {
-			tester.updateRawButton(gamepadRaw.buttons[b], gamepadId, b);
-		}
-
-		for (const a in gamepadRaw.axes) {
-			tester.updateRawAxis(gamepadRaw.axes[a], gamepadId, a);
-		}
+		for (const b in gamepadRaw.buttons) tester.updateRawButton(gamepadRaw.buttons[b], gamepadId, b);
+		for (const a in gamepadRaw.axes) tester.updateRawAxis(gamepadRaw.axes[a], gamepadId, a);
 
 		const gamepad = gamepadSupport.gamepads[gamepadId];
 
@@ -182,50 +152,34 @@ const gamepadSupport = {
 		tester.queueAxis(gamepad.axes[2], gamepad.axes[3], gamepadId, "stick-2");
 
 		let extraButtonId = gamepadSupport.TYPICAL_BUTTON_COUNT;
-		while (typeof gamepad.buttons[extraButtonId] !== "undefined") {
-			extraButtonId++;
-		}
-
+		while (typeof gamepad.buttons[extraButtonId] !== "undefined") extraButtonId++;
 		let extraAxisId = gamepadSupport.TYPICAL_AXIS_COUNT;
-		while (typeof gamepad.axes[extraAxisId] !== "undefined") {
-			extraAxisId++;
-		}
+		while (typeof gamepad.axes[extraAxisId] !== "undefined") extraAxisId++;
 	}
 };
 
 function bindWrapper(bindmap, remapObj) {
-	if (bindmap.targetType === "dpad") {
-		dpadPOV(bindmap, remapObj);
-	} else if (bindmap.axesConfig) {
-		fixAxes(bindmap, remapObj);
-	} else {
-		setMapping(bindmap, {}, remapObj);
-	}
+	if (bindmap.targetType === "dpad") dpadPOV(bindmap, remapObj);
+	else if (bindmap.axesConfig) fixAxes(bindmap, remapObj);
+	else setMapping(bindmap, {}, remapObj);
 }
 
 function setMapping(stickObj, setValue, remapObj) {
 	switch (typeof setValue) {
 		case "number":
-			if (stickObj.targetType === "axes") {
-				remapObj[stickObj.targetType][stickObj.target] = setValue;
-			} else {
-				remapObj[stickObj.targetType][stickObj.target].value = setValue;
-			}
+			if (stickObj.targetType === "axes") remapObj[stickObj.targetType][stickObj.target] = setValue;
+			else remapObj[stickObj.targetType][stickObj.target].value = setValue;
 			break;
 		case "object":
-			if (stickObj.targetType === "axes") {
-				remapObj[stickObj.targetType][stickObj.target] = makeAxis(stickToButton(stickObj.positive), stickToButton(stickObj.negative));
-			} else {
-				remapObj[stickObj.targetType][stickObj.target].value = stickToButton(stickObj);
-			}
+			if (stickObj.targetType === "axes") remapObj[stickObj.targetType][stickObj.target] = stickToButton(stickObj.positive) - stickToButton(stickObj.negative);
+			else remapObj[stickObj.targetType][stickObj.target].value = stickToButton(stickObj);
 			break;
 	}
 }
 
 function stickToButton(stickObj) {
-	if (stickObj.choiceType === "buttons") {
-		return rawGamepads[i].buttons[stickObj.choice].value;
-	} else {
+	if (stickObj.choiceType === "buttons") return rawGamepads[i].buttons[stickObj.choice].value;
+	else {
 		const axisVal = rawGamepads[i].axes[stickObj.choice];
 		switch (stickObj.choiceOperand) {
 			case "+":
@@ -238,29 +192,16 @@ function stickToButton(stickObj) {
 	}
 }
 
-function makeAxis(positiveAxis, negativeAxis) {
-	return positiveAxis - negativeAxis;
-}
-
 function fixAxes(stickObj, remapObj) {
+	if (stickObj.axesConfig.type != "trigger" || stickObj.axesConfig.type != "stick") return;
 	const startValue = +stickObj.axesConfig.lowValue;
 	const endValue = +stickObj.axesConfig.highValue;
 	const isFlipped = endValue < startValue;
-
 	const zeroOffset = startValue * -1;
 	let axisVal = choiceValue(stickObj);
-
 	let newValue = (axisVal + zeroOffset) / (endValue + zeroOffset);
 	newValue = isFlipped ? 1 - newValue : newValue;
-
-	if (stickObj.axesConfig.type === "trigger") {
-		// do nothing, just return the newValue
-	} else if (stickObj.axesConfig.type === "stick") {
-		newValue = -1 + newValue * 2;
-	} else {
-		setMapping(stickObj, {}, remapObj);
-		return;
-	}
+	if (stickObj.axesConfig.type === "stick") newValue = -1 + newValue * 2;
 	setMapping(stickObj, newValue, remapObj);
 }
 
@@ -278,6 +219,10 @@ function choiceValue(mapObj) {
 }
 
 function dpadPOV(stickObj, remapObj) {
+	function isWithinRange(val, target) {
+		return val >= target - 0.001 && val <= target + 0.001;
+	}
+
 	const positions = {
 		up: 12,
 		down: 13,
@@ -285,23 +230,11 @@ function dpadPOV(stickObj, remapObj) {
 		right: 15
 	};
 
-	for (const pos in positions) {
-		setMapping({ targetType: "buttons", target: positions[pos] }, 0, remapObj);
-	}
-
+	for (const pos in positions) setMapping({ targetType: "buttons", target: positions[pos] }, 0, remapObj);
 	if (stickObj.disabled) return;
-
 	const value = choiceValue(stickObj);
 
-	function isWithinRange(val, target) {
-		return val >= target - 0.001 && val <= target + 0.001;
-	}
-
-	for (const pos in positions) {
-		if (isWithinRange(value, stickObj.positions[pos])) {
-			setMapping({ targetType: "buttons", target: positions[pos] }, 1, remapObj);
-		}
-	}
+	for (const pos in positions) if (isWithinRange(value, stickObj.positions[pos])) setMapping({ targetType: "buttons", target: positions[pos] }, 1, remapObj);
 
 	const diagonals = {
 		upright: ["up", "right"],
@@ -310,11 +243,9 @@ function dpadPOV(stickObj, remapObj) {
 		upleft: ["up", "left"]
 	};
 
-	for (const diag in diagonals) {
-		if (isWithinRange(value, stickObj.positions[diag])) {
+	for (const diag in diagonals)
+		if (isWithinRange(value, stickObj.positions[diag]))
 			diagonals[diag].forEach((dir) => {
 				setMapping({ targetType: "buttons", target: positions[dir] }, 1, remapObj);
 			});
-		}
-	}
 }

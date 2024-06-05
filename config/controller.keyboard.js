@@ -1,1 +1,27 @@
-const settings = {};
+const settingsKB = {
+	j: 0,
+	k: 1,
+	u: 2,
+	i: 3,
+	q: 4,
+	o: 5,
+	e: 6,
+	l: 7,
+	1: 8,
+	2: 9,
+	r: 10,
+	y: 11,
+	w: 12,
+	s: 13,
+	a: 14,
+	d: 16,
+	3: 17,
+	up: "lsU",
+	down: "lsD",
+	left: "lsL",
+	right: "lsR",
+	t: "rsU",
+	g: "rsD",
+	f: "rsL",
+	h: "rsR"
+};
