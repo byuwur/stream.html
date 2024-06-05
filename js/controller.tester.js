@@ -31,8 +31,6 @@ const tester = {
 	MONITOR_TYPE: "",
 	DISABLED_INPUTS: {},
 	DELAY_TIME_MS: 0,
-	updateQueue: new Queue(),
-	processQueueCall: 0,
 
 	absDiff: function (a, b) {
 		return Math.abs(a - b);
@@ -44,10 +42,6 @@ const tester = {
 
 	init: function () {
 		tester.updateGamepads();
-	},
-
-	showNotSupported: function () {
-		document.querySelector("#no-gamepad-support").classList.add("visible");
 	},
 
 	updateGamepads: function (gamepads) {
@@ -98,34 +92,10 @@ const tester = {
 		}
 	},
 
-	queueButton: function (value, gamepadId, id) {
-		tester.updateQueue.enqueue([Date.now() + tester.DELAY_TIME_MS, tester.updateButton, [jQuery.extend({}, value), gamepadId, id]]);
-		tester.processQueue();
-	},
-
-	queueStick: function (value, className, gamepadId, id) {
-		tester.updateQueue.enqueue([Date.now() + tester.DELAY_TIME_MS, tester.updateStick, [jQuery.extend({}, value), className, gamepadId, id]]);
-		tester.processQueue();
-	},
-
-	queueTrigger: function (value, gamepadId, id) {
-		tester.updateQueue.enqueue([Date.now() + tester.DELAY_TIME_MS, tester.updateTrigger, [jQuery.extend({}, value), gamepadId, id]]);
-		tester.processQueue();
-	},
-
-	queueTriggerDigital: function (value, gamepadId, id) {
-		tester.updateQueue.enqueue([Date.now() + tester.DELAY_TIME_MS, tester.updateTriggerDigital, [jQuery.extend({}, value), gamepadId, id]]);
-		tester.processQueue();
-	},
-
-	queueAxis: function (value, valueV, gamepadId, stickId) {
-		tester.updateQueue.enqueue([Date.now() + tester.DELAY_TIME_MS, tester.updateAxis, [value, valueV, gamepadId, stickId]]);
-		tester.processQueue();
-	},
-
 	updateButton: function (value, gamepadId, id) {
+		//console.log(`value=${value},gamepad=${gamepadId},btn=${id}`);
 		const gamepadEl = document.querySelector(`#gamepad-${gamepadId}`);
-		const newValue = value.value ?? value;
+		const newValue = value?.value ?? value;
 		const buttonEl = gamepadEl.querySelector(`[data-name="${id}"]`);
 		if (buttonEl) buttonEl.classList.toggle("pressed", newValue > tester.ANALOGUE_BUTTON_THRESHOLD);
 	},
@@ -231,15 +201,6 @@ const tester = {
 					if ((tester.MONITOR_TYPE === "remapping" && tester.absDiff(tester.SNAPSHOT.axes[axisId], newValue) > tester.ANALOGUE_BUTTON_THRESHOLD) || tester.MONITOR_TYPE === "value") document.querySelectorAll("#mapping-config button").forEach((el) => el.dispatchEvent(gpEvent));
 				}
 			}
-		}
-	},
-
-	processQueue: function () {
-		tester.processQueueCall += 1;
-		while (tester.updateQueue.peek() && tester.updateQueue.peek()[0] <= Date.now()) {
-			const [, updateFunction, args] = tester.updateQueue.dequeue();
-			if (updateFunction === tester.updateStick || updateFunction === tester.updateAxis) updateFunction(...args);
-			else updateFunction(args[0], args[1], args[2]);
 		}
 	}
 };

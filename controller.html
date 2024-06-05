@@ -5,25 +5,6 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
 		<title>Controller</title>
 		<link rel="stylesheet" type="text/css" href="./css/controller.css" />
-		<script defer>
-			function Queue() {
-				let queue = [],
-					offset = 0;
-				this.getLength = () => queue.length - offset;
-				this.isEmpty = () => this.getLength() === 0;
-				this.enqueue = (item) => queue.push(item);
-				this.dequeue = () => {
-					if (this.isEmpty()) return undefined;
-					const item = queue[offset++];
-					if (offset * 2 >= queue.length) {
-						queue = queue.slice(offset);
-						offset = 0;
-					}
-					return item;
-				};
-				this.peek = () => (this.isEmpty() ? undefined : queue[offset]);
-			}
-		</script>
 		<script src="./js/_jquery1102.min.js" defer></script>
 		<script src="./config/controller.keyboard.js" defer></script>
 		<script src="./js/controller.gamepad.js" defer></script>

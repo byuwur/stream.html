@@ -29,12 +29,11 @@ const gamepadSupport = {
 
 	init: function () {
 		const gamepadSupportAvailable = !!navigator.getGamepads || !!navigator.webkitGetGamepads || !!navigator.webkitGamepads || navigator.userAgent.indexOf("Firefox/") !== -1;
-		if (!gamepadSupportAvailable) tester.showNotSupported();
-		else {
+		if (gamepadSupportAvailable) {
 			window.addEventListener("gamepadconnected", gamepadSupport.onGamepadConnect, false);
 			window.addEventListener("gamepaddisconnected", gamepadSupport.onGamepadDisconnect, false);
 			window.addEventListener("keydown", gamepadSupport.onKeyboardConnect, false);
-			if (gamepadSupportAvailable) gamepadSupport.startPolling();
+			gamepadSupport.startPolling();
 		}
 	},
 
@@ -146,37 +145,37 @@ const gamepadSupport = {
 
 		const gamepad = gamepadSupport.gamepads[gamepadId];
 
-		tester.queueButton(gamepad.buttons[0], gamepadId, "button-1");
-		tester.queueButton(gamepad.buttons[1], gamepadId, "button-2");
-		tester.queueButton(gamepad.buttons[2], gamepadId, "button-3");
-		tester.queueButton(gamepad.buttons[3], gamepadId, "button-4");
+		tester.updateButton(gamepad.buttons[0], gamepadId, "button-1");
+		tester.updateButton(gamepad.buttons[1], gamepadId, "button-2");
+		tester.updateButton(gamepad.buttons[2], gamepadId, "button-3");
+		tester.updateButton(gamepad.buttons[3], gamepadId, "button-4");
 
-		tester.queueButton(gamepad.buttons[4], gamepadId, "button-left-shoulder-top");
-		tester.queueTrigger(gamepad.buttons[6], gamepadId, "button-left-shoulder-bottom");
-		tester.queueTriggerDigital(gamepad.buttons[6], gamepadId, "button-left-shoulder-bottom-digital");
-		tester.queueButton(gamepad.buttons[5], gamepadId, "button-right-shoulder-top");
-		tester.queueTrigger(gamepad.buttons[7], gamepadId, "button-right-shoulder-bottom");
-		tester.queueTriggerDigital(gamepad.buttons[7], gamepadId, "button-right-shoulder-bottom-digital");
+		tester.updateButton(gamepad.buttons[4], gamepadId, "button-left-shoulder-top");
+		tester.updateTrigger(gamepad.buttons[6], gamepadId, "button-left-shoulder-bottom");
+		tester.updateTriggerDigital(gamepad.buttons[6], gamepadId, "button-left-shoulder-bottom-digital");
+		tester.updateButton(gamepad.buttons[5], gamepadId, "button-right-shoulder-top");
+		tester.updateTrigger(gamepad.buttons[7], gamepadId, "button-right-shoulder-bottom");
+		tester.updateTriggerDigital(gamepad.buttons[7], gamepadId, "button-right-shoulder-bottom-digital");
 
-		tester.queueButton(gamepad.buttons[8], gamepadId, "button-select");
-		tester.queueButton(gamepad.buttons[9], gamepadId, "button-start");
-		tester.queueButton(gamepad.buttons[10], gamepadId, "stick-1");
-		tester.queueButton(gamepad.buttons[11], gamepadId, "stick-2");
+		tester.updateButton(gamepad.buttons[8], gamepadId, "button-select");
+		tester.updateButton(gamepad.buttons[9], gamepadId, "button-start");
+		tester.updateButton(gamepad.buttons[10], gamepadId, "stick-1");
+		tester.updateButton(gamepad.buttons[11], gamepadId, "stick-2");
 
-		tester.queueButton(gamepad.buttons[12], gamepadId, "button-dpad-top");
-		tester.queueButton(gamepad.buttons[13], gamepadId, "button-dpad-bottom");
-		tester.queueButton(gamepad.buttons[14], gamepadId, "button-dpad-left");
-		tester.queueButton(gamepad.buttons[15], gamepadId, "button-dpad-right");
-		tester.queueButton(gamepad.buttons[16], gamepadId, "button-meta");
-		tester.queueButton(gamepad.buttons[17], gamepadId, "touch-pad");
+		tester.updateButton(gamepad.buttons[12], gamepadId, "button-dpad-top");
+		tester.updateButton(gamepad.buttons[13], gamepadId, "button-dpad-bottom");
+		tester.updateButton(gamepad.buttons[14], gamepadId, "button-dpad-left");
+		tester.updateButton(gamepad.buttons[15], gamepadId, "button-dpad-right");
+		tester.updateButton(gamepad.buttons[16], gamepadId, "button-meta");
+		tester.updateButton(gamepad.buttons[17], gamepadId, "touch-pad");
 
-		tester.queueStick(gamepad.buttons[12], "up", gamepadId, "arcade-stick");
-		tester.queueStick(gamepad.buttons[13], "down", gamepadId, "arcade-stick");
-		tester.queueStick(gamepad.buttons[14], "left", gamepadId, "arcade-stick");
-		tester.queueStick(gamepad.buttons[15], "right", gamepadId, "arcade-stick");
+		tester.updateStick(gamepad.buttons[12], "up", gamepadId, "arcade-stick");
+		tester.updateStick(gamepad.buttons[13], "down", gamepadId, "arcade-stick");
+		tester.updateStick(gamepad.buttons[14], "left", gamepadId, "arcade-stick");
+		tester.updateStick(gamepad.buttons[15], "right", gamepadId, "arcade-stick");
 
-		tester.queueAxis(gamepad.axes[0], gamepad.axes[1], gamepadId, "stick-1");
-		tester.queueAxis(gamepad.axes[2], gamepad.axes[3], gamepadId, "stick-2");
+		tester.updateAxis(gamepad.axes[0], gamepad.axes[1], gamepadId, "stick-1");
+		tester.updateAxis(gamepad.axes[2], gamepad.axes[3], gamepadId, "stick-2");
 
 		let extraButtonId = gamepadSupport.TYPICAL_BUTTON_COUNT;
 		while (typeof gamepad.buttons[extraButtonId] !== "undefined") extraButtonId++;

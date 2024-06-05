@@ -2434,7 +2434,7 @@ a:active .menu-button {
 }
 
 .disconnected {
-	opacity: 0.05;
+	opacity: 0.05 !important;
 }
 
 .disconnected[id*="gamepad-"] .plshalpme {
