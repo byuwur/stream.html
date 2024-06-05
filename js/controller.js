@@ -415,7 +415,6 @@ function changeCssURL(cssURL) {
 
 var messages = [];
 var messagesOld = [];
-//    var messages = ['Gamepad Viewer Survey: <a href="https://goo.gl/XF4VjL">https://goo.gl/XF4VjL</a>'];
 var message = messages[Math.floor(Math.random() * messages.length)];
 $(".update div span").html(message);
 
@@ -571,14 +570,14 @@ if (triggerStrength == 1) {
 $(".pselect .player").on("change", function () {
 	var value = $("select").val();
 	var player = $(".player option:selected").text();
-	var title = "GamePad Viewer";
+	var title = "Controller";
 
 	$(".controller").removeClass("active");
 	$("#" + value).addClass("active");
 	if (!player) {
 		$(document).attr("title", title);
 	} else {
-		$(document).attr("title", title + " - " + player);
+		$(document).attr("title", title + " - P" + player);
 	}
 });
 var consoleSelect = $(".console");
