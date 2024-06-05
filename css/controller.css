@@ -9,7 +9,6 @@
 	}
 }
 
-/*Keyframes*/
 @-webkit-keyframes messagefade {
 	0% {
 		opacity: 1;
@@ -120,22 +119,6 @@
 	}
 }
 
-/* Didn't work, used transitions instead
-@keyframes modal-flow {
-    from {visibility: hidden;top:-100px;opacity: 0;}
-    to {visitbility: visible;top:0px;opacity:1;}
-}
-@-moz-keyframes modal-flow {
-    from {transform: scale(3.3) rotateX(60deg) translateY(-100%);}
-    to {transform: scale(1) rotateX(0deg) translateY(0%);}
-}*/
-/*END Keyframes*/
-
-/*Top Level Elements*/
-::selection {
-	background: rgba(9, 63, 59, 0.75);
-}
-
 sup {
 	vertical-align: super;
 	font-size: smaller;
@@ -143,8 +126,10 @@ sup {
 
 html,
 body {
-	font-family: "Source Sans Pro", sans-serif;
+	margin: 0;
+	font-family: "Courier New", sans-serif;
 	overflow-y: hidden;
+	font-weight: 600;
 }
 
 a {
@@ -174,7 +159,6 @@ strong {
 	font-weight: bold;
 }
 
-/*Container classes and whatnot*/
 .container {
 	width: 668px;
 	margin: 0 auto;
@@ -190,16 +174,14 @@ strong {
 }
 
 .main-content {
-	background: #0F0;
+	background: #0f0;
 	height: 100vh;
 }
 
-/* Hide ad code if unfilled */
 .adsbygoogle[data-ad-status="unfilled"] {
 	display: none !important;
 }
 
-/*Now here's where the fun begins...*/
 .controller {
 	position: absolute;
 	top: 50%;
@@ -214,21 +196,18 @@ strong {
 	margin-top: 0px !important;
 }
 
-/*BEGIN Xbox One Controller Styling*/
 .controller.xbox {
-	background: url(../img/base.svg);
+	background: url(../img/xbox/base.svg);
 	height: 630px;
 	width: 750px;
-	/*    margin-left: -375px;
-        margin-top: -285px;*/
 }
 
 .xbox.white {
-	background: url(../img/base-white.svg);
+	background: url(../img/xbox/base-white.svg);
 }
 
 .xbox.disconnected {
-	background: url(../img/disconnected.svg);
+	background: url(../img/xbox/disconnected.svg);
 }
 
 .xbox.disconnected div {
@@ -245,7 +224,7 @@ strong {
 .xbox .trigger {
 	width: 88px;
 	height: 121px;
-	background: url(../img/trigger.svg);
+	background: url(../img/xbox/trigger.svg);
 	opacity: 0;
 }
 
@@ -262,7 +241,7 @@ strong {
 .xbox .bumper {
 	width: 170px;
 	height: 61px;
-	background: url(../img/bumper.svg);
+	background: url(../img/xbox/bumper.svg);
 	opacity: 0;
 }
 
@@ -290,7 +269,7 @@ strong {
 
 .xbox .quadrant {
 	position: absolute;
-	background: url(../img/quadrant.svg);
+	background: url(../img/xbox/quadrant.svg);
 	height: 45px;
 	width: 45px;
 	top: 258px;
@@ -328,7 +307,7 @@ strong {
 
 .xbox .back,
 .xbox .start {
-	background: url(../img/start-select.svg);
+	background: url(../img/xbox/start-select.svg);
 	width: 33px;
 	height: 33px;
 	opacity: 0;
@@ -358,7 +337,7 @@ strong {
 
 .xbox .button {
 	position: absolute;
-	background: url(../img/abxy.svg);
+	background: url(../img/xbox/abxy.svg);
 	width: 48px;
 	height: 48px;
 }
@@ -403,7 +382,7 @@ strong {
 
 .xbox .stick {
 	position: absolute;
-	background: url(../img/stick.svg);
+	background: url(../img/xbox/stick.svg);
 	background-position: -85px 0;
 	height: 83px;
 	width: 83px;
@@ -432,7 +411,7 @@ strong {
 }
 
 .xbox .face {
-	background: url(../img/dpad.svg);
+	background: url(../img/xbox/dpad.svg);
 	position: absolute;
 	opacity: 0;
 }
@@ -480,13 +459,709 @@ strong {
 	background: no-repeat center;
 }
 
-/*END Xbox One Controller Styling*/
+.controller.ps {
+	background: url(../img/sony/base.png);
+	height: 558px;
+	width: 784px;
+}
 
-/*Navbar Elements & their inner contents*/
+.ps.disconnected {
+	background: url(../img/sony/disconnected.png);
+}
+
+.ps.disconnected div {
+	display: none;
+}
+
+.ps .triggers {
+	width: 586px;
+	height: 65px;
+	position: absolute;
+	left: 99px;
+}
+
+.ps .trigger {
+	width: 86px;
+	height: 65px;
+	background: url(../img/sony/triggers.png);
+	opacity: 0;
+}
+
+.ps .trigger.left {
+	float: left;
+}
+
+.ps .trigger.right {
+	float: right;
+}
+
+.ps .bumper {
+	width: 89px;
+	height: 28px;
+	background: url(../img/sony/bumpers.png);
+	opacity: 0;
+}
+
+.ps .bumpers {
+	position: absolute;
+	width: 586px;
+	height: 28px;
+	left: 99px;
+	top: 72px;
+}
+
+.ps .bumper.pressed {
+	opacity: 1;
+}
+
+.ps .bumper.left {
+	-webkit-transform: rotateY(180deg);
+	transform: rotateY(180deg);
+	float: left;
+}
+
+.ps .bumper.right {
+	float: right;
+}
+
+.ps .quadrant {
+	position: absolute;
+	background: url(../img/sony/player-n.png);
+	height: 17px;
+	width: 111px;
+	top: 140px;
+	left: 240px;
+}
+
+.ps .p0 {
+	background-position: 0 -6px;
+}
+
+.ps .p1 {
+	background-position: 0 -28px;
+}
+
+.ps .p2 {
+	background-position: 0 -49px;
+}
+
+.ps .p3 {
+	background-position: 0 -70px;
+}
+
+.ps .arrows {
+	position: absolute;
+	width: 205px;
+	height: 19px;
+	top: 250px;
+	left: 291px;
+}
+
+.ps .back,
+.ps .start {
+	background: url(../img/sony/menus.png);
+	width: 34px;
+	height: 19px;
+}
+
+.ps .back.pressed,
+.ps .start.pressed {
+	background-position-y: -21px;
+	margin-top: 2px;
+}
+
+.ps .back {
+	float: left;
+	width: 38px;
+}
+
+.ps .start {
+	float: right;
+	width: 36px;
+	background-position: 37px 0;
+}
+
+.ps .abxy {
+	position: absolute;
+	width: 204px;
+	height: 205px;
+	top: 156px;
+	left: 538px;
+}
+
+.ps .button {
+	position: absolute;
+	width: 62px;
+	height: 62px;
+	background: url(../img/sony/face-buttons.png);
+}
+
+.ps .button.pressed {
+	background-position-y: -64px;
+	margin-top: 5px;
+}
+
+.ps .a {
+	background-position: 62px 0;
+	top: 142px;
+	left: 71px;
+}
+
+.ps .b {
+	background-position: 125px 0;
+	top: 71px;
+	right: 0px;
+}
+
+.ps .x {
+	background-position: 0 0;
+	top: 71px;
+}
+
+.ps .y {
+	background-position: -63px 0;
+	left: 71px;
+}
+
+.ps .sticks {
+	position: absolute;
+	width: 364px;
+	height: 105px;
+	top: 328px;
+	left: 210px;
+}
+
+.ps .stick {
+	position: absolute;
+	background: url(../img/sony/thumbs.png);
+	height: 105px;
+	width: 105px;
+}
+
+.ps .stick.pressed.left {
+	background-position-x: -106px;
+}
+
+.ps .stick.pressed.right {
+	background-position-x: -211px;
+}
+
+.ps .stick.left {
+	top: 0;
+	left: 0;
+}
+
+.ps .stick.right {
+	top: calc(100% - 105px);
+	left: calc(100% - 105px);
+}
+
+.ps .dpad {
+	position: absolute;
+	width: 140px;
+	height: 132px;
+	top: 192px;
+	left: 74px;
+}
+
+.ps .face {
+	background: url(../img/sony/dpad.png);
+	position: absolute;
+}
+
+.ps .face.up,
+.ps .face.down {
+	width: 38px;
+	height: 52px;
+}
+
+.ps .face.left,
+.ps .face.right {
+	width: 52px;
+	height: 38px;
+}
+
+.ps .face.up {
+	left: 50px;
+	top: 0;
+	background-position: 92px 0px;
+}
+
+.ps .face.down {
+	left: 50px;
+	top: 79px;
+	background-position: 131px 0;
+}
+
+.ps .face.left {
+	top: 47px;
+	left: 0;
+	background-position: 0px 0;
+}
+
+.ps .face.right {
+	top: 47px;
+	right: 0px;
+	background-position: 53px 0;
+}
+
+.ps .face.pressed {
+	margin-top: 5px;
+	background-position-y: 52px;
+}
+
+.ps.half {
+	margin-top: -279px;
+}
+
+.controller.fight-stick {
+	background: url(../img/fsc/base.svg) center no-repeat;
+	height: 534px;
+	width: 1122px;
+}
+
+.fight-stick.disconnected {
+	background: url(../img/fsc/disconnected.svg) no-repeat;
+}
+
+.fight-stick.disconnected div {
+	display: none;
+}
+
+.fight-stick .triggers {
+	width: 326px;
+	height: 198px;
+	position: absolute;
+	right: 0px;
+	bottom: 66px;
+}
+
+.fight-stick .trigger-button {
+	width: 123px;
+	height: 123px;
+	background: #333333;
+	border-radius: 100%;
+	opacity: 1;
+	display: block;
+}
+
+.fight-stick .trigger-button.pressed {
+	transform: translateY(5px);
+	-webkit-filter: invert(1);
+}
+
+.fight-stick .trigger-button.left {
+	position: absolute;
+	float: right;
+	bottom: 4px;
+	right: 42px;
+}
+
+.fight-stick .trigger-button.right {
+	float: left;
+}
+
+.fight-stick .bumpers {
+	width: 295px;
+	height: 198px;
+	position: absolute;
+	right: 0px;
+	top: 88px;
+}
+
+.fight-stick .bumper {
+	width: 123px;
+	height: 123px;
+	background: #333333;
+	border-radius: 100%;
+	opacity: 1;
+	display: block;
+}
+
+.fight-stick .bumper.pressed {
+	transform: translateY(5px);
+	-webkit-filter: invert(1);
+}
+
+.fight-stick .bumper.left {
+	position: absolute;
+	float: right;
+	bottom: 4px;
+	right: 11px;
+}
+
+.fight-stick .bumper.right {
+	float: left;
+}
+
+.fight-stick .quadrant {
+	position: absolute;
+	font-size: 28px;
+	font-weight: normal;
+	top: 20px;
+	left: 236px;
+	color: white;
+}
+
+.fight-stick .arrows {
+	position: absolute;
+	width: 70px;
+	height: 217px;
+	top: 53px;
+	left: 49px;
+}
+
+.fight-stick .back,
+.fight-stick .start {
+	width: 70px;
+	height: 70px;
+	background: #333333;
+	display: block;
+	border-radius: 100%;
+}
+
+.fight-stick .back {
+	float: left;
+}
+
+.fight-stick .start {
+	position: absolute;
+	bottom: 4px;
+	left: -1px;
+}
+
+.fight-stick .back.pressed,
+.fight-stick .start.pressed {
+	transform: translateY(5px);
+	-webkit-filter: invert(1);
+}
+
+.fight-stick .abxy {
+	position: absolute;
+	width: 310px;
+	height: 370px;
+	bottom: 103px;
+	left: 472px;
+}
+
+.fight-stick .button {
+	width: 123px;
+	height: 123px;
+	background: #333333;
+	border-radius: 100%;
+	opacity: 1;
+	display: block;
+	position: absolute;
+}
+
+.fight-stick .button.pressed {
+	transform: translateY(5px);
+	-webkit-filter: invert(1);
+}
+
+.fight-stick .a {
+	bottom: 0px;
+	left: 0px;
+}
+
+.fight-stick .b {
+	bottom: 66px;
+	right: 31px;
+}
+
+.fight-stick .x {
+	top: 66px;
+	left: 33px;
+}
+
+.fight-stick .y {
+	right: 0px;
+	top: 0px;
+}
+
+.fight-stick .fstick {
+	position: absolute;
+	width: 221px;
+	height: 221px;
+	top: 199px;
+	left: 192px;
+	background: url(../img/fsc/stick.svg);
+}
+
+.fight-stick .fstick.up {
+	background-position-x: -1762px;
+}
+
+.fight-stick .fstick.down {
+	background-position-x: -882px;
+}
+
+.fight-stick .fstick.left {
+	background-position-x: -1322px;
+}
+
+.fight-stick .fstick.right {
+	background-position-x: -442px;
+}
+
+.fight-stick .fstick.up.right {
+	background-position-x: -222px;
+}
+
+.fight-stick .fstick.up.left {
+	background-position-x: -1542px;
+}
+
+.fight-stick .fstick.down.right {
+	background-position-x: -662px;
+}
+
+.fight-stick .fstick.down.left {
+	background-position-x: -1102px;
+}
+
+.controller.gc {
+	background: url(../img/gcn/base.svg) no-repeat;
+	height: 837px;
+	width: 978px;
+}
+
+.gc.disconnected {
+	background: url(../img/gcn/disconnected.svg) no-repeat;
+}
+
+.gc.disconnected div {
+	display: none;
+}
+
+.gc .triggers {
+	width: 775px;
+	height: 95px;
+	position: absolute;
+	left: 102px;
+}
+
+.gc .trigger {
+	width: 131px;
+	height: 100%;
+	background: url(../img/gcn/trigger.svg);
+	opacity: 0;
+}
+
+.gc .trigger.left {
+	float: left;
+}
+
+.gc .trigger.right {
+	float: right;
+}
+
+.gc .bumper {
+	width: 158px;
+	height: 100%;
+	background: url(../img/gcn/buttons.svg) no-repeat;
+	background-position: -358px 0px;
+	opacity: 0;
+}
+
+.gc .bumpers {
+	position: absolute;
+	width: 792px;
+	height: 73px;
+	left: 103px;
+	top: 138px;
+}
+
+.gc .bumper.pressed {
+	opacity: 1;
+}
+
+.gc .bumper.left {
+	float: left;
+	display: none;
+}
+
+.gc .bumper.right {
+	float: right;
+}
+
+.gc .arrows {
+	position: absolute;
+	width: 50px;
+	height: 50px;
+	top: 324px;
+	left: 465px;
+}
+
+.gc .back,
+.gc .start {
+	width: 43px;
+	height: 43px;
+	background: #e7e7e7;
+	border-radius: 100%;
+	border: solid 4.5px rgba(0, 0, 0, 0.65);
+	background-clip: content-box;
+	opacity: 0;
+}
+
+.gc .back.pressed,
+.gc .start.pressed {
+	opacity: 1;
+	filter: invert(1);
+	-webkit-filter: invert(1);
+}
+
+.gc .back {
+	display: none;
+}
+
+.gc .start {
+	float: right;
+}
+
+.gc .abxy {
+	position: absolute;
+	width: 288px;
+	height: 230px;
+	top: 207px;
+	left: 640px;
+}
+
+.gc .button {
+	position: absolute;
+	background: url(../img/gcn/buttons.svg);
+	opacity: 0;
+}
+
+.gc .button.pressed {
+	opacity: 1;
+}
+
+.gc .a {
+	background-position: 0 0;
+	width: 114px;
+	height: 114px;
+	bottom: 35px;
+	left: 91px;
+}
+
+.gc .b {
+	width: 71px;
+	height: 71px;
+	background-position: -116px 0;
+	bottom: 0px;
+	left: 1px;
+}
+
+.gc .x {
+	width: 66px;
+	height: 103px;
+	background-position: -292px 0;
+	top: 65px;
+	right: 0px;
+}
+
+.gc .y {
+	width: 103px;
+	height: 66px;
+	background-position: -189px 0;
+	left: 67px;
+	top: 2px;
+}
+
+.gc .sticks {
+	position: absolute;
+	width: 628px;
+	height: 392px;
+	top: 258px;
+	left: 106px;
+}
+
+.gc .stick {
+	position: absolute;
+}
+
+.gc .stick.left {
+	top: 24px;
+	left: 23px;
+	background: url(../img/gcn/left-stick.svg) center no-repeat;
+	height: 121px;
+	width: 121px;
+}
+
+.gc .stick.right {
+	top: calc(100% - 127px);
+	left: calc(100% - 125px);
+	background: url(../img/gcn/cstick.svg) center no-repeat;
+	width: 84px;
+	height: 84px;
+}
+
+.gc .dpad {
+	position: absolute;
+	width: 125px;
+	height: 126px;
+	top: 181px;
+	left: 92px;
+}
+
+.gc .dpad {
+	position: absolute;
+	width: 130px;
+	height: 130px;
+	top: 497px;
+	left: 263px;
+}
+
+.gc .face {
+	background: url(../img/gcn/dpad.svg) no-repeat;
+	position: absolute;
+	opacity: 0;
+}
+
+.gc .face.up,
+.gc .face.down {
+	width: 44px;
+	height: 65px;
+}
+
+.gc .face.left,
+.gc .face.right {
+	width: 65px;
+	height: 44px;
+}
+
+.gc .face.up {
+	left: 42px;
+	top: 0;
+	background-position: 0px 0px;
+}
+
+.gc .face.down {
+	left: 42px;
+	bottom: 0;
+	background-position: -46px 0;
+}
+
+.gc .face.left {
+	top: 43px;
+	left: 0;
+	background-position: -93px 0;
+}
+
+.gc .face.right {
+	top: 43px;
+	right: 0px;
+	background-position: -160px 0;
+}
+
+.gc .face.pressed {
+	opacity: 1;
+}
+
 .navbar {
 	height: 50px;
-	background: cornflowerblue;
-	border-bottom: 1px solid #5570b8;
+	background: #600;
 	color: white;
 	width: 100%;
 	z-index: 10;
@@ -496,9 +1171,8 @@ strong {
 }
 
 .nocon {
-	background: indianred;
+	background: #600;
 	border-bottom: none;
-	border-top: 1px solid #ff7474;
 	bottom: 0;
 	top: auto;
 }
@@ -516,20 +1190,13 @@ strong {
 
 .navbar .content {
 	font-size: 25px;
-	width: 960px;
+	max-width: 960px;
 	display: flex;
 	margin: 0 auto;
+	padding: 0 16px;
 	line-height: 50px;
 	justify-content: space-between;
 }
-
-/*.navbar .content .left {
-    float: left;
-}
-
-.navbar .content .right {
-    float: right;
-}*/
 
 .right a.button {
 	top: 0;
@@ -596,12 +1263,6 @@ strong {
 	width: 50px;
 }
 
-/*.skins{*/
-/*margin: 0 0 0 -4px;*/
-/*}*/
-/*.skins input{*/
-/*display: none;*/
-/*}*/
 .console {
 	padding: 9px;
 	vertical-align: top;
@@ -631,34 +1292,20 @@ strong {
 	background: white;
 }
 
-.console.xbox,
-.console.xbox-old {
-	background: url("icons/xbx.png") no-repeat center;
+.console.xbox {
+	background: url("../img/xbox.png") no-repeat center;
 }
 
-.console.ps,
-.console.ds4 {
-	background: url("icons/psn.png") no-repeat center;
-}
-
-.console.nes {
-	background: url("icons/nes.png") no-repeat center;
-}
-
-.console.fpp {
-	background: url("icons/fpp.png") no-repeat center;
+.console.ps {
+	background: url("../img/sony.png") no-repeat center;
 }
 
 .console.fight-stick {
-	background: url("icons/fight-stick.png") no-repeat center;
+	background: url("../img/fsc.png") no-repeat center;
 }
 
 .console.gc {
-	background: url("icons/gc.png") no-repeat center;
-}
-
-.console.n64 {
-	background: url("icons/n64.png") no-repeat center;
+	background: url("../img/gcn.png") no-repeat center;
 }
 
 #color-picker {
@@ -677,31 +1324,6 @@ strong {
 	transform: scale(0);
 }
 
-/*.box.xbx, .box.psn{*/
-/*background: #53BDFF;*/
-/*}*/
-/*.box.xbx label, .box.psn label{*/
-/*color: #5570B8;*/
-/*text-shadow: 0 1px 0 #90D4FF;*/
-/*}*/
-/*.box.psn label{*/
-/*line-height: 55px;*/
-/*font-size: 50px;*/
-/*}*/
-/*.box.xbx label{*/
-/*font-size: 17px;*/
-/*line-height: 53px;*/
-/*}*/
-/*.box.xbx label:hover, .box.xbx input:checked + label{*/
-/*background: forestgreen;*/
-/*color: white;*/
-/*text-shadow: none;*/
-/*}*/
-/*.box.psn label:hover, .box.psn input:checked + label{*/
-/*background: #252EAE;*/
-/*color: white;*/
-/*text-shadow: none;*/
-/*}*/
 span.code {
 	border-radius: 2px;
 	font-family: monospace;
@@ -721,7 +1343,7 @@ span.code {
 }
 
 .help a {
-	color: #5570b8;
+	color: ;
 }
 
 .thanks {
@@ -731,7 +1353,7 @@ span.code {
 }
 
 .thanks a {
-	color: darkred;
+	color: #600;
 }
 
 .talk {
@@ -792,36 +1414,6 @@ span.code {
 	padding: 15px;
 }
 
-/*#help{
-    -webkit-transform: rotateX(-100deg);
-    -webkit-backface-visibility: hidden;
-    -moz-transform: rotateX(-100deg);
-    -moz-backface-visibility: hidden;
-    -moz-transform-origin: top;
-    transform: rotateX(-100deg);
-    backface-visibility: hidden;
-    transform-origin: top;
-    -webkit-transform-origin: top;
-    transition: transform .3s ease;
-    transition: -webkit-transform .3s ease;
-    visibility: hidden;
-    position: absolute;
-    margin: 0 auto;
-
-}
-#help:target{
-    -webkit-transform: rotateX(0deg);
-    -moz-transform: rotateX(0deg);
-    transform: rotateX(0deg);
-    transition: -webkit-transform 2s ease;
-    transition: transform 2s ease;
-    transform-origin: top;
-    -moz-transform-origin: top;
-    -webkit-transform-origin: top;
-    visibility: visible;
-    position: relative;
-    margin: 0 auto;
-}*/
 .ac {
 }
 
@@ -911,7 +1503,7 @@ span.code {
 }
 
 .log code {
-	font-family: "Consolas", monospace;
+	font-family: monospace;
 	white-space: pre-line;
 }
 
@@ -943,7 +1535,7 @@ span.code {
 }
 
 .update {
-	background: darkred;
+	background: #600;
 	z-index: 11;
 	border-bottom: 1px solid rgb(125, 0, 0);
 	display: none;
@@ -960,66 +1552,6 @@ span.code {
 	width: 100%;
 }
 
-/*
-Help Box Stuff
-.changelog::-webkit-scrollbar
-{
-    width: 22px;  !* for vertical scrollbars *!
-    height: 12px; !* for horizontal scrollbars *!
-}
-
-.changelog::-webkit-scrollbar-track
-{
-    !*background: rgba(0, 0, 0, 0.1);*!
-    !*border-radius: 12px;*!
-    !*box-shadow: inset 1px 1px 12px rgba(0, 0, 0, 0.28);*!
-}
-
-.changelog::-webkit-scrollbar-thumb
-{
-    background: linear-gradient(to right, rgba(54, 58, 65, 0.2) 0%,rgba(0,0,0,0.3) 100%);
-    border-radius: 12px;
-    border: 4px solid transparent;
-    background-clip: padding-box;
-}
-*/
-/*.info {
-    display: block;
-    background: #75bbfd;
-    font-size: 13pt;
-    padding: 12px;
-    vertical-align: text-bottom;
-    color: black;
-}
-.info span:before {
-    content: "INFO";
-    padding: 2px 6px;
-    border: solid #95d0fc 2px;
-    margin: 0 6px 0 0;
-    font-weight: 700;
-    border-radius: 3px;
-}
-.warning {
-    display: block;
-    background: darkred;
-    font-size: 13pt;
-    padding: 12px;
-    vertical-align: text-bottom;
-}
-.warning span:before {
-    content: "WARNING";
-    padding: 2px 6px;
-    background: red;
-    margin: 0 6px 0 0;
-    font-weight: 700;
-    border-radius: 3px;
-}
-.info span, .warning span {
-    text-align: center;
-    display: block;
-}*/
-
-/*CSS Slideout Menu*/
 a .menu-button {
 	color: white;
 	font-size: 36px;
@@ -1087,46 +1619,6 @@ a:active .menu-button {
 	height: 100%;
 }
 
-/*Twitch Video Tooltip*/
-/*.menu .yt-contain:before, .yt-contain:after{
-    display: block;
-    visibility: hidden;
-    z-index: 10;
-    position: fixed;
-    white-space: pre-line;
-    transform: translateX(-20px);
-    transition: transform .3s ease-out, opacity .3s ease-out;
-    opacity: 0;
-}
-
-.menu .yt-contain:hover:after, .yt-contain:hover:before{
-    transform: translateX(-5px);
-    visibility: visible;
-    opacity: 1;
-}
-.menu .yt-contain:after {
-    content: "Upsilon Pi Epsilon @ FIU is hosting a Super Smash Bros. tournament on Friday, October 28th at 6pm EST. \AHope to see you in chat!";
-    width: 200px;
-    text-align: center;
-    padding: 8px 8px 8px 8px;
-    color: whitesmoke;
-    right: -240px;
-    top: 120px;
-    border-radius: 5px;
-    background: rgba(0,0,0,.7);
-}
-.menu .yt-contain:before{
-    content: "";
-    width: 0px;
-    height: 0;
-    top: 160px;
-    right: -24px;
-    border-style: solid;
-    border-width: 13px 15px 13px 0px;
-    border-color: transparent rgba(0,0,0,.7) transparent transparent;
-    box-sizing: border-box;
-}*/
-
 .menu ul {
 	height: calc(100% - 50px);
 	overflow-y: auto;
@@ -1137,7 +1629,6 @@ a:active .menu-button {
 }
 
 .menu a {
-	/* vertical-align: baseline; */
 	display: block;
 	padding: 10px;
 	font-size: 26px;
@@ -1158,7 +1649,7 @@ a:active .menu-button {
 .menu h1 {
 	font-size: 30px;
 	padding: 10px;
-	background: darkred;
+	background: #600;
 	color: floralwhite;
 	padding-left: 64px;
 }
@@ -1170,10 +1661,6 @@ a:active .menu-button {
 	top: 2px;
 }
 
-.menu {
-	/*position: relative;*/
-}
-
 .menu .divider {
 	border-bottom: 1px solid gray;
 	margin: 10px 50px;
@@ -1183,9 +1670,7 @@ a:active .menu-button {
 	background: rgba(0, 0, 0, 0.2);
 }
 
-/* CSS Modals */
 .modal-container {
-	/*background: rgba(0, 0, 0, 0);*/
 	z-index: 13;
 	position: absolute;
 	width: 100%;
@@ -1199,14 +1684,11 @@ a:active .menu-button {
 
 .modal-container:target {
 	visibility: visible;
-	/*background: rgba(0, 0, 0, 0.61);*/
 }
 
 .modal-container:target .modal {
 	opacity: 1;
 	transform: scale(1) rotateX(0deg) translateY(0%);
-	/*animation: modal-flow .5s;*/
-	/*animation-timing-function: cubic-bezier(0.27, 1.29, 0.63, 1);*/
 }
 
 .modal-bg {
@@ -1230,7 +1712,6 @@ a:active .menu-button {
 
 .modal {
 	width: 870px;
-	/*height: calc(100% - 100px);*/
 	max-height: calc(100% - 100px);
 	min-height: 415px;
 	display: flex;
@@ -1242,8 +1723,6 @@ a:active .menu-button {
 	transform: scale(1.4) rotateX(60deg) translateY(-100%);
 	transform-origin: center -70px;
 	transition: all 0.7s cubic-bezier(0.27, 1.29, 0.63, 1) 0.1s, opacity 100ms ease 0.1s;
-	/*animation: modal-flow .5s reverse;*/
-	/*animation-timing-function: cubic-bezier(0.27, 1.29, 0.63, 1);*/
 }
 
 .modal article {
@@ -1254,16 +1733,6 @@ a:active .menu-button {
 	overflow-y: auto;
 	flex: 1 1 auto;
 }
-
-/* Unnecessary fix since this flexbox bug has been fixed
-
-.modal article > :first-child {
-    margin-top: 18px;
-}
-
-.modal article > :last-child {
-    margin-bottom: 18px;
-}*/
 
 .modal h1 {
 	font-size: 3em;
@@ -1288,7 +1757,7 @@ a:active .menu-button {
 }
 
 .modal .codeblock {
-	font-family: "Consolas", monospace;
+	font-family: monospace;
 	background: lightgrey;
 	color: darkgoldenrod;
 	word-wrap: break-word;
@@ -1326,7 +1795,8 @@ a:active .menu-button {
 }
 
 .modal .minimenu + header {
-	background: deepskyblue;
+	background: #600;
+	color: white;
 	-webkit-box-sizing: border-box;
 	-moz-box-sizing: border-box;
 	box-sizing: border-box;
@@ -1442,7 +1912,7 @@ a:active .menu-button {
 	content: attr(data-param);
 	margin-left: 5px;
 	padding: 3px;
-	font-family: "Consolas", monospace;
+	font-family: monospace;
 	background: lightgrey;
 	color: darkgoldenrod;
 	word-wrap: break-word;
@@ -1535,7 +2005,7 @@ a:active .menu-button {
 	min-width: 40px;
 	text-align: right;
 	padding: 20px 5px 5px 10px;
-	background: deepskyblue;
+	background: #600;
 	box-sizing: border-box;
 	position: relative;
 	margin: 0 5px 5px 0;
@@ -1699,32 +2169,11 @@ a:active .menu-button {
 }
 
 #mapping-config input[value="dpad"]:after {
-	font-family: "Material Icons";
-	content: "gamepad";
-	font-size: 23px;
+	content: "Pad";
 }
 
 #mapping-config .disable-item:after {
 	content: "Disable";
-}
-
-#mapping-config .axes-config:after {
-	font-family: inherit;
-	content: "check_box_outline_blank";
-	line-height: inherit;
-	cursor: pointer;
-}
-
-#mapping-config .axes-config:checked:after {
-	content: "check_box";
-}
-
-#mapping-config .axes-config {
-	width: 37px;
-	height: 0;
-	padding: 0;
-	margin: 0;
-	outline: none;
 }
 
 #mapping-config .axes-config:checked {
@@ -1845,9 +2294,6 @@ a:active .menu-button {
 	margin-right: 10px;
 }
 
-#showcase .description {
-}
-
 #adoptaskin p {
 	margin-bottom: 8px;
 }
@@ -1880,7 +2326,6 @@ a:active .menu-button {
 	box-sizing: border-box;
 	font-size: 30px;
 	padding: 10px;
-	font-family: inherit;
 }
 
 #contact-form textarea {
@@ -1984,9 +2429,12 @@ a:active .menu-button {
 	color: black;
 }
 
-/* Survey Beg Box */
 .plshalpme {
 	display: none;
+}
+
+.disconnected {
+	opacity: 0.05;
 }
 
 .disconnected[id*="gamepad-"] .plshalpme {
@@ -1994,13 +2442,11 @@ a:active .menu-button {
 	position: absolute;
 	width: 100%;
 	height: 100%;
-	background: darkred;
+	background: #600;
 }
 
 .disconnected[id*="gamepad-"] .plshalpme div {
 	display: block;
-	/* margin: 0 auto; */
-	/* width: 238px; */
 	text-align: center;
 	position: absolute;
 	top: 50%;
@@ -2015,7 +2461,6 @@ a:active .menu-button {
 	text-decoration: none;
 }
 
-/*Generic Classes*/
 .active {
 	display: block;
 }
