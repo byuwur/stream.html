@@ -82,7 +82,7 @@
 			<div class="controller xbox disconnected" id="gamepad-1"></div>
 			<div class="controller xbox disconnected" id="gamepad-2"></div>
 			<div class="controller xbox disconnected" id="gamepad-3"></div>
-			<div class="controller xbox disconnected" id="gamepad-4"></div>
+			<div class="controller xbox disconnected" id="gamepad-9"></div>
 		</div>
 		<div class="navbar hide-me">
 			<div class="content">
@@ -98,7 +98,7 @@
 							<option value="gamepad-1">2</option>
 							<option value="gamepad-2">3</option>
 							<option value="gamepad-3">4</option>
-							<option value="gamepad-4">KB</option>
+							<option value="gamepad-9">KB</option>
 						</select>
 					</div>
 					<div class="left skins">
@@ -118,9 +118,8 @@
 					<div class="box alert">
 						<span><i class="fa fa-exclamation-circle"></i></span>
 					</div>
-					<span>No controllers detected. Try pressing a button.</span>
+					<span>No controllers detected. Press ANY Button or [F].</span>
 				</div>
-				<span class="clear"></span>
 			</div>
 		</div>
 		<div class="slideout-menu hide-me" id="menu">
@@ -183,10 +182,10 @@
 							<ul>
 								<li>N/A</li>
 								<li>1</li>
-								<li>1, 2, 3, 4</li>
-								<li>Enables "Compact Mode", displaying only the controller.</li>
+								<li>0 (P1), 1 (P2), 2 (P3), 3 (P4), 9 (KB)</li>
+								<li>Enables "Lite Mode", displaying only the controller.</li>
 							</ul>
-							<p>Selects which controller to view in Compact Mode.</p>
+							<p>Selects which controller to view in Lite Mode.</p>
 						</section>
 						<section class="definition">
 							<h2 data-param="s=">Skin ID</h2>
@@ -198,7 +197,7 @@
 								<li>Defaults to '1' (Xbox) if set to other values.</li>
 								<li>Requires a player number (<code class="codeblock">p=</code>).</li>
 							</ul>
-							<p>Sets the gamepad skin in Compact Mode. For custom skins, see <code class="codeblock">css=</code>.</p>
+							<p>Sets the gamepad skin in Lite Mode. For custom skins, see <code class="codeblock">css=</code>.</p>
 						</section>
 						<section class="definition">
 							<h2 data-param="smeter=">Strength Meter</h2>
@@ -297,6 +296,7 @@
 								<option value="1" disabled>2</option>
 								<option value="2" disabled>3</option>
 								<option value="3" disabled>4</option>
+								<option value="9" disabled>KB</option>
 							</select>
 						</p>
 						<div id="output-display">

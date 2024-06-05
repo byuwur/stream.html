@@ -21,6 +21,7 @@ const gamepadSupport = {
 	TYPICAL_BUTTON_COUNT: 18,
 	TYPICAL_AXIS_COUNT: 4,
 	ticking: false,
+	kb: false,
 	gamepads: [],
 	gamepadsRaw: [],
 	prevRawGamepadTypes: [],
@@ -32,12 +33,36 @@ const gamepadSupport = {
 		else {
 			window.addEventListener("gamepadconnected", gamepadSupport.onGamepadConnect, false);
 			window.addEventListener("gamepaddisconnected", gamepadSupport.onGamepadDisconnect, false);
+			window.addEventListener("keydown", gamepadSupport.onKeyboardConnect, false);
 			if (gamepadSupportAvailable) gamepadSupport.startPolling();
 		}
 	},
 
+	onKeyboardConnect: function (event) {
+		if (!gamepadSupport.kb && event.type === "keydown" && event.key === "f") {
+			gamepadSupport.kb = true;
+			gamepadSupport.gamepads[9] = settingsKB;
+			function kbKeyDown(event) {
+				if (settingsKB.buttons.includes(event.key)) console.log(`press ${event.key}=${settingsKB.buttons.indexOf(event.key)}`);
+				if (settingsKB.axesBtn.includes(event.key)) console.log(`press ${event.key}=${settingsKB.buttons.indexOf(event.key)}`);
+			}
+			document.addEventListener("keydown", kbKeyDown, false);
+			function kbKeyUp(event) {
+				if (settingsKB.buttons.includes(event.key)) console.log(`release ${event.key}=${settingsKB.buttons.indexOf(event.key)}`);
+				if (settingsKB.axesBtn.includes(event.key)) console.log(`release ${event.key}=${settingsKB.buttons.indexOf(event.key)}`);
+			}
+			document.addEventListener("keyup", kbKeyUp, false);
+			tester.updateGamepads(gamepadSupport.gamepads);
+			gamepadSupport.startPolling();
+		}
+	},
+
 	onGamepadConnect: function (event) {
-		gamepadSupport.gamepads.push(event.gamepad);
+		for (const i in allowedPlayers)
+			if (!gamepadSupport.gamepads[i] && i != 9) {
+				gamepadSupport.gamepads[i] = event.gamepad;
+				break;
+			}
 		tester.updateGamepads(gamepadSupport.gamepads);
 		gamepadSupport.startPolling();
 	},
@@ -89,23 +114,23 @@ const gamepadSupport = {
 					gamepadsChanged = true;
 					gamepadSupport.prevRawGamepadTypes[i] = typeof rawGamepads[i];
 				}
-				if (rawGamepads[i] && controllerRebinds && controllerRebinds.mapping && controllerRebinds.mapping.length > 0) {
-					const remapObj = $.extend(true, {}, rawGamepads[i]);
-					for (let b = 0; b < remapObj.buttons.length; b++) {
-						remapObj.buttons[b] = $.extend({}, rawGamepads[i].buttons[b]);
+				if (rawGamepads[i] && i != 9) {
+					gamepadSupport.gamepadsRaw[i] = rawGamepads[i];
+					gamepadSupport.gamepads[i] = rawGamepads[i];
+					if (controllerRebinds?.mapping?.length > 0) {
+						const remapObj = $.extend(true, {}, rawGamepads[i]);
+						for (let b = 0; b < remapObj.buttons.length; b++) remapObj.buttons[b] = $.extend({}, rawGamepads[i].buttons[b]);
+
+						controllerRebinds.mapping.forEach((bindmap) => {
+							if (bindmap.disabled && bindmap.targetType !== "dpad") setMapping(bindmap, 0, remapObj);
+							else bindWrapper(bindmap, remapObj);
+						});
+						gamepadSupport.gamepads[i] = remapObj;
 					}
-					controllerRebinds.mapping.forEach((bindmap) => {
-						if (bindmap.disabled && bindmap.targetType !== "dpad") {
-							setMapping(bindmap, 0, remapObj);
-						} else {
-							bindWrapper(bindmap, remapObj);
-						}
-					});
-					gamepadSupport.gamepads.push(remapObj);
-					gamepadSupport.gamepadsRaw.push(rawGamepads[i]);
-				} else if (rawGamepads[i]) {
-					gamepadSupport.gamepads.push(rawGamepads[i]);
-					gamepadSupport.gamepadsRaw.push(rawGamepads[i]);
+				}
+				if (gamepadSupport.kb || i == 9) {
+					gamepadSupport.gamepads[9] = settingsKB;
+					gamepadSupport.gamepadsRaw[9] = settingsKB;
 				}
 			}
 			if (gamepadsChanged) tester.updateGamepads(gamepadSupport.gamepads);
@@ -113,9 +138,11 @@ const gamepadSupport = {
 	},
 
 	updateDisplay: function (gamepadId) {
-		const gamepadRaw = gamepadSupport.gamepadsRaw[gamepadId];
-		for (const b in gamepadRaw.buttons) tester.updateRawButton(gamepadRaw.buttons[b], gamepadId, b);
-		for (const a in gamepadRaw.axes) tester.updateRawAxis(gamepadRaw.axes[a], gamepadId, a);
+		if (pnumber === "") {
+			const gamepadRaw = gamepadSupport.gamepadsRaw[gamepadId];
+			for (const b in gamepadRaw.buttons) tester.updateRawButton(gamepadRaw.buttons[b], gamepadId, b);
+			for (const a in gamepadRaw.axes) tester.updateRawAxis(gamepadRaw.axes[a], gamepadId, a);
+		}
 
 		const gamepad = gamepadSupport.gamepads[gamepadId];
 

@@ -51,68 +51,46 @@ const tester = {
 	},
 
 	updateGamepads: function (gamepads) {
-		document.querySelectorAll(".controller:not(.template)").forEach((el) => {
-			el.classList.add("disconnected");
-			$("#player-base").val("None").trigger("change");
-		});
-
-		document.querySelectorAll("#player-base [value]").forEach((el) => {
-			el.disabled = true;
-		});
-
-		document.querySelectorAll(".raw-outputs:not(.template)").forEach((el) => {
-			el.remove();
-		});
-
 		let padsConnected = false;
 		tester.DISABLED_INPUTS = {};
+		for (const i in gamepads ?? []) {
+			const gamepad = gamepads[i];
+			if (pnumber === "") {
+				document.getElementById("player-base").querySelector(`option[value="${i}"]`).disabled = false;
+				const newRawMap = document.createElement("div");
+				newRawMap.innerHTML = document.querySelector(".raw-outputs.template").innerHTML;
+				newRawMap.id = `gamepad-map-${i}`;
+				newRawMap.className = "raw-outputs";
 
-		if (gamepads) {
-			for (const i in gamepads) {
-				const gamepad = gamepads[i];
+				gamepad.buttons.forEach((button, b) => {
+					const bEl = document.createElement("li");
+					bEl.setAttribute("data-shortname", `B${b}`);
+					bEl.setAttribute("data-name", `button-${b}`);
+					bEl.setAttribute("data-info", JSON.stringify({ id: i, type: "buttons", number: b }));
+					bEl.title = `Button ${b}`;
+					newRawMap.querySelector(".buttons").appendChild(bEl);
+				});
 
-				if (gamepad) {
-					if (pnumber === "") {
-						const el2 = document.getElementById("player-base");
-						el2.querySelector(`option[value="${i}"]`).disabled = false;
+				gamepad.axes.forEach((axis, a) => {
+					const aEl = document.createElement("li");
+					aEl.setAttribute("data-shortname", `Axis ${a}`);
+					aEl.setAttribute("data-name", `axis-${a}`);
+					aEl.setAttribute("data-info", JSON.stringify({ id: i, type: "axes", number: a }));
+					aEl.title = `Axis ${a}`;
+					newRawMap.querySelector(".axes").appendChild(aEl);
+				});
 
-						const newRawMap = document.createElement("div");
-						newRawMap.innerHTML = document.querySelector(".raw-outputs.template").innerHTML;
-						newRawMap.id = `gamepad-map-${i}`;
-						newRawMap.className = "raw-outputs";
-
-						gamepad.buttons.forEach((button, b) => {
-							const bEl = document.createElement("li");
-							bEl.setAttribute("data-shortname", `B${b}`);
-							bEl.setAttribute("data-name", `button-${b}`);
-							bEl.setAttribute("data-info", JSON.stringify({ id: i, type: "buttons", number: b }));
-							bEl.title = `Button ${b}`;
-							newRawMap.querySelector(".buttons").appendChild(bEl);
-						});
-
-						gamepad.axes.forEach((axis, a) => {
-							const aEl = document.createElement("li");
-							aEl.setAttribute("data-shortname", `Axis ${a}`);
-							aEl.setAttribute("data-name", `axis-${a}`);
-							aEl.setAttribute("data-info", JSON.stringify({ id: i, type: "axes", number: a }));
-							aEl.title = `Axis ${a}`;
-							newRawMap.querySelector(".axes").appendChild(aEl);
-						});
-
-						const nameEl = document.createElement("h2");
-						nameEl.innerHTML = gamepad.id;
-						newRawMap.insertBefore(nameEl, newRawMap.firstChild);
-						document.querySelector("#output-display").appendChild(newRawMap);
-					}
-
-					const el = document.getElementById(`gamepad-${i}`);
-					el.querySelector(".quadrant").classList.add(`p${i}`);
-					el.classList.remove("disconnected");
-					padsConnected = true;
-				}
+				const nameEl = document.createElement("h2");
+				nameEl.innerHTML = gamepad.id;
+				newRawMap.insertBefore(nameEl, newRawMap.firstChild);
+				document.querySelector("#output-display").appendChild(newRawMap);
 			}
-		}
 
+			const el = document.getElementById(`gamepad-${i}`);
+			el.querySelector(".quadrant").classList.add(`p${i}`);
+			el.classList.remove("disconnected");
+			padsConnected = true;
+		}
 		if (pnumber === "") {
 			document.querySelector(".nocon").classList.toggle("visible", !padsConnected);
 			document.querySelector(".pselect").classList.toggle("visible", padsConnected);
@@ -148,63 +126,47 @@ const tester = {
 	updateButton: function (value, gamepadId, id) {
 		const gamepadEl = document.querySelector(`#gamepad-${gamepadId}`);
 		const newValue = value.value ?? value;
-
 		const buttonEl = gamepadEl.querySelector(`[data-name="${id}"]`);
-		if (buttonEl) {
-			buttonEl.classList.toggle("pressed", newValue > tester.ANALOGUE_BUTTON_THRESHOLD);
-		}
+		if (buttonEl) buttonEl.classList.toggle("pressed", newValue > tester.ANALOGUE_BUTTON_THRESHOLD);
 	},
 
 	updateStick: function (value, className, gamepadId, id) {
 		const gamepadEl = document.querySelector(`#gamepad-${gamepadId}`);
 		const newValue = value.value ?? value;
-
 		const buttonEl = gamepadEl.querySelector(`[data-name="${id}"]`);
-		if (buttonEl) {
-			buttonEl.classList.toggle(className, newValue > tester.ANALOGUE_BUTTON_THRESHOLD);
-		}
+		if (buttonEl) buttonEl.classList.toggle(className, newValue > tester.ANALOGUE_BUTTON_THRESHOLD);
 	},
 
 	updateTrigger: function (value, gamepadId, id) {
 		const gamepadEl = document.querySelector(`#gamepad-${gamepadId}`);
 		const newValue = value.value ?? value;
-
 		const triggerEl = gamepadEl.querySelector(`[data-name="${id}"]`);
-		if (triggerEl) {
-			if (tester.TRIGGER_DISPLAY_TYPE === 1) {
-				triggerEl.style.opacity = 1;
-				const insetValue = `${(-1 + newValue) * -1 * 100 - 0.00001}%`;
-				triggerEl.style.clipPath = `inset(${insetValue} 0px 0px 0pc)`;
-			} else {
-				triggerEl.style.opacity = newValue;
-			}
+		if (!triggerEl) return;
+		if (!tester.TRIGGER_DISPLAY_TYPE) triggerEl.style.opacity = newValue;
+		else {
+			triggerEl.style.opacity = 1;
+			const insetValue = `${(-1 + newValue) * -1 * 100 - 0.00001}%`;
+			triggerEl.style.clipPath = `inset(${insetValue} 0px 0px 0pc)`;
 		}
 	},
 
 	updateTriggerDigital: function (value, gamepadId, id) {
 		const gamepadEl = document.querySelector(`#gamepad-${gamepadId}`);
 		const newValue = value.value ?? value;
-
 		const buttonEl = gamepadEl.querySelector(`[data-name="${id}"]`);
-		if (buttonEl) {
-			buttonEl.classList.toggle("pressed", newValue > tester.DIGITAL_THRESHOLD);
-		}
+		if (buttonEl) buttonEl.classList.toggle("pressed", newValue > tester.DIGITAL_THRESHOLD);
 	},
 
 	updateAxis: function (value, valueV, gamepadId, stickId) {
 		const gamepadEl = document.querySelector(`#gamepad-${gamepadId}`);
-
 		const stickEl = gamepadEl.querySelector(`[data-name="${stickId}"]`);
 		if (stickEl) {
 			const offsetValH = value * tester.STICK_OFFSET;
 			const offsetValV = valueV * tester.STICK_OFFSET;
 			stickEl.style.marginLeft = `${offsetValH}px`;
 			stickEl.style.marginTop = `${offsetValV}px`;
-			if (tester.STICK_CURVING) {
-				stickEl.style.transform = `rotateX(${offsetValV * -1}deg) rotateY(${offsetValH}deg)`;
-			}
+			if (tester.STICK_CURVING) stickEl.style.transform = `rotateX(${offsetValV * -1}deg) rotateY(${offsetValH}deg)`;
 		}
-
 		const stickRotEL = gamepadEl.querySelector(`[data-name="${stickId}-wheel"]`);
 		if (stickRotEL) {
 			const rotValH = value * tester.ROTATE_BOUNDARY;
@@ -215,10 +177,9 @@ const tester = {
 	updateRawButton: function (value, gamepadId, buttonId) {
 		const gamepadEl = document.querySelector(`#gamepad-map-${gamepadId}`);
 		const newValue = value.value ?? value;
-
 		const buttonEl = gamepadEl.querySelector(`[data-name="button-${buttonId}"]`);
 		if (buttonEl) {
-			buttonEl.innerHTML = newValue.toFixed(2);
+			buttonEl.innerHTML = newValue;
 			buttonEl.style.opacity = 0.6 + newValue * 0.4;
 			if (tester.EVENT_LISTEN) {
 				if (tester.MONITOR_ID === gamepadId && !tester.ifDisabledExists("buttons", gamepadId, buttonId)) {
@@ -236,10 +197,7 @@ const tester = {
 						},
 						bubbles: true
 					});
-
-					if ((tester.MONITOR_TYPE === "remapping" && tester.absDiff(tester.SNAPSHOT.buttons[buttonId].value, newValue) > tester.ANALOGUE_BUTTON_THRESHOLD) || tester.MONITOR_TYPE === "value") {
-						document.querySelectorAll("#mapping-config button").forEach((el) => el.dispatchEvent(gpEvent));
-					}
+					if ((tester.MONITOR_TYPE === "remapping" && tester.absDiff(tester.SNAPSHOT.buttons[buttonId].value, newValue) > tester.ANALOGUE_BUTTON_THRESHOLD) || tester.MONITOR_TYPE === "value") document.querySelectorAll("#mapping-config button").forEach((el) => el.dispatchEvent(gpEvent));
 				}
 			}
 		}
@@ -248,10 +206,9 @@ const tester = {
 	updateRawAxis: function (value, gamepadId, axisId) {
 		const gamepadEl = document.querySelector(`#gamepad-map-${gamepadId}`);
 		const newValue = value.value ?? value;
-
 		const axisEl = gamepadEl.querySelector(`[data-name="axis-${axisId}"]`);
 		if (axisEl) {
-			axisEl.innerHTML = newValue.toFixed(10);
+			axisEl.innerHTML = newValue;
 			axisEl.style.opacity = 0.6 + Math.abs(newValue) * 0.4;
 			if (tester.EVENT_LISTEN) {
 				if (tester.MONITOR_ID === gamepadId && !tester.ifDisabledExists("axes", gamepadId, axisId)) {
@@ -271,10 +228,7 @@ const tester = {
 						},
 						bubbles: true
 					});
-
-					if ((tester.MONITOR_TYPE === "remapping" && tester.absDiff(tester.SNAPSHOT.axes[axisId], newValue) > tester.ANALOGUE_BUTTON_THRESHOLD) || tester.MONITOR_TYPE === "value") {
-						document.querySelectorAll("#mapping-config button").forEach((el) => el.dispatchEvent(gpEvent));
-					}
+					if ((tester.MONITOR_TYPE === "remapping" && tester.absDiff(tester.SNAPSHOT.axes[axisId], newValue) > tester.ANALOGUE_BUTTON_THRESHOLD) || tester.MONITOR_TYPE === "value") document.querySelectorAll("#mapping-config button").forEach((el) => el.dispatchEvent(gpEvent));
 				}
 			}
 		}

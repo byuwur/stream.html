@@ -1,14 +1,3 @@
-$.fn.serializeObject = function () {
-	const o = {};
-	const a = this.serializeArray();
-	$.each(a, function () {
-		if (this.value !== "undefined" && this.value !== "") {
-			o[this.name] = this.value;
-		}
-	});
-	return o;
-};
-
 const gamepadHTML = $("#gamepads .template").html();
 const menuHTML = $("#modal-template .minimenu").html();
 $(".controller").append(gamepadHTML);
@@ -277,11 +266,9 @@ function changeCssURL(cssURL) {
 
 function bindingSettings(paramData) {
 	try {
-		var rebindParse = JSON.parse(paramData || `{"mapping":[]}`);
-		return rebindParse;
+		return JSON.parse(paramData || `{"mapping":[]}`);
 	} catch (e) {
-		console.error("Unable to parse mapping object.");
-		console.log(e);
+		console.error("Unable to parse mapping object.", e);
 	}
 }
 
@@ -291,7 +278,7 @@ const allowedControllers = {
 	7: "fight-stick",
 	9: "gc"
 };
-const allowedPlayers = [0, 1, 2, 3, 4]; // P1, P2, P3, P4, KB
+const allowedPlayers = [0, 1, 2, 3, 9]; // P1, P2, P3, P4, KB
 const skinSwitch = getParameterByName("s") !== "" ? allowedControllers[getParameterByName("s")] : "xbox";
 const pnumber = getParameterByName("p");
 const scaleSize = getParameterByName("sc");
