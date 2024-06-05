@@ -38,19 +38,11 @@ const gamepadSupport = {
 	},
 
 	onKeyboardConnect: function (event) {
-		if (!gamepadSupport.kb && event.type === "keydown" && event.key === "f") {
+		if (!gamepadSupport.kb && event.type === "keydown" && event.keyCode === 70) {
 			gamepadSupport.kb = true;
 			gamepadSupport.gamepads[9] = settingsKB;
-			function kbKeyDown(event) {
-				if (settingsKB.buttons.includes(event.key)) console.log(`press ${event.key}=${settingsKB.buttons.indexOf(event.key)}`);
-				if (settingsKB.axesBtn.includes(event.key)) console.log(`press ${event.key}=${settingsKB.buttons.indexOf(event.key)}`);
-			}
-			document.addEventListener("keydown", kbKeyDown, false);
-			function kbKeyUp(event) {
-				if (settingsKB.buttons.includes(event.key)) console.log(`release ${event.key}=${settingsKB.buttons.indexOf(event.key)}`);
-				if (settingsKB.axesBtn.includes(event.key)) console.log(`release ${event.key}=${settingsKB.buttons.indexOf(event.key)}`);
-			}
-			document.addEventListener("keyup", kbKeyUp, false);
+			document.addEventListener("keydown", tester.updateInputKB, false);
+			document.addEventListener("keyup", tester.updateInputKB, false);
 			tester.updateGamepads(gamepadSupport.gamepads);
 			gamepadSupport.startPolling();
 		}

@@ -92,8 +92,30 @@ const tester = {
 		}
 	},
 
+	updateInputKB: function (event) {
+		const value = event.type === "keydown" ? 1 : 0;
+		if (settingsKB.btns.includes(event.keyCode)) {
+			const i = settingsKB.btns.indexOf(event.keyCode);
+			settingsKB.buttons[i] = value;
+		}
+		if (settingsKB.axesBtns.includes(event.keyCode)) {
+			const axesMap = {
+				0: [0, -1], // lsL
+				1: [0, 1], // lsR
+				2: [1, -1], // lsU
+				3: [1, 1], // lsD
+				4: [2, -1], // rsL
+				5: [2, 1], // rsR
+				6: [3, -1], // rsU
+				7: [3, 1] // rsD
+			};
+			const i = settingsKB.axesBtns.indexOf(event.keyCode);
+			const [axis, mult] = axesMap[i];
+			settingsKB.axes[axis] = value * mult;
+		}
+	},
+
 	updateButton: function (value, gamepadId, id) {
-		//console.log(`value=${value},gamepad=${gamepadId},btn=${id}`);
 		const gamepadEl = document.querySelector(`#gamepad-${gamepadId}`);
 		const newValue = value?.value ?? value;
 		const buttonEl = gamepadEl.querySelector(`[data-name="${id}"]`);
