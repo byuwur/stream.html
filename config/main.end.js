@@ -1,4 +1,4 @@
-let settings = {
+const settings = {
 	...commonSettings,
 	options: {
 		...commonSettings.options,

@@ -1,6 +1,6 @@
 // order: Facebook, YouTube, Instagram, Twitch, Twitter
-let values = ["@byUwUr", "/byUwUr", "@byUwUr", "/byUwUr", "@byUwUr"];
-let settings = {
+const values = ["@byUwUr", "/byUwUr", "@byUwUr", "/byUwUr", "@byUwUr"];
+const settings = {
 	options: {
 		pauseTime: "5",
 		inbetweenPauseTime: "5"

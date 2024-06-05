@@ -25,6 +25,7 @@
 			}
 		</script>
 		<script src="./js/_jquery1102.min.js" defer></script>
+		<script src="./config/controller.keyboard.js" defer></script>
 		<script src="./js/controller.gamepad.js" defer></script>
 		<script src="./js/controller.tester.js" defer></script>
 		<script src="./js/controller.js" defer></script>
@@ -85,12 +86,12 @@
 		<div class="navbar hide-me">
 			<div class="content">
 				<div class="left">
-					<a href="#menu"><i class="fa fa-bars menu-button"></i></a>
+					<a href="#menu" title="Menu"><i class="fa fa-bars menu-button"></i></a>
 				</div>
 				<div class="center pselect">
 					<div class="left">
 						<span>Player:</span>
-						<select class="player" id="pselect">
+						<select class="player" id="pselect" title="Player">
 							<option>-</option>
 							<option value="gamepad-0">1</option>
 							<option value="gamepad-1">2</option>
@@ -100,7 +101,7 @@
 						</select>
 					</div>
 					<div class="left skins">
-						<select class="console" id="cselect">
+						<select class="console" id="cselect" title="Console">
 							<option value="xbox">Xbox (1)</option>
 							<option value="ps">PlayStation (2)</option>
 							<option value="fight-stick">Fight Stick (7)</option>
@@ -122,7 +123,7 @@
 			</div>
 		</div>
 		<div class="slideout-menu hide-me" id="menu">
-			<a class="bglink" href="#"><div class="modal-bg"></div></a>
+			<a class="bglink" href="#" title="Close"><div class="modal-bg"></div></a>
 			<div class="menu">
 				<h1><i class="fa fa-gamepad"></i>Controller</h1>
 				<a href="#about"><i class="fa fa-info-circle"></i><span>Info</span></a>
@@ -132,7 +133,7 @@
 		</div>
 		<div id="modals" class="hide-me">
 			<div id="modal-template" class="modal-container">
-				<a class="bglink" href="#"><div class="modal-bg"></div></a>
+				<a class="bglink" href="#" title="Close"><div class="modal-bg"></div></a>
 				<div class="modal">
 					<header class="minimenu">
 						<a class="close" href="#">&times;</a>
@@ -145,7 +146,7 @@
 				</div>
 			</div>
 			<div id="about" class="modal-container">
-				<a class="bglink" href="#"><div class="modal-bg"></div></a>
+				<a class="bglink" href="#" title="Close"><div class="modal-bg"></div></a>
 				<div class="modal">
 					<header class="minimenu"></header>
 					<header>
@@ -155,8 +156,8 @@
 						<h2>About this tool</h2>
 						<p>Locally, offline, reliable. - [Mateus] byUwUr</p>
 						<p>
-							This is possible thanks to <a href="http://aresluna.org" target="_blank">Marcin Wichary's</a> <a href="https://github.com/html5rocks/www.html5rocks.com/blob/master/content/tutorials/doodles/gamepad/static/gamepad-tester/gamepad.js" target="_blank">Gamepad.js</a> and
-							<a href="https://github.com/html5rocks/www.html5rocks.com/blob/master/content/tutorials/doodles/gamepad/static/gamepad-tester/tester.js" target="_blank">Tester.js</a> libraries.
+							This is possible thanks to <a rel="noopener" href="http://aresluna.org" target="_blank">Marcin Wichary's</a> <a rel="noopener" href="https://github.com/html5rocks/www.html5rocks.com/blob/master/content/tutorials/doodles/gamepad/static/gamepad-tester/gamepad.js" target="_blank">Gamepad.js</a> and
+							<a rel="noopener" href="https://github.com/html5rocks/www.html5rocks.com/blob/master/content/tutorials/doodles/gamepad/static/gamepad-tester/tester.js" target="_blank">Tester.js</a> libraries.
 						</p>
 						<div class="info">
 							<div>
@@ -172,7 +173,7 @@
 				</div>
 			</div>
 			<div id="docs" class="modal-container">
-				<a class="bglink" href="#"><div class="modal-bg"></div></a>
+				<a class="bglink" href="#" title="Close"><div class="modal-bg"></div></a>
 				<div class="modal">
 					<header class="minimenu"></header>
 					<header>
@@ -284,7 +285,7 @@
 				</div>
 			</div>
 			<div id="remap" class="modal-container">
-				<a class="bglink" href="#"><div class="modal-bg"></div></a>
+				<a class="bglink" href="#" title="Close"><div class="modal-bg"></div></a>
 				<div class="modal">
 					<header class="minimenu"></header>
 					<header>
@@ -292,13 +293,13 @@
 					</header>
 					<article>
 						<p>
-							Please select the controller to use as a mapping base.
-							<select id="player-base">
-								<option>None</option>
-								<option value="0" disabled>Player 1</option>
-								<option value="1" disabled>Player 2</option>
-								<option value="2" disabled>Player 3</option>
-								<option value="3" disabled>Player 4</option>
+							Please select the controller:
+							<select id="player-base" title="Player">
+								<option>-</option>
+								<option value="0" disabled>1</option>
+								<option value="1" disabled>2</option>
+								<option value="2" disabled>3</option>
+								<option value="3" disabled>4</option>
 							</select>
 						</p>
 						<div id="output-display">
@@ -318,11 +319,11 @@
 							<div class="template">
 								<div class="form-group">
 									<div class="map-message"></div>
-									<input type="radio" name="targetType" value="buttons" checked />
-									<input type="radio" name="targetType" value="axes" />
-									<input type="radio" name="targetType" value="dpad" />
-									<input type="checkbox" class="axes-config" value="false" />
-									<select name="buttons" value>
+									<input type="radio" name="targetType" value="buttons" title="Buttons" checked />
+									<input type="radio" name="targetType" value="axes" title="Axes" />
+									<input type="radio" name="targetType" value="dpad" title="D-Pad" />
+									<input type="checkbox" class="axes-config" value="false" title="Axes configuration" />
+									<select name="buttons" title="Buttons">
 										<option title="Button 0" value="0">A/Cross</option>
 										<option title="Button 1" value="1">B/Circle</option>
 										<option title="Button 2" value="2">X/Square</option>
@@ -342,20 +343,20 @@
 										<option title="Button 16" value="16">PS Button</option>
 										<option title="Button 17" value="17">TouchPad Press</option>
 									</select>
-									<select name="axes" value>
+									<select name="axes" title="Axes">
 										<option title="Axis 0" value="0">LS Horizontal</option>
 										<option title="Axis 1" value="1">LS Vertical</option>
 										<option title="Axis 2" value="2">RS Horizontal</option>
 										<option title="Axis 3" value="3">RS Vertical</option>
 									</select>
-									<input type="checkbox" class="disable-item" value="true" />
+									<input type="checkbox" class="disable-item" value="true" title="Disable" />
 									<button data-tooltip="Positive Axis" data-button="positive" data-button-type="remapping" data-object="">Click to Set</button>
 									<button data-tooltip="Negative Axis" data-button="negative" data-button-type="remapping" data-object="">Click to Set</button>
-									<a href="#" class="fa fa-minus-circle del-config"></a>
-									<a href="#" class="fa fa-plus-circle add-config"></a>
+									<a title="Add" href="#" class="fa fa-minus-circle del-config"></a>
+									<a title="Remove" href="#" class="fa fa-plus-circle add-config"></a>
 									<div class="fix-panel fix-axes">
 										<span>Fix Type: </span>
-										<select name="fix-type">
+										<select name="fix-type" title="Type">
 											<option value="trigger">Trigger (0 to 1)</option>
 											<option value="stick">Stick (-1 to 1)</option>
 										</select>

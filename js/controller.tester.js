@@ -16,505 +16,282 @@
  * @author mwichary@google.com (Marcin Wichary)
  * Improved by [Mateus] byUwUr
  */
+const tester = {
+	VISIBLE_THRESHOLD: 0.25,
+	STICK_OFFSET: 25,
+	STICK_CURVING: 0,
+	TRIGGER_DISPLAY_TYPE: 1,
+	ANALOGUE_BUTTON_THRESHOLD: 0.25,
+	ANALOGUE_STICK_THRESHOLD: 0.25,
+	DIGITAL_THRESHOLD: 0.1,
+	EVENT_LISTEN: 0,
+	MONITOR_ID: "",
+	ROTATE_BOUNDARY: 120,
+	SNAPSHOT: {},
+	MONITOR_TYPE: "",
+	DISABLED_INPUTS: {},
+	DELAY_TIME_MS: 0,
+	updateQueue: new Queue(),
+	processQueueCall: 0,
 
-var tester = {
-  // If the number exceeds this in any way, we treat the label as active
-  // and highlight it.
-  VISIBLE_THRESHOLD: 0.25,
-  // How far can a stick move on screen.
-  STICK_OFFSET: 22,
+	absDiff: function (a, b) {
+		return Math.abs(a - b);
+	},
 
-  //If stick curving should be enabled or not
-  STICK_CURVING: 1,
+	ifDisabledExists: function (type, id, number) {
+		return tester.DISABLED_INPUTS[id]?.[type]?.[number] ?? false;
+	},
 
-  TRIGGER_DISPLAY_TYPE: 0,
+	init: function () {
+		tester.updateGamepads();
+	},
 
-  // How “deep” does an analogue button need to be depressed to consider it
-  // a button down.
+	showNotSupported: function () {
+		document.querySelector("#no-gamepad-support").classList.add("visible");
+	},
 
-  //For controllers like the Dualshock 3, which have analogue buttons instead of digital ones
-  ANALOGUE_BUTTON_THRESHOLD: 0.25,
-  //Analogue stick threshold
-  ANALOGUE_STICK_THRESHOLD: 0.25,
-  //Threshold for digital versions of analog buttons
-  DIGITAL_THRESHOLD: 0.1,
+	updateGamepads: function (gamepads) {
+		document.querySelectorAll(".controller:not(.template)").forEach((el) => {
+			el.classList.add("disconnected");
+			$("#player-base").val("None").trigger("change");
+		});
 
-  //Whether or not to start
-  EVENT_LISTEN: 0,
-  //ID of gamepad being monitored for input
-  MONITOR_ID: "",
+		document.querySelectorAll("#player-base [value]").forEach((el) => {
+			el.disabled = true;
+		});
 
-  //Rotation limit
-  ROTATE_BOUNDARY: 120,
+		document.querySelectorAll(".raw-outputs:not(.template)").forEach((el) => {
+			el.remove();
+		});
 
-  //Snapshot object to test against when making remappings
-  SNAPSHOT: {},
+		let padsConnected = false;
+		tester.DISABLED_INPUTS = {};
 
-  MONITOR_TYPE: "",
+		if (gamepads) {
+			for (const i in gamepads) {
+				const gamepad = gamepads[i];
 
-  //An object list of inputs that are disabled from monitoring at the request of the user. This helps when pesky
-  // axes/buttons are interfering with the proper capture of data by constantly changing values.
-  DISABLED_INPUTS: {},
+				if (gamepad) {
+					if (pnumber === "") {
+						const el2 = document.getElementById("player-base");
+						el2.querySelector(`option[value="${i}"]`).disabled = false;
 
-  absDiff: function (a, b) {
-    var result = a - b;
-    result = Math.abs(result);
-    return result;
-  },
+						const newRawMap = document.createElement("div");
+						newRawMap.innerHTML = document.querySelector(".raw-outputs.template").innerHTML;
+						newRawMap.id = `gamepad-map-${i}`;
+						newRawMap.className = "raw-outputs";
 
-  ifDisabledExists: function (type, id, number) {
-    if (id in tester.DISABLED_INPUTS) {
-      if (type in tester.DISABLED_INPUTS[id]) {
-        if (number in tester.DISABLED_INPUTS[id][type]) {
-          return true;
-        }
-      }
-    }
-    return false;
-  },
+						gamepad.buttons.forEach((button, b) => {
+							const bEl = document.createElement("li");
+							bEl.setAttribute("data-shortname", `B${b}`);
+							bEl.setAttribute("data-name", `button-${b}`);
+							bEl.setAttribute("data-info", JSON.stringify({ id: i, type: "buttons", number: b }));
+							bEl.title = `Button ${b}`;
+							newRawMap.querySelector(".buttons").appendChild(bEl);
+						});
 
-  DELAY_TIME_MS: 0,
+						gamepad.axes.forEach((axis, a) => {
+							const aEl = document.createElement("li");
+							aEl.setAttribute("data-shortname", `Axis ${a}`);
+							aEl.setAttribute("data-name", `axis-${a}`);
+							aEl.setAttribute("data-info", JSON.stringify({ id: i, type: "axes", number: a }));
+							aEl.title = `Axis ${a}`;
+							newRawMap.querySelector(".axes").appendChild(aEl);
+						});
 
-  updateQueue: new Queue(),
-  processQueueCall: 0,
+						const nameEl = document.createElement("h2");
+						nameEl.innerHTML = gamepad.id;
+						newRawMap.insertBefore(nameEl, newRawMap.firstChild);
+						document.querySelector("#output-display").appendChild(newRawMap);
+					}
 
-  init: function () {
-    //        tester.updateMode();
-    tester.updateGamepads();
-  },
+					const el = document.getElementById(`gamepad-${i}`);
+					el.querySelector(".quadrant").classList.add(`p${i}`);
+					el.classList.remove("disconnected");
+					padsConnected = true;
+				}
+			}
+		}
 
-  /**
-   * Tell the user the browser doesn’t support Gamepad API.
-   */
-  showNotSupported: function () {
-    document.querySelector("#no-gamepad-support").classList.add("visible");
-  },
+		if (pnumber === "") {
+			document.querySelector(".nocon").classList.toggle("visible", !padsConnected);
+			document.querySelector(".pselect").classList.toggle("visible", padsConnected);
+			document.querySelector(".pselect select").disabled = !padsConnected;
+		}
+	},
 
-  /**
-   * Update the gamepads on the screen, creating new elements from the
-   * template.
-   */
-  updateGamepads: function (gamepads) {
-    var els = document.querySelectorAll(".controller:not(.template)");
-    for (var i = 0, el; (el = els[i]); i++) {
-      el.classList.add("disconnected");
-      $("#player-base").val("None").trigger("change");
-      //            el.parentNode.removeChild(el);
-    }
-    var els2 = document.querySelectorAll("#player-base [value]");
-    for (var i = 0, el; (el = els2[i]); i++) {
-      el.disabled = true;
-    }
-    var els3 = document.querySelectorAll(".raw-outputs:not(.template)");
-    for (var i = 0, el; (el = els3[i]); i++) {
-      el.remove();
-    }
+	queueButton: function (value, gamepadId, id) {
+		tester.updateQueue.enqueue([Date.now() + tester.DELAY_TIME_MS, tester.updateButton, [jQuery.extend({}, value), gamepadId, id]]);
+		tester.processQueue();
+	},
 
-    var padsConnected = false;
-    tester.DISABLED_INPUTS = {};
+	queueStick: function (value, className, gamepadId, id) {
+		tester.updateQueue.enqueue([Date.now() + tester.DELAY_TIME_MS, tester.updateStick, [jQuery.extend({}, value), className, gamepadId, id]]);
+		tester.processQueue();
+	},
 
-    if (gamepads) {
-      for (var i in gamepads) {
-        var gamepad = gamepads[i];
+	queueTrigger: function (value, gamepadId, id) {
+		tester.updateQueue.enqueue([Date.now() + tester.DELAY_TIME_MS, tester.updateTrigger, [jQuery.extend({}, value), gamepadId, id]]);
+		tester.processQueue();
+	},
 
-        if (gamepad) {
-          if (pnumber == "") {
-            var el2 = document.getElementById("player-base");
-            el2.querySelector('option[value="' + i + '"]').disabled = false;
-            var newRawMap = document.createElement("div");
-            newRawMap.innerHTML = document.querySelector(
-              ".raw-outputs.template"
-            ).innerHTML;
-            newRawMap.id = "gamepad-map-" + i;
-            newRawMap.className = "raw-outputs";
-            for (var b in gamepad.buttons) {
-              var bEl = document.createElement("li");
-              bEl.setAttribute("data-shortname", "B" + b);
-              bEl.setAttribute("data-name", "button-" + b);
-              bEl.setAttribute(
-                "data-info",
-                JSON.stringify({ id: i, type: "buttons", number: b })
-              );
-              bEl.title = "Button " + b;
-              newRawMap.querySelector(".buttons").appendChild(bEl);
-            }
-            for (var a in gamepad.axes) {
-              var aEl = document.createElement("li");
-              aEl.setAttribute("data-shortname", "Axis " + a);
-              aEl.setAttribute("data-name", "axis-" + a);
-              aEl.setAttribute(
-                "data-info",
-                JSON.stringify({ id: i, type: "axes", number: a })
-              );
-              aEl.title = "Axis " + a;
-              newRawMap.querySelector(".axes").appendChild(aEl);
-            }
-            var nameEl = document.createElement("h2");
-            nameEl.innerHTML = gamepad.id;
-            newRawMap.insertBefore(nameEl, newRawMap.firstChild);
-            document.querySelector("#output-display").appendChild(newRawMap);
-          }
+	queueTriggerDigital: function (value, gamepadId, id) {
+		tester.updateQueue.enqueue([Date.now() + tester.DELAY_TIME_MS, tester.updateTriggerDigital, [jQuery.extend({}, value), gamepadId, id]]);
+		tester.processQueue();
+	},
 
-          var el = document.getElementById("gamepad-" + i);
+	queueAxis: function (value, valueV, gamepadId, stickId) {
+		tester.updateQueue.enqueue([Date.now() + tester.DELAY_TIME_MS, tester.updateAxis, [value, valueV, gamepadId, stickId]]);
+		tester.processQueue();
+	},
 
-          //                    el.id = 'gamepad-' + i;
-          //                    el.className = 'controller';
-          el.querySelector(".quadrant").classList.add("p" + i);
-          el.classList.remove("disconnected");
-          //                    el.querySelector('.name').innerHTML = gamepad.id;
-          //                    el.querySelector('.index').innerHTML = gamepad.index;
+	updateButton: function (value, gamepadId, id) {
+		const gamepadEl = document.querySelector(`#gamepad-${gamepadId}`);
+		const newValue = value.value ?? value;
 
-          //                    document.querySelector('#gamepads').appendChild(el);
+		const buttonEl = gamepadEl.querySelector(`[data-name="${id}"]`);
+		if (buttonEl) {
+			buttonEl.classList.toggle("pressed", newValue > tester.ANALOGUE_BUTTON_THRESHOLD);
+		}
+	},
 
-          padsConnected = true;
-        }
-      }
-    }
+	updateStick: function (value, className, gamepadId, id) {
+		const gamepadEl = document.querySelector(`#gamepad-${gamepadId}`);
+		const newValue = value.value ?? value;
 
-    if (pnumber == "") {
-      if (padsConnected) {
-        document.querySelector(".nocon").classList.remove("visible");
-        document.querySelector(".pselect").classList.add("visible");
-        document.querySelector(".pselect select").disabled = false;
-      } else {
-        document.querySelector(".pselect").classList.remove("visible");
-        document.querySelector(".nocon").classList.add("visible");
-        document.querySelector(".pselect select").disabled = true;
-      }
-    }
-  },
+		const buttonEl = gamepadEl.querySelector(`[data-name="${id}"]`);
+		if (buttonEl) {
+			buttonEl.classList.toggle(className, newValue > tester.ANALOGUE_BUTTON_THRESHOLD);
+		}
+	},
 
-  queueButton: function (value, gamepadId, id) {
-    //copy value ... because reference
-    var newVal = jQuery.extend({}, value);
+	updateTrigger: function (value, gamepadId, id) {
+		const gamepadEl = document.querySelector(`#gamepad-${gamepadId}`);
+		const newValue = value.value ?? value;
 
-    tester.updateQueue.enqueue([
-      Date.now() + tester.DELAY_TIME_MS,
-      tester.updateButton,
-      [newVal, gamepadId, id],
-    ]);
-    tester.processQueue();
-  },
+		const triggerEl = gamepadEl.querySelector(`[data-name="${id}"]`);
+		if (triggerEl) {
+			if (tester.TRIGGER_DISPLAY_TYPE === 1) {
+				triggerEl.style.opacity = 1;
+				const insetValue = `${(-1 + newValue) * -1 * 100 - 0.00001}%`;
+				triggerEl.style.clipPath = `inset(${insetValue} 0px 0px 0pc)`;
+			} else {
+				triggerEl.style.opacity = newValue;
+			}
+		}
+	},
 
-  queueStick: function (value, className, gamepadId, id) {
-    //copy value needed? don't know
-    var newVal = jQuery.extend({}, value);
+	updateTriggerDigital: function (value, gamepadId, id) {
+		const gamepadEl = document.querySelector(`#gamepad-${gamepadId}`);
+		const newValue = value.value ?? value;
 
-    tester.updateQueue.enqueue([
-      Date.now() + tester.DELAY_TIME_MS,
-      tester.updateStick,
-      [newVal, className, gamepadId, id],
-    ]);
-    tester.processQueue();
-  },
+		const buttonEl = gamepadEl.querySelector(`[data-name="${id}"]`);
+		if (buttonEl) {
+			buttonEl.classList.toggle("pressed", newValue > tester.DIGITAL_THRESHOLD);
+		}
+	},
 
-  queueTrigger: function (value, gamepadId, id) {
-    //copy value needed? don't know
-    var newVal = jQuery.extend({}, value);
+	updateAxis: function (value, valueV, gamepadId, stickId) {
+		const gamepadEl = document.querySelector(`#gamepad-${gamepadId}`);
 
-    tester.updateQueue.enqueue([
-      Date.now() + tester.DELAY_TIME_MS,
-      tester.updateTrigger,
-      [newVal, gamepadId, id],
-    ]);
-    tester.processQueue();
-  },
+		const stickEl = gamepadEl.querySelector(`[data-name="${stickId}"]`);
+		if (stickEl) {
+			const offsetValH = value * tester.STICK_OFFSET;
+			const offsetValV = valueV * tester.STICK_OFFSET;
+			stickEl.style.marginLeft = `${offsetValH}px`;
+			stickEl.style.marginTop = `${offsetValV}px`;
+			if (tester.STICK_CURVING) {
+				stickEl.style.transform = `rotateX(${offsetValV * -1}deg) rotateY(${offsetValH}deg)`;
+			}
+		}
 
-  queueTriggerDigital: function (value, gamepadId, id) {
-    //copy value ... because reference
-    var newVal = jQuery.extend({}, value);
+		const stickRotEL = gamepadEl.querySelector(`[data-name="${stickId}-wheel"]`);
+		if (stickRotEL) {
+			const rotValH = value * tester.ROTATE_BOUNDARY;
+			stickRotEL.style.transform = `rotate(${rotValH}deg)`;
+		}
+	},
 
-    tester.updateQueue.enqueue([
-      Date.now() + tester.DELAY_TIME_MS,
-      tester.updateTriggerDigital,
-      [newVal, gamepadId, id],
-    ]);
-    tester.processQueue();
-  },
+	updateRawButton: function (value, gamepadId, buttonId) {
+		const gamepadEl = document.querySelector(`#gamepad-map-${gamepadId}`);
+		const newValue = value.value ?? value;
 
-  queueAxis: function (value, valueV, gamepadId, stickId) {
-    //copy value not needed?
-    tester.updateQueue.enqueue([
-      Date.now() + tester.DELAY_TIME_MS,
-      tester.updateAxis,
-      [value, valueV, gamepadId, stickId],
-    ]);
-    tester.processQueue();
-  },
+		const buttonEl = gamepadEl.querySelector(`[data-name="button-${buttonId}"]`);
+		if (buttonEl) {
+			buttonEl.innerHTML = newValue.toFixed(2);
+			buttonEl.style.opacity = 0.6 + newValue * 0.4;
+			if (tester.EVENT_LISTEN) {
+				if (tester.MONITOR_ID === gamepadId && !tester.ifDisabledExists("buttons", gamepadId, buttonId)) {
+					const gpEvent = new CustomEvent("GamepadPressed", {
+						detail: {
+							gamepad: gamepadId,
+							type: "buttons",
+							typeName: "Button",
+							fullname: `Button ${buttonId}`,
+							value: newValue,
+							config: {
+								choiceType: "buttons",
+								choice: buttonId
+							}
+						},
+						bubbles: true
+					});
 
-  /**
-   * Update a given button on the screen.
-   */
-  updateButton: function (value, gamepadId, id) {
-    var gamepadEl = document.querySelector("#gamepad-" + gamepadId);
-    var newValue = value;
-    if (typeof value == "object") {
-      var newValue = value.value;
-    }
-    // Update the button visually.
+					if ((tester.MONITOR_TYPE === "remapping" && tester.absDiff(tester.SNAPSHOT.buttons[buttonId].value, newValue) > tester.ANALOGUE_BUTTON_THRESHOLD) || tester.MONITOR_TYPE === "value") {
+						document.querySelectorAll("#mapping-config button").forEach((el) => el.dispatchEvent(gpEvent));
+					}
+				}
+			}
+		}
+	},
 
-    var buttonEl = gamepadEl.querySelector('[data-name="' + id + '"]');
-    if (buttonEl) {
-      // Extraneous buttons have just a label.
-      if (newValue > tester.ANALOGUE_BUTTON_THRESHOLD) {
-        buttonEl.classList.add("pressed");
-      } else {
-        buttonEl.classList.remove("pressed");
-      }
-    }
-  },
+	updateRawAxis: function (value, gamepadId, axisId) {
+		const gamepadEl = document.querySelector(`#gamepad-map-${gamepadId}`);
+		const newValue = value.value ?? value;
 
-  /**
-   * Update a the fight stick using the name provided
-   */
-  updateStick: function (value, className, gamepadId, id) {
-    var gamepadEl = document.querySelector("#gamepad-" + gamepadId);
-    var newValue = value;
-    if (typeof value == "object") {
-      var newValue = value.value;
-    }
-    // Update the button visually.
+		const axisEl = gamepadEl.querySelector(`[data-name="axis-${axisId}"]`);
+		if (axisEl) {
+			axisEl.innerHTML = newValue.toFixed(10);
+			axisEl.style.opacity = 0.6 + Math.abs(newValue) * 0.4;
+			if (tester.EVENT_LISTEN) {
+				if (tester.MONITOR_ID === gamepadId && !tester.ifDisabledExists("axes", gamepadId, axisId)) {
+					const axisOp = newValue > 0 ? "+" : "-";
+					const gpEvent = new CustomEvent("GamepadPressed", {
+						detail: {
+							gamepad: gamepadId,
+							type: "axes",
+							typeName: "Axis",
+							fullname: `Axis ${axisId} ${axisOp}`,
+							value: newValue,
+							config: {
+								choiceOperand: axisOp,
+								choiceType: "axes",
+								choice: axisId
+							}
+						},
+						bubbles: true
+					});
 
-    var buttonEl = gamepadEl.querySelector('[data-name="' + id + '"]');
-    if (buttonEl) {
-      // Extraneous buttons have just a label.
-      if (newValue > tester.ANALOGUE_BUTTON_THRESHOLD) {
-        buttonEl.classList.add(className);
-      } else {
-        buttonEl.classList.remove(className);
-      }
-    }
-  },
+					if ((tester.MONITOR_TYPE === "remapping" && tester.absDiff(tester.SNAPSHOT.axes[axisId], newValue) > tester.ANALOGUE_BUTTON_THRESHOLD) || tester.MONITOR_TYPE === "value") {
+						document.querySelectorAll("#mapping-config button").forEach((el) => el.dispatchEvent(gpEvent));
+					}
+				}
+			}
+		}
+	},
 
-  updateTrigger: function (value, gamepadId, id) {
-    var gamepadEl = document.querySelector("#gamepad-" + gamepadId);
-    var newValue = value;
-    if (typeof value == "object") {
-      var newValue = value.value;
-    }
+	processQueue: function () {
+		tester.processQueueCall += 1;
+		const myProcessQueueCall = tester.processQueueCall;
 
-    // Update the button visually.
+		while (tester.updateQueue.peek() && tester.updateQueue.peek()[0] <= Date.now()) {
+			const [, updateFunction, args] = tester.updateQueue.dequeue();
 
-    var triggerEl = gamepadEl.querySelector('[data-name="' + id + '"]');
-    if (triggerEl) {
-      if (tester.TRIGGER_DISPLAY_TYPE == 1) {
-        triggerEl.style.opacity = 1;
-        var insetValue = (-1 + newValue) * -1 * 100 - 0.00001;
-        //var insetValue = (((-1 + newValue) * -1) * 100);
-        insetValue = insetValue.toString() + "%";
-        triggerEl.style.webkitClipPath =
-          "inset(" + insetValue + " 0px 0px 0pc)";
-        triggerEl.style.mozClipPath = "inset(" + insetValue + " 0px 0px 0pc)";
-        triggerEl.style.clipPath = "inset(" + insetValue + " 0px 0px 0pc)";
-      } else {
-        triggerEl.style.opacity = newValue;
-      }
-    }
-  },
-
-  /**
-   * Update a trigger in a binary fashion on the screen.
-   */
-  updateTriggerDigital: function (value, gamepadId, id) {
-    var gamepadEl = document.querySelector("#gamepad-" + gamepadId);
-    var newValue = value;
-    if (typeof value == "object") {
-      var newValue = value.value;
-    }
-    // Update the button visually.
-
-    var buttonEl = gamepadEl.querySelector('[data-name="' + id + '"]');
-    if (buttonEl) {
-      // Extraneous buttons have just a label.
-      if (newValue > tester.DIGITAL_THRESHOLD) {
-        buttonEl.classList.add("pressed");
-      } else {
-        buttonEl.classList.remove("pressed");
-      }
-    }
-  },
-
-  /**
-   * Update a given analogue stick on the screen.
-   */
-  updateAxis: function (value, valueV, gamepadId, stickId) {
-    var gamepadEl = document.querySelector("#gamepad-" + gamepadId);
-
-    function lineDistance(point1, point2) {
-      var xs = point1 - 0;
-      var ys = point2 - 0;
-
-      xs = xs * xs;
-
-      ys = ys * ys;
-
-      return Math.sqrt(xs + ys);
-    }
-
-    // Update the stick visually.
-
-    var stickEl = gamepadEl.querySelector('[data-name="' + stickId + '"]');
-    if (stickEl) {
-      // Extraneous sticks have just a label.
-      if (lineDistance(value, valueV) >= tester.ANALOGUE_STICK_THRESHOLD) {
-        var offsetValH = value * tester.STICK_OFFSET;
-        var offsetValV = valueV * tester.STICK_OFFSET;
-      } else {
-        var offsetValH = 0;
-        var offsetValV = 0;
-      }
-      stickEl.style.marginLeft = offsetValH + "px";
-      stickEl.style.marginTop = offsetValV + "px";
-      if (tester.STICK_CURVING) {
-        stickEl.style.transform =
-          "rotateX(" + offsetValV * -1 + "deg) rotateY(" + offsetValH + "deg)";
-      }
-    }
-    /**
-     * Update stick lateral rotation
-     */
-    var stickRotEL = gamepadEl.querySelector(
-      '[data-name="' + stickId + '-wheel"]'
-    );
-    if (stickRotEL) {
-      if (lineDistance(value, valueV) >= tester.ANALOGUE_STICK_THRESHOLD) {
-        var rotValH = value;
-      } else {
-        var rotValH = 0;
-      }
-      stickRotEL.style.transform =
-        "rotate(" + rotValH * tester.ROTATE_BOUNDARY + "deg)";
-    }
-  },
-
-  /**
-   * Update a given button on the screen.
-   */
-  updateRawButton: function (value, gamepadId, buttonId) {
-    var gamepadEl = document.querySelector("#gamepad-map-" + gamepadId);
-    var newValue = value;
-    if (typeof value == "object") {
-      var newValue = value.value;
-    }
-    // Update the button visually.
-
-    var buttonEl = gamepadEl.querySelector(
-      '[data-name="button-' + buttonId + '"]'
-    );
-    var mapConfig = document.querySelectorAll("#mapping-config button");
-    if (buttonEl) {
-      // Extraneous buttons have just a label.
-      buttonEl.innerHTML = newValue.toFixed(2);
-      buttonEl.style.opacity = 0.6 + newValue * 0.4;
-      if (tester.EVENT_LISTEN) {
-        if (
-          tester.MONITOR_ID == gamepadId &&
-          !tester.ifDisabledExists("buttons", gamepadId, buttonId)
-        ) {
-          var gpEvent = new CustomEvent("GamepadPressed", {
-            detail: {
-              gamepad: gamepadId,
-              type: "buttons",
-              typeName: "Button",
-              fullname: "Button " + buttonId,
-              value: newValue,
-              config: {
-                choiceType: "buttons",
-                choice: buttonId,
-              },
-            },
-            bubbles: true,
-          });
-          if (
-            (tester.MONITOR_TYPE == "remapping" &&
-              tester.absDiff(
-                tester.SNAPSHOT.buttons[buttonId].value,
-                newValue
-              ) > tester.ANALOGUE_BUTTON_THRESHOLD) ||
-            tester.MONITOR_TYPE == "value"
-          ) {
-            for (var i = 0; i < mapConfig.length; i++) {
-              mapConfig[i].dispatchEvent(gpEvent);
-            }
-          }
-        }
-      }
-    }
-  },
-  /**
-   * Update a given axis value on the screen.
-   */
-  updateRawAxis: function (value, gamepadId, axisId) {
-    var gamepadEl = document.querySelector("#gamepad-map-" + gamepadId);
-    var newValue = value;
-    if (typeof value == "object") {
-      var newValue = value.value;
-    }
-    // Update the button visually.
-
-    var axisEl = gamepadEl.querySelector('[data-name="axis-' + axisId + '"]');
-    var mapConfig = document.querySelectorAll("#mapping-config button");
-    if (axisEl) {
-      // Extraneous buttons have just a label.
-      axisEl.innerHTML = newValue.toFixed(10);
-      axisEl.style.opacity = 0.6 + Math.abs(newValue) * 0.4;
-      if (tester.EVENT_LISTEN) {
-        if (
-          tester.MONITOR_ID == gamepadId &&
-          !tester.ifDisabledExists("axes", gamepadId, axisId)
-        ) {
-          var axisOp = newValue > 0 ? "+" : "-";
-          var gpEvent = new CustomEvent("GamepadPressed", {
-            detail: {
-              gamepad: +gamepadId,
-              type: "axes",
-              typeName: "Axis",
-              fullname: "Axis " + axisId + " " + axisOp,
-              value: newValue,
-              config: {
-                choiceOperand: axisOp,
-                choiceType: "axes",
-                choice: axisId,
-              },
-            },
-            bubbles: true,
-          });
-          if (
-            (tester.MONITOR_TYPE == "remapping" &&
-              tester.absDiff(tester.SNAPSHOT.axes[axisId], newValue) >
-                tester.ANALOGUE_BUTTON_THRESHOLD) ||
-            tester.MONITOR_TYPE == "value"
-          ) {
-            for (var i = 0; i < mapConfig.length; i++) {
-              mapConfig[i].dispatchEvent(gpEvent);
-            }
-          }
-        }
-      }
-    }
-  },
-
-  processQueue: function () {
-    var myProcessQueueCall = tester.processQueueCall + 1;
-    tester.processQueueCall = myProcessQueueCall;
-    //while(tester.updateQueue != undefined && tester.updateQueue.peek() != undefined && myProcessQueueCall == tester.processQueueCall) {
-    while (
-      tester.updateQueue != undefined &&
-      tester.updateQueue.peek() != undefined &&
-      tester.updateQueue.peek()[0] <= Date.now()
-    ) {
-      var elem = tester.updateQueue.dequeue();
-      var vars = elem[2];
-      if (elem[1] == tester.updateStick) {
-        tester.updateStick(vars[0], vars[1], vars[2], vars[3]);
-      } else if (elem[1] == tester.updateAxis) {
-        tester.updateAxis(vars[0], vars[1], vars[2], vars[3]);
-      } else {
-        elem[1](vars[0], vars[1], vars[2]);
-      }
-    }
-    //while(tester.updateQueue != undefined && tester.updateQueue.peek() != undefined && tester.updateQueue.peek()[0] > Date.now() && myProcessQueueCall == tester.processQueueCall) {
-    //}
-    //}
-  },
+			if (updateFunction === tester.updateStick || updateFunction === tester.updateAxis) {
+				updateFunction(...args);
+			} else {
+				updateFunction(args[0], args[1], args[2]);
+			}
+		}
+	}
 };

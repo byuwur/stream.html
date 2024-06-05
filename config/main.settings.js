@@ -1,4 +1,4 @@
-let commonSettings = {
+const commonSettings = {
 	options: {
 		backgroundType: "video",
 		backgroundOverlayOpacity: 0,
