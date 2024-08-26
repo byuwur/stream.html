@@ -66,7 +66,7 @@ const commonSettings = {
 	},
 	countdown: {
 		displayCountdown: "yes",
-		countdownTime: 10, // minutes
+		countdownTime: 10, // In MINUTES
 		countdownMessage: "La cuenta regresiva pa' tramar.",
 		countdownOverMessage: "Vamo' a vé'."
 	},

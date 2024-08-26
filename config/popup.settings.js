@@ -1,4 +1,4 @@
-// order: Facebook, YouTube, Instagram, Twitch, Twitter
+// In order:	Facebook,  YouTube,   Instagram,  Twitch,   Twitter
 const values = ["@byUwUr", "/byUwUr", "@byUwUr", "/byUwUr", "@byUwUr"];
 const settings = {
 	options: {
