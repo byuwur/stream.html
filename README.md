@@ -1,5 +1,13 @@
 # byuwur/stream.html
 
+**HTML resources for your stream overlays**
+
+Test it out at:
+
+-   [byuwur.net/\_stream.html/main.html](https://byuwur.net/_stream.html/main.html)
+-   [byuwur.net/\_stream.html/popup.html](https://byuwur.net/_stream.html/popup.html)
+-   [byuwur.net/\_stream.html/controller.html](https://byuwur.net/_stream.html/controller.html)
+
 ## Overview
 
 This project is designed to provide various overlay options for live streaming using OBS (Open Broadcaster Software). The setup includes three distinct HTML overlays, each serving different purposes during a live stream. The project also includes configuration files and JavaScript libraries that support dynamic content and interactive features.
@@ -83,4 +91,4 @@ This project is designed to provide various overlay options for live streaming u
 
 ## License
 
-This project is distributed under the MIT License. See the `LICENSE.md` file for more details.
+MIT (c) Andrés Trujillo [Mateus] byUwUr
