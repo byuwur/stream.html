@@ -11,6 +11,6 @@ const settings = {
 	},
 	countdown: {
 		...commonSettings.countdown,
-		countdownTime: 1, // minutes
+		countdownTime: 1 // minutes
 	}
 };
