@@ -2,7 +2,7 @@ const settings = {
 	...commonSettings,
 	options: {
 		...commonSettings.options,
-		sceneTitle: "Be Right Back (Ya casito vuelvo)"
+		sceneTitle: "Ya casito volvemos"
 	},
 	colors: {
 		...commonSettings.colors,
