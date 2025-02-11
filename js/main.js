@@ -66,7 +66,8 @@ function applySettings() {
 	});
 	// Social
 	$("#displaySocial").html(displaySocial);
-	["twitch", "twitter", "facebook", "instagram", "youtube"].forEach((network) => {
+    // ["twitch", "twitter", "facebook", "instagram", "youtube"]
+	["twitch", "instagram", "youtube"].forEach((network) => {
 		$(`#${network}`).html(settings.social[network]);
 		$(`#${network}Header`).html(settings.social[`${network}Header`]);
 	});

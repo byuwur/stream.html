@@ -1,9 +1,10 @@
-// In order:	Facebook,  YouTube,   Instagram,  Twitch,   Twitter
-const values = ["@byUwUr", "/byUwUr", "@byUwUr", "/byUwUr", "@byUwUr"];
+// In order:	1. Twitch, 2. YT,     3. IG,     4. FB,     5. Twitter
+const values = ["/byUwUr", "@byUwUr", "@byUwUr", "@byUwUr", "@byUwUr"];
 const settings = {
 	options: {
 		pauseTime: "5",
-		inbetweenPauseTime: "5"
+		inbetweenPauseTime: "5",
+		socialsDisplayed: "3"
 	},
 	colors: {
 		iconBoxColor: "rgba(64, 0, 0, 1)",

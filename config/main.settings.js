@@ -5,7 +5,7 @@ const commonSettings = {
 		backgroundBlur: 0,
 		backgroundScale: 1,
 		displayBranding: "yes",
-		logoOpacity: 0.25,
+		logoOpacity: 0.1,
 		logoScale: 1,
 		frameWidth: 24,
 		sceneTitle: "",
@@ -22,23 +22,23 @@ const commonSettings = {
 	labels: {
 		displayLabels: "no",
 		labelOneHeading: "¡Suscriptor más reciente!",
-		labelOnePath: "recent_sub", // ../txt/recent_sub.txt
-		labelTwoHeading: "¡Donación más copada!",
-		labelTwoPath: "top_donation", // ../txt/top_donation.txt
-		labelThreeHeading: "¡Donación más reciente!",
-		labelThreePath: "recent_donation", // ../txt/recent_donation.txt
-		labelFourHeading: "¡Nuevo seguidor!",
-		labelFourPath: "recent_follower" // ../txt/recent_follower.txt
+		labelOnePath: "../txt/recent_sub.txt",
+		labelTwoHeading: "Más gastón:",
+		labelTwoPath: "../txt/top_donation.txt",
+		labelThreeHeading: "Último gastón:",
+		labelThreePath: " ../txt/recent_donation.txt",
+		labelFourHeading: "Nuevo Yogurt:",
+		labelFourPath: "../txt/recent_follower.txt"
 	},
 	schedule: {
 		displaySchedule: "no",
-		sunday: "3:00pm - 5:00pm",
-		monday: "3:00pm - 5:00pm",
-		tuesday: "3:00pm - 5:00pm",
-		wednesday: "3:00pm - 5:00pm",
-		thursday: "3:00pm - 5:00pm",
-		friday: "3:00pm - 5:00pm",
-		saturday: "3:00pm - 5:00pm"
+		sunday: "",
+		monday: "",
+		tuesday: "",
+		wednesday: "",
+		thursday: "",
+		friday: "",
+		saturday: ""
 	},
 	scaling: {
 		socialMediaScale: 1.5,
@@ -52,7 +52,7 @@ const commonSettings = {
 		titleSize: 84,
 		titleVerticalOffset: -5,
 		subtitleSize: 48,
-		subtitleVerticalOffset: 0,
+		subtitleVerticalOffset: 100,
 		labelNameSize: 24,
 		labelNameVerticalOffset: 0,
 		labelHeaderSize: 12,
@@ -73,13 +73,14 @@ const commonSettings = {
 	social: {
 		displaySocial: "yes",
 		twitch: "byUwUr",
-		twitterHeader: "Por si mi opinión te interesa.",
-		twitter: "@byUwUr",
-		facebookHeader: "Por si lo que subo te interesa.",
-		facebook: "@byUwUr",
-		instagramHeader: "Por si mis fotos te interesan.",
+		twitchHeader: "Stream casi todos los días",
+		youtube: "[Mateus] @byUwUr",
+		youtubeHeader: "VODs todas las semanas",
 		instagram: "@byUwUr",
-		youtubeHeader: "En YouTube sí hago cosas interesantes.",
-		youtube: "[Mateus] byUwUr"
+		instagramHeader: "Fotos de vez en cuando",
+		facebook: "",
+		facebookHeader: "",
+		twitter: "",
+		twitterHeader: ""
 	}
 };

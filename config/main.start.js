@@ -2,7 +2,7 @@ const settings = {
 	...commonSettings,
 	options: {
 		...commonSettings.options,
-		sceneTitle: "Ya casito empezamos"
+		sceneTitle: "Ya estamos<br>empezando"
 	},
 	colors: {
 		...commonSettings.colors,

@@ -49,7 +49,7 @@ tl.to("body", 0, { opacity: 1, delay: 0.3 })
 	.to("#iconBox", 0.2, { x: moveConfig[2] }, "-=.2")
 	.to(square, 0.2, { morphSVG: "#square" });
 
-for (let i = 0; i < values.length - 1; i++) {
+for (let i = 0; i < settings.options.socialsDisplayed - 1; i++) {
 	tl.to("#canvasHolder", 0.1, { y: "-=20", delay: settings.options.pauseTime })
 		.to(square, 0.2, { morphSVG: "#bigUp" }, "-=.1")
 		.to("#iconBox", 0.2, { y: "-=20" }, "-=.2")
