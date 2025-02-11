@@ -72,7 +72,7 @@ const commonSettings = {
 	},
 	social: {
 		displaySocial: "yes",
-		twitch: "byUwUr",
+		twitch: "/byUwUr",
 		twitchHeader: "Stream casi todos los días",
 		youtube: "[Mateus] @byUwUr",
 		youtubeHeader: "VODs todas las semanas",
