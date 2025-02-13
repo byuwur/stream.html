@@ -1,0 +1,231 @@
+{
+	"matchWidth": {
+		"label": "Top and Bottom with the same width?",
+		"type": "dropdown",
+		"options": {
+			"no": "No",
+			"yes": "Yes"
+		},
+		"value": "no"
+	},
+	"textAlign": {
+		"label": "Text Alignment",
+		"type": "dropdown",
+		"options": {
+			"left": "Left",
+			"center": "Center",
+			"right": "Right"
+		},
+		"value": "left"
+	},
+	"font": {
+		"label": "Main Font",
+		"type": "fontpicker",
+		"value": "IBM Plex Mono"
+	},
+	"horzAnchor": {
+		"label": "Horizontal Anchor",
+		"type": "dropdown",
+		"options": {
+			"left": "Left",
+			"center": "Center",
+			"right": "Right"
+		},
+		"value": "left"
+	},
+	"vertAnchor": {
+		"label": "Vertical Anchor",
+		"type": "dropdown",
+		"options": {
+			"top": "Top",
+			"bottom": "Bottom"
+		},
+		"value": "top"
+	},
+	"xOffset": {
+		"label": "Horizontal Offset (px)",
+		"type": "slider",
+		"name": "",
+		"value": 0,
+		"max": 1000,
+		"min": -1000,
+		"steps": 10
+	},
+	"yOffset": {
+		"label": "Vertical Offset (px)",
+		"type": "slider",
+		"name": "",
+		"value": 0,
+		"max": 1000,
+		"min": -1000,
+		"steps": 10
+	},
+	"mainTransform": {
+		"label": "Transform Origin - where animation starts",
+		"type": "dropdown",
+		"options": {
+			"left center": "X: Left, Y: Middle",
+			"left top": "X: Left, Y: Top",
+			"center top": "X: Middle, Y: Top",
+			"right top": "X: Right, Y: Top",
+			"right center": "X: Right, Y: Middle",
+			"right bottom": "X: Right, Y: Bottom",
+			"center bottom": "X: Middle, Y: Bottom",
+			"left bottom": "X: Left, Y: Bottom",
+			"center center": "X: Middle, Y: Middle"
+		},
+		"value": "left center"
+	},
+	"animationSpeed": {
+		"label": "Animation Speed (%)",
+		"type": "slider",
+		"name": "",
+		"value": 100,
+		"max": 300,
+		"min": 50,
+		"steps": 2
+	},
+	"pauseTime": {
+		"label": "Pause Time (Alert on screen)",
+		"type": "slider",
+		"name": "",
+		"value": 16,
+		"max": 100,
+		"min": 1,
+		"steps": 1
+	},
+	"horzPadding": {
+		"label": "Horizontal Padding (Inner Text, px)",
+		"type": "slider",
+		"name": "",
+		"value": 10,
+		"max": 200,
+		"min": 0,
+		"steps": 5
+	},
+	"vertPadding": {
+		"label": "Vertical Padding (Inner Text, px)",
+		"type": "slider",
+		"name": "",
+		"value": 10,
+		"max": 200,
+		"min": 0,
+		"steps": 5
+	},
+	"mainTextArea": {
+		"label": "Main Area - Text Template",
+		"type": "textfield",
+		"value": "¡Bievenido al Yogurt, {name}!"
+	},
+	"mainColor": {
+		"label": "Main Area - Font Color",
+		"type": "colorpicker",
+		"value": "#000000"
+	},
+	"mainFS": {
+		"label": "Main Area - Font Size",
+		"type": "slider",
+		"name": "",
+		"value": 24,
+		"max": 80,
+		"min": 10,
+		"steps": 1
+	},
+	"mainFW": {
+		"label": "Main Area - Font Weight",
+		"type": "slider",
+		"name": "",
+		"value": 700,
+		"max": 900,
+		"min": 100,
+		"steps": 100
+	},
+	"mainBg": {
+		"label": "Main Area - Background Color",
+		"type": "colorpicker",
+		"value": "#FFFFFF"
+	},
+	"mainBgOpacity": {
+		"label": "Main Area - Background Opacity",
+		"type": "slider",
+		"name": "",
+		"value": 100,
+		"max": 100,
+		"min": 0,
+		"steps": 1
+	},
+	"topBH": {
+		"label": "Main Area - Top Border Height",
+		"type": "slider",
+		"name": "",
+		"value": 0,
+		"max": 10,
+		"min": 0,
+		"steps": 1
+	},
+	"botBH": {
+		"label": "Main Area - Bottom Border Height",
+		"type": "slider",
+		"name": "",
+		"value": 5,
+		"max": 10,
+		"min": 0,
+		"steps": 1
+	},
+	"borderColor": {
+		"label": "Main Area - Border Color",
+		"type": "colorpicker",
+		"value": "#660000"
+	},
+	"altPosition": {
+		"label": "Alternate Area - Above or Below the Main Area?",
+		"type": "dropdown",
+		"options": {
+			"above": "Above",
+			"below": "Below"
+		},
+		"value": "above"
+	},
+	"altTextArea": {
+		"label": "Alternate Area - Text Template",
+		"type": "textfield",
+		"value": "NUEVO SEGUIDOR"
+	},
+	"altColor": {
+		"label": "Alternate Area - Font Color",
+		"type": "colorpicker",
+		"value": "#FFFFFF"
+	},
+	"altFS": {
+		"label": "Alternate Area - Font Size",
+		"type": "slider",
+		"name": "",
+		"value": 16,
+		"max": 80,
+		"min": 10,
+		"steps": 1
+	},
+	"altFW": {
+		"label": "Alternate Area - Font Weight",
+		"type": "slider",
+		"name": "",
+		"value": 700,
+		"max": 900,
+		"min": 100,
+		"steps": 100
+	},
+	"altBg": {
+		"label": "Alternate Area - Background Color",
+		"type": "colorpicker",
+		"value": "#000000"
+	},
+	"altBgOpacity": {
+		"label": "Alternate Area - Background Opacity",
+		"type": "slider",
+		"name": "",
+		"value": 100,
+		"max": 100,
+		"min": 0,
+		"steps": 1
+	}
+}

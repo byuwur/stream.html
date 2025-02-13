@@ -1,0 +1,144 @@
+@import url("https://fonts.googleapis.com/css?family={font}");
+
+:root {
+/*   Global variables */
+  --widthType: inline-block;
+  --padding: {vertPadding}px {horzPadding}px;
+  --textAlign: {textAlign};
+  --font: {font};
+  --xOffset: {xOffset}px;
+  --yOffset: {yOffset}px;
+  
+/*   Main Text variables */
+  --mainColor: {mainColor};
+  --mainFS: {mainFS}px;
+  --mainFW: {mainFW};
+  --mainBg: {mainBg};
+  --mainTransform: {mainTransform};
+  --mainBgOpacity: calc({mainBgOpacity} * .01);  
+  
+/*   Alt Text variables */
+  --altColor: {altColor};
+  --altFS: {altFS}px;
+  --altFW: {altFW};
+  --altBg: {altBg};
+  --altTransform: {mainTransform};
+  --altBgOpacity: calc({altBgOpacity} * .01);
+}
+
+html,body {
+  padding: 0;
+  margin: 0;
+  font-family: var(--font);
+  text-align: var(--textAlign);
+}
+
+#alertHolder {
+  position: absolute;
+  font-size: 0;
+  opacity: 0;
+}
+
+.left {
+  left: var(--xOffset);
+}
+.right {
+  right: var(--xOffset);
+}
+.top {
+  top: var(--yOffset);
+}
+.bottom {
+  bottom: var(--yOffset);
+}
+
+.center {
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+#main, .alt {
+  padding: var(--padding);
+  display: var(--widthType);
+  overflow: hidden;
+  position: relative;
+  white-space: nowrap;
+}
+
+#mainText img {
+  height: var(--mainFS);
+  width: auto;
+  margin: 0;
+  padding: 0;
+  float: left;
+}
+
+#main {
+  color: var(--mainColor);
+  font-size: var(--mainFS);
+  line-height: var(--mainFS);
+  height: var(--mainFS);
+  font-weight: var(--mainFW);
+  transform-origin: var(--mainTransform);
+  border-top: {topBH}px solid {borderColor};
+  border-bottom: {botBH}px solid {borderColor};
+}
+
+.alt {
+  color: var(--altColor);
+  font-size: var(--altFS);
+  line-height: var(--altFS);
+  height: var(--altFS);
+  font-weight: var(--altFW);
+  transform-origin: var(--altTransform);
+}
+
+.bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+#main .bg {
+  background: var(--mainBg);
+  opacity: var(--mainBgOpacity);
+}
+
+.alt .bg {
+  background: var(--altBg);
+  opacity: var(--altBgOpacity);
+}
+
+#mainText, .altText {
+  z-index: 999;
+  position: relative;
+}
+
+.above #altBelow {
+  display: none;
+  visibility: hidden;
+}
+
+.below #altAbove {
+  display: none;
+  visibility: hidden;
+}
+
+#messageHolder {
+  color: #FFF;
+  text-shadow: 0 0 2px #000, 0 0 4px #000, 0 0 6px #000;
+  position: relative;
+  top: 10px;
+  padding: var(--padding);
+  left: 0;
+  max-width: 600px;
+  font-size: 16px;
+  word-wrap: break-word;
+}
+
+.alert-image {
+  max-height: 128px;
+}
