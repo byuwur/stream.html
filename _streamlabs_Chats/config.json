@@ -1,0 +1,95 @@
+{
+	"alignWhere": {
+		"label": "Vertical Alignment? top or bottom",
+		"type": "textfield",
+		"value": "bottom"
+	},
+	"textAlignment": {
+		"label": "Text alignment? left or right",
+		"type": "textfield",
+		"value": "left"
+	},
+	"separator": {
+		"label": "Character used to separate the name from the message",
+		"type": "textfield",
+		"value": "="
+	},
+	"chatFont": {
+		"label": "Font Family",
+		"type": "fontpicker",
+		"value": "IBM Plex Mono"
+	},
+	"fontWeight": {
+		"label": "Font Weight",
+		"type": "slider",
+		"name": "",
+		"value": 700,
+		"max": 900,
+		"min": 300,
+		"steps": 50
+	},
+	"maxLines": {
+		"label": "Maximum message amount limit",
+		"type": "slider",
+		"name": "",
+		"value": 50,
+		"max": 50,
+		"min": 1,
+		"steps": 1
+	},
+	"glitchSpeed": {
+		"label": "Glitch Time - lower is faster",
+		"type": "slider",
+		"name": "",
+		"value": 7,
+		"max": 10,
+		"min": 1,
+		"steps": 1
+	},
+	"repeatAmount": {
+		"label": "How many times do you want the glitch effect to repeat?",
+		"type": "slider",
+		"name": "",
+		"value": 100,
+		"max": 100,
+		"min": 1,
+		"steps": 1
+	},
+	"borderHeight": {
+		"label": "Border Height",
+		"type": "slider",
+		"name": "",
+		"value": 3,
+		"max": 5,
+		"min": 0,
+		"steps": 1
+	},
+	"borderColor": {
+		"label": "Border color",
+		"type": "colorpicker",
+		"value": "#FFFFFF"
+	},
+	"bottomMargin": {
+		"label": "Margin between each message",
+		"type": "slider",
+		"name": "",
+		"value": 5,
+		"max": 50,
+		"min": 0,
+		"steps": 1
+	},
+	"bgColor": {
+		"label": "Background Color",
+		"type": "colorpicker",
+		"value": "#000000"
+	},
+	"bgOpacity": {
+		"label": "Opacity of background",
+		"type": "slider",
+		"name": "",
+		"value": 50,
+		"max": 100,
+		"min": 0,
+		"steps": 1
+	}
+}

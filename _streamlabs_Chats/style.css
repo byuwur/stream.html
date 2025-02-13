@@ -1,0 +1,182 @@
+@import url('https://fonts.googleapis.com/css?family={chatFont}');
+
+* {
+    box-sizing: border-box;
+}
+
+html, body {
+    height: 100%;
+    overflow: hidden;
+}
+
+body {
+    text-shadow: 0 0 1px #000, 0 0 2px #000;
+    background: {background_color};
+    font-family: '{chatFont}';
+    font-weight: {fontWeight};
+    font-size: {font_size};
+    line-height: 1.5em;
+    color: {text_color};
+  	text-align: {textAlignment};
+}
+
+.colon {
+    display: none;
+}
+
+#log {
+    position: absolute;
+  	{alignWhere}: 0;
+    left: 0;
+    padding: 0 10px 10px;
+    width: 100%;
+    table-layout: fixed;
+}
+
+#log>div {
+    animation: fadeOut 0.5s ease {message_hide_delay} forwards;
+    -webkit-animation: fadeOut 0.5s ease {message_hide_delay} forwards;
+}
+
+#log>div.deleted {
+    visibility: hidden;
+}
+
+#log .emote {
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    padding: 0.4em 0.2em;
+    position: relative;
+}
+
+#log .emote img {
+    display: inline-block;
+    height: 1em;
+    opacity: 0;
+}
+
+#log .message,#log .meta {
+    vertical-align: top;
+    padding-bottom: 0.1em;
+}
+
+#log .meta {
+    padding-right: 0.1em;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+#log .message {
+    word-wrap: break-word;
+}
+
+.badge {
+    display: inline-block;
+    margin-right: 0.2em;
+    position: relative;
+    height: 1em;
+    vertical-align: middle;
+    top: -0.1em;
+}
+
+/* Custom Coderino 
+**********************************************************
+**********************************************************
+**********************************************************
+**********************************************************
+**********************************************************
+**********************************************************
+************************************************************/
+
+.line {
+  margin-bottom: {bottomMargin}px;
+  padding: 10px;
+  border-bottom: {borderHeight}px solid {borderColor};
+  position: relative;
+  z-index: 99;
+}
+
+.bg {
+  background: {bgColor};
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 1;
+  opacity: calc({bgOpacity}*.01)
+}
+
+.meta, .message{
+  position: relative;
+  z-index: 99;
+}
+
+.shiftGlitch {
+  position: relative;
+}
+.shiftGlitch:after {
+  position: absolute;
+  left: 2px;
+  top: 0;
+  content: attr(data-text);
+  overflow: hidden;
+  clip: rect(0, 200px, 0, 0);
+/*   animation: shift 2s 2 linear alternate-reverse; */
+}
+
+.shiftGlitch:before {
+  position: absolute;
+  left: -2px;
+  top: 2px;
+  content: attr(data-text);
+  overflow: hidden;
+  clip: rect(0, 200px, 0, 0);
+/*   animation: shift-2 6s 2 linear alternate-reverse; */
+}
+
+@keyframes shift {
+  0% {transform: translate(-2px, 1px); clip: rect(40px, 9999px, 53px, 0);}
+  2% {clip: rect(15px, 9999px, 46px, 0);}
+  6% {clip: rect(93px, 9999px, 24px, 0);}
+  8% {clip: rect(61px, 9999px, 1px, 0);}
+  10% {clip: rect(26px, 9999px, 81px, 0);}
+  12% {clip: rect(79px, 9999px, 63px, 0);}
+  14% {clip: rect(39px, 9999px, 86px, 0);}
+  16% {clip: rect(84px, 9999px, 60px, 0);}
+  40% {clip: rect(79px, 9999px, 71px, 0);}
+  42% {clip: rect(21px, 9999px, 41px, 0);}
+  44% {clip: rect(3px, 9999px, 95px, 0);}
+  46% {clip: rect(29px, 9999px, 41px, 0);}
+  52% {transform: translate(3px, -1px);clip: rect(73px, 9999px, 61px, 0);}
+  54% {clip: rect(76px, 9999px, 22px, 0);}
+  56% {clip: rect(40px, 9999px, 59px, 0);}
+  58% {clip: rect(6px, 9999px, 78px, 0);}
+  60% {clip: rect(69px, 9999px, 84px, 0);}
+  62% {clip: rect(35px, 9999px, 51px, 0);}
+  64% {clip: rect(78px, 9999px, 84px, 0);}
+  86% {clip: rect(45px, 9999px, 68px, 0);}
+  88% {transform: translate(-2px, 2px); clip: rect(34px, 9999px, 4px, 0);}
+  90% {clip: rect(99px, 9999px, 73px, 0);}
+  92% {clip: rect(88px, 9999px, 43px, 0);}
+  94% {clip: rect(7px, 9999px, 53px, 0);}
+  98% {clip: rect(22px, 9999px, 1px, 0);}
+  100% {transform: translate(0, 0); clip: rect(21px, 9999px, 69px, 0);}
+}
+
+
+@keyframes shift-2 {
+  0% {clip: rect(17px, 9999px, 89px, 0);}
+  5% {clip: rect(48px, 9999px, 32px, 0);}
+  24% {clip: rect(22px, 9999px, 17px, 0);}
+  55% {clip: rect(21px, 9999px, 12px, 0);}
+  60% {transform: translate(-2px, 2px); clip: rect(84px, 9999px, 21px, 0);}
+  70% {clip: rect(24px, 9999px, 35px, 0);}
+  75% {clip: rect(44px, 9999px, 70px, 0);}
+  85% {transform: translate(-2px, 1px); clip: rect(42px, 9999px, 29px, 0);}
+  90% {clip: rect(73px, 9999px, 17px, 0);}
+  95% {clip: rect(69px, 9999px, 80px, 0);}
+  100% {transform: translate(0, 0); clip: rect(99px, 9999px, 50px, 0);}
+}
