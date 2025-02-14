@@ -1,19 +1,4 @@
 {
-	"alignWhere": {
-		"label": "Vertical Alignment? top or bottom",
-		"type": "textfield",
-		"value": "bottom"
-	},
-	"textAlignment": {
-		"label": "Text alignment? left or right",
-		"type": "textfield",
-		"value": "left"
-	},
-	"separator": {
-		"label": "Character used to separate the name from the message",
-		"type": "textfield",
-		"value": "="
-	},
 	"chatFont": {
 		"label": "Font Family",
 		"type": "fontpicker",
@@ -26,10 +11,33 @@
 		"value": 700,
 		"max": 900,
 		"min": 300,
-		"steps": 50
+		"steps": 100
+	},
+	"separator": {
+		"label": "Separator Character (@name [&] message)",
+		"type": "textfield",
+		"value": "="
+	},
+	"alignWhere": {
+		"label": "Vertical Anchor",
+		"type": "dropdown",
+		"options": {
+			"top": "Top",
+			"bottom": "Bottom"
+		},
+		"value": "bottom"
+	},
+	"textAlignment": {
+		"label": "Text Alignment",
+		"type": "dropdown",
+		"options": {
+			"left": "Left",
+			"right": "Right"
+		},
+		"value": "left"
 	},
 	"maxLines": {
-		"label": "Maximum message amount limit",
+		"label": "Max. messages on screen",
 		"type": "slider",
 		"name": "",
 		"value": 50,
@@ -38,16 +46,16 @@
 		"steps": 1
 	},
 	"glitchSpeed": {
-		"label": "Glitch Time - lower is faster",
+		"label": "Glitch Pause",
 		"type": "slider",
 		"name": "",
-		"value": 7,
+		"value": 5,
 		"max": 10,
 		"min": 1,
 		"steps": 1
 	},
 	"repeatAmount": {
-		"label": "How many times do you want the glitch effect to repeat?",
+		"label": "Glitch Repeat",
 		"type": "slider",
 		"name": "",
 		"value": 100,
@@ -55,11 +63,34 @@
 		"min": 1,
 		"steps": 1
 	},
-	"borderHeight": {
-		"label": "Border Height",
+	"bgColor": {
+		"label": "BG Color",
+		"type": "colorpicker",
+		"value": "#000000"
+	},
+	"bgOpacity": {
+		"label": "BG Opacity",
 		"type": "slider",
 		"name": "",
-		"value": 3,
+		"value": 50,
+		"max": 100,
+		"min": 0,
+		"steps": 1
+	},
+	"bottomMargin": {
+		"label": "Message margin (px)",
+		"type": "slider",
+		"name": "",
+		"value": 5,
+		"max": 50,
+		"min": 0,
+		"steps": 1
+	},
+	"borderHeight": {
+		"label": "Border height (px)",
+		"type": "slider",
+		"name": "",
+		"value": 0,
 		"max": 5,
 		"min": 0,
 		"steps": 1
@@ -68,28 +99,5 @@
 		"label": "Border color",
 		"type": "colorpicker",
 		"value": "#FFFFFF"
-	},
-	"bottomMargin": {
-		"label": "Margin between each message",
-		"type": "slider",
-		"name": "",
-		"value": 5,
-		"max": 50,
-		"min": 0,
-		"steps": 1
-	},
-	"bgColor": {
-		"label": "Background Color",
-		"type": "colorpicker",
-		"value": "#000000"
-	},
-	"bgOpacity": {
-		"label": "Opacity of background",
-		"type": "slider",
-		"name": "",
-		"value": 50,
-		"max": 100,
-		"min": 0,
-		"steps": 1
 	}
 }
