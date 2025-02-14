@@ -716,8 +716,8 @@ strong {
 
 .controller.fight-stick {
 	background: url(../img/fsc/base.svg) center no-repeat;
-	height: 534px;
-	width: 1122px;
+	height: 530px;
+	width: 910px;
 }
 
 .fight-stick.disconnected {
@@ -729,11 +729,11 @@ strong {
 }
 
 .fight-stick .triggers {
-	width: 326px;
-	height: 198px;
+	width: 325px;
+	height: 200px;
 	position: absolute;
 	right: 0px;
-	bottom: 66px;
+	bottom: 60px;
 }
 
 .fight-stick .trigger-button {
@@ -763,15 +763,15 @@ strong {
 
 .fight-stick .bumpers {
 	width: 295px;
-	height: 198px;
+	height: 200px;
 	position: absolute;
 	right: 0px;
-	top: 88px;
+	top: 90px;
 }
 
 .fight-stick .bumper {
-	width: 123px;
-	height: 123px;
+	width: 125px;
+	height: 125px;
 	background: #333333;
 	border-radius: 100%;
 	opacity: 1;
@@ -805,10 +805,10 @@ strong {
 
 .fight-stick .arrows {
 	position: absolute;
-	width: 70px;
-	height: 217px;
-	top: 53px;
-	left: 49px;
+	width: 175px;
+	height: 70px;
+	top: 30px;
+	left: 10px;
 }
 
 .fight-stick .back,
@@ -826,8 +826,7 @@ strong {
 
 .fight-stick .start {
 	position: absolute;
-	bottom: 4px;
-	left: -1px;
+	right: 0;
 }
 
 .fight-stick .back.pressed,
@@ -840,13 +839,13 @@ strong {
 	position: absolute;
 	width: 310px;
 	height: 370px;
-	bottom: 103px;
-	left: 472px;
+	bottom: 100px;
+	right: 340px;
 }
 
 .fight-stick .button {
-	width: 123px;
-	height: 123px;
+	width: 125px;
+	height: 125px;
 	background: #333333;
 	border-radius: 100%;
 	opacity: 1;
@@ -881,10 +880,10 @@ strong {
 
 .fight-stick .fstick {
 	position: absolute;
-	width: 221px;
-	height: 221px;
-	top: 199px;
-	left: 192px;
+	width: 220px;
+	height: 220px;
+	top: 195px;
+	left: -15px;
 	background: url(../img/fsc/stick.svg);
 }
 
