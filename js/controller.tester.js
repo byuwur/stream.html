@@ -30,7 +30,6 @@ const tester = {
 	SNAPSHOT: {},
 	MONITOR_TYPE: "",
 	DISABLED_INPUTS: {},
-	DELAY_TIME_MS: 0,
 
 	absDiff: function (a, b) {
 		return Math.abs(a - b);

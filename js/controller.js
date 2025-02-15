@@ -270,7 +270,6 @@ const skinControl = getParameterByName("skin") !== "" ? allowedControllers[getPa
 const scaleSize = getParameterByName("scale");
 const skinOpacity = getParameterByName("opacity");
 const stickOffset = getParameterByName("offset");
-const delayTime = getParameterByName("delay");
 const deadzone = getParameterByName("deadzone");
 const triggerStrength = getParameterByName("strength");
 const stickCurve = getParameterByName("curve");
@@ -296,7 +295,6 @@ if (playerNumber !== "" && allowedPlayers.includes(parseInt(playerNumber))) {
 }
 if (skinOpacity) controller.css("opacity", skinOpacity);
 if (stickOffset) tester.STICK_OFFSET = parseInt(stickOffset);
-if (delayTime) tester.DELAY_TIME_MS = parseInt(delayTime);
 if (deadzone) tester.ANALOGUE_STICK_THRESHOLD = parseFloat(deadzone);
 if (triggerStrength == 0) tester.TRIGGER_DISPLAY_TYPE = parseInt(triggerStrength);
 if (stickCurve == 1) tester.STICK_CURVING = parseInt(stickCurve);
