@@ -36,6 +36,12 @@ const tester = {
 		return Math.abs(a - b);
 	},
 
+	axisDistance: function (a, b) {
+		const x = parseFloat(a) * parseFloat(a),
+			y = parseFloat(b) * parseFloat(b);
+		return Math.sqrt(x + y);
+	},
+
 	ifDisabledExists: function (type, id, number) {
 		return tester.DISABLED_INPUTS[id]?.[type]?.[number] ?? false;
 	},
@@ -128,7 +134,7 @@ const tester = {
 		const gamepadEl = document.querySelector(`#gamepad-${gamepadId}`);
 		const newValue = value.value ?? value;
 		const buttonEl = gamepadEl.querySelector(`[data-name="${id}"]`);
-		if (buttonEl) buttonEl.classList.toggle(className, newValue > tester.ANALOGUE_BUTTON_THRESHOLD);
+		if (buttonEl) buttonEl.classList.toggle(className, newValue > tester.ANALOGUE_STICK_THRESHOLD);
 	},
 
 	updateTrigger: function (value, gamepadId, id) {
@@ -151,19 +157,25 @@ const tester = {
 		if (buttonEl) buttonEl.classList.toggle("pressed", newValue > tester.DIGITAL_THRESHOLD);
 	},
 
-	updateAxis: function (value, valueV, gamepadId, stickId) {
+	updateAxis: function (valueH, valueV, gamepadId, stickId) {
 		const gamepadEl = document.querySelector(`#gamepad-${gamepadId}`);
 		const stickEl = gamepadEl.querySelector(`[data-name="${stickId}"]`);
 		if (stickEl) {
-			const offsetValH = value * tester.STICK_OFFSET;
-			const offsetValV = valueV * tester.STICK_OFFSET;
+			let offsetValH, offsetValV;
+			if (tester.axisDistance(valueH, valueV) >= tester.ANALOGUE_STICK_THRESHOLD) {
+				offsetValH = valueH * tester.STICK_OFFSET;
+				offsetValV = valueV * tester.STICK_OFFSET;
+			} else {
+				offsetValH = 0;
+				offsetValV = 0;
+			}
 			stickEl.style.marginLeft = `${offsetValH}px`;
 			stickEl.style.marginTop = `${offsetValV}px`;
 			if (tester.STICK_CURVING) stickEl.style.transform = `rotateX(${offsetValV * -1}deg) rotateY(${offsetValH}deg)`;
 		}
 		const stickRotEL = gamepadEl.querySelector(`[data-name="${stickId}-wheel"]`);
 		if (stickRotEL) {
-			const rotValH = value * tester.ROTATE_BOUNDARY;
+			const rotValH = valueH * tester.ROTATE_BOUNDARY;
 			stickRotEL.style.transform = `rotate(${rotValH}deg)`;
 		}
 	},
@@ -222,7 +234,7 @@ const tester = {
 						},
 						bubbles: true
 					});
-					if ((tester.MONITOR_TYPE === "remapping" && tester.absDiff(tester.SNAPSHOT.axes[axisId], newValue) > tester.ANALOGUE_BUTTON_THRESHOLD) || tester.MONITOR_TYPE === "value") document.querySelectorAll("#mapping-config button").forEach((el) => el.dispatchEvent(gpEvent));
+					if ((tester.MONITOR_TYPE === "remapping" && tester.absDiff(tester.SNAPSHOT.axes[axisId], newValue) > tester.ANALOGUE_STICK_THRESHOLD) || tester.MONITOR_TYPE === "value") document.querySelectorAll("#mapping-config button").forEach((el) => el.dispatchEvent(gpEvent));
 				}
 			}
 		}
