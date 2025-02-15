@@ -56,10 +56,10 @@
 				</div>
 				<div class="fstick" data-name="arcade-stick"></div>
 			</div>
-			<div class="controller xbox disconnected" id="gamepad-0"></div>
 			<div class="controller xbox disconnected" id="gamepad-1"></div>
 			<div class="controller xbox disconnected" id="gamepad-2"></div>
 			<div class="controller xbox disconnected" id="gamepad-3"></div>
+			<div class="controller xbox disconnected" id="gamepad-4"></div>
 			<div class="controller xbox disconnected" id="gamepad-9"></div>
 		</div>
 		<div class="navbar hide-me">
@@ -75,10 +75,10 @@
 						<span>Player:</span>
 						<select class="player" id="pselect" title="Player">
 							<option>-</option>
-							<option value="gamepad-0">1</option>
-							<option value="gamepad-1">2</option>
-							<option value="gamepad-2">3</option>
-							<option value="gamepad-3">4</option>
+							<option value="gamepad-1">1</option>
+							<option value="gamepad-2">2</option>
+							<option value="gamepad-3">3</option>
+							<option value="gamepad-4">4</option>
 							<option value="gamepad-9">KB</option>
 						</select>
 					</div>
@@ -86,8 +86,8 @@
 						<select class="console" id="cselect" title="Console">
 							<option value="xbox">Xbox (1)</option>
 							<option value="ps">PlayStation (2)</option>
-							<option value="fight-stick">Fight Stick (7)</option>
-							<option value="gc">GameCube (9)</option>
+							<option value="fight-stick">Fight Stick (3)</option>
+							<option value="gc">GameCube (4)</option>
 						</select>
 					</div>
 				</div>
@@ -99,7 +99,7 @@
 					<div class="box alert">
 						<span><i class="fa fa-exclamation-circle"></i></span>
 					</div>
-					<span>No controllers detected. Press ANY button or [F] on keyboard.</span>
+					<span>No controllers detected. Press ANY button or [F] on your keyboard.</span>
 				</div>
 			</div>
 		</div>
@@ -188,8 +188,8 @@
 							<span>Full:<span class="codeblock" id="url-gen-full">https://byuwur.net/_stream.html/controller.html</span></span>
 							<form id="url-form">
 								<div class="form-group">
-									<label for="p-input">Player Number: </label>
-									<select id="p-input" name="p">
+									<label for="player-input">Player Number: </label>
+									<select id="player-input" name="player">
 										<option value="">None (Chroma-Key)</option>
 										<option value="1">Player 1</option>
 										<option value="2">Player 2</option>
@@ -199,23 +199,24 @@
 									</select>
 								</div>
 								<div class="form-group">
-									<label for="s-input">Skin: </label>
-									<select id="s-input" name="s">
+									<label for="skin-input">Skin: </label>
+									<select id="skin-input" name="skin">
 										<option value="">None</option>
 										<option value="1">Xbox (1)</option>
 										<option value="2">PlayStation (2)</option>
-										<option value="7">Fight Stick (7)</option>
-										<option value="9">GameCube (9)</option>
+										<option value="3">Fight Stick (3)</option>
+										<option value="4">GameCube (4)</option>
 									</select>
 								</div>
-								<div class="form-group"><label for="sc-input">Scale Multiplier: </label><span class="input-unit">x</span><input id="sc-input" type="text" name="sc" placeholder="0.5, 1, 2..." /></div>
-								<div class="form-group"><label for="op-input">Opacity: </label><input id="op-input" type="text" name="op" placeholder="0.0 to 1.0" /></div>
-								<div class="form-group"><label for="soffset-input">Stick Offset: </label><span class="input-unit">px</span><input id="soffset-input" type="text" name="soffset" placeholder="0" /></div>
+								<div class="form-group"><label for="scale-input">Scale Multiplier: </label><span class="input-unit">x</span><input id="scale-input" type="text" name="scale" placeholder="0.5, 1, 2..." /></div>
+								<div class="form-group"><label for="opacity-input">Opacity: </label><input id="opacity-input" type="text" name="opacity" placeholder="0.0 to 1.0" /></div>
+								<div class="form-group"><label for="offset-input">Stick Offset: </label><span class="input-unit">px</span><input id="offset-input" type="text" name="offset" placeholder="0" /></div>
 								<div class="form-group"><label for="delay-input">Delay: </label><span class="input-unit">ms</span><input id="delay-input" type="text" name="delay" placeholder="0" /></div>
-								<div class="form-group"><label for="dz-input">Deadzone: </label><input id="dz-input" type="text" name="dz" placeholder="0.0 to 1.0" /></div>
-								<div class="form-group"><label for="smeter-input">Strength Meter: </label><input id="smeter-input" type="checkbox" name="smeter" value="1" /></div>
-								<div class="form-group"><label for="curve-input">Stick Curving: </label><input id="curve-input" type="checkbox" name="curve" value="1" /></div>
-								<div class="form-group"><label for="rot-input">Rotation Stop: </label><span class="input-unit">deg</span><input id="rot-input" type="text" name="rot" placeholder="0" /></div>
+								<div class="form-group"><label for="deadzone-input">Deadzone: </label><input id="deadzone-input" type="text" name="deadzone" placeholder="0.0 to 1.0" /></div>
+								<div class="form-group"><label for="strength-input">Disable Strength Meter: </label><input id="strength-input" type="checkbox" name="strength" value="0" /></div>
+								<div class="form-group"><label for="curve-input">Enable Stick Curving: </label><input id="curve-input" type="checkbox" name="curve" value="1" /></div>
+								<div class="form-group"><label for="rotation-input">Rotation Stop: </label><span class="input-unit">deg</span><input id="rotation-input" type="text" name="rotation" placeholder="0" /></div>
+								<input type="text" name="mapping" id="mapping-input" hidden />
 							</form>
 							<span>You can <a href="#params">see all the parameters here</a>.</span>
 						</section>
@@ -342,11 +343,11 @@
 						<p>
 							Please select the controller:
 							<select id="player-base" title="Player">
-								<option selected>-</option>
-								<option value="0" disabled>1</option>
-								<option value="1" disabled>2</option>
-								<option value="2" disabled>3</option>
-								<option value="3" disabled>4</option>
+								<option value="" selected>-</option>
+								<option value="1" disabled>1</option>
+								<option value="2" disabled>2</option>
+								<option value="3" disabled>3</option>
+								<option value="4" disabled>4</option>
 								<option value="9" disabled>KB</option>
 							</select>
 						</p>
