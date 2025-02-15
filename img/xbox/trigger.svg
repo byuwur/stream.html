@@ -1,18 +1,21 @@
-<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" width="88.93" height="121.8" viewBox="0 0 88.93 121.8">
-  <defs>
-    <style>
-      .cls-1 {
-        fill: #e5e5e5;
-      }
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="layer" xmlns="http://www.w3.org/2000/svg" version="1.1" width="89" height="122"
+    viewBox="0 0 89 122">
+    <defs>
+        <style>
+            .st0 {
+            fill: #e5e5e5;
+            }
 
-      .cls-2 {
-        fill: #ebebeb;
-      }
-    </style>
-  </defs>
-  <g id="LT_Pressed" data-name="LT Pressed">
-    <path class="cls-1" d="M74.75,56.08v-.67A5.91,5.91,0,0,1,74.75,56.08Z" transform="translate(0 0)"/>
-    <path class="cls-1" d="M49.72,5.47c.4-.32.8-.62,1.21-.9l2.32,110L0,121.79C12.07,5,43,10.76,49.72,5.47Z" transform="translate(0 0)"/>
-    <path class="cls-2" d="M76.74.14C87.57.55,88.81,11.58,88.93,15.33v1.23a819.52,819.52,0,0,0,0,93.09C79,111.94,50.39,115,50.39,115s0-20.91-.68-50.6c-.81-37.5,1.22-59.78,1.22-59.78C57.34.09,64.49-.31,76.74.14Z" transform="translate(0 0)"/>
-  </g>
+            .st1 {
+            fill: #ebebeb;
+            }
+        </style>
+    </defs>
+    <g id="LT_Pressed">
+        <path class="st0" d="M74.8,56.1v-.7c0,.2,0,.4,0,.7Z" />
+        <path class="st0" d="M49.7,5.5c.4-.3.8-.6,1.2-.9l2.3,110L0,121.8C12.1,5,43,10.8,49.7,5.5Z" />
+        <path class="st1"
+            d="M76.7.1c10.8.4,12.1,11.4,12.2,15.2v1.2c-1.8,31-1.8,62.1,0,93.1-9.9,2.3-38.5,5.4-38.5,5.4,0,0,0-20.9-.7-50.6-.8-37.5,1.2-59.8,1.2-59.8C57.3,0,64.5-.3,76.7.1Z" />
+    </g>
 </svg>

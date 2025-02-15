@@ -1,17 +1,18 @@
-<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" width="131.2" height="94.6" viewBox="0 0 131.2 94.6">
-  <defs>
-    <style>
-      .cls-1 {
-        fill: #171717;
-      }
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="layer" xmlns="http://www.w3.org/2000/svg" version="1.1" width="132" height="95"
+    viewBox="0 0 132 95">
+    <defs>
+        <style>
+            .st0 {
+            fill: #0c0c0c;
+            }
 
-      .cls-2 {
-        fill: #080808;
-      }
-    </style>
-  </defs>
-  <g>
-    <path class="cls-1" d="M1,90H130.2a.94.94,0,0,0,1-1V52a52,52,0,0,0-52-52H52A52,52,0,0,0,0,52V89A.94.94,0,0,0,1,90Z"/>
-    <ellipse class="cls-2" cx="65.6" cy="89.3" rx="65.6" ry="5.3"/>
-  </g>
+            .st1 {
+            fill: #171717;
+            }
+        </style>
+    </defs>
+    <path class="st1"
+        d="M1,90h129.2c.5,0,1-.4,1-.9,0,0,0,0,0-.1v-37C131.2,23.3,107.9,0,79.2,0h-27.2C23.3,0,0,23.3,0,52v37c0,.5.4,1,.9,1,0,0,0,0,.1,0Z" />
+    <ellipse class="st0" cx="65.6" cy="89.3" rx="65.6" ry="5.3" />
 </svg>
