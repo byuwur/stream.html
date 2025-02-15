@@ -601,8 +601,8 @@ i {
 
 .controller.fight-stick {
 	background: url(../img/fsc/base.svg) center no-repeat;
-	height: 530px;
-	width: 910px;
+	height: 534px;
+	width: 912px;
 }
 
 .fight-stick.disconnected {
@@ -611,6 +611,13 @@ i {
 
 .fight-stick.disconnected div {
 	display: none;
+}
+
+.fight-stick .abxy *,
+.fight-stick .triggers *,
+.fight-stick .bumpers *,
+.fight-stick .arrows * {
+	border-radius: 100%;
 }
 
 .fight-stick .triggers {
