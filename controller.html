@@ -64,6 +64,7 @@
 		</div>
 		<div class="navbar hide-me">
 			<div class="content">
+				<div class="byuwur"></div>
 				<div class="left">
 					<a href="#menu" title="Menu"><i class="fa fa-bars menu-button"></i></a>
 				</div>
@@ -95,10 +96,8 @@
 		</div>
 		<div class="navbar nocon hide-me">
 			<div class="content">
-				<div class="left">
-					<div class="box alert">
-						<span><i class="fa fa-exclamation-circle"></i></span>
-					</div>
+				<div class="box left">
+					<i class="box alert fa fa-exclamation-circle"></i>
 					<span>No controllers detected. Press ANY button or [F] on your keyboard.</span>
 				</div>
 			</div>
@@ -106,11 +105,15 @@
 		<div class="slideout-menu hide-me" id="menu">
 			<a class="bglink" href="#" title="Close"><div class="modal-bg"></div></a>
 			<div class="menu">
+				<div class="byuwur absolute"></div>
 				<h1><i class="fa fa-gamepad"></i>Controller</h1>
-				<a href="#info"><i class="fa fa-info-circle"></i><span>Info</span></a>
-				<a href="#obs"><i class="fa fa-tv"></i><span>Use with OBS</span></a>
-				<a href="#params"><i class="fa fa-file-text"></i><span>Parameters</span></a>
-				<a href="#remap"><i class="fa fa-gamepad"></i><span>Custom Mapping</span></a>
+				<div class="menu-list">
+					<a href="#info"><i class="fa fa-info-circle"></i><span>Info</span></a>
+					<a href="#obs"><i class="fa fa-tv"></i><span>Use with OBS</span></a>
+					<a href="#params"><i class="fa fa-file-text"></i><span>Parameters</span></a>
+					<a href="#remap"><i class="fa fa-gamepad"></i><span>Custom Mapping</span></a>
+				</div>
+				<p class="year">&copy; <span id="year">2025</span> Made with <i class="fa fa-heart"></i> by <a rel="noopener" href="https://byuwur.net" target="_blank">[Mateus] byUwUr</a></p>
 			</div>
 		</div>
 		<div id="modals" class="hide-me">
@@ -118,7 +121,7 @@
 				<a class="bglink" href="#" title="Close"><div class="modal-bg"></div></a>
 				<div class="modal">
 					<header class="minimenu">
-						<a class="close" href="#">&times;</a>
+						<a class="byuwur" rel="noopener" href="https://byuwur.net" target="_blank" title="[Mateus] byUwUr">&lrm;</a>
 						<ul>
 							<li>
 								<a href="#info"><i class="fa fa-info-circle"></i>Info</a>
@@ -133,6 +136,7 @@
 								<a href="#remap"><i class="fa fa-gamepad"></i>Custom Mapping</a>
 							</li>
 						</ul>
+						<a class="close" href="#">&times;</a>
 					</header>
 				</div>
 			</div>
@@ -144,13 +148,11 @@
 						<h1>Information</h1>
 					</header>
 					<article>
-						<p>"Locally, offline, reliable." - <a rel="noopener" href="https://byuwur.net" target="_blank">[Mateus] byUwUr</a></p>
-						<p>Free. Forever.</p>
+						<p>"Locally, offline, reliable." - <a rel="noopener" href="https://byuwur.net" target="_blank">[Mateus] byUwUr</a> - Free. Forever.</p>
 						<p>You can also <a rel="noopener" href="https://streamlabs.com/byuwur" target="_blank">tip</a>, <a rel="noopener" href="https://twitch.tv/byuwur" target="_blank">subscribe</a> or <a rel="noopener" href="https://paypal.me/byuwur" target="_blank">donate</a>.</p>
 						<p>Download the <a rel="noopener" href="https://github.com/byuwur/stream.html/releases" target="_blank">source code</a> to use it locally and independent of online services!</p>
 						<p>
-							Thanks to
-							<a rel="noopener" href="http://aresluna.org" target="_blank">Marcin Wichary's</a>
+							Thanks, <a rel="noopener" href="http://aresluna.org" target="_blank">Marcin Wichary</a>, for the
 							<a rel="noopener" href="https://github.com/html5rocks/www.html5rocks.com/blob/master/content/tutorials/doodles/gamepad/static/gamepad-tester/gamepad.js" target="_blank">Gamepad.js</a>
 							and
 							<a rel="noopener" href="https://github.com/html5rocks/www.html5rocks.com/blob/master/content/tutorials/doodles/gamepad/static/gamepad-tester/tester.js" target="_blank">Tester.js</a> libraries.
@@ -185,7 +187,7 @@
 								<div class="codeblock url-gen" id="url-gen-copy"><span>Copy</span></div>
 								<div class="codeblock url-gen" id="url-gen-reset"><span>Reset</span></div>
 							</div>
-							<span>Full:<span class="codeblock" id="url-gen-full">https://byuwur.net/_stream.html/controller.html</span></span>
+							<span>Full: <span class="codeblock" id="url-gen-full">https://byuwur.net/_stream.html/controller.html</span></span>
 							<form id="url-form">
 								<div class="form-group">
 									<label for="player-input">Player Number: </label>
@@ -220,10 +222,9 @@
 							<span>You can <a href="#params">see all the parameters here</a>.</span>
 						</section>
 						<hr />
-						<p>"Locally, offline, reliable." - <a rel="noopener" href="https://byuwur.net" target="_blank">[Mateus] byUwUr</a></p>
-						<p>Free. Forever.</p>
 						<p>You can also <a rel="noopener" href="https://streamlabs.com/byuwur" target="_blank">tip</a>, <a rel="noopener" href="https://twitch.tv/byuwur" target="_blank">subscribe</a> or <a rel="noopener" href="https://paypal.me/byuwur" target="_blank">donate</a>.</p>
 						<p>Download the <a rel="noopener" href="https://github.com/byuwur/stream.html/releases" target="_blank">source code</a> to use it locally and independent of online services!</p>
+						<p>"Locally, offline, reliable." - <a rel="noopener" href="https://byuwur.net" target="_blank">[Mateus] byUwUr</a> - Free. Forever.</p>
 					</article>
 				</div>
 			</div>

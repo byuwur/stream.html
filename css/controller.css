@@ -1075,14 +1075,24 @@ i {
 	float: left;
 }
 
+.byuwur {
+	width: 60px;
+	height: 50px;
+	background: url(../img/main.png) center / contain no-repeat !important;
+}
+
+.absolute {
+	position: absolute;
+}
+
 .navbar .content {
 	font-size: 1.5rem;
-	max-width: 960px;
+	max-width: 1120px;
 	display: flex;
 	margin: 0 auto;
 	padding: 0 16px;
-	line-height: 50px;
 	justify-content: space-between;
+	align-items: center;
 }
 
 .right a.button {
@@ -1155,11 +1165,10 @@ i {
 }
 
 .box {
-	width: 50px;
-	height: 50px;
-	font-size: 30pt;
-	font-weight: 700;
+	display: flex;
 	float: left;
+	align-items: center;
+	gap: 8px;
 }
 
 .box .fa {
@@ -1167,18 +1176,11 @@ i {
 	display: block;
 }
 
-.box a,
-.box label {
-	text-decoration: none;
+.box.alert {
+	font-size: 2rem;
+	color: salmon;
 	display: block;
-	height: 50px;
-	width: 50px;
-}
-
-.alert span {
-	color: #a85454;
-	display: block;
-	text-shadow: 0 1px 0 #ffa78b;
+	text-shadow: 0 1px 0 lightcoral;
 }
 
 .player {
@@ -1235,76 +1237,61 @@ a:active .menu-button {
 }
 
 .menu {
-	width: 400px;
+	width: 360px;
 	height: 100%;
-	background: whitesmoke;
+	background: white;
 	position: absolute;
-	transition: transform ease-in-out 0.4s;
-	transform: translateX(-400px);
+	transition: transform ease-in-out 0.25s;
+	transform: translateX(-360px);
 	display: flex;
 	flex-direction: column;
 }
 
-.menu ul {
-	height: calc(100% - 50px);
+.menu .menu-list {
+	flex-grow: 1;
 	overflow-y: auto;
 }
 
-.menu .yt-contain + ul {
-	height: calc(100% - 275px);
-}
-
-.menu a {
+.menu .menu-list a {
 	display: block;
 	padding: 10px;
-	font-size: 26px;
+	font-size: 1.5rem;
 	text-decoration: none;
 	color: rgba(0, 0, 0, 0.65);
 	transition: background ease 0.5s;
 }
 
-.menu li span {
-	vertical-align: top;
+.menu a:hover {
+	background: rgba(0, 0, 0, 0.25);
 }
 
-.menu i {
-	font-size: 28px;
+.menu .menu-list i {
 	margin-right: 4px;
 }
 
 .menu h1 {
-	font-size: 30px;
-	padding: 10px;
+	font-size: 1.75rem;
+	padding: 8px;
+	margin: 0 0 32px 0;
 	background: #600;
-	color: floralwhite;
-	padding-left: 64px;
+	color: white;
+	text-align: center;
 }
 
-.menu h1 i.material-icons {
-	font-size: 48px;
-	position: absolute;
-	left: 10px;
-	top: 2px;
-}
-
-.menu .divider {
-	border-bottom: 1px solid gray;
-	margin: 10px 50px;
-}
-
-.menu a:hover {
-	background: rgba(0, 0, 0, 0.2);
+.menu .year {
+	font-size: 0.75rem;
+	margin: 24px 12px;
 }
 
 .modal-container {
-	z-index: 13;
+	z-index: 20;
 	position: absolute;
 	width: 100%;
 	height: 100%;
 	visibility: hidden;
 	transition: all 0.5s;
 	transition-delay: 0.1s;
-	transition-timing-function: cubic-bezier(0.27, 1.29, 0.63, 1);
+	transition-timing-function: cubic-bezier(0.25, 1.5, 0.66, 1);
 	overflow: hidden;
 }
 
@@ -1373,12 +1360,6 @@ a:active .menu-button {
 	text-shadow: rgba(0, 0, 0, 0.5) 0px 1px 3px;
 }
 
-.modal a.close:active,
-.modal a.close:hover {
-	-webkit-filter: invert(100%);
-	filter: invert(100%);
-}
-
 .modal .codeblock {
 	font-family: monospace;
 	padding: 5px;
@@ -1391,40 +1372,51 @@ a:active .menu-button {
 }
 
 .modal p {
-	margin-bottom: 15px;
+	margin-bottom: 16px;
 }
 
 .modal .minimenu {
-	width: 100%;
-	box-sizing: border-box;
+	display: flex;
+	gap: 8px;
+	justify-content: space-between;
+	align-items: center;
 	background: #300;
 }
 
+.modal .minimenu ul,
+.modal .minimenu ol {
+	flex-grow: 1;
+}
+
 .modal .minimenu li {
-	height: 100%;
 	display: table-cell;
 }
 
 .modal .minimenu li:hover,
 .modal .minimenu .selected {
-	background: rgba(0, 0, 0, 0.25);
+	background: rgba(255, 255, 255, 0.125);
 }
 
 .modal .minimenu a {
-	color: whitesmoke;
-	padding: 7px 8px;
+	color: white;
+	padding: 8px;
 	text-decoration: none;
 	display: inline-block;
+}
+
+.modal .minimenu a:hover {
+	background: rgba(255, 255, 255, 0.25);
+}
+
+.modal .minimenu .byuwur {
+	height: 40px;
+	padding: 0 0 0 24px;
 }
 
 .modal .minimenu + header {
 	background: #600;
 	color: white;
-	-webkit-box-sizing: border-box;
-	-moz-box-sizing: border-box;
-	box-sizing: border-box;
-	padding: 0 25px;
-	flex: 0 0 100px;
+	padding: 0 24px;
 }
 
 .info {
@@ -1573,7 +1565,7 @@ a:active .menu-button {
 }
 
 #url-gen-url {
-    max-width: 70%;
+	max-width: 70%;
 	padding: 16px;
 	line-height: 1;
 	cursor: pointer;

@@ -1,3 +1,5 @@
+$("#year").text(new Date().getFullYear());
+
 const gamepadHTML = $("#gamepads .template").html();
 const menuHTML = $("#modal-template .minimenu").html();
 $(".controller").append(gamepadHTML);
