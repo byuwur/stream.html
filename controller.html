@@ -235,29 +235,29 @@
 						<h1>Parameters</h1>
 					</header>
 					<article>
+						<p>You can <a href="#obs">generate your URL here</a>!</p>
 						<section class="definition">
-							<p>You can <a href="#obs">generate your URL here</a>!</p>
-							<h2 data-param="p=">Player Number</h2>
-							<div class="codeblock">/?p=1</div>
+							<h2 data-param="player=">Player Number</h2>
+							<div class="codeblock">/?player=1</div>
 							<ul>
 								<li>1</li>
-								<li>0 (P1), 1 (P2), 2 (P3), 3 (P4), 9 (KB)</li>
-								<li>Enables "Lite Mode", displaying only the controller.</li>
+								<li>1 (P1), 2 (P2), 3 (P3), 4 (P4), 9 (Keyboard)</li>
+								<li>Enables "Lite Mode", displaying ONLY the controller.</li>
 							</ul>
 						</section>
 						<section class="definition">
-							<h2 data-param="s=">Skin ID</h2>
-							<div class="codeblock">/?s=1</div>
+							<h2 data-param="skin=">Skin ID</h2>
+							<div class="codeblock">/?skin=1</div>
 							<ul>
 								<li>1</li>
-								<li>1 (Xbox), 2 (Sony), 7 (Stick), 9 (GCN)</li>
+								<li>1 (Xbox), 2 (Sony), 3 (Stick), 4 (GCN)</li>
 								<li>Defaults to '1' (Xbox) if set to other values.</li>
-								<li>Requires a player number (<code class="codeblock">p=</code>).</li>
+								<li>Requires a player number to apply (set <code class="codeblock">player=[number]</code>).</li>
 							</ul>
 						</section>
 						<section class="definition">
-							<h2 data-param="sc=">Scale Multiplier</h2>
-							<div class="codeblock">/?sc=1.25</div>
+							<h2 data-param="scale=">Scale Multiplier</h2>
+							<div class="codeblock">/?scale=1.25</div>
 							<ul>
 								<li>1</li>
 								<li>Any number (with decimals).</li>
@@ -265,8 +265,8 @@
 							</ul>
 						</section>
 						<section class="definition">
-							<h2 data-param="op=">Opacity</h2>
-							<div class="codeblock">/?op=1.25</div>
+							<h2 data-param="opacity=">Opacity (%)</h2>
+							<div class="codeblock">/?opacity=0.25</div>
 							<ul>
 								<li>1</li>
 								<li>0.0 to 1.0 (with decimals).</li>
@@ -274,8 +274,8 @@
 							</ul>
 						</section>
 						<section class="definition">
-							<h2 data-param="soffset=">Stick Offset (pixels)</h2>
-							<div class="codeblock">/?soffset=1</div>
+							<h2 data-param="offset=">Stick Offset (pixels)</h2>
+							<div class="codeblock">/?offset=25</div>
 							<ul>
 								<li>20</li>
 								<li>Any number (positive).</li>
@@ -283,8 +283,8 @@
 							</ul>
 						</section>
 						<section class="definition">
-							<h2 data-param="dz=">Deadzone Radius</h2>
-							<div class="codeblock">/?dz=0.25</div>
+							<h2 data-param="deadzone=">Deadzone Radius (%)</h2>
+							<div class="codeblock">/?deadzone=0.25</div>
 							<ul>
 								<li>.25</li>
 								<li>0.0 to 1.0 (with decimals).</li>
@@ -292,16 +292,17 @@
 							</ul>
 						</section>
 						<section class="definition">
-							<h2 data-param="smeter=">Strength Meter (boolean)</h2>
-							<div class="codeblock">/?smeter=1</div>
+							<h2 data-param="strength=">Height Strength Meter (boolean)</h2>
+							<div class="codeblock">/?strength=0</div>
 							<ul>
-								<li>0 (false)</li>
+								<li>1 (true)</li>
 								<li>0 (false), 1 (true)</li>
-								<li>Any value other than '1' disables this setting.</li>
+								<li>Any value other than '0' enables this setting.</li>
+								<li>Replaces the opacity meter with a height meter.</li>
 							</ul>
 						</section>
 						<section class="definition">
-							<h2 data-param="curve=">Stick Curving (boolean)</h2>
+							<h2 data-param="curve=">Enable Stick Curving (boolean)</h2>
 							<div class="codeblock">/?curve=1</div>
 							<ul>
 								<li>0 (false)</li>
@@ -310,13 +311,13 @@
 							</ul>
 						</section>
 						<section class="definition">
-							<h2 data-param="rot=">Rotational Stop (degrees)</h2>
-							<div class="codeblock">/?rot=100</div>
+							<h2 data-param="rotation=">Rotational Stop (degrees)</h2>
+							<div class="codeblock">/?rotation=120</div>
 							<ul>
 								<li>120</li>
 								<li>Any positive number</li>
 								<li>Half the total rotational stop of the wheel.</li>
-								<li>Deadzone values affect this setting. Set <code class="codeblock">dz=0</code>.</li>
+								<li>Deadzone values affect this setting (must set <code class="codeblock">deadzone=0</code>).</li>
 							</ul>
 						</section>
 					</article>

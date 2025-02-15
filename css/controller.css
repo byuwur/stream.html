@@ -1573,6 +1573,7 @@ a:active .menu-button {
 }
 
 #url-gen-url {
+    max-width: 70%;
 	padding: 16px;
 	line-height: 1;
 	cursor: pointer;
