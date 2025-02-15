@@ -14,7 +14,7 @@
 	<body>
 		<div class="container" id="gamepads">
 			<div class="template">
-				<div class="plshalpme">
+				<div class="disconn">
 					<div><p>Disconnected</p></div>
 				</div>
 				<div class="triggers">
@@ -22,12 +22,10 @@
 					<span class="trigger right" data-name="button-right-shoulder-bottom"></span>
 					<span class="trigger-button left" data-name="button-left-shoulder-bottom-digital"></span>
 					<span class="trigger-button right" data-name="button-right-shoulder-bottom-digital"></span>
-					<span class="clear"></span>
 				</div>
 				<div class="bumpers">
 					<span class="bumper left" data-name="button-left-shoulder-top"></span>
 					<span class="bumper right" data-name="button-right-shoulder-top"></span>
-					<span class="clear"></span>
 				</div>
 				<div class="touchpad" data-name="touch-pad"></div>
 				<div class="quadrant"></div>
@@ -35,7 +33,6 @@
 				<div class="arrows">
 					<span class="back" data-name="button-select"></span>
 					<span class="start" data-name="button-start"></span>
-					<span class="clear"></span>
 				</div>
 				<div class="abxy">
 					<span class="button a" data-name="button-1"></span>
@@ -70,6 +67,9 @@
 				<div class="left">
 					<a href="#menu" title="Menu"><i class="fa fa-bars menu-button"></i></a>
 				</div>
+				<div style="flex-grow: 1; text-align: right">
+					<a href="#obs" class="btn">Use with OBS here!</a>
+				</div>
 				<div class="center pselect">
 					<div class="left">
 						<span>Player:</span>
@@ -90,9 +90,6 @@
 							<option value="gc">GameCube (9)</option>
 						</select>
 					</div>
-					<div class="left">
-						<a href="#obs" class="btn">Use with OBS!</a>
-					</div>
 				</div>
 			</div>
 		</div>
@@ -102,7 +99,7 @@
 					<div class="box alert">
 						<span><i class="fa fa-exclamation-circle"></i></span>
 					</div>
-					<span>No controllers detected. Press ANY Button or [F].</span>
+					<span>No controllers detected. Press ANY button or [F] on keyboard.</span>
 				</div>
 			</div>
 		</div>
@@ -171,16 +168,57 @@
 					<article>
 						<p>You can:</p>
 						<ol>
-							<li>Create new window capture source, then select this window.</li>
-							<li>Enable "Color Key" in the source's filters. Set it up as you like.</li>
+							<li>Create a new Window Capture source, then select this window.</li>
+							<li>Enable "Chroma Key" in the source's filters. Set to Green.</li>
 							<li>By then you should be already done!</li>
 						</ol>
-						<p>Or also:</p>
+						<p>Or preferably:</p>
 						<ol>
-							<li>Create a new browser source on OBS.</li>
-							<li>Generate your URL and paste it.</li>
+							<li>Create a new Browser source on OBS.</li>
+							<li>Generate your URL and paste it, then click OK.</li>
 							<li>By then you should be already done!</li>
 						</ol>
+						<hr />
+						<section id="url-gen-page">
+							<div id="url-gen-area">
+								<div class="codeblock url-gen" id="url-gen-url" data-clipboard-text="?">Generate your URL below</div>
+								<div class="codeblock url-gen" id="url-gen-copy"><span>Copy</span></div>
+								<div class="codeblock url-gen" id="url-gen-reset"><span>Reset</span></div>
+							</div>
+							<span>Full:<span class="codeblock" id="url-gen-full">https://byuwur.net/_stream.html/controller.html</span></span>
+							<form id="url-form">
+								<div class="form-group">
+									<label for="p-input">Player Number: </label>
+									<select id="p-input" name="p">
+										<option value="">None (Chroma-Key)</option>
+										<option value="1">Player 1</option>
+										<option value="2">Player 2</option>
+										<option value="3">Player 3</option>
+										<option value="4">Player 4</option>
+										<option value="9">Keyboard</option>
+									</select>
+								</div>
+								<div class="form-group">
+									<label for="s-input">Skin: </label>
+									<select id="s-input" name="s">
+										<option value="">None</option>
+										<option value="1">Xbox (1)</option>
+										<option value="2">PlayStation (2)</option>
+										<option value="7">Fight Stick (7)</option>
+										<option value="9">GameCube (9)</option>
+									</select>
+								</div>
+								<div class="form-group"><label for="sc-input">Scale Multiplier: </label><span class="input-unit">x</span><input id="sc-input" type="text" name="sc" placeholder="0.5, 1, 2..." /></div>
+								<div class="form-group"><label for="op-input">Opacity: </label><input id="op-input" type="text" name="op" placeholder="0.0 to 1.0" /></div>
+								<div class="form-group"><label for="soffset-input">Stick Offset: </label><span class="input-unit">px</span><input id="soffset-input" type="text" name="soffset" placeholder="0" /></div>
+								<div class="form-group"><label for="delay-input">Delay: </label><span class="input-unit">ms</span><input id="delay-input" type="text" name="delay" placeholder="0" /></div>
+								<div class="form-group"><label for="dz-input">Deadzone: </label><input id="dz-input" type="text" name="dz" placeholder="0.0 to 1.0" /></div>
+								<div class="form-group"><label for="smeter-input">Strength Meter: </label><input id="smeter-input" type="checkbox" name="smeter" value="1" /></div>
+								<div class="form-group"><label for="nocurve-input">Disable Curving: </label><input id="nocurve-input" type="checkbox" name="nocurve" value="1" /></div>
+								<div class="form-group"><label for="rot-input">Rotation Stop: </label><span class="input-unit">deg</span><input id="rot-input" type="text" name="rot" placeholder="0" /></div>
+							</form>
+							<span>You can <a href="#params">see all the parameters here</a>.</span>
+						</section>
 						<hr />
 						<p>"Locally, offline, reliable." - <a rel="noopener" href="https://byuwur.net" target="_blank">[Mateus] byUwUr</a></p>
 						<p>Free. Forever.</p>
@@ -198,6 +236,7 @@
 					</header>
 					<article>
 						<section class="definition">
+							<p>You can <a href="#obs">generate your URL here</a>!</p>
 							<h2 data-param="p=">Player Number</h2>
 							<div class="codeblock">/?p=1</div>
 							<ul>
@@ -205,7 +244,6 @@
 								<li>0 (P1), 1 (P2), 2 (P3), 3 (P4), 9 (KB)</li>
 								<li>Enables "Lite Mode", displaying only the controller.</li>
 							</ul>
-							<p>Selects which controller to view in Lite Mode.</p>
 						</section>
 						<section class="definition">
 							<h2 data-param="s=">Skin ID</h2>
@@ -218,32 +256,30 @@
 							</ul>
 						</section>
 						<section class="definition">
-							<h2 data-param="smeter=">Strength Meter (boolean)</h2>
-							<div class="codeblock">/?smeter=1</div>
-							<ul>
-								<li>0 (false)</li>
-								<li>0 (false), 1 (true)</li>
-								<li>Any value other than '1' disables this setting.</li>
-							</ul>
-							<p>Enables strength meters for triggers instead of opacity levels.</p>
-						</section>
-						<section class="definition">
 							<h2 data-param="sc=">Scale Multiplier</h2>
 							<div class="codeblock">/?sc=1.25</div>
 							<ul>
-								<li>N/A</li>
 								<li>1</li>
-								<li>Any number, including decimals.</li>
+								<li>Any number (with decimals).</li>
 								<li>Negative values flip the controller.</li>
 							</ul>
 						</section>
 						<section class="definition">
-							<h2 data-param="dz=">Deadzone Radius</h2>
-							<div class="codeblock">/?dz=0.25</div>
+							<h2 data-param="op=">Opacity</h2>
+							<div class="codeblock">/?op=1.25</div>
 							<ul>
-								<li>.25</li>
-								<li>Any number from 0 to 1, including decimals.</li>
-								<li>Setting to 1 or higher disables stick movement.</li>
+								<li>1</li>
+								<li>0.0 to 1.0 (with decimals).</li>
+								<li>Negative values hide the controller.</li>
+							</ul>
+						</section>
+						<section class="definition">
+							<h2 data-param="soffset=">Stick Offset (pixels)</h2>
+							<div class="codeblock">/?soffset=1</div>
+							<ul>
+								<li>20</li>
+								<li>Any number (positive).</li>
+								<li>Anything beyond 25px isn't recommended.</li>
 							</ul>
 						</section>
 						<section class="definition">
@@ -251,8 +287,35 @@
 							<div class="codeblock">/?delay=1000</div>
 							<ul>
 								<li>0</li>
-								<li>Any positive number.</li>
+								<li>Any number (positive).</li>
 								<li>Anything beyond 2000ms isn't recommended.</li>
+							</ul>
+						</section>
+						<section class="definition">
+							<h2 data-param="dz=">Deadzone Radius</h2>
+							<div class="codeblock">/?dz=0.25</div>
+							<ul>
+								<li>.25</li>
+								<li>0.0 to 1.0 (with decimals).</li>
+								<li>Values higher than 1 disable stick movement.</li>
+							</ul>
+						</section>
+						<section class="definition">
+							<h2 data-param="smeter=">Strength Meter (boolean)</h2>
+							<div class="codeblock">/?smeter=1</div>
+							<ul>
+								<li>0 (false)</li>
+								<li>0 (false), 1 (true)</li>
+								<li>Any value other than '1' disables this setting.</li>
+							</ul>
+						</section>
+						<section class="definition">
+							<h2 data-param="nocurve=">Disable Curving (boolean)</h2>
+							<div class="codeblock">/?nocurve=1</div>
+							<ul>
+								<li>0 (false)</li>
+								<li>0 (false), 1 (true)</li>
+								<li>Any value other than '1' disables this setting.</li>
 							</ul>
 						</section>
 						<section class="definition">
@@ -363,7 +426,6 @@
 							<div id="mappings"></div>
 							<div class="button-group">
 								<button id="apply-mapping">Apply Mapping</button>
-								<span class="clear"></span>
 							</div>
 						</div>
 					</article>
