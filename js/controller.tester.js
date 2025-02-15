@@ -47,13 +47,15 @@ const tester = {
 	updateGamepads: function (gamepads) {
 		let padsConnected = false;
 		tester.DISABLED_INPUTS = {};
-		for (const i in gamepads ?? []) {
+		for (const index in gamepads ?? []) {
+			const i = index != 9 ? parseInt(index) : 9;
+			const i_frontend = i != 9 ? i + 1 : 9;
 			const gamepad = gamepads[i];
-			if (pnumber === "") {
-				document.getElementById("player-base").querySelector(`option[value="${i}"]`).disabled = false;
+			if (playerNumber === "") {
+				document.getElementById("player-base").querySelector(`option[value="${i_frontend}"]`).disabled = false;
 				const newRawMap = document.createElement("div");
 				newRawMap.innerHTML = document.querySelector(".raw-outputs.template").innerHTML;
-				newRawMap.id = `gamepad-map-${i}`;
+				newRawMap.id = `gamepad-map-${i_frontend}`;
 				newRawMap.className = "raw-outputs";
 
 				gamepad.buttons.forEach((button, b) => {
@@ -80,12 +82,12 @@ const tester = {
 				document.querySelector("#output-display").appendChild(newRawMap);
 			}
 
-			const el = document.getElementById(`gamepad-${i}`);
+			const el = document.getElementById(`gamepad-${i_frontend}`);
 			el.querySelector(".quadrant").classList.add(`p${i}`);
 			el.classList.remove("disconnected");
 			padsConnected = true;
 		}
-		if (pnumber === "") {
+		if (playerNumber === "") {
 			document.querySelector(".nocon").classList.toggle("visible", !padsConnected);
 			document.querySelector(".pselect").classList.toggle("visible", padsConnected);
 			document.querySelector(".pselect select").disabled = !padsConnected;

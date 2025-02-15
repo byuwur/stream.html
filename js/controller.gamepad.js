@@ -30,9 +30,9 @@ const gamepadSupport = {
 	init: function () {
 		const gamepadSupportAvailable = !!navigator.getGamepads || !!navigator.webkitGetGamepads || !!navigator.webkitGamepads || navigator.userAgent.indexOf("Firefox/") !== -1;
 		if (gamepadSupportAvailable) {
-			window.addEventListener("gamepadconnected", gamepadSupport.onGamepadConnect, false);
-			window.addEventListener("gamepaddisconnected", gamepadSupport.onGamepadDisconnect, false);
-			window.addEventListener("keydown", gamepadSupport.onKeyboardConnect, false);
+			window.addEventListener("gamepadconnected", gamepadSupport.onGamepadConnect);
+			window.addEventListener("gamepaddisconnected", gamepadSupport.onGamepadDisconnect);
+			window.addEventListener("keydown", gamepadSupport.onKeyboardConnect);
 			gamepadSupport.startPolling();
 		}
 	},
@@ -41,8 +41,8 @@ const gamepadSupport = {
 		if (!gamepadSupport.kb && event.type === "keydown" && event.keyCode === 70) {
 			gamepadSupport.kb = true;
 			gamepadSupport.gamepads[9] = settingsKB;
-			document.addEventListener("keydown", tester.updateInputKB, false);
-			document.addEventListener("keyup", tester.updateInputKB, false);
+			document.addEventListener("keydown", tester.updateInputKB);
+			document.addEventListener("keyup", tester.updateInputKB);
 			tester.updateGamepads(gamepadSupport.gamepads);
 			gamepadSupport.startPolling();
 		}
@@ -108,11 +108,11 @@ const gamepadSupport = {
 				if (rawGamepads[i] && i != 9) {
 					gamepadSupport.gamepadsRaw[i] = rawGamepads[i];
 					gamepadSupport.gamepads[i] = rawGamepads[i];
-					if (controllerRebinds?.mapping?.length > 0) {
+					if (controllerCustomMapping?.mapping?.length > 0) {
 						const remapObj = $.extend(true, {}, rawGamepads[i]);
 						for (let b = 0; b < remapObj.buttons.length; b++) remapObj.buttons[b] = $.extend({}, rawGamepads[i].buttons[b]);
 
-						controllerRebinds.mapping.forEach((bindmap) => {
+						controllerCustomMapping.mapping.forEach((bindmap) => {
 							if (bindmap.disabled && bindmap.targetType !== "dpad") setMapping(bindmap, 0, remapObj);
 							else bindWrapper(bindmap, remapObj);
 						});
@@ -128,46 +128,49 @@ const gamepadSupport = {
 		}
 	},
 
-	updateDisplay: function (gamepadId) {
-		if (pnumber === "") {
+	updateDisplay: function (controllerId) {
+		const gamepadId = controllerId != 9 ? parseInt(controllerId) : 9;
+		const gamepadId_frontend = gamepadId != 9 ? gamepadId + 1 : 9;
+
+		if (playerNumber === "") {
 			const gamepadRaw = gamepadSupport.gamepadsRaw[gamepadId];
-			for (const b in gamepadRaw.buttons) tester.updateRawButton(gamepadRaw.buttons[b], gamepadId, b);
-			for (const a in gamepadRaw.axes) tester.updateRawAxis(gamepadRaw.axes[a], gamepadId, a);
+			for (const b in gamepadRaw.buttons) tester.updateRawButton(gamepadRaw.buttons[b], gamepadId_frontend, b);
+			for (const a in gamepadRaw.axes) tester.updateRawAxis(gamepadRaw.axes[a], gamepadId_frontend, a);
 		}
 
 		const gamepad = gamepadSupport.gamepads[gamepadId];
 
-		tester.updateButton(gamepad.buttons[0], gamepadId, "button-1");
-		tester.updateButton(gamepad.buttons[1], gamepadId, "button-2");
-		tester.updateButton(gamepad.buttons[2], gamepadId, "button-3");
-		tester.updateButton(gamepad.buttons[3], gamepadId, "button-4");
+		tester.updateButton(gamepad.buttons[0], gamepadId_frontend, "button-1");
+		tester.updateButton(gamepad.buttons[1], gamepadId_frontend, "button-2");
+		tester.updateButton(gamepad.buttons[2], gamepadId_frontend, "button-3");
+		tester.updateButton(gamepad.buttons[3], gamepadId_frontend, "button-4");
 
-		tester.updateButton(gamepad.buttons[4], gamepadId, "button-left-shoulder-top");
-		tester.updateTrigger(gamepad.buttons[6], gamepadId, "button-left-shoulder-bottom");
-		tester.updateTriggerDigital(gamepad.buttons[6], gamepadId, "button-left-shoulder-bottom-digital");
-		tester.updateButton(gamepad.buttons[5], gamepadId, "button-right-shoulder-top");
-		tester.updateTrigger(gamepad.buttons[7], gamepadId, "button-right-shoulder-bottom");
-		tester.updateTriggerDigital(gamepad.buttons[7], gamepadId, "button-right-shoulder-bottom-digital");
+		tester.updateButton(gamepad.buttons[4], gamepadId_frontend, "button-left-shoulder-top");
+		tester.updateTrigger(gamepad.buttons[6], gamepadId_frontend, "button-left-shoulder-bottom");
+		tester.updateTriggerDigital(gamepad.buttons[6], gamepadId_frontend, "button-left-shoulder-bottom-digital");
+		tester.updateButton(gamepad.buttons[5], gamepadId_frontend, "button-right-shoulder-top");
+		tester.updateTrigger(gamepad.buttons[7], gamepadId_frontend, "button-right-shoulder-bottom");
+		tester.updateTriggerDigital(gamepad.buttons[7], gamepadId_frontend, "button-right-shoulder-bottom-digital");
 
-		tester.updateButton(gamepad.buttons[8], gamepadId, "button-select");
-		tester.updateButton(gamepad.buttons[9], gamepadId, "button-start");
-		tester.updateButton(gamepad.buttons[10], gamepadId, "stick-1");
-		tester.updateButton(gamepad.buttons[11], gamepadId, "stick-2");
+		tester.updateButton(gamepad.buttons[8], gamepadId_frontend, "button-select");
+		tester.updateButton(gamepad.buttons[9], gamepadId_frontend, "button-start");
+		tester.updateButton(gamepad.buttons[10], gamepadId_frontend, "stick-1");
+		tester.updateButton(gamepad.buttons[11], gamepadId_frontend, "stick-2");
 
-		tester.updateButton(gamepad.buttons[12], gamepadId, "button-dpad-top");
-		tester.updateButton(gamepad.buttons[13], gamepadId, "button-dpad-bottom");
-		tester.updateButton(gamepad.buttons[14], gamepadId, "button-dpad-left");
-		tester.updateButton(gamepad.buttons[15], gamepadId, "button-dpad-right");
-		tester.updateButton(gamepad.buttons[16], gamepadId, "button-meta");
-		tester.updateButton(gamepad.buttons[17], gamepadId, "touch-pad");
+		tester.updateButton(gamepad.buttons[12], gamepadId_frontend, "button-dpad-top");
+		tester.updateButton(gamepad.buttons[13], gamepadId_frontend, "button-dpad-bottom");
+		tester.updateButton(gamepad.buttons[14], gamepadId_frontend, "button-dpad-left");
+		tester.updateButton(gamepad.buttons[15], gamepadId_frontend, "button-dpad-right");
+		tester.updateButton(gamepad.buttons[16], gamepadId_frontend, "button-meta");
+		tester.updateButton(gamepad.buttons[17], gamepadId_frontend, "touch-pad");
 
-		tester.updateStick(gamepad.buttons[12], "up", gamepadId, "arcade-stick");
-		tester.updateStick(gamepad.buttons[13], "down", gamepadId, "arcade-stick");
-		tester.updateStick(gamepad.buttons[14], "left", gamepadId, "arcade-stick");
-		tester.updateStick(gamepad.buttons[15], "right", gamepadId, "arcade-stick");
+		tester.updateStick(gamepad.buttons[12], "up", gamepadId_frontend, "arcade-stick");
+		tester.updateStick(gamepad.buttons[13], "down", gamepadId_frontend, "arcade-stick");
+		tester.updateStick(gamepad.buttons[14], "left", gamepadId_frontend, "arcade-stick");
+		tester.updateStick(gamepad.buttons[15], "right", gamepadId_frontend, "arcade-stick");
 
-		tester.updateAxis(gamepad.axes[0], gamepad.axes[1], gamepadId, "stick-1");
-		tester.updateAxis(gamepad.axes[2], gamepad.axes[3], gamepadId, "stick-2");
+		tester.updateAxis(gamepad.axes[0], gamepad.axes[1], gamepadId_frontend, "stick-1");
+		tester.updateAxis(gamepad.axes[2], gamepad.axes[3], gamepadId_frontend, "stick-2");
 
 		let extraButtonId = gamepadSupport.TYPICAL_BUTTON_COUNT;
 		while (typeof gamepad.buttons[extraButtonId] !== "undefined") extraButtonId++;
