@@ -257,13 +257,6 @@ function switchClass(elem, switchWhat, switchTo) {
 	$(elem).toggleClass(switchWhat).toggleClass(switchTo);
 }
 
-function changeCssURL(cssURL) {
-	const re1 = ".*?"; // Non-greedy match on filler
-	const re2 = "(gist\\.github\\.com|gist\\.githubusercontent\\.com|raw\\.githubusercontent\\.com)"; // Fully Qualified Domain Name 1
-	const p = new RegExp(re1 + re2);
-	return p.test(decodeURIComponent(cssURL)) ? decodeURIComponent(cssURL).replace(p, "https://rawgit.com") : cssURL;
-}
-
 function bindingSettings(paramData) {
 	try {
 		return JSON.parse(paramData || `{"mapping":[]}`);
@@ -282,8 +275,6 @@ const allowedPlayers = [0, 1, 2, 3, 9]; // P1, P2, P3, P4, KB
 const skinSwitch = getParameterByName("s") !== "" ? allowedControllers[getParameterByName("s")] : "xbox";
 const pnumber = getParameterByName("p");
 const scaleSize = getParameterByName("sc");
-const skinStyle = getParameterByName("css");
-const skinEdit = getParameterByName("editcss");
 const skinOpacity = getParameterByName("op");
 const delayTime = getParameterByName("delay");
 const deadZone = getParameterByName("dz");
@@ -315,14 +306,6 @@ if (pnumber !== "" && allowedPlayers.includes(parseInt(pnumber))) {
 if (delayTime) tester.DELAY_TIME_MS = parseInt(delayTime);
 if (deadZone) tester.ANALOGUE_STICK_THRESHOLD = parseFloat(deadZone);
 if (rotationStop) tester.ROTATE_BOUNDARY = parseFloat(rotationStop);
-if (skinStyle) {
-	switchClass("#gamepads .controller", skinSwitch, "custom");
-	$("#custom-css").append('@import url("' + changeCssURL(skinStyle) + '");');
-}
-if (skinEdit) {
-	gpController.addClass("edit");
-	$("#custom-css").append('@import url("' + changeCssURL(skinEdit) + '");');
-}
 if (skinOpacity) gpController.css("opacity", skinOpacity);
 if (disableCurving == 1) tester.STICK_CURVING = 0;
 if (setOffset) tester.STICK_OFFSET = parseInt(setOffset);
