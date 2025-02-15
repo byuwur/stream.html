@@ -232,7 +232,7 @@ $("#output-display").on("contextmenu", "li", function (e) {
 });
 
 $("#apply-mapping").on("click", function () {
-	controllerRebinds = createMapping();
+	controllerCustomMapping = createMapping();
 });
 
 $("#export-mapping").on("click", function () {
@@ -243,7 +243,7 @@ $("#export-mapping").on("click", function () {
 function getParameterByName(name) {
 	const regex = new RegExp("[\\?&]" + name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]") + "=([^&#]*)");
 	const results = regex.exec(location.search);
-	return results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+	return results != null ? decodeURIComponent(results[1].replace(/\+/g, " ")) : "";
 }
 
 function switchClass(elem, switchWhat, switchTo) {
@@ -258,52 +258,49 @@ function bindingSettings(paramData) {
 	}
 }
 
+const allowedPlayers = [1, 2, 3, 4, 9]; // P1, P2, P3, P4, KB
 const allowedControllers = {
 	1: "xbox",
 	2: "ps",
-	7: "fight-stick",
-	9: "gc"
+	3: "fight-stick",
+	4: "gc"
 };
-const allowedPlayers = [0, 1, 2, 3, 9]; // P1, P2, P3, P4, KB
-const skinSwitch = getParameterByName("s") !== "" ? allowedControllers[getParameterByName("s")] : "xbox";
-const pnumber = getParameterByName("p");
-const scaleSize = getParameterByName("sc");
-const skinOpacity = getParameterByName("op");
+const playerNumber = getParameterByName("player");
+const skinControl = getParameterByName("skin") !== "" ? allowedControllers[getParameterByName("skin")] : "xbox";
+const scaleSize = getParameterByName("scale");
+const skinOpacity = getParameterByName("opacity");
+const stickOffset = getParameterByName("offset");
 const delayTime = getParameterByName("delay");
-const deadZone = getParameterByName("dz");
-const rotationStop = getParameterByName("rot");
-const triggerStrength = getParameterByName("smeter");
-const curving = getParameterByName("curve");
-const setOffset = getParameterByName("soffset");
-const noSurvey = 1;
-const gpController = $("#gamepads .controller");
-const controllerRebinds = bindingSettings(getParameterByName("map"));
+const deadzone = getParameterByName("deadzone");
+const triggerStrength = getParameterByName("strength");
+const stickCurve = getParameterByName("curve");
+const rotationStop = getParameterByName("rotation");
+const controller = $("#gamepads .controller");
+const controllerCustomMapping = bindingSettings(getParameterByName("mapping"));
 
-if (pnumber !== "" && allowedPlayers.includes(parseInt(pnumber))) {
+if (playerNumber !== "" && allowedPlayers.includes(parseInt(playerNumber))) {
 	$(".hide-me").remove();
-	$("#gamepad-" + pnumber).toggleClass("active");
-	if (skinSwitch) switchClass("#gamepads .controller", "xbox", skinSwitch);
+	$("#gamepad-" + playerNumber).toggleClass("active");
+	if (skinControl) switchClass("#gamepads .controller", "xbox", skinControl);
 	$("html, body").css({
 		cssText: "background: transparent !important; overflow: hidden;"
 	});
-	gpController.addClass("half").css({
+	controller.addClass("half").css({
 		transform: `scale(${scaleSize}) translate(-50%,-50%)`,
 		"transform-origin": "0 0"
 	});
 } else {
 	$(".hide-me").removeClass("hide-me");
 	$("body").addClass("main-content");
-	if (controllerRebinds) createUIFromMapping(controllerRebinds);
+	if (controllerCustomMapping) createUIFromMapping(controllerCustomMapping);
 }
-
+if (skinOpacity) controller.css("opacity", skinOpacity);
+if (stickOffset) tester.STICK_OFFSET = parseInt(stickOffset);
 if (delayTime) tester.DELAY_TIME_MS = parseInt(delayTime);
-if (deadZone) tester.ANALOGUE_STICK_THRESHOLD = parseFloat(deadZone);
+if (deadzone) tester.ANALOGUE_STICK_THRESHOLD = parseFloat(deadzone);
+if (triggerStrength == 0) tester.TRIGGER_DISPLAY_TYPE = parseInt(triggerStrength);
+if (stickCurve == 1) tester.STICK_CURVING = parseInt(stickCurve);
 if (rotationStop) tester.ROTATE_BOUNDARY = parseFloat(rotationStop);
-if (skinOpacity) gpController.css("opacity", skinOpacity);
-if (curving == 1) tester.STICK_CURVING = 1;
-if (setOffset) tester.STICK_OFFSET = parseInt(setOffset);
-if (noSurvey == 1) $(".disconn").remove();
-if (triggerStrength == 1) tester.TRIGGER_DISPLAY_TYPE = triggerStrength;
 
 $(".pselect .player").on("change", function () {
 	const value = $(this).val();
