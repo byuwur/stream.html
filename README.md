@@ -4,9 +4,9 @@
 
 Test it out at:
 
--   [byuwur.net/\_stream.html/main.html](https://byuwur.net/_stream.html/main.html)
--   [byuwur.net/\_stream.html/popup.html](https://byuwur.net/_stream.html/popup.html)
--   [byuwur.net/\_stream.html/controller.html](https://byuwur.net/_stream.html/controller.html)
+-   [byuwur.co/\_stream.html/main.html](https://byuwur.co/_stream.html/main.html)
+-   [byuwur.co/\_stream.html/popup.html](https://byuwur.co/_stream.html/popup.html)
+-   [byuwur.co/\_stream.html/controller.html](https://byuwur.co/_stream.html/controller.html)
 
 ## Overview
 

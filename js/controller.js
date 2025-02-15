@@ -337,7 +337,7 @@ const clipboardAttr = "data-clipboard-text";
 
 function setURL() {
 	const params = `?${$.param($("#url-form [name]").serializeObject())}`;
-	const url = `https://byuwur.net/_stream.html/controller.html${params}`;
+	const url = `https://byuwur.co/_stream.html/controller.html${params}`;
 	genURL.attr(clipboardAttr, url).attr("title", url).text(params);
 	$("#url-gen-full").text(url);
 }
