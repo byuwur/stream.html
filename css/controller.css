@@ -39,9 +39,14 @@ i {
 	padding: 0 4px;
 }
 
+.obs {
+	flex-grow: 1;
+	text-align: right;
+}
+
 .btn {
-	padding: 4px 8px;
-	margin: 4px 8px;
+	padding: 0 4px;
+	margin: 0 4px;
 }
 
 .container {

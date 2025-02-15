@@ -273,7 +273,7 @@ const delayTime = getParameterByName("delay");
 const deadZone = getParameterByName("dz");
 const rotationStop = getParameterByName("rot");
 const triggerStrength = getParameterByName("smeter");
-const disableCurving = getParameterByName("nocurve");
+const curving = getParameterByName("curve");
 const setOffset = getParameterByName("soffset");
 const noSurvey = 1;
 const gpController = $("#gamepads .controller");
@@ -300,9 +300,9 @@ if (delayTime) tester.DELAY_TIME_MS = parseInt(delayTime);
 if (deadZone) tester.ANALOGUE_STICK_THRESHOLD = parseFloat(deadZone);
 if (rotationStop) tester.ROTATE_BOUNDARY = parseFloat(rotationStop);
 if (skinOpacity) gpController.css("opacity", skinOpacity);
-if (disableCurving == 1) tester.STICK_CURVING = 0;
+if (curving == 1) tester.STICK_CURVING = 1;
 if (setOffset) tester.STICK_OFFSET = parseInt(setOffset);
-if (noSurvey == 1) $(".plshalpme").remove();
+if (noSurvey == 1) $(".disconn").remove();
 if (triggerStrength == 1) tester.TRIGGER_DISPLAY_TYPE = triggerStrength;
 
 $(".pselect .player").on("change", function () {

@@ -67,7 +67,7 @@
 				<div class="left">
 					<a href="#menu" title="Menu"><i class="fa fa-bars menu-button"></i></a>
 				</div>
-				<div style="flex-grow: 1; text-align: right">
+				<div class="obs">
 					<a href="#obs" class="btn">Use with OBS here!</a>
 				</div>
 				<div class="center pselect">
@@ -214,7 +214,7 @@
 								<div class="form-group"><label for="delay-input">Delay: </label><span class="input-unit">ms</span><input id="delay-input" type="text" name="delay" placeholder="0" /></div>
 								<div class="form-group"><label for="dz-input">Deadzone: </label><input id="dz-input" type="text" name="dz" placeholder="0.0 to 1.0" /></div>
 								<div class="form-group"><label for="smeter-input">Strength Meter: </label><input id="smeter-input" type="checkbox" name="smeter" value="1" /></div>
-								<div class="form-group"><label for="nocurve-input">Disable Curving: </label><input id="nocurve-input" type="checkbox" name="nocurve" value="1" /></div>
+								<div class="form-group"><label for="curve-input">Stick Curving: </label><input id="curve-input" type="checkbox" name="curve" value="1" /></div>
 								<div class="form-group"><label for="rot-input">Rotation Stop: </label><span class="input-unit">deg</span><input id="rot-input" type="text" name="rot" placeholder="0" /></div>
 							</form>
 							<span>You can <a href="#params">see all the parameters here</a>.</span>
@@ -310,8 +310,8 @@
 							</ul>
 						</section>
 						<section class="definition">
-							<h2 data-param="nocurve=">Disable Curving (boolean)</h2>
-							<div class="codeblock">/?nocurve=1</div>
+							<h2 data-param="curve=">Stick Curving (boolean)</h2>
+							<div class="codeblock">/?curve=1</div>
 							<ul>
 								<li>0 (false)</li>
 								<li>0 (false), 1 (true)</li>
