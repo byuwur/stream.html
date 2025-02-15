@@ -90,6 +90,9 @@
 							<option value="gc">GameCube (9)</option>
 						</select>
 					</div>
+					<div class="left">
+						<a href="#obs" class="btn">Use with OBS!</a>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -107,9 +110,10 @@
 			<a class="bglink" href="#" title="Close"><div class="modal-bg"></div></a>
 			<div class="menu">
 				<h1><i class="fa fa-gamepad"></i>Controller</h1>
-				<a href="#about"><i class="fa fa-info-circle"></i><span>Info</span></a>
-				<a href="#docs"><i class="fa fa-file-text"></i><span>Params</span></a>
-				<a href="#remap"><i class="fa fa-gamepad"></i><span>Remap</span></a>
+				<a href="#info"><i class="fa fa-info-circle"></i><span>Info</span></a>
+				<a href="#obs"><i class="fa fa-tv"></i><span>Use with OBS</span></a>
+				<a href="#params"><i class="fa fa-file-text"></i><span>Parameters</span></a>
+				<a href="#remap"><i class="fa fa-gamepad"></i><span>Custom Mapping</span></a>
 			</div>
 		</div>
 		<div id="modals" class="hide-me">
@@ -119,14 +123,23 @@
 					<header class="minimenu">
 						<a class="close" href="#">&times;</a>
 						<ul>
-							<li><a href="#about">Info</a></li>
-							<li><a href="#docs">Params</a></li>
-							<li><a href="#remap">Remap</a></li>
+							<li>
+								<a href="#info"><i class="fa fa-info-circle"></i>Info</a>
+							</li>
+							<li>
+								<a href="#obs"><i class="fa fa-tv"></i>Use with OBS</a>
+							</li>
+							<li>
+								<a href="#params"><i class="fa fa-file-text"></i>Parameters</a>
+							</li>
+							<li>
+								<a href="#remap"><i class="fa fa-gamepad"></i>Custom Mapping</a>
+							</li>
 						</ul>
 					</header>
 				</div>
 			</div>
-			<div id="about" class="modal-container">
+			<div id="info" class="modal-container">
 				<a class="bglink" href="#" title="Close"><div class="modal-bg"></div></a>
 				<div class="modal">
 					<header class="minimenu"></header>
@@ -134,22 +147,49 @@
 						<h1>Information</h1>
 					</header>
 					<article>
-						<h2>About this tool</h2>
-						<p>Locally, offline, reliable. - <a rel="noopener" href="https://byuwur.net" target="_blank">[Mateus] byUwUr</a></p>
+						<p>"Locally, offline, reliable." - <a rel="noopener" href="https://byuwur.net" target="_blank">[Mateus] byUwUr</a></p>
+						<p>Free. Forever.</p>
+						<p>You can also <a rel="noopener" href="https://streamlabs.com/byuwur" target="_blank">tip</a>, <a rel="noopener" href="https://twitch.tv/byuwur" target="_blank">subscribe</a> or <a rel="noopener" href="https://paypal.me/byuwur" target="_blank">donate</a>.</p>
+						<p>Download the <a rel="noopener" href="https://github.com/byuwur/stream.html/releases" target="_blank">source code</a> to use it locally and independent of online services!</p>
 						<p>
-							This is possible thanks to <a rel="noopener" href="http://aresluna.org" target="_blank">Marcin Wichary's</a> <a rel="noopener" href="https://github.com/html5rocks/www.html5rocks.com/blob/master/content/tutorials/doodles/gamepad/static/gamepad-tester/gamepad.js" target="_blank">Gamepad.js</a> and
+							Thanks to
+							<a rel="noopener" href="http://aresluna.org" target="_blank">Marcin Wichary's</a>
+							<a rel="noopener" href="https://github.com/html5rocks/www.html5rocks.com/blob/master/content/tutorials/doodles/gamepad/static/gamepad-tester/gamepad.js" target="_blank">Gamepad.js</a>
+							and
 							<a rel="noopener" href="https://github.com/html5rocks/www.html5rocks.com/blob/master/content/tutorials/doodles/gamepad/static/gamepad-tester/tester.js" target="_blank">Tester.js</a> libraries.
 						</p>
-						<h2>Chroma Key Installation with OBS</h2>
+					</article>
+				</div>
+			</div>
+			<div id="obs" class="modal-container">
+				<a class="bglink" href="#" title="Close"><div class="modal-bg"></div></a>
+				<div class="modal">
+					<header class="minimenu"></header>
+					<header>
+						<h1>Use with OBS</h1>
+					</header>
+					<article>
+						<p>You can:</p>
 						<ol>
 							<li>Create new window capture source, then select this window.</li>
 							<li>Enable "Color Key" in the source's filters. Set it up as you like.</li>
 							<li>By then you should be already done!</li>
 						</ol>
+						<p>Or also:</p>
+						<ol>
+							<li>Create a new browser source on OBS.</li>
+							<li>Generate your URL and paste it.</li>
+							<li>By then you should be already done!</li>
+						</ol>
+						<hr />
+						<p>"Locally, offline, reliable." - <a rel="noopener" href="https://byuwur.net" target="_blank">[Mateus] byUwUr</a></p>
+						<p>Free. Forever.</p>
+						<p>You can also <a rel="noopener" href="https://streamlabs.com/byuwur" target="_blank">tip</a>, <a rel="noopener" href="https://twitch.tv/byuwur" target="_blank">subscribe</a> or <a rel="noopener" href="https://paypal.me/byuwur" target="_blank">donate</a>.</p>
+						<p>Download the <a rel="noopener" href="https://github.com/byuwur/stream.html/releases" target="_blank">source code</a> to use it locally and independent of online services!</p>
 					</article>
 				</div>
 			</div>
-			<div id="docs" class="modal-container">
+			<div id="params" class="modal-container">
 				<a class="bglink" href="#" title="Close"><div class="modal-bg"></div></a>
 				<div class="modal">
 					<header class="minimenu"></header>
@@ -161,7 +201,6 @@
 							<h2 data-param="p=">Player Number</h2>
 							<div class="codeblock">/?p=1</div>
 							<ul>
-								<li>N/A</li>
 								<li>1</li>
 								<li>0 (P1), 1 (P2), 2 (P3), 3 (P4), 9 (KB)</li>
 								<li>Enables "Lite Mode", displaying only the controller.</li>
@@ -172,68 +211,59 @@
 							<h2 data-param="s=">Skin ID</h2>
 							<div class="codeblock">/?s=1</div>
 							<ul>
-								<li>N/A</li>
 								<li>1</li>
 								<li>1 (Xbox), 2 (Sony), 7 (Stick), 9 (GCN)</li>
 								<li>Defaults to '1' (Xbox) if set to other values.</li>
 								<li>Requires a player number (<code class="codeblock">p=</code>).</li>
 							</ul>
-							<p>Sets the gamepad skin in Lite Mode. For custom skins, see <code class="codeblock">css=</code>.</p>
 						</section>
 						<section class="definition">
-							<h2 data-param="smeter=">Strength Meter</h2>
+							<h2 data-param="smeter=">Strength Meter (boolean)</h2>
 							<div class="codeblock">/?smeter=1</div>
 							<ul>
-								<li>N/A</li>
-								<li>0</li>
-								<li>0,1</li>
+								<li>0 (false)</li>
+								<li>0 (false), 1 (true)</li>
 								<li>Any value other than '1' disables this setting.</li>
 							</ul>
 							<p>Enables strength meters for triggers instead of opacity levels.</p>
 						</section>
 						<section class="definition">
 							<h2 data-param="sc=">Scale Multiplier</h2>
-							<div class="codeblock">/?sc=1.2</div>
+							<div class="codeblock">/?sc=1.25</div>
 							<ul>
 								<li>N/A</li>
 								<li>1</li>
 								<li>Any number, including decimals.</li>
-								<li>Negative values flip and scale the skin.</li>
+								<li>Negative values flip the controller.</li>
 							</ul>
-							<p>Scales the gamepad size using integer or decimal values.</p>
 						</section>
 						<section class="definition">
 							<h2 data-param="dz=">Deadzone Radius</h2>
-							<div class="codeblock">/?dz=0.3</div>
+							<div class="codeblock">/?dz=0.25</div>
 							<ul>
-								<li>N/A</li>
 								<li>.25</li>
 								<li>Any number from 0 to 1, including decimals.</li>
 								<li>Setting to 1 or higher disables stick movement.</li>
 							</ul>
-							<p>Ideal for reducing stick drift or ignoring tiny movements.</p>
 						</section>
 						<section class="definition">
-							<h2 data-param="delay=">Input Delay</h2>
-							<div class="codeblock">/?delay=2000</div>
+							<h2 data-param="delay=">Input Delay (milliseconds)</h2>
+							<div class="codeblock">/?delay=1000</div>
 							<ul>
-								<li>milliseconds</li>
 								<li>0</li>
-								<li>Any positive number</li>
+								<li>Any positive number.</li>
+								<li>Anything beyond 2000ms isn't recommended.</li>
 							</ul>
-							<p>Syncs inputs with stream delay when connected to both PC and console.</p>
 						</section>
 						<section class="definition">
-							<h2 data-param="rot=">Rotational Stop</h2>
-							<div class="codeblock">/?rot=450</div>
+							<h2 data-param="rot=">Rotational Stop (degrees)</h2>
+							<div class="codeblock">/?rot=100</div>
 							<ul>
-								<li>Degrees</li>
 								<li>120</li>
 								<li>Any positive number</li>
 								<li>Half the total rotational stop of the wheel.</li>
 								<li>Deadzone values affect this setting. Set <code class="codeblock">dz=0</code>.</li>
 							</ul>
-							<p>Sets max rotation for thumbsticks representing wheels.</p>
 						</section>
 					</article>
 				</div>
@@ -243,7 +273,7 @@
 				<div class="modal">
 					<header class="minimenu"></header>
 					<header>
-						<h1>Remapping</h1>
+						<h1>Custom Mapping</h1>
 					</header>
 					<article>
 						<p>

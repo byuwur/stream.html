@@ -9,7 +9,7 @@ body {
 }
 
 a {
-	color: #ff5722;
+	color: #2622ff;
 	text-decoration: underline;
 }
 
@@ -33,6 +33,15 @@ h3 {
 
 strong {
 	font-weight: bold;
+}
+
+i {
+	padding: 0 4px;
+}
+
+.btn {
+	padding: 4px 8px;
+	margin: 4px 8px;
 }
 
 .container {
@@ -1421,38 +1430,6 @@ span.code {
 	cursor: pointer;
 }
 
-.ty {
-	background: green;
-	z-index: 11;
-	display: none;
-	border-bottom: 1px solid darkgreen;
-}
-
-.uc {
-	background: orange;
-	z-index: 11;
-	border-bottom: 1px solid darkorange;
-	display: none;
-}
-
-.update {
-	background: #600;
-	z-index: 11;
-	border-bottom: 1px solid rgb(125, 0, 0);
-	display: none;
-}
-
-.message {
-	display: block;
-	-webkit-animation: messagefade 6s forwards;
-	-moz-animation: messagefade 6s forwards;
-	animation: messagefade 6s forwards;
-}
-
-.message span {
-	width: 100%;
-}
-
 a .menu-button {
 	color: white;
 	font-size: 36px;
@@ -1501,23 +1478,6 @@ a:active .menu-button {
 	transform: translateX(-400px);
 	display: flex;
 	flex-direction: column;
-}
-
-.yt-contain {
-	position: relative;
-	padding-bottom: 56.25%;
-	height: 0;
-	overflow: hidden;
-}
-
-.yt-contain iframe,
-.yt-contain object,
-.yt-contain embed {
-	position: absolute;
-	top: 0;
-	left: 0;
-	width: 100%;
-	height: 100%;
 }
 
 .menu ul {
@@ -1659,8 +1619,9 @@ a:active .menu-button {
 
 .modal .codeblock {
 	font-family: monospace;
-	background: lightgrey;
-	color: darkgoldenrod;
+	padding: 5px;
+	background: black;
+	color: white;
 	word-wrap: break-word;
 	border-radius: 5px;
 	border: 1px solid hsla(0, 0%, 77%, 1);
@@ -1703,12 +1664,6 @@ a:active .menu-button {
 	box-sizing: border-box;
 	padding: 35px 2% 2%;
 	flex: 0 0 100px;
-}
-
-#about .video {
-	float: right;
-	width: 50%;
-	margin-left: 10px;
 }
 
 .info {
@@ -1805,53 +1760,52 @@ a:active .menu-button {
 	padding-right: 60px;
 }
 
-#docs h2 {
+#params h2 {
 	margin-bottom: 15px;
 }
 
-#docs h2:after {
+#params h2:after {
 	content: attr(data-param);
-	margin-left: 5px;
-	padding: 3px;
+	margin-left: 12px;
+	padding: 4px;
 	font-family: monospace;
 	background: lightgrey;
-	color: darkgoldenrod;
+	color: darkblue;
 	word-wrap: break-word;
 	border-radius: 5px;
 	border: 1px solid hsla(0, 0%, 77%, 1);
 	text-shadow: rgba(0, 0, 0, 0.44) 0 0 0.1px;
 }
 
-#docs .definition,
-#docs .definition ul {
+#params .definition,
+#params .definition ul {
 	margin-bottom: 15px;
 }
 
-#docs .definition ul li {
+#params .definition ul li {
 	margin-bottom: 4px;
 }
 
-#docs .definition div.codeblock {
+#params .definition div.codeblock {
 	padding: 10px;
 	margin-bottom: 15px;
 }
 
-#docs .definition li:before {
-	content: "\2012";
+#params .definition li::marker {
+	content: "—";
+}
+
+#params .definition li:before {
+	content: "—";
 	margin-right: 4px;
 }
 
-#docs .definition li:nth-child(1):before {
-	content: "UNIT: ";
-	font-weight: bold;
-}
-
-#docs .definition li:nth-child(2):before {
+#params .definition li:nth-child(1):before {
 	content: "DEFAULT VALUE: ";
 	font-weight: bold;
 }
 
-#docs .definition li:nth-child(3):before {
+#params .definition li:nth-child(2):before {
 	content: "ACCEPTABLE VALUES: ";
 	font-weight: bold;
 }
@@ -2195,141 +2149,6 @@ a:active .menu-button {
 	margin-right: 10px;
 }
 
-#adoptaskin p {
-	margin-bottom: 8px;
-}
-
-#adoptaskin article ul {
-	list-style: inside disc;
-	margin: 0 0 8px 10px;
-}
-
-#adoptaskin article ul li:not(:last-of-type) {
-	margin-bottom: 4px;
-}
-
-#adoptaskin #skin-tc {
-	color: white;
-	text-align: center;
-	width: 100%;
-	display: block;
-	background: crimson;
-	padding: 10px;
-	box-sizing: border-box;
-	text-decoration: none;
-	border-radius: 4px;
-}
-
-#contact-form input,
-#contact-form textarea,
-#contact-form select {
-	width: 100%;
-	box-sizing: border-box;
-	font-size: 30px;
-	padding: 10px;
-}
-
-#contact-form textarea {
-	min-height: 200px;
-}
-
-#contact-form .g-recaptcha {
-	float: left;
-}
-
-#contact-form .button-group {
-	float: right;
-}
-
-#contact-form .button-group button {
-	background: tomato;
-	border: 1px solid rgba(0, 0, 0, 0.1);
-	height: 78px;
-	font-size: 30px;
-	padding: 0px 50px;
-	border-radius: 4px;
-	color: white;
-	margin-left: 10px;
-	box-shadow: rgba(0, 0, 0, 0.08) 0px 0px 4px 1px;
-}
-
-#contact-form .button-group button:disabled {
-	opacity: 0.5;
-}
-
-#messages {
-	background: orangered;
-	border-radius: 3px;
-	padding: 10px;
-	box-sizing: border-box;
-	margin-bottom: 10px;
-	color: white;
-}
-
-#messages p {
-	padding: 0px;
-	margin: 0px;
-}
-
-#messages ul {
-	list-style: inside disc;
-}
-
-#messages ul li {
-	margin-bottom: 4px;
-}
-
-#messages.success {
-	background: #006b00;
-}
-
-#messages:empty {
-	display: none;
-}
-
-#donate article {
-	display: flex;
-	flex-direction: row;
-}
-
-#donate .donate-buttons {
-	flex: 0 0 250px;
-	display: flex;
-	flex-direction: column;
-	margin-left: 10px;
-}
-
-#donate .donate-buttons a {
-	text-decoration: none;
-	margin: 0.7%;
-}
-
-#donate .donate-buttons .dbutton {
-	text-align: center;
-	box-sizing: border-box;
-	padding: 12px;
-	border-radius: 3px;
-}
-
-#donate .dbutton .fa {
-	margin-right: 5px;
-}
-
-#donate .pp.dbutton {
-	background: #009cde;
-	color: black;
-}
-
-#donate .btc.dbutton {
-	background: yellowgreen;
-	color: black;
-}
-
-#donate .amzn.dbutton {
-	background: #ff9900;
-	color: black;
-}
-
 .plshalpme {
 	display: none;
 }
@@ -2364,29 +2183,4 @@ a:active .menu-button {
 
 .active {
 	display: block;
-}
-
-#banners {
-	box-sizing: border-box;
-	max-width: 1920px;
-	position: relative;
-	left: 50%;
-	transform: translateX(-50%) translateY(-50%);
-	display: flex;
-	justify-content: space-between;
-	height: calc(100vh - 50px);
-	top: calc(50vh + 50px);
-	align-items: center;
-	padding: 0 20px;
-}
-
-.banner {
-	max-width: 300px;
-	height: 600px;
-	flex: 1;
-}
-
-#banners .spacer {
-	flex-shrink: 0;
-	min-width: 1130px;
 }
