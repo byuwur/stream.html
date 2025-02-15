@@ -7,13 +7,6 @@ $(".modal-container[id]:not(#modal-template)").each(function () {
 	$(this).find(`.modal .minimenu a[href=${targetId}]`).closest("li").addClass("selected");
 });
 
-$("#skin-tc").click(function () {
-	$("#contact-form").find("select").val("skin");
-	setTimeout(() => {
-		$("#contact-form input[name=name]").focus();
-	}, 300);
-});
-
 const mappingTemplate = $("#mapping-config .template .form-group");
 const mappingID = $("#mapping-config");
 
@@ -341,6 +334,40 @@ bindBase.change(function () {
 	switchClass(`#gamepad-map-${previousValue}`, "active", "");
 	$(this).data("previous-value", $(this).val());
 });
+
+const genURL = $("#url-gen-url");
+const clipboardAttr = "data-clipboard-text";
+
+function setURL() {
+	const params = `?${$.param($("#url-form [name]").serializeObject())}`;
+	const url = `https://byuwur.net/_stream.html/controller.html${params}`;
+	genURL.attr(clipboardAttr, url).attr("title", url).text(params);
+	$("#url-gen-full").text(url);
+}
+
+$("#url-gen-copy")
+	.add(genURL)
+	.on("click", function () {
+		navigator.clipboard.writeText(genURL.attr(clipboardAttr));
+		$("#url-gen-copy").text("Copied!");
+	})
+	.on("mouseleave focusout", function () {
+		$("#url-gen-copy").text("Copy");
+	});
+
+$("#url-gen-reset").on("click", () => {
+	$("#url-form")[0].reset();
+	setURL();
+});
+
+$("#url-form").on("keyup change", setURL);
+
+$.fn.serializeObject = function () {
+	return this.serializeArray().reduce((obj, { name, value }) => {
+		if (value !== "undefined" && value !== "") obj[name] = value;
+		return obj;
+	}, {});
+};
 
 window.onload = function () {
 	tester.init();
