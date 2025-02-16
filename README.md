@@ -29,10 +29,9 @@ This project is designed to provide various overlay options for live streaming u
     -   This overlay is designed to be used as a controller input viewer for your stream.
 -   **Usage**:
     -   Add `controller/index.html` as a browser source in OBS.
-    -   Remember explore the search params to configure your overlay.
+    -   You can create your link at [controller.byuwur.co/#obs](https://controller.byuwur.co/#obs).
     -   It automatically detects your Xinput devices.
     -   Configure keyboard bindings through `controller.keyboard.js` in the `controller/config/` directory.
--   Try it out at [controller.byuwur.co](https://controller.byuwur.co).
 
 ### 2. Popup Scene `popup/index.html`
 
@@ -58,15 +57,8 @@ This project is designed to provide various overlay options for live streaming u
 
 -   **Purpose**: Defines keyboard controls for interacting with the `controller/index.html` overlay.
 -   **Key Configurations**:
-
     -   `buttons`: Array mapping keys to specific functions like Start, Stop, Pause, etc.
     -   `axes`: Controls the axes for different movements or actions.
-
--   **Key Configurations**:
-    -   `backgroundType`: Choose between a video or image background.
-    -   `logoOpacity` & `logoScale`: Adjust the visibility and size of your logo.
-    -   `countdownTime`: Set the countdown duration before the stream starts.
-    -   `social`: Customize social media handles and headers displayed during the stream.
 
 ### `popup.settings.js`
 
@@ -79,6 +71,11 @@ This project is designed to provide various overlay options for live streaming u
 ### `main.settings.js`
 
 -   **Purpose**: This file contains the common settings for the `main/index.html` overlay, such as background settings, colors, fonts, countdown timers, and social media details. This also includes its variations: `main.start.js`, `main.end.js`...
+-   **Key Configurations**:
+    -   `backgroundType`: Choose between a video or image background.
+    -   `logoOpacity` & `logoScale`: Adjust the visibility and size of your logo.
+    -   `countdownTime`: Set the countdown duration before the stream starts.
+    -   `social`: Customize social media handles and headers displayed during the stream.
 
 ## Usage with OBS
 
