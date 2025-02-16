@@ -298,7 +298,7 @@ if (playerNumber !== "" && allowedPlayers.includes(parseInt(playerNumber))) {
 if (skinOpacity) controller.css("opacity", skinOpacity);
 if (stickOffset) tester.STICK_OFFSET = parseInt(stickOffset);
 if (deadzone) tester.ANALOGUE_STICK_THRESHOLD = parseFloat(deadzone);
-if (triggerStrength == 0) tester.TRIGGER_DISPLAY_TYPE = parseInt(triggerStrength);
+if (triggerStrength && triggerStrength == 0) tester.TRIGGER_DISPLAY_TYPE = parseInt(triggerStrength);
 if (stickCurve == 1) tester.STICK_CURVING = parseInt(stickCurve);
 if (rotationStop) tester.ROTATE_BOUNDARY = parseFloat(rotationStop);
 
