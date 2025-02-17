@@ -62,7 +62,7 @@ html,body {
   display: var(--widthType);
   overflow: hidden;
   position: relative;
-  white-space: nowrap;
+  word-wrap: break-word;
 }
 
 #mainText img {
@@ -77,7 +77,6 @@ html,body {
   color: var(--mainColor);
   font-size: var(--mainFS);
   line-height: var(--mainFS);
-  height: var(--mainFS);
   font-weight: var(--mainFW);
   transform-origin: var(--mainTransform);
   border-top: {topBH}px solid {borderColor};
@@ -88,7 +87,6 @@ html,body {
   color: var(--altColor);
   font-size: var(--altFS);
   line-height: var(--altFS);
-  height: var(--altFS);
   font-weight: var(--altFW);
   transform-origin: var(--altTransform);
 }
@@ -134,11 +132,15 @@ html,body {
   top: 10px;
   padding: var(--padding);
   left: 0;
-  max-width: 600px;
-  font-size: 16px;
   word-wrap: break-word;
 }
 
+#messageHolder > * > img {
+    max-height: var(--altFS);
+}
+
 .alert-image {
-  max-height: 128px;
+  position: absolute;
+  right: 0;
+  max-height: calc(var(--mainFS) * 3);
 }

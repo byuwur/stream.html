@@ -2,12 +2,12 @@
 	"mainTextArea": {
 		"label": "Main - Text Template",
 		"type": "textfield",
-		"value": "¡Bievenido al Yogurt, {name}!"
+		"value": "¡{name} cheers x{amount}!"
 	},
 	"altTextArea": {
 		"label": "Sub - Text Template",
 		"type": "textfield",
-		"value": "NUEVO SEGUIDOR"
+		"value": "BITS (Twitch)"
 	},
 	"font": {
 		"label": "Font Family",
@@ -49,7 +49,7 @@
 		"label": "Main - Font Size",
 		"type": "slider",
 		"name": "",
-		"value": 24,
+		"value": 48,
 		"max": 72,
 		"min": 12,
 		"steps": 1
@@ -59,7 +59,7 @@
 		"type": "slider",
 		"name": "",
 		"value": 700,
-		"max": 900,
+		"max": 700,
 		"min": 100,
 		"steps": 100
 	},
@@ -95,7 +95,7 @@
 		"label": "Main - Bottom Border Height (px)",
 		"type": "slider",
 		"name": "",
-		"value": 5,
+		"value": 10,
 		"max": 10,
 		"min": 0,
 		"steps": 1
@@ -109,7 +109,7 @@
 		"label": "Sub - Font Size",
 		"type": "slider",
 		"name": "",
-		"value": 16,
+		"value": 32,
 		"max": 64,
 		"min": 12,
 		"steps": 1
@@ -168,7 +168,7 @@
 		"label": "Alert Time (seconds)",
 		"type": "slider",
 		"name": "",
-		"value": 7,
+		"value": 8,
 		"max": 60,
 		"min": 1,
 		"steps": 1
