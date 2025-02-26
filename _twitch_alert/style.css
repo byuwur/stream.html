@@ -1,0 +1,169 @@
+:root {
+	/*   Global variables */
+	--widthType: inline-block;
+	--padding: 10px 10px;
+	--textAlign: left;
+	--font: monospace;
+	--xOffset: 0px;
+	--yOffset: 0px;
+
+	/*   Main Text variables */
+	--mainColor: #000000;
+	--mainFS: 48px;
+	--mainFW: 700;
+	--mainBg: #ffffff;
+	--mainTransform: left center;
+	--mainBgOpacity: calc(100 * 0.01);
+
+	/*   Alt Text variables */
+	--altColor: #ffffff;
+	--altFS: 32px;
+	--altFW: 700;
+	--altBg: #000000;
+	--altTransform: left center;
+	--altBgOpacity: calc(100 * 0.01);
+}
+
+html,
+body {
+	padding: 0;
+	margin: 0;
+	font-family: var(--font);
+	text-align: var(--textAlign);
+	animation: 10s alert-animation ease-in-out forwards;
+}
+
+@keyframes alert-animation {
+	0% {
+		opacity: 0;
+        transform: translateX(-1500px);
+	}
+	15% {
+		opacity: 1;
+        transform: translateX(0);
+	}
+	85% {
+		opacity: 1;
+        transform: translateX(0);
+	}
+	100% {
+		opacity: 0;
+        transform: translateX(-1500px);
+	}
+}
+
+#alertHolder {
+	position: absolute;
+	font-size: 0;
+	opacity: 1;
+}
+
+.left {
+	left: var(--xOffset);
+}
+.right {
+	right: var(--xOffset);
+}
+.top {
+	top: var(--yOffset);
+}
+.bottom {
+	bottom: var(--yOffset);
+}
+
+.center {
+	left: 50%;
+	transform: translateX(-50%);
+}
+
+#main,
+.alt {
+	padding: var(--padding);
+	display: var(--widthType);
+	overflow: hidden;
+	position: relative;
+	word-wrap: break-word;
+}
+
+#mainText img {
+	height: var(--mainFS);
+	width: auto;
+	margin: 0;
+	padding: 0;
+	float: left;
+}
+
+#main {
+	color: var(--mainColor);
+	font-size: var(--mainFS);
+	line-height: var(--mainFS);
+	font-weight: var(--mainFW);
+	transform-origin: var(--mainTransform);
+	border-top: 0px solid #006688;
+	border-bottom: 10px solid #006688;
+}
+
+.alt {
+	color: var(--altColor);
+	font-size: var(--altFS);
+	line-height: var(--altFS);
+	font-weight: var(--altFW);
+	transform-origin: var(--altTransform);
+}
+
+.bg {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	z-index: 1;
+}
+
+#main .bg {
+	background: var(--mainBg);
+	opacity: var(--mainBgOpacity);
+}
+
+.alt .bg {
+	background: var(--altBg);
+	opacity: var(--altBgOpacity);
+}
+
+#mainText,
+.altText {
+	z-index: 999;
+	position: relative;
+}
+
+.above #altBelow {
+	display: none;
+	visibility: hidden;
+}
+
+.below #altAbove {
+	display: none;
+	visibility: hidden;
+}
+
+#messageHolder {
+	color: #fff;
+	text-shadow: 0 0 2px #000, 0 0 4px #000, 0 0 6px #000;
+	position: relative;
+	top: 10px;
+	padding: var(--padding);
+	left: 0;
+	word-wrap: break-word;
+	opacity: 1;
+	font-size: var(--altFS);
+}
+
+#messageHolder > * > img {
+	max-height: var(--altFS);
+}
+
+.alert-image {
+	position: absolute;
+	right: 0;
+	max-height: calc(var(--mainFS) * 3);
+}
