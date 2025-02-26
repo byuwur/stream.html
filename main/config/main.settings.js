@@ -7,7 +7,7 @@ const commonSettings = {
 		displayBranding: "yes",
 		logoOpacity: 0.1,
 		logoScale: 1,
-		frameWidth: 24,
+		frameWidth: 12,
 		sceneTitle: "",
 		tagline: "[Mateus] byUwUr"
 	},
@@ -41,18 +41,18 @@ const commonSettings = {
 		saturday: ""
 	},
 	scaling: {
-		socialMediaScale: 1.5,
-		labelsScale: 1.5,
-		scheduleScale: 1.5,
-		countdownScale: 1.5
+		socialMediaScale: 1.25,
+		labelsScale: 1.25,
+		scheduleScale: 1.25,
+		countdownScale: 1.25
 	},
 	fonts: {
 		primaryFont: "Courier New",
 		subFont: "Courier New",
-		titleSize: 84,
-		titleVerticalOffset: -5,
+		titleSize: 72,
+		titleVerticalOffset: -8,
 		subtitleSize: 48,
-		subtitleVerticalOffset: 100,
+		subtitleVerticalOffset: 128,
 		labelNameSize: 24,
 		labelNameVerticalOffset: 0,
 		labelHeaderSize: 12,
@@ -66,7 +66,7 @@ const commonSettings = {
 	},
 	countdown: {
 		displayCountdown: "yes",
-		countdownTime: 10, // In MINUTES
+		countdownTime: 10, // Minutes
 		countdownMessage: "La cuenta regresiva pa' tramar.",
 		countdownOverMessage: "Vamo' a vé'."
 	},
