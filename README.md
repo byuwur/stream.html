@@ -4,9 +4,9 @@
 
 Test it out at:
 
--   [byuwur.co/\_stream.html/controller/index.html](https://byuwur.co/_stream.html/controller/index.html) or [controller.byuwur.co](https://controller.byuwur.co)
--   [byuwur.co/\_stream.html/popup/index.html](https://byuwur.co/_stream.html/popup/index.html)
--   [byuwur.co/\_stream.html/main/index.html](https://byuwur.co/_stream.html/main/index.html)
+-   [byuwur.co/stream.html/controller/index.html](https://byuwur.co/stream.html/controller/index.html) or [controller.byuwur.co](https://controller.byuwur.co)
+-   [byuwur.co/stream.html/popup/index.html](https://byuwur.co/stream.html/popup/index.html)
+-   [byuwur.co/stream.html/main/index.html](https://byuwur.co/stream.html/main/index.html)
 
 ## Overview
 
