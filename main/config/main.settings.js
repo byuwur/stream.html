@@ -5,16 +5,16 @@ const commonSettings = {
 		backgroundBlur: 0,
 		backgroundScale: 1,
 		displayBranding: "yes",
-		logoOpacity: 0.1,
+		logoOpacity: 0.05,
 		logoScale: 1,
-		frameWidth: 12,
+		frameWidth: 10,
 		sceneTitle: "",
 		tagline: "[Mateus] byUwUr"
 	},
 	colors: {
 		backgroundOverlay: "rgba(54, 53, 58, 1)",
-		accentColor: "rgba(255,255,255,1)",
-		frameColor: "rgba(255,255,255,1)",
+		accentColor: "rgba(64,0,0,1)",
+		frameColor: "rgba(64,0,0,1)",
 		primaryTextColor: "rgba(255, 255, 255, 1)",
 		subTextColor: "rgba(201,201,201,1)",
 		contentBackgrounds: "rgba(255, 255, 255, .1)"
@@ -66,8 +66,8 @@ const commonSettings = {
 	},
 	countdown: {
 		displayCountdown: "yes",
-		countdownTime: 10, // Minutes
-		countdownMessage: "La cuenta regresiva pa' tramar.",
+		countdownTime: 4, // minutes
+		countdownMessage: "cuenta regresiva tramadora",
 		countdownOverMessage: "Vamo' a vé'."
 	},
 	social: {
