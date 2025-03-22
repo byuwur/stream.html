@@ -6,7 +6,6 @@
 	--font: monospace;
 	--xOffset: 0px;
 	--yOffset: 0px;
-
 	/*   Main Text variables */
 	--mainColor: #000000;
 	--mainFS: 48px;
@@ -14,7 +13,6 @@
 	--mainBg: #ffffff;
 	--mainTransform: left center;
 	--mainBgOpacity: calc(100 * 0.01);
-
 	/*   Alt Text variables */
 	--altColor: #ffffff;
 	--altFS: 32px;
@@ -36,19 +34,19 @@ body {
 @keyframes alert-animation {
 	0% {
 		opacity: 0;
-        transform: translateX(-1500px);
+		transform: translateX(-1500px);
 	}
 	15% {
 		opacity: 1;
-        transform: translateX(0);
+		transform: translateX(0);
 	}
 	85% {
 		opacity: 1;
-        transform: translateX(0);
+		transform: translateX(0);
 	}
 	100% {
 		opacity: 0;
-        transform: translateX(-1500px);
+		transform: translateX(-1500px);
 	}
 }
 

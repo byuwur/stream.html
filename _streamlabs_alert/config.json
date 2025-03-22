@@ -1,231 +1,231 @@
 {
-	"mainTextArea": {
-		"label": "Main - Text Template",
-		"type": "textfield",
-		"value": "¡{name} cheers x{amount}!"
-	},
-	"altTextArea": {
-		"label": "Sub - Text Template",
-		"type": "textfield",
-		"value": "BITS (Twitch)"
-	},
-	"font": {
-		"label": "Font Family",
-		"type": "fontpicker",
-		"value": "IBM Plex Mono"
-	},
-	"textAlign": {
-		"label": "Text Alignment",
-		"type": "dropdown",
-		"options": {
-			"left": "Left",
-			"center": "Center",
-			"right": "Right"
-		},
-		"value": "left"
-	},
-	"mainTransform": {
-		"label": "Transform Origin - where animation starts",
-		"type": "dropdown",
-		"options": {
-			"left center": "X: Left, Y: Middle",
-			"left top": "X: Left, Y: Top",
-			"center top": "X: Middle, Y: Top",
-			"right top": "X: Right, Y: Top",
-			"right center": "X: Right, Y: Middle",
-			"right bottom": "X: Right, Y: Bottom",
-			"center bottom": "X: Middle, Y: Bottom",
-			"left bottom": "X: Left, Y: Bottom",
-			"center center": "X: Middle, Y: Middle"
-		},
-		"value": "left center"
-	},
-	"mainColor": {
-		"label": "Main - Font Color",
-		"type": "colorpicker",
-		"value": "#000000"
-	},
-	"mainFS": {
-		"label": "Main - Font Size",
-		"type": "slider",
-		"name": "",
-		"value": 48,
-		"max": 72,
-		"min": 12,
-		"steps": 1
-	},
-	"mainFW": {
-		"label": "Main - Font Weight",
-		"type": "slider",
-		"name": "",
-		"value": 700,
-		"max": 700,
-		"min": 100,
-		"steps": 100
-	},
-	"mainBg": {
-		"label": "Main - BG Color",
-		"type": "colorpicker",
-		"value": "#FFFFFF"
-	},
-	"mainBgOpacity": {
-		"label": "Main - BG Opacity (%)",
-		"type": "slider",
-		"name": "",
-		"value": 100,
-		"max": 100,
-		"min": 0,
-		"steps": 1
-	},
-	"borderColor": {
-		"label": "Main - Border Color",
-		"type": "colorpicker",
-		"value": "#660000"
-	},
-	"topBH": {
-		"label": "Main - Top Border Height (px)",
-		"type": "slider",
-		"name": "",
-		"value": 0,
-		"max": 10,
-		"min": 0,
-		"steps": 1
-	},
-	"botBH": {
-		"label": "Main - Bottom Border Height (px)",
-		"type": "slider",
-		"name": "",
-		"value": 10,
-		"max": 10,
-		"min": 0,
-		"steps": 1
-	},
-	"altColor": {
-		"label": "Sub - Font Color",
-		"type": "colorpicker",
-		"value": "#FFFFFF"
-	},
-	"altFS": {
-		"label": "Sub - Font Size",
-		"type": "slider",
-		"name": "",
-		"value": 32,
-		"max": 64,
-		"min": 12,
-		"steps": 1
-	},
-	"altFW": {
-		"label": "Sub - Font Weight",
-		"type": "slider",
-		"name": "",
-		"value": 700,
-		"max": 700,
-		"min": 100,
-		"steps": 100
-	},
-	"altBg": {
-		"label": "Sub - BG Color",
-		"type": "colorpicker",
-		"value": "#000000"
-	},
-	"altBgOpacity": {
-		"label": "Sub - BG Opacity (%)",
-		"type": "slider",
-		"name": "",
-		"value": 100,
-		"max": 100,
-		"min": 0,
-		"steps": 1
-	},
-	"altPosition": {
-		"label": "Sub - Above or Below Main?",
-		"type": "dropdown",
-		"options": {
-			"above": "Above",
-			"below": "Below"
-		},
-		"value": "above"
-	},
-	"matchWidth": {
-		"label": "Same width for Main and Sub?",
-		"type": "dropdown",
-		"options": {
-			"no": "No",
-			"yes": "Yes"
-		},
-		"value": "no"
-	},
-	"animationSpeed": {
-		"label": "Animation Speed (%)",
-		"type": "slider",
-		"name": "",
-		"value": 100,
-		"max": 200,
-		"min": 50,
-		"steps": 5
-	},
-	"pauseTime": {
-		"label": "Alert Time (seconds)",
-		"type": "slider",
-		"name": "",
-		"value": 8,
-		"max": 60,
-		"min": 1,
-		"steps": 1
-	},
-	"horzAnchor": {
-		"label": "Horizontal Anchor",
-		"type": "dropdown",
-		"options": {
-			"left": "Left",
-			"center": "Center",
-			"right": "Right"
-		},
-		"value": "left"
-	},
-	"vertAnchor": {
-		"label": "Vertical Anchor",
-		"type": "dropdown",
-		"options": {
-			"top": "Top",
-			"bottom": "Bottom"
-		},
-		"value": "top"
-	},
-	"xOffset": {
-		"label": "Horizontal Offset (px)",
-		"type": "slider",
-		"name": "",
-		"value": 0,
-		"max": 500,
-		"min": -500,
-		"steps": 10
-	},
-	"yOffset": {
-		"label": "Vertical Offset (px)",
-		"type": "slider",
-		"name": "",
-		"value": 0,
-		"max": 500,
-		"min": -500,
-		"steps": 10
-	},
-	"horzPadding": {
-		"label": "Horizontal Padding (Inner Text, px)",
-		"type": "slider",
-		"name": "",
-		"value": 10,
-		"max": 100,
-		"min": 0,
-		"steps": 5
-	},
-	"vertPadding": {
-		"label": "Vertical Padding (Inner Text, px)",
-		"type": "slider",
-		"name": "",
-		"value": 10,
-		"max": 100,
-		"min": 0,
-		"steps": 5
-	}
+    "mainTextArea": {
+        "label": "Main - Text Template",
+        "type": "textfield",
+        "value": "¡{name} cheers x{amount}!"
+    },
+    "altTextArea": {
+        "label": "Sub - Text Template",
+        "type": "textfield",
+        "value": "BITS (Twitch)"
+    },
+    "font": {
+        "label": "Font Family",
+        "type": "fontpicker",
+        "value": "IBM Plex Mono"
+    },
+    "textAlign": {
+        "label": "Text Alignment",
+        "type": "dropdown",
+        "options": {
+            "left": "Left",
+            "center": "Center",
+            "right": "Right"
+        },
+        "value": "left"
+    },
+    "mainTransform": {
+        "label": "Transform Origin - where animation starts",
+        "type": "dropdown",
+        "options": {
+            "left center": "X: Left, Y: Middle",
+            "left top": "X: Left, Y: Top",
+            "center top": "X: Middle, Y: Top",
+            "right top": "X: Right, Y: Top",
+            "right center": "X: Right, Y: Middle",
+            "right bottom": "X: Right, Y: Bottom",
+            "center bottom": "X: Middle, Y: Bottom",
+            "left bottom": "X: Left, Y: Bottom",
+            "center center": "X: Middle, Y: Middle"
+        },
+        "value": "left center"
+    },
+    "mainColor": {
+        "label": "Main - Font Color",
+        "type": "colorpicker",
+        "value": "#000000"
+    },
+    "mainFS": {
+        "label": "Main - Font Size",
+        "type": "slider",
+        "name": "",
+        "value": 48,
+        "max": 72,
+        "min": 12,
+        "steps": 1
+    },
+    "mainFW": {
+        "label": "Main - Font Weight",
+        "type": "slider",
+        "name": "",
+        "value": 700,
+        "max": 700,
+        "min": 100,
+        "steps": 100
+    },
+    "mainBg": {
+        "label": "Main - BG Color",
+        "type": "colorpicker",
+        "value": "#FFFFFF"
+    },
+    "mainBgOpacity": {
+        "label": "Main - BG Opacity (%)",
+        "type": "slider",
+        "name": "",
+        "value": 100,
+        "max": 100,
+        "min": 0,
+        "steps": 1
+    },
+    "borderColor": {
+        "label": "Main - Border Color",
+        "type": "colorpicker",
+        "value": "#660000"
+    },
+    "topBH": {
+        "label": "Main - Top Border Height (px)",
+        "type": "slider",
+        "name": "",
+        "value": 0,
+        "max": 10,
+        "min": 0,
+        "steps": 1
+    },
+    "botBH": {
+        "label": "Main - Bottom Border Height (px)",
+        "type": "slider",
+        "name": "",
+        "value": 10,
+        "max": 10,
+        "min": 0,
+        "steps": 1
+    },
+    "altColor": {
+        "label": "Sub - Font Color",
+        "type": "colorpicker",
+        "value": "#FFFFFF"
+    },
+    "altFS": {
+        "label": "Sub - Font Size",
+        "type": "slider",
+        "name": "",
+        "value": 32,
+        "max": 64,
+        "min": 12,
+        "steps": 1
+    },
+    "altFW": {
+        "label": "Sub - Font Weight",
+        "type": "slider",
+        "name": "",
+        "value": 700,
+        "max": 700,
+        "min": 100,
+        "steps": 100
+    },
+    "altBg": {
+        "label": "Sub - BG Color",
+        "type": "colorpicker",
+        "value": "#000000"
+    },
+    "altBgOpacity": {
+        "label": "Sub - BG Opacity (%)",
+        "type": "slider",
+        "name": "",
+        "value": 100,
+        "max": 100,
+        "min": 0,
+        "steps": 1
+    },
+    "altPosition": {
+        "label": "Sub - Above or Below Main?",
+        "type": "dropdown",
+        "options": {
+            "above": "Above",
+            "below": "Below"
+        },
+        "value": "above"
+    },
+    "matchWidth": {
+        "label": "Same width for Main and Sub?",
+        "type": "dropdown",
+        "options": {
+            "no": "No",
+            "yes": "Yes"
+        },
+        "value": "no"
+    },
+    "animationSpeed": {
+        "label": "Animation Speed (%)",
+        "type": "slider",
+        "name": "",
+        "value": 100,
+        "max": 200,
+        "min": 50,
+        "steps": 5
+    },
+    "pauseTime": {
+        "label": "Alert Time (seconds)",
+        "type": "slider",
+        "name": "",
+        "value": 8,
+        "max": 60,
+        "min": 1,
+        "steps": 1
+    },
+    "horzAnchor": {
+        "label": "Horizontal Anchor",
+        "type": "dropdown",
+        "options": {
+            "left": "Left",
+            "center": "Center",
+            "right": "Right"
+        },
+        "value": "left"
+    },
+    "vertAnchor": {
+        "label": "Vertical Anchor",
+        "type": "dropdown",
+        "options": {
+            "top": "Top",
+            "bottom": "Bottom"
+        },
+        "value": "top"
+    },
+    "xOffset": {
+        "label": "Horizontal Offset (px)",
+        "type": "slider",
+        "name": "",
+        "value": 0,
+        "max": 500,
+        "min": -500,
+        "steps": 10
+    },
+    "yOffset": {
+        "label": "Vertical Offset (px)",
+        "type": "slider",
+        "name": "",
+        "value": 0,
+        "max": 500,
+        "min": -500,
+        "steps": 10
+    },
+    "horzPadding": {
+        "label": "Horizontal Padding (Inner Text, px)",
+        "type": "slider",
+        "name": "",
+        "value": 10,
+        "max": 100,
+        "min": 0,
+        "steps": 5
+    },
+    "vertPadding": {
+        "label": "Vertical Padding (Inner Text, px)",
+        "type": "slider",
+        "name": "",
+        "value": 10,
+        "max": 100,
+        "min": 0,
+        "steps": 5
+    }
 }

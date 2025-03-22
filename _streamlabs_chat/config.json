@@ -1,103 +1,103 @@
 {
-	"chatFont": {
-		"label": "Font Family",
-		"type": "fontpicker",
-		"value": "IBM Plex Mono"
-	},
-	"fontWeight": {
-		"label": "Font Weight",
-		"type": "slider",
-		"name": "",
-		"value": 700,
-		"max": 900,
-		"min": 300,
-		"steps": 100
-	},
-	"separator": {
-		"label": "Separator Character (@name [&] message)",
-		"type": "textfield",
-		"value": "="
-	},
-	"alignWhere": {
-		"label": "Vertical Anchor",
-		"type": "dropdown",
-		"options": {
-			"top": "Top",
-			"bottom": "Bottom"
-		},
-		"value": "bottom"
-	},
-	"textAlignment": {
-		"label": "Text Alignment",
-		"type": "dropdown",
-		"options": {
-			"left": "Left",
-			"right": "Right"
-		},
-		"value": "left"
-	},
-	"maxLines": {
-		"label": "Max. messages on screen",
-		"type": "slider",
-		"name": "",
-		"value": 50,
-		"max": 50,
-		"min": 1,
-		"steps": 1
-	},
-	"glitchSpeed": {
-		"label": "Glitch Pause",
-		"type": "slider",
-		"name": "",
-		"value": 5,
-		"max": 10,
-		"min": 1,
-		"steps": 1
-	},
-	"repeatAmount": {
-		"label": "Glitch Repeat",
-		"type": "slider",
-		"name": "",
-		"value": 100,
-		"max": 100,
-		"min": 1,
-		"steps": 1
-	},
-	"bgColor": {
-		"label": "BG Color",
-		"type": "colorpicker",
-		"value": "#000000"
-	},
-	"bgOpacity": {
-		"label": "BG Opacity",
-		"type": "slider",
-		"name": "",
-		"value": 50,
-		"max": 100,
-		"min": 0,
-		"steps": 1
-	},
-	"bottomMargin": {
-		"label": "Message margin (px)",
-		"type": "slider",
-		"name": "",
-		"value": 5,
-		"max": 50,
-		"min": 0,
-		"steps": 1
-	},
-	"borderHeight": {
-		"label": "Border height (px)",
-		"type": "slider",
-		"name": "",
-		"value": 0,
-		"max": 5,
-		"min": 0,
-		"steps": 1
-	},
-	"borderColor": {
-		"label": "Border color",
-		"type": "colorpicker",
-		"value": "#FFFFFF"
-	}
+    "chatFont": {
+        "label": "Font Family",
+        "type": "fontpicker",
+        "value": "IBM Plex Mono"
+    },
+    "fontWeight": {
+        "label": "Font Weight",
+        "type": "slider",
+        "name": "",
+        "value": 700,
+        "max": 900,
+        "min": 300,
+        "steps": 100
+    },
+    "separator": {
+        "label": "Separator Character (@name [&] message)",
+        "type": "textfield",
+        "value": "="
+    },
+    "alignWhere": {
+        "label": "Vertical Anchor",
+        "type": "dropdown",
+        "options": {
+            "top": "Top",
+            "bottom": "Bottom"
+        },
+        "value": "bottom"
+    },
+    "textAlignment": {
+        "label": "Text Alignment",
+        "type": "dropdown",
+        "options": {
+            "left": "Left",
+            "right": "Right"
+        },
+        "value": "left"
+    },
+    "maxLines": {
+        "label": "Max. messages on screen",
+        "type": "slider",
+        "name": "",
+        "value": 50,
+        "max": 50,
+        "min": 1,
+        "steps": 1
+    },
+    "glitchSpeed": {
+        "label": "Glitch Pause",
+        "type": "slider",
+        "name": "",
+        "value": 5,
+        "max": 10,
+        "min": 1,
+        "steps": 1
+    },
+    "repeatAmount": {
+        "label": "Glitch Repeat",
+        "type": "slider",
+        "name": "",
+        "value": 100,
+        "max": 100,
+        "min": 1,
+        "steps": 1
+    },
+    "bgColor": {
+        "label": "BG Color",
+        "type": "colorpicker",
+        "value": "#000000"
+    },
+    "bgOpacity": {
+        "label": "BG Opacity",
+        "type": "slider",
+        "name": "",
+        "value": 50,
+        "max": 100,
+        "min": 0,
+        "steps": 1
+    },
+    "bottomMargin": {
+        "label": "Message margin (px)",
+        "type": "slider",
+        "name": "",
+        "value": 5,
+        "max": 50,
+        "min": 0,
+        "steps": 1
+    },
+    "borderHeight": {
+        "label": "Border height (px)",
+        "type": "slider",
+        "name": "",
+        "value": 0,
+        "max": 5,
+        "min": 0,
+        "steps": 1
+    },
+    "borderColor": {
+        "label": "Border color",
+        "type": "colorpicker",
+        "value": "#FFFFFF"
+    }
 }
