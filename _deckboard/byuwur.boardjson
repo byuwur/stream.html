@@ -2,7 +2,7 @@
     {
         "name": "byuwur",
         "background": "#000000",
-        "order": 1,
+        "order": 2,
         "layout": 4,
         "image": "",
         "sort": null,
@@ -13,7 +13,7 @@
         "converted": 1,
         "macros": [
             {
-                "board_id": 1,
+                "board_id": 2,
                 "title": "Toggle Stream",
                 "img": "",
                 "type": "obs-control",
@@ -45,7 +45,7 @@
                 "mode": "button"
             },
             {
-                "board_id": 1,
+                "board_id": 2,
                 "title": "Toggle Record",
                 "img": "",
                 "type": "obs-control",
@@ -66,7 +66,7 @@
                 "color2": null,
                 "shape2": 0,
                 "border_color2": "",
-                "title_position2": null,
+                "title_position2": 0,
                 "title_box_color2": "",
                 "title_color2": "#ffffff",
                 "position2": null,
@@ -77,7 +77,7 @@
                 "mode": "button"
             },
             {
-                "board_id": 1,
+                "board_id": 2,
                 "title": "Toggle Studio Mode",
                 "img": "",
                 "type": "obs-studio-mode",
@@ -109,7 +109,7 @@
                 "mode": "button"
             },
             {
-                "board_id": 1,
+                "board_id": 2,
                 "title": "Scene: START",
                 "img": "",
                 "type": "obs-scene",
@@ -134,14 +134,14 @@
                 "title_box_color2": "#0000007F",
                 "title_color2": "#FFFFFF",
                 "position2": null,
-                "x": 1,
+                "x": 0,
                 "y": 4,
                 "w": 1,
                 "h": 1,
                 "mode": "button"
             },
             {
-                "board_id": 1,
+                "board_id": 2,
                 "title": "Scene: MAIN",
                 "img": "",
                 "type": "obs-scene",
@@ -166,14 +166,14 @@
                 "title_box_color2": "#0000007F",
                 "title_color2": "#FFFFFF",
                 "position2": null,
-                "x": 0,
+                "x": 1,
                 "y": 4,
                 "w": 1,
                 "h": 1,
                 "mode": "button"
             },
             {
-                "board_id": 1,
+                "board_id": 2,
                 "title": "Scene: _EMPTY",
                 "img": "",
                 "type": "obs-scene",
@@ -198,14 +198,14 @@
                 "title_box_color2": "#0000007F",
                 "title_color2": "#FFFFFF",
                 "position2": null,
-                "x": 2,
-                "y": 4,
+                "x": 0,
+                "y": 7,
                 "w": 1,
                 "h": 1,
                 "mode": "button"
             },
             {
-                "board_id": 1,
+                "board_id": 2,
                 "title": "Pause Record",
                 "img": "",
                 "type": "obs-control",
@@ -237,7 +237,7 @@
                 "mode": "button"
             },
             {
-                "board_id": 1,
+                "board_id": 2,
                 "title": "Scene: _SCREEN",
                 "img": "",
                 "type": "obs-scene",
@@ -262,14 +262,14 @@
                 "title_box_color2": "#0000007F",
                 "title_color2": "#FFFFFF",
                 "position2": null,
-                "x": 3,
-                "y": 4,
+                "x": 1,
+                "y": 7,
                 "w": 1,
                 "h": 1,
                 "mode": "button"
             },
             {
-                "board_id": 1,
+                "board_id": 2,
                 "title": "Previous Song",
                 "img": "",
                 "type": "key",
@@ -301,7 +301,7 @@
                 "mode": "button"
             },
             {
-                "board_id": 1,
+                "board_id": 2,
                 "title": "Next Song",
                 "img": "",
                 "type": "key",
@@ -333,7 +333,7 @@
                 "mode": "button"
             },
             {
-                "board_id": 1,
+                "board_id": 2,
                 "title": "Play Pause",
                 "img": "",
                 "type": "key",
@@ -365,7 +365,7 @@
                 "mode": "button"
             },
             {
-                "board_id": 1,
+                "board_id": 2,
                 "title": "START: Camera",
                 "img": "",
                 "type": "obs-source",
@@ -397,7 +397,7 @@
                 "mode": "button"
             },
             {
-                "board_id": 1,
+                "board_id": 2,
                 "title": "START: Screen",
                 "img": "",
                 "type": "obs-source",
@@ -429,7 +429,7 @@
                 "mode": "button"
             },
             {
-                "board_id": 1,
+                "board_id": 2,
                 "title": "START: Starting",
                 "img": "",
                 "type": "obs-source",
@@ -461,7 +461,7 @@
                 "mode": "button"
             },
             {
-                "board_id": 1,
+                "board_id": 2,
                 "title": "START: BRB",
                 "img": "",
                 "type": "obs-source",
@@ -493,7 +493,7 @@
                 "mode": "button"
             },
             {
-                "board_id": 1,
+                "board_id": 2,
                 "title": "START: Inter",
                 "img": "",
                 "type": "obs-source",
@@ -525,7 +525,7 @@
                 "mode": "button"
             },
             {
-                "board_id": 1,
+                "board_id": 2,
                 "title": "START: Ending",
                 "img": "",
                 "type": "obs-source",
@@ -557,7 +557,7 @@
                 "mode": "button"
             },
             {
-                "board_id": 1,
+                "board_id": 2,
                 "title": "START: CamAux",
                 "img": "",
                 "type": "obs-source",
@@ -589,7 +589,7 @@
                 "mode": "button"
             },
             {
-                "board_id": 1,
+                "board_id": 2,
                 "title": "MAIN: Camera",
                 "img": "",
                 "type": "obs-source",
@@ -621,7 +621,7 @@
                 "mode": "button"
             },
             {
-                "board_id": 1,
+                "board_id": 2,
                 "title": "MAIN: CamAux",
                 "img": "",
                 "type": "obs-source",
@@ -653,8 +653,8 @@
                 "mode": "button"
             },
             {
-                "board_id": 1,
-                "title": "MAIN: MusicTx",
+                "board_id": 2,
+                "title": "MAIN: MusicTxt",
                 "img": "",
                 "type": "obs-source",
                 "command": "{\"scene\":\"MAIN\",\"source\":\"_MUSIC_\",\"group\":null}",
@@ -678,15 +678,15 @@
                 "title_box_color2": "#0000007F",
                 "title_color2": "#FFFFFF",
                 "position2": null,
-                "x": 0,
-                "y": 7,
+                "x": 2,
+                "y": 4,
                 "w": 1,
                 "h": 1,
                 "mode": "button"
             },
             {
-                "board_id": 1,
-                "title": "MAIN: GameTx",
+                "board_id": 2,
+                "title": "MAIN: GameTxt",
                 "img": "",
                 "type": "obs-source",
                 "command": "{\"scene\":\"MAIN\",\"source\":\"_GAME_\",\"group\":null}",
@@ -710,14 +710,14 @@
                 "title_box_color2": "#0000007F",
                 "title_color2": "#FFFFFF",
                 "position2": null,
-                "x": 1,
-                "y": 7,
+                "x": 3,
+                "y": 4,
                 "w": 1,
                 "h": 1,
                 "mode": "button"
             },
             {
-                "board_id": 1,
+                "board_id": 2,
                 "title": "START: Screen Full",
                 "img": "",
                 "type": "obs-source",
@@ -749,7 +749,7 @@
                 "mode": "button"
             },
             {
-                "board_id": 1,
+                "board_id": 2,
                 "title": "START: Screen Full (Audio)",
                 "img": "",
                 "type": "obs-source",
@@ -781,7 +781,7 @@
                 "mode": "button"
             },
             {
-                "board_id": 1,
+                "board_id": 2,
                 "title": "Go to CAM",
                 "img": "",
                 "type": "board",
@@ -813,11 +813,11 @@
                 "mode": "button"
             },
             {
-                "board_id": 1,
+                "board_id": 2,
                 "title": "Cam OFF",
                 "img": "",
                 "type": "obs-filter",
-                "command": "{\"scene\":\"MAIN\",\"source\":\"_CAM\",\"filter\":\"CAMoff_720p_1080p\"}",
+                "command": "{\"scene\":\"MAIN\",\"source\":\"_CAM\",\"filter\":\"CAMoff\"}",
                 "position": 0,
                 "title_position": 0,
                 "title_color": "#FFFFFF",
@@ -845,11 +845,11 @@
                 "mode": "button"
             },
             {
-                "board_id": 1,
+                "board_id": 2,
                 "title": "Cam ON",
                 "img": "",
                 "type": "obs-filter",
-                "command": "{\"scene\":\"MAIN\",\"source\":\"_CAM\",\"filter\":\"CAMfull_720p_1080p\"}",
+                "command": "{\"scene\":\"MAIN\",\"source\":\"_CAM\",\"filter\":\"CAMfull\"}",
                 "position": 0,
                 "title_position": 0,
                 "title_color": "#FFFFFF",
@@ -877,7 +877,7 @@
                 "mode": "button"
             },
             {
-                "board_id": 1,
+                "board_id": 2,
                 "title": "Go to MUSIC",
                 "img": "",
                 "type": "board",
@@ -909,11 +909,11 @@
                 "mode": "button"
             },
             {
-                "board_id": 1,
+                "board_id": 2,
                 "title": "MAIN: Chat Mic",
                 "img": "",
                 "type": "obs-source",
-                "command": "{\"scene\":\"MAIN\",\"source\":\"ChatAudio\",\"group\":\"_CAM_\"}",
+                "command": "{\"scene\":\"_CAM\",\"source\":\"ChatAudio\",\"group\":\"_CAM_\"}",
                 "position": 0,
                 "title_position": 0,
                 "title_color": "#FFFFFF",
@@ -941,11 +941,11 @@
                 "mode": "button"
             },
             {
-                "board_id": 1,
+                "board_id": 2,
                 "title": "MAIN: Cam Mic",
                 "img": "",
                 "type": "obs-source",
-                "command": "{\"scene\":\"MAIN\",\"source\":\"Mic\",\"group\":\"_CAM_\"}",
+                "command": "{\"scene\":\"_CAM\",\"source\":\"Mic\",\"group\":\"_CAM_\"}",
                 "position": 0,
                 "title_position": 0,
                 "title_color": "#FFFFFF",
@@ -973,11 +973,11 @@
                 "mode": "button"
             },
             {
-                "board_id": 1,
+                "board_id": 2,
                 "title": "MAIN: Control",
                 "img": "",
                 "type": "obs-source",
-                "command": "{\"scene\":\"MAIN\",\"source\":\"Controller\",\"group\":\"_CAM_\"}",
+                "command": "{\"scene\":\"_CAM\",\"source\":\"Controller\",\"group\":\"_CAM_\"}",
                 "position": 0,
                 "title_position": 0,
                 "title_color": "#FFFFFF",
@@ -1005,11 +1005,11 @@
                 "mode": "button"
             },
             {
-                "board_id": 1,
+                "board_id": 2,
                 "title": "MAIN: KB&M",
                 "img": "",
                 "type": "multiaction",
-                "command": "[{\"type\":\"obs-source\",\"command\":\"{\\\"scene\\\":\\\"MAIN\\\",\\\"source\\\":\\\"Keyboard\\\",\\\"group\\\":\\\"_CAM_\\\"}\",\"options\":null},{\"type\":\"obs-source\",\"command\":\"{\\\"scene\\\":\\\"MAIN\\\",\\\"source\\\":\\\"Mouse\\\",\\\"group\\\":\\\"_CAM_\\\"}\",\"options\":null}]",
+                "command": "[{\"type\":\"obs-source\",\"command\":\"{\\\"scene\\\":\\\"_CAM\\\",\\\"source\\\":\\\"Keyboard\\\",\\\"group\\\":\\\"_CAM_\\\"}\",\"options\":null},{\"type\":\"obs-source\",\"command\":\"{\\\"scene\\\":\\\"_CAM\\\",\\\"source\\\":\\\"Mouse\\\",\\\"group\\\":\\\"_CAM_\\\"}\",\"options\":null}]",
                 "position": 0,
                 "title_position": 0,
                 "title_color": "#FFFFFF",
@@ -1037,8 +1037,8 @@
                 "mode": "button"
             },
             {
-                "board_id": 1,
-                "title": "START: Draw",
+                "board_id": 2,
+                "title": "START: #art",
                 "img": "",
                 "type": "obs-source",
                 "command": "{\"scene\":\"START\",\"source\":\"ImgHighlights\",\"group\":null}",
@@ -1069,11 +1069,11 @@
                 "mode": "button"
             },
             {
-                "board_id": 1,
+                "board_id": 2,
                 "title": "START: Screen Game",
                 "img": "",
                 "type": "obs-source",
-                "command": "{\"scene\":\"START\",\"source\":\"GameScreen\",\"group\":\"_SCREEN_\"}",
+                "command": "{\"scene\":\"START\",\"source\":\"GameCapture\",\"group\":\"_SCREEN_\"}",
                 "position": 0,
                 "title_position": 0,
                 "title_color": "#FFFFFF",
@@ -1101,11 +1101,11 @@
                 "mode": "button"
             },
             {
-                "board_id": 1,
+                "board_id": 2,
                 "title": "MAIN: Stick",
                 "img": "",
                 "type": "obs-source",
-                "command": "{\"scene\":\"MAIN\",\"source\":\"Stick\",\"group\":\"_CAM_\"}",
+                "command": "{\"scene\":\"_CAM\",\"source\":\"Stick\",\"group\":\"_CAM_\"}",
                 "position": 0,
                 "title_position": 0,
                 "title_color": "#FFFFFF",
@@ -1133,7 +1133,7 @@
                 "mode": "button"
             },
             {
-                "board_id": 1,
+                "board_id": 2,
                 "title": "START: Screen Frame",
                 "img": "",
                 "type": "obs-source",
