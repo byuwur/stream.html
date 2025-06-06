@@ -1,0 +1,14 @@
+{
+    "type": "rtmp_common",
+    "settings": {
+        "service": "Twitch",
+        "protocol": "RTMP",
+        "server": "rtmp://mia05.contribute.live-video.net/app",
+        "bwtest": false,
+        "key": "",
+        "stream_key_link": "https://dashboard.twitch.tv/settings/stream",
+        "multitrack_video_configuration_url": "https://ingest.twitch.tv/api/v3/GetClientConfiguration",
+        "multitrack_video_name": "Enhanced Broadcasting",
+        "multitrack_video_disclaimer": " Enhanced Broadcasting optimiza automáticamente su configuración para codificar y enviar múltiples calidades de vídeo a Twitch. Al seleccionar esta opción se enviará a Twitch información sobre la configuración de su ordenador y software.<a href='https://help.twitch.tv/s/article/multiple-encodes'>Aprende más</a>"
+    }
+}
