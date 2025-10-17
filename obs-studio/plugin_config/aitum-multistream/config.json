@@ -1,0 +1,20 @@
+{
+    "partner_block": 0,
+    "profiles": [
+        {
+            "name": "byuwur",
+            "outputs": [
+                {
+                    "name": "YouTube",
+                    "stream_server": "rtmps://a.rtmps.youtube.com:443/live2",
+                    "stream_key": "",
+                    "scale_type": 3,
+                    "audio_encoder_settings": {
+                        "bitrate": 128
+                    },
+                    "audio_encoder": "ffmpeg_aac"
+                }
+            ]
+        }
+    ]
+}

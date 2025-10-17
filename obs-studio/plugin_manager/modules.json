@@ -1,0 +1,143 @@
+[
+    {
+        "display_name": "AMD Advanced Media Framework Plugin",
+        "enabled": true,
+        "encoders": [
+            "amd_amf_h264",
+            "amd_amf_h265"
+        ],
+        "id": "",
+        "module_name": "enc-amf",
+        "outputs": [],
+        "services": [],
+        "sources": [],
+        "version": ""
+    },
+    {
+        "display_name": "Move Transition",
+        "enabled": true,
+        "encoders": [],
+        "id": "",
+        "module_name": "move-transition",
+        "outputs": [],
+        "services": [],
+        "sources": [
+            "move_transition",
+            "move_transition_override_filter",
+            "move_source_filter",
+            "move_source_swap_filter",
+            "move_value_filter",
+            "move_audio_value_filter",
+            "audio_move_filter",
+            "move_action_filter",
+            "move_audio_action_filter",
+            "move_directshow_filter"
+        ],
+        "version": ""
+    },
+    {
+        "display_name": "Vertical Canvas",
+        "enabled": true,
+        "encoders": [],
+        "id": "",
+        "module_name": "vertical-canvas",
+        "outputs": [],
+        "services": [],
+        "sources": [
+            "vertical_audio_wrapper_source",
+            "vertical_multi_canvas_source"
+        ],
+        "version": ""
+    },
+    {
+        "display_name": "",
+        "enabled": true,
+        "encoders": [],
+        "id": "",
+        "module_name": "input-overlay",
+        "outputs": [],
+        "services": [],
+        "sources": [
+            "input-overlay"
+        ],
+        "version": ""
+    },
+    {
+        "display_name": "",
+        "enabled": true,
+        "encoders": [],
+        "id": "",
+        "module_name": "obs-multi-rtmp",
+        "outputs": [],
+        "services": [],
+        "sources": [],
+        "version": ""
+    },
+    {
+        "display_name": "",
+        "enabled": true,
+        "encoders": [],
+        "id": "",
+        "module_name": "obs-shaderfilter",
+        "outputs": [],
+        "services": [],
+        "sources": [
+            "shader_filter",
+            "shader_transition"
+        ],
+        "version": ""
+    },
+    {
+        "display_name": "",
+        "enabled": true,
+        "encoders": [],
+        "id": "",
+        "module_name": "spectralizer",
+        "outputs": [],
+        "services": [],
+        "sources": [
+            "spectralizer"
+        ],
+        "version": ""
+    },
+    {
+        "display_name": "DroidCam",
+        "enabled": true,
+        "encoders": [],
+        "id": "",
+        "module_name": "droidcam-obs",
+        "outputs": [],
+        "services": [],
+        "sources": [
+            "droidcam_obs"
+        ],
+        "version": ""
+    },
+    {
+        "display_name": "Replay Source",
+        "enabled": true,
+        "encoders": [],
+        "id": "",
+        "module_name": "replay-source",
+        "outputs": [],
+        "services": [],
+        "sources": [
+            "replay_source",
+            "replay_filter",
+            "replay_filter_audio",
+            "replay_filter_async"
+        ],
+        "version": ""
+    },
+    {
+        "display_name": "",
+        "enabled": true,
+        "encoders": [],
+        "id": "",
+        "module_name": "aitum-multistream",
+        "outputs": [],
+        "services": [],
+        "sources": [],
+        "version": ""
+    }
+]

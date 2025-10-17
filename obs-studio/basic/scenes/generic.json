@@ -1,6 +1,6 @@
 {
-    "current_scene": "CAM2",
-    "current_program_scene": "CAM2",
+    "current_scene": "CAM1",
+    "current_program_scene": "CAM1",
     "scene_order": [
         {
             "name": "INTRO"
@@ -21,7 +21,7 @@
     "name": "generic",
     "sources": [
         {
-            "prev_ver": 520159234,
+            "prev_ver": 536870913,
             "name": "FIN",
             "uuid": "347f4594-a394-4dda-a7c4-ae9dcb9dcfe1",
             "id": "text_gdiplus",
@@ -56,7 +56,7 @@
             "private_settings": {}
         },
         {
-            "prev_ver": 520159234,
+            "prev_ver": 536870913,
             "name": "CARGO",
             "uuid": "c99a833c-351a-452a-b90e-1970dad2382e",
             "id": "text_gdiplus",
@@ -92,7 +92,7 @@
             "private_settings": {}
         },
         {
-            "prev_ver": 520159234,
+            "prev_ver": 536870913,
             "name": "NOMBRE",
             "uuid": "94854283-4cd0-4d33-a472-9a452084e5cf",
             "id": "text_gdiplus",
@@ -143,7 +143,7 @@
             "private_settings": {}
         },
         {
-            "prev_ver": 520159234,
+            "prev_ver": 536870913,
             "name": "CAMARA2",
             "uuid": "5ed86f79-6edd-41ad-83a2-3ebc927c385e",
             "id": "dshow_input",
@@ -175,7 +175,7 @@
             "private_settings": {}
         },
         {
-            "prev_ver": 520159234,
+            "prev_ver": 536870913,
             "name": "CAMARA1",
             "uuid": "d4fa92b7-b484-48dd-b3c3-e4904376ddb3",
             "id": "dshow_input",
@@ -217,7 +217,7 @@
             "private_settings": {}
         },
         {
-            "prev_ver": 520159234,
+            "prev_ver": 536870913,
             "name": "AUDIO",
             "uuid": "1b8e91d0-91a4-4eee-9d7a-cc3110196d32",
             "id": "wasapi_input_capture",
@@ -249,7 +249,7 @@
             "private_settings": {},
             "filters": [
                 {
-                    "prev_ver": 520159234,
+                    "prev_ver": 536870913,
                     "name": "Ganancia",
                     "uuid": "a4906e96-c8ff-44d1-b2e8-e5ade3085b58",
                     "id": "gain_filter",
@@ -275,7 +275,7 @@
                     "private_settings": {}
                 },
                 {
-                    "prev_ver": 520159234,
+                    "prev_ver": 536870913,
                     "name": "Eliminación de ruido",
                     "uuid": "e288efb1-9413-4865-aa3a-869eac82422e",
                     "id": "noise_suppress_filter",
@@ -302,7 +302,7 @@
                     "private_settings": {}
                 },
                 {
-                    "prev_ver": 520159234,
+                    "prev_ver": 536870913,
                     "name": "Limitador",
                     "uuid": "30a491d7-453f-4775-97f4-4d18b68cd6c2",
                     "id": "limiter_filter",
@@ -329,7 +329,7 @@
                     "private_settings": {}
                 },
                 {
-                    "prev_ver": 520159234,
+                    "prev_ver": 536870913,
                     "name": "Compresor",
                     "uuid": "707c6448-6621-44af-8146-27ada4b9b527",
                     "id": "compressor_filter",
@@ -355,7 +355,7 @@
             ]
         },
         {
-            "prev_ver": 520159234,
+            "prev_ver": 536870913,
             "name": "CAM2",
             "uuid": "036e4661-bc4f-45d5-94b1-e01ab04733bb",
             "id": "scene",
@@ -469,7 +469,7 @@
             "private_settings": {}
         },
         {
-            "prev_ver": 520159234,
+            "prev_ver": 536870913,
             "name": "CAM1",
             "uuid": "e5be3e5a-ce54-484f-a6b3-0f49f99cf327",
             "id": "scene",
@@ -583,7 +583,7 @@
             "private_settings": {}
         },
         {
-            "prev_ver": 520159234,
+            "prev_ver": 536870913,
             "name": "INTRO",
             "uuid": "a83dc11a-1691-4942-a4c4-9485107a3ac4",
             "id": "scene",
@@ -1025,7 +1025,7 @@
             "private_settings": {}
         },
         {
-            "prev_ver": 520159234,
+            "prev_ver": 536870913,
             "name": "BLANCO",
             "uuid": "2d932c1f-206a-4837-a41f-fea07faeec2a",
             "id": "color_source",
@@ -1051,7 +1051,7 @@
             "private_settings": {}
         },
         {
-            "prev_ver": 520159234,
+            "prev_ver": 536870913,
             "name": "LOGO",
             "uuid": "17ab2022-7610-4f81-99dd-43c69b9edf0f",
             "id": "image_source",
@@ -1077,7 +1077,7 @@
             "private_settings": {}
         },
         {
-            "prev_ver": 520159234,
+            "prev_ver": 536870913,
             "name": "_OVERLAY",
             "uuid": "e2649bc4-9899-453c-aed8-18608d1268e0",
             "id": "scene",
@@ -1688,7 +1688,7 @@
             "private_settings": {}
         },
         {
-            "prev_ver": 520159234,
+            "prev_ver": 536870913,
             "name": "LOWER THIRD",
             "uuid": "7c8c6d51-cc24-4bf9-afb9-049bd2c9bce5",
             "id": "image_source",
@@ -1714,7 +1714,7 @@
             "private_settings": {}
         },
         {
-            "prev_ver": 520159234,
+            "prev_ver": 536870913,
             "name": "HORA",
             "uuid": "3844cf5d-c524-4ea9-abec-39711715cbf0",
             "id": "text_gdiplus",
@@ -1748,15 +1748,15 @@
             "private_settings": {}
         },
         {
-            "prev_ver": 520159234,
+            "prev_ver": 536870913,
             "name": "LOGO COSMIC",
             "uuid": "21d2f5e8-e966-40ce-81cb-3d506616e659",
             "id": "image_source",
             "versioned_id": "image_source",
             "settings": {
+                "file": "C:/Program Files/obs-studio/stream.html/_generic/logoCOSMIC_black.png",
                 "unload": false,
-                "linear_alpha": false,
-                "file": "C:/Program Files/obs-studio/stream.html/_generic/logoCOSMIC_black.png"
+                "linear_alpha": false
             },
             "mixers": 0,
             "sync": 0,
@@ -1776,7 +1776,7 @@
             "private_settings": {}
         },
         {
-            "prev_ver": 520159234,
+            "prev_ver": 536870913,
             "name": "EMPEZAMOS",
             "uuid": "5b8d117c-01a5-4c5d-a516-8629c07ffda0",
             "id": "text_gdiplus",
@@ -1812,7 +1812,7 @@
             "private_settings": {}
         },
         {
-            "prev_ver": 520159234,
+            "prev_ver": 536870913,
             "name": "AMBIENTE",
             "uuid": "498139cc-f30f-437b-8f50-06e127f90727",
             "id": "wasapi_input_capture",
@@ -1843,7 +1843,7 @@
             "private_settings": {},
             "filters": [
                 {
-                    "prev_ver": 520159234,
+                    "prev_ver": 536870913,
                     "name": "Eliminación de ruido",
                     "uuid": "12b585c5-95ee-44f9-a736-15f4107c1c93",
                     "id": "noise_suppress_filter",
@@ -1867,7 +1867,7 @@
                     "private_settings": {}
                 },
                 {
-                    "prev_ver": 520159234,
+                    "prev_ver": 536870913,
                     "name": "Limitador",
                     "uuid": "44d6ad0d-0dff-412f-8b7f-de58562d7310",
                     "id": "limiter_filter",
@@ -1891,7 +1891,7 @@
                     "private_settings": {}
                 },
                 {
-                    "prev_ver": 520159234,
+                    "prev_ver": 536870913,
                     "name": "Compresor",
                     "uuid": "f182fe77-275d-47c4-bff5-8e5f45c387f6",
                     "id": "compressor_filter",
@@ -1917,7 +1917,7 @@
             ]
         },
         {
-            "prev_ver": 520159234,
+            "prev_ver": 536870913,
             "name": "VOLVEMOS",
             "uuid": "62fd895f-25c1-4b1e-a57c-a374f6fd5571",
             "id": "text_gdiplus",
@@ -1954,16 +1954,16 @@
             "private_settings": {}
         },
         {
-            "prev_ver": 520159234,
+            "prev_ver": 536870913,
             "name": "CosmicIntro",
             "uuid": "4b9d76e5-2643-4e77-b240-63bba0f5ab0c",
             "id": "ffmpeg_source",
             "versioned_id": "ffmpeg_source",
             "settings": {
                 "hw_decode": true,
+                "local_file": "C:/Program Files/obs-studio/stream.html/_generic/CosmicIntro.mp4",
                 "clear_on_media_end": false,
-                "restart_on_activate": true,
-                "local_file": "C:/Program Files/obs-studio/stream.html/_generic/CosmicIntro.mp4"
+                "restart_on_activate": true
             },
             "mixers": 255,
             "sync": 0,
@@ -1992,7 +1992,7 @@
             "private_settings": {}
         },
         {
-            "prev_ver": 520159234,
+            "prev_ver": 536870913,
             "name": "FULLSCREEN",
             "uuid": "ac8c3565-c6d8-4f3b-8784-9e16fc804c77",
             "id": "scene",
@@ -2065,7 +2065,7 @@
             "private_settings": {}
         },
         {
-            "prev_ver": 520159234,
+            "prev_ver": 536870913,
             "name": "SCREEN",
             "uuid": "20def09a-5c2e-4ee3-a2ab-224cc3008a4e",
             "id": "monitor_capture",
@@ -2093,7 +2093,7 @@
             "private_settings": {}
         },
         {
-            "prev_ver": 520159234,
+            "prev_ver": 536870913,
             "name": "Vertical Scene",
             "uuid": "78aef36c-f619-4adb-a87e-f12e54e43fa2",
             "id": "scene",
@@ -2124,7 +2124,7 @@
     ],
     "groups": [
         {
-            "prev_ver": 520159234,
+            "prev_ver": 536870913,
             "name": "TERCIO INFERIOR",
             "uuid": "f7103dc8-5ddd-4919-b2c8-588fa4e7a555",
             "id": "group",
@@ -2142,8 +2142,8 @@
                         "locked": true,
                         "rot": 0.0,
                         "scale_ref": {
-                            "x": 1280.0,
-                            "y": 720.0
+                            "x": 1920.0,
+                            "y": 1080.0
                         },
                         "align": 5,
                         "bounds_type": 0,
@@ -2197,8 +2197,8 @@
                         "locked": true,
                         "rot": 0.0,
                         "scale_ref": {
-                            "x": 1280.0,
-                            "y": 720.0
+                            "x": 1920.0,
+                            "y": 1080.0
                         },
                         "align": 5,
                         "bounds_type": 0,
@@ -2248,8 +2248,8 @@
                         "locked": true,
                         "rot": 0.0,
                         "scale_ref": {
-                            "x": 1280.0,
-                            "y": 720.0
+                            "x": 1920.0,
+                            "y": 1080.0
                         },
                         "align": 5,
                         "bounds_type": 0,
@@ -2320,7 +2320,7 @@
             "private_settings": {}
         },
         {
-            "prev_ver": 520159234,
+            "prev_ver": 536870913,
             "name": "LOGO_HORA",
             "uuid": "38a1513e-0011-45db-871c-7f247ca10687",
             "id": "group",
@@ -2338,8 +2338,8 @@
                         "locked": true,
                         "rot": 0.0,
                         "scale_ref": {
-                            "x": 1280.0,
-                            "y": 720.0
+                            "x": 1920.0,
+                            "y": 1080.0
                         },
                         "align": 5,
                         "bounds_type": 0,
@@ -2381,8 +2381,8 @@
                         "locked": true,
                         "rot": 0.0,
                         "scale_ref": {
-                            "x": 1280.0,
-                            "y": 720.0
+                            "x": 1920.0,
+                            "y": 1080.0
                         },
                         "align": 5,
                         "bounds_type": 2,
@@ -2424,8 +2424,8 @@
                         "locked": true,
                         "rot": 0.0,
                         "scale_ref": {
-                            "x": 1280.0,
-                            "y": 720.0
+                            "x": 1920.0,
+                            "y": 1080.0
                         },
                         "align": 5,
                         "bounds_type": 0,
@@ -2467,8 +2467,8 @@
                         "locked": true,
                         "rot": 0.0,
                         "scale_ref": {
-                            "x": 1280.0,
-                            "y": 720.0
+                            "x": 1920.0,
+                            "y": 1080.0
                         },
                         "align": 5,
                         "bounds_type": 0,
@@ -2549,8 +2549,8 @@
             "settings": {
                 "audio_fade_style": 1,
                 "transition_point": 1000,
-                "hw_decode": true,
-                "path": "C:/Program Files/obs-studio/stream.html/_generic/furidance_stinger.webm"
+                "path": "C:/Program Files/obs-studio/stream.html/_generic/furidance_stinger.webm",
+                "hw_decode": true
             }
         }
     ],
@@ -2569,7 +2569,7 @@
     "transition_duration": 300,
     "preview_locked": false,
     "scaling_enabled": false,
-    "scaling_level": -11,
+    "scaling_level": -20,
     "scaling_off_x": 0.0,
     "scaling_off_y": 0.0,
     "virtual-camera": {
