@@ -64,7 +64,7 @@
     },
     {
         "display_name": "",
-        "enabled": true,
+        "enabled": false,
         "encoders": [],
         "id": "",
         "module_name": "obs-multi-rtmp",
