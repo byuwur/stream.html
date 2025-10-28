@@ -1,3 +1,22 @@
 [
-
+  {
+    "data": "CwwNDxESFBMUFRQTEhEQDxQP",
+    "guid": "82AEF845-DCC3-4DA5-9D80-E9A972B2140D",
+    "name": "Equalizer"
+  },
+  {
+    "data": "",
+    "guid": "11B13A25-C282-41F6-B1F0-CEB7ECBCEAA8",
+    "name": "Advanced Limiter"
+  },
+  {
+    "data": "",
+    "guid": "F661D118-5627-40AD-AB31-CCCF71A4819D",
+    "name": "Convert mono to stereo"
+  },
+  {
+    "data": "",
+    "guid": "866233BB-C466-43E6-AFC4-8B7BE563D912",
+    "name": "Downmix channels to stereo"
+  }
 ]
