@@ -49,7 +49,7 @@
                 "title": "Open foobar",
                 "img": "",
                 "type": "multiaction",
-                "command": "[{\"type\":\"app\",\"command\":\"C:\\\\__stream__\\\\foobar2000\\\\foobar2000.exe\",\"options\":null},{\"type\":\"delay\",\"command\":\"100\",\"options\":null},{\"type\":\"key\",\"command\":\"ALT+S\",\"options\":null}]",
+                "command": "[{\"type\":\"app\",\"command\":\"C:\\\\Program Files\\\\obs-studio\\\\stream.html\\\\foobar2000\\\\foobar2000.exe\",\"options\":null},{\"type\":\"delay\",\"command\":\"5000\",\"options\":null},{\"type\":\"key\",\"command\":\"ALT+S\",\"options\":null}]",
                 "position": null,
                 "title_position": 0,
                 "title_color": "#FFFFFF",
