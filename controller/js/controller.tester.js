@@ -202,7 +202,8 @@ const tester = {
 						},
 						bubbles: true
 					});
-					if ((tester.MONITOR_TYPE === "remapping" && tester.absDiff(tester.SNAPSHOT.buttons[buttonId].value, newValue) > tester.ANALOGUE_BUTTON_THRESHOLD) || tester.MONITOR_TYPE === "value") document.querySelectorAll("#mapping-config button").forEach((el) => el.dispatchEvent(gpEvent));
+					if ((tester.MONITOR_TYPE === "remapping" && tester.absDiff(tester.SNAPSHOT.buttons[buttonId].value, newValue) > tester.ANALOGUE_BUTTON_THRESHOLD) || tester.MONITOR_TYPE === "value")
+						document.querySelectorAll("#mapping-config button").forEach((el) => el.dispatchEvent(gpEvent));
 				}
 			}
 		}
@@ -233,7 +234,8 @@ const tester = {
 						},
 						bubbles: true
 					});
-					if ((tester.MONITOR_TYPE === "remapping" && tester.absDiff(tester.SNAPSHOT.axes[axisId], newValue) > tester.ANALOGUE_STICK_THRESHOLD) || tester.MONITOR_TYPE === "value") document.querySelectorAll("#mapping-config button").forEach((el) => el.dispatchEvent(gpEvent));
+					if ((tester.MONITOR_TYPE === "remapping" && tester.absDiff(tester.SNAPSHOT.axes[axisId], newValue) > tester.ANALOGUE_STICK_THRESHOLD) || tester.MONITOR_TYPE === "value")
+						document.querySelectorAll("#mapping-config button").forEach((el) => el.dispatchEvent(gpEvent));
 				}
 			}
 		}

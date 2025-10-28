@@ -3,5 +3,5 @@ const settings = {
 	options: {
 		...commonSettings.options,
 		tagline: ""
-	},
+	}
 };

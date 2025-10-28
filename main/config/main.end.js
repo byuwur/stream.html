@@ -3,5 +3,5 @@ const settings = {
 	options: {
 		...commonSettings.options,
 		sceneTitle: "Gracias por<br>estar aquí hoy"
-	},
+	}
 };
