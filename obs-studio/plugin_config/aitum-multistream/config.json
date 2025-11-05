@@ -1,5 +1,5 @@
 {
-    "partner_block": 0,
+    "partner_block": 1761985297,
     "profiles": [
         {
             "name": "byuwur",
@@ -14,7 +14,20 @@
                     },
                     "audio_encoder": "ffmpeg_aac"
                 }
-            ]
+            ],
+            "video_encoder_description0": "1920x1080 60fps 6000Kbps"
+        },
+        {
+            "name": "720p60"
+        },
+        {
+            "name": "720p24"
+        },
+        {
+            "name": "1080p60"
+        },
+        {
+            "name": "1080p30"
         }
     ]
 }

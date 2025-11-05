@@ -1,7 +1,7 @@
 [
     {
         "display_name": "AMD Advanced Media Framework Plugin",
-        "enabled": true,
+        "enabled": false,
         "encoders": [
             "amd_amf_h264",
             "amd_amf_h265"
@@ -11,6 +11,19 @@
         "outputs": [],
         "services": [],
         "sources": [],
+        "version": ""
+    },
+    {
+        "display_name": "DroidCam",
+        "enabled": true,
+        "encoders": [],
+        "id": "",
+        "module_name": "droidcam-obs",
+        "outputs": [],
+        "services": [],
+        "sources": [
+            "droidcam_obs"
+        ],
         "version": ""
     },
     {
@@ -36,6 +49,22 @@
         "version": ""
     },
     {
+        "display_name": "Replay Source",
+        "enabled": false,
+        "encoders": [],
+        "id": "",
+        "module_name": "replay-source",
+        "outputs": [],
+        "services": [],
+        "sources": [
+            "replay_source",
+            "replay_filter",
+            "replay_filter_audio",
+            "replay_filter_async"
+        ],
+        "version": ""
+    },
+    {
         "display_name": "Vertical Canvas",
         "enabled": true,
         "encoders": [],
@@ -52,6 +81,17 @@
     {
         "display_name": "",
         "enabled": true,
+        "encoders": [],
+        "id": "",
+        "module_name": "aitum-multistream",
+        "outputs": [],
+        "services": [],
+        "sources": [],
+        "version": ""
+    },
+    {
+        "display_name": "",
+        "enabled": false,
         "encoders": [],
         "id": "",
         "module_name": "input-overlay",
@@ -75,7 +115,7 @@
     },
     {
         "display_name": "",
-        "enabled": true,
+        "enabled": false,
         "encoders": [],
         "id": "",
         "module_name": "obs-shaderfilter",
@@ -98,46 +138,6 @@
         "sources": [
             "spectralizer"
         ],
-        "version": ""
-    },
-    {
-        "display_name": "DroidCam",
-        "enabled": true,
-        "encoders": [],
-        "id": "",
-        "module_name": "droidcam-obs",
-        "outputs": [],
-        "services": [],
-        "sources": [
-            "droidcam_obs"
-        ],
-        "version": ""
-    },
-    {
-        "display_name": "Replay Source",
-        "enabled": true,
-        "encoders": [],
-        "id": "",
-        "module_name": "replay-source",
-        "outputs": [],
-        "services": [],
-        "sources": [
-            "replay_source",
-            "replay_filter",
-            "replay_filter_audio",
-            "replay_filter_async"
-        ],
-        "version": ""
-    },
-    {
-        "display_name": "",
-        "enabled": true,
-        "encoders": [],
-        "id": "",
-        "module_name": "aitum-multistream",
-        "outputs": [],
-        "services": [],
-        "sources": [],
         "version": ""
     }
 ]

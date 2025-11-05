@@ -3,17 +3,17 @@
         {
             "current_scene": "START.vertical",
             "grid_mode": false,
-            "width": 720,
-            "height": 1280,
-            "partner_block": 1759514775,
+            "width": 1080,
+            "height": 1920,
+            "partner_block": 1761020339,
             "preview_disabled": false,
             "virtual_cam_warned": false,
             "streaming_video_bitrate": 6000,
-            "streaming_match_main": true,
+            "streaming_match_main": false,
             "record_video_bitrate": 6000,
             "max_size_mb": 0,
             "max_time_sec": 0,
-            "recording_match_main": true,
+            "recording_match_main": false,
             "audio_bitrate": 128,
             "backtrack": false,
             "backtrack_seconds": 5,
@@ -21,17 +21,28 @@
             "backtrack_hotkeys": {
                 "ReplayBuffer.Save": []
             },
-            "virtual_camera_mode": 1,
+            "virtual_camera_mode": 0,
             "stream_outputs": [],
             "stream_delay_enabled": false,
             "stream_delay_duration": 0,
             "stream_delay_preserve": false,
             "stream_advanced_settings": false,
-            "stream_audio_track": 0,
-            "stream_encoder": "ffmpeg_svt_av1",
+            "stream_audio_track": 1,
+            "stream_encoder": "obs_nvenc_h264_tex",
             "stream_encoder_settings": {
                 "cqp": 1,
-                "bitrate": 50
+                "bitrate": 6000,
+                "rate_control": "VBR",
+                "max_bitrate": 6000,
+                "keyint_sec": 2,
+                "preset": "p7",
+                "tune": "ull",
+                "multipass": "fullres",
+                "profile": "main",
+                "target_quality": 1,
+                "bf": 0,
+                "adaptive_quantization": false,
+                "lookahead": false
             },
             "record_path": "D:/OBSVids",
             "record_advanced_settings": false,
@@ -63,7 +74,7 @@
             "split_hotkey": [],
             "transitions": [
                 {
-                    "prev_ver": 536870913,
+                    "prev_ver": 536870914,
                     "name": "byUwUr",
                     "uuid": "c0a4c6e7-a621-4f69-aadd-923323650dfb",
                     "id": "obs_stinger_transition",
@@ -74,8 +85,8 @@
                         "tp_type": 0,
                         "transition_point": 1024,
                         "preload": true,
-                        "hw_decode": true,
-                        "path": "C:/Program Files/obs-studio/stream.html/__byuwur__/stinger720p60.webm"
+                        "path": "C:/Program Files/obs-studio/stream.html/__byuwur__/stinger720p60.webm",
+                        "hw_decode": true
                     },
                     "mixers": 0,
                     "sync": 0,
@@ -97,11 +108,11 @@
                     "transition_alignment": 5,
                     "transition_mode": 0,
                     "transition_scale_type": 0,
-                    "transition_cx": 720,
-                    "transition_cy": 1280
+                    "transition_cx": 0,
+                    "transition_cy": 0
                 },
                 {
-                    "prev_ver": 536870913,
+                    "prev_ver": 536870914,
                     "name": "Move",
                     "uuid": "576007c2-b75b-40bb-ba69-7b895a8c1dfc",
                     "id": "move_transition",
@@ -144,8 +155,8 @@
                     "transition_alignment": 5,
                     "transition_mode": 0,
                     "transition_scale_type": 0,
-                    "transition_cx": 720,
-                    "transition_cy": 1280
+                    "transition_cx": 1080,
+                    "transition_cy": 1920
                 }
             ],
             "transition": "Move"

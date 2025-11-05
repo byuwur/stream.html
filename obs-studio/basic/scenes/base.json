@@ -1,6 +1,6 @@
 {
-    "current_scene": "DesktopMain",
-    "current_program_scene": "DesktopMain",
+    "current_scene": "Desktop",
+    "current_program_scene": "Desktop",
     "scene_order": [
         {
             "name": "CameraChroma"
@@ -1359,7 +1359,7 @@
                             "y": 720.0
                         },
                         "align": 5,
-                        "bounds_type": 0,
+                        "bounds_type": 2,
                         "bounds_align": 0,
                         "bounds_crop": false,
                         "crop_left": 0,
@@ -1385,12 +1385,12 @@
                             "y": 1.0
                         },
                         "bounds": {
-                            "x": 0.0,
-                            "y": 0.0
+                            "x": 1920.0,
+                            "y": 1080.0
                         },
                         "bounds_rel": {
-                            "x": 0.0,
-                            "y": 0.0
+                            "x": 3.555555582046509,
+                            "y": 2.0
                         },
                         "scale_filter": "disable",
                         "blend_method": "default",
@@ -1408,7 +1408,7 @@
                     {
                         "name": "Screen",
                         "source_uuid": "44ecfb24-066e-4ab8-a562-446867476195",
-                        "visible": false,
+                        "visible": true,
                         "locked": true,
                         "rot": 0.0,
                         "scale_ref": {
@@ -1475,7 +1475,7 @@
                         "bounds_align": 0,
                         "bounds_crop": false,
                         "crop_left": 0,
-                        "crop_top": 73,
+                        "crop_top": 0,
                         "crop_right": 0,
                         "crop_bottom": 0,
                         "id": 14,
@@ -1641,7 +1641,7 @@
                     "id": "limiter_filter",
                     "versioned_id": "limiter_filter",
                     "settings": {
-                        "threshold": -1.1
+                        "threshold": -3.0
                     },
                     "mixers": 255,
                     "sync": 0,
@@ -1666,7 +1666,10 @@
                     "uuid": "ce51d289-ac4b-435d-a787-48496a90bd58",
                     "id": "noise_gate_filter",
                     "versioned_id": "noise_gate_filter",
-                    "settings": {},
+                    "settings": {
+                        "open_threshold": -27.0,
+                        "close_threshold": -36.0
+                    },
                     "mixers": 255,
                     "sync": 0,
                     "flags": 0,
@@ -2674,7 +2677,8 @@
             "versioned_id": "monitor_capture",
             "settings": {
                 "monitor": 1,
-                "monitor_id": "\\\\?\\DISPLAY#LEN9059#5&23f07447&0&UID512#{e6f07b5f-ee97-4a90-b076-33f57bf4eaa7}"
+                "method": 2,
+                "monitor_id": "\\\\?\\DISPLAY#GSM5C89#5&58edbd1&0&UID4352#{e6f07b5f-ee97-4a90-b076-33f57bf4eaa7}"
             },
             "mixers": 0,
             "sync": 0,
@@ -2701,11 +2705,11 @@
             "versioned_id": "window_capture",
             "settings": {
                 "priority": 2,
-                "window": "Vehikl1 - AnyDesk:ad_win#222\n:AnyDesk.exe",
                 "capture_audio": true,
                 "method": 2,
                 "force_sdr": true,
-                "client_area": true
+                "client_area": true,
+                "window": "Internal Portal | Chocolate Soup - Personal - Microsoft​ Edge:Chrome_WidgetWin_1:msedge.exe"
             },
             "mixers": 63,
             "sync": 0,
@@ -2713,7 +2717,7 @@
             "volume": 1.0,
             "balance": 0.5,
             "enabled": true,
-            "muted": false,
+            "muted": true,
             "push-to-mute": false,
             "push-to-mute-delay": 0,
             "push-to-talk": false,
