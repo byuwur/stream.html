@@ -1,1 +1,11 @@
-{"rate_control":"CBR","bitrate":6000,"preset":"p1","tune":"ull","multipass":"disabled","keyint_sec":2,"profile":"baseline","lookahead":false,"adaptive_quantization":false}
+{
+  "rate_control": "CBR",
+  "bitrate": 6000,
+  "preset": "p7",
+  "tune": "hq",
+  "multipass": "qres",
+  "keyint_sec": 2,
+  "profile": "high",
+  "lookahead": true,
+  "adaptive_quantization": true
+}

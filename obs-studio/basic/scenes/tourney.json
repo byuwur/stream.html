@@ -9,7 +9,7 @@
     "name": "tourney",
     "sources": [
         {
-            "prev_ver": 536870913,
+            "prev_ver": 536870916,
             "name": "MAIN",
             "uuid": "34d6e73e-9794-4a49-aaaa-bd9ad06b2007",
             "id": "scene",
@@ -40,7 +40,7 @@
             "private_settings": {}
         },
         {
-            "prev_ver": 536870913,
+            "prev_ver": 536870916,
             "name": "MAIN.vertical",
             "uuid": "cb43b76d-c340-4123-8a81-f2a73eeed78c",
             "id": "scene",
@@ -48,7 +48,9 @@
             "settings": {
                 "id_counter": 0,
                 "custom_size": false,
-                "items": []
+                "items": [],
+                "order": 0,
+                "canvas_active": true
             },
             "mixers": 0,
             "sync": 0,
@@ -109,7 +111,7 @@
     "transition_duration": 300,
     "preview_locked": false,
     "scaling_enabled": false,
-    "scaling_level": -12,
+    "scaling_level": -18,
     "scaling_off_x": 0.0,
     "scaling_off_y": 0.0,
     "virtual-camera": {

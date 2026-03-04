@@ -1,1 +1,5 @@
-{"bitrate":6000,"preset":"balanced","profile":"main","bf":2,"keyint_sec":2}
+{
+  "rate_control": "CBR",
+  "bitrate": 5800,
+  "preset": "p7"
+}

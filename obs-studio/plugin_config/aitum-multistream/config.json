@@ -1,33 +1,34 @@
 {
-    "partner_block": 1761985297,
-    "profiles": [
+  "partner_block": 1771477519,
+  "profiles": [
+    {
+      "name": "byuwur",
+      "outputs": [
         {
-            "name": "byuwur",
-            "outputs": [
-                {
-                    "name": "YouTube",
-                    "stream_server": "rtmps://a.rtmps.youtube.com:443/live2",
-                    "stream_key": "",
-                    "scale_type": 3,
-                    "audio_encoder_settings": {
-                        "bitrate": 128
-                    },
-                    "audio_encoder": "ffmpeg_aac"
-                }
-            ],
-            "video_encoder_description0": "1920x1080 60fps 6000Kbps"
-        },
-        {
-            "name": "720p60"
-        },
-        {
-            "name": "720p24"
-        },
-        {
-            "name": "1080p60"
-        },
-        {
-            "name": "1080p30"
+          "name": "YouTube",
+          "stream_server": "rtmps://a.rtmps.youtube.com:443/live2",
+          "stream_key": "",
+          "scale_type": 3,
+          "audio_encoder_settings": {
+            "bitrate": 192
+          },
+          "audio_encoder": "ffmpeg_aac",
+          "advanced": false
         }
-    ]
+      ],
+      "video_encoder_description0": "1920x1080 60fps 5800Kbps"
+    },
+    {
+      "name": "720p60"
+    },
+    {
+      "name": "720p24"
+    },
+    {
+      "name": "1080p60"
+    },
+    {
+      "name": "1080p30"
+    }
+  ]
 }

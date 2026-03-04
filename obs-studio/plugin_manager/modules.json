@@ -15,7 +15,7 @@
     },
     {
         "display_name": "DroidCam",
-        "enabled": true,
+        "enabled": false,
         "encoders": [],
         "id": "",
         "module_name": "droidcam-obs",
@@ -85,6 +85,19 @@
         "id": "",
         "module_name": "aitum-multistream",
         "outputs": [],
+        "services": [],
+        "sources": [],
+        "version": ""
+    },
+    {
+        "display_name": "",
+        "enabled": false,
+        "encoders": [],
+        "id": "",
+        "module_name": "droidcam-virtual-output",
+        "outputs": [
+            "droidcam_virtual_output"
+        ],
         "services": [],
         "sources": [],
         "version": ""

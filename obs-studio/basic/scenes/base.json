@@ -27,7 +27,7 @@
     "name": "base",
     "sources": [
         {
-            "prev_ver": 536870913,
+            "prev_ver": 536870916,
             "name": "DesktopMain",
             "uuid": "8b3aeebc-b469-4d7b-ab78-09db5a5c760d",
             "id": "scene",
@@ -94,7 +94,7 @@
                     {
                         "name": "byuwur",
                         "source_uuid": "f9023f55-3eba-4354-8900-c7657cc30711",
-                        "visible": true,
+                        "visible": false,
                         "locked": true,
                         "rot": 0.0,
                         "scale_ref": {
@@ -509,7 +509,7 @@
             "private_settings": {}
         },
         {
-            "prev_ver": 536870913,
+            "prev_ver": 536870916,
             "name": "byuwur",
             "uuid": "f9023f55-3eba-4354-8900-c7657cc30711",
             "id": "image_source",
@@ -537,7 +537,7 @@
             "private_settings": {},
             "filters": [
                 {
-                    "prev_ver": 536870913,
+                    "prev_ver": 536870916,
                     "name": "Corrección de color",
                     "uuid": "f659d398-7650-4005-8c7c-785451b83f4c",
                     "id": "color_filter",
@@ -566,7 +566,7 @@
             ]
         },
         {
-            "prev_ver": 536870913,
+            "prev_ver": 536870916,
             "name": "TestControllers",
             "uuid": "595c592f-b663-4614-b576-949cbc7fbc48",
             "id": "scene",
@@ -940,7 +940,7 @@
             "private_settings": {}
         },
         {
-            "prev_ver": 536870913,
+            "prev_ver": 536870916,
             "name": "Gamepad1",
             "uuid": "95025f4e-cf9c-4526-bb50-c6c5916b1dd1",
             "id": "browser_source",
@@ -975,7 +975,7 @@
             "private_settings": {}
         },
         {
-            "prev_ver": 536870913,
+            "prev_ver": 536870916,
             "name": "Gamepad2",
             "uuid": "2f62ab45-d383-4557-865a-bc1780f987c8",
             "id": "browser_source",
@@ -1010,7 +1010,7 @@
             "private_settings": {}
         },
         {
-            "prev_ver": 536870913,
+            "prev_ver": 536870916,
             "name": "Gamepad3",
             "uuid": "d17de192-0bb1-4625-ab77-8d8d17aa4199",
             "id": "browser_source",
@@ -1045,7 +1045,7 @@
             "private_settings": {}
         },
         {
-            "prev_ver": 536870913,
+            "prev_ver": 536870916,
             "name": "Gamepad4",
             "uuid": "b61cb076-a1f8-49c9-b5b6-4bd0630c915f",
             "id": "browser_source",
@@ -1080,7 +1080,7 @@
             "private_settings": {}
         },
         {
-            "prev_ver": 536870913,
+            "prev_ver": 536870916,
             "name": "Labels",
             "uuid": "66cd3d78-37b9-493c-9393-183f4b505537",
             "id": "text_gdiplus",
@@ -1119,7 +1119,7 @@
             "private_settings": {}
         },
         {
-            "prev_ver": 536870913,
+            "prev_ver": 536870916,
             "name": "Desktop",
             "uuid": "e3706b93-418d-4b1d-9882-2cf73efe10b6",
             "id": "scene",
@@ -1186,7 +1186,7 @@
                     {
                         "name": "byuwur",
                         "source_uuid": "f9023f55-3eba-4354-8900-c7657cc30711",
-                        "visible": true,
+                        "visible": false,
                         "locked": true,
                         "rot": 0.0,
                         "scale_ref": {
@@ -1402,13 +1402,13 @@
                             "duration": 0
                         },
                         "private_settings": {
-                            "collapsed": true
+                            "collapsed": false
                         }
                     },
                     {
                         "name": "Screen",
                         "source_uuid": "44ecfb24-066e-4ab8-a562-446867476195",
-                        "visible": true,
+                        "visible": false,
                         "locked": true,
                         "rot": 0.0,
                         "scale_ref": {
@@ -1474,9 +1474,9 @@
                         "bounds_type": 2,
                         "bounds_align": 0,
                         "bounds_crop": false,
-                        "crop_left": 0,
-                        "crop_top": 0,
-                        "crop_right": 0,
+                        "crop_left": 45,
+                        "crop_top": 43,
+                        "crop_right": 35,
                         "crop_bottom": 0,
                         "id": 14,
                         "group_item_backup": false,
@@ -1544,7 +1544,7 @@
             "private_settings": {}
         },
         {
-            "prev_ver": 536870913,
+            "prev_ver": 536870916,
             "name": "Audio",
             "uuid": "2045ad58-dfba-4bed-9783-5a1858c865da",
             "id": "wasapi_output_capture",
@@ -1575,7 +1575,7 @@
             "private_settings": {},
             "filters": [
                 {
-                    "prev_ver": 536870913,
+                    "prev_ver": 536870916,
                     "name": "Ganancia",
                     "uuid": "70267fc7-93e2-420a-af80-20b35ceae66c",
                     "id": "gain_filter",
@@ -1603,7 +1603,7 @@
             ]
         },
         {
-            "prev_ver": 536870913,
+            "prev_ver": 536870916,
             "name": "Mic",
             "uuid": "5f730251-a0e2-4bb5-a03a-7cc561b89909",
             "id": "wasapi_input_capture",
@@ -1618,7 +1618,7 @@
             "volume": 1.0,
             "balance": 0.5,
             "enabled": true,
-            "muted": false,
+            "muted": true,
             "push-to-mute": false,
             "push-to-mute-delay": 0,
             "push-to-talk": false,
@@ -1635,7 +1635,7 @@
             "private_settings": {},
             "filters": [
                 {
-                    "prev_ver": 536870913,
+                    "prev_ver": 536870916,
                     "name": "Limitador",
                     "uuid": "6ba64e74-3041-4846-af18-99589e49c6c7",
                     "id": "limiter_filter",
@@ -1661,7 +1661,7 @@
                     "private_settings": {}
                 },
                 {
-                    "prev_ver": 536870913,
+                    "prev_ver": 536870916,
                     "name": "Noise Gate",
                     "uuid": "ce51d289-ac4b-435d-a787-48496a90bd58",
                     "id": "noise_gate_filter",
@@ -1688,7 +1688,7 @@
                     "private_settings": {}
                 },
                 {
-                    "prev_ver": 536870913,
+                    "prev_ver": 536870916,
                     "name": "Ganancia",
                     "uuid": "2bd82644-13e1-4483-9489-1ba194e3ff32",
                     "id": "gain_filter",
@@ -1716,7 +1716,7 @@
             ]
         },
         {
-            "prev_ver": 536870913,
+            "prev_ver": 536870916,
             "name": "White",
             "uuid": "a8db54ba-0ae3-47b9-bda5-b2de9bb55c6e",
             "id": "color_source",
@@ -1742,7 +1742,7 @@
             "private_settings": {}
         },
         {
-            "prev_ver": 536870913,
+            "prev_ver": 536870916,
             "name": "CameraMain",
             "uuid": "ebc8475c-297a-439c-9413-c4179a897c92",
             "id": "scene",
@@ -1809,7 +1809,7 @@
                     {
                         "name": "byuwur",
                         "source_uuid": "f9023f55-3eba-4354-8900-c7657cc30711",
-                        "visible": true,
+                        "visible": false,
                         "locked": true,
                         "rot": 0.0,
                         "scale_ref": {
@@ -2224,7 +2224,7 @@
             "private_settings": {}
         },
         {
-            "prev_ver": 536870913,
+            "prev_ver": 536870916,
             "name": "Camera",
             "uuid": "e938a96f-2600-4910-922f-0e8b681bd5c7",
             "id": "scene",
@@ -2291,7 +2291,7 @@
                     {
                         "name": "byuwur",
                         "source_uuid": "f9023f55-3eba-4354-8900-c7657cc30711",
-                        "visible": true,
+                        "visible": false,
                         "locked": true,
                         "rot": 0.0,
                         "scale_ref": {
@@ -2592,7 +2592,7 @@
             "private_settings": {}
         },
         {
-            "prev_ver": 536870913,
+            "prev_ver": 536870916,
             "name": "Cam",
             "uuid": "c97bb7e9-767c-403d-aafe-b47ff9707fbc",
             "id": "dshow_input",
@@ -2640,7 +2640,7 @@
             },
             "filters": [
                 {
-                    "prev_ver": 536870913,
+                    "prev_ver": 536870916,
                     "name": "Chroma Key",
                     "uuid": "f89c55db-95e6-43c1-97c1-a2fed09f4601",
                     "id": "chroma_key_filter",
@@ -2670,7 +2670,7 @@
             ]
         },
         {
-            "prev_ver": 536870913,
+            "prev_ver": 536870916,
             "name": "Screen",
             "uuid": "44ecfb24-066e-4ab8-a562-446867476195",
             "id": "monitor_capture",
@@ -2678,7 +2678,7 @@
             "settings": {
                 "monitor": 1,
                 "method": 2,
-                "monitor_id": "\\\\?\\DISPLAY#GSM5C89#5&58edbd1&0&UID4352#{e6f07b5f-ee97-4a90-b076-33f57bf4eaa7}"
+                "monitor_id": "\\\\?\\DISPLAY#GSM5C68#5&58edbd1&0&UID4352#{e6f07b5f-ee97-4a90-b076-33f57bf4eaa7}"
             },
             "mixers": 0,
             "sync": 0,
@@ -2698,7 +2698,7 @@
             "private_settings": {}
         },
         {
-            "prev_ver": 536870913,
+            "prev_ver": 536870916,
             "name": "Window",
             "uuid": "f4c77145-1473-4a37-98c7-dfb047f5fd83",
             "id": "window_capture",
@@ -2706,10 +2706,10 @@
             "settings": {
                 "priority": 2,
                 "capture_audio": true,
+                "window": "NI.2022-00052AudienciaJuicioOralAlirioAndrésTrujilloMateus | Microsoft Teams - Personal - Microsoft​ Edge:Chrome_WidgetWin_1:msedge.exe",
                 "method": 2,
                 "force_sdr": true,
-                "client_area": true,
-                "window": "Internal Portal | Chocolate Soup - Personal - Microsoft​ Edge:Chrome_WidgetWin_1:msedge.exe"
+                "client_area": true
             },
             "mixers": 63,
             "sync": 0,
@@ -2717,7 +2717,7 @@
             "volume": 1.0,
             "balance": 0.5,
             "enabled": true,
-            "muted": true,
+            "muted": false,
             "push-to-mute": false,
             "push-to-mute-delay": 0,
             "push-to-talk": false,
@@ -2734,7 +2734,7 @@
             "private_settings": {}
         },
         {
-            "prev_ver": 536870913,
+            "prev_ver": 536870916,
             "name": "CameraChroma",
             "uuid": "7d513aff-2981-4923-a7a0-f609f3253e68",
             "id": "scene",
@@ -2801,7 +2801,7 @@
                     {
                         "name": "byuwur",
                         "source_uuid": "f9023f55-3eba-4354-8900-c7657cc30711",
-                        "visible": true,
+                        "visible": false,
                         "locked": true,
                         "rot": 0.0,
                         "scale_ref": {
@@ -3216,7 +3216,7 @@
             "private_settings": {}
         },
         {
-            "prev_ver": 536870913,
+            "prev_ver": 536870916,
             "name": "Video",
             "uuid": "de86d0d6-4e9a-42e6-aa1c-155e66862cd8",
             "id": "scene",
@@ -3283,7 +3283,7 @@
                     {
                         "name": "byuwur",
                         "source_uuid": "f9023f55-3eba-4354-8900-c7657cc30711",
-                        "visible": true,
+                        "visible": false,
                         "locked": true,
                         "rot": 0.0,
                         "scale_ref": {
@@ -3641,7 +3641,7 @@
             "private_settings": {}
         },
         {
-            "prev_ver": 536870913,
+            "prev_ver": 536870916,
             "name": "Media",
             "uuid": "fcf32ae3-65ec-40e9-aea5-50f788b09b43",
             "id": "ffmpeg_source",
@@ -3681,7 +3681,7 @@
             "private_settings": {},
             "filters": [
                 {
-                    "prev_ver": 536870913,
+                    "prev_ver": 536870916,
                     "name": "Gain",
                     "uuid": "c7b03555-54ec-4a96-a938-66f307bca568",
                     "id": "gain_filter",
@@ -3709,7 +3709,7 @@
             ]
         },
         {
-            "prev_ver": 536870913,
+            "prev_ver": 536870916,
             "name": "Escena vertical",
             "uuid": "05d1f088-3d63-4dd9-a06b-bf827750e0ff",
             "id": "scene",
@@ -3717,7 +3717,9 @@
             "settings": {
                 "id_counter": 0,
                 "custom_size": false,
-                "items": []
+                "items": [],
+                "order": 0,
+                "canvas_active": true
             },
             "mixers": 0,
             "sync": 0,
@@ -3740,7 +3742,7 @@
     ],
     "groups": [
         {
-            "prev_ver": 536870913,
+            "prev_ver": 536870916,
             "name": "_common",
             "uuid": "a933aec7-43fa-46cb-a71e-cec4d5a070a6",
             "id": "group",
@@ -3809,7 +3811,7 @@
                     {
                         "name": "byuwur",
                         "source_uuid": "f9023f55-3eba-4354-8900-c7657cc30711",
-                        "visible": true,
+                        "visible": false,
                         "locked": true,
                         "rot": 0.0,
                         "scale_ref": {
@@ -4055,7 +4057,7 @@
     "transition_duration": 999,
     "preview_locked": false,
     "scaling_enabled": false,
-    "scaling_level": -20,
+    "scaling_level": -18,
     "scaling_off_x": 0.0,
     "scaling_off_y": 0.0,
     "virtual-camera": {
