@@ -1,5 +1,1 @@
-{
-  "rate_control": "CBR",
-  "bitrate": 5800,
-  "preset": "p7"
-}
+{"rate_control":"CBR","bitrate":5800,"preset":"p7"}
