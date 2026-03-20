@@ -5,7 +5,7 @@
       "grid_mode": false,
       "width": 1080,
       "height": 1920,
-      "partner_block": 1772712543,
+      "partner_block": 1773936328,
       "preview_disabled": true,
       "virtual_cam_warned": false,
       "streaming_video_bitrate": 5800,
@@ -74,7 +74,7 @@
       "split_hotkey": [],
       "transitions": [
         {
-          "prev_ver": 536870916,
+          "prev_ver": 536936448,
           "name": "byUwUr",
           "uuid": "c0a4c6e7-a621-4f69-aadd-923323650dfb",
           "id": "obs_stinger_transition",
@@ -112,7 +112,7 @@
           "transition_cy": 0
         },
         {
-          "prev_ver": 536870916,
+          "prev_ver": 536936448,
           "name": "Move",
           "uuid": "576007c2-b75b-40bb-ba69-7b895a8c1dfc",
           "id": "move_transition",

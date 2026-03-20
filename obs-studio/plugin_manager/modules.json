@@ -49,22 +49,6 @@
         "version": ""
     },
     {
-        "display_name": "Replay Source",
-        "enabled": false,
-        "encoders": [],
-        "id": "",
-        "module_name": "replay-source",
-        "outputs": [],
-        "services": [],
-        "sources": [
-            "replay_source",
-            "replay_filter",
-            "replay_filter_audio",
-            "replay_filter_async"
-        ],
-        "version": ""
-    },
-    {
         "display_name": "Vertical Canvas",
         "enabled": true,
         "encoders": [],
@@ -117,6 +101,35 @@
     },
     {
         "display_name": "",
+        "enabled": true,
+        "encoders": [],
+        "id": "",
+        "module_name": "spectralizer",
+        "outputs": [],
+        "services": [],
+        "sources": [
+            "spectralizer"
+        ],
+        "version": ""
+    },
+    {
+        "display_name": "Replay Source",
+        "enabled": false,
+        "encoders": [],
+        "id": "",
+        "module_name": "replay-source",
+        "outputs": [],
+        "services": [],
+        "sources": [
+            "replay_source",
+            "replay_filter",
+            "replay_filter_audio",
+            "replay_filter_async"
+        ],
+        "version": ""
+    },
+    {
+        "display_name": "",
         "enabled": false,
         "encoders": [],
         "id": "",
@@ -137,19 +150,6 @@
         "sources": [
             "shader_filter",
             "shader_transition"
-        ],
-        "version": ""
-    },
-    {
-        "display_name": "",
-        "enabled": true,
-        "encoders": [],
-        "id": "",
-        "module_name": "spectralizer",
-        "outputs": [],
-        "services": [],
-        "sources": [
-            "spectralizer"
         ],
         "version": ""
     }
