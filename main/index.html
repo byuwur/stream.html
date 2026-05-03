@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 	<head>
 		<meta charset="utf-8" />
@@ -15,8 +15,14 @@
 		<script src="./js/_jquery311.min.js" defer></script>
 		<script src="./js/_tweenMax.min.js" defer></script>
 		<script defer>
+			const TRUTHIES = [true, "true", "t", 1, "1", "yes", "y"];
+			const FALSIES = [false, "false", "f", 0, "0", "no", "n"];
 			const config = new URLSearchParams(window.location.search).get("mode") || "start";
+			const showBG = new URLSearchParams(window.location.search).get("showBG") || "false";
+			const hideCountdown = new URLSearchParams(window.location.search).get("hideCountdown") || "false";
 			console.log("config=", config);
+			console.log("showBG=", showBG);
+			console.log("hideCountdown=", hideCountdown);
 			function loadScript(src) {
 				return new Promise((resolve, reject) => {
 					const script = document.createElement("script");
@@ -31,6 +37,9 @@
 					await loadScript("./config/main.settings.js");
 					await loadScript(`./config/main.${config}.js`);
 					await loadScript("./js/main.js");
+					//
+					if (!FALSIES.includes(showBG)) $("#scene").css("background", "#0007");
+					if (!FALSIES.includes(hideCountdown)) $("#countdown").remove();
 				} catch (error) {
 					console.error("Error loading scripts:", error);
 				}

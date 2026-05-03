@@ -15,7 +15,7 @@
     },
     {
         "display_name": "DroidCam",
-        "enabled": false,
+        "enabled": true,
         "encoders": [],
         "id": "",
         "module_name": "droidcam-obs",
@@ -75,7 +75,7 @@
     },
     {
         "display_name": "",
-        "enabled": false,
+        "enabled": true,
         "encoders": [],
         "id": "",
         "module_name": "droidcam-virtual-output",
@@ -88,7 +88,7 @@
     },
     {
         "display_name": "",
-        "enabled": false,
+        "enabled": true,
         "encoders": [],
         "id": "",
         "module_name": "input-overlay",
