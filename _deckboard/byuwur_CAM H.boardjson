@@ -1,19 +1,19 @@
 [
   {
-    "name": "byuwur_CAM",
+    "name": "byuwur_CAM H",
     "background": "#434343",
-    "order": 2,
+    "order": 4,
     "layout": 6,
     "image": "",
     "sort": null,
     "type": "buttons",
     "args": "",
-    "width": 3,
-    "height": 8,
-    "converted": 1,
+    "width": 6,
+    "height": 4,
+    "converted": null,
     "macros": [
       {
-        "board_id": 3,
+        "board_id": 6,
         "title": "Go to byUwUr",
         "img": "",
         "type": "board",
@@ -38,14 +38,14 @@
         "title_box_color2": "",
         "title_color2": "#ffffff",
         "position2": null,
-        "x": 1,
-        "y": 7,
+        "x": 4,
+        "y": 3,
         "w": 1,
         "h": 1,
         "mode": "button"
       },
       {
-        "board_id": 3,
+        "board_id": 6,
         "title": "Cam ON",
         "img": "",
         "type": "obs-filter",
@@ -77,7 +77,7 @@
         "mode": "button"
       },
       {
-        "board_id": 3,
+        "board_id": 6,
         "title": "Cam OFF",
         "img": "",
         "type": "obs-filter",
@@ -109,7 +109,7 @@
         "mode": "button"
       },
       {
-        "board_id": 3,
+        "board_id": 6,
         "title": "720p Bottom",
         "img": "",
         "type": "obs-filter",
@@ -134,14 +134,14 @@
         "title_box_color2": "#0000007F",
         "title_color2": "#FFFFFF",
         "position2": null,
-        "x": 0,
-        "y": 6,
+        "x": 3,
+        "y": 2,
         "w": 1,
         "h": 1,
         "mode": "button"
       },
       {
-        "board_id": 3,
+        "board_id": 6,
         "title": "1080p Bottom",
         "img": "",
         "type": "obs-filter",
@@ -173,7 +173,7 @@
         "mode": "button"
       },
       {
-        "board_id": 3,
+        "board_id": 6,
         "title": "720p TopLeft",
         "img": "",
         "type": "obs-filter",
@@ -198,14 +198,14 @@
         "title_box_color2": "#0000007F",
         "title_color2": "#FFFFFF",
         "position2": null,
-        "x": 0,
-        "y": 4,
+        "x": 3,
+        "y": 0,
         "w": 1,
         "h": 1,
         "mode": "button"
       },
       {
-        "board_id": 3,
+        "board_id": 6,
         "title": "720p MidLeft",
         "img": "",
         "type": "obs-filter",
@@ -230,14 +230,14 @@
         "title_box_color2": "#0000007F",
         "title_color2": "#FFFFFF",
         "position2": null,
-        "x": 0,
-        "y": 5,
+        "x": 3,
+        "y": 1,
         "w": 1,
         "h": 1,
         "mode": "button"
       },
       {
-        "board_id": 3,
+        "board_id": 6,
         "title": "720p TopRight",
         "img": "",
         "type": "obs-filter",
@@ -262,14 +262,14 @@
         "title_box_color2": "#0000007F",
         "title_color2": "#FFFFFF",
         "position2": null,
-        "x": 2,
-        "y": 4,
+        "x": 5,
+        "y": 0,
         "w": 1,
         "h": 1,
         "mode": "button"
       },
       {
-        "board_id": 3,
+        "board_id": 6,
         "title": "720p BotRight",
         "img": "",
         "type": "obs-filter",
@@ -294,14 +294,14 @@
         "title_box_color2": "#0000007F",
         "title_color2": "#FFFFFF",
         "position2": null,
-        "x": 1,
-        "y": 6,
+        "x": 4,
+        "y": 2,
         "w": 1,
         "h": 1,
         "mode": "button"
       },
       {
-        "board_id": 3,
+        "board_id": 6,
         "title": "720p MidRight",
         "img": "",
         "type": "obs-filter",
@@ -326,14 +326,14 @@
         "title_box_color2": "#0000007F",
         "title_color2": "#FFFFFF",
         "position2": null,
-        "x": 2,
-        "y": 5,
+        "x": 5,
+        "y": 1,
         "w": 1,
         "h": 1,
         "mode": "button"
       },
       {
-        "board_id": 3,
+        "board_id": 6,
         "title": "1080p TopLeft",
         "img": "",
         "type": "obs-filter",
@@ -365,7 +365,7 @@
         "mode": "button"
       },
       {
-        "board_id": 3,
+        "board_id": 6,
         "title": "1080p MidLeft",
         "img": "",
         "type": "obs-filter",
@@ -397,7 +397,7 @@
         "mode": "button"
       },
       {
-        "board_id": 3,
+        "board_id": 6,
         "title": "1080p TopRight",
         "img": "",
         "type": "obs-filter",
@@ -429,7 +429,7 @@
         "mode": "button"
       },
       {
-        "board_id": 3,
+        "board_id": 6,
         "title": "1080p BotRight",
         "img": "",
         "type": "obs-filter",
@@ -461,7 +461,7 @@
         "mode": "button"
       },
       {
-        "board_id": 3,
+        "board_id": 6,
         "title": "1080p MidRight",
         "img": "",
         "type": "obs-filter",
@@ -493,7 +493,7 @@
         "mode": "button"
       },
       {
-        "board_id": 3,
+        "board_id": 6,
         "title": "MAIN: MusicTxt",
         "img": "",
         "type": "obs-source",
@@ -525,7 +525,7 @@
         "mode": "button"
       },
       {
-        "board_id": 3,
+        "board_id": 6,
         "title": "720p BotRight Music",
         "img": "",
         "type": "obs-filter",
@@ -550,14 +550,14 @@
         "title_box_color2": "#0000007F",
         "title_color2": "#FFFFFF",
         "position2": null,
-        "x": 2,
-        "y": 6,
+        "x": 5,
+        "y": 2,
         "w": 1,
         "h": 1,
         "mode": "button"
       },
       {
-        "board_id": 3,
+        "board_id": 6,
         "title": "1080p BotRight Music",
         "img": "",
         "type": "obs-filter",
@@ -589,7 +589,7 @@
         "mode": "button"
       },
       {
-        "board_id": 3,
+        "board_id": 6,
         "title": "1080p Rotate 180°",
         "img": "",
         "type": "obs-filter",
@@ -621,7 +621,7 @@
         "mode": "button"
       },
       {
-        "board_id": 3,
+        "board_id": 6,
         "title": "1080p Rotate 0°",
         "img": "",
         "type": "obs-filter",
@@ -653,7 +653,7 @@
         "mode": "button"
       },
       {
-        "board_id": 3,
+        "board_id": 6,
         "title": "720p Rotate 180°",
         "img": "",
         "type": "obs-filter",
@@ -678,14 +678,14 @@
         "title_box_color2": "#0000007F",
         "title_color2": "#FFFFFF",
         "position2": null,
-        "x": 1,
-        "y": 4,
+        "x": 4,
+        "y": 0,
         "w": 1,
         "h": 1,
         "mode": "button"
       },
       {
-        "board_id": 3,
+        "board_id": 6,
         "title": "720p Rotate 0°",
         "img": "",
         "type": "obs-filter",
@@ -710,8 +710,8 @@
         "title_box_color2": "#0000007F",
         "title_color2": "#FFFFFF",
         "position2": null,
-        "x": 1,
-        "y": 5,
+        "x": 4,
+        "y": 1,
         "w": 1,
         "h": 1,
         "mode": "button"
