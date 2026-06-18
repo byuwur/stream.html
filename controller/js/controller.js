@@ -76,8 +76,8 @@ function setButtonValues(currentItem, value) {
 			currentItem.find(".axes-config").prop("checked") || currentItem.find("input[type=radio][value=dpad]").prop("checked")
 				? `${properNames[dataObject.choiceType]} ${dataObject.choice}`
 				: dataObject.choiceOperand
-				? `${properNames[dataObject.choiceType]} ${dataObject.choice} ${dataObject.choiceOperand}`
-				: `${properNames[dataObject.choiceType]} ${dataObject.choice}`;
+					? `${properNames[dataObject.choiceType]} ${dataObject.choice} ${dataObject.choiceOperand}`
+					: `${properNames[dataObject.choiceType]} ${dataObject.choice}`;
 		$(this).html(displayName).data("previous-value", displayName);
 	});
 }

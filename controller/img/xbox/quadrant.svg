@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg id="layer" xmlns="http://www.w3.org/2000/svg" version="1.1" width="38" height="38"
-    viewBox="0 0 38 38">
-    <defs>
-        <style>
+<svg id="layer"
+  xmlns="http://www.w3.org/2000/svg" version="1.1" width="38" height="38" viewBox="0 0 38 38">
+  <defs>
+    <style>
             .st0 {
             fill: #fff;
             }
@@ -19,24 +19,24 @@
             .st3 {
             fill: #dedede;
             }
-        </style>
-    </defs>
+    </style>
+  </defs>
+  <g>
+    <rect class="st2" x="10.2" y="29.3" width="8.5" height="8.5" />
+    <path class="st3" d="M18.2,29.8v7.5h-7.5v-7.5h7.5M19.3,28.8h-9.5v9.5h9.5v-9.5h0Z" />
+  </g>
+  <g>
     <g>
-        <rect class="st2" x="10.2" y="29.3" width="8.5" height="8.5" />
-        <path class="st3" d="M18.2,29.8v7.5h-7.5v-7.5h7.5M19.3,28.8h-9.5v9.5h9.5v-9.5h0Z" />
+      <rect class="st0" x="10.2" y="10.5" width="8.5" height="8.5" />
+      <path class="st3" d="M18.2,11v7.5h-7.5v-7.5h7.5M19.3,10h-9.5v9.5h9.5v-9.5h0Z" />
     </g>
-    <g>
-        <g>
-            <rect class="st0" x="10.2" y="10.5" width="8.5" height="8.5" />
-            <path class="st3" d="M18.2,11v7.5h-7.5v-7.5h7.5M19.3,10h-9.5v9.5h9.5v-9.5h0Z" />
-        </g>
-    </g>
-    <g>
-        <rect class="st2" x="29" y="10.5" width="8.5" height="8.5" />
-        <path class="st3" d="M37,11v7.5h-7.5v-7.5h7.5M38,10h-9.5v9.5h9.5v-9.5Z" />
-    </g>
-    <g>
-        <rect class="st2" x="29" y="29.3" width="8.5" height="8.5" />
-        <path class="st3" d="M37,29.8v7.5h-7.5v-7.5h7.5M38,28.8h-9.5v9.5h9.5v-9.5Z" />
-    </g>
+  </g>
+  <g>
+    <rect class="st2" x="29" y="10.5" width="8.5" height="8.5" />
+    <path class="st3" d="M37,11v7.5h-7.5v-7.5h7.5M38,10h-9.5v9.5h9.5v-9.5Z" />
+  </g>
+  <g>
+    <rect class="st2" x="29" y="29.3" width="8.5" height="8.5" />
+    <path class="st3" d="M37,29.8v7.5h-7.5v-7.5h7.5M38,28.8h-9.5v9.5h9.5v-9.5Z" />
+  </g>
 </svg>
