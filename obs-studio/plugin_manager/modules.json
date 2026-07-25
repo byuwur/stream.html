@@ -14,6 +14,17 @@
         "version": ""
     },
     {
+        "display_name": "Aitum Multistream",
+        "enabled": true,
+        "encoders": [],
+        "id": "",
+        "module_name": "aitum-multistream",
+        "outputs": [],
+        "services": [],
+        "sources": [],
+        "version": ""
+    },
+    {
         "display_name": "DroidCam",
         "enabled": true,
         "encoders": [],
@@ -64,18 +75,7 @@
     },
     {
         "display_name": "",
-        "enabled": true,
-        "encoders": [],
-        "id": "",
-        "module_name": "aitum-multistream",
-        "outputs": [],
-        "services": [],
-        "sources": [],
-        "version": ""
-    },
-    {
-        "display_name": "",
-        "enabled": true,
+        "enabled": false,
         "encoders": [],
         "id": "",
         "module_name": "droidcam-virtual-output",
@@ -88,7 +88,7 @@
     },
     {
         "display_name": "",
-        "enabled": true,
+        "enabled": false,
         "encoders": [],
         "id": "",
         "module_name": "input-overlay",
@@ -109,47 +109,6 @@
         "services": [],
         "sources": [
             "spectralizer"
-        ],
-        "version": ""
-    },
-    {
-        "display_name": "Replay Source",
-        "enabled": false,
-        "encoders": [],
-        "id": "",
-        "module_name": "replay-source",
-        "outputs": [],
-        "services": [],
-        "sources": [
-            "replay_source",
-            "replay_filter",
-            "replay_filter_audio",
-            "replay_filter_async"
-        ],
-        "version": ""
-    },
-    {
-        "display_name": "",
-        "enabled": false,
-        "encoders": [],
-        "id": "",
-        "module_name": "obs-multi-rtmp",
-        "outputs": [],
-        "services": [],
-        "sources": [],
-        "version": ""
-    },
-    {
-        "display_name": "",
-        "enabled": false,
-        "encoders": [],
-        "id": "",
-        "module_name": "obs-shaderfilter",
-        "outputs": [],
-        "services": [],
-        "sources": [
-            "shader_filter",
-            "shader_transition"
         ],
         "version": ""
     }
