@@ -1539,11 +1539,11 @@ a:active .menu-button {
 }
 
 #params .definition li::marker {
-	content: "—";
+	content: "=";
 }
 
 #params .definition li:before {
-	content: "—";
+	content: "=";
 	margin-right: 4px;
 }
 
