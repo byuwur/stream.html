@@ -1,11 +1,11 @@
 {
   "canvas": [
     {
-      "current_scene": "START.vertical",
+      "current_scene": "MAIN.vertical",
       "grid_mode": false,
       "width": 1080,
       "height": 1920,
-      "partner_block": 1786031454,
+      "partner_block": 1789889037,
       "preview_disabled": false,
       "virtual_cam_warned": false,
       "streaming_video_bitrate": 5800,
@@ -27,27 +27,39 @@
           "enabled": true,
           "name": "YouTube Vertical",
           "stream_server": "rtmps://a.rtmps.youtube.com:443/live2",
-          "stream_key": "",
           "scale_type": 3,
           "audio_encoder_settings": {
             "bitrate": 192
           },
           "audio_encoder": "ffmpeg_aac",
           "expanded": false,
-          "advanced": false
+          "advanced": false,
+          "stream_key": ""
         },
         {
           "enabled": true,
-          "name": "TikTok Vertical",
+          "stream_server": "rtmp://127.0.0.1:19351/live",
+          "scale_type": 3,
+          "audio_encoder_settings": {
+            "bitrate": 192
+          },
+          "audio_encoder": "ffmpeg_aac",
+          "expanded": false,
+          "advanced": false,
+          "name": "TikTok Vertical (Dual)",
+          "stream_key": ""
+        },
+        {
+          "enabled": true,
+          "name": "TikTok Vertical (Main)",
           "stream_server": "rtmp://127.0.0.1:19350/live",
           "stream_key": "",
           "scale_type": 3,
           "audio_encoder_settings": {
-            "bitrate": 192
+            "bitrate": 128
           },
           "audio_encoder": "ffmpeg_aac",
-          "expanded": false,
-          "advanced": false
+          "expanded": false
         }
       ],
       "stream_delay_enabled": false,
@@ -103,7 +115,7 @@
       "split_hotkey": [],
       "transitions": [
         {
-          "prev_ver": 537001985,
+          "prev_ver": 537001986,
           "name": "byUwUr",
           "uuid": "c0a4c6e7-a621-4f69-aadd-923323650dfb",
           "id": "obs_stinger_transition",
@@ -141,7 +153,7 @@
           "transition_cy": 0
         },
         {
-          "prev_ver": 537001985,
+          "prev_ver": 537001986,
           "name": "Move",
           "uuid": "576007c2-b75b-40bb-ba69-7b895a8c1dfc",
           "id": "move_transition",
@@ -180,7 +192,7 @@
           "deinterlace_field_order": 0,
           "monitoring_type": 0,
           "private_settings": {},
-          "transition_source_a": "START.vertical",
+          "transition_source_a": "MAIN.vertical",
           "transition_alignment": 5,
           "transition_mode": 0,
           "transition_scale_type": 0,
