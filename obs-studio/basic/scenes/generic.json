@@ -368,7 +368,7 @@
             "id": "image_source",
             "versioned_id": "image_source",
             "settings": {
-                "file": "C:/Program Files/obs-studio/stream.html/_generic/logoFuridance.png"
+                "file": "C:/Program Files/obs-studio/stream.html/_generic.OBS/logoFuridance.png"
             },
             "mixers": 0,
             "sync": 0,
@@ -394,7 +394,7 @@
             "id": "image_source",
             "versioned_id": "image_source",
             "settings": {
-                "file": "C:/Program Files/obs-studio/stream.html/_generic/lowerThird.png"
+                "file": "C:/Program Files/obs-studio/stream.html/_generic.OBS/lowerThird.png"
             },
             "mixers": 0,
             "sync": 0,
@@ -454,7 +454,7 @@
             "id": "image_source",
             "versioned_id": "image_source",
             "settings": {
-                "file": "C:/Program Files/obs-studio/stream.html/_generic/logoCOSMIC_black.png",
+                "file": "C:/Program Files/obs-studio/stream.html/_generic.OBS/logoCOSMIC_black.png",
                 "unload": false,
                 "linear_alpha": false
             },
@@ -661,7 +661,7 @@
             "versioned_id": "ffmpeg_source",
             "settings": {
                 "hw_decode": true,
-                "local_file": "C:/Program Files/obs-studio/stream.html/_generic/CosmicIntro.mp4",
+                "local_file": "C:/Program Files/obs-studio/stream.html/_generic.OBS/CosmicIntro.mp4",
                 "clear_on_media_end": false,
                 "restart_on_activate": true
             },
@@ -2556,7 +2556,7 @@
             "settings": {
                 "audio_fade_style": 1,
                 "transition_point": 1000,
-                "path": "C:/Program Files/obs-studio/stream.html/_generic/furidance_stinger.webm",
+                "path": "C:/Program Files/obs-studio/stream.html/_generic.OBS/furidance_stinger.webm",
                 "hw_decode": true
             }
         }

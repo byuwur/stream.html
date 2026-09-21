@@ -8,9 +8,9 @@
             "id": "image_source",
             "versioned_id": "image_source",
             "settings": {
-                "file": "C:/Program Files/obs-studio/stream.html/__byuwur__/Profile128p.png",
                 "unload": false,
-                "linear_alpha": false
+                "linear_alpha": false,
+                "file": "C:/Program Files/obs-studio/stream.html/_byuwur.OBS/Profile128p.png"
             },
             "mixers": 0,
             "sync": 0,
@@ -586,10 +586,10 @@
             "settings": {
                 "hw_decode": true,
                 "close_when_inactive": true,
-                "local_file": "C:/Program Files/obs-studio/stream.html/__byuwur__/bg.mp4",
                 "clear_on_media_end": false,
                 "restart_on_activate": false,
-                "speed_percent": 100
+                "speed_percent": 100,
+                "local_file": "C:/Program Files/obs-studio/stream.html/_byuwur.OBS/stinger720p60.webm"
             },
             "mixers": 255,
             "sync": 0,
@@ -4090,18 +4090,6 @@
     "transition_duration": 999,
     "transitions": [
         {
-            "name": "TestStinger",
-            "id": "obs_stinger_transition",
-            "settings": {
-                "audio_fade_style": 1,
-                "audio_monitoring": 2,
-                "transition_point": 1500,
-                "preload": true,
-                "path": "C:/Program Files/obs-studio/stream.html/__byuwur__/stinger720p60.webm",
-                "hw_decode": true
-            }
-        },
-        {
             "name": "Mover",
             "id": "move_transition",
             "settings": {
@@ -4116,6 +4104,18 @@
                 "position_out": 96,
                 "zoom_out": 100.0
             }
+        },
+        {
+            "name": "TestStinger",
+            "id": "obs_stinger_transition",
+            "settings": {
+                "audio_fade_style": 1,
+                "audio_monitoring": 2,
+                "transition_point": 1500,
+                "preload": true,
+                "hw_decode": true,
+                "path": "C:/Program Files/obs-studio/stream.html/_byuwur.OBS/stinger720p60.webm"
+            }
         }
     ],
     "quick_transitions": [
@@ -4127,14 +4127,7 @@
             "fade_to_black": false
         }
     ],
-    "saved_projectors": [
-        {
-            "monitor": -1,
-            "type": 2,
-            "geometry": "AdnQywADAAD///s5AAABKv///+QAAAQL///7OQAAAUn////kAAAECwAAAAEAAAAAB4D///s5AAABSf///+QAAAQL",
-            "alwaysOnTopOverridden": false
-        }
-    ],
+    "saved_projectors": [],
     "preview_locked": false,
     "scaling_enabled": false,
     "scaling_level": -15,
