@@ -1,437 +1,464 @@
 <!doctype html>
 <html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-		<meta property="og:title" content="Controller = [Mateus] byUwUr" />
-		<meta property="og:type" content="website" />
-		<meta property="og:image" content="https://byuwur.co/img/logo.png" />
-		<meta property="og:url" content="https://controller.byuwur.co" />
-		<meta property="og:site_name" content="Controller = [Mateus] byUwUr" />
-		<meta property="og:description" content="Bring your controller to your steam." />
-		<link rel="icon" href="./img/main.png" />
-		<title>Controller = [Mateus] byUwUr</title>
-		<link rel="stylesheet" type="text/css" href="./css/controller.css" />
-		<script src="./js/jquery1102.min.js" defer></script>
-		<script src="./config/controller.keyboard.js" defer></script>
-		<script src="./js/controller.gamepad.js" defer></script>
-		<script src="./js/controller.tester.js" defer></script>
-		<script src="./js/controller.js" defer></script>
-	</head>
-	<body>
-		<div class="container" id="gamepads">
-			<div class="template">
-				<div class="triggers">
-					<span class="trigger left" data-name="button-left-shoulder-bottom"></span>
-					<span class="trigger right" data-name="button-right-shoulder-bottom"></span>
-					<span class="trigger-button left" data-name="button-left-shoulder-bottom-digital"></span>
-					<span class="trigger-button right" data-name="button-right-shoulder-bottom-digital"></span>
-				</div>
-				<div class="bumpers">
-					<span class="bumper left" data-name="button-left-shoulder-top"></span>
-					<span class="bumper right" data-name="button-right-shoulder-top"></span>
-				</div>
-				<div class="touchpad" data-name="touch-pad"></div>
-				<div class="quadrant"></div>
-				<div class="meta" data-name="button-meta"></div>
-				<div class="arrows">
-					<span class="back" data-name="button-select"></span>
-					<span class="start" data-name="button-start"></span>
-				</div>
-				<div class="abxy">
-					<span class="button a" data-name="button-1"></span>
-					<span class="button b" data-name="button-2"></span>
-					<span class="button x" data-name="button-3"></span>
-					<span class="button y" data-name="button-4"></span>
-				</div>
-				<div class="sticks">
-					<span class="stick left" data-name="stick-1"></span>
-					<span class="stick right" data-name="stick-2"></span>
-				</div>
-				<div class="wheels">
-					<span class="wheel left" data-name="stick-1-wheel"></span>
-					<span class="wheel right" data-name="stick-2-wheel"></span>
-				</div>
-				<div class="dpad">
-					<span class="face up" data-name="button-dpad-top"></span>
-					<span class="face down" data-name="button-dpad-bottom"></span>
-					<span class="face left" data-name="button-dpad-left"></span>
-					<span class="face right" data-name="button-dpad-right"></span>
-				</div>
-				<div class="fstick" data-name="arcade-stick"></div>
-			</div>
-			<div class="controller xbox disconnected" id="gamepad-1"></div>
-			<div class="controller xbox disconnected" id="gamepad-2"></div>
-			<div class="controller xbox disconnected" id="gamepad-3"></div>
-			<div class="controller xbox disconnected" id="gamepad-4"></div>
-			<div class="controller xbox disconnected" id="gamepad-9"></div>
-		</div>
-		<div class="navbar hide-me">
-			<div class="content">
-				<div class="byuwur"></div>
-				<div class="left">
-					<a href="#menu" title="Menu"><i class="fa fa-bars menu-button"></i></a>
-				</div>
-				<div class="obs">
-					<a href="#obs" class="btn">Use with OBS here!</a>
-				</div>
-				<div class="center pselect">
-					<span>Player:</span>
-					<select class="player" id="pselect" title="Player">
-						<option>-</option>
-						<option value="gamepad-1">1</option>
-						<option value="gamepad-2">2</option>
-						<option value="gamepad-3">3</option>
-						<option value="gamepad-4">4</option>
-						<option value="gamepad-9">KB</option>
-					</select>
-					<div class="left skins">
-						<select class="console" id="cselect" title="Console">
-							<option value="xbox">Xbox (1)</option>
-							<option value="ps">PlayStation (2)</option>
-							<option value="fight-stick">Fight Stick (3)</option>
-							<option value="gc">GameCube (4)</option>
-						</select>
-					</div>
-				</div>
-			</div>
-		</div>
-		<div class="navbar nocon hide-me">
-			<div class="content">
-				<div class="box left">
-					<i class="box alert fa fa-exclamation-circle"></i>
-					<span>No controllers detected. Press ANY button or [F] on your keyboard.</span>
-				</div>
-			</div>
-		</div>
-		<div class="slideout-menu hide-me" id="menu">
-			<a class="bglink" href="#" title="Close"><div class="modal-bg"></div></a>
-			<div class="menu">
-				<div class="byuwur absolute"></div>
-				<h1><i class="fa fa-gamepad"></i>Controller</h1>
-				<div class="menu-list">
-					<a href="#info"><i class="fa fa-info-circle"></i><span>Info</span></a>
-					<a href="#obs"><i class="fa fa-tv"></i><span>Use with OBS</span></a>
-					<a href="#params"><i class="fa fa-file-text"></i><span>Parameters</span></a>
-					<a href="#remap"><i class="fa fa-gamepad"></i><span>Custom Mapping</span></a>
-				</div>
-				<p class="year">&copy; <span id="year">2025</span> Made with <i class="fa fa-heart"></i> by <a rel="noopener" href="https://byuwur.co" target="_blank">[Mateus] byUwUr</a></p>
-			</div>
-		</div>
-		<div id="modals" class="hide-me">
-			<div id="modal-template" class="modal-container">
-				<a class="bglink" href="#" title="Close"><div class="modal-bg"></div></a>
-				<div class="modal">
-					<header class="minimenu">
-						<a class="byuwur" rel="noopener" href="https://byuwur.co" target="_blank" title="[Mateus] byUwUr">&lrm;</a>
-						<ul>
-							<li>
-								<a href="#info"><i class="fa fa-info-circle"></i>Info</a>
-							</li>
-							<li>
-								<a href="#obs"><i class="fa fa-tv"></i>Use with OBS</a>
-							</li>
-							<li>
-								<a href="#params"><i class="fa fa-file-text"></i>Parameters</a>
-							</li>
-							<li>
-								<a href="#remap"><i class="fa fa-gamepad"></i>Custom Mapping</a>
-							</li>
-						</ul>
-						<a class="close" href="#">&times;</a>
-					</header>
-				</div>
-			</div>
-			<div id="info" class="modal-container">
-				<a class="bglink" href="#" title="Close"><div class="modal-bg"></div></a>
-				<div class="modal">
-					<header class="minimenu"></header>
-					<header>
-						<h1>Information</h1>
-					</header>
-					<article>
-						<p>"Locally, offline, reliable." - <a rel="noopener" href="https://byuwur.co" target="_blank">[Mateus] byUwUr</a> - Free. Forever.</p>
-						<p>
-							You can also <a rel="noopener" href="https://streamlabs.com/byuwur" target="_blank">tip</a>, <a rel="noopener" href="https://twitch.tv/byuwur" target="_blank">subscribe</a> or
-							<a rel="noopener" href="https://paypal.me/byuwur" target="_blank">donate</a>.
-						</p>
-						<p>Download the <a rel="noopener" href="https://github.com/byuwur/stream.html/releases" target="_blank">source code</a> to use it locally and independent of online services!</p>
-						<p>
-							Thanks, <a rel="noopener" href="http://aresluna.org" target="_blank">Marcin Wichary</a>, for the
-							<a rel="noopener" href="https://github.com/html5rocks/www.html5rocks.com/blob/master/content/tutorials/doodles/gamepad/static/gamepad-tester/gamepad.js" target="_blank">Gamepad.js</a>
-							and
-							<a rel="noopener" href="https://github.com/html5rocks/www.html5rocks.com/blob/master/content/tutorials/doodles/gamepad/static/gamepad-tester/tester.js" target="_blank">Tester.js</a> libraries.
-						</p>
-					</article>
-				</div>
-			</div>
-			<div id="obs" class="modal-container">
-				<a class="bglink" href="#" title="Close"><div class="modal-bg"></div></a>
-				<div class="modal">
-					<header class="minimenu"></header>
-					<header>
-						<h1>Use with OBS</h1>
-					</header>
-					<article>
-						<p>You can:</p>
-						<ol>
-							<li>Create a new Window Capture source, then select this window.</li>
-							<li>Enable "Chroma Key" in the source's filters. Set to Green.</li>
-							<li>By then you should be already done!</li>
-						</ol>
-						<p>Or preferably:</p>
-						<ol>
-							<li>Create a new Browser source on OBS.</li>
-							<li>Generate your URL and paste it, then click OK.</li>
-							<li>By then you should be already done!</li>
-						</ol>
-						<hr />
-						<section id="url-gen-page">
-							<div id="url-gen-area">
-								<div class="codeblock url-gen" id="url-gen-url" data-clipboard-text="?">Generate your URL below</div>
-								<div class="codeblock url-gen" id="url-gen-copy"><span>Copy</span></div>
-								<div class="codeblock url-gen" id="url-gen-reset"><span>Reset</span></div>
-							</div>
-							<span>Full: <span class="codeblock" id="url-gen-full">https://controller.byuwur.co/</span></span>
-							<form id="url-form">
-								<div class="form-group">
-									<label for="player-input">Player Number: </label>
-									<select id="player-input" name="player">
-										<option value="">None (Chroma-Key)</option>
-										<option value="1">Player 1</option>
-										<option value="2">Player 2</option>
-										<option value="3">Player 3</option>
-										<option value="4">Player 4</option>
-										<option value="9">Keyboard</option>
-									</select>
-								</div>
-								<div class="form-group">
-									<label for="skin-input">Skin: </label>
-									<select id="skin-input" name="skin">
-										<option value="">None</option>
-										<option value="1">Xbox (1)</option>
-										<option value="2">PlayStation (2)</option>
-										<option value="3">Fight Stick (3)</option>
-										<option value="4">GameCube (4)</option>
-									</select>
-								</div>
-								<div class="form-group"><label for="scale-input">Scale Multiplier: </label><span class="input-unit">x</span><input id="scale-input" type="text" name="scale" placeholder="0.5, 1, 2..." /></div>
-								<div class="form-group"><label for="opacity-input">Opacity: </label><input id="opacity-input" type="text" name="opacity" placeholder="0.0 to 1.0" /></div>
-								<div class="form-group"><label for="offset-input">Stick Offset: </label><span class="input-unit">px</span><input id="offset-input" type="text" name="offset" placeholder="0" /></div>
-								<div class="form-group"><label for="deadzone-input">Deadzone: </label><input id="deadzone-input" type="text" name="deadzone" placeholder="0.0 to 1.0" /></div>
-								<div class="form-group"><label for="strength-input">Disable Strength Meter: </label><input id="strength-input" type="checkbox" name="strength" value="0" /></div>
-								<div class="form-group"><label for="curve-input">Enable Stick Curving: </label><input id="curve-input" type="checkbox" name="curve" value="1" /></div>
-								<div class="form-group"><label for="rotation-input">Rotation Stop: </label><span class="input-unit">deg</span><input id="rotation-input" type="text" name="rotation" placeholder="0" /></div>
-								<input type="text" name="mapping" id="mapping-input" hidden />
-							</form>
-							<span>You can <a href="#params">see all the parameters here</a>.</span>
-						</section>
-						<hr />
-						<p>
-							You can also <a rel="noopener" href="https://streamlabs.com/byuwur" target="_blank">tip</a>, <a rel="noopener" href="https://twitch.tv/byuwur" target="_blank">subscribe</a> or
-							<a rel="noopener" href="https://paypal.me/byuwur" target="_blank">donate</a>.
-						</p>
-						<p>Download the <a rel="noopener" href="https://github.com/byuwur/stream.html/releases" target="_blank">source code</a> to use it locally and independent of online services!</p>
-						<p>"Locally, offline, reliable." - <a rel="noopener" href="https://byuwur.co" target="_blank">[Mateus] byUwUr</a> - Free. Forever.</p>
-					</article>
-				</div>
-			</div>
-			<div id="params" class="modal-container">
-				<a class="bglink" href="#" title="Close"><div class="modal-bg"></div></a>
-				<div class="modal">
-					<header class="minimenu"></header>
-					<header>
-						<h1>Parameters</h1>
-					</header>
-					<article>
-						<p>You can <a href="#obs">generate your URL here</a>!</p>
-						<section class="definition">
-							<h2 data-param="player=">Player Number</h2>
-							<div class="codeblock">/?player=1</div>
-							<ul>
-								<li>1</li>
-								<li>1 (P1), 2 (P2), 3 (P3), 4 (P4), 9 (Keyboard)</li>
-								<li>Enables "Lite Mode", displaying ONLY the controller.</li>
-							</ul>
-						</section>
-						<section class="definition">
-							<h2 data-param="skin=">Skin ID</h2>
-							<div class="codeblock">/?skin=1</div>
-							<ul>
-								<li>1</li>
-								<li>1 (Xbox), 2 (Sony), 3 (Stick), 4 (GCN)</li>
-								<li>Defaults to '1' (Xbox) if set to other values.</li>
-								<li>Requires a player number to apply (set <code class="codeblock">player=[number]</code>).</li>
-							</ul>
-						</section>
-						<section class="definition">
-							<h2 data-param="scale=">Scale Multiplier</h2>
-							<div class="codeblock">/?scale=1.25</div>
-							<ul>
-								<li>1</li>
-								<li>Any number (with decimals).</li>
-								<li>Negative values flip the controller.</li>
-							</ul>
-						</section>
-						<section class="definition">
-							<h2 data-param="opacity=">Opacity (%)</h2>
-							<div class="codeblock">/?opacity=0.25</div>
-							<ul>
-								<li>1</li>
-								<li>0.0 to 1.0 (with decimals).</li>
-								<li>Negative values hide the controller.</li>
-							</ul>
-						</section>
-						<section class="definition">
-							<h2 data-param="offset=">Stick Offset (pixels)</h2>
-							<div class="codeblock">/?offset=25</div>
-							<ul>
-								<li>20</li>
-								<li>Any number (positive).</li>
-								<li>Anything beyond 25px isn't recommended.</li>
-							</ul>
-						</section>
-						<section class="definition">
-							<h2 data-param="deadzone=">Deadzone Radius (%)</h2>
-							<div class="codeblock">/?deadzone=0.25</div>
-							<ul>
-								<li>.25</li>
-								<li>0.0 to 1.0 (with decimals).</li>
-								<li>Values higher than 1 disable stick movement.</li>
-							</ul>
-						</section>
-						<section class="definition">
-							<h2 data-param="strength=">Height Strength Meter (boolean)</h2>
-							<div class="codeblock">/?strength=0</div>
-							<ul>
-								<li>1 (true)</li>
-								<li>0 (false), 1 (true)</li>
-								<li>Any value other than '0' enables this setting.</li>
-								<li>Replaces the opacity meter with a height meter.</li>
-							</ul>
-						</section>
-						<section class="definition">
-							<h2 data-param="curve=">Enable Stick Curving (boolean)</h2>
-							<div class="codeblock">/?curve=1</div>
-							<ul>
-								<li>0 (false)</li>
-								<li>0 (false), 1 (true)</li>
-								<li>Any value other than '1' disables this setting.</li>
-							</ul>
-						</section>
-						<section class="definition">
-							<h2 data-param="rotation=">Rotational Stop (degrees)</h2>
-							<div class="codeblock">/?rotation=120</div>
-							<ul>
-								<li>120</li>
-								<li>Any positive number</li>
-								<li>Half the total rotational stop of the wheel.</li>
-								<li>Deadzone values affect this setting (must set <code class="codeblock">deadzone=0</code>).</li>
-							</ul>
-						</section>
-					</article>
-				</div>
-			</div>
-			<div id="remap" class="modal-container">
-				<a class="bglink" href="#" title="Close"><div class="modal-bg"></div></a>
-				<div class="modal">
-					<header class="minimenu"></header>
-					<header>
-						<h1>Custom Mapping</h1>
-					</header>
-					<article>
-						<p>
-							Please select the controller:
-							<select id="player-base" title="Player">
-								<option value="" selected>-</option>
-								<option value="1" disabled>1</option>
-								<option value="2" disabled>2</option>
-								<option value="3" disabled>3</option>
-								<option value="4" disabled>4</option>
-								<option value="9" disabled>KB</option>
-							</select>
-						</p>
-						<div id="output-display">
-							<div class="raw-outputs template">
-								<div>
-									<h3>Axes</h3>
-									<ul class="axes"></ul>
-								</div>
-								<div>
-									<h3>Buttons</h3>
-									<ul class="buttons"></ul>
-								</div>
-							</div>
-						</div>
-						<div id="mapping-config">
-							<a href="#" id="prepend-mapping" class="map-control"><i class="fa fa-plus-circle"></i> Add New Mapping</a>
-							<div class="template">
-								<div class="form-group">
-									<div class="map-message"></div>
-									<input type="radio" name="targetType" value="buttons" title="Buttons" checked />
-									<input type="radio" name="targetType" value="axes" title="Axes" />
-									<input type="radio" name="targetType" value="dpad" title="D-Pad" />
-									<input type="checkbox" class="axes-config" value="false" title="Axes configuration" />
-									<select name="buttons" title="Buttons">
-										<option title="Button 0" value="0">A/Cross</option>
-										<option title="Button 1" value="1">B/Circle</option>
-										<option title="Button 2" value="2">X/Square</option>
-										<option title="Button 3" value="3">Y/Triangle</option>
-										<option title="Button 4" value="4">LB/L1</option>
-										<option title="Button 5" value="5">RB/R1</option>
-										<option title="Button 6" value="6">LT/L2</option>
-										<option title="Button 7" value="7">RT/R2</option>
-										<option title="Button 8" value="8">Select/Back</option>
-										<option title="Button 9" value="9">Start</option>
-										<option title="Button 10" value="10">LS/L3</option>
-										<option title="Button 11" value="11">RS/R3</option>
-										<option title="Button 12" value="12">D-Pad Up</option>
-										<option title="Button 13" value="13">D-Pad Down</option>
-										<option title="Button 14" value="14">D-Pad Left</option>
-										<option title="Button 15" value="15">D-Pad Right</option>
-										<option title="Button 16" value="16">PS Button</option>
-										<option title="Button 17" value="17">TouchPad Press</option>
-									</select>
-									<select name="axes" title="Axes">
-										<option title="Axis 0" value="0">LS Horizontal</option>
-										<option title="Axis 1" value="1">LS Vertical</option>
-										<option title="Axis 2" value="2">RS Horizontal</option>
-										<option title="Axis 3" value="3">RS Vertical</option>
-									</select>
-									<input type="checkbox" class="disable-item" value="true" title="Disable" />
-									<button data-tooltip="Positive Axis" data-button="positive" data-button-type="remapping" data-object="">Click to Set</button>
-									<button data-tooltip="Negative Axis" data-button="negative" data-button-type="remapping" data-object="">Click to Set</button>
-									<a title="Add" href="#" class="fa fa-minus-circle del-config"></a>
-									<a title="Remove" href="#" class="fa fa-plus-circle add-config"></a>
-									<div class="fix-panel fix-axes">
-										<span>Fix Type: </span>
-										<select name="fix-type" title="Type">
-											<option value="trigger">Trigger (0 to 1)</option>
-											<option value="stick">Stick (-1 to 1)</option>
-										</select>
-										<button data-tooltip="Lowest Value" data-button="low-value" data-button-type="value">Click to Set Value</button>
-										<button data-tooltip="Highest Value" data-button="high-value" data-button-type="value">Click to Set Value</button>
-									</div>
-									<ul class="fix-panel fix-dpad">
-										<li><span>Up: </span><button data-button="up" data-button-type="value">Click to Set Value</button></li>
-										<li><span>Down: </span><button data-button="down" data-button-type="value">Click to Set Value</button></li>
-										<li><span>Left: </span><button data-button="left" data-button-type="value">Click to Set Value</button></li>
-										<li><span>Right: </span><button data-button="right" data-button-type="value">Click to Set Value</button></li>
-										<li><span>Up and Right: </span><button data-button="upright" data-button-type="value">Click to Set Value</button></li>
-										<li><span>Up and Left: </span><button data-button="upleft" data-button-type="value">Click to Set Value</button></li>
-										<li><span>Down and Right: </span><button data-button="downright" data-button-type="value">Click to Set Value</button></li>
-										<li><span>Down and Left: </span><button data-button="downleft" data-button-type="value">Click to Set Value</button></li>
-									</ul>
-								</div>
-							</div>
-							<div id="mappings"></div>
-							<div class="button-group">
-								<button id="apply-mapping">Apply Mapping</button>
-							</div>
-						</div>
-					</article>
-				</div>
-			</div>
-		</div>
-	</body>
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  <meta property="og:title" content="Controller = [Mateus] byUwUr" />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="https://byuwur.co/img/logo.png" />
+  <meta property="og:url" content="https://controller.byuwur.co" />
+  <meta property="og:site_name" content="Controller = [Mateus] byUwUr" />
+  <meta property="og:description" content="Bring your controller to your steam." />
+  <link rel="icon" href="./img/main.png" />
+  <title>Controller = [Mateus] byUwUr</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.php@main/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.php@main/css/jquery-ui.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.php@main/_common.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.php@main/css/fontawesome.min.css" />
+  <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.php@main/js/jquery.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.php@main/js/jquery-ui.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.php@main/js/popper.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.php@main/js/bootstrap.min.js" defer></script>
+  <script>
+    const settingsKB = {
+      id: "Keyboard",
+      buttons: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      // map: A,  B,  X,  Y, L1, R1, L2, R2,  B,  S, L3, R3, dU, dD, dL, dR,  H,
+      // IDs: 0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15, 16,
+      // key: J,  K,  U,  I,  A,  O,  Z,  L,Tab,Esc, R,  Y,[ ],  S,  Q,  X,  3
+      btns: [74, 75, 85, 73, 65, 79, 90, 76, 9, 27, 82, 89, 32, 83, 81, 88, 51],
+      //   lsH lsV rsH rsV
+      axes: [0, 0, 0, 0],
+      // map:   lsL,   lsR, lsU,  lsD, rsL, rsR, rsU, rsD,
+      // key:  left, right,  up, down,   F,   H,   T,   G
+      axesBtns: [37, 39, 38, 40, 70, 72, 84, 71]
+    };
+  </script>
+  <script src="./controller.js" defer></script>
+
+  <script src="../configurator.js" defer></script>
+  <script>
+    /**
+     * @file Embedded initialization for controller/index.html.
+     */
+    const parameterDetails = {
+      player: ["Player Number", "1", "1 (P1), 2 (P2), 3 (P3), 4 (P4), 9 (Keyboard)", "1"],
+      skin: ["Skin ID", "1", "1 (Xbox), 2 (PlayStation), 3 (Fight Stick), 4 (GameCube)", "1"],
+      scale: ["Scale Multiplier", "1", "Any number (with decimals). Negative values flip the controller.", "1.25"],
+      opacity: ["Opacity (%)", "1", "0.0 to 1.0 (with decimals)", "0.25"],
+      offset: ["Stick Offset (pixels)", "20", "Any positive number; values beyond 25px are not recommended.", "25"],
+      deadzone: ["Deadzone Radius (%)", "0.25", "0.0 to 1.0 (with decimals)", "0.25"],
+      strength: ["Height Strength Meter (boolean)", "1 (true)", "0 (false), 1 (true)", "0"],
+      curve: ["Enable Stick Curving (boolean)", "0 (false)", "0 (false), 1 (true)", "1"],
+      rotation: ["Rotational Stop (degrees)", "120", "Any positive number", "120"],
+      mapping: ["Custom Mapping", "None", "Mapping JSON generated by the Custom Mapping tab", '{"mapping":[]}']
+    };
+
+    /**
+     * Adds controller credits and mapping controls to the shared help modal.
+     * @param {HTMLElement} dialog Help modal.
+     * @param {Object<string, string>} titles Help section titles.
+     * @param {Function} closeHelp Closes the help modal.
+     * @returns {void}
+     */
+    function initControllerHelp(dialog, titles, closeHelp) {
+      const mapping = document.querySelector("#remap article");
+      if (mapping) {
+        titles.remap = "Custom Mapping";
+        const credit = document.createElement("p");
+        credit.innerHTML =
+          'Controller input is based on <a href="https://github.com/html5rocks/www.html5rocks.com/tree/master/content/tutorials/doodles/gamepad/static/gamepad-tester" target="_blank" rel="noopener">Gamepad.js and Tester.js</a> by Marcin Wichary.';
+        dialog.querySelector('[data-panel="info"]').appendChild(credit);
+        const panel = document.createElement("section");
+        panel.dataset.panel = "remap";
+        panel.hidden = true;
+        panel.append(...mapping.childNodes);
+        $(panel).find("select").addClass("form-select w-auto");
+        $(panel).find("button").addClass("btn btn-outline-secondary btn-sm");
+        $(panel).find("input").addClass("form-check-input");
+        $(panel).find(".form-group").addClass("d-flex flex-wrap gap-2 align-items-center border rounded p-3 my-3");
+        $(panel).find(".map-message").addClass("w-100 small");
+        $(panel).find(".map-control").addClass("btn btn-outline-primary my-3");
+        $(panel).find(".del-config").text("Remove").addClass("btn btn-outline-danger btn-sm");
+        $(panel).find(".add-config").text("Add").addClass("btn btn-outline-secondary btn-sm");
+        $(panel).find('.form-group > input').each(function () {
+          const label = document.createElement("label");
+          label.className = "small me-2";
+          label.textContent = this.title;
+          this.after(label);
+
+        });
+        dialog.querySelector("article").appendChild(panel);
+        initMappingControls(panel);
+        $(panel).on("click", ".form-group > label", function () { $(this).prev("input")[0]?.click(); });
+        const button = document.createElement("button");
+        button.type = "button";
+        button.dataset.section = "remap";
+        button.className = "btn btn-sm btn-outline-light border-0";
+        button.textContent = titles.remap;
+        button.innerHTML = '<i class="fa-solid fa-gamepad me-1" aria-hidden="true"></i>Custom Mapping';
+        dialog.querySelector(".help-close").before(button);
+        document.getElementById("modals").remove();
+        $(document).on("mapping-applied", closeHelp);
+      }
+
+    }
+
+    /**
+     * Synchronizes mapping controls and manages their DOM observers.
+     * @param {HTMLElement} panel Mapping panel.
+     * @returns {void}
+     */
+    function initMappingControls(panel) {
+      panel.querySelector("#mapping-config > .template").classList.add("d-none");
+      panel.querySelector(".raw-outputs.template").classList.add("d-none");
+      /**
+       * Updates mapping visibility and disabled states from the selected options.
+       * @returns {void}
+       */
+      function updateMappingControls() {
+        panel.querySelectorAll("#mappings .form-group").forEach(group => {
+          const type = group.querySelector('input[type="radio"]:checked')?.value;
+          const fixAxes = group.querySelector(".axes-config").checked;
+          const disabled = group.querySelector(".disable-item").checked;
+          group.querySelectorAll(":scope > select").forEach(select => select.classList.toggle("d-none", select.name !== type));
+          const buttons = group.querySelectorAll(":scope > button");
+          buttons[1].classList.toggle("d-none", type !== "axes" || fixAxes);
+          group.querySelector(".axes-config").classList.toggle("d-none", type === "dpad");
+          group.querySelector(".fix-axes").classList.toggle("d-none", !fixAxes || type === "dpad");
+          group.querySelector(".fix-dpad").classList.toggle("d-none", type !== "dpad");
+          group.querySelectorAll("button").forEach(button => { button.disabled = disabled; });
+        });
+        panel.querySelectorAll(".raw-outputs").forEach(output => {
+          output.classList.toggle("d-none", !output.classList.contains("active"));
+        });
+        panel.querySelector(".button-group").classList.toggle("d-none", !panel.querySelector("#mappings").children.length);
+      }
+      $(panel).on("change", updateMappingControls);
+      const mappingObserver = new MutationObserver(updateMappingControls);
+      mappingObserver.observe(panel.querySelector("#mappings"), { childList: true, subtree: true });
+      const outputObserver = new MutationObserver(updateMappingControls);
+      outputObserver.observe(panel.querySelector("#output-display"), { childList: true, attributes: true, attributeFilter: ["class"], subtree: true });
+      $(window).on("pagehide", () => {
+        mappingObserver.disconnect();
+        outputObserver.disconnect();
+      }).on("pageshow", () => {
+        mappingObserver.observe(panel.querySelector("#mappings"), { childList: true, subtree: true });
+        outputObserver.observe(panel.querySelector("#output-display"), { childList: true, attributes: true, attributeFilter: ["class"], subtree: true });
+        updateMappingControls();
+      });
+      updateMappingControls();
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      if (document.documentElement.classList.contains("configure")) {
+        document.getElementById("controller-parameters").appendChild(document.getElementById("url-form"));
+        const controls = document.getElementById("url-gen-area");
+        $("#controller-url-field").append($(controls).find(".url-field").addClass("w-100"));
+        $(controls).find("button").addClass("flex-shrink-0 text-nowrap");
+        document.getElementById("controller-url-controls").replaceWith(...controls.children);
+        const params = new URLSearchParams(location.search);
+        document.querySelectorAll("#url-form [name]").forEach((field) => {
+          if (!params.has(field.name)) return;
+          if (field.type === "checkbox") field.defaultChecked = field.checked = params.get(field.name) === field.value;
+          else {
+            field.value = params.get(field.name);
+            if (field.tagName === "SELECT") Array.from(field.options).forEach((option) => { option.defaultSelected = option.selected; });
+            else field.defaultValue = field.value;
+          }
+        });
+        $("#url-form label").removeClass("mb-3").addClass("mb-2");
+        $("#url-form .input-unit").each(function () { $(this).prev("label").append(` (${this.textContent})`); this.remove(); });
+
+        initConfigurator({ parameterDetails, initResourceHelp: initControllerHelp });
+        setURL();
+      }
+    });
+  </script>
+</head>
+
+<body class="bg-body text-body m-0">
+  <main id="setup" class="d-flex flex-column vh-100 overflow-hidden">
+    <header class="url-toolbar d-flex flex-column gap-2 p-3 bg-body border-bottom sticky-top flex-shrink-0">
+      <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+        <div class="d-flex align-items-center gap-2">
+          <img src="https://byuwur.github.io/img/logo.png" alt="" width="36" height="36" />
+          <details class="tool-switcher position-relative flex-shrink-0 me-2" data-tool="controller">
+            <summary class="tool-brand list-unstyled d-flex align-items-center gap-2 fw-bold text-nowrap fs-5" aria-label="stream.html tools"><span
+                class="tool-wordmark text-body">stream<span>.html</span></span><span class="tool-caret"
+                aria-hidden="true">&#9662;</span></summary>
+            <nav class="dropdown-menu d-block shadow mt-0" aria-label="Tools"></nav>
+          </details>
+        </div>
+        <p class="m-0 ms-auto text-end small text-body-secondary">&copy; 2026, Made with <i class="fa-solid fa-heart text-danger align-middle" role="img" aria-label="love"></i> by <a href="https://byuwur.co" target="_blank" rel="noopener"
+            class="link-body-emphasis">BONYUR @byUwUr</a></p>
+        <nav class="config-menu d-flex align-items-center gap-2 flex-shrink-0" aria-label="Configurator menu">
+          <button id="theme-toggle" class="theme-toggle" type="button" disabled title="Loading theme controls" aria-label="Toggle theme" aria-pressed="true"><span aria-hidden="true">&#9790;&#65038; &#9728;&#65038;</span></button>
+          <a class="btn btn-sm btn-outline-secondary" href="https://github.com/byuwur/stream.html" target="_blank" rel="noopener" title="Source code"><i class="fa-brands fa-github me-1" aria-hidden="true"></i>GitHub</a>
+        </nav>
+      </div>
+      <div class="d-flex align-items-center gap-2">
+        <div id="controller-url-field" class="flex-grow-1 overflow-hidden"></div>
+        <span id="controller-url-controls"></span>
+      </div>
+    </header>
+    <div class="setup-layout row g-0 flex-grow-1 flex-column-reverse flex-md-row overflow-auto">
+      <aside class="settings-panel h-100 col-12 col-md-4 col-xl-3 bg-body-tertiary p-4 overflow-y-auto border-end" aria-label="Overlay parameters">
+        <h1><i class="fa-solid fa-gamepad me-2" aria-hidden="true"></i>Controller</h1>
+        <p class="setup-intro">Show gamepad or keyboard input. Click the preview, then press a gamepad button or F for keyboard input.</p>
+        <div id="controller-parameters"></div>
+      </aside>
+      <section class="preview-panel h-100 col-12 col-md-8 col-xl-9 bg-body p-3 p-lg-4 d-flex flex-column gap-3" aria-label="Overlay preview">
+        <header class="preview-toolbar d-flex justify-content-between align-items-center small"><strong><i class="fa-solid fa-eye me-2" aria-hidden="true"></i>Live preview</strong><a id="preview-url" target="_blank" rel="noopener"><i
+              class="fa-solid fa-arrow-up-right-from-square me-2" aria-hidden="true"></i>Open overlay</a></header>
+        <div id="preview-stage" class="ratio ratio-16x9 flex-grow-1 overflow-hidden border rounded-3 bg-body-secondary">
+          <svg id="preview-viewport" viewBox="0 0 1000 900" role="group" aria-label="Scaled overlay preview">
+            <foreignObject width="1000" height="900"><iframe id="overlay-preview" class="border-0" title="Controller preview" width="1000" height="900"
+                allow="autoplay; gamepad *"></iframe></foreignObject>
+          </svg>
+        </div>
+        <footer class="preview-footer d-flex flex-wrap justify-content-between gap-2 small text-body-secondary"><span id="preview-status">Change a parameter to update the preview.</span><span id="copy-status" role="status"></span></footer>
+      </section>
+    </div>
+    <footer class="config-footer border-top p-3 d-flex flex-column gap-2 text-center small text-body-secondary flex-shrink-0">
+      <p class="setup-help m-0">To edit an overlay URL, replace <code>controller.html</code> with <code>index.html</code>, keeping its parameters. Reset restores the settings loaded when you opened this page.</p>
+      <nav class="footer-links" aria-label="Help"></nav>
+    </footer>
+  </main>
+  <div class="container d-none" id="gamepads">
+    <div class="template">
+      <div class="triggers">
+        <span class="trigger left" data-name="button-left-shoulder-bottom"></span>
+        <span class="trigger right" data-name="button-right-shoulder-bottom"></span>
+        <span class="trigger-button left" data-name="button-left-shoulder-bottom-digital"></span>
+        <span class="trigger-button right" data-name="button-right-shoulder-bottom-digital"></span>
+      </div>
+      <div class="bumpers">
+        <span class="bumper left" data-name="button-left-shoulder-top"></span>
+        <span class="bumper right" data-name="button-right-shoulder-top"></span>
+      </div>
+      <div class="touchpad" data-name="touch-pad"></div>
+      <div class="quadrant"></div>
+      <div class="meta" data-name="button-meta"></div>
+      <div class="arrows">
+        <span class="back" data-name="button-select"></span>
+        <span class="start" data-name="button-start"></span>
+      </div>
+      <div class="abxy">
+        <span class="button a" data-name="button-1"></span>
+        <span class="button b" data-name="button-2"></span>
+        <span class="button x" data-name="button-3"></span>
+        <span class="button y" data-name="button-4"></span>
+      </div>
+      <div class="sticks">
+        <span class="stick left" data-name="stick-1"></span>
+        <span class="stick right" data-name="stick-2"></span>
+      </div>
+      <div class="wheels">
+        <span class="wheel left" data-name="stick-1-wheel"></span>
+        <span class="wheel right" data-name="stick-2-wheel"></span>
+      </div>
+      <div class="dpad">
+        <span class="face up" data-name="button-dpad-top"></span>
+        <span class="face down" data-name="button-dpad-bottom"></span>
+        <span class="face left" data-name="button-dpad-left"></span>
+        <span class="face right" data-name="button-dpad-right"></span>
+      </div>
+      <div class="fstick" data-name="arcade-stick"></div>
+    </div>
+    <div class="controller xbox disconnected" id="gamepad-1"></div>
+    <div class="controller xbox disconnected" id="gamepad-2"></div>
+    <div class="controller xbox disconnected" id="gamepad-3"></div>
+    <div class="controller xbox disconnected" id="gamepad-4"></div>
+    <div class="controller xbox disconnected" id="gamepad-9"></div>
+  </div>
+  <div class="navbar d-none">
+    <div class="content">
+      <div class="byuwur"></div>
+      <div class="left">
+        <a href="#menu" title="Menu"><i class="fa fa-bars menu-button"></i></a>
+      </div>
+      <div class="obs">
+        <a href="#obs" class="btn">Use with OBS here!</a>
+      </div>
+      <div class="center pselect">
+        <span>Player:</span>
+        <select class="player" id="pselect" title="Player">
+          <option>-</option>
+          <option value="gamepad-1">1</option>
+          <option value="gamepad-2">2</option>
+          <option value="gamepad-3">3</option>
+          <option value="gamepad-4">4</option>
+          <option value="gamepad-9">KB</option>
+        </select>
+        <div class="left skins">
+          <select class="console" id="cselect" title="Console">
+            <option value="xbox">Xbox (1)</option>
+            <option value="ps">PlayStation (2)</option>
+            <option value="fight-stick">Fight Stick (3)</option>
+            <option value="gc">GameCube (4)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="navbar nocon d-none">
+    <div class="content">
+      <div class="box left">
+        <i class="box alert fa fa-exclamation-circle"></i>
+        <span>No controllers detected. Press ANY button or [F] on your keyboard.</span>
+      </div>
+    </div>
+  </div>
+  <div class="slideout-menu d-none" id="menu">
+    <a class="bglink" href="#" title="Close">
+      <div class="modal-bg"></div>
+    </a>
+    <div class="menu">
+      <div class="byuwur absolute"></div>
+      <h1><i class="fa fa-gamepad"></i>Controller</h1>
+      <div class="menu-list">
+        <a href="#info"><i class="fa fa-info-circle"></i><span>Info</span></a>
+        <a href="#obs"><i class="fa fa-tv"></i><span>Use with OBS</span></a>
+        <a href="#params"><i class="fa fa-file-text"></i><span>Parameters</span></a>
+        <a href="#remap"><i class="fa fa-gamepad"></i><span>Custom Mapping</span></a>
+      </div>
+      <p class="year">&copy; <span id="year">2025</span> Made with <i class="fa fa-heart"></i> by <a rel="noopener" href="https://byuwur.co" target="_blank">[Mateus] byUwUr</a></p>
+    </div>
+  </div>
+  <div id="modals" hidden>
+    <div id="url-gen-area">
+      <label class="url-field flex-grow-1" for="url-gen-url"><span>Overlay URL</span><input id="url-gen-url" readonly spellcheck="false" /></label>
+      <button class="btn btn-primary" id="url-gen-copy" type="button"><i class="fa-solid fa-copy me-2" aria-hidden="true"></i>Copy URL</button>
+      <button class="btn btn-outline-secondary" id="url-gen-reset" type="button"><i class="fa-solid fa-arrow-rotate-left me-2" aria-hidden="true"></i>Reset</button>
+    </div>
+    <form id="url-form">
+      <div class="form-group">
+        <label for="player-input">Player Number: </label>
+        <select id="player-input" name="player">
+          <option value="" disabled>Select a player</option>
+          <option value="1" selected>Player 1</option>
+          <option value="2">Player 2</option>
+          <option value="3">Player 3</option>
+          <option value="4">Player 4</option>
+          <option value="9">Keyboard</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="skin-input">Skin: </label>
+        <select id="skin-input" name="skin">
+          <option value="">None</option>
+          <option value="1">Xbox (1)</option>
+          <option value="2">PlayStation (2)</option>
+          <option value="3">Fight Stick (3)</option>
+          <option value="4">GameCube (4)</option>
+        </select>
+      </div>
+      <div class="form-group"><label for="scale-input">Scale Multiplier: </label><span class="input-unit">x</span><input id="scale-input" type="text" name="scale" placeholder="0.5, 1, 2..." /></div>
+      <div class="form-group"><label for="opacity-input">Opacity: </label><input id="opacity-input" type="text" name="opacity" placeholder="0.0 to 1.0" /></div>
+      <div class="form-group"><label for="offset-input">Stick Offset: </label><span class="input-unit">px</span><input id="offset-input" type="text" name="offset" placeholder="0" /></div>
+      <div class="form-group"><label for="deadzone-input">Deadzone: </label><input id="deadzone-input" type="text" name="deadzone" placeholder="0.0 to 1.0" /></div>
+      <div class="form-group"><label for="strength-input">Disable Strength Meter: </label><input id="strength-input" type="checkbox" name="strength" value="0" /></div>
+      <div class="form-group"><label for="curve-input">Enable Stick Curving: </label><input id="curve-input" type="checkbox" name="curve" value="1" /></div>
+      <div class="form-group"><label for="rotation-input">Rotation Stop: </label><span class="input-unit">deg</span><input id="rotation-input" type="text" name="rotation" placeholder="0" /></div>
+      <input type="text" name="mapping" id="mapping-input" hidden />
+    </form>
+    <section id="remap">
+      <article>
+        <p>
+          Please select the controller:
+          <select id="player-base" title="Player">
+            <option value="" selected>-</option>
+            <option value="1" disabled>1</option>
+            <option value="2" disabled>2</option>
+            <option value="3" disabled>3</option>
+            <option value="4" disabled>4</option>
+            <option value="9" disabled>KB</option>
+          </select>
+        </p>
+        <div id="output-display">
+          <div class="raw-outputs template">
+            <div>
+              <h3>Axes</h3>
+              <ul class="axes"></ul>
+            </div>
+            <div>
+              <h3>Buttons</h3>
+              <ul class="buttons"></ul>
+            </div>
+          </div>
+        </div>
+        <div id="mapping-config">
+          <a href="#" id="prepend-mapping" class="map-control"><i class="fa fa-plus-circle"></i> Add New Mapping</a>
+          <div class="template">
+            <div class="form-group">
+              <div class="map-message"></div>
+              <input type="radio" name="targetType" value="buttons" title="Buttons" checked />
+              <input type="radio" name="targetType" value="axes" title="Axes" />
+              <input type="radio" name="targetType" value="dpad" title="D-Pad" />
+              <input type="checkbox" class="axes-config" value="false" title="Axes configuration" />
+              <select name="buttons" title="Buttons">
+                <option title="Button 0" value="0">A/Cross</option>
+                <option title="Button 1" value="1">B/Circle</option>
+                <option title="Button 2" value="2">X/Square</option>
+                <option title="Button 3" value="3">Y/Triangle</option>
+                <option title="Button 4" value="4">LB/L1</option>
+                <option title="Button 5" value="5">RB/R1</option>
+                <option title="Button 6" value="6">LT/L2</option>
+                <option title="Button 7" value="7">RT/R2</option>
+                <option title="Button 8" value="8">Select/Back</option>
+                <option title="Button 9" value="9">Start</option>
+                <option title="Button 10" value="10">LS/L3</option>
+                <option title="Button 11" value="11">RS/R3</option>
+                <option title="Button 12" value="12">D-Pad Up</option>
+                <option title="Button 13" value="13">D-Pad Down</option>
+                <option title="Button 14" value="14">D-Pad Left</option>
+                <option title="Button 15" value="15">D-Pad Right</option>
+                <option title="Button 16" value="16">PS Button</option>
+                <option title="Button 17" value="17">TouchPad Press</option>
+              </select>
+              <select name="axes" title="Axes">
+                <option title="Axis 0" value="0">LS Horizontal</option>
+                <option title="Axis 1" value="1">LS Vertical</option>
+                <option title="Axis 2" value="2">RS Horizontal</option>
+                <option title="Axis 3" value="3">RS Vertical</option>
+              </select>
+              <input type="checkbox" class="disable-item" value="true" title="Disable" />
+              <button data-tooltip="Positive Axis" data-button="positive" data-button-type="remapping" data-object="">Click to Set</button>
+              <button data-tooltip="Negative Axis" data-button="negative" data-button-type="remapping" data-object="">Click to Set</button>
+              <a title="Add" href="#" class="fa fa-minus-circle del-config"></a>
+              <a title="Remove" href="#" class="fa fa-plus-circle add-config"></a>
+              <div class="fix-panel fix-axes">
+                <span>Fix Type: </span>
+                <select name="fix-type" title="Type">
+                  <option value="trigger">Trigger (0 to 1)</option>
+                  <option value="stick">Stick (-1 to 1)</option>
+                </select>
+                <button data-tooltip="Lowest Value" data-button="low-value" data-button-type="value">Click to Set Value</button>
+                <button data-tooltip="Highest Value" data-button="high-value" data-button-type="value">Click to Set Value</button>
+              </div>
+              <ul class="fix-panel fix-dpad">
+                <li><span>Up: </span><button data-button="up" data-button-type="value">Click to Set Value</button></li>
+                <li><span>Down: </span><button data-button="down" data-button-type="value">Click to Set Value</button></li>
+                <li><span>Left: </span><button data-button="left" data-button-type="value">Click to Set Value</button></li>
+                <li><span>Right: </span><button data-button="right" data-button-type="value">Click to Set Value</button></li>
+                <li><span>Up and Right: </span><button data-button="upright" data-button-type="value">Click to Set Value</button></li>
+                <li><span>Up and Left: </span><button data-button="upleft" data-button-type="value">Click to Set Value</button></li>
+                <li><span>Down and Right: </span><button data-button="downright" data-button-type="value">Click to Set Value</button></li>
+                <li><span>Down and Left: </span><button data-button="downleft" data-button-type="value">Click to Set Value</button></li>
+              </ul>
+            </div>
+          </div>
+          <div id="mappings"></div>
+          <div class="button-group">
+            <button id="apply-mapping">Apply Mapping</button>
+          </div>
+        </div>
+      </article>
+    </section>
+  </div>
+
+</body>
+
 </html>

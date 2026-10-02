@@ -1,215 +1,285 @@
 <!doctype html>
 <html lang="es">
-	<head>
-		<meta charset="utf-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-		<meta property="og:title" content="Main Scene = [Mateus] byUwUr" />
-		<meta property="og:type" content="website" />
-		<meta property="og:image" content="https://byuwur.co/img/logo.png" />
-		<meta property="og:url" content="https://mainscene.byuwur.co" />
-		<meta property="og:site_name" content="Main Scene = [Mateus] byUwUr" />
-		<meta property="og:description" content="Bring your brand to your steam." />
-		<link rel="icon" href="./img/main.png" />
-		<title>Main Scene = [Mateus] byUwUr</title>
-		<link rel="stylesheet" href="./css/main.css" />
-		<script src="./js/jquery311.min.js" defer></script>
-		<script src="./js/tweenMax.min.js" defer></script>
-		<script defer>
-			const TRUTHIES = [true, "true", "t", 1, "1", "yes", "y"];
-			const FALSIES = [false, "false", "f", 0, "0", "no", "n"];
-			const config = new URLSearchParams(window.location.search).get("mode") || "start";
-			const showBG = new URLSearchParams(window.location.search).get("showBG") || "false";
-			const hideCountdown = new URLSearchParams(window.location.search).get("hideCountdown") || "false";
-			console.log("config=", config);
-			console.log("showBG=", showBG);
-			console.log("hideCountdown=", hideCountdown);
-			function loadScript(src) {
-				return new Promise((resolve, reject) => {
-					const script = document.createElement("script");
-					script.src = src;
-					script.onload = resolve;
-					script.onerror = reject;
-					document.head.appendChild(script);
-				});
-			}
-			window.onload = async function () {
-				try {
-					await loadScript("./config/main.settings.js");
-					await loadScript(`./config/main.${config}.js`);
-					await loadScript("./js/main.js");
-					//
-					if (!FALSIES.includes(showBG)) $("#scene").css("background", "#0007");
-					if (!FALSIES.includes(hideCountdown)) $("#countdown").remove();
-				} catch (error) {
-					console.error("Error loading scripts:", error);
-				}
-			};
-		</script>
-	</head>
-	<body>
-		<div id="scene">
-			<div id="bg">
-				<div id="image">
-					<img src="./img/" alt="" onError="this.style.display='none';" />
-					<img src="./img/" alt="" onError="this.style.display='none';" />
-				</div>
-				<div id="video">
-					<video width="1920" height="1080" autoplay loop muted>
-						<source src="" type="video/mp4" />
-					</video>
-				</div>
-				<div id="overlay"></div>
-				<div id="frame" class="bg-accent"></div>
-			</div>
 
-			<div id="branding">
-				<div id="brandImg"></div>
-				<span id="title"></span>
-				<span id="subtitle"></span>
-			</div>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  <meta property="og:title" content="Main Scene = [Mateus] byUwUr" />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="https://byuwur.co/img/logo.png" />
+  <meta property="og:url" content="https://mainscene.byuwur.co" />
+  <meta property="og:site_name" content="Main Scene = [Mateus] byUwUr" />
+  <meta property="og:description" content="Bring your brand to your steam." />
+  <link rel="icon" href="./main.png" />
+  <title>Main Scene = [Mateus] byUwUr</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.php@main/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.php@main/css/jquery-ui.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.php@main/_common.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.php@main/css/fontawesome.min.css" />
+  <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.php@main/js/jquery.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.php@main/js/jquery-ui.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.php@main/js/popper.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.php@main/js/bootstrap.min.js" defer></script>
 
-			<div id="updates">
-				<div id="social">
-					<div id="twi" class="item">
-						<div class="network">
-							<div class="borderTop"></div>
-							<div class="icon"><i class="fa fa-twitch" aria-hidden="true"></i></div>
-							<div class="inner">
-								<div id="twitchHeader" class="socialHead"></div>
-								<div id="twitch" class="socialName"></div>
-							</div>
-						</div>
-					</div>
-					<div id="yt" class="item">
-						<div class="network">
-							<div class="borderTop"></div>
-							<div class="icon"><i class="fa fa-youtube" aria-hidden="true"></i></div>
-							<div class="inner">
-								<div id="youtubeHeader" class="socialHead"></div>
-								<div id="youtube" class="socialName"></div>
-							</div>
-						</div>
-					</div>
-					<div id="in" class="item">
-						<div class="network">
-							<div class="borderTop"></div>
-							<div class="icon"><i class="fa fa-instagram" aria-hidden="true"></i></div>
-							<div class="inner">
-								<div id="instagramHeader" class="socialHead"></div>
-								<div id="instagram" class="socialName"></div>
-							</div>
-						</div>
-					</div>
-					<!--div id="tw" class="item">
-						<div class="network">
-							<div class="borderTop"></div>
-							<div class="icon"><i class="fa fa-twitter" aria-hidden="true"></i></div>
-							<div class="inner">
-								<div id="twitterHeader" class="socialHead"></div>
-								<div id="twitter" class="socialName"></div>
-							</div>
-						</div>
-					</div-->
-					<!--div id="fb" class="item">
-						<div class="network">
-							<div class="borderTop"></div>
-							<div class="icon"><i class="fa fa-facebook" aria-hidden="true"></i></div>
-							<div class="inner">
-								<div id="facebookHeader" class="socialHead"></div>
-								<div id="facebook" class="socialName"></div>
-							</div>
-						</div>
-					</div-->
-				</div>
+  <script src="../configurator.js" defer></script>
+  <script>
+    /**
+     * @file Embedded initialization for main/index.html.
+     */
+    const params = new URLSearchParams(location.search);
+    const config = ["start", "brb", "end", "inter"].includes(params.get("mode")) ? params.get("mode") : "start";
 
-				<div id="schedule">
-					<div id="week" class="item">
-						<div class="day">
-							<div class="borderTop"></div>
-							<div class="inner">
-								<div class="scheduleHead">Lunes</div>
-								<div id="monday" class="scheduleTime"></div>
-							</div>
-						</div>
-						<div class="day">
-							<div class="borderTop"></div>
-							<div class="inner">
-								<div class="scheduleHead">Martes</div>
-								<div id="tuesday" class="scheduleTime"></div>
-							</div>
-						</div>
-						<div class="day">
-							<div class="borderTop"></div>
-							<div class="inner">
-								<div class="scheduleHead">Miércoles</div>
-								<div id="wednesday" class="scheduleTime"></div>
-							</div>
-						</div>
-						<div class="day">
-							<div class="borderTop"></div>
-							<div class="inner">
-								<div class="scheduleHead">Jueves</div>
-								<div id="thursday" class="scheduleTime"></div>
-							</div>
-						</div>
-						<div class="day">
-							<div class="borderTop"></div>
-							<div class="inner">
-								<div class="scheduleHead">Viernes</div>
-								<div id="friday" class="scheduleTime"></div>
-							</div>
-						</div>
-						<div class="day">
-							<div class="borderTop"></div>
-							<div class="inner">
-								<div class="scheduleHead">Sábado</div>
-								<div id="saturday" class="scheduleTime"></div>
-							</div>
-						</div>
-						<div class="day">
-							<div class="borderTop"></div>
-							<div class="inner">
-								<div class="scheduleHead">Domingo</div>
-								<div id="sunday" class="scheduleTime"></div>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
+    const settings = {
+      options: {
+        backgroundType: "video",
+        backgroundOverlayOpacity: 0,
+        backgroundBlur: 0,
+        backgroundScale: 1,
+        displayBranding: "yes",
+        logoOpacity: 0.05,
+        logoScale: 1,
+        frameWidth: 10,
+        sceneTitle: { start: "Ya estamos\nempezando", brb: "Ya casito\nvolvemos", end: "Gracias por\nestar aquí hoy", inter: "" }[config],
+        tagline: config === "inter" ? "" : "[Mateus] byUwUr"
+      },
+      colors: {
+        backgroundOverlay: "rgba(54, 53, 58, 1)",
+        accentColor: "rgba(64,0,0,1)",
+        frameColor: "rgba(64,0,0,1)",
+        primaryTextColor: "rgba(255, 255, 255, 1)",
+        subTextColor: "rgba(201,201,201,1)",
+        contentBackgrounds: "rgba(255, 255, 255, .1)"
+      },
+      labels: {
+        displayLabels: "no",
+        labelOneHeading: "¡Suscriptor más reciente!",
+        labelOnePath: "../txt/recent_sub.txt",
+        labelTwoHeading: "Más gastón:",
+        labelTwoPath: "../txt/top_donation.txt",
+        labelThreeHeading: "Último gastón:",
+        labelThreePath: " ../txt/recent_donation.txt",
+        labelFourHeading: "Nuevo Yogurt:",
+        labelFourPath: "../txt/recent_follower.txt"
+      },
+      schedule: {
+        displaySchedule: "no",
+        sunday: "",
+        monday: "",
+        tuesday: "",
+        wednesday: "",
+        thursday: "",
+        friday: "",
+        saturday: ""
+      },
+      scaling: {
+        socialMediaScale: 1.25,
+        labelsScale: 1.25,
+        scheduleScale: 1.25,
+        countdownScale: 1.25
+      },
+      fonts: {
+        primaryFont: "Courier New",
+        subFont: "Courier New",
+        titleSize: 72,
+        titleVerticalOffset: -8,
+        subtitleSize: 48,
+        subtitleVerticalOffset: 128,
+        labelNameSize: 24,
+        labelNameVerticalOffset: 0,
+        labelHeaderSize: 12,
+        labelHeaderVerticalOffset: 4,
+        countdownTimeSize: 64,
+        countdownTimeVerticalOffset: 0,
+        countdownMessageSize: 24,
+        countdownMessageVerticalOffset: 0,
+        countdownEndMessageSize: 64,
+        countdownEndMessageVerticalOffset: 0
+      },
+      countdown: {
+        displayCountdown: "yes",
+        countdownTime: 4, // minutes
+        countdownMessage: "cuenta regresiva tramadora",
+        countdownOverMessage: "Vamo' a vé'."
+      },
+      social: {
+        displaySocial: "yes",
+        twitch: "/byUwUr",
+        twitchHeader: "Stream casi todos los días",
+        youtube: "[Mateus] @byUwUr",
+        youtubeHeader: "VODs todas las semanas",
+        instagram: "@byUwUr",
+        instagramHeader: "Fotos de vez en cuando",
+        facebook: "",
+        facebookHeader: "",
+        twitter: "",
+        twitterHeader: ""
+      }
+    };
 
-			<div id="list">
-				<div id="one" class="event">
-					<div class="borderLeft"></div>
-					<div id="followName" class="name">&nbsp;</div>
-					<div id="followLine" class="type"></div>
-				</div>
+    document.documentElement.classList.add("configure");
 
-				<div id="two" class="event">
-					<div class="borderLeft"></div>
-					<div id="tipName" class="name">&nbsp;</div>
-					<div id="tipLine" class="type"></div>
-				</div>
+    window.addEventListener("load", async () => {
+      try {
+        await loadScript(`./${configuratorTool}.js`);
+        form = document.getElementById("overlay-form");
+        fields = Array.from(form.querySelectorAll("[name]"));
+        fields.forEach(field => {
+          const rule = parameterRules[field.name];
+          let value = rule.group ? settings[rule.group]?.[field.name] : field.value;
+          if (field.name === "mode") value = config;
+          if (["showBG", "hideCountdown"].includes(field.name)) value = parameterValue(field.name, "false");
+          field.value = value ?? "";
+          if (field.tagName === "SELECT") Array.from(field.options).forEach(option => { option.defaultSelected = option.selected; });
+          else field.defaultValue = field.value;
+        });
+        $(form.elements.mode).on("change", () => {
+          if (!generateURL()) return;
+          const url = new URL("index.html", location.href);
+          url.search = new URL(document.getElementById("overlay-url").value).search;
+          Object.entries(presetText).forEach(([name, value]) => {
+            if (form.elements[name].value === value) url.searchParams.delete(name);
+          });
+          location.href = url.href;
+        });
+        initConfigurator();
+      } catch (error) {
+        console.error("Error loading overlay:", error);
+        document.body.textContent = "Unable to load the tool. Check your internet connection and keep its local files together, then reload.";
+      }
+    });
+  </script>
+</head>
 
-				<div id="three" class="event">
-					<div class="borderLeft"></div>
-					<div id="bigTipName" class="name">&nbsp;</div>
-					<div id="bigTipLine" class="type"></div>
-				</div>
+<body class="bg-body text-body m-0">
+  <main id="setup" class="d-flex flex-column vh-100 overflow-hidden">
+    <header class="url-toolbar d-flex flex-column gap-2 p-3 bg-body border-bottom sticky-top flex-shrink-0">
+      <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+        <div class="d-flex align-items-center gap-2">
+          <img src="https://byuwur.github.io/img/logo.png" alt="" width="36" height="36" />
+          <details class="tool-switcher position-relative flex-shrink-0 me-2" data-tool="main">
+            <summary class="tool-brand list-unstyled d-flex align-items-center gap-2 fw-bold text-nowrap fs-5" aria-label="stream.html tools"><span
+                class="tool-wordmark text-body">stream<span>.html</span></span><span class="tool-caret"
+                aria-hidden="true">&#9662;</span></summary>
+            <nav class="dropdown-menu d-block shadow mt-0" aria-label="Tools"></nav>
+          </details>
+        </div>
+        <p class="m-0 ms-auto text-end small text-body-secondary">&copy; 2026, Made with <i class="fa-solid fa-heart text-danger align-middle" role="img" aria-label="love"></i> by <a href="https://byuwur.co" target="_blank" rel="noopener"
+            class="link-body-emphasis">BONYUR @byUwUr</a></p>
+        <nav class="config-menu d-flex align-items-center gap-2 flex-shrink-0" aria-label="Configurator menu">
 
-				<div id="four" class="event">
-					<div class="borderLeft"></div>
-					<div id="subName" class="name">&nbsp;</div>
-					<div id="subLine" class="type"></div>
-				</div>
-			</div>
+          <button id="theme-toggle" class="theme-toggle" type="button" disabled title="Loading theme controls" aria-label="Toggle theme" aria-pressed="true"><span aria-hidden="true">&#9790;&#65038; &#9728;&#65038;</span></button>
+          <a class="btn btn-sm btn-outline-secondary" href="https://github.com/byuwur/stream.html" target="_blank" rel="noopener" title="Source code"><i class="fa-brands fa-github me-1" aria-hidden="true"></i>GitHub</a>
+        </nav>
+      </div>
+      <div class="d-flex align-items-center gap-2">
+        <label class="url-field flex-grow-1 overflow-hidden" for="overlay-url"><span>Overlay URL</span><input id="overlay-url" readonly spellcheck="false" /></label>
+        <button id="copy-url" class="btn btn-primary flex-shrink-0 text-nowrap" type="button"><i class="fa-solid fa-copy me-2" aria-hidden="true"></i>Copy URL</button>
+        <button class="btn btn-outline-secondary flex-shrink-0" type="reset" form="overlay-form"><i class="fa-solid fa-arrow-rotate-left me-2" aria-hidden="true"></i>Reset</button>
+      </div>
+    </header>
+    <div class="setup-layout row g-0 flex-grow-1 flex-column-reverse flex-md-row overflow-auto">
+      <aside class="settings-panel h-100 col-12 col-md-4 col-xl-3 bg-body-tertiary p-4 overflow-y-auto border-end" aria-label="Overlay parameters">
+        <h1><i class="fa-solid fa-clapperboard me-2" aria-hidden="true"></i>Main scene</h1>
+        <p class="setup-intro">Set up your starting, BRB, ending, or intermission scene.</p>
+        <form id="overlay-form">
+          <fieldset>
+            <legend><i class="fa-solid fa-clapperboard me-2" aria-hidden="true"></i>Scene</legend>
+            <label>Scene mode<select name="mode">
+                <option value="start">Starting</option>
+                <option value="brb">Be right back</option>
+                <option value="end">Ending</option>
+                <option value="inter">Intermission</option>
+              </select></label>
+            <label>Title (line breaks supported)<textarea name="sceneTitle" data-group="options" maxlength="300" rows="2"></textarea></label>
+            <label>Subtitle<input name="tagline" data-group="options" type="text" maxlength="160" /></label>
+            <label>Countdown (minutes)<input name="countdownTime" data-group="countdown" type="number" min="0" max="1440" step="any" required /></label>
+            <label>Countdown<select name="displayCountdown" data-group="countdown">
+                <option value="yes">Show</option>
+                <option value="no">Hide</option>
+              </select></label>
+            <label>Countdown message<input name="countdownMessage" data-group="countdown" type="text" maxlength="160" /></label>
+            <label>Finished message<input name="countdownOverMessage" data-group="countdown" type="text" maxlength="160" /></label>
+            <label>Dark background<select name="showBG">
+                <option value="false">Off</option>
+                <option value="true">On</option>
+              </select></label>
+            <label>Force countdown hidden<select name="hideCountdown">
+                <option value="false">Off</option>
+                <option value="true">On</option>
+              </select></label>
+          </fieldset>
+          <fieldset>
+            <legend><i class="fa-solid fa-palette me-2" aria-hidden="true"></i>Appearance</legend>
+            <label>Font family<input name="primaryFont" data-group="fonts" type="text" maxlength="160" /></label>
+            <label>Title size (px)<input name="titleSize" data-group="fonts" type="number" min="8" max="200" step="any" required /></label>
+            <label>Subtitle size (px)<input name="subtitleSize" data-group="fonts" type="number" min="8" max="200" step="any" required /></label>
+            <label>Text color (CSS color)<input name="primaryTextColor" data-group="colors" type="text" maxlength="160" /></label>
+            <label>Secondary text color<input name="subTextColor" data-group="colors" type="text" maxlength="160" /></label>
+            <label>Accent color<input name="accentColor" data-group="colors" type="text" maxlength="160" /></label>
+            <label>Frame color<input name="frameColor" data-group="colors" type="text" maxlength="160" /></label>
+            <label>Frame width (px)<input name="frameWidth" data-group="options" type="number" min="0" max="100" step="any" required /></label>
+            <label>Logo<select name="displayBranding" data-group="options">
+                <option value="yes">Show</option>
+                <option value="no">Hide</option>
+              </select></label>
+            <label>Logo URL or relative image path<input name="logoUrl" data-group="options" type="text" maxlength="160" /></label>
+            <label>Logo opacity<input name="logoOpacity" data-group="options" type="number" min="0" max="1" step="any" required /></label>
+            <label>Logo scale<input name="logoScale" data-group="options" type="number" min="0.1" max="5" step="any" required /></label>
+            <label>Background type<select name="backgroundType" data-group="options">
+                <option value="video">Video</option>
+                <option value="image">Image</option>
+              </select></label>
+            <label>Background URL or relative path<input name="backgroundUrl" data-group="options" type="text" maxlength="160" /></label>
+            <label>Background blur (px)<input name="backgroundBlur" data-group="options" type="number" min="0" max="100" step="any" required /></label>
+            <label>Background tint opacity<input name="backgroundOverlayOpacity" data-group="options" type="number" min="0" max="1" step="any" required /></label>
+            <label>Background tint color<input name="backgroundOverlay" data-group="colors" type="text" maxlength="160" /></label>
+          </fieldset>
+          <fieldset>
+            <legend><i class="fa-solid fa-users me-2" aria-hidden="true"></i>Social accounts</legend>
+            <label>Social accounts<select name="displaySocial" data-group="social">
+                <option value="yes">Show</option>
+                <option value="no">Hide</option>
+              </select></label>
+            <label>Twitch handle<input name="twitch" data-group="social" type="text" maxlength="160" /></label>
+            <label>Twitch heading<input name="twitchHeader" data-group="social" type="text" maxlength="160" /></label>
+            <label>Youtube handle<input name="youtube" data-group="social" type="text" maxlength="160" /></label>
+            <label>Youtube heading<input name="youtubeHeader" data-group="social" type="text" maxlength="160" /></label>
+            <label>Instagram handle<input name="instagram" data-group="social" type="text" maxlength="160" /></label>
+            <label>Instagram heading<input name="instagramHeader" data-group="social" type="text" maxlength="160" /></label>
+          </fieldset>
+          <fieldset>
+            <legend><i class="fa-solid fa-calendar-days me-2" aria-hidden="true"></i>Schedule</legend>
+            <label>Schedule<select name="displaySchedule" data-group="schedule">
+                <option value="yes">Show</option>
+                <option value="no">Hide</option>
+              </select></label>
+            <label>Monday<input name="monday" data-group="schedule" type="text" maxlength="160" /></label>
+            <label>Tuesday<input name="tuesday" data-group="schedule" type="text" maxlength="160" /></label>
+            <label>Wednesday<input name="wednesday" data-group="schedule" type="text" maxlength="160" /></label>
+            <label>Thursday<input name="thursday" data-group="schedule" type="text" maxlength="160" /></label>
+            <label>Friday<input name="friday" data-group="schedule" type="text" maxlength="160" /></label>
+            <label>Saturday<input name="saturday" data-group="schedule" type="text" maxlength="160" /></label>
+            <label>Sunday<input name="sunday" data-group="schedule" type="text" maxlength="160" /></label>
+          </fieldset>
+        </form>
+      </aside>
+      <section class="preview-panel h-100 col-12 col-md-8 col-xl-9 bg-body p-3 p-lg-4 d-flex flex-column gap-3" aria-label="Overlay preview">
+        <header class="preview-toolbar d-flex justify-content-between align-items-center small"><strong><i class="fa-solid fa-eye me-2" aria-hidden="true"></i>Live preview</strong><a id="preview-url" target="_blank" rel="noopener"><i
+              class="fa-solid fa-arrow-up-right-from-square me-2" aria-hidden="true"></i>Open overlay</a></header>
+        <div id="preview-stage" class="ratio ratio-16x9 flex-grow-1 overflow-hidden border rounded-3 bg-body-secondary">
+          <svg id="preview-viewport" viewBox="0 0 1920 1080" role="group" aria-label="Scaled overlay preview">
+            <foreignObject width="1920" height="1080"><iframe id="overlay-preview" class="border-0" title="Main scene preview" width="1920" height="1080"
+                allow="autoplay; gamepad *"></iframe></foreignObject>
+          </svg>
+        </div>
+        <footer class="preview-footer d-flex flex-wrap justify-content-between gap-2 small text-body-secondary"><span id="preview-status">Change a parameter to update the preview.</span><span id="copy-status" role="status"></span></footer>
+      </section>
+    </div>
+    <footer class="config-footer border-top p-3 d-flex flex-column gap-2 text-center small text-body-secondary flex-shrink-0">
+      <p class="setup-help m-0">To edit an overlay URL, replace <code>main.html</code> with <code>index.html</code>, keeping its parameters. Reset restores the settings loaded when you opened this page.</p>
+      <nav class="footer-links" aria-label="Help"></nav>
+    </footer>
+  </main>
+</body>
 
-			<div id="countdown">
-				<div id="timer">
-					<div id="time"></div>
-					<div id="message"></div>
-					<div id="endMessage"></div>
-				</div>
-			</div>
-		</div>
-	</body>
 </html>
