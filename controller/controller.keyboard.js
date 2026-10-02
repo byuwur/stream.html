@@ -1,3 +1,12 @@
+/**
+ * File: controller/config/controller.keyboard.js
+ * @file Keyboard button bindings, axis bindings, and mutable keyboard adapter state.
+ * Deps: Controller input handlers.
+ */
+/**
+ * Keyboard mappings and current virtual-controller readings.
+ * @type {Object}
+ */
 const settingsKB = {
   id: "Keyboard",
   buttons: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],

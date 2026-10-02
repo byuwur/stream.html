@@ -1,3 +1,12 @@
+/**
+ * File: main/config/main.settings.js
+ * @file Shared scene defaults for branding, countdown, appearance, social accounts, and schedule.
+ * Deps: Loaded before a main scene preset.
+ */
+/**
+ * Base scene configuration; presets override selected groups.
+ * @type {Object}
+ */
 const commonSettings = {
   options: {
     backgroundType: "video",

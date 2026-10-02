@@ -1,3 +1,8 @@
+/**
+ * File: main/main.js
+ * @file Scene parameter validation and rendering for start, BRB, end, and intermission presets.
+ * Deps: jQuery 4, GSAP, main.settings.js, selected scene preset, params and config globals.
+ */
 // URL parameters and documentation
 const parameterRules = {
   mode: { options: ["start", "brb", "end", "inter"], description: "Selects the scene preset or the side from which social popups animate." },
@@ -43,6 +48,12 @@ const parameterRules = {
   sunday: { type: "text", maxlength: "160", group: "schedule", description: "Schedule text displayed for Sunday." }
 };
 
+/**
+ * Validates a known parameter against its bounds, options, color, and URL restrictions.
+ * @param {string} name Key in parameterRules.
+ * @param {string} value Candidate URL or form value.
+ * @returns {boolean} Whether the value is accepted.
+ */
 function validParameter(name, value) {
   const rule = parameterRules[name];
   if (rule.options && !rule.options.includes(value)) return false;
@@ -64,6 +75,12 @@ function validParameter(name, value) {
   return true;
 }
 
+/**
+ * Reads a validated URL override, otherwise retaining the configured fallback.
+ * @param {string} name Key in parameterRules.
+ * @param {string|number} fallback Configured default.
+ * @returns {string|number} Valid override or fallback; numeric rules return numbers.
+ */
 function parameterValue(name, fallback) {
   if (parameterRules[name].type === "number") fallback = Number(fallback);
   if (!params.has(name)) return fallback;
@@ -82,20 +99,39 @@ Object.entries(parameterRules).forEach(([name, rule]) => {
 // Overlay rendering
 if (document.documentElement.hasAttribute("data-overlay")) {
   // Utility Functions
+  /**
+   * Removes matched overlay elements when a setting is absent or disabled.
+   * @param {string|boolean} setting Display setting.
+   * @param {string} div Element selector.
+   */
   function removeHtml(setting, div) {
     if (!setting || setting === "no" || setting === "") $(div).remove();
   }
 
+  /**
+   * Applies a CSS property to matched overlay elements.
+   * @param {string} target Element selector.
+   * @param {string} property CSS property name.
+   * @param {string|number} value Property value.
+   */
   function setCssProperty(target, property, value) {
     $(target).css(property, value);
   }
 
+  /**
+   * Loads a text file and replaces the matched elements' text content.
+   * @param {string} selector Element selector.
+   * @param {string} path Text file name relative to ../txt/, without its extension.
+   */
   function updateText(selector, path) {
     $.get(`../txt/${path}.txt`, (data) => {
       $(selector).text(data);
     });
   }
 
+  /**
+   * Applies the active scene settings to branding, backgrounds, text, social accounts, and schedule.
+   */
   function applySettings() {
     const { backgroundType, displayBranding, sceneTitle, tagline, logoOpacity, logoScale, frameWidth, backgroundOverlayOpacity, backgroundBlur, backgroundScale } = settings.options;
     const { displayLabels, labelOne, labelTwoHeading, labelThreeHeading, labelFourHeading } = settings.labels;
@@ -191,6 +227,11 @@ if (document.documentElement.hasAttribute("data-overlay")) {
     });
   }
 
+  /**
+   * Updates a countdown once per second and clears its interval when the ending message appears.
+   * @param {number} duration Duration in seconds.
+   * @param {jQuery} display Countdown text element.
+   */
   function startTimer(duration, display) {
     let timer = duration,
       minutes,

@@ -85,17 +85,17 @@ i {
 }
 
 .controller.xbox {
-  background: url(../img/xbox/base.svg);
+  background: url(./img/xbox/base.svg);
   height: 630px;
   width: 750px;
 }
 
 .xbox.white {
-  background: url(../img/xbox/base-white.svg);
+  background: url(./img/xbox/base-white.svg);
 }
 
 .xbox.disconnected {
-  background: url(../img/xbox/disconnected.svg);
+  background: url(./img/xbox/disconnected.svg);
 }
 
 .xbox.disconnected div {
@@ -112,7 +112,7 @@ i {
 .xbox .trigger {
   width: 88px;
   height: 121px;
-  background: url(../img/xbox/trigger.svg);
+  background: url(./img/xbox/trigger.svg);
   opacity: 0;
 }
 
@@ -129,7 +129,7 @@ i {
 .xbox .bumper {
   width: 170px;
   height: 61px;
-  background: url(../img/xbox/bumper.svg);
+  background: url(./img/xbox/bumper.svg);
   opacity: 0;
 }
 
@@ -157,7 +157,7 @@ i {
 
 .xbox .quadrant {
   position: absolute;
-  background: url(../img/xbox/quadrant.svg);
+  background: url(./img/xbox/quadrant.svg);
   height: 45px;
   width: 45px;
   top: 258px;
@@ -195,7 +195,7 @@ i {
 
 .xbox .back,
 .xbox .start {
-  background: url(../img/xbox/start-select.svg);
+  background: url(./img/xbox/start-select.svg);
   width: 33px;
   height: 33px;
   opacity: 0;
@@ -225,7 +225,7 @@ i {
 
 .xbox .button {
   position: absolute;
-  background: url(../img/xbox/abxy.svg);
+  background: url(./img/xbox/abxy.svg);
   width: 48px;
   height: 48px;
 }
@@ -270,7 +270,7 @@ i {
 
 .xbox .stick {
   position: absolute;
-  background: url(../img/xbox/stick.svg);
+  background: url(./img/xbox/stick.svg);
   background-position: -85px 0;
   height: 83px;
   width: 83px;
@@ -299,7 +299,7 @@ i {
 }
 
 .xbox .face {
-  background: url(../img/xbox/dpad.svg);
+  background: url(./img/xbox/dpad.svg);
   position: absolute;
   opacity: 0;
 }
@@ -348,13 +348,13 @@ i {
 }
 
 .controller.ps {
-  background: url(../img/ps/base.svg);
+  background: url(./img/ps/base.svg);
   height: 598px;
   width: 806px;
 }
 
 .ps.disconnected {
-  background: url(../img/ps/disconnected.svg);
+  background: url(./img/ps/disconnected.svg);
 }
 
 .ps.disconnected div {
@@ -371,7 +371,7 @@ i {
 .ps .trigger {
   width: 99px;
   height: 100%;
-  background: url(../img/ps/triggers.svg);
+  background: url(./img/ps/triggers.svg);
   opacity: 0;
 }
 
@@ -387,7 +387,7 @@ i {
 .ps .bumper {
   width: 99px;
   height: 23px;
-  background: url(../img/ps/bumper.svg) no-repeat;
+  background: url(./img/ps/bumper.svg) no-repeat;
   opacity: 0;
 }
 
@@ -421,7 +421,7 @@ i {
 }
 
 .ps .touchpad.pressed {
-  background: url(../img/ps/touchpad.svg) no-repeat center;
+  background: url(./img/ps/touchpad.svg) no-repeat center;
 }
 
 .ps .meta {
@@ -433,7 +433,7 @@ i {
 }
 
 .ps .meta.pressed {
-  background: url(../img/ps/meta.svg) no-repeat center;
+  background: url(./img/ps/meta.svg) no-repeat center;
 }
 
 .ps .arrows {
@@ -446,7 +446,7 @@ i {
 
 .ps .back,
 .ps .start {
-  background: url(../img/ps/start.svg);
+  background: url(./img/ps/start.svg);
   width: 28px;
   height: 46px;
   opacity: 0;
@@ -478,7 +478,7 @@ i {
   position: absolute;
   width: 55px;
   height: 55px;
-  background: url(../img/ps/face.svg);
+  background: url(./img/ps/face.svg);
 }
 
 .ps .button.pressed {
@@ -517,7 +517,7 @@ i {
 
 .ps .stick {
   position: absolute;
-  background: url(../img/ps/sticks.svg);
+  background: url(./img/ps/sticks.svg);
   height: 94px;
   width: 94px;
 }
@@ -549,7 +549,7 @@ i {
 }
 
 .ps .face {
-  background: url(../img/ps/dpad.svg);
+  background: url(./img/ps/dpad.svg);
   position: absolute;
 }
 
@@ -598,13 +598,13 @@ i {
 }
 
 .controller.fight-stick {
-  background: url(../img/fsc/base.svg) center no-repeat;
+  background: url(./img/fsc/base.svg) center no-repeat;
   height: 534px;
   width: 912px;
 }
 
 .fight-stick.disconnected {
-  background: url(../img/fsc/disconnected.svg) no-repeat;
+  background: url(./img/fsc/disconnected.svg) no-repeat;
 }
 
 .fight-stick.disconnected div {
@@ -774,7 +774,7 @@ i {
   height: 220px;
   top: 195px;
   left: -15px;
-  background: url(../img/fsc/stick.svg);
+  background: url(./img/fsc/stick.svg);
 }
 
 .fight-stick .fstick.up {
@@ -810,13 +810,13 @@ i {
 }
 
 .controller.gc {
-  background: url(../img/gcn/base.svg) no-repeat;
+  background: url(./img/gcn/base.svg) no-repeat;
   height: 837px;
   width: 978px;
 }
 
 .gc.disconnected {
-  background: url(../img/gcn/disconnected.svg) no-repeat;
+  background: url(./img/gcn/disconnected.svg) no-repeat;
 }
 
 .gc.disconnected div {
@@ -833,7 +833,7 @@ i {
 .gc .trigger {
   width: 131px;
   height: 100%;
-  background: url(../img/gcn/trigger.svg);
+  background: url(./img/gcn/trigger.svg);
   opacity: 0;
 }
 
@@ -848,7 +848,7 @@ i {
 .gc .bumper {
   width: 158px;
   height: 100%;
-  background: url(../img/gcn/buttons.svg) no-repeat;
+  background: url(./img/gcn/buttons.svg) no-repeat;
   background-position: -358px 0px;
   opacity: 0;
 }
@@ -917,7 +917,7 @@ i {
 
 .gc .button {
   position: absolute;
-  background: url(../img/gcn/buttons.svg);
+  background: url(./img/gcn/buttons.svg);
   opacity: 0;
 }
 
@@ -972,7 +972,7 @@ i {
 .gc .stick.left {
   top: 24px;
   left: 23px;
-  background: url(../img/gcn/left-stick.svg) center no-repeat;
+  background: url(./img/gcn/left-stick.svg) center no-repeat;
   height: 121px;
   width: 121px;
 }
@@ -980,7 +980,7 @@ i {
 .gc .stick.right {
   top: calc(100% - 127px);
   left: calc(100% - 125px);
-  background: url(../img/gcn/cstick.svg) center no-repeat;
+  background: url(./img/gcn/cstick.svg) center no-repeat;
   width: 84px;
   height: 84px;
 }
@@ -1002,7 +1002,7 @@ i {
 }
 
 .gc .face {
-  background: url(../img/gcn/dpad.svg) no-repeat;
+  background: url(./img/gcn/dpad.svg) no-repeat;
   position: absolute;
   opacity: 0;
 }
@@ -1076,7 +1076,7 @@ i {
 .byuwur {
   width: 60px;
   height: 50px;
-  background: url(../img/main.png) center / contain no-repeat !important;
+  background: url(./img/main.png) center / contain no-repeat !important;
 }
 
 .absolute {
@@ -1155,19 +1155,19 @@ i {
 }
 
 .console.xbox {
-  background: url("../img/xbox.png") no-repeat center;
+  background: url("./img/xbox.png") no-repeat center;
 }
 
 .console.ps {
-  background: url("../img/sony.png") no-repeat center;
+  background: url("./img/sony.png") no-repeat center;
 }
 
 .console.fight-stick {
-  background: url("../img/fsc.png") no-repeat center;
+  background: url("./img/fsc.png") no-repeat center;
 }
 
 .console.gc {
-  background: url("../img/gcn.png") no-repeat center;
+  background: url("./img/gcn.png") no-repeat center;
 }
 
 .box {

@@ -1,3 +1,8 @@
+/**
+ * File: popup/popup.js
+ * @file Popup parameter validation and animated social-account rendering.
+ * Deps: jQuery 4, GSAP, MorphSVGPlugin, popup.settings.js, params and config globals.
+ */
 // URL parameters and documentation
 const parameterRules = {
   twitch: { type: "text", maxlength: "160", group: "values", description: "Twitch account name shown as plain text." },
@@ -20,6 +25,12 @@ const parameterRules = {
   textYOffset: { type: "number", min: "-100", max: "100", step: "any", group: "fonts", description: "Vertical text adjustment in pixels." }
 };
 
+/**
+ * Validates a known popup parameter against its options, length, number bounds, and CSS color rules.
+ * @param {string} name Key in parameterRules.
+ * @param {string} value Candidate URL or form value.
+ * @returns {boolean} Whether the value is accepted.
+ */
 function validParameter(name, value) {
   const rule = parameterRules[name];
   if (rule.options && !rule.options.includes(value)) return false;
@@ -41,6 +52,12 @@ function validParameter(name, value) {
   return true;
 }
 
+/**
+ * Reads a validated URL override or uses the configured fallback.
+ * @param {string} name Key in parameterRules.
+ * @param {string|number} fallback Configured default.
+ * @returns {string|number} Valid override or fallback; numeric rules return numbers.
+ */
 function parameterValue(name, fallback) {
   if (parameterRules[name].type === "number") fallback = Number(fallback);
   if (!params.has(name)) return fallback;
