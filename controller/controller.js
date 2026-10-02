@@ -282,7 +282,7 @@ function dpadPOV(stickObj, remapObj) {
 /**
  * File: controller/controller.tester.js
  * @file Controller artwork updates, keyboard state, and raw input capture.
- * Deps: controller.js, controller.keyboard.js, controller DOM.
+ * Deps: embedded keyboard settings and controller DOM.
  */
 
 /**
@@ -608,7 +608,7 @@ const tester = {
 /**
  * File: controller/controller.js
  * @file Controller URL settings, input remapping, and configurator integration.
- * Deps: jQuery 4, controller.tester.js, controller.keyboard.js, Gamepad integration.
+ * Deps: jQuery 4, embedded keyboard settings and Gamepad integration.
  */
 
 // URL parameter documentation

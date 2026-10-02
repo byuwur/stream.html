@@ -1,7 +1,7 @@
 /**
  * File: popup/popup.js
  * @file Popup parameter validation and animated social-account rendering.
- * Deps: jQuery 4, GSAP, MorphSVGPlugin, popup.settings.js, params and config globals.
+ * Deps: jQuery 4, GSAP, MorphSVGPlugin, embedded settings, params and config globals.
  */
 // URL parameters and documentation
 const parameterRules = {

@@ -1,7 +1,7 @@
 /**
  * File: main/main.js
  * @file Scene parameter validation and rendering for start, BRB, end, and intermission presets.
- * Deps: jQuery 4, GSAP, main.settings.js, selected scene preset, params and config globals.
+ * Deps: jQuery 4, GSAP, embedded settings, params and config globals.
  */
 // URL parameters and documentation
 const parameterRules = {
