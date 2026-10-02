@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Simple browser overlays for your stream. Configure a controller, social popup, or main scene and copy its URL into OBS." />
+  <title>stream.html</title>
+  <link rel="icon" href="./main/main.png" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.php@main/css/fontawesome.min.css" />
+  <style>
+    :root { color-scheme: dark; --footer-height: 56px; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #131b2b; color: #fff; font-family: system-ui, sans-serif; }
+    a { color: inherit; }
+    .landing { display: grid; grid-template-columns: 1fr 1fr; height: calc(100dvh - var(--footer-height)); }
+    .intro { display: flex; flex-direction: column; justify-content: center; align-items: flex-start; padding: clamp(32px, 7vw, 120px); background: radial-gradient(ellipse at 80% 25%, #53617b66, transparent 65%), linear-gradient(135deg, #26334b, #101a2d); }
+    .logo { width: 64px; height: 64px; object-fit: contain; margin-bottom: 32px; }
+    h1 { margin: 0 0 20px; font-size: clamp(48px, 5vw, 88px); font-weight: 300; letter-spacing: -.05em; }
+    h1 span { color: #c8d2e4; }
+    .description { max-width: 440px; margin: 0 0 32px; color: #c8d2e4; font-size: clamp(18px, 1.5vw, 24px); line-height: 1.5; }
+    .motto { margin: 0; font-size: 12px; font-weight: 600; letter-spacing: .14em; line-height: 1.8; text-transform: uppercase; }
+    .resources { display: flex; flex-direction: column; overflow-y: auto; min-height: 0; scrollbar-gutter: stable; }
+    .resource { position: relative; isolation: isolate; display: flex; flex: 1 0 25%; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 24px 32px; text-align: center; text-decoration: none; overflow: hidden; }
+    .resource::before { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(135deg, var(--resource-tint), #0005), var(--resource-image) center / cover no-repeat; transition: transform .35s ease, background-color .35s ease; }
+    .resource:hover::before, .resource:focus-visible::before { transform: scale(1.08); background-color: #ffffff12; }
+    .resource:focus-visible { outline: 3px solid white; outline-offset: -6px; }
+    .resource > i { font-size: 36px; }
+    .resource h2 { margin: 0; font-size: clamp(26px, 2.5vw, 42px); font-weight: 300; }
+    .resource p { margin: 0; max-width: 420px; color: #ffffffe0; font-size: 14px; line-height: 1.5; }
+    .controller { background: #223a61; --resource-tint: #223a61bb; --resource-image: url("./controller/img/background.jpg"); }
+    .popup { background: #970f28; --resource-tint: #970f28bb; --resource-image: url("./popup/img/background.jpg"); }
+    .main-scene { background: #075847; --resource-tint: #075847bb; --resource-image: url("./main/img/background.jpg"); }
+    footer { position: fixed; inset: auto 0 0; height: var(--footer-height); display: flex; align-items: center; justify-content: center; gap: 6px; padding: 12px; background: #101725; font-size: 13px; }
+    footer i { color: #e95b72; }
+    footer a { text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+    footer a:focus-visible { outline: 2px solid white; outline-offset: 4px; }
+    @media (max-width: 767px) {
+      .landing { display: block; height: auto; padding-bottom: var(--footer-height); }
+      .intro { min-height: 45dvh; padding: 40px 28px; }
+      .logo { width: 48px; height: 48px; margin-bottom: 20px; }
+      .resources { height: 75dvh; }
+      .resource { padding: 20px; }
+      .resource > i { font-size: 28px; }
+    }
+    @media (prefers-reduced-motion: reduce) { .resource::before { transition: none; } }
+  </style>
+</head>
+<body>
+  <main class="landing">
+    <section class="intro" aria-labelledby="site-title">
+      <img class="logo" src="./main/main.png" alt="" width="64" height="64" />
+      <h1 id="site-title">stream<span>.html</span></h1>
+      <p class="description">Browser overlays for your stream. Choose a tool, make it yours, and copy the URL into OBS.</p>
+      <p class="motto">Simple is complicated enough.</p>
+    </section>
+    <nav class="resources" aria-label="Stream tools" tabindex="0">
+      <a class="resource controller" href="./controller/index.html">
+        <i class="fa-solid fa-gamepad" aria-hidden="true"></i>
+        <h2>Controller</h2>
+        <p>Show gamepad or keyboard input with your favorite controller skin.</p>
+      </a>
+      <a class="resource popup" href="./popup/index.html">
+        <i class="fa-solid fa-comment" aria-hidden="true"></i>
+        <h2>Social popup</h2>
+        <p>Bring your social accounts on screen with animated icons and handles.</p>
+      </a>
+      <a class="resource main-scene" href="./main/index.html">
+        <i class="fa-solid fa-clapperboard" aria-hidden="true"></i>
+        <h2>Main scene</h2>
+        <p>Starting, BRB, ending, and intermission scenes with your branding.</p>
+      </a>
+    </nav>
+  </main>
+  <footer>&copy; 2026, Made with <i class="fa-solid fa-heart" role="img" aria-label="love"></i> by <a href="https://byuwur.co" target="_blank" rel="noopener">BONYUR @byUwUr</a></footer>
+</body>
+</html>
