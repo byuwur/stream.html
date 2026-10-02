@@ -1,424 +1,423 @@
-@import url(https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css);
 :root {
-	--font-family: "Courier New", Courier, monospace;
-	--font-color: #fff;
-	--bg-color: #0001;
-	--accent-color: #fff;
-	--font-weight: 700;
-	--border-width: 24px;
-	--small-font-size: 12px;
-	--medium-font-size: 16px;
-	--large-font-size: 24px;
-	--xlarge-font-size: 64px;
-	--xxlarge-font-size: 128px;
-	--padding-right: 48px;
-	--margin-top: 24px;
-	--margin-right: 24px;
-	--width: 1920px;
-	--height: 1080px;
-	--position-absolute: absolute;
-	--animation-duration: 10s;
-	--animation-direction: forwards;
+  --font-family: "Courier New", Courier, monospace;
+  --font-color: #fff;
+  --bg-color: #0001;
+  --accent-color: #fff;
+  --font-weight: 700;
+  --border-width: 24px;
+  --small-font-size: 12px;
+  --medium-font-size: 16px;
+  --large-font-size: 24px;
+  --xlarge-font-size: 64px;
+  --xxlarge-font-size: 128px;
+  --padding-right: 48px;
+  --margin-top: 24px;
+  --margin-right: 24px;
+  --width: 1920px;
+  --height: 1080px;
+  --position-absolute: absolute;
+  --animation-duration: 10s;
+  --animation-direction: forwards;
 }
 * {
-	box-sizing: border-box;
+  box-sizing: border-box;
 }
 html,
 body {
-	font-family: var(--font-family);
-	font-weight: var(--font-weight);
-	color: var(--font-color);
-	margin: 0;
-	padding: 0;
-	width: var(--width);
-	height: var(--height);
-	overflow: hidden;
+  font-family: var(--font-family);
+  font-weight: var(--font-weight);
+  color: var(--font-color);
+  margin: 0;
+  padding: 0;
+  width: var(--width);
+  height: var(--height);
+  overflow: hidden;
 }
 .bg,
 #scene {
-	width: var(--width);
-	height: var(--height);
-	position: var(--position-absolute);
-	top: 0;
-	left: 0;
-	overflow: hidden;
+  width: var(--width);
+  height: var(--height);
+  position: var(--position-absolute);
+  top: 0;
+  left: 0;
+  overflow: hidden;
 }
 #frame {
-	width: calc(var(--width) - 2 * var(--border-width));
-	height: calc(var(--height) - 2 * var(--border-width));
-	left: var(--border-width);
-	top: var(--border-width);
-	border: var(--border-width) solid var(--accent-color);
-	position: var(--position-absolute);
+  width: calc(var(--width) - 2 * var(--border-width));
+  height: calc(var(--height) - 2 * var(--border-width));
+  left: var(--border-width);
+  top: var(--border-width);
+  border: var(--border-width) solid var(--accent-color);
+  position: var(--position-absolute);
 }
 #branding {
-	width: auto;
-	height: 500px;
-	position: var(--position-absolute);
-	top: 50%;
-	margin-top: -250px;
-	text-align: center;
+  width: auto;
+  height: 500px;
+  position: var(--position-absolute);
+  top: 50%;
+  margin-top: -250px;
+  text-align: center;
 }
 #brandImg {
-	width: var(--width);
-	height: 500px;
-	background: url("../img/main.png") center center no-repeat;
-	background-size: contain !important;
-	position: var(--position-absolute);
-	top: 0;
-	left: 0;
-	z-index: 1;
-	opacity: 0.1;
+  width: var(--width);
+  height: 500px;
+  background: url("../img/main.png") center center no-repeat;
+  background-size: contain !important;
+  position: var(--position-absolute);
+  top: 0;
+  left: 0;
+  z-index: 1;
+  opacity: 0.1;
 }
 #title {
-	width: var(--width);
-	font-size: var(--xxlarge-font-size);
-	margin-top: 142px;
-	z-index: 2;
-	position: var(--position-absolute);
+  width: var(--width);
+  font-size: var(--xxlarge-font-size);
+  margin-top: 142px;
+  z-index: 2;
+  position: var(--position-absolute);
 }
 #subtitle {
-	width: var(--width);
-	font-size: var(--large-font-size);
-	top: 290px;
-	z-index: 2;
-	position: var(--position-absolute);
+  width: var(--width);
+  font-size: var(--large-font-size);
+  top: 290px;
+  z-index: 2;
+  position: var(--position-absolute);
 }
 #updates,
 #social,
 #list,
 #countdown,
 #endMessage {
-	position: var(--position-absolute);
+  position: var(--position-absolute);
 }
 #updates {
-	left: 80px;
-	top: 80px;
+  left: 80px;
+  top: 80px;
 }
 #social {
-	left: 0;
-	top: 0;
-	white-space: nowrap;
-	transform-origin: left top;
+  left: 0;
+  top: 0;
+  white-space: nowrap;
+  transform-origin: left top;
 }
 .network {
-	padding-right: var(--padding-right);
-	width: 0;
-	padding-right: 0;
+  padding-right: var(--padding-right);
+  width: 0;
+  padding-right: 0;
 }
 .icon {
-	width: 40px;
-	height: 50px;
-	font-size: 40px;
-	overflow: hidden;
-	position: var(--position-absolute);
-	top: 10px;
-	left: 10px;
-	text-indent: -40px;
+  width: 40px;
+  height: 50px;
+  font-size: 40px;
+  overflow: hidden;
+  position: var(--position-absolute);
+  top: 10px;
+  left: 10px;
+  text-indent: -40px;
 }
 .socialHead,
 .socialName {
-	padding: 0;
-	position: relative;
-	left: -200px;
+  padding: 0;
+  position: relative;
+  left: -200px;
 }
 .socialHead {
-	font-size: var(--small-font-size);
-	line-height: var(--small-font-size);
-	padding-top: 10px;
+  font-size: var(--small-font-size);
+  line-height: var(--small-font-size);
+  padding-top: 10px;
 }
 .socialName {
-	font-size: var(--large-font-size);
-	line-height: var(--large-font-size);
-	padding-top: 2px;
+  font-size: var(--large-font-size);
+  line-height: var(--large-font-size);
+  padding-top: 2px;
 }
 #list {
-	bottom: 80px;
-	left: 80px;
-	text-align: left;
-	white-space: nowrap;
-	transform-origin: left bottom;
+  bottom: 80px;
+  left: 80px;
+  text-align: left;
+  white-space: nowrap;
+  transform-origin: left bottom;
 }
 .borderTop,
 .borderRight,
 .borderLeft {
-	position: var(--position-absolute);
+  position: var(--position-absolute);
 }
 .borderTop {
-	height: 2px;
-	width: 100%;
-	top: -2px;
-	left: 0;
+  height: 2px;
+  width: 100%;
+  top: -2px;
+  left: 0;
 }
 .borderRight {
-	width: 2px;
-	top: 0;
-	right: -2px;
-	height: 100%;
+  width: 2px;
+  top: 0;
+  right: -2px;
+  height: 100%;
 }
 .borderLeft {
-	width: 2px;
-	top: 0;
-	left: 0;
-	height: 100%;
+  width: 2px;
+  top: 0;
+  left: 0;
+  height: 100%;
 }
 .event {
-	padding: 0 40px 20px 20px;
-	margin-top: var(--margin-top);
-	position: relative;
-	background: var(--bg-color);
+  padding: 0 40px 20px 20px;
+  margin-top: var(--margin-top);
+  position: relative;
+  background: var(--bg-color);
 }
 #list .name,
 #list .type {
-	padding-right: 10px;
+  padding-right: 10px;
 }
 #list .name {
-	font-size: 20px;
-	line-height: 20px;
-	padding-top: 14px;
+  font-size: 20px;
+  line-height: 20px;
+  padding-top: 14px;
 }
 #list .type {
-	font-size: var(--small-font-size);
-	line-height: var(--small-font-size);
-	padding-top: 2px;
+  font-size: var(--small-font-size);
+  line-height: var(--small-font-size);
+  padding-top: 2px;
 }
 .inner {
-	overflow: hidden;
+  overflow: hidden;
 }
 #social .inner {
-	margin-left: 60px;
-	padding: 0 0 10px;
+  margin-left: 60px;
+  padding: 0 0 10px;
 }
 #social .item,
 #schedule .item {
-	position: var(--position-absolute);
-	top: 0;
-	left: 0;
+  position: var(--position-absolute);
+  top: 0;
+  left: 0;
 }
 #schedule {
-	max-width: 1900px;
-	position: relative;
-	top: -20px;
+  max-width: 1900px;
+  position: relative;
+  top: -20px;
 }
 .day {
-	margin-right: var(--margin-right);
-	margin-top: var(--margin-top);
-	position: relative;
-	float: left;
+  margin-right: var(--margin-right);
+  margin-top: var(--margin-top);
+  position: relative;
+  float: left;
 }
 .day:nth-child(7) {
-	margin-right: 0;
+  margin-right: 0;
 }
 #week .day {
-	padding: 0 10px 10px 10px;
+  padding: 0 10px 10px 10px;
 }
 .scheduleHead,
 .scheduleTime {
-	position: relative;
-	text-align: center;
+  position: relative;
+  text-align: center;
 }
 .scheduleHead {
-	font-size: var(--small-font-size);
-	font-weight: bold;
-	padding-top: 10px;
+  font-size: var(--small-font-size);
+  font-weight: bold;
+  padding-top: 10px;
 }
 .scheduleTime {
-	font-size: var(--medium-font-size);
-	padding-top: 2px;
+  font-size: var(--medium-font-size);
+  padding-top: 2px;
 }
 #schedule .borderTop {
-	width: 0;
+  width: 0;
 }
 #schedule .day {
-	top: 20px;
+  top: 20px;
 }
 #schedule .scheduleHead,
 #schedule .scheduleTime {
-	opacity: 0;
-	left: -60px;
+  opacity: 0;
+  left: -60px;
 }
 #countdown {
-	text-align: right;
-	bottom: 80px;
-	right: 80px;
-	font-size: var(--xlarge-font-size);
-	transform-origin: right bottom;
-	z-index: 999;
+  text-align: right;
+  bottom: 80px;
+  right: 80px;
+  font-size: var(--xlarge-font-size);
+  transform-origin: right bottom;
+  z-index: 999;
 }
 #message {
-	font-size: var(--large-font-size);
+  font-size: var(--large-font-size);
 }
 #endMessage {
-	text-align: right;
-	bottom: 0;
-	right: 0;
-	font-size: var(--xlarge-font-size);
-	white-space: nowrap;
-	display: none;
+  text-align: right;
+  bottom: 0;
+  right: 0;
+  font-size: var(--xlarge-font-size);
+  white-space: nowrap;
+  display: none;
 }
 #video video,
 #image img {
-	left: 0;
-	right: 0;
-	min-width: var(--width);
-	min-height: var(--height);
-	position: var(--position-absolute);
+  left: 0;
+  right: 0;
+  min-width: var(--width);
+  min-height: var(--height);
+  position: var(--position-absolute);
 }
 #overlay {
-	width: var(--width);
-	height: var(--height);
-	position: var(--position-absolute);
-	top: 0;
-	left: 0;
-	background: #0000;
+  width: var(--width);
+  height: var(--height);
+  position: var(--position-absolute);
+  top: 0;
+  left: 0;
+  background: #0000;
 }
 @keyframes soBorderTop {
-	0%,
-	100% {
-		width: 0;
-	}
-	5%,
-	95% {
-		width: 100%;
-	}
+  0%,
+  100% {
+    width: 0;
+  }
+  5%,
+  95% {
+    width: 100%;
+  }
 }
 @keyframes network {
-	0%,
-	1%,
-	99%,
-	100% {
-		width: 0;
-		padding-right: 0;
-	}
-	6%,
-	94% {
-		width: 100%;
-		padding-right: var(--padding-right);
-	}
+  0%,
+  1%,
+  99%,
+  100% {
+    width: 0;
+    padding-right: 0;
+  }
+  6%,
+  94% {
+    width: 100%;
+    padding-right: var(--padding-right);
+  }
 }
 @keyframes icon {
-	0%,
-	4%,
-	96%,
-	100% {
-		text-indent: -40px;
-	}
-	10%,
-	90% {
-		text-indent: 0px;
-	}
+  0%,
+  4%,
+  96%,
+  100% {
+    text-indent: -40px;
+  }
+  10%,
+  90% {
+    text-indent: 0px;
+  }
 }
 @keyframes socialHead {
-	0%,
-	4%,
-	96%,
-	100% {
-		left: -400px;
-	}
-	11%,
-	89% {
-		left: 0;
-	}
+  0%,
+  4%,
+  96%,
+  100% {
+    left: -400px;
+  }
+  11%,
+  89% {
+    left: 0;
+  }
 }
 @keyframes socialName {
-	0%,
-	6%,
-	94%,
-	100% {
-		left: -400px;
-	}
-	13%,
-	87% {
-		left: 0;
-	}
+  0%,
+  6%,
+  94%,
+  100% {
+    left: -400px;
+  }
+  13%,
+  87% {
+    left: 0;
+  }
 }
 @keyframes scAnimated {
-	0%,
-	2%,
-	98%,
-	100% {
-		opacity: 0;
-	}
-	6%,
-	92% {
-		opacity: 1;
-	}
+  0%,
+  2%,
+  98%,
+  100% {
+    opacity: 0;
+  }
+  6%,
+  92% {
+    opacity: 1;
+  }
 }
 @keyframes scBorderTop {
-	0%,
-	100% {
-		top: 60px;
-	}
-	8%,
-	92% {
-		top: 0;
-	}
+  0%,
+  100% {
+    top: 60px;
+  }
+  8%,
+  92% {
+    top: 0;
+  }
 }
 @keyframes day {
-	0%,
-	100% {
-		top: 20px;
-	}
-	10%,
-	90% {
-		top: 0;
-	}
+  0%,
+  100% {
+    top: 20px;
+  }
+  10%,
+  90% {
+    top: 0;
+  }
 }
 @keyframes scheduleHead {
-	0%,
-	7%,
-	93%,
-	100% {
-		opacity: 0;
-		left: -60px;
-	}
-	14%,
-	86% {
-		opacity: 1;
-		left: 0;
-	}
+  0%,
+  7%,
+  93%,
+  100% {
+    opacity: 0;
+    left: -60px;
+  }
+  14%,
+  86% {
+    opacity: 1;
+    left: 0;
+  }
 }
 @keyframes scheduleTime {
-	0%,
-	9%,
-	91%,
-	100% {
-		opacity: 0;
-		left: -60px;
-	}
-	16%,
-	84% {
-		opacity: 1;
-		left: 0;
-	}
+  0%,
+  9%,
+  91%,
+  100% {
+    opacity: 0;
+    left: -60px;
+  }
+  16%,
+  84% {
+    opacity: 1;
+    left: 0;
+  }
 }
 #social .animated .borderTop {
-	animation: soBorderTop var(--animation-duration) var(--animation-direction);
+  animation: soBorderTop var(--animation-duration) var(--animation-direction);
 }
 #social .animated .network {
-	animation: network var(--animation-duration) var(--animation-direction);
+  animation: network var(--animation-duration) var(--animation-direction);
 }
 .animated .icon {
-	animation: icon var(--animation-duration) var(--animation-direction);
+  animation: icon var(--animation-duration) var(--animation-direction);
 }
 .animated .socialHead {
-	animation: socialHead var(--animation-duration) var(--animation-direction);
+  animation: socialHead var(--animation-duration) var(--animation-direction);
 }
 .animated .socialName {
-	animation: socialName var(--animation-duration) var(--animation-direction);
+  animation: socialName var(--animation-duration) var(--animation-direction);
 }
 #schedule .animated {
-	animation: scAnimated var(--animation-duration) var(--animation-direction);
+  animation: scAnimated var(--animation-duration) var(--animation-direction);
 }
 #schedule .animated .borderTop {
-	animation: scBorderTop var(--animation-duration) var(--animation-direction);
+  animation: scBorderTop var(--animation-duration) var(--animation-direction);
 }
 #schedule .animated .day {
-	animation: day var(--animation-duration) var(--animation-direction);
+  animation: day var(--animation-duration) var(--animation-direction);
 }
 #schedule .animated .scheduleHead {
-	animation: scheduleHead var(--animation-duration) var(--animation-direction);
+  animation: scheduleHead var(--animation-duration) var(--animation-direction);
 }
 #schedule .animated .scheduleTime {
-	animation: scheduleTime var(--animation-duration) var(--animation-direction);
+  animation: scheduleTime var(--animation-duration) var(--animation-direction);
 }

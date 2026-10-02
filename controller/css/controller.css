@@ -1,1885 +1,1883 @@
-@import url(https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css);
-
 html,
 body {
-	margin: 0;
-	font-family: "Courier New", sans-serif;
-	overflow-y: hidden;
-	font-weight: 600;
+  margin: 0;
+  font-family: "Courier New", sans-serif;
+  overflow-y: hidden;
+  font-weight: 600;
 }
 
 a {
-	color: #2622ff;
-	text-decoration: underline;
+  color: #2622ff;
+  text-decoration: underline;
 }
 
 b {
-	font-weight: bold;
+  font-weight: bold;
 }
 
 em {
-	font-style: italic;
+  font-style: italic;
 }
 
 h2 {
-	font-size: 25px;
-	margin-bottom: 5px;
+  font-size: 25px;
+  margin-bottom: 5px;
 }
 
 h3 {
-	font-size: 20px;
-	margin-bottom: 5px;
+  font-size: 20px;
+  margin-bottom: 5px;
 }
 
 strong {
-	font-weight: bold;
+  font-weight: bold;
 }
 
 i {
-	padding: 0 4px;
+  padding: 0 4px;
 }
 
 .obs {
-	flex-grow: 1;
-	text-align: right;
+  flex-grow: 1;
+  text-align: right;
 }
 
 .btn {
-	padding: 0 4px;
-	margin: 0 4px;
+  padding: 0 4px;
+  margin: 0 4px;
 }
 
 .container {
-	width: 668px;
-	margin: 0 auto;
+  width: 668px;
+  margin: 0 auto;
 }
 
 .clear {
-	clear: both;
-	display: block;
+  clear: both;
+  display: block;
 }
 
 .hide-me {
-	display: none !important;
+  display: none !important;
 }
 
 .main-content {
-	background: #0f0;
-	height: 100vh;
+  background: #0f0;
+  height: 100vh;
 }
 
 .adsbygoogle[data-ad-status="unfilled"] {
-	display: none !important;
+  display: none !important;
 }
 
 .controller {
-	position: absolute;
-	top: 50%;
-	left: 50%;
-	transform: translate(-50%, -50%);
-	display: none;
-	margin-top: 30px !important;
-	margin-left: 0px !important;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: none;
+  margin-top: 30px !important;
+  margin-left: 0px !important;
 }
 
 .controller.half {
-	margin-top: 0px !important;
+  margin-top: 0px !important;
 }
 
 .controller.xbox {
-	background: url(../img/xbox/base.svg);
-	height: 630px;
-	width: 750px;
+  background: url(../img/xbox/base.svg);
+  height: 630px;
+  width: 750px;
 }
 
 .xbox.white {
-	background: url(../img/xbox/base-white.svg);
+  background: url(../img/xbox/base-white.svg);
 }
 
 .xbox.disconnected {
-	background: url(../img/xbox/disconnected.svg);
+  background: url(../img/xbox/disconnected.svg);
 }
 
 .xbox.disconnected div {
-	display: none;
+  display: none;
 }
 
 .xbox .triggers {
-	width: 446px;
-	height: 121px;
-	position: absolute;
-	left: 152px;
+  width: 446px;
+  height: 121px;
+  position: absolute;
+  left: 152px;
 }
 
 .xbox .trigger {
-	width: 88px;
-	height: 121px;
-	background: url(../img/xbox/trigger.svg);
-	opacity: 0;
+  width: 88px;
+  height: 121px;
+  background: url(../img/xbox/trigger.svg);
+  opacity: 0;
 }
 
 .xbox .trigger.left {
-	float: left;
-	background-position: 0 0;
+  float: left;
+  background-position: 0 0;
 }
 
 .xbox .trigger.right {
-	float: right;
-	transform: rotateY(180deg);
+  float: right;
+  transform: rotateY(180deg);
 }
 
 .xbox .bumper {
-	width: 170px;
-	height: 61px;
-	background: url(../img/xbox/bumper.svg);
-	opacity: 0;
+  width: 170px;
+  height: 61px;
+  background: url(../img/xbox/bumper.svg);
+  opacity: 0;
 }
 
 .xbox .bumpers {
-	position: absolute;
-	width: 536px;
-	height: 61px;
-	left: 107px;
-	top: 129px;
+  position: absolute;
+  width: 536px;
+  height: 61px;
+  left: 107px;
+  top: 129px;
 }
 
 .xbox .bumper.pressed {
-	opacity: 1;
+  opacity: 1;
 }
 
 .xbox .bumper.left {
-	float: left;
+  float: left;
 }
 
 .xbox .bumper.right {
-	float: right;
-	-webkit-transform: rotateY(180deg);
-	transform: rotateY(180deg);
+  float: right;
+  -webkit-transform: rotateY(180deg);
+  transform: rotateY(180deg);
 }
 
 .xbox .quadrant {
-	position: absolute;
-	background: url(../img/xbox/quadrant.svg);
-	height: 45px;
-	width: 45px;
-	top: 258px;
-	left: 354px;
-	z-index: 0;
+  position: absolute;
+  background: url(../img/xbox/quadrant.svg);
+  height: 45px;
+  width: 45px;
+  top: 258px;
+  left: 354px;
+  z-index: 0;
 }
 
 .xbox .p0 {
-	-webkit-transform: rotate(0deg);
-	transform: rotate(0deg);
+  -webkit-transform: rotate(0deg);
+  transform: rotate(0deg);
 }
 
 .xbox .p1 {
-	-webkit-transform: rotate(90deg);
-	transform: rotate(90deg);
+  -webkit-transform: rotate(90deg);
+  transform: rotate(90deg);
 }
 
 .xbox .p2 {
-	-webkit-transform: rotate(270deg);
-	transform: rotate(270deg);
+  -webkit-transform: rotate(270deg);
+  transform: rotate(270deg);
 }
 
 .xbox .p3 {
-	-webkit-transform: rotate(180deg);
-	transform: rotate(180deg);
+  -webkit-transform: rotate(180deg);
+  transform: rotate(180deg);
 }
 
 .xbox .arrows {
-	position: absolute;
-	width: 141px;
-	height: 33px;
-	top: 264px;
-	left: 306px;
+  position: absolute;
+  width: 141px;
+  height: 33px;
+  top: 264px;
+  left: 306px;
 }
 
 .xbox .back,
 .xbox .start {
-	background: url(../img/xbox/start-select.svg);
-	width: 33px;
-	height: 33px;
-	opacity: 0;
+  background: url(../img/xbox/start-select.svg);
+  width: 33px;
+  height: 33px;
+  opacity: 0;
 }
 
 .xbox .back.pressed,
 .xbox .start.pressed {
-	opacity: 1;
+  opacity: 1;
 }
 
 .xbox .back {
-	float: left;
+  float: left;
 }
 
 .xbox .start {
-	background-position: 33px 0px;
-	float: right;
+  background-position: 33px 0px;
+  float: right;
 }
 
 .xbox .abxy {
-	position: absolute;
-	width: 153px;
-	height: 156px;
-	top: 192px;
-	left: 488px;
+  position: absolute;
+  width: 153px;
+  height: 156px;
+  top: 192px;
+  left: 488px;
 }
 
 .xbox .button {
-	position: absolute;
-	background: url(../img/xbox/abxy.svg);
-	width: 48px;
-	height: 48px;
+  position: absolute;
+  background: url(../img/xbox/abxy.svg);
+  width: 48px;
+  height: 48px;
 }
 
 .xbox .button.pressed {
-	background-position-y: -48px;
-	margin-top: 5px;
-	opacity: 1;
+  background-position-y: -48px;
+  margin-top: 5px;
+  opacity: 1;
 }
 
 .xbox .a {
-	background-position: 0 0;
-	top: 108px;
-	left: 55px;
+  background-position: 0 0;
+  top: 108px;
+  left: 55px;
 }
 
 .xbox .b {
-	background-position: -49px 0;
-	top: 58px;
-	right: 0px;
+  background-position: -49px 0;
+  top: 58px;
+  right: 0px;
 }
 
 .xbox .x {
-	background-position: -98px 0;
-	top: 58px;
-	left: 4px;
+  background-position: -98px 0;
+  top: 58px;
+  left: 4px;
 }
 
 .xbox .y {
-	background-position: 48px 0;
-	left: 55px;
-	top: 7px;
+  background-position: 48px 0;
+  left: 55px;
+  top: 7px;
 }
 
 .xbox .sticks {
-	position: absolute;
-	width: 371px;
-	height: 196px;
-	top: 239px;
-	left: 144px;
+  position: absolute;
+  width: 371px;
+  height: 196px;
+  top: 239px;
+  left: 144px;
 }
 
 .xbox .stick {
-	position: absolute;
-	background: url(../img/xbox/stick.svg);
-	background-position: -85px 0;
-	height: 83px;
-	width: 83px;
+  position: absolute;
+  background: url(../img/xbox/stick.svg);
+  background-position: -85px 0;
+  height: 83px;
+  width: 83px;
 }
 
 .xbox .stick.pressed {
-	background-position: 0 0;
+  background-position: 0 0;
 }
 
 .xbox .stick.left {
-	top: 0;
-	left: 0;
+  top: 0;
+  left: 0;
 }
 
 .xbox .stick.right {
-	top: 113px;
-	left: 288px;
+  top: 113px;
+  left: 288px;
 }
 
 .xbox .dpad {
-	position: absolute;
-	width: 110px;
-	height: 111px;
-	top: 345px;
-	left: 223px;
+  position: absolute;
+  width: 110px;
+  height: 111px;
+  top: 345px;
+  left: 223px;
 }
 
 .xbox .face {
-	background: url(../img/xbox/dpad.svg);
-	position: absolute;
-	opacity: 0;
+  background: url(../img/xbox/dpad.svg);
+  position: absolute;
+  opacity: 0;
 }
 
 .xbox .face.pressed {
-	opacity: 1;
+  opacity: 1;
 }
 
 .xbox .face.up {
-	background-position: 34px 0;
-	left: 38px;
-	top: 0px;
-	width: 34px;
-	height: 56px;
+  background-position: 34px 0;
+  left: 38px;
+  top: 0px;
+  width: 34px;
+  height: 56px;
 }
 
 .xbox .face.down {
-	left: 38px;
-	bottom: 0;
-	width: 34px;
-	height: 56px;
+  left: 38px;
+  bottom: 0;
+  width: 34px;
+  height: 56px;
 }
 
 .xbox .face.left {
-	background-position: 0 -93px;
-	width: 55px;
-	height: 35px;
-	top: 38px;
-	left: 0;
+  background-position: 0 -93px;
+  width: 55px;
+  height: 35px;
+  top: 38px;
+  left: 0;
 }
 
 .xbox .face.right {
-	background-position: 0 -57px;
-	width: 55px;
-	height: 35px;
-	top: 38px;
-	right: 0;
+  background-position: 0 -57px;
+  width: 55px;
+  height: 35px;
+  top: 38px;
+  right: 0;
 }
 
 .xbox.half {
-	margin-top: -315px;
+  margin-top: -315px;
 }
 
 .xbox {
-	background: no-repeat center;
+  background: no-repeat center;
 }
 
 .controller.ps {
-	background: url(../img/ps/base.svg);
-	height: 598px;
-	width: 806px;
+  background: url(../img/ps/base.svg);
+  height: 598px;
+  width: 806px;
 }
 
 .ps.disconnected {
-	background: url(../img/ps/disconnected.svg);
+  background: url(../img/ps/disconnected.svg);
 }
 
 .ps.disconnected div {
-	display: none;
+  display: none;
 }
 
 .ps .triggers {
-	width: 588px;
-	height: 90px;
-	position: absolute;
-	left: 109px;
+  width: 588px;
+  height: 90px;
+  position: absolute;
+  left: 109px;
 }
 
 .ps .trigger {
-	width: 99px;
-	height: 100%;
-	background: url(../img/ps/triggers.svg);
-	opacity: 0;
+  width: 99px;
+  height: 100%;
+  background: url(../img/ps/triggers.svg);
+  opacity: 0;
 }
 
 .ps .trigger.left {
-	float: left;
+  float: left;
 }
 
 .ps .trigger.right {
-	float: right;
-	background-position-x: 99px;
+  float: right;
+  background-position-x: 99px;
 }
 
 .ps .bumper {
-	width: 99px;
-	height: 23px;
-	background: url(../img/ps/bumper.svg) no-repeat;
-	opacity: 0;
+  width: 99px;
+  height: 23px;
+  background: url(../img/ps/bumper.svg) no-repeat;
+  opacity: 0;
 }
 
 .ps .bumpers {
-	position: absolute;
-	width: 588px;
-	height: 23px;
-	left: 109px;
-	top: 94px;
+  position: absolute;
+  width: 588px;
+  height: 23px;
+  left: 109px;
+  top: 94px;
 }
 
 .ps .bumper.pressed {
-	opacity: 1;
+  opacity: 1;
 }
 
 .ps .bumper.left {
-	float: left;
+  float: left;
 }
 
 .ps .bumper.right {
-	float: right;
-	transform: rotateY(180deg);
+  float: right;
+  transform: rotateY(180deg);
 }
 
 .ps .touchpad {
-	width: 262px;
-	height: 151px;
-	position: absolute;
-	left: 272px;
-	top: 122px;
+  width: 262px;
+  height: 151px;
+  position: absolute;
+  left: 272px;
+  top: 122px;
 }
 
 .ps .touchpad.pressed {
-	background: url(../img/ps/touchpad.svg) no-repeat center;
+  background: url(../img/ps/touchpad.svg) no-repeat center;
 }
 
 .ps .meta {
-	width: 42px;
-	height: 42px;
-	position: absolute;
-	left: 382px;
-	bottom: 216px;
+  width: 42px;
+  height: 42px;
+  position: absolute;
+  left: 382px;
+  bottom: 216px;
 }
 
 .ps .meta.pressed {
-	background: url(../img/ps/meta.svg) no-repeat center;
+  background: url(../img/ps/meta.svg) no-repeat center;
 }
 
 .ps .arrows {
-	position: absolute;
-	width: 352px;
-	height: 46px;
-	top: 142px;
-	left: 227px;
+  position: absolute;
+  width: 352px;
+  height: 46px;
+  top: 142px;
+  left: 227px;
 }
 
 .ps .back,
 .ps .start {
-	background: url(../img/ps/start.svg);
-	width: 28px;
-	height: 46px;
-	opacity: 0;
+  background: url(../img/ps/start.svg);
+  width: 28px;
+  height: 46px;
+  opacity: 0;
 }
 
 .ps .back.pressed,
 .ps .start.pressed {
-	opacity: 1;
+  opacity: 1;
 }
 
 .ps .back {
-	float: left;
+  float: left;
 }
 
 .ps .start {
-	float: right;
-	background-position: 28px 0;
+  float: right;
+  background-position: 28px 0;
 }
 
 .ps .abxy {
-	position: absolute;
-	width: 170px;
-	height: 171px;
-	top: 159px;
-	left: 567px;
+  position: absolute;
+  width: 170px;
+  height: 171px;
+  top: 159px;
+  left: 567px;
 }
 
 .ps .button {
-	position: absolute;
-	width: 55px;
-	height: 55px;
-	background: url(../img/ps/face.svg);
+  position: absolute;
+  width: 55px;
+  height: 55px;
+  background: url(../img/ps/face.svg);
 }
 
 .ps .button.pressed {
-	background-position-y: 55px;
+  background-position-y: 55px;
 }
 
 .ps .a {
-	background-position: 0 0;
-	bottom: 0;
-	left: 58px;
+  background-position: 0 0;
+  bottom: 0;
+  left: 58px;
 }
 
 .ps .b {
-	background-position: -57px 0;
-	top: 58px;
-	right: 0px;
+  background-position: -57px 0;
+  top: 58px;
+  right: 0px;
 }
 
 .ps .x {
-	background-position: -113px 0;
-	top: 58px;
+  background-position: -113px 0;
+  top: 58px;
 }
 
 .ps .y {
-	background-position: 55px 0;
-	left: 58px;
+  background-position: 55px 0;
+  left: 58px;
 }
 
 .ps .sticks {
-	position: absolute;
-	width: 361px;
-	height: 105px;
-	top: 308px;
-	left: 228px;
+  position: absolute;
+  width: 361px;
+  height: 105px;
+  top: 308px;
+  left: 228px;
 }
 
 .ps .stick {
-	position: absolute;
-	background: url(../img/ps/sticks.svg);
-	height: 94px;
-	width: 94px;
+  position: absolute;
+  background: url(../img/ps/sticks.svg);
+  height: 94px;
+  width: 94px;
 }
 
 .ps .stick.pressed.left {
-	background-position-x: -96px;
+  background-position-x: -96px;
 }
 
 .ps .stick.pressed.right {
-	background-position-x: -192px;
+  background-position-x: -192px;
 }
 
 .ps .stick.left {
-	top: 0;
-	left: 0;
+  top: 0;
+  left: 0;
 }
 
 .ps .stick.right {
-	top: calc(100% - 105px);
-	left: calc(100% - 105px);
+  top: calc(100% - 105px);
+  left: calc(100% - 105px);
 }
 
 .ps .dpad {
-	position: absolute;
-	width: 125px;
-	height: 126px;
-	top: 181px;
-	left: 92px;
+  position: absolute;
+  width: 125px;
+  height: 126px;
+  top: 181px;
+  left: 92px;
 }
 
 .ps .face {
-	background: url(../img/ps/dpad.svg);
-	position: absolute;
+  background: url(../img/ps/dpad.svg);
+  position: absolute;
 }
 
 .ps .face.up,
 .ps .face.down {
-	width: 36px;
-	height: 52px;
+  width: 36px;
+  height: 52px;
 }
 
 .ps .face.left,
 .ps .face.right {
-	width: 52px;
-	height: 36px;
+  width: 52px;
+  height: 36px;
 }
 
 .ps .face.up {
-	left: 44px;
-	top: 0;
-	background-position: -37px 0px;
+  left: 44px;
+  top: 0;
+  background-position: -37px 0px;
 }
 
 .ps .face.down {
-	left: 44px;
-	bottom: 0;
-	background-position: 0px 0;
+  left: 44px;
+  bottom: 0;
+  background-position: 0px 0;
 }
 
 .ps .face.left {
-	top: 45px;
-	left: 0;
-	background-position: 104px 0;
+  top: 45px;
+  left: 0;
+  background-position: 104px 0;
 }
 
 .ps .face.right {
-	top: 45px;
-	right: 0px;
-	background-position: 52px 0;
+  top: 45px;
+  right: 0px;
+  background-position: 52px 0;
 }
 
 .ps .face.pressed {
-	background-position-y: 52px;
+  background-position-y: 52px;
 }
 
 .ps.half {
-	margin-top: -300px;
+  margin-top: -300px;
 }
 
 .controller.fight-stick {
-	background: url(../img/fsc/base.svg) center no-repeat;
-	height: 534px;
-	width: 912px;
+  background: url(../img/fsc/base.svg) center no-repeat;
+  height: 534px;
+  width: 912px;
 }
 
 .fight-stick.disconnected {
-	background: url(../img/fsc/disconnected.svg) no-repeat;
+  background: url(../img/fsc/disconnected.svg) no-repeat;
 }
 
 .fight-stick.disconnected div {
-	display: none;
+  display: none;
 }
 
 .fight-stick .abxy *,
 .fight-stick .triggers *,
 .fight-stick .bumpers *,
 .fight-stick .arrows * {
-	border-radius: 100%;
+  border-radius: 100%;
 }
 
 .fight-stick .triggers {
-	width: 325px;
-	height: 200px;
-	position: absolute;
-	right: 0px;
-	bottom: 60px;
+  width: 325px;
+  height: 200px;
+  position: absolute;
+  right: 0px;
+  bottom: 60px;
 }
 
 .fight-stick .trigger-button {
-	width: 123px;
-	height: 123px;
-	background: #333333;
-	opacity: 1;
-	display: block;
+  width: 123px;
+  height: 123px;
+  background: #333333;
+  opacity: 1;
+  display: block;
 }
 
 .fight-stick .trigger-button.pressed {
-	transform: translateY(5px);
-	-webkit-filter: invert(1);
-	filter: invert(1);
+  transform: translateY(5px);
+  -webkit-filter: invert(1);
+  filter: invert(1);
 }
 
 .fight-stick .trigger-button.left {
-	position: absolute;
-	float: right;
-	bottom: 4px;
-	right: 42px;
+  position: absolute;
+  float: right;
+  bottom: 4px;
+  right: 42px;
 }
 
 .fight-stick .trigger-button.right {
-	float: left;
+  float: left;
 }
 
 .fight-stick .bumpers {
-	width: 295px;
-	height: 200px;
-	position: absolute;
-	right: 0px;
-	top: 90px;
+  width: 295px;
+  height: 200px;
+  position: absolute;
+  right: 0px;
+  top: 90px;
 }
 
 .fight-stick .bumper {
-	width: 125px;
-	height: 125px;
-	background: #333333;
-	opacity: 1;
-	display: block;
+  width: 125px;
+  height: 125px;
+  background: #333333;
+  opacity: 1;
+  display: block;
 }
 
 .fight-stick .bumper.pressed {
-	transform: translateY(5px);
-	-webkit-filter: invert(1);
-	filter: invert(1);
+  transform: translateY(5px);
+  -webkit-filter: invert(1);
+  filter: invert(1);
 }
 
 .fight-stick .bumper.left {
-	position: absolute;
-	float: right;
-	bottom: 4px;
-	right: 11px;
+  position: absolute;
+  float: right;
+  bottom: 4px;
+  right: 11px;
 }
 
 .fight-stick .bumper.right {
-	float: left;
+  float: left;
 }
 
 .fight-stick .quadrant {
-	position: absolute;
-	font-size: 28px;
-	font-weight: normal;
-	top: 20px;
-	left: 236px;
-	color: white;
+  position: absolute;
+  font-size: 28px;
+  font-weight: normal;
+  top: 20px;
+  left: 236px;
+  color: white;
 }
 
 .fight-stick .arrows {
-	position: absolute;
-	width: 175px;
-	height: 70px;
-	top: 30px;
-	left: 10px;
+  position: absolute;
+  width: 175px;
+  height: 70px;
+  top: 30px;
+  left: 10px;
 }
 
 .fight-stick .back,
 .fight-stick .start {
-	width: 70px;
-	height: 70px;
-	background: #333333;
-	display: block;
+  width: 70px;
+  height: 70px;
+  background: #333333;
+  display: block;
 }
 
 .fight-stick .back {
-	float: left;
+  float: left;
 }
 
 .fight-stick .start {
-	position: absolute;
-	right: 0;
+  position: absolute;
+  right: 0;
 }
 
 .fight-stick .back.pressed,
 .fight-stick .start.pressed {
-	transform: translateY(5px);
-	-webkit-filter: invert(1);
-	filter: invert(1);
+  transform: translateY(5px);
+  -webkit-filter: invert(1);
+  filter: invert(1);
 }
 
 .fight-stick .abxy {
-	position: absolute;
-	width: 310px;
-	height: 370px;
-	bottom: 100px;
-	right: 340px;
+  position: absolute;
+  width: 310px;
+  height: 370px;
+  bottom: 100px;
+  right: 340px;
 }
 
 .fight-stick .button {
-	width: 125px;
-	height: 125px;
-	background: #333333;
-	opacity: 1;
-	display: block;
-	position: absolute;
+  width: 125px;
+  height: 125px;
+  background: #333333;
+  opacity: 1;
+  display: block;
+  position: absolute;
 }
 
 .fight-stick .button.pressed {
-	transform: translateY(5px);
-	-webkit-filter: invert(1);
-	filter: invert(1);
+  transform: translateY(5px);
+  -webkit-filter: invert(1);
+  filter: invert(1);
 }
 
 .fight-stick .a {
-	bottom: 0px;
-	left: 0px;
+  bottom: 0px;
+  left: 0px;
 }
 
 .fight-stick .b {
-	bottom: 66px;
-	right: 31px;
+  bottom: 66px;
+  right: 31px;
 }
 
 .fight-stick .x {
-	top: 66px;
-	left: 33px;
+  top: 66px;
+  left: 33px;
 }
 
 .fight-stick .y {
-	right: 0px;
-	top: 0px;
+  right: 0px;
+  top: 0px;
 }
 
 .fight-stick .fstick {
-	position: absolute;
-	width: 220px;
-	height: 220px;
-	top: 195px;
-	left: -15px;
-	background: url(../img/fsc/stick.svg);
+  position: absolute;
+  width: 220px;
+  height: 220px;
+  top: 195px;
+  left: -15px;
+  background: url(../img/fsc/stick.svg);
 }
 
 .fight-stick .fstick.up {
-	background-position-x: -1762px;
+  background-position-x: -1762px;
 }
 
 .fight-stick .fstick.down {
-	background-position-x: -882px;
+  background-position-x: -882px;
 }
 
 .fight-stick .fstick.left {
-	background-position-x: -1322px;
+  background-position-x: -1322px;
 }
 
 .fight-stick .fstick.right {
-	background-position-x: -442px;
+  background-position-x: -442px;
 }
 
 .fight-stick .fstick.up.right {
-	background-position-x: -222px;
+  background-position-x: -222px;
 }
 
 .fight-stick .fstick.up.left {
-	background-position-x: -1542px;
+  background-position-x: -1542px;
 }
 
 .fight-stick .fstick.down.right {
-	background-position-x: -662px;
+  background-position-x: -662px;
 }
 
 .fight-stick .fstick.down.left {
-	background-position-x: -1102px;
+  background-position-x: -1102px;
 }
 
 .controller.gc {
-	background: url(../img/gcn/base.svg) no-repeat;
-	height: 837px;
-	width: 978px;
+  background: url(../img/gcn/base.svg) no-repeat;
+  height: 837px;
+  width: 978px;
 }
 
 .gc.disconnected {
-	background: url(../img/gcn/disconnected.svg) no-repeat;
+  background: url(../img/gcn/disconnected.svg) no-repeat;
 }
 
 .gc.disconnected div {
-	display: none;
+  display: none;
 }
 
 .gc .triggers {
-	width: 775px;
-	height: 95px;
-	position: absolute;
-	left: 102px;
+  width: 775px;
+  height: 95px;
+  position: absolute;
+  left: 102px;
 }
 
 .gc .trigger {
-	width: 131px;
-	height: 100%;
-	background: url(../img/gcn/trigger.svg);
-	opacity: 0;
+  width: 131px;
+  height: 100%;
+  background: url(../img/gcn/trigger.svg);
+  opacity: 0;
 }
 
 .gc .trigger.left {
-	float: left;
+  float: left;
 }
 
 .gc .trigger.right {
-	float: right;
+  float: right;
 }
 
 .gc .bumper {
-	width: 158px;
-	height: 100%;
-	background: url(../img/gcn/buttons.svg) no-repeat;
-	background-position: -358px 0px;
-	opacity: 0;
+  width: 158px;
+  height: 100%;
+  background: url(../img/gcn/buttons.svg) no-repeat;
+  background-position: -358px 0px;
+  opacity: 0;
 }
 
 .gc .bumpers {
-	position: absolute;
-	width: 792px;
-	height: 73px;
-	left: 103px;
-	top: 138px;
+  position: absolute;
+  width: 792px;
+  height: 73px;
+  left: 103px;
+  top: 138px;
 }
 
 .gc .bumper.pressed {
-	opacity: 1;
+  opacity: 1;
 }
 
 .gc .bumper.left {
-	float: left;
-	display: none;
+  float: left;
+  display: none;
 }
 
 .gc .bumper.right {
-	float: right;
+  float: right;
 }
 
 .gc .arrows {
-	position: absolute;
-	width: 50px;
-	height: 50px;
-	top: 324px;
-	left: 465px;
+  position: absolute;
+  width: 50px;
+  height: 50px;
+  top: 324px;
+  left: 465px;
 }
 
 .gc .back,
 .gc .start {
-	width: 43px;
-	height: 43px;
-	background: #e7e7e7;
-	border: solid 4.5px rgba(0, 0, 0, 0.65);
-	background-clip: content-box;
-	opacity: 0;
+  width: 43px;
+  height: 43px;
+  background: #e7e7e7;
+  border: solid 4.5px rgba(0, 0, 0, 0.65);
+  background-clip: content-box;
+  opacity: 0;
 }
 
 .gc .back.pressed,
 .gc .start.pressed {
-	opacity: 1;
-	-webkit-filter: invert(1);
-	filter: invert(1);
+  opacity: 1;
+  -webkit-filter: invert(1);
+  filter: invert(1);
 }
 
 .gc .back {
-	display: none;
+  display: none;
 }
 
 .gc .start {
-	float: right;
+  float: right;
 }
 
 .gc .abxy {
-	position: absolute;
-	width: 288px;
-	height: 230px;
-	top: 207px;
-	left: 640px;
+  position: absolute;
+  width: 288px;
+  height: 230px;
+  top: 207px;
+  left: 640px;
 }
 
 .gc .button {
-	position: absolute;
-	background: url(../img/gcn/buttons.svg);
-	opacity: 0;
+  position: absolute;
+  background: url(../img/gcn/buttons.svg);
+  opacity: 0;
 }
 
 .gc .button.pressed {
-	opacity: 1;
+  opacity: 1;
 }
 
 .gc .a {
-	background-position: 0 0;
-	width: 114px;
-	height: 114px;
-	bottom: 35px;
-	left: 91px;
+  background-position: 0 0;
+  width: 114px;
+  height: 114px;
+  bottom: 35px;
+  left: 91px;
 }
 
 .gc .b {
-	width: 71px;
-	height: 71px;
-	background-position: -116px 0;
-	bottom: 0px;
-	left: 1px;
+  width: 71px;
+  height: 71px;
+  background-position: -116px 0;
+  bottom: 0px;
+  left: 1px;
 }
 
 .gc .x {
-	width: 66px;
-	height: 103px;
-	background-position: -292px 0;
-	top: 65px;
-	right: 0px;
+  width: 66px;
+  height: 103px;
+  background-position: -292px 0;
+  top: 65px;
+  right: 0px;
 }
 
 .gc .y {
-	width: 103px;
-	height: 66px;
-	background-position: -189px 0;
-	left: 67px;
-	top: 2px;
+  width: 103px;
+  height: 66px;
+  background-position: -189px 0;
+  left: 67px;
+  top: 2px;
 }
 
 .gc .sticks {
-	position: absolute;
-	width: 628px;
-	height: 392px;
-	top: 258px;
-	left: 106px;
+  position: absolute;
+  width: 628px;
+  height: 392px;
+  top: 258px;
+  left: 106px;
 }
 
 .gc .stick {
-	position: absolute;
+  position: absolute;
 }
 
 .gc .stick.left {
-	top: 24px;
-	left: 23px;
-	background: url(../img/gcn/left-stick.svg) center no-repeat;
-	height: 121px;
-	width: 121px;
+  top: 24px;
+  left: 23px;
+  background: url(../img/gcn/left-stick.svg) center no-repeat;
+  height: 121px;
+  width: 121px;
 }
 
 .gc .stick.right {
-	top: calc(100% - 127px);
-	left: calc(100% - 125px);
-	background: url(../img/gcn/cstick.svg) center no-repeat;
-	width: 84px;
-	height: 84px;
+  top: calc(100% - 127px);
+  left: calc(100% - 125px);
+  background: url(../img/gcn/cstick.svg) center no-repeat;
+  width: 84px;
+  height: 84px;
 }
 
 .gc .dpad {
-	position: absolute;
-	width: 125px;
-	height: 126px;
-	top: 181px;
-	left: 92px;
+  position: absolute;
+  width: 125px;
+  height: 126px;
+  top: 181px;
+  left: 92px;
 }
 
 .gc .dpad {
-	position: absolute;
-	width: 130px;
-	height: 130px;
-	top: 497px;
-	left: 263px;
+  position: absolute;
+  width: 130px;
+  height: 130px;
+  top: 497px;
+  left: 263px;
 }
 
 .gc .face {
-	background: url(../img/gcn/dpad.svg) no-repeat;
-	position: absolute;
-	opacity: 0;
+  background: url(../img/gcn/dpad.svg) no-repeat;
+  position: absolute;
+  opacity: 0;
 }
 
 .gc .face.up,
 .gc .face.down {
-	width: 44px;
-	height: 65px;
+  width: 44px;
+  height: 65px;
 }
 
 .gc .face.left,
 .gc .face.right {
-	width: 65px;
-	height: 44px;
+  width: 65px;
+  height: 44px;
 }
 
 .gc .face.up {
-	left: 42px;
-	top: 0;
-	background-position: 0px 0px;
+  left: 42px;
+  top: 0;
+  background-position: 0px 0px;
 }
 
 .gc .face.down {
-	left: 42px;
-	bottom: 0;
-	background-position: -46px 0;
+  left: 42px;
+  bottom: 0;
+  background-position: -46px 0;
 }
 
 .gc .face.left {
-	top: 43px;
-	left: 0;
-	background-position: -93px 0;
+  top: 43px;
+  left: 0;
+  background-position: -93px 0;
 }
 
 .gc .face.right {
-	top: 43px;
-	right: 0px;
-	background-position: -160px 0;
+  top: 43px;
+  right: 0px;
+  background-position: -160px 0;
 }
 
 .gc .face.pressed {
-	opacity: 1;
+  opacity: 1;
 }
 
 .navbar {
-	background: #600;
-	color: white;
-	width: 100%;
-	z-index: 10;
-	position: absolute;
-	top: 0;
-	text-align: center;
+  background: #600;
+  color: white;
+  width: 100%;
+  z-index: 10;
+  position: absolute;
+  top: 0;
+  text-align: center;
 }
 
 .nocon {
-	border-bottom: none;
-	bottom: 0;
-	top: auto;
+  border-bottom: none;
+  bottom: 0;
+  top: auto;
 }
 
 .nocon.visible,
 .pselect.visible {
-	visibility: visible;
-	opacity: 1;
+  visibility: visible;
+  opacity: 1;
 }
 
 .nocon ul {
-	float: left;
+  float: left;
 }
 
 .byuwur {
-	width: 60px;
-	height: 50px;
-	background: url(../img/main.png) center / contain no-repeat !important;
+  width: 60px;
+  height: 50px;
+  background: url(../img/main.png) center / contain no-repeat !important;
 }
 
 .absolute {
-	position: absolute;
+  position: absolute;
 }
 
 .navbar .content {
-	font-size: 1.5rem;
-	max-width: 1120px;
-	display: flex;
-	margin: 0 auto;
-	padding: 0 16px;
-	justify-content: space-between;
-	align-items: center;
+  font-size: 1.5rem;
+  max-width: 1120px;
+  display: flex;
+  margin: 0 auto;
+  padding: 0 16px;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .right a.button {
-	top: 0;
-	background: #ff9900;
-	box-sizing: border-box;
-	padding: 5px;
-	display: inline-block;
-	line-height: normal;
-	text-decoration: none;
-	color: rgba(0, 0, 0, 0.74);
-	margin: 4px;
+  top: 0;
+  background: #ff9900;
+  box-sizing: border-box;
+  padding: 5px;
+  display: inline-block;
+  line-height: normal;
+  text-decoration: none;
+  color: rgba(0, 0, 0, 0.74);
+  margin: 4px;
 }
 
 .navbar .content .center {
-	display: flex;
+  display: flex;
 }
 
 .pselect,
 .nocon {
-	visibility: hidden;
-	opacity: 0;
-	transition: 0.5s ease;
+  visibility: hidden;
+  opacity: 0;
+  transition: 0.5s ease;
 }
 
 .pselect {
-	display: flex;
-	align-items: center;
-	border-left: white 1px solid;
-	margin-left: 16px;
-	padding-left: 16px;
+  display: flex;
+  align-items: center;
+  border-left: white 1px solid;
+  margin-left: 16px;
+  padding-left: 16px;
 }
 
 .console {
-	padding: 9px;
-	vertical-align: top;
-	-webkit-appearance: none;
-	-moz-appearance: none;
-	appearance: none;
-	height: 50px;
-	border: none;
-	font-size: 20px;
-	width: 50px;
-	color: transparent;
-	outline: 0;
-	-webkit-filter: invert(0.97);
-	-moz-filter: invert(0.97);
-	filter: invert(0.97);
-	transition: 0.3s ease-out;
-	cursor: pointer;
+  padding: 9px;
+  vertical-align: top;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  height: 50px;
+  border: none;
+  font-size: 20px;
+  width: 50px;
+  color: transparent;
+  outline: 0;
+  -webkit-filter: invert(0.97);
+  -moz-filter: invert(0.97);
+  filter: invert(0.97);
+  transition: 0.3s ease-out;
+  cursor: pointer;
 }
 
 .console:hover {
-	-webkit-filter: invert(0);
-	-moz-filter: invert(0);
-	filter: invert(0);
+  -webkit-filter: invert(0);
+  -moz-filter: invert(0);
+  filter: invert(0);
 }
 
 .console option {
-	color: black;
-	background: white;
+  color: black;
+  background: white;
 }
 
 .console.xbox {
-	background: url("../img/xbox.png") no-repeat center;
+  background: url("../img/xbox.png") no-repeat center;
 }
 
 .console.ps {
-	background: url("../img/sony.png") no-repeat center;
+  background: url("../img/sony.png") no-repeat center;
 }
 
 .console.fight-stick {
-	background: url("../img/fsc.png") no-repeat center;
+  background: url("../img/fsc.png") no-repeat center;
 }
 
 .console.gc {
-	background: url("../img/gcn.png") no-repeat center;
+  background: url("../img/gcn.png") no-repeat center;
 }
 
 .box {
-	display: flex;
-	float: left;
-	align-items: center;
-	gap: 8px;
+  display: flex;
+  float: left;
+  align-items: center;
+  gap: 8px;
 }
 
 .box .fa {
-	line-height: 50px;
-	display: block;
+  line-height: 50px;
+  display: block;
 }
 
 .box.alert {
-	font-size: 2rem;
-	color: salmon;
-	display: block;
-	text-shadow: 0 1px 0 lightcoral;
+  font-size: 2rem;
+  color: salmon;
+  display: block;
+  text-shadow: 0 1px 0 lightcoral;
 }
 
 .player {
-	background: white;
-	padding: 9px;
-	vertical-align: top;
-	-webkit-appearance: none;
-	-moz-appearance: none;
-	appearance: none;
-	height: 50px;
-	border: none;
-	font-size: 25px;
-	outline: 0;
-	cursor: pointer;
+  background: white;
+  padding: 9px;
+  vertical-align: top;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  height: 50px;
+  border: none;
+  font-size: 25px;
+  outline: 0;
+  cursor: pointer;
 }
 
 a .menu-button {
-	color: white;
-	font-size: 36px;
-	vertical-align: text-bottom;
-	-webkit-transform: scaleX(0.75);
-	-moz-transform: scaleX(0.75);
-	transform: scaleX(0.75);
+  color: white;
+  font-size: 36px;
+  vertical-align: text-bottom;
+  -webkit-transform: scaleX(0.75);
+  -moz-transform: scaleX(0.75);
+  transform: scaleX(0.75);
 }
 
 a:active .menu-button {
-	-webkit-filter: invert(100%);
-	filter: invert(100%);
+  -webkit-filter: invert(100%);
+  filter: invert(100%);
 }
 
 .slideout-menu {
-	z-index: 99;
-	position: absolute;
-	width: 100%;
-	height: 100%;
-	visibility: hidden;
-	transition: all 0.5s;
-	transition-delay: 0.1s;
-	transition-timing-function: ease-in-out;
+  z-index: 99;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  visibility: hidden;
+  transition: all 0.5s;
+  transition-delay: 0.1s;
+  transition-timing-function: ease-in-out;
 }
 
 .slideout-menu:target {
-	visibility: visible;
+  visibility: visible;
 }
 
 .slideout-menu:target .menu {
-	transform: translateX(0px);
-	box-shadow: black -1px 0 10px;
+  transform: translateX(0px);
+  box-shadow: black -1px 0 10px;
 }
 
 .slideout-menu:target .modal-bg {
-	transition-delay: 0s;
-	transition-duration: 0.5s;
+  transition-delay: 0s;
+  transition-duration: 0.5s;
 }
 
 .menu {
-	width: 360px;
-	height: 100%;
-	background: white;
-	position: absolute;
-	transition: transform ease-in-out 0.25s;
-	transform: translateX(-360px);
-	display: flex;
-	flex-direction: column;
+  width: 360px;
+  height: 100%;
+  background: white;
+  position: absolute;
+  transition: transform ease-in-out 0.25s;
+  transform: translateX(-360px);
+  display: flex;
+  flex-direction: column;
 }
 
 .menu .menu-list {
-	flex-grow: 1;
-	overflow-y: auto;
+  flex-grow: 1;
+  overflow-y: auto;
 }
 
 .menu .menu-list a {
-	display: block;
-	padding: 10px;
-	font-size: 1.5rem;
-	text-decoration: none;
-	color: rgba(0, 0, 0, 0.65);
-	transition: background ease 0.5s;
+  display: block;
+  padding: 10px;
+  font-size: 1.5rem;
+  text-decoration: none;
+  color: rgba(0, 0, 0, 0.65);
+  transition: background ease 0.5s;
 }
 
 .menu a:hover {
-	background: rgba(0, 0, 0, 0.25);
+  background: rgba(0, 0, 0, 0.25);
 }
 
 .menu .menu-list i {
-	margin-right: 4px;
+  margin-right: 4px;
 }
 
 .menu h1 {
-	font-size: 1.75rem;
-	padding: 8px;
-	margin: 0 0 32px 0;
-	background: #600;
-	color: white;
-	text-align: center;
+  font-size: 1.75rem;
+  padding: 8px;
+  margin: 0 0 32px 0;
+  background: #600;
+  color: white;
+  text-align: center;
 }
 
 .menu .year {
-	font-size: 0.75rem;
-	margin: 24px 12px;
+  font-size: 0.75rem;
+  margin: 24px 12px;
 }
 
 .modal-container {
-	z-index: 20;
-	position: absolute;
-	width: 100%;
-	height: 100%;
-	visibility: hidden;
-	transition: all 0.5s;
-	transition-delay: 0.1s;
-	transition-timing-function: cubic-bezier(0.25, 1.5, 0.66, 1);
-	overflow: hidden;
+  z-index: 20;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  visibility: hidden;
+  transition: all 0.5s;
+  transition-delay: 0.1s;
+  transition-timing-function: cubic-bezier(0.25, 1.5, 0.66, 1);
+  overflow: hidden;
 }
 
 .modal-container:target {
-	visibility: visible;
+  visibility: visible;
 }
 
 .modal-container:target .modal {
-	opacity: 1;
-	transform: scale(1) rotateX(0deg) translateY(0%);
+  opacity: 1;
+  transform: scale(1) rotateX(0deg) translateY(0%);
 }
 
 .modal-bg {
-	background: rgba(0, 0, 0, 0);
-	transition: all 0.5s cubic-bezier(0.27, 1.29, 0.63, 1) 0.1s;
-	width: 100%;
-	height: 100%;
+  background: rgba(0, 0, 0, 0);
+  transition: all 0.5s cubic-bezier(0.27, 1.29, 0.63, 1) 0.1s;
+  width: 100%;
+  height: 100%;
 }
 
 .bglink {
-	position: absolute;
-	width: 100%;
-	height: 100%;
-	cursor: default;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  cursor: default;
 }
 
 .modal-container:target .modal-bg,
 .slideout-menu:target .modal-bg {
-	background: rgba(0, 0, 0, 0.66);
+  background: rgba(0, 0, 0, 0.66);
 }
 
 .modal {
-	max-width: 855px;
-	max-height: calc(100% - 100px);
-	min-height: 360px;
-	display: flex;
-	flex-flow: column;
-	background: whitesmoke;
-	margin: 40px auto;
-	opacity: 0;
-	transform: scale(1.1);
-	transform-origin: center center;
-	transition:
-		all 0.5s cubic-bezier(0.25, 1.25, 0.75, 1) 0.1s,
-		opacity 0.25s ease 0.1s;
+  max-width: 855px;
+  max-height: calc(100% - 100px);
+  min-height: 360px;
+  display: flex;
+  flex-flow: column;
+  background: whitesmoke;
+  margin: 40px auto;
+  opacity: 0;
+  transform: scale(1.1);
+  transform-origin: center center;
+  transition:
+    all 0.5s cubic-bezier(0.25, 1.25, 0.75, 1) 0.1s,
+    opacity 0.25s ease 0.1s;
 }
 
 .modal article {
-	-webkit-box-sizing: border-box;
-	-moz-box-sizing: border-box;
-	box-sizing: border-box;
-	padding: 0 18px;
-	overflow-y: auto;
-	flex: 1 1 auto;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  padding: 0 18px;
+  overflow-y: auto;
+  flex: 1 1 auto;
 }
 
 .modal h1 {
-	font-size: 3rem;
+  font-size: 3rem;
 }
 
 .modal a.close {
-	float: right;
-	text-align: center;
-	font-size: 3em;
-	width: 1em;
-	text-decoration: none;
-	color: white;
-	text-shadow: rgba(0, 0, 0, 0.5) 0px 1px 3px;
+  float: right;
+  text-align: center;
+  font-size: 3em;
+  width: 1em;
+  text-decoration: none;
+  color: white;
+  text-shadow: rgba(0, 0, 0, 0.5) 0px 1px 3px;
 }
 
 .modal .codeblock {
-	font-family: monospace;
-	padding: 5px;
-	background: black;
-	color: white;
-	word-wrap: break-word;
-	line-height: 2;
-	border: 1px solid rgb(255, 255, 255, 0.5);
-	text-shadow: rgba(0, 0, 0, 0.5) 0 0 1px;
+  font-family: monospace;
+  padding: 5px;
+  background: black;
+  color: white;
+  word-wrap: break-word;
+  line-height: 2;
+  border: 1px solid rgb(255, 255, 255, 0.5);
+  text-shadow: rgba(0, 0, 0, 0.5) 0 0 1px;
 }
 
 .modal p {
-	margin-bottom: 16px;
+  margin-bottom: 16px;
 }
 
 .modal .minimenu {
-	display: flex;
-	gap: 8px;
-	justify-content: space-between;
-	align-items: center;
-	background: #300;
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+  align-items: center;
+  background: #300;
 }
 
 .modal .minimenu ul,
 .modal .minimenu ol {
-	flex-grow: 1;
+  flex-grow: 1;
 }
 
 .modal .minimenu li {
-	display: table-cell;
+  display: table-cell;
 }
 
 .modal .minimenu li:hover,
 .modal .minimenu .selected {
-	background: rgba(255, 255, 255, 0.125);
+  background: rgba(255, 255, 255, 0.125);
 }
 
 .modal .minimenu a {
-	color: white;
-	padding: 8px;
-	text-decoration: none;
-	display: inline-block;
+  color: white;
+  padding: 8px;
+  text-decoration: none;
+  display: inline-block;
 }
 
 .modal .minimenu a:hover {
-	background: rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.25);
 }
 
 .modal .minimenu .byuwur {
-	height: 40px;
-	padding: 0 0 0 24px;
+  height: 40px;
+  padding: 0 0 0 24px;
 }
 
 .modal .minimenu + header {
-	background: #600;
-	color: white;
-	padding: 0 24px;
+  background: #600;
+  color: white;
+  padding: 0 24px;
 }
 
 .info {
-	clear: both;
+  clear: both;
 }
 
 .info div {
-	width: 50%;
-	box-sizing: border-box;
+  width: 50%;
+  box-sizing: border-box;
 }
 
 .info ol {
-	list-style: decimal inside;
+  list-style: decimal inside;
 }
 
 .info ol li {
-	margin-bottom: 5px;
+  margin-bottom: 5px;
 }
 
 .info div:nth-of-type(1) {
-	float: left;
-	padding-right: 1%;
+  float: left;
+  padding-right: 1%;
 }
 
 .info div:nth-of-type(2) {
-	float: right;
-	padding-left: 1%;
+  float: right;
+  padding-left: 1%;
 }
 
 .form-group {
-	font-size: 1.25rem;
-	display: flex;
-	gap: 12px;
-	justify-content: space-between;
-	margin-bottom: 12px;
-	position: relative;
-	border-bottom: rgba(0, 0, 0, 0.1) 1px solid;
+  font-size: 1.25rem;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  position: relative;
+  border-bottom: rgba(0, 0, 0, 0.1) 1px solid;
 }
 
 .form-group [id*="-input"] {
-	font-size: 1.25rem;
-	flex-grow: 1;
-	max-width: 60%;
-	padding: 0px;
-	border: none;
-	background: transparent;
-	border-bottom: rgba(0, 0, 0, 0.5) 1px solid;
-	text-align: center;
-	transition: border-bottom 0.2s ease-in;
-	font-family: "Courier New", sans-serif;
+  font-size: 1.25rem;
+  flex-grow: 1;
+  max-width: 60%;
+  padding: 0px;
+  border: none;
+  background: transparent;
+  border-bottom: rgba(0, 0, 0, 0.5) 1px solid;
+  text-align: center;
+  transition: border-bottom 0.2s ease-in;
+  font-family: "Courier New", sans-serif;
 }
 
 .form-group [id*="-input"]:focus {
-	border-bottom: black 1px solid;
-	outline: none;
+  border-bottom: black 1px solid;
+  outline: none;
 }
 
 .form-group [type="checkbox"]:before {
-	content: "Off";
-	display: block;
-	cursor: pointer;
-	background: rgba(255, 0, 0, 0.5);
+  content: "Off";
+  display: block;
+  cursor: pointer;
+  background: rgba(255, 0, 0, 0.5);
 }
 
 .form-group [type="checkbox"]:checked:before {
-	content: "On";
-	background: rgba(0, 110, 0, 0.5);
+  content: "On";
+  background: rgba(0, 110, 0, 0.5);
 }
 
 .form-group [type="checkbox"] {
-	width: 0;
-	height: 0;
-	position: relative;
+  width: 0;
+  height: 0;
+  position: relative;
 }
 
 .form-group .input-unit {
-	position: absolute;
-	right: 0;
+  position: absolute;
+  right: 0;
 }
 
 #params h2 {
-	margin-bottom: 15px;
+  margin-bottom: 15px;
 }
 
 #params h2:after {
-	content: attr(data-param);
-	margin-left: 12px;
-	padding: 4px;
-	font-family: monospace;
-	background: lightgrey;
-	color: darkblue;
-	word-wrap: break-word;
-	border: 1px solid hsla(0, 0%, 77%, 1);
-	text-shadow: rgba(0, 0, 0, 0.44) 0 0 0.1px;
+  content: attr(data-param);
+  margin-left: 12px;
+  padding: 4px;
+  font-family: monospace;
+  background: lightgrey;
+  color: darkblue;
+  word-wrap: break-word;
+  border: 1px solid hsla(0, 0%, 77%, 1);
+  text-shadow: rgba(0, 0, 0, 0.44) 0 0 0.1px;
 }
 
 #params .definition,
 #params .definition ul {
-	margin-bottom: 15px;
-	border-bottom: rgba(0, 0, 0, 0.1) 1px solid;
+  margin-bottom: 15px;
+  border-bottom: rgba(0, 0, 0, 0.1) 1px solid;
 }
 
 #params .definition ul li {
-	margin-bottom: 4px;
+  margin-bottom: 4px;
 }
 
 #params .definition div.codeblock {
-	padding: 10px;
-	margin-bottom: 15px;
+  padding: 10px;
+  margin-bottom: 15px;
 }
 
 #params .definition li::marker {
-	content: "=";
+  content: "=";
 }
 
 #params .definition li:before {
-	content: "=";
-	margin-right: 4px;
+  content: "=";
+  margin-right: 4px;
 }
 
 #params .definition li:nth-child(1):before {
-	content: "DEFAULT VALUE: ";
-	font-weight: bold;
+  content: "DEFAULT VALUE: ";
+  font-weight: bold;
 }
 
 #params .definition li:nth-child(2):before {
-	content: "ACCEPTABLE VALUES: ";
-	font-weight: bold;
+  content: "ACCEPTABLE VALUES: ";
+  font-weight: bold;
 }
 
 #url-form {
-	margin-top: 8px;
+  margin-top: 8px;
 }
 
 #url-gen-page {
-	display: flex;
-	flex-direction: column;
-	gap: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 #url-gen-area {
-	font-size: 1.25rem;
-	display: flex;
-	gap: 12px;
-	justify-content: space-between;
+  font-size: 1.25rem;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
 }
 
 #url-gen-url {
-	max-width: 70%;
-	padding: 16px;
-	line-height: 1;
-	cursor: pointer;
-	display: inline-block;
-	position: relative;
-	flex-grow: 1;
+  max-width: 70%;
+  padding: 16px;
+  line-height: 1;
+  cursor: pointer;
+  display: inline-block;
+  position: relative;
+  flex-grow: 1;
 }
 
 #url-gen-reset,
 #url-gen-copy {
-	padding: 16px;
-	cursor: pointer;
+  padding: 16px;
+  cursor: pointer;
 }
 
 .raw-outputs {
-	display: none;
+  display: none;
 }
 
 .raw-outputs.active {
-	display: block;
+  display: block;
 }
 
 .raw-outputs li {
-	display: inline-block;
-	min-width: 40px;
-	text-align: right;
-	padding: 20px 5px 5px 10px;
-	background: #600;
-	box-sizing: border-box;
-	position: relative;
-	margin: 0 5px 5px 0;
-	opacity: 0.6;
+  display: inline-block;
+  min-width: 40px;
+  text-align: right;
+  padding: 20px 5px 5px 10px;
+  background: #600;
+  box-sizing: border-box;
+  position: relative;
+  margin: 0 5px 5px 0;
+  opacity: 0.6;
 }
 
 .raw-outputs li.disabled {
-	background: darkblue;
+  background: darkblue;
 }
 
 .raw-outputs li:before {
-	content: attr(data-shortname);
-	font-size: 15px;
-	font-weight: bold;
-	color: white;
-	position: absolute;
-	top: 3px;
-	left: 4px;
+  content: attr(data-shortname);
+  font-size: 15px;
+  font-weight: bold;
+  color: white;
+  position: absolute;
+  top: 3px;
+  left: 4px;
 }
 
 #mapping-config .form-group {
-	font-size: 20px;
-	display: flex;
-	flex-wrap: wrap;
+  font-size: 20px;
+  display: flex;
+  flex-wrap: wrap;
 }
 
 #mapping-config #mappings select {
-	font-size: inherit;
+  font-size: inherit;
 }
 
 #mapping-config #mappings .form-group > select {
-	display: none;
+  display: none;
 }
 
 #mapping-config #mappings button {
-	flex-grow: 1;
-	margin: 0 5px 0px 14px;
-	transition: 0.4s ease-out;
-	position: relative;
+  flex-grow: 1;
+  margin: 0 5px 0px 14px;
+  transition: 0.4s ease-out;
+  position: relative;
 }
 
 #mapping-config #mappings .form-group > button + button {
-	display: none;
-	margin: 0 5px 0px 0px;
+  display: none;
+  margin: 0 5px 0px 0px;
 }
 
 #mapping-config #mappings [data-tooltip]:after {
-	opacity: 0;
-	content: attr(data-tooltip);
-	position: absolute;
-	top: 0;
-	left: 50%;
-	transform: translateX(-50%);
-	pointer-events: none;
-	background: darkblue;
-	color: white;
-	padding: 4px;
-	transition: 0.3s ease-out;
-	white-space: nowrap;
+  opacity: 0;
+  content: attr(data-tooltip);
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  pointer-events: none;
+  background: darkblue;
+  color: white;
+  padding: 4px;
+  transition: 0.3s ease-out;
+  white-space: nowrap;
 }
 
 #mapping-config .template {
-	display: none;
+  display: none;
 }
 
 #mapping-config .map-control {
-	font-size: 24px;
-	padding-bottom: 10px;
-	text-decoration: none;
-	display: inline-block;
-	color: black;
+  font-size: 24px;
+  padding-bottom: 10px;
+  text-decoration: none;
+  display: inline-block;
+  color: black;
 }
 
 #mapping-config .map-control i {
-	vertical-align: top;
+  vertical-align: top;
 }
 
 #mapping-help.map-control {
-	float: right;
+  float: right;
 }
 
 #mapping-help.map-control:after {
-	display: block;
-	clear: both;
+  display: block;
+  clear: both;
 }
 
 #mapping-config .form-group .material-icons {
-	color: black;
-	transition: 0.4s ease-out;
-	opacity: 0.5;
-	text-decoration: none;
-	font-size: 37px;
-	line-height: normal;
-	vertical-align: bottom;
+  color: black;
+  transition: 0.4s ease-out;
+  opacity: 0.5;
+  text-decoration: none;
+  font-size: 37px;
+  line-height: normal;
+  vertical-align: bottom;
 }
 
 #mapping-config .form-group .material-icons:hover {
-	opacity: 1;
+  opacity: 1;
 }
 
 #mapping-config .add-config:hover {
-	color: green;
+  color: green;
 }
 
 #mapping-config .del-config:hover {
-	color: red;
+  color: red;
 }
 
 #mapping-config input[type="radio"],
 #mapping-config .disable-item {
-	margin-right: 70px;
-	display: inline-block;
-	width: 0px;
-	height: 23px;
-	font-size: inherit;
-	opacity: 0.5;
-	transition: 0.4s ease-out;
+  margin-right: 70px;
+  display: inline-block;
+  width: 0px;
+  height: 23px;
+  font-size: inherit;
+  opacity: 0.5;
+  transition: 0.4s ease-out;
 }
 
 #mapping-config input[type="radio"][value="axes"] {
-	margin-right: 50px;
+  margin-right: 50px;
 }
 
 #mapping-config input[type="radio"][value="dpad"] {
-	margin-right: 36px;
+  margin-right: 36px;
 }
 
 #mapping-config select {
-	margin-left: 6px;
+  margin-left: 6px;
 }
 
 #mapping-config input[type="radio"]:checked,
 #mapping-config .disable-item:checked {
-	opacity: 1;
+  opacity: 1;
 }
 
 #mapping-config #mappings .disable-item:checked ~ button {
-	opacity: 0.5;
-	pointer-events: none;
+  opacity: 0.5;
+  pointer-events: none;
 }
 
 #mapping-config input[value="buttons"]:after,
 #mapping-config input[value="axes"]:after,
 #mapping-config input[value="dpad"]:after,
 #mapping-config .disable-item:after {
-	display: inline-block;
-	background: darkblue;
-	color: white;
-	padding: 5px;
-	cursor: pointer;
+  display: inline-block;
+  background: darkblue;
+  color: white;
+  padding: 5px;
+  cursor: pointer;
 }
 
 #mapping-config input[value="buttons"]:after {
-	content: "Button";
+  content: "Button";
 }
 
 #mapping-config input[value="axes"]:after {
-	content: "Axis";
+  content: "Axis";
 }
 
 #mapping-config input[value="dpad"]:after {
-	content: "Pad";
+  content: "Pad";
 }
 
 #mapping-config .disable-item:after {
-	content: "Disable";
+  content: "Disable";
 }
 
 #mapping-config .axes-config:checked {
-	opacity: 1;
+  opacity: 1;
 }
 
 #mapping-config .axes-config {
-	order: -1;
+  order: -1;
 }
 
 #mapping-config #mappings input[value="buttons"]:checked ~ select[name="buttons"],
 #mapping-config #mappings input[value="axes"]:checked ~ select[name="axes"] {
-	display: inline-block;
+  display: inline-block;
 }
 
 #mapping-config #mappings .fix-panel {
-	display: none;
-	width: 100%;
-	margin-top: 5px;
-	font-size: 20px;
+  display: none;
+  width: 100%;
+  margin-top: 5px;
+  font-size: 20px;
 }
 
 #mapping-config #mappings .fix-panel span {
-	line-height: 37px;
-	margin-right: 5px;
-	font-size: inherit;
+  line-height: 37px;
+  margin-right: 5px;
+  font-size: inherit;
 }
 
 #mapping-config #mappings .fix-axes,
 #mapping-config #mappings .fix-dpad li {
-	height: 37px;
+  height: 37px;
 }
 
 #mapping-config #mappings .fix-dpad li {
-	display: flex;
-	margin-bottom: 5px;
-	justify-content: flex-end;
+  display: flex;
+  margin-bottom: 5px;
+  justify-content: flex-end;
 }
 
 #mapping-config #mappings .fix-dpad {
-	flex-direction: column;
+  flex-direction: column;
 }
 
 #mapping-config #mappings .fix-dpad button {
-	max-width: 655px;
+  max-width: 655px;
 }
 
 #mapping-config #mappings .axes-config:checked ~ .fix-axes,
 #mapping-config #mappings input[type="radio"][value="dpad"]:checked ~ .fix-dpad {
-	display: flex;
+  display: flex;
 }
 
 #mapping-config #mappings .axes-config:checked ~ button:nth-of-type(2) {
-	display: none !important;
+  display: none !important;
 }
 
 #mapping-config #mappings input[value="dpad"]:checked ~ .axes-config,
 #mapping-config #mappings input[value="dpad"]:checked ~ .fix-axes {
-	display: none;
+  display: none;
 }
 
 #mapping-config #mappings input[value="axes"]:checked ~ .axes-config:not(:checked) ~ [data-tooltip]:hover:after,
 #mapping-config #mappings .fix-axes [data-tooltip]:hover:after {
-	opacity: 1;
-	top: -28px;
+  opacity: 1;
+  top: -28px;
 }
 
 #mapping-config #mappings input[value="axes"]:checked ~ button:nth-of-type(2) {
-	display: block;
+  display: block;
 }
 
 #mapping-config #mappings .map-message {
-	width: 100%;
-	display: none;
-	order: -2;
-	background: darkgreen;
-	color: #f2f2f2;
-	padding: 5px;
-	margin-bottom: 5px;
+  width: 100%;
+  display: none;
+  order: -2;
+  background: darkgreen;
+  color: #f2f2f2;
+  padding: 5px;
+  margin-bottom: 5px;
 }
 
 #mapping-config #mappings .map-message.error {
-	display: block;
-	background: hsla(0, 86%, 50%, 1);
+  display: block;
+  background: hsla(0, 86%, 50%, 1);
 }
 
 #mapping-config #mappings .map-message.success {
-	display: block;
-	animation: 4s msg-animation forwards;
+  display: block;
+  animation: 4s msg-animation forwards;
 }
 
 #mapping-config .button-group button {
-	float: right;
-	font-size: 20px;
-	padding: 5px;
-	background: darkblue;
-	color: white;
-	border: none;
-	cursor: pointer;
-	margin-left: 10px;
+  float: right;
+  font-size: 20px;
+  padding: 5px;
+  background: darkblue;
+  color: white;
+  border: none;
+  cursor: pointer;
+  margin-left: 10px;
 }
 
 #mappings:empty + div {
-	display: none;
+  display: none;
 }
 
 .disconnected {
-	opacity: 0.05 !important;
+  opacity: 0.05 !important;
 }
 
 .active {
-	display: block;
+  display: block;
 }

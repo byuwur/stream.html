@@ -1,7 +1,7 @@
 const settings = {
-	...commonSettings,
-	options: {
-		...commonSettings.options,
-		tagline: ""
-	}
+  ...commonSettings,
+  options: {
+    ...commonSettings.options,
+    tagline: ""
+  }
 };

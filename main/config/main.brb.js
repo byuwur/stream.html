@@ -1,7 +1,7 @@
 const settings = {
-	...commonSettings,
-	options: {
-		...commonSettings.options,
-		sceneTitle: "Ya casito<br>volvemos"
-	}
+  ...commonSettings,
+  options: {
+    ...commonSettings.options,
+    sceneTitle: "Ya casito<br>volvemos"
+  }
 };
