@@ -273,6 +273,11 @@ function renderPopup() {
     .to("#iconBox", { duration: 0.3, x: direction * (textWidth + 240) }, "-=0.2")
     .to("#textBox", { duration: 0.2, opacity: 0, scaleX: 0, transformOrigin: mode + " center" }, "-=0.3")
     .set(popup, { autoAlpha: 0 });
+
+  window.addEventListener("pagehide", () => timeline.pause());
+  window.addEventListener("pageshow", (event) => {
+    if (event.persisted) timeline.restart();
+  });
 }
 
 applyParameters(settings);
