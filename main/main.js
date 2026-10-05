@@ -1,51 +1,110 @@
 /**
  * File: main/main.js
  * @file Scene parameter validation and rendering for start, BRB, end, and intermission presets.
- * Deps: jQuery 4, GSAP, embedded settings, params and config globals.
+ * Deps: GSAP and shared page setup.
  */
-// URL parameters and documentation
+
+// URL defaults; the configurator edits this same object.
+const settings = {
+  mode: "start",
+  showBG: "false",
+  hideCountdown: "false",
+  accounts: [
+    { platform: "twitch", handle: "/byUwUr", heading: "Stream casi todos los días" },
+    { platform: "youtube", handle: "[Mateus] @byUwUr", heading: "VODs todas las semanas" },
+    { platform: "instagram", handle: "@byUwUr", heading: "Fotos de vez en cuando" }
+  ],
+  scheduleEntries: [
+    { day: "monday", text: "" },
+    { day: "tuesday", text: "" },
+    { day: "wednesday", text: "" },
+    { day: "thursday", text: "" },
+    { day: "friday", text: "" },
+    { day: "saturday", text: "" },
+    { day: "sunday", text: "" }
+  ],
+  backgroundType: "video",
+  backgroundUrl: "",
+  backgroundOverlayOpacity: 0,
+  backgroundBlur: 0,
+  backgroundScale: 1,
+  displayBranding: "yes",
+  logoUrl: "",
+  logoOpacity: 0.05,
+  logoScale: 1,
+  frameWidth: 10,
+  sceneTitle: "Ya estamos\nempezando",
+  tagline: "[Mateus] byUwUr",
+  backgroundOverlay: "rgba(54, 53, 58, 1)",
+  accentColor: "rgba(64,0,0,1)",
+  frameColor: "rgba(64,0,0,1)",
+  primaryTextColor: "rgba(255, 255, 255, 1)",
+  subTextColor: "rgba(201,201,201,1)",
+  contentBackgrounds: "rgba(255, 255, 255, .1)",
+  displayLabels: "no",
+  labelOneHeading: "¡Suscriptor más reciente!",
+  labelTwoHeading: "Más gastón:",
+  labelThreeHeading: "Último gastón:",
+  labelFourHeading: "Nuevo Yogurt:",
+  displaySchedule: "no",
+  socialMediaScale: 1.25,
+  labelsScale: 1.25,
+  scheduleScale: 1.25,
+  countdownScale: 1.25,
+  primaryFont: "Courier New",
+  titleSize: 72,
+  titleVerticalOffset: -8,
+  subtitleSize: 48,
+  subtitleVerticalOffset: 128,
+  labelNameSize: 24,
+  labelNameVerticalOffset: 0,
+  labelHeaderSize: 12,
+  labelHeaderVerticalOffset: 4,
+  countdownTimeSize: 64,
+  countdownTimeVerticalOffset: 0,
+  countdownMessageSize: 24,
+  countdownMessageVerticalOffset: 0,
+  countdownEndMessageSize: 64,
+  countdownEndMessageVerticalOffset: 0,
+  displayCountdown: "yes",
+  countdownTime: 4,
+  countdownMessage: "cuenta regresiva tramadora",
+  countdownOverMessage: "Vamo' a vé'.",
+  displaySocial: "yes"
+};
+
+// URL validation rules
 const parameterRules = {
-  mode: { options: ["start", "brb", "end", "inter"], description: "Selects the scene preset or the side from which social popups animate." },
-  sceneTitle: { maxlength: "300", group: "options", description: "Main heading displayed on the scene. Line breaks are supported." },
-  tagline: { type: "text", maxlength: "160", group: "options", description: "Subtitle displayed beneath the main heading." },
-  countdownTime: { type: "number", min: "0", max: "1440", step: "any", group: "countdown", description: "Duration of the countdown in minutes." },
-  displayCountdown: { group: "countdown", options: ["yes", "no"], description: "Shows or hides the countdown area." },
-  countdownMessage: { type: "text", maxlength: "160", group: "countdown", description: "Message displayed while the timer runs." },
-  countdownOverMessage: { type: "text", maxlength: "160", group: "countdown", description: "Message displayed when the timer finishes." },
-  showBG: { options: ["false", "true"], description: "Adds a translucent dark background behind the scene." },
-  hideCountdown: { options: ["false", "true"], description: "Forces the countdown area to be hidden." },
-  primaryFont: { type: "text", maxlength: "160", group: "fonts", description: "Font family to use. It must be available on the viewing computer." },
-  titleSize: { type: "number", min: "8", max: "200", step: "any", group: "fonts", description: "Main heading size in pixels." },
-  subtitleSize: { type: "number", min: "8", max: "200", step: "any", group: "fonts", description: "Subtitle size in pixels." },
-  primaryTextColor: { type: "text", maxlength: "160", group: "colors", description: "CSS color used for primary text." },
-  subTextColor: { type: "text", maxlength: "160", group: "colors", description: "CSS color used for secondary text." },
-  accentColor: { type: "text", maxlength: "160", group: "colors", description: "CSS color used for accents." },
-  frameColor: { type: "text", maxlength: "160", group: "colors", description: "CSS color of the scene border." },
-  frameWidth: { type: "number", min: "0", max: "100", step: "any", group: "options", description: "Scene border thickness in pixels." },
-  displayBranding: { group: "options", options: ["yes", "no"], description: "Shows or hides the logo independently of the title." },
-  logoUrl: { type: "text", maxlength: "160", group: "options", description: "Image URL or relative path. Empty keeps the bundled logo." },
-  logoOpacity: { type: "number", min: "0", max: "1", step: "any", group: "options", description: "Logo opacity, from transparent to fully opaque." },
-  logoScale: { type: "number", min: "0.1", max: "5", step: "any", group: "options", description: "Multiplier applied to the logo size." },
-  backgroundType: { group: "options", options: ["video", "image"], description: "Selects image or video background media." },
-  backgroundUrl: { type: "text", maxlength: "160", group: "options", description: "Public media URL or relative file path. Does not upload a file." },
-  backgroundBlur: { type: "number", min: "0", max: "100", step: "any", group: "options", description: "Background blur radius in pixels." },
-  backgroundOverlayOpacity: { type: "number", min: "0", max: "1", step: "any", group: "options", description: "Opacity of the tint over the background." },
-  backgroundOverlay: { type: "text", maxlength: "160", group: "colors", description: "CSS color of the background tint." },
-  displaySocial: { group: "social", options: ["yes", "no"], description: "Shows or hides the social account area." },
-  twitch: { type: "text", maxlength: "160", group: "social", description: "Twitch account name shown as plain text." },
-  twitchHeader: { type: "text", maxlength: "160", group: "social", description: "Heading displayed above this social account." },
-  youtube: { type: "text", maxlength: "160", group: "social", description: "Youtube account name shown as plain text." },
-  youtubeHeader: { type: "text", maxlength: "160", group: "social", description: "Heading displayed above this social account." },
-  instagram: { type: "text", maxlength: "160", group: "social", description: "Instagram account name shown as plain text." },
-  instagramHeader: { type: "text", maxlength: "160", group: "social", description: "Heading displayed above this social account." },
-  displaySchedule: { group: "schedule", options: ["yes", "no"], description: "Shows or hides the weekly schedule." },
-  monday: { type: "text", maxlength: "160", group: "schedule", description: "Schedule text displayed for Monday." },
-  tuesday: { type: "text", maxlength: "160", group: "schedule", description: "Schedule text displayed for Tuesday." },
-  wednesday: { type: "text", maxlength: "160", group: "schedule", description: "Schedule text displayed for Wednesday." },
-  thursday: { type: "text", maxlength: "160", group: "schedule", description: "Schedule text displayed for Thursday." },
-  friday: { type: "text", maxlength: "160", group: "schedule", description: "Schedule text displayed for Friday." },
-  saturday: { type: "text", maxlength: "160", group: "schedule", description: "Schedule text displayed for Saturday." },
-  sunday: { type: "text", maxlength: "160", group: "schedule", description: "Schedule text displayed for Sunday." }
+  accounts: { validate: parseAccounts, maxlength: 20000 },
+  scheduleEntries: { validate: parseScheduleEntries, maxlength: 4000 },
+  mode: { options: ["start", "brb", "end", "inter"] },
+  sceneTitle: { maxlength: 300 },
+  tagline: { type: "text", maxlength: 160 },
+  countdownTime: { type: "number", min: 0, max: 1440, step: "any" },
+  displayCountdown: { options: ["yes", "no"] },
+  countdownMessage: { type: "text", maxlength: 160 },
+  countdownOverMessage: { type: "text", maxlength: 160 },
+  showBG: { options: ["false", "true"] },
+  hideCountdown: { options: ["false", "true"] },
+  primaryFont: { type: "text", maxlength: 160 },
+  titleSize: { type: "number", min: 8, max: 200, step: "any" },
+  subtitleSize: { type: "number", min: 8, max: 200, step: "any" },
+  primaryTextColor: { type: "color", maxlength: 160 },
+  subTextColor: { type: "color", maxlength: 160 },
+  accentColor: { type: "color", maxlength: 160 },
+  frameColor: { type: "color", maxlength: 160 },
+  frameWidth: { type: "number", min: 0, max: 100, step: "any" },
+  displayBranding: { options: ["yes", "no"] },
+  logoUrl: { type: "text", maxlength: 160 },
+  logoOpacity: { type: "number", min: 0, max: 1, step: "any" },
+  logoScale: { type: "number", min: 0.1, max: 5, step: "any" },
+  backgroundType: { options: ["video", "image"] },
+  backgroundUrl: { type: "text", maxlength: 160 },
+  backgroundBlur: { type: "number", min: 0, max: 100, step: "any" },
+  backgroundOverlayOpacity: { type: "number", min: 0, max: 1, step: "any" },
+  backgroundOverlay: { type: "color", maxlength: 160 },
+  displaySocial: { options: ["yes", "no"] },
+  displaySchedule: { options: ["yes", "no"] }
 };
 
 const dayLabels = { monday: "Lunes", tuesday: "Martes", wednesday: "Miércoles", thursday: "Jueves", friday: "Viernes", saturday: "Sábado", sunday: "Domingo" };
@@ -145,53 +204,48 @@ const platforms = {
   zhihu: "Zhihu"
 };
 
-/**
- * Validates a known parameter against its bounds, options, color, and URL restrictions.
- * @param {string} name Key in parameterRules.
- * @param {string} value Candidate URL or form value.
- * @returns {boolean} Whether the value is accepted.
- */
+// URL validation is repeated in each resource and configurator.js to avoid extra files. Keep the copies in sync.
 function validParameter(name, value) {
+  if (!Object.hasOwn(parameterRules, name)) return false;
   const rule = parameterRules[name];
+  if (rule.validate) return rule.validate(value) !== null;
   if (rule.options && !rule.options.includes(value)) return false;
   if (rule.maxlength && value.length > Number(rule.maxlength)) return false;
   if (rule.type === "number") {
     const number = Number(value);
     if (!value.trim() || !Number.isFinite(number) || number < Number(rule.min) || number > Number(rule.max)) return false;
-    if (rule.step !== "any" && Math.abs((number - Number(rule.min)) / Number(rule.step) - Math.round((number - Number(rule.min)) / Number(rule.step))) > 1e-8) return false;
+    if (rule.step && rule.step !== "any") {
+      const steps = (number - Number(rule.min)) / Number(rule.step);
+      if (Math.abs(steps - Math.round(steps)) > 1e-8) return false;
+    }
   }
-  if (rule.group === "colors" && !CSS.supports("color", value)) return false;
+  if (rule.type === "color" && !CSS.supports("color", value)) return false;
   if (name.endsWith("Url") && value) {
     try {
       const url = new URL(value, location.href);
       if (!["http:", "https:", "file:"].includes(url.protocol) || (url.protocol === "file:" && location.protocol !== "file:") || url.username || url.password) return false;
-    } catch (error) {
+    } catch {
       return false;
     }
   }
   return true;
 }
 
-/**
- * Reads a validated URL override, otherwise retaining the configured fallback.
- * @param {string} name Key in parameterRules.
- * @param {string|number} fallback Configured default.
- * @returns {string|number} Valid override or fallback; numeric rules return numbers.
- */
-function parameterValue(name, fallback) {
-  if (parameterRules[name].type === "number") fallback = Number(fallback);
-  if (!params.has(name)) return fallback;
-  let value = params.get(name);
-  if (["showBG", "hideCountdown"].includes(name)) value = ["true", "t", "1", "yes", "y"].includes(value) ? "true" : "false";
-  if (!validParameter(name, value)) return fallback;
-  return parameterRules[name].type === "number" ? Number(value) : value;
+/** Apply validated URL values to the declared settings object; invalid values leave it intact. */
+function applyParameters(settings, values = params) {
+  for (const [name, value] of values) {
+    if (!Object.hasOwn(parameterRules, name)) continue;
+    const rule = parameterRules[name];
+    let parsed;
+    if (rule.validate) parsed = rule.validate(value);
+    else {
+      if (!validParameter(name, value)) continue;
+      parsed = rule.type === "number" ? Number(value) : value;
+    }
+    if (parsed === null) continue;
+    settings[name] = parsed;
+  }
 }
-
-const presetText = { sceneTitle: settings.options.sceneTitle.replace(/<br\s*\/?\s*>/gi, "\n"), tagline: settings.options.tagline };
-settings.options.sceneTitle = presetText.sceneTitle;
-Object.entries(parameterRules).forEach(([name, rule]) => {
-  if (rule.group) settings[rule.group][name] = parameterValue(name, settings[rule.group][name] ?? "");
-});
 
 /** Parses only supported platforms and bounded display text; null keeps the defaults. */
 function parseAccounts(value) {
@@ -230,178 +284,130 @@ function parseScheduleEntries(value) {
   }
 }
 
-// Overlay rendering
-if (document.documentElement.hasAttribute("data-overlay")) {
-  // Utility Functions
-  /**
-   * Removes matched overlay elements when a setting is absent or disabled.
-   * @param {string|boolean} setting Display setting.
-   * @param {string} div Element selector.
-   */
-  function removeHtml(setting, div) {
-    if (!setting || setting === "no" || setting === "") $(div).remove();
+/** Apply scene settings, then run the countdown and rotate visible cards. */
+function renderMain() {
+  const { accounts, scheduleEntries } = settings;
+  const rootStyle = document.documentElement.style;
+  // CSS owns appearance; settings only provide its colors, sizes, and offsets.
+  const styles = {
+    "font-family": `${settings.primaryFont || '"Courier New"'}, Courier, monospace`,
+    "primary-color": settings.primaryTextColor,
+    "secondary-color": settings.subTextColor,
+    "accent-color": settings.accentColor,
+    "frame-color": settings.frameColor,
+    "content-background": settings.contentBackgrounds,
+    "background-tint": settings.backgroundOverlay,
+    "frame-width": `${settings.frameWidth / 16}rem`,
+    "logo-opacity": settings.logoOpacity,
+    "logo-scale": settings.logoScale,
+    "background-opacity": settings.backgroundOverlayOpacity,
+    "background-blur": `${settings.backgroundBlur / 16}rem`,
+    "background-scale": settings.backgroundScale
+  };
+  for (const [name, value] of Object.entries(styles)) rootStyle.setProperty("--" + name, value);
+  for (const [name, value] of Object.entries(settings)) {
+    if (name.endsWith("Size") || name.endsWith("Offset")) rootStyle.setProperty("--" + name, `${value / 16}rem`);
   }
+  for (const name of ["socialMediaScale", "labelsScale", "scheduleScale", "countdownScale"]) rootStyle.setProperty("--" + name, settings[name]);
 
-  /**
-   * Applies a CSS property to matched overlay elements.
-   * @param {string} target Element selector.
-   * @param {string} property CSS property name.
-   * @param {string|number} value Property value.
-   */
-  function setCssProperty(target, property, value) {
-    $(target).css(property, value);
+  function setText(id, value) {
+    document.getElementById(id).textContent = value ?? "";
   }
+  setText("title", settings.sceneTitle);
+  setText("subtitle", settings.tagline);
+  setText("message", settings.countdownMessage);
+  setText("endMessage", settings.countdownOverMessage);
+  setText("followLine", settings.labelOneHeading);
+  setText("tipLine", settings.labelTwoHeading);
+  setText("bigTipLine", settings.labelThreeHeading);
+  setText("subLine", settings.labelFourHeading);
 
-  /**
-   * Loads a text file and replaces the matched elements' text content.
-   * @param {string} selector Element selector.
-   * @param {string} path Text file name relative to ../txt/, without its extension.
-   */
-  function updateText(selector, path) {
-    $.get(`../txt/${path}.txt`, (data) => {
-      $(selector).text(data);
-    });
+  const brand = document.getElementById("brandImg");
+  if (settings.logoUrl) brand.style.backgroundImage = `url(${JSON.stringify(settings.logoUrl)})`;
+  const background = document.querySelector(settings.backgroundType === "video" ? "#video video" : "#image img");
+  document.getElementById(settings.backgroundType === "video" ? "image" : "video").remove();
+  if (settings.backgroundUrl) background.src = settings.backgroundUrl;
+  if (settings.showBG === "true") document.getElementById("scene").style.background = "#0007";
+
+  for (const { platform, handle, heading } of accounts) {
+    if (!handle) continue;
+    const item = document.createElement("div");
+    item.className = "item";
+    item.innerHTML = '<div class="network"><div class="borderTop"></div><div class="icon"><i aria-hidden="true"></i></div><div class="inner"><div class="socialHead"></div><div class="socialName"></div></div></div>';
+    item.querySelector("i").className = "fa-brands fa-" + platform;
+    item.querySelector(".socialHead").textContent = heading;
+    item.querySelector(".socialName").textContent = handle;
+    document.getElementById("social").append(item);
   }
+  for (const { day, text } of scheduleEntries) {
+    const entry = document.createElement("div");
+    entry.className = "day";
+    entry.innerHTML = '<div class="borderTop"></div><div class="scheduleHead"></div><div class="scheduleTime"></div>';
+    entry.querySelector(".scheduleHead").textContent = dayLabels[day];
+    entry.querySelector(".scheduleTime").textContent = text;
+    document.getElementById("week").append(entry);
+  }
+  const sections = {
+    brandImg: settings.displayBranding === "yes",
+    list: settings.displayLabels === "yes",
+    schedule: settings.displaySchedule === "yes" && scheduleEntries.length > 0,
+    countdown: settings.displayCountdown === "yes" && settings.hideCountdown !== "true",
+    social: settings.displaySocial === "yes" && accounts.some((entry) => entry.handle)
+  };
+  for (const [id, shown] of Object.entries(sections)) if (!shown) document.getElementById(id).remove();
 
-  /**
-   * Applies the active scene settings to branding, backgrounds, text, social accounts, and schedule.
-   */
-  function applySettings() {
-    const { backgroundType, displayBranding, sceneTitle, tagline, logoOpacity, logoScale, frameWidth, backgroundOverlayOpacity, backgroundBlur, backgroundScale } = settings.options;
-    const { displayLabels, labelOne, labelTwoHeading, labelThreeHeading, labelFourHeading } = settings.labels;
-    const { displaySchedule } = settings.schedule;
-    const { displayCountdown, countdownMessage, countdownEndMessage, countdownTime } = settings.countdown;
-    const { displaySocial, twitter, facebook, instagram, youtube, socialMediaScale } = settings.social;
-    const { colors, fonts, scaling } = settings;
-    // Background
-    if (settings.options.backgroundUrl) {
-      if (backgroundType === "video") {
-        $("#video video").attr("src", settings.options.backgroundUrl);
-      } else {
-        $("#image img").first().attr("src", settings.options.backgroundUrl).show();
-      }
+  const time = document.getElementById("time");
+  const deadline = Date.now() + settings.countdownTime * 60000;
+  let countdownTimer;
+  function updateCountdown() {
+    const remaining = Math.max(0, Math.ceil((deadline - Date.now()) / 1000));
+    time.textContent = `${Math.floor(remaining / 60)}:${String(remaining % 60).padStart(2, "0")}`;
+    if (remaining === 0) {
+      clearInterval(countdownTimer);
+      time.hidden = true;
+      document.getElementById("message").hidden = true;
+      document.getElementById("endMessage").hidden = false;
     }
-    if (settings.options.logoUrl) $("#brandImg").css("background-image", `url(${JSON.stringify(settings.options.logoUrl)})`);
-    $("body").css("font-family", fonts.primaryFont);
-    $("#title, #time, .socialName, .scheduleTime, #list .name").css("color", colors.primaryTextColor);
-    $("#subtitle, #message, .socialHead, .scheduleHead, #list .type").css("color", colors.subTextColor);
-    if (["true", "t", "1", "yes", "y"].includes(params.get("showBG"))) $("#scene").css("background", "#0007");
-    if (["true", "t", "1", "yes", "y"].includes(params.get("hideCountdown"))) $("#countdown").remove();
-    backgroundType === "video" ? $("#image").remove() : $("#video").remove();
-    // Entire Areas
-    [
-      { setting: displayBranding, div: "#brandImg" },
-      { setting: displayLabels, div: "#list" },
-      { setting: displaySchedule, div: "#schedule" },
-      { setting: displayCountdown, div: "#countdown" },
-      { setting: displaySocial, div: "#social" }
-    ].forEach(({ setting, div }) => removeHtml(setting, div));
-    // Individual Social Networks
-    Object.entries({ twitch: "twi", instagram: "in", youtube: "yt" }).forEach(([network, id]) => {
-      removeHtml(settings.social[network], `#${id}`);
-    });
-    // Set Colors
-    const cssProperties = [
-      { target: "#overlay", property: "background", value: colors.backgroundOverlay },
-      { target: ".bg-accent", property: "border-color", value: colors.frameColor },
-      { target: ".primaryFont", property: "color", value: colors.primaryTextColor },
-      { target: ".secondaryFont", property: "color", value: colors.subTextColor },
-      { target: "#endMessage", property: "color", value: colors.subTextColor },
-      { target: ".borderTop, .borderRight, .borderLeft", property: "background", value: colors.accentColor },
-      { target: ".network, .event, #week .day", property: "background", value: colors.contentBackgrounds }
-    ];
-    cssProperties.forEach(({ target, property, value }) => setCssProperty(target, property, value));
-    // Set Text
-    $("#title").text(sceneTitle).css("white-space", "pre-line");
-    $("#subtitle").text(tagline);
-    $("#message").text(countdownMessage);
-    // Set Fonts
-    const fontSettings = [
-      { target: "#title", size: fonts.titleSize, offset: fonts.titleVerticalOffset },
-      { target: "#subtitle", size: fonts.subtitleSize, offset: fonts.subtitleVerticalOffset },
-      { target: "#list .name", size: fonts.labelNameSize, offset: fonts.labelNameVerticalOffset, lineHeight: fonts.labelNameSize },
-      { target: "#list .type", size: fonts.labelHeaderSize, offset: fonts.labelHeaderVerticalOffset, lineHeight: fonts.labelHeaderSize },
-      { target: "#time", size: fonts.countdownTimeSize, offset: fonts.countdownTimeVerticalOffset },
-      { target: "#message", size: fonts.countdownMessageSize, offset: fonts.countdownMessageVerticalOffset },
-      { target: "#endMessage", size: fonts.countdownEndMessageSize, offset: fonts.countdownEndMessageVerticalOffset }
-    ];
-    fontSettings.forEach(({ target, size, offset, lineHeight }) => {
-      setCssProperty(target, "font-size", `${size}px`);
-      setCssProperty(target, "transform", `translateY(${offset}px)`);
-      if (lineHeight) setCssProperty(target, "line-height", `${lineHeight}px`);
-    });
-    // Social
-    $("#displaySocial").text(displaySocial);
-    // ["twitch", "twitter", "facebook", "instagram", "youtube"]
-    ["twitch", "instagram", "youtube"].forEach((network) => {
-      $(`#${network}`).text(settings.social[network]);
-      $(`#${network}Header`).text(settings.social[`${network}Header`]);
-    });
-    // Branding
-    setCssProperty("#brandImg", "opacity", Number(logoOpacity));
-    setCssProperty("#brandImg", "transform", `scale(${Number(logoScale)})`);
-    // Schedule
-    ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"].forEach((day) => {
-      $(`#${day}`).text(settings.schedule[day]);
-    });
-    // Misc
-    setCssProperty("#frame", "border-width", `${Number(frameWidth)}px`);
-    setCssProperty("#overlay", "opacity", Number(backgroundOverlayOpacity));
-    ["#video video", "#image img"].forEach((selector) => {
-      setCssProperty(selector, "filter", `blur(${Number(backgroundBlur)}px)`);
-      setCssProperty(selector, "transform", `scale(${Number(backgroundScale)})`);
-    });
-    // Labels
-    ["labelOne", "labelTwoHeading", "labelThreeHeading", "labelFourHeading"].forEach((label, index) => {
-      $(`#${["followLine", "tipLine", "bigTipLine", "subLine"][index]}`).text(settings.labels[label]);
-    });
-    // Scaling
-    ["socialMediaScale", "labelsScale", "scheduleScale", "countdownScale"].forEach((scale, index) => {
-      setCssProperty(`#${["social", "list", "schedule", "countdown"][index]}`, "transform", `scale(${Number(scaling[scale])})`);
-    });
   }
 
-  /**
-   * Updates a countdown once per second and clears its interval when the ending message appears.
-   * @param {number} duration Duration in seconds.
-   * @param {jQuery} display Countdown text element.
-   */
-  function startTimer(duration, display) {
-    let timer = duration,
-      minutes,
-      seconds;
-    const interval = setInterval(() => {
-      minutes = parseInt(timer / 60, 10);
-      seconds = parseInt(timer % 60, 10);
-      minutes = minutes < 10 ? "" + minutes : minutes;
-      seconds = seconds < 10 ? "0" + seconds : seconds;
-      display.text(`${minutes}:${seconds}`);
-      if (--timer < 0) {
-        clearInterval(interval);
-        $("#time").hide();
-        $("#message").hide();
-        $("#endMessage").text(settings.countdown.countdownOverMessage);
-        $("#endMessage").css("display", "block");
-      }
-    }, 1000);
-  }
-
-  // Initial Setup
-  $(document).ready(() => {
-    applySettings();
-    // Update names periodically (uncomment if needed)
-    /* setInterval(() => {
-			updateText("#followName", settings.labels.labelOnePath);
-			updateText("#tipName", settings.labels.labelTwoPath);
-			updateText("#bigTipName", settings.labels.labelThreePath);
-			updateText("#subName", settings.labels.labelFourPath);
-		}, 3000); */
-    // Start timer
-    if ($("#time").length) startTimer(60 * settings.countdown.countdownTime, $("#time"));
-    // Add Animations
-    const tl = gsap.timeline({ repeat: -1 });
-    $(".item").each(function () {
-      tl.to(this, { duration: 0, onComplete: () => $(this).addClass("animated"), delay: 1 }).to(this, { duration: 10, onComplete: () => $(this).removeClass("animated") });
-    });
+  const items = [...document.querySelectorAll(".item")];
+  const animation = items.length ? gsap.timeline({ repeat: -1, paused: true }) : null;
+  items.forEach((item) => {
+    const border = item.querySelectorAll(".borderTop");
+    const icon = item.querySelector(".icon");
+    const details = item.querySelectorAll(".socialHead, .socialName, .scheduleHead, .scheduleTime");
+    const card = gsap.timeline();
+    card
+      .set(item, { autoAlpha: 1 })
+      .fromTo(item, { clipPath: "inset(-0.125rem 100% 0 0)" }, { clipPath: "inset(-0.125rem 0% 0 0)", duration: 0.6 }, 0)
+      .fromTo(border, { scaleX: 0, transformOrigin: "left center" }, { scaleX: 1, duration: 0.5 }, 0)
+      .fromTo(details, { x: "-3.75rem", opacity: 0 }, { x: 0, opacity: 1, duration: 0.7, stagger: { amount: 0.2 } }, 0.4)
+      .to(details, { x: "-3.75rem", opacity: 0, duration: 0.7, stagger: { amount: 0.2 } }, 8.7)
+      .to(border, { scaleX: 0, duration: 0.5 }, 9.5)
+      .to(item, { clipPath: "inset(-0.125rem 100% 0 0)", duration: 0.6 }, 9.4)
+      .set(item, { autoAlpha: 0 }, 10);
+    if (icon) {
+      card.fromTo(icon, { x: "-2.5rem", opacity: 0 }, { x: 0, opacity: 1, duration: 0.6 }, 0.4).to(icon, { x: "-2.5rem", opacity: 0, duration: 0.6 }, 9);
+    }
+    animation.add(card, "+=1");
   });
+  function start() {
+    if (time) {
+      if (Date.now() < deadline) countdownTimer = setInterval(updateCountdown, 1000);
+      updateCountdown();
+    }
+    animation?.restart();
+  }
+  start();
 }
+
+// Scene modes supply text defaults; explicit URL text overrides them.
+const scenePresets = {
+  start: { sceneTitle: settings.sceneTitle, tagline: settings.tagline },
+  brb: { sceneTitle: "Ya casito\nvolvemos", tagline: settings.tagline },
+  end: { sceneTitle: "Gracias por\nestar aquí hoy", tagline: settings.tagline },
+  inter: { sceneTitle: "", tagline: "" }
+};
+if (Object.hasOwn(scenePresets, params.get("mode"))) Object.assign(settings, scenePresets[params.get("mode")]);
+applyParameters(settings);
+if (streamOverlay) renderMain();
