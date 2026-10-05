@@ -1,14 +1,11 @@
 /**
  * File: main/main.js
- * @file Scene parameter validation and rendering for start, BRB, end, and intermission presets.
+ * @file Scene parameter validation, rendering, countdown, and rotating cards.
  * Deps: GSAP and shared page setup.
  */
 
 // URL defaults; the configurator edits this same object.
 const settings = {
-  mode: "start",
-  showBG: "false",
-  hideCountdown: "false",
   accounts: [
     { platform: "twitch", handle: "/byUwUr", heading: "Stream casi todos los días" },
     { platform: "youtube", handle: "[Mateus] @byUwUr", heading: "VODs todas las semanas" },
@@ -23,6 +20,7 @@ const settings = {
     { day: "saturday", text: "" },
     { day: "sunday", text: "" }
   ],
+  backgroundColor: "transparent",
   backgroundType: "video",
   backgroundUrl: "",
   backgroundOverlayOpacity: 0,
@@ -77,15 +75,12 @@ const settings = {
 const parameterRules = {
   accounts: { validate: parseAccounts, maxlength: 20000 },
   scheduleEntries: { validate: parseScheduleEntries, maxlength: 4000 },
-  mode: { options: ["start", "brb", "end", "inter"] },
   sceneTitle: { maxlength: 300 },
   tagline: { type: "text", maxlength: 160 },
   countdownTime: { type: "number", min: 0, max: 1440, step: "any" },
   displayCountdown: { options: ["yes", "no"] },
   countdownMessage: { type: "text", maxlength: 160 },
   countdownOverMessage: { type: "text", maxlength: 160 },
-  showBG: { options: ["false", "true"] },
-  hideCountdown: { options: ["false", "true"] },
   primaryFont: { type: "text", maxlength: 160 },
   titleSize: { type: "number", min: 8, max: 200, step: "any" },
   subtitleSize: { type: "number", min: 8, max: 200, step: "any" },
@@ -98,6 +93,7 @@ const parameterRules = {
   logoUrl: { type: "text", maxlength: 160 },
   logoOpacity: { type: "number", min: 0, max: 1, step: "any" },
   logoScale: { type: "number", min: 0.1, max: 5, step: "any" },
+  backgroundColor: { type: "color", maxlength: 160 },
   backgroundType: { options: ["video", "image"] },
   backgroundUrl: { type: "text", maxlength: 160 },
   backgroundBlur: { type: "number", min: 0, max: 100, step: "any" },
@@ -296,6 +292,7 @@ function renderMain() {
     "accent-color": settings.accentColor,
     "frame-color": settings.frameColor,
     "content-background": settings.contentBackgrounds,
+    "background-color": settings.backgroundColor,
     "background-tint": settings.backgroundOverlay,
     "frame-width": `${settings.frameWidth / 16}rem`,
     "logo-opacity": settings.logoOpacity,
@@ -327,7 +324,6 @@ function renderMain() {
   const background = document.querySelector(settings.backgroundType === "video" ? "#video video" : "#image img");
   document.getElementById(settings.backgroundType === "video" ? "image" : "video").remove();
   if (settings.backgroundUrl) background.src = settings.backgroundUrl;
-  if (settings.showBG === "true") document.getElementById("scene").style.background = "#0007";
 
   for (const { platform, handle, heading } of accounts) {
     if (!handle) continue;
@@ -351,7 +347,7 @@ function renderMain() {
     brandImg: settings.displayBranding === "yes",
     list: settings.displayLabels === "yes",
     schedule: settings.displaySchedule === "yes" && scheduleEntries.length > 0,
-    countdown: settings.displayCountdown === "yes" && settings.hideCountdown !== "true",
+    countdown: settings.displayCountdown === "yes",
     social: settings.displaySocial === "yes" && accounts.some((entry) => entry.handle)
   };
   for (const [id, shown] of Object.entries(sections)) if (!shown) document.getElementById(id).remove();
@@ -408,13 +404,5 @@ function renderMain() {
   start();
 }
 
-// Scene modes supply text defaults; explicit URL text overrides them.
-const scenePresets = {
-  start: { sceneTitle: settings.sceneTitle, tagline: settings.tagline },
-  brb: { sceneTitle: "Ya casito\nvolvemos", tagline: settings.tagline },
-  end: { sceneTitle: "Gracias por\nestar aquí hoy", tagline: settings.tagline },
-  inter: { sceneTitle: "", tagline: "" }
-};
-if (Object.hasOwn(scenePresets, params.get("mode"))) Object.assign(settings, scenePresets[params.get("mode")]);
 applyParameters(settings);
 if (streamOverlay) renderMain();
