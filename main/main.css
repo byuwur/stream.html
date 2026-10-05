@@ -1,423 +1,255 @@
+/* Match main.js defaults; inline settings override these values. */
 :root {
   --font-family: "Courier New", Courier, monospace;
-  --font-color: #fff;
-  --bg-color: #0001;
-  --accent-color: #fff;
-  --font-weight: 700;
-  --border-width: 24px;
-  --small-font-size: 12px;
-  --medium-font-size: 16px;
-  --large-font-size: 24px;
-  --xlarge-font-size: 64px;
-  --xxlarge-font-size: 128px;
-  --padding-right: 48px;
-  --margin-top: 24px;
-  --margin-right: 24px;
-  --width: 1920px;
-  --height: 1080px;
-  --position-absolute: absolute;
-  --animation-duration: 10s;
-  --animation-direction: forwards;
+  --primary-color: #ffffff;
+  --secondary-color: #c9c9c9;
+  --accent-color: #400000;
+  --frame-color: #400000;
+  --content-background: #ffffff1a;
+  --background-color: #00000000;
+  --background-tint: #36353a;
+  --frame-width: 0.625rem;
+  --logo-opacity: 0.05;
+  --logo-scale: 1;
+  --background-opacity: 0;
+  --background-blur: 0rem;
+  --background-scale: 1;
+
+  --socialMediaScale: 1.25;
+  --labelsScale: 1.25;
+  --scheduleScale: 1.25;
+  --countdownScale: 1.25;
+
+  --titleSize: 4.5rem;
+  --titleVerticalOffset: -0.5rem;
+  --subtitleSize: 3rem;
+  --subtitleVerticalOffset: 8rem;
+  --labelNameSize: 1.5rem;
+  --labelNameVerticalOffset: 0rem;
+  --labelHeaderSize: 0.75rem;
+  --labelHeaderVerticalOffset: 0.25rem;
+  --countdownTimeSize: 4rem;
+  --countdownTimeVerticalOffset: 0rem;
+  --countdownMessageSize: 1.5rem;
+  --countdownMessageVerticalOffset: 0rem;
+  --countdownEndMessageSize: 4rem;
+  --countdownEndMessageVerticalOffset: 0rem;
+}
+
+html {
+  font-size: 16px;
 }
 * {
   box-sizing: border-box;
 }
+[hidden] {
+  display: none !important;
+}
 html,
 body {
-  font-family: var(--font-family);
-  font-weight: var(--font-weight);
-  color: var(--font-color);
   margin: 0;
   padding: 0;
-  width: var(--width);
-  height: var(--height);
+  width: 120rem;
+  height: 67.5rem;
   overflow: hidden;
+  font-family: var(--font-family);
+  font-weight: 700;
+  color: var(--primary-color);
 }
-.bg,
+
+/* Full scene and background. */
+#scene,
+#overlay {
+  position: absolute;
+  inset: 0;
+  width: 120rem;
+  height: 67.5rem;
+}
 #scene {
-  width: var(--width);
-  height: var(--height);
-  position: var(--position-absolute);
-  top: 0;
-  left: 0;
-  overflow: hidden;
+  background: var(--background-color);
 }
 #frame {
-  width: calc(var(--width) - 2 * var(--border-width));
-  height: calc(var(--height) - 2 * var(--border-width));
-  left: var(--border-width);
-  top: var(--border-width);
-  border: var(--border-width) solid var(--accent-color);
-  position: var(--position-absolute);
-}
-#branding {
-  width: auto;
-  height: 500px;
-  position: var(--position-absolute);
-  top: 50%;
-  margin-top: -250px;
-  text-align: center;
-}
-#brandImg {
-  width: var(--width);
-  height: 500px;
-  background: url("./main.png") center center no-repeat;
-  background-size: contain !important;
-  position: var(--position-absolute);
-  top: 0;
-  left: 0;
-  z-index: 1;
-  opacity: 0.1;
-}
-#title {
-  width: var(--width);
-  font-size: var(--xxlarge-font-size);
-  margin-top: 142px;
-  z-index: 2;
-  position: var(--position-absolute);
-}
-#subtitle {
-  width: var(--width);
-  font-size: var(--large-font-size);
-  top: 290px;
-  z-index: 2;
-  position: var(--position-absolute);
-}
-#updates,
-#social,
-#list,
-#countdown,
-#endMessage {
-  position: var(--position-absolute);
-}
-#updates {
-  left: 80px;
-  top: 80px;
-}
-#social {
-  left: 0;
-  top: 0;
-  white-space: nowrap;
-  transform-origin: left top;
-}
-.network {
-  padding-right: var(--padding-right);
-  width: 0;
-  padding-right: 0;
-}
-.icon {
-  width: 40px;
-  height: 50px;
-  font-size: 40px;
-  overflow: hidden;
-  position: var(--position-absolute);
-  top: 10px;
-  left: 10px;
-  text-indent: -40px;
-}
-.socialHead,
-.socialName {
-  padding: 0;
-  position: relative;
-  left: -200px;
-}
-.socialHead {
-  font-size: var(--small-font-size);
-  line-height: var(--small-font-size);
-  padding-top: 10px;
-}
-.socialName {
-  font-size: var(--large-font-size);
-  line-height: var(--large-font-size);
-  padding-top: 2px;
-}
-#list {
-  bottom: 80px;
-  left: 80px;
-  text-align: left;
-  white-space: nowrap;
-  transform-origin: left bottom;
-}
-.borderTop,
-.borderRight,
-.borderLeft {
-  position: var(--position-absolute);
-}
-.borderTop {
-  height: 2px;
-  width: 100%;
-  top: -2px;
-  left: 0;
-}
-.borderRight {
-  width: 2px;
-  top: 0;
-  right: -2px;
-  height: 100%;
-}
-.borderLeft {
-  width: 2px;
-  top: 0;
-  left: 0;
-  height: 100%;
-}
-.event {
-  padding: 0 40px 20px 20px;
-  margin-top: var(--margin-top);
-  position: relative;
-  background: var(--bg-color);
-}
-#list .name,
-#list .type {
-  padding-right: 10px;
-}
-#list .name {
-  font-size: 20px;
-  line-height: 20px;
-  padding-top: 14px;
-}
-#list .type {
-  font-size: var(--small-font-size);
-  line-height: var(--small-font-size);
-  padding-top: 2px;
-}
-.inner {
-  overflow: hidden;
-}
-#social .inner {
-  margin-left: 60px;
-  padding: 0 0 10px;
-}
-#social .item,
-#schedule .item {
-  position: var(--position-absolute);
-  top: 0;
-  left: 0;
-}
-#schedule {
-  max-width: 1900px;
-  position: relative;
-  top: -20px;
-}
-.day {
-  margin-right: var(--margin-right);
-  margin-top: var(--margin-top);
-  position: relative;
-  float: left;
-}
-.day:nth-child(7) {
-  margin-right: 0;
-}
-#week .day {
-  padding: 0 10px 10px 10px;
-}
-.scheduleHead,
-.scheduleTime {
-  position: relative;
-  text-align: center;
-}
-.scheduleHead {
-  font-size: var(--small-font-size);
-  font-weight: bold;
-  padding-top: 10px;
-}
-.scheduleTime {
-  font-size: var(--medium-font-size);
-  padding-top: 2px;
-}
-#schedule .borderTop {
-  width: 0;
-}
-#schedule .day {
-  top: 20px;
-}
-#schedule .scheduleHead,
-#schedule .scheduleTime {
-  opacity: 0;
-  left: -60px;
-}
-#countdown {
-  text-align: right;
-  bottom: 80px;
-  right: 80px;
-  font-size: var(--xlarge-font-size);
-  transform-origin: right bottom;
-  z-index: 999;
-}
-#message {
-  font-size: var(--large-font-size);
-}
-#endMessage {
-  text-align: right;
-  bottom: 0;
-  right: 0;
-  font-size: var(--xlarge-font-size);
-  white-space: nowrap;
-  display: none;
+  position: absolute;
+  inset: 1.5rem;
+  border: var(--frame-width) solid var(--frame-color);
 }
 #video video,
 #image img {
-  left: 0;
-  right: 0;
-  min-width: var(--width);
-  min-height: var(--height);
-  position: var(--position-absolute);
+  position: absolute;
+  min-width: 120rem;
+  min-height: 67.5rem;
+  filter: blur(var(--background-blur));
+  transform: scale(var(--background-scale));
 }
 #overlay {
-  width: var(--width);
-  height: var(--height);
-  position: var(--position-absolute);
+  background: var(--background-tint);
+  opacity: var(--background-opacity);
+}
+
+/* Logo, title, and subtitle. */
+#branding {
+  position: absolute;
+  top: 50%;
+  margin-top: -15.625rem;
+  text-align: center;
+}
+#brandImg {
+  position: absolute;
+  width: 120rem;
+  height: 31.25rem;
+  background: url("https://byuwur.github.io/img/logo.png") center / contain no-repeat;
+  opacity: var(--logo-opacity);
+  transform: scale(var(--logo-scale));
+}
+#title,
+#subtitle {
+  position: absolute;
+  width: 120rem;
+}
+#title {
+  margin-top: 8.875rem;
+  font-size: var(--titleSize);
+  transform: translateY(var(--titleVerticalOffset));
+  white-space: pre-line;
+}
+#subtitle {
+  top: 18.125rem;
+  color: var(--secondary-color);
+  font-size: var(--subtitleSize);
+  transform: translateY(var(--subtitleVerticalOffset));
+}
+
+/* Social accounts and schedule; GSAP owns their entrance, exit, and rotation. */
+#updates {
+  position: absolute;
+  left: 5rem;
+  top: 5rem;
+}
+#social {
+  position: absolute;
+  transform: scale(var(--socialMediaScale));
+  transform-origin: left top;
+}
+.item {
+  position: absolute;
   top: 0;
   left: 0;
-  background: #0000;
+  opacity: 0;
+  white-space: nowrap;
 }
-@keyframes soBorderTop {
-  0%,
-  100% {
-    width: 0;
-  }
-  5%,
-  95% {
-    width: 100%;
-  }
+.network,
+.day,
+.event {
+  position: relative;
+  background: var(--content-background);
 }
-@keyframes network {
-  0%,
-  1%,
-  99%,
-  100% {
-    width: 0;
-    padding-right: 0;
-  }
-  6%,
-  94% {
-    width: 100%;
-    padding-right: var(--padding-right);
-  }
+.network {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.625rem 3rem 0.625rem 0.625rem;
 }
-@keyframes icon {
-  0%,
-  4%,
-  96%,
-  100% {
-    text-indent: -40px;
-  }
-  10%,
-  90% {
-    text-indent: 0px;
-  }
+.borderTop {
+  position: absolute;
+  height: 0.125rem;
+  width: 100%;
+  top: -0.125rem;
+  left: 0;
+  background: var(--accent-color);
 }
-@keyframes socialHead {
-  0%,
-  4%,
-  96%,
-  100% {
-    left: -400px;
-  }
-  11%,
-  89% {
-    left: 0;
-  }
+.icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 2.5rem;
+  height: 2.5rem;
+  font-size: 2rem;
+  line-height: 1;
 }
-@keyframes socialName {
-  0%,
-  6%,
-  94%,
-  100% {
-    left: -400px;
-  }
-  13%,
-  87% {
-    left: 0;
-  }
+.socialHead,
+.scheduleHead {
+  color: var(--secondary-color);
+  font-size: 1rem;
 }
-@keyframes scAnimated {
-  0%,
-  2%,
-  98%,
-  100% {
-    opacity: 0;
-  }
-  6%,
-  92% {
-    opacity: 1;
-  }
+.socialName {
+  font-size: 1rem;
+  padding-top: 0.125rem;
 }
-@keyframes scBorderTop {
-  0%,
-  100% {
-    top: 60px;
-  }
-  8%,
-  92% {
-    top: 0;
-  }
+#schedule {
+  position: relative;
+  max-width: 118.75rem;
+  top: -1.25rem;
+  transform: scale(var(--scheduleScale));
+  transform-origin: left top;
 }
-@keyframes day {
-  0%,
-  100% {
-    top: 20px;
-  }
-  10%,
-  90% {
-    top: 0;
-  }
+#week {
+  display: flex;
+  gap: 1.5rem;
 }
-@keyframes scheduleHead {
-  0%,
-  7%,
-  93%,
-  100% {
-    opacity: 0;
-    left: -60px;
-  }
-  14%,
-  86% {
-    opacity: 1;
-    left: 0;
-  }
+.day {
+  margin-top: 1.5rem;
+  padding: 0.625rem;
+  text-align: center;
 }
-@keyframes scheduleTime {
-  0%,
-  9%,
-  91%,
-  100% {
-    opacity: 0;
-    left: -60px;
-  }
-  16%,
-  84% {
-    opacity: 1;
-    left: 0;
-  }
+.scheduleTime {
+  padding-top: 0.125rem;
 }
-#social .animated .borderTop {
-  animation: soBorderTop var(--animation-duration) var(--animation-direction);
+/* Optional event labels. */
+#list {
+  position: absolute;
+  bottom: 5rem;
+  left: 5rem;
+  transform: scale(var(--labelsScale));
+  transform-origin: left bottom;
 }
-#social .animated .network {
-  animation: network var(--animation-duration) var(--animation-direction);
+.event {
+  margin-top: 1.5rem;
+  padding: 0 2.5rem 1.25rem 1.25rem;
+  white-space: nowrap;
 }
-.animated .icon {
-  animation: icon var(--animation-duration) var(--animation-direction);
+.borderLeft {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0.125rem;
+  height: 100%;
+  background: var(--accent-color);
 }
-.animated .socialHead {
-  animation: socialHead var(--animation-duration) var(--animation-direction);
+#list .name {
+  padding-top: 0.875rem;
+  font-size: var(--labelNameSize);
+  line-height: var(--labelNameSize);
+  transform: translateY(var(--labelNameVerticalOffset));
 }
-.animated .socialName {
-  animation: socialName var(--animation-duration) var(--animation-direction);
+#list .type {
+  padding-top: 0.125rem;
+  color: var(--secondary-color);
+  font-size: var(--labelHeaderSize);
+  line-height: var(--labelHeaderSize);
+  transform: translateY(var(--labelHeaderVerticalOffset));
 }
-#schedule .animated {
-  animation: scAnimated var(--animation-duration) var(--animation-direction);
+
+/* Countdown and its completion message. */
+#countdown {
+  position: absolute;
+  bottom: 5rem;
+  right: 5rem;
+  text-align: right;
+  transform: scale(var(--countdownScale));
+  transform-origin: right bottom;
 }
-#schedule .animated .borderTop {
-  animation: scBorderTop var(--animation-duration) var(--animation-direction);
+#time {
+  font-size: var(--countdownTimeSize);
+  transform: translateY(var(--countdownTimeVerticalOffset));
 }
-#schedule .animated .day {
-  animation: day var(--animation-duration) var(--animation-direction);
+#message {
+  color: var(--secondary-color);
+  font-size: var(--countdownMessageSize);
+  transform: translateY(var(--countdownMessageVerticalOffset));
 }
-#schedule .animated .scheduleHead {
-  animation: scheduleHead var(--animation-duration) var(--animation-direction);
-}
-#schedule .animated .scheduleTime {
-  animation: scheduleTime var(--animation-duration) var(--animation-direction);
+#endMessage {
+  white-space: nowrap;
+  color: var(--secondary-color);
+  font-size: var(--countdownEndMessageSize);
+  transform: translateY(var(--countdownEndMessageVerticalOffset));
 }

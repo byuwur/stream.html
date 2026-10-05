@@ -1,93 +1,105 @@
-html,
+/* Match popup.js defaults; inline settings override these values. */
+:root {
+  --iconBoxColor: #400000;
+  --textBoxColor: #ffffff;
+  --iconColor: #ffffff;
+  --fontColor: #400000;
+  --font-family: "Courier New", Courier, monospace;
+  --font-size: 4.5rem;
+  --font-weight: 700;
+  --text-offset: 0rem;
+}
+
+html {
+  font-size: 16px;
+}
 body {
-  padding: 0;
   margin: 0;
   overflow: hidden;
 }
-body {
-  opacity: 0;
-}
+
 #socialHolder {
   position: absolute;
   top: 0;
+  opacity: 0;
+  font-family: var(--font-family);
+  font-weight: var(--font-weight);
+  font-size: var(--font-size);
 }
 #socialHolder.left {
   left: 0;
+  transform-origin: left top;
 }
 #socialHolder.right {
   right: 0;
+  transform-origin: right top;
 }
 #holder {
-  display: inline-block;
-  height: 100px;
-  line-height: 100px;
-  font-size: 40px;
   position: absolute;
-  opacity: 1;
+  height: 6.25rem;
+  line-height: 6.25rem;
 }
-#holder.left {
-  left: 0;
-}
-#holder.right {
+.right #holder {
   right: 0;
 }
-#nameHolder {
-  position: relative;
-  top: 0;
+.left #holder {
   left: 0;
+}
+#textBox {
   overflow: hidden;
-  padding: 0 20px;
-  max-height: 100px;
-  white-space: nowrap;
+  height: 6.25rem;
+  background: var(--textBoxColor);
+  color: var(--fontColor);
+}
+#nameHolder {
+  padding: 0 1.25rem;
 }
 .name {
-  position: relative;
   display: block;
-  top: 0;
-  left: 0;
+  height: 6.25rem;
+  line-height: 6.25rem;
+  white-space: nowrap;
+  position: relative;
+  top: var(--text-offset);
 }
+
+/* The square sits inside a larger SVG so its curves have room to stretch. */
 #iconBox {
-  width: 140px;
-  height: 140px;
   position: absolute;
-  top: -20px;
+  top: -1.25rem;
+  width: 8.75rem;
+  height: 8.75rem;
+  color: var(--iconColor);
 }
-#iconBox.left {
-  right: -120px;
+.left #iconBox {
+  right: -7.5rem;
 }
-#iconBox.right {
-  left: -120px;
-}
-#iconBox svg {
-  position: absolute;
-  width: 140px;
-  height: auto;
-  z-index: 99;
-}
-#bigLeft,
-#littleLeft,
-#littleRight,
-#bigRight,
-#littleUp,
-#bigDown,
-#bigUp {
-  visibility: hidden;
-}
-#canvasHolder {
-  width: 120px;
-  height: 120px;
-  overflow: hidden;
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  z-index: 999;
-  transform: scale(0.5);
-}
-#canvas {
-  position: absolute;
-  top: 0;
-  left: 0;
+.right #iconBox {
+  left: -7.5rem;
 }
 #svg {
-  enable-background: new 0 0 140 140;
+  position: absolute;
+  width: 8.75rem;
+  height: 8.75rem;
+  fill: var(--iconBoxColor);
+}
+#svg path:not(#square) {
+  visibility: hidden;
+}
+#iconHolder {
+  position: absolute;
+  top: 0.625rem;
+  left: 0.625rem;
+  width: 7.5rem;
+  height: 7.5rem;
+  overflow: hidden;
+  transform: scale(0.75);
+}
+#icons > i {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 7.5rem;
+  height: 7.5rem;
+  font-size: 6.25rem;
 }
