@@ -398,6 +398,13 @@ function renderMain() {
     }
     animation?.restart();
   }
+  window.addEventListener("pagehide", () => {
+    clearInterval(countdownTimer);
+    animation?.pause();
+  });
+  window.addEventListener("pageshow", (event) => {
+    if (event.persisted) start();
+  });
   start();
 }
 
