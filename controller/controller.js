@@ -1,8 +1,21 @@
 /**
  * File: controller/controller.gamepad.js
- * @file Gamepad integration placeholder; this file currently contains no implementation.
- * Deps: None.
+ * @file Gamepad polling and renderer settings.
+ * Deps: shared page setup and embedded settingsKB.
  */
+
+// URL defaults; the configurator edits this same object.
+const settings = {
+  player: "1",
+  skin: "1",
+  opacity: 1,
+  offset: 20,
+  deadzone: 0.25,
+  strength: "1",
+  curve: "0",
+  rotation: 120,
+  mapping: []
+};
 
 /**
  * Copyright 2012 Google Inc. All Rights Reserved.
@@ -75,7 +88,7 @@ const gamepadSupport = {
     for (const pad of pads) {
       if (!pad || pad.index === 9) continue;
       this.gamepadsRaw[pad.index] = pad;
-      this.gamepads[pad.index] = controllerCustomMapping.mapping.length ? remapGamepad(pad) : pad;
+      this.gamepads[pad.index] = settings.mapping.length ? remapGamepad(pad) : pad;
     }
     if (this.kb) this.gamepads[9] = this.gamepadsRaw[9] = settingsKB;
     const changed = Object.keys(previous).join() !== Object.keys(this.gamepads).join() || Object.keys(this.gamepads).some((index) => previous[index]?.id !== this.gamepads[index].id);
@@ -145,13 +158,13 @@ const gamepadSupport = {
  */
 
 const tester = {
-  STICK_OFFSET: 20,
-  STICK_CURVING: false,
-  TRIGGER_DISPLAY_TYPE: 1,
+  STICK_OFFSET: settings.offset,
+  STICK_CURVING: settings.curve == "1",
+  TRIGGER_DISPLAY_TYPE: Number(settings.strength),
   ANALOGUE_BUTTON_THRESHOLD: 0.25,
-  ANALOGUE_STICK_THRESHOLD: 0.25,
+  ANALOGUE_STICK_THRESHOLD: settings.deadzone,
   DIGITAL_THRESHOLD: 0.1,
-  ROTATE_BOUNDARY: 120,
+  ROTATE_BOUNDARY: settings.rotation,
   keys: new Set(),
   updateGamepads(pads = []) {
     document.querySelectorAll(".controller").forEach((controller) => {
@@ -196,8 +209,8 @@ const tester = {
 
 /**
  * File: controller/controller.js
- * @file Controller configurator integration.
- * Deps: jQuery 4, embedded keyboard settings and Gamepad integration.
+ * @file Controller parameter validation and gamepad remapping.
+ * Deps: shared page setup and Gamepad integration.
  * @author mateus@byuwur.co (Andres Trujillo Mateus)
  */
 const parameterRules = {
@@ -206,22 +219,65 @@ const parameterRules = {
   opacity: { type: "number", min: 0, max: 1 },
   offset: { type: "number", min: 0, max: Infinity },
   deadzone: { type: "number", min: 0, max: 1 },
-  strength: { options: ["0"] },
-  curve: { options: ["1"] },
-  rotation: { type: "number", min: 0, max: Infinity }
+  strength: { options: ["0", "1"] },
+  curve: { options: ["0", "1"] },
+  rotation: { type: "number", min: 0, max: Infinity },
+  mapping: { validate: bindingSettings }
 };
 
 const allowedControllers = { 1: "xbox", 2: "ps", 3: "fight-stick", 4: "gc" };
-const playerNumber = parameterValue("player", "1");
-let controllerCustomMapping = bindingSettings(params.get("mapping"));
 
-/** Invalid mapping input leaves the standard gamepad layout active. */
+// URL validation is repeated in each resource and configurator.js to avoid extra files. Keep the copies in sync.
+function validParameter(name, value) {
+  if (!Object.hasOwn(parameterRules, name)) return false;
+  const rule = parameterRules[name];
+  if (rule.validate) return rule.validate(value) !== null;
+  if (rule.options && !rule.options.includes(value)) return false;
+  if (rule.maxlength && value.length > Number(rule.maxlength)) return false;
+  if (rule.type === "number") {
+    const number = Number(value);
+    if (!value.trim() || !Number.isFinite(number) || number < Number(rule.min) || number > Number(rule.max)) return false;
+    if (rule.step && rule.step !== "any") {
+      const steps = (number - Number(rule.min)) / Number(rule.step);
+      if (Math.abs(steps - Math.round(steps)) > 1e-8) return false;
+    }
+  }
+  if (rule.type === "color" && !CSS.supports("color", value)) return false;
+  if (name.endsWith("Url") && value) {
+    try {
+      const url = new URL(value, location.href);
+      if (!["http:", "https:", "file:"].includes(url.protocol) || (url.protocol === "file:" && location.protocol !== "file:") || url.username || url.password) return false;
+    } catch {
+      return false;
+    }
+  }
+  return true;
+}
+
+/** Apply validated URL values to the declared settings object; invalid values leave it intact. */
+function applyParameters(settings, values = params) {
+  for (const [name, value] of values) {
+    if (!Object.hasOwn(parameterRules, name)) continue;
+    const rule = parameterRules[name];
+    let parsed;
+    if (rule.validate) parsed = rule.validate(value);
+    else {
+      if (!validParameter(name, value)) continue;
+      parsed = rule.type === "number" ? Number(value) : value;
+    }
+    if (parsed === null) continue;
+    settings[name] = parsed;
+  }
+}
+
+/** Parse binding arrays or prior wrapped URLs; invalid JSON leaves settings unchanged. */
 function bindingSettings(value) {
   try {
-    const result = JSON.parse(value || '{"mapping":[]}');
-    return result && Array.isArray(result.mapping) ? { mapping: result.mapping.filter((binding) => binding && ["buttons", "axes", "dpad"].includes(binding.targetType)) } : { mapping: [] };
+    const result = JSON.parse(value);
+    const bindings = Array.isArray(result) ? result : result?.mapping;
+    return Array.isArray(bindings) ? bindings.filter((binding) => binding && ["buttons", "axes", "dpad"].includes(binding.targetType)) : null;
   } catch {
-    return { mapping: [] };
+    return null;
   }
 }
 function buttonValue(button) {
@@ -247,7 +303,7 @@ function sourceValue(binding, pad) {
 /** Reads every binding from the original pad; mappings never alter another binding's source. */
 function remapGamepad(pad) {
   const result = copyGamepad(pad);
-  for (const binding of controllerCustomMapping.mapping) {
+  for (const binding of settings.mapping) {
     if (!binding || !["buttons", "axes", "dpad"].includes(binding.targetType)) continue;
     if (binding.targetType === "dpad") {
       const value = sourceValue(binding, pad);
@@ -286,21 +342,21 @@ function initController() {
   document.querySelectorAll(".controller").forEach((controller) => {
     controller.append(template.content.cloneNode(true));
     controller.classList.remove("xbox");
-    controller.classList.add(allowedControllers[parameterValue("skin", "1")]);
-    controller.style.opacity = parameterValue("opacity", 1);
+    controller.classList.add(allowedControllers[settings.skin]);
+    controller.style.opacity = settings.opacity;
   });
   for (const [name, property] of [
     ["offset", "STICK_OFFSET"],
     ["deadzone", "ANALOGUE_STICK_THRESHOLD"],
     ["rotation", "ROTATE_BOUNDARY"]
   ]) {
-    tester[property] = parameterValue(name, tester[property]);
+    tester[property] = settings[name];
   }
-  tester.TRIGGER_DISPLAY_TYPE = params.get("strength") === "0" ? 0 : 1;
-  tester.STICK_CURVING = params.get("curve") === "1";
-  const active = document.getElementById("gamepad-" + playerNumber);
+  tester.TRIGGER_DISPLAY_TYPE = Number(settings.strength);
+  tester.STICK_CURVING = settings.curve === "1";
+  const active = document.getElementById("gamepad-" + settings.player);
   active.classList.add("active");
-  active.querySelector(".quadrant").classList.add("p" + (playerNumber === "9" ? 9 : Number(playerNumber) - 1));
+  active.querySelector(".quadrant").classList.add("p" + (settings.player === "9" ? 9 : Number(settings.player) - 1));
   function fitController() {
     const margin = parseFloat(getComputedStyle(document.documentElement).fontSize) * 0.5;
     const scale = Math.max(0, Math.min((innerHeight - margin * 2) / active.offsetHeight, innerWidth / active.offsetWidth));
@@ -311,5 +367,6 @@ function initController() {
   tester.updateGamepads();
 }
 
+applyParameters(settings);
 gamepadSupport.init();
 if (streamOverlay) initController();
