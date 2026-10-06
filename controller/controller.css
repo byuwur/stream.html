@@ -42,14 +42,14 @@ body {
 
 .xbox .triggers {
   width: 27.875rem;
-  height: 7.5625rem;
+  height: 7.55rem;
   position: absolute;
   left: 9.5rem;
 }
 
 .xbox .trigger {
   width: 5.5rem;
-  height: 7.5625rem;
+  height: 7.55rem;
   background: url(./img/xbox/trigger.svg);
   opacity: 0;
 }
@@ -66,7 +66,7 @@ body {
 
 .xbox .bumper {
   width: 10.625rem;
-  height: 3.8125rem;
+  height: 3.8rem;
   background: url(./img/xbox/bumper.svg);
   opacity: 0;
 }
@@ -74,9 +74,9 @@ body {
 .xbox .bumpers {
   position: absolute;
   width: 33.5rem;
-  height: 3.8125rem;
-  left: 6.6875rem;
-  top: 8.0625rem;
+  height: 3.8rem;
+  left: 6.7rem;
+  top: 8.05rem;
 }
 
 .xbox .bumper.pressed {
@@ -95,8 +95,8 @@ body {
 .xbox .quadrant {
   position: absolute;
   background: url(./img/xbox/quadrant.svg);
-  height: 2.8125rem;
-  width: 2.8125rem;
+  height: 2.8rem;
+  width: 2.8rem;
   top: 16.125rem;
   left: 22.125rem;
   z-index: 0;
@@ -120,8 +120,8 @@ body {
 
 .xbox .arrows {
   position: absolute;
-  width: 8.8125rem;
-  height: 2.0625rem;
+  width: 8.8rem;
+  height: 2.05rem;
   top: 16.5rem;
   left: 19.125rem;
 }
@@ -129,8 +129,8 @@ body {
 .xbox .back,
 .xbox .start {
   background: url(./img/xbox/start-select.svg);
-  width: 2.0625rem;
-  height: 2.0625rem;
+  width: 2.05rem;
+  height: 2.05rem;
   opacity: 0;
 }
 
@@ -144,13 +144,13 @@ body {
 }
 
 .xbox .start {
-  background-position: 2.0625rem 0rem;
+  background-position: 2.05rem 0rem;
   float: right;
 }
 
 .xbox .abxy {
   position: absolute;
-  width: 9.5625rem;
+  width: 9.55rem;
   height: 9.75rem;
   top: 12rem;
   left: 30.5rem;
@@ -165,18 +165,18 @@ body {
 
 .xbox .button.pressed {
   background-position-y: -3rem;
-  margin-top: 0.3125rem;
+  margin-top: 0.3rem;
   opacity: 1;
 }
 
 .xbox .a {
   background-position: 0 0;
   top: 6.75rem;
-  left: 3.4375rem;
+  left: 3.45rem;
 }
 
 .xbox .b {
-  background-position: -3.0625rem 0;
+  background-position: -3.05rem 0;
   top: 3.625rem;
   right: 0rem;
 }
@@ -189,24 +189,24 @@ body {
 
 .xbox .y {
   background-position: 3rem 0;
-  left: 3.4375rem;
-  top: 0.4375rem;
+  left: 3.45rem;
+  top: 0.45rem;
 }
 
 .xbox .sticks {
   position: absolute;
-  width: 23.1875rem;
+  width: 23.2rem;
   height: 12.25rem;
-  top: 14.9375rem;
+  top: 14.95rem;
   left: 9rem;
 }
 
 .xbox .stick {
   position: absolute;
   background: url(./img/xbox/stick.svg);
-  background-position: -5.3125rem 0;
-  height: 5.1875rem;
-  width: 5.1875rem;
+  background-position: -5.3rem 0;
+  height: 5.2rem;
+  width: 5.2rem;
 }
 
 .xbox .stick.pressed {
@@ -219,16 +219,16 @@ body {
 }
 
 .xbox .stick.right {
-  top: 7.0625rem;
+  top: 7.05rem;
   left: 18rem;
 }
 
 .xbox .dpad {
   position: absolute;
   width: 6.875rem;
-  height: 6.9375rem;
-  top: 21.5625rem;
-  left: 13.9375rem;
+  height: 6.95rem;
+  top: 21.55rem;
+  left: 13.95rem;
 }
 
 .xbox .face {
@@ -257,23 +257,23 @@ body {
 }
 
 .xbox .face.left {
-  background-position: 0 -5.8125rem;
-  width: 3.4375rem;
-  height: 2.1875rem;
+  background-position: 0 -5.8rem;
+  width: 3.45rem;
+  height: 2.2rem;
   top: 2.375rem;
   left: 0;
 }
 
 .xbox .face.right {
-  background-position: 0 -3.5625rem;
-  width: 3.4375rem;
-  height: 2.1875rem;
+  background-position: 0 -3.55rem;
+  width: 3.45rem;
+  height: 2.2rem;
   top: 2.375rem;
   right: 0;
 }
 
 .xbox.half {
-  margin-top: -19.6875rem;
+  margin-top: -19.7rem;
 }
 
 .xbox {
@@ -299,11 +299,11 @@ body {
   width: 36.75rem;
   height: 5.625rem;
   position: absolute;
-  left: 6.8125rem;
+  left: 6.8rem;
 }
 
 .ps .trigger {
-  width: 6.1875rem;
+  width: 6.2rem;
   height: 100%;
   background: url(./img/ps/triggers.svg);
   opacity: 0;
@@ -315,12 +315,12 @@ body {
 
 .ps .trigger.right {
   float: right;
-  background-position-x: 6.1875rem;
+  background-position-x: 6.2rem;
 }
 
 .ps .bumper {
-  width: 6.1875rem;
-  height: 1.4375rem;
+  width: 6.2rem;
+  height: 1.45rem;
   background: url(./img/ps/bumper.svg) no-repeat;
   opacity: 0;
 }
@@ -328,8 +328,8 @@ body {
 .ps .bumpers {
   position: absolute;
   width: 36.75rem;
-  height: 1.4375rem;
-  left: 6.8125rem;
+  height: 1.45rem;
+  left: 6.8rem;
   top: 5.875rem;
 }
 
@@ -348,7 +348,7 @@ body {
 
 .ps .touchpad {
   width: 16.375rem;
-  height: 9.4375rem;
+  height: 9.45rem;
   position: absolute;
   left: 17rem;
   top: 7.625rem;
@@ -375,7 +375,7 @@ body {
   width: 22rem;
   height: 2.875rem;
   top: 8.875rem;
-  left: 14.1875rem;
+  left: 14.2rem;
 }
 
 .ps .back,
@@ -403,20 +403,20 @@ body {
 .ps .abxy {
   position: absolute;
   width: 10.625rem;
-  height: 10.6875rem;
-  top: 9.9375rem;
-  left: 35.4375rem;
+  height: 10.7rem;
+  top: 9.95rem;
+  left: 35.45rem;
 }
 
 .ps .button {
   position: absolute;
-  width: 3.4375rem;
-  height: 3.4375rem;
+  width: 3.45rem;
+  height: 3.45rem;
   background: url(./img/ps/face.svg);
 }
 
 .ps .button.pressed {
-  background-position-y: 3.4375rem;
+  background-position-y: 3.45rem;
 }
 
 .ps .a {
@@ -426,25 +426,25 @@ body {
 }
 
 .ps .b {
-  background-position: -3.5625rem 0;
+  background-position: -3.55rem 0;
   top: 3.625rem;
   right: 0rem;
 }
 
 .ps .x {
-  background-position: -7.0625rem 0;
+  background-position: -7.05rem 0;
   top: 3.625rem;
 }
 
 .ps .y {
-  background-position: 3.4375rem 0;
+  background-position: 3.45rem 0;
   left: 3.625rem;
 }
 
 .ps .sticks {
   position: absolute;
-  width: 22.5625rem;
-  height: 6.5625rem;
+  width: 22.55rem;
+  height: 6.55rem;
   top: 19.25rem;
   left: 14.25rem;
 }
@@ -470,15 +470,15 @@ body {
 }
 
 .ps .stick.right {
-  top: calc(100% - 6.5625rem);
-  left: calc(100% - 6.5625rem);
+  top: calc(100% - 6.55rem);
+  left: calc(100% - 6.55rem);
 }
 
 .ps .dpad {
   position: absolute;
-  width: 7.8125rem;
+  width: 7.8rem;
   height: 7.875rem;
-  top: 11.3125rem;
+  top: 11.3rem;
   left: 5.75rem;
 }
 
@@ -502,7 +502,7 @@ body {
 .ps .face.up {
   left: 2.75rem;
   top: 0;
-  background-position: -2.3125rem 0rem;
+  background-position: -2.3rem 0rem;
 }
 
 .ps .face.down {
@@ -512,13 +512,13 @@ body {
 }
 
 .ps .face.left {
-  top: 2.8125rem;
+  top: 2.8rem;
   left: 0;
   background-position: 6.5rem 0;
 }
 
 .ps .face.right {
-  top: 2.8125rem;
+  top: 2.8rem;
   right: 0rem;
   background-position: 3.25rem 0;
 }
@@ -554,7 +554,7 @@ body {
 }
 
 .fight-stick .triggers {
-  width: 20.3125rem;
+  width: 20.3rem;
   height: 12.5rem;
   position: absolute;
   right: 0rem;
@@ -562,15 +562,15 @@ body {
 }
 
 .fight-stick .trigger-button {
-  width: 7.6875rem;
-  height: 7.6875rem;
+  width: 7.7rem;
+  height: 7.7rem;
   background: #333333;
   opacity: 1;
   display: block;
 }
 
 .fight-stick .trigger-button.pressed {
-  transform: translateY(0.3125rem);
+  transform: translateY(0.3rem);
   filter: invert(1);
 }
 
@@ -586,7 +586,7 @@ body {
 }
 
 .fight-stick .bumpers {
-  width: 18.4375rem;
+  width: 18.45rem;
   height: 12.5rem;
   position: absolute;
   right: 0rem;
@@ -594,15 +594,15 @@ body {
 }
 
 .fight-stick .bumper {
-  width: 7.8125rem;
-  height: 7.8125rem;
+  width: 7.8rem;
+  height: 7.8rem;
   background: #333333;
   opacity: 1;
   display: block;
 }
 
 .fight-stick .bumper.pressed {
-  transform: translateY(0.3125rem);
+  transform: translateY(0.3rem);
   filter: invert(1);
 }
 
@@ -610,7 +610,7 @@ body {
   position: absolute;
   float: right;
   bottom: 0.25rem;
-  right: 0.6875rem;
+  right: 0.7rem;
 }
 
 .fight-stick .bumper.right {
@@ -628,7 +628,7 @@ body {
 
 .fight-stick .arrows {
   position: absolute;
-  width: 10.9375rem;
+  width: 10.95rem;
   height: 4.375rem;
   top: 1.875rem;
   left: 0.625rem;
@@ -653,7 +653,7 @@ body {
 
 .fight-stick .back.pressed,
 .fight-stick .start.pressed {
-  transform: translateY(0.3125rem);
+  transform: translateY(0.3rem);
   filter: invert(1);
 }
 
@@ -666,8 +666,8 @@ body {
 }
 
 .fight-stick .button {
-  width: 7.8125rem;
-  height: 7.8125rem;
+  width: 7.8rem;
+  height: 7.8rem;
   background: #333333;
   opacity: 1;
   display: block;
@@ -675,7 +675,7 @@ body {
 }
 
 .fight-stick .button.pressed {
-  transform: translateY(0.3125rem);
+  transform: translateY(0.3rem);
   filter: invert(1);
 }
 
@@ -686,12 +686,12 @@ body {
 
 .fight-stick .b {
   bottom: 4.125rem;
-  right: 1.9375rem;
+  right: 1.95rem;
 }
 
 .fight-stick .x {
   top: 4.125rem;
-  left: 2.0625rem;
+  left: 2.05rem;
 }
 
 .fight-stick .y {
@@ -703,8 +703,8 @@ body {
   position: absolute;
   width: 13.75rem;
   height: 13.75rem;
-  top: 12.1875rem;
-  left: -0.9375rem;
+  top: 12.2rem;
+  left: -0.95rem;
   background: url(./img/fsc/stick.svg);
 }
 
@@ -743,7 +743,7 @@ body {
 /* GameCube artwork. */
 .controller.gc {
   background: url(./img/gcn/base.svg) no-repeat;
-  height: 52.3125rem;
+  height: 52.3rem;
   width: 61.125rem;
 }
 
@@ -756,14 +756,14 @@ body {
 }
 
 .gc .triggers {
-  width: 48.4375rem;
-  height: 5.9375rem;
+  width: 48.45rem;
+  height: 5.95rem;
   position: absolute;
   left: 6.375rem;
 }
 
 .gc .trigger {
-  width: 8.1875rem;
+  width: 8.2rem;
   height: 100%;
   background: url(./img/gcn/trigger.svg);
   opacity: 0;
@@ -788,8 +788,8 @@ body {
 .gc .bumpers {
   position: absolute;
   width: 49.5rem;
-  height: 4.5625rem;
-  left: 6.4375rem;
+  height: 4.55rem;
+  left: 6.45rem;
   top: 8.625rem;
 }
 
@@ -811,15 +811,15 @@ body {
   width: 3.125rem;
   height: 3.125rem;
   top: 20.25rem;
-  left: 29.0625rem;
+  left: 29.05rem;
 }
 
 .gc .back,
 .gc .start {
-  width: 2.6875rem;
-  height: 2.6875rem;
+  width: 2.7rem;
+  height: 2.7rem;
   background: #e7e7e7;
-  border: solid 0.28125rem rgba(0, 0, 0, 0.65);
+  border: solid 0.3rem rgba(0, 0, 0, 0.65);
   background-clip: content-box;
   opacity: 0;
 }
@@ -842,7 +842,7 @@ body {
   position: absolute;
   width: 18rem;
   height: 14.375rem;
-  top: 12.9375rem;
+  top: 12.95rem;
   left: 40rem;
 }
 
@@ -860,13 +860,13 @@ body {
   background-position: 0 0;
   width: 7.125rem;
   height: 7.125rem;
-  bottom: 2.1875rem;
-  left: 5.6875rem;
+  bottom: 2.2rem;
+  left: 5.7rem;
 }
 
 .gc .b {
-  width: 4.4375rem;
-  height: 4.4375rem;
+  width: 4.45rem;
+  height: 4.45rem;
   background-position: -7.25rem 0;
   bottom: 0rem;
   left: 0.0625rem;
@@ -874,17 +874,17 @@ body {
 
 .gc .x {
   width: 4.125rem;
-  height: 6.4375rem;
+  height: 6.45rem;
   background-position: -18.25rem 0;
-  top: 4.0625rem;
+  top: 4.05rem;
   right: 0rem;
 }
 
 .gc .y {
-  width: 6.4375rem;
+  width: 6.45rem;
   height: 4.125rem;
-  background-position: -11.8125rem 0;
-  left: 4.1875rem;
+  background-position: -11.8rem 0;
+  left: 4.2rem;
   top: 0.125rem;
 }
 
@@ -902,15 +902,15 @@ body {
 
 .gc .stick.left {
   top: 1.5rem;
-  left: 1.4375rem;
+  left: 1.45rem;
   background: url(./img/gcn/left-stick.svg) center no-repeat;
-  height: 7.5625rem;
-  width: 7.5625rem;
+  height: 7.55rem;
+  width: 7.55rem;
 }
 
 .gc .stick.right {
-  top: calc(100% - 7.9375rem);
-  left: calc(100% - 7.8125rem);
+  top: calc(100% - 7.95rem);
+  left: calc(100% - 7.8rem);
   background: url(./img/gcn/cstick.svg) center no-repeat;
   width: 5.25rem;
   height: 5.25rem;
@@ -920,8 +920,8 @@ body {
   position: absolute;
   width: 8.125rem;
   height: 8.125rem;
-  top: 31.0625rem;
-  left: 16.4375rem;
+  top: 31.05rem;
+  left: 16.45rem;
 }
 
 .gc .face {
@@ -933,12 +933,12 @@ body {
 .gc .face.up,
 .gc .face.down {
   width: 2.75rem;
-  height: 4.0625rem;
+  height: 4.05rem;
 }
 
 .gc .face.left,
 .gc .face.right {
-  width: 4.0625rem;
+  width: 4.05rem;
   height: 2.75rem;
 }
 
@@ -955,13 +955,13 @@ body {
 }
 
 .gc .face.left {
-  top: 2.6875rem;
+  top: 2.7rem;
   left: 0;
-  background-position: -5.8125rem 0;
+  background-position: -5.8rem 0;
 }
 
 .gc .face.right {
-  top: 2.6875rem;
+  top: 2.7rem;
   right: 0rem;
   background-position: -10rem 0;
 }

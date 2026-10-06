@@ -81,6 +81,10 @@ body {
   filter: blur(var(--background-blur));
   transform: scale(var(--background-scale));
 }
+#video video {
+  width: 120rem;
+  height: 67.5rem;
+}
 #overlay {
   background: var(--background-tint);
   opacity: var(--background-opacity);
