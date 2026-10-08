@@ -1,8 +1,8 @@
 <!doctype html>
 <!-- A working base for your next overlay, with example fields and a live preview.
-     Copy this HTML and its matching CSS/JS into your resource folder.
-     Replace the demo markup/settings, set shared configurator imports to ../,
-     and use configureResource() here only if custom editor controls are needed. -->
+     Copy this HTML into your resource folder.
+     Replace the embedded demo CSS/JS with your resource's own files, set shared imports to ../,
+     and use configureResource(resource, editor) here only if custom editor controls are needed. -->
 <html lang="en" class="bywr-configurator" data-tool="template">
 
 <head>
@@ -14,7 +14,7 @@
 
 <body>
   <!-- ===== SHARED PAGE SETUP ===== -->
-  <script src="./configurator.js" defer></script>
+  <script src="./configurator.js"></script>
 
   <!-- ===== RESOURCE DEMO ===== -->
   <template id="overlay-markup">
@@ -26,6 +26,81 @@
       </div>
     </main>
   </template>
+  <!-- ./example.css -->
+  <style data-renderer-style>
+    /* Demo-only CSS; keep each real resource's styles in its own file. */
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+      background: transparent;
+      font-size: 16px;
+    }
+
+    #demo-preview {
+      --demo-size: 3rem;
+      --demo-color: #FFFFFF;
+      display: grid;
+      place-items: center;
+      box-sizing: border-box;
+      min-height: 100%;
+      padding: 2rem;
+      font-family: system-ui, sans-serif;
+      text-align: center;
+      color: var(--demo-color);
+    }
+
+    .demo-label,
+    .demo-note {
+      margin: 1rem 0;
+      font-size: 1rem;
+      line-height: 1.5;
+      opacity: 0.65;
+    }
+
+    #demo-message {
+      margin: 0;
+      font-size: var(--demo-size);
+      font-weight: 700;
+      line-height: 1.2;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+  </style>
+  <!-- ./example.js -->
+  <script>
+    // Demo-only JavaScript; keep each real resource's renderer in its own file.
+    document.addEventListener("DOMContentLoaded", () => {
+      const params = new URLSearchParams(location.search);
+      const settings = {
+        message: "Something awesome starts here.",
+        fontSizeRem: 3,
+        textColor: "#FFFFFF"
+      };
+      const parameterRules = {
+        message: { type: "text", maxlength: 160 },
+        fontSizeRem: { type: "number", min: 0.5, max: 6, step: "any" },
+        textColor: { type: "color", maxlength: 160 }
+      };
+      for (const [name, value] of params) {
+        if (!Object.hasOwn(parameterRules, name)) continue;
+        const rule = parameterRules[name];
+        if (rule.maxlength && value.length > rule.maxlength) continue;
+        if (rule.type === "color" && !CSS.supports("color", value)) continue;
+        if (rule.type === "number") {
+          const number = Number(value);
+          if (!value.trim() || !Number.isFinite(number) || number < rule.min || number > rule.max) continue;
+          settings[name] = number;
+        } else settings[name] = value;
+      }
+      document.dispatchEvent(new CustomEvent("resource-ready", { detail: { settings, parameterRules } }));
+      if (!streamOverlay) return;
+      const preview = document.getElementById("demo-preview");
+      document.getElementById("demo-message").textContent = settings.message;
+      preview.style.setProperty("--demo-size", settings.fontSizeRem + "rem");
+      preview.style.setProperty("--demo-color", settings.textColor);
+    });
+  </script>
 
   <!-- ===== CONFIGURATOR ===== -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.php@v19.4/css/fontawesome.min.css" data-editor-style />
@@ -163,40 +238,6 @@
     </main>
   </template>
 
-  <!-- ./configurator.js -->
-  <script>
-    // Demo-only renderer for configurator.html template.
-    const settings = {
-      message: "Something awesome starts here.",
-      fontSizeRem: 3,
-      textColor: "#FFFFFF"
-    };
-    const parameterRules = {
-      message: { type: "text", maxlength: 160 },
-      fontSizeRem: { type: "number", min: 0.5, max: 6, step: "any" },
-      textColor: { type: "color", maxlength: 160 }
-    };
-    // Validation is repeated here to keep the renderer independent of the editor.
-    for (const [name, value] of params) {
-      if (!Object.hasOwn(parameterRules, name)) continue;
-      const rule = parameterRules[name];
-      if (rule.maxlength && value.length > rule.maxlength) continue;
-      if (rule.type === "color" && !CSS.supports("color", value)) continue;
-      if (rule.type === "number") {
-        const number = Number(value);
-        if (!value.trim() || !Number.isFinite(number) || number < rule.min || number > rule.max) continue;
-        settings[name] = number;
-      } else settings[name] = value;
-    }
-    if (streamOverlay) {
-      const preview = document.getElementById("demo-preview");
-      document.getElementById("demo-message").textContent = settings.message;
-      preview.style.setProperty("--demo-size", settings.fontSizeRem + "rem");
-      preview.style.setProperty("--demo-color", settings.textColor);
-    }
-  </script>
-  <!-- ./configurator.css  -->
-  <style></style>
 </body>
 
 </html>
