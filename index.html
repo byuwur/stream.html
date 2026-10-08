@@ -1,77 +1,103 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="stream-home" data-bs-theme="dark">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="Simple browser overlays for your stream. Configure a controller, social popup, or main scene and copy its URL into OBS." />
+  <meta name="description" content="Free browser overlays for your stream. Configure a controller, social popup, or main scene and copy its URL into OBS." />
   <title>stream.html</title>
-  <link rel="icon" href="./main/main.png" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.php@main/css/fontawesome.min.css" />
-  <style>
-    :root { color-scheme: dark; --footer-height: 56px; }
-    * { box-sizing: border-box; }
-    body { margin: 0; background: #131b2b; color: #fff; font-family: system-ui, sans-serif; }
-    a { color: inherit; }
-    .landing { display: grid; grid-template-columns: 1fr 1fr; height: calc(100dvh - var(--footer-height)); }
-    .intro { display: flex; flex-direction: column; justify-content: center; align-items: flex-start; padding: clamp(32px, 7vw, 120px); background: radial-gradient(ellipse at 80% 25%, #53617b66, transparent 65%), linear-gradient(135deg, #26334b, #101a2d); }
-    .logo { width: 64px; height: 64px; object-fit: contain; margin-bottom: 32px; }
-    h1 { margin: 0 0 20px; font-size: clamp(48px, 5vw, 88px); font-weight: 300; letter-spacing: -.05em; }
-    h1 span { color: #c8d2e4; }
-    .description { max-width: 440px; margin: 0 0 32px; color: #c8d2e4; font-size: clamp(18px, 1.5vw, 24px); line-height: 1.5; }
-    .motto { margin: 0; font-size: 12px; font-weight: 600; letter-spacing: .14em; line-height: 1.8; text-transform: uppercase; }
-    .resources { display: flex; flex-direction: column; overflow-y: auto; min-height: 0; scrollbar-gutter: stable; }
-    .resource { position: relative; isolation: isolate; display: flex; flex: 1 0 25%; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 24px 32px; text-align: center; text-decoration: none; overflow: hidden; }
-    .resource::before { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(135deg, var(--resource-tint), #0005), var(--resource-image) center / cover no-repeat; transition: transform .35s ease, background-color .35s ease; }
-    .resource:hover::before, .resource:focus-visible::before { transform: scale(1.08); background-color: #ffffff12; }
-    .resource:focus-visible { outline: 3px solid white; outline-offset: -6px; }
-    .resource > i { font-size: 36px; }
-    .resource h2 { margin: 0; font-size: clamp(26px, 2.5vw, 42px); font-weight: 300; }
-    .resource p { margin: 0; max-width: 420px; color: #ffffffe0; font-size: 14px; line-height: 1.5; }
-    .controller { background: #223a61; --resource-tint: #223a61bb; --resource-image: url("./controller/img/background.jpg"); }
-    .popup { background: #970f28; --resource-tint: #970f28bb; --resource-image: url("./popup/img/background.jpg"); }
-    .main-scene { background: #075847; --resource-tint: #075847bb; --resource-image: url("./main/img/background.jpg"); }
-    footer { position: fixed; inset: auto 0 0; height: var(--footer-height); display: flex; align-items: center; justify-content: center; gap: 6px; padding: 12px; background: #101725; font-size: 13px; }
-    footer i { color: #e95b72; }
-    footer a { text-decoration: none; }
-    footer a:hover { text-decoration: underline; }
-    footer a:focus-visible { outline: 2px solid white; outline-offset: 4px; }
-    @media (max-width: 767px) {
-      .landing { display: block; height: auto; padding-bottom: var(--footer-height); }
-      .intro { min-height: 45dvh; padding: 40px 28px; }
-      .logo { width: 48px; height: 48px; margin-bottom: 20px; }
-      .resources { height: 75dvh; }
-      .resource { padding: 20px; }
-      .resource > i { font-size: 28px; }
-    }
-    @media (prefers-reduced-motion: reduce) { .resource::before { transition: none; } }
-  </style>
+  <link rel="icon" href="https://byuwur.github.io/img/logo.png" />
 </head>
-<body>
-  <main class="landing">
-    <section class="intro" aria-labelledby="site-title">
-      <img class="logo" src="./main/main.png" alt="" width="64" height="64" />
-      <h1 id="site-title">stream<span>.html</span></h1>
-      <p class="description">Browser overlays for your stream. Choose a tool, make it yours, and copy the URL into OBS.</p>
-      <p class="motto">Simple is complicated enough.</p>
+
+<body class="d-flex flex-column min-vh-100 bg-dark text-white light-links">
+  <!-- ===== HOMEPAGE ===== -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.php@v19.4/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.php@v19.4/css/fontawesome.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.php@v19.4/_common.css" />
+  <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.php@v19.4/_common.js"></script>
+  <script src="./configurator.js" defer></script> <!-- This <script> is loaded only for caching -->
+  <!-- ===== RESOURCE ===== -->
+  <main class="row g-0 flex-md-nowrap flex-grow-1 overflow-hidden">
+    <section class="home-intro col-12 col-md-6 d-flex flex-column gap-4 p-4 p-lg-5 overflow-y-auto"
+      style="background: linear-gradient(180deg, var(--primary-color), var(--bywr-red-dark));" aria-labelledby="site-title">
+      <div class="home-intro-top d-flex align-items-center justify-content-between gap-3">
+        <img class="object-fit-contain" src="https://byuwur.github.io/img/logo.png" alt="" />
+        <a class="home-source btn btn-outline-light btn-sm rounded-0 d-inline-flex align-items-center gap-2 px-3 py-2"
+          href="https://github.com/byuwur/stream.html" target="_blank" rel="noopener">
+          <i class="fa-brands fa-github" aria-hidden="true"></i> GitHub
+          <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i>
+        </a>
+      </div>
+      <div class="d-flex flex-column justify-content-center flex-grow-1 gap-3">
+        <p class="home-eyebrow small fw-semibold text-uppercase m-0">Free. Forever.</p>
+        <h1 id="site-title" class="display-2 fw-medium lh-1 m-0">stream<span class="fw-light">.html</span></h1>
+        <p class="home-description lead fw-normal m-0">Browser overlays for your stream. Choose a tool, make it yours, and copy its URL into OBS.</p>
+        <p class="home-motto small fw-semibold text-uppercase m-0">Simple is complicated enough.</p>
+      </div>
     </section>
-    <nav class="resources" aria-label="Stream tools" tabindex="0">
-      <a class="resource controller" href="./controller/index.html">
-        <i class="fa-solid fa-gamepad" aria-hidden="true"></i>
-        <h2>Controller</h2>
-        <p>Show gamepad or keyboard input with your favorite controller skin.</p>
+
+    <nav class="home-tools col-12 col-md-6 d-flex flex-column overflow-y-auto" aria-label="Stream tools">
+      <a class="home-tool d-flex flex-column flex-fill flex-shrink-0 gap-3 p-4 p-lg-5 text-white has-background-cover has-overlay bg-pos-top"
+        href="./controller/index.html" style="background-image: url('./controller/prev.jpg');" aria-label="Configure Controller">
+        <div class="overlay" aria-hidden="true"></div>
+        <div class="home-tool-top d-flex align-items-center justify-content-between gap-3">
+          <span class="small fw-semibold text-uppercase">01 / Input</span>
+          <i class="fa-solid fa-gamepad text-large lh-1 m-0" aria-hidden="true"></i>
+        </div>
+        <div class="home-tool-info d-grid gap-2 my-auto">
+          <h2 class="fs-1 fw-medium m-0">Controller</h2>
+          <p class="text-wrap m-0">Gamepad or keyboard. Four skins. Every input on screen.</p>
+        </div>
+        <span class="home-tool-action btn btn-outline-light btn-sm rounded-0 d-inline-flex align-self-end align-items-center gap-2 px-3 py-2 fw-semibold">
+          <span data-home-cta>Configure</span> <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+        </span>
       </a>
-      <a class="resource popup" href="./popup/index.html">
-        <i class="fa-solid fa-comment" aria-hidden="true"></i>
-        <h2>Social popup</h2>
-        <p>Bring your social accounts on screen with animated icons and handles.</p>
+      <a class="home-tool d-flex flex-column flex-fill flex-shrink-0 gap-3 p-4 p-lg-5 text-white has-background-cover has-overlay bg-pos-top"
+        href="./popup/index.html" style="background-image: url('./popup/prev.jpg');" aria-label="Configure Social popup">
+        <div class="overlay" aria-hidden="true"></div>
+        <div class="home-tool-top d-flex align-items-center justify-content-between gap-3">
+          <span class="small fw-semibold text-uppercase">02 / Social</span>
+          <i class="fa-solid fa-comment text-large lh-1 m-0" aria-hidden="true"></i>
+        </div>
+        <div class="home-tool-info d-grid gap-2 my-auto">
+          <h2 class="fs-1 fw-medium m-0">Social popup</h2>
+          <p class="text-wrap m-0">Your accounts, one animated popup at a time. Pick from 91 platforms.</p>
+        </div>
+        <span class="home-tool-action btn btn-outline-light btn-sm rounded-0 d-inline-flex align-self-end align-items-center gap-2 px-3 py-2 fw-semibold">
+          <span data-home-cta>Configure</span> <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+        </span>
       </a>
-      <a class="resource main-scene" href="./main/index.html">
-        <i class="fa-solid fa-clapperboard" aria-hidden="true"></i>
-        <h2>Main scene</h2>
-        <p>Starting, BRB, ending, and intermission scenes with your branding.</p>
+      <a class="home-tool d-flex flex-column flex-fill flex-shrink-0 gap-3 p-4 p-lg-5 text-white has-background-cover has-overlay bg-pos-top"
+        href="./main/index.html" style="background-image: url('./main/prev.jpg');" aria-label="Configure Main scene">
+        <div class="overlay" aria-hidden="true"></div>
+        <div class="home-tool-top d-flex align-items-center justify-content-between gap-3">
+          <span class="small fw-semibold text-uppercase">03 / Scenes</span>
+          <i class="fa-solid fa-clapperboard text-large lh-1 m-0" aria-hidden="true"></i>
+        </div>
+        <div class="home-tool-info d-grid gap-2 my-auto">
+          <h2 class="fs-1 fw-medium m-0">Main scene</h2>
+          <p class="text-wrap m-0">Starting, BRB, ending, and intermission. Make each moment yours.</p>
+        </div>
+        <span class="home-tool-action btn btn-outline-light btn-sm rounded-0 d-inline-flex align-self-end align-items-center gap-2 px-3 py-2 fw-semibold">
+          <span data-home-cta>Configure</span> <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+        </span>
       </a>
     </nav>
   </main>
-  <footer>&copy; 2026, Made with <i class="fa-solid fa-heart" role="img" aria-label="love"></i> by <a href="https://byuwur.co" target="_blank" rel="noopener">BONYUR @byUwUr</a></footer>
+  <footer class="home-footer d-flex align-items-center justify-content-center small text-center border-top border-dark px-3 py-3">
+    <p class="m-0">&copy; <span id="year-txt">2026</span>, Made with <i class="fa-solid fa-heart" role="img" aria-label="love"></i> by <a class="link-light" href="https://byuwur.co" target="_blank" rel="noopener">BONYUR @byUwUr</a></p>
+  </footer>
+
+  <script>
+    document.querySelectorAll(".home-tool").forEach((card) => {
+      card.querySelector("[data-home-cta]").textContent = byCommon.randomCTAMessage();
+      card.querySelector(".overlay").style.background = byCommon.randomAccentColor({ tone: "dark", gradient: true, angle: 180 });
+    });
+    document.getElementById("year-txt").textContent = new Date().getFullYear();
+  </script>
+  <style>
+    .stream-home a:hover,.stream-home a:hover *{text-decoration:none!important}.home-intro-top img{width:4rem;height:4rem}.home-tool>.overlay{box-shadow:inset 0 0 2.5rem #0009,inset 0 0 0 .0625rem #ffffff20;opacity:.8;transition:opacity .2s!important}.home-tool-action,.home-tool-action i{transition:transform .2s!important}.home-tool:focus-visible>.overlay,.home-tool:hover>.overlay{opacity:.9}.home-tool:focus-visible .home-tool-action,.home-tool:hover .home-tool-action{transform:translateY(-.15rem)}.home-tool:focus-visible .home-tool-action i,.home-tool:hover .home-tool-action i{transform:translateX(.25rem)}.home-tool:focus-visible{outline:currentColor solid .125rem;outline-offset:-0.375rem}@media (min-width:48rem){.stream-home body{height:100dvh}}@media (max-width:47.99rem){.home-intro{min-height:32rem}}@media (prefers-reduced-motion:reduce){.home-tool-action,.home-tool-action i,.home-tool>.overlay{transition:none!important}.home-tool-action,.home-tool-action i{transform:none!important}}
+  </style>
 </body>
+
 </html>
