@@ -1,0 +1,207 @@
+html {
+  font-size: 16px;
+}
+body {
+  font-size: 1rem;
+}
+.bywr-configurator ::selection {
+  color: #fff;
+  background: var(--primary-color);
+}
+
+/* Configurator themes. */
+.bywr-configurator {
+  --secondary-color: #000;
+  --bs-border-radius: 0;
+  --bs-border-radius-sm: 0;
+  --bs-border-radius-lg: 0;
+  --preview-grid-a: #ddd;
+  --preview-grid-b: #eee;
+}
+.bywr-configurator[data-bs-theme="dark"] {
+  --bs-body-bg: #111;
+  --bs-body-bg-rgb: 17, 17, 17;
+  --bs-secondary-bg: #242424;
+  --bs-secondary-bg-rgb: 36, 36, 36;
+  --bs-tertiary-bg: #181818;
+  --bs-tertiary-bg-rgb: 24, 24, 24;
+  --bs-border-color: #555;
+  --preview-grid-a: #202020;
+  --preview-grid-b: #292929;
+}
+.bywr-configurator body {
+  font-family: Archivo, system-ui, sans-serif;
+  font-weight: 400;
+}
+.bywr-configurator :is(.preview-panel, .config-footer) a:hover,
+.bywr-configurator :is(.preview-panel, .config-footer) a:hover * {
+  color: var(--primary-foreground) !important;
+}
+.bywr-configurator .dropdown-item.active {
+  color: var(--light-color);
+  background-color: var(--primary-color);
+}
+.bywr-configurator .theme-toggle::after {
+  border-radius: 0;
+}
+.bywr-configurator .pickr .pcr-button {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0;
+}
+.bywr-configurator .pcr-app {
+  color: var(--bs-body-color);
+  background: var(--bs-body-bg);
+  border: 1px solid var(--bs-border-color);
+  border-radius: 0;
+}
+.bywr-configurator .pcr-app .pcr-interaction :is(.pcr-save, .pcr-type.active) {
+  color: var(--light-color);
+  background: var(--primary-color);
+  border-radius: 0;
+}
+.bywr-configurator :is(.setup-layout, .settings-panel, .preview-panel, .form-control, .form-select) {
+  transition:
+    background-color 0.15s,
+    border-color 0.15s !important;
+}
+.bywr-configurator :is(.form-control, .form-select, .form-check-input):focus {
+  border-color: var(--primary-foreground);
+  box-shadow: 0 0 0 0.2rem color-mix(in srgb, var(--primary-foreground) 25%, transparent) !important;
+}
+.bywr-configurator .url-toolbar img,
+.bywr-configurator .config-help .modal-header img {
+  width: 2.25rem;
+  height: 2.25rem;
+  object-fit: contain;
+}
+.bywr-configurator .config-help ol {
+  list-style: decimal;
+  padding-left: 1.5rem;
+}
+.bywr-configurator .config-help ol li {
+  margin-bottom: 0.75rem;
+}
+
+/* Settings, ordered entries, and live preview. */
+.bywr-configurator .settings-panel {
+  min-width: 20rem;
+  scrollbar-color: var(--bs-border-color) var(--bs-tertiary-bg);
+  scrollbar-width: thin;
+}
+.bywr-configurator .settings-panel fieldset {
+  min-width: 0;
+}
+.bywr-configurator .settings-panel fieldset > :not(legend) {
+  clear: both;
+}
+.bywr-configurator .settings-panel .accordion-button {
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  background: transparent;
+  box-shadow: none;
+}
+.bywr-configurator .settings-panel .accordion-button::after {
+  width: 0.5rem;
+  height: 0.5rem;
+  margin-right: 0.25rem;
+  border-right: 1px solid currentColor;
+  border-bottom: 1px solid currentColor;
+  background-image: none;
+  transform: rotate(45deg);
+}
+.bywr-configurator .settings-panel .accordion-button:not(.collapsed)::after {
+  transform: rotate(-135deg);
+}
+.bywr-configurator .settings-panel .accordion-button:focus-visible {
+  outline: 0.125rem solid var(--primary-foreground);
+  outline-offset: 0.125rem;
+}
+.bywr-configurator .field-caption {
+  font-size: 0.875rem;
+}
+.bywr-configurator .form-switch .form-check-input {
+  width: 2.75rem;
+  height: 1.5rem;
+  margin: 0;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+.bywr-configurator .entry-row .form-select {
+  min-width: 0;
+  flex-basis: 0;
+}
+.bywr-configurator .preview-panel {
+  width: 0;
+  flex-basis: 0;
+  flex-grow: 1;
+  min-width: 0;
+}
+/* The checkerboard shows transparency; the iframe keeps the overlay's own colors. */
+.bywr-configurator #preview-stage {
+  background-image: conic-gradient(from 90deg, var(--preview-grid-b) 25%, var(--preview-grid-a) 0 50%, var(--preview-grid-b) 0 75%, var(--preview-grid-a) 0);
+  background-size: 32px 32px;
+}
+.bywr-configurator #overlay-preview {
+  width: 100%;
+  height: 100%;
+  color-scheme: light;
+  background: transparent;
+}
+/* Raw controller readings belong to the mapping editor, not the overlay skins. */
+.bywr-configurator .raw-outputs ul {
+  padding: 0;
+}
+.bywr-configurator .raw-outputs li {
+  display: inline-block;
+  position: relative;
+  min-width: 3rem;
+  margin: 0 0.25rem 0.25rem 0;
+  padding: 1.5rem 0.5rem 0.5rem;
+  border: 1px solid transparent;
+  color: var(--light-color);
+  background: var(--primary-color);
+}
+.bywr-configurator .raw-outputs li::before {
+  content: attr(data-shortname);
+  position: absolute;
+  top: 0.25rem;
+  left: 0.5rem;
+  font-size: 0.75rem;
+}
+.bywr-configurator .raw-outputs li.disabled {
+  color: #ccc;
+  background: #333;
+  border-color: #777;
+  border-style: dashed;
+}
+/* SPA.php accessibility controls stay above the footer. */
+.bywr-configurator #bywr-accessibility {
+  top: auto;
+  bottom: 1rem;
+  flex-direction: column-reverse;
+}
+.bywr-configurator #bywr-accessibility-buttons {
+  max-height: 65vh;
+  overflow-y: auto;
+  flex-wrap: nowrap;
+}
+.bywr-configurator #bywr-accessibility a {
+  background-color: var(--primary-color);
+}
+@media (max-width: 48rem) {
+  .bywr-configurator .settings-panel,
+  .bywr-configurator .preview-panel {
+    height: auto !important;
+    min-width: 0;
+  }
+  .bywr-configurator .settings-panel {
+    overflow-y: visible !important;
+  }
+  .bywr-configurator .preview-panel {
+    min-height: 15rem;
+    width: 100%;
+    flex: none;
+  }
+}
