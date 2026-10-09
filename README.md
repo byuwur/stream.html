@@ -45,7 +45,7 @@ Configurators and animated overlays need internet for CDN libraries, fonts, the 
 | Popup renderer      | Native DOM APIs, GSAP, MorphSVG, and Font Awesome brand icons.         |
 | Main renderer       | Native DOM APIs, GSAP, and Font Awesome brand icons.                   |
 
-CDN imports use `byuwur/spa.php@v19.4` through jsDelivr, with separate script tags in dependency order. jQuery belongs to the configurator; resource rendering does not use it.
+CDN imports use `byuwur/spa.js@v19.4` through jsDelivr, with separate script tags in dependency order. jQuery belongs to the configurator; resource rendering does not use it.
 
 ### Editing an existing URL
 
