@@ -2,7 +2,7 @@
 <!-- A working base for your next overlay, with example fields and a live preview.
      Copy this HTML into your resource folder.
      Replace the embedded demo CSS/JS with your resource's own files, set shared imports to ../,
-     and use configureResource(resource, editor) here only if custom editor controls are needed. -->
+     and use byConfigureResource(resource, editor) here only if custom editor controls are needed. -->
 <html lang="en" class="bywr-configurator" data-tool="template">
 
 <head>
@@ -93,8 +93,8 @@
           settings[name] = number;
         } else settings[name] = value;
       }
-      document.dispatchEvent(new CustomEvent("resource-ready", { detail: { settings, parameterRules } }));
-      if (!streamOverlay) return;
+      window.byStreamResource = { settings, parameterRules };
+      if (!byStreamOverlay) return;
       const preview = document.getElementById("demo-preview");
       document.getElementById("demo-message").textContent = settings.message;
       preview.style.setProperty("--demo-size", settings.fontSizeRem + "rem");
