@@ -81,6 +81,201 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  // Ordered account and schedule editors
+
+  // Repeated in Popup and Main to avoid a platform file. Keep all three lists in sync.
+  const configuratorPlatforms = {
+    "500px": "500px",
+    artstation: "ArtStation",
+    bandcamp: "Bandcamp",
+    behance: "Behance",
+    bilibili: "Bilibili",
+    bitbucket: "Bitbucket",
+    blogger: "Blogger",
+    bluesky: "Bluesky",
+    codepen: "CodePen",
+    dailymotion: "Dailymotion",
+    deezer: "Deezer",
+    delicious: "Delicious",
+    dev: "DEV Community",
+    deviantart: "DeviantArt",
+    digg: "Digg",
+    discord: "Discord",
+    discourse: "Discourse",
+    dribbble: "Dribbble",
+    ello: "Ello",
+    facebook: "Facebook",
+    figma: "Figma",
+    flickr: "Flickr",
+    foursquare: "Foursquare",
+    github: "GitHub",
+    gitlab: "GitLab",
+    goodreads: "Goodreads",
+    "google-scholar": "Google Scholar",
+    "google-plus": "Google+",
+    guilded: "Guilded",
+    "hacker-news": "Hacker News",
+    hashnode: "Hashnode",
+    houzz: "Houzz",
+    instagram: "Instagram",
+    itunes: "iTunes",
+    keybase: "Keybase",
+    "ko-fi": "Ko-fi",
+    lastfm: "Last.fm",
+    letterboxd: "Letterboxd",
+    line: "LINE",
+    linkedin: "LinkedIn",
+    mastodon: "Mastodon",
+    medium: "Medium",
+    meetup: "Meetup",
+    mixcloud: "Mixcloud",
+    mixer: "Mixer",
+    napster: "Napster",
+    odnoklassniki: "Odnoklassniki",
+    orcid: "ORCID",
+    patreon: "Patreon",
+    periscope: "Periscope",
+    pinterest: "Pinterest",
+    pixiv: "pixiv",
+    "product-hunt": "Product Hunt",
+    qq: "QQ",
+    quora: "Quora",
+    ravelry: "Ravelry",
+    reddit: "Reddit",
+    renren: "Renren",
+    researchgate: "ResearchGate",
+    "signal-messenger": "Signal",
+    skype: "Skype",
+    slack: "Slack",
+    snapchat: "Snapchat",
+    soundcloud: "SoundCloud",
+    spotify: "Spotify",
+    "stack-overflow": "Stack Overflow",
+    steam: "Steam",
+    strava: "Strava",
+    stumbleupon: "StumbleUpon",
+    telegram: "Telegram",
+    "tencent-weibo": "Tencent Weibo",
+    threads: "Threads",
+    tiktok: "TikTok",
+    tumblr: "Tumblr",
+    twitch: "Twitch",
+    twitter: "Twitter",
+    unsplash: "Unsplash",
+    viadeo: "Viadeo",
+    viber: "Viber",
+    vimeo: "Vimeo",
+    vine: "Vine",
+    vk: "VK",
+    weixin: "WeChat",
+    weibo: "Weibo",
+    whatsapp: "WhatsApp",
+    "x-twitter": "X",
+    xing: "XING",
+    yammer: "Yammer",
+    yelp: "Yelp",
+    youtube: "YouTube",
+    zhihu: "Zhihu"
+  };
+
+  /**
+   * Edits an ordered list; the resource validates entries and the configurator owns URL generation.
+   * @param {string} name Hidden form field holding the serialized list.
+   * @param {Array<Object>} entries Initial entries, restored on Reset.
+   * @param {Object} options Choice labels/key, text field key/label pairs, new entry defaults, and row limit.
+   */
+  function initEntryEditor(name, entries, { choices, choiceKey, textFields, newEntry, limit = 100 }) {
+    const jqOutput = $(form.elements[name]);
+    const jqSection = jqOutput.closest("fieldset");
+    const jqEditor = jqSection.find(".entry-list");
+    const jqAdd = jqSection.find(".add-entry");
+    const initial = entries.map((entry) => ({ ...entry }));
+    jqOutput.prop("defaultValue", JSON.stringify(initial));
+
+    function updateIcon(jqRow) {
+      const choice = jqRow.find("select").val();
+      jqRow.find(".entry-icon").attr("class", "entry-icon text-primary fa-fw " + (choiceKey === "platform" ? "fa-brands fa-" + choice : "fa-solid fa-calendar-days"));
+    }
+    function addRow(entry) {
+      const jqRow = $('<div class="entry-row p-2 mb-2 border border-secondary-subtle bg-body-tertiary">').html(`
+        <div class="d-flex align-items-center gap-1 mb-1">
+          <i class="entry-icon" aria-hidden="true"></i>
+          <select class="form-select rounded-0 bg-body-secondary border-secondary-subtle flex-grow-1" aria-label="${choiceKey === "platform" ? "Platform" : "Day"}"></select>
+          <div class="btn-group flex-shrink-0" role="group" aria-label="Entry controls">
+            <button type="button" class="btn btn-sm btn-outline-primary" data-action="up" aria-label="Move entry up" title="Move up"><i class="fa-solid fa-arrow-up" aria-hidden="true"></i></button>
+            <button type="button" class="btn btn-sm btn-outline-primary" data-action="down" aria-label="Move entry down" title="Move down"><i class="fa-solid fa-arrow-down" aria-hidden="true"></i></button>
+            <button type="button" class="btn btn-sm btn-outline-primary" data-action="remove" aria-label="Remove entry" title="Remove"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
+          </div>
+        </div>`);
+      const jqSelect = jqRow.find("select");
+      Object.entries(choices).forEach(([value, title]) => jqSelect.append(new Option(title, value)));
+      jqSelect.val(entry[choiceKey]);
+      updateIcon(jqRow);
+      textFields.forEach(([key, title]) => {
+        $("<input>", {
+          type: "text",
+          maxlength: 160,
+          "data-field": key,
+          "aria-label": title,
+          placeholder: title,
+          class: "form-control rounded-0 bg-body-secondary border-secondary-subtle mb-1"
+        })
+          .val(entry[key])
+          .appendTo(jqRow);
+      });
+      return jqRow.appendTo(jqEditor);
+    }
+    // Serialize the current row order for validation and URL generation.
+    function sync() {
+      const jqRows = jqEditor.children();
+      const values = jqRows
+        .map(function (index) {
+          const jqRow = $(this);
+          jqRow.find('[data-action="up"]').prop("disabled", index === 0);
+          jqRow.find('[data-action="down"]').prop("disabled", index === jqRows.length - 1);
+          const entry = { [choiceKey]: jqRow.find("select").val() };
+          jqRow.find("input").each(function () {
+            entry[$(this).data("field")] = $(this).val();
+          });
+          return entry;
+        })
+        .get();
+      jqOutput.val(JSON.stringify(values));
+      jqEditor.find("input").each(function () {
+        this.setCustomValidity("");
+      });
+      jqEditor.find("input")[0]?.setCustomValidity(validConfiguratorParameter(name, jqOutput.val()) ? "" : "List is too large. Shorten text or remove entries.");
+      jqAdd.prop("disabled", jqRows.length >= limit);
+    }
+    function reset() {
+      jqEditor.empty();
+      initial.forEach(addRow);
+      sync();
+    }
+    jqEditor
+      .on("input change", "input, select", function () {
+        if ($(this).is("select")) updateIcon($(this).closest(".entry-row"));
+        sync();
+      })
+      .on("click", "[data-action]", function () {
+        const jqRow = $(this).closest(".entry-row");
+        const action = $(this).data("action");
+        if (action === "remove") jqRow.remove();
+        else if (action === "up") jqRow.insertBefore(jqRow.prev());
+        else jqRow.insertAfter(jqRow.next());
+        sync();
+        generateURL();
+      });
+    jqAdd.on("click", () => {
+      if (jqEditor.children().length >= limit) return;
+      addRow(newEntry).find("select").trigger("focus");
+      sync();
+      generateURL();
+    });
+    $(form).on("reset", () => setTimeout(reset, 0));
+    reset();
+  }
+
   // Theme, accessibility, and colors
 
   /** Theme and accessibility behavior belong to SPA.php's byCommon. */
@@ -448,7 +643,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       });
 
-      const editor = { generateURL };
+      const editor = { generateURL, initEntryEditor, platforms: configuratorPlatforms };
       const { parameterDetails = {}, initResourceHelp } = window.byConfigureResource?.(resource, editor) || {};
       initTheme();
       initTools();
