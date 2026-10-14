@@ -131,6 +131,7 @@
           href: new URL(`${tool.id}/${location.protocol === "file:" ? "index.html" : ""}`, byConfigurator.catalog.root).href
         }).css({
           backgroundImage: `url("${new URL(`${tool.id}/prev.jpg`, byConfigurator.catalog.root).href}")`,
+          viewTransitionName: `tool-${tool.id}`
         });
         jqCard.find("h2").text(tool.name);
         jqCard.find("p").text(tool.description);
@@ -146,7 +147,7 @@
       // ==========
 
       /** Move and resize matching cards; read the latest inputs when overlapping transitions update. */
-      function filterTools() {
+      async function filterTools(animate = true) {
         const update = () => {
           const query = $("#tool-search").val().trim().toLocaleLowerCase();
           const category = jqCategory.val();
@@ -161,7 +162,13 @@
           $("#catalog-empty").prop("hidden", count > 0);
           jqGallery.attr("data-result-count", count).scrollTop(0);
         };
-        update();
+        if (!animate || !document.startViewTransition || !CSS.supports("view-transition-group", "contain") || $("html").hasClass("no-motion")) return update();
+        try {
+          await document.startViewTransition(update).ready;
+        } catch (error) {
+          // Rapid typing can replace a transition before its snapshots are ready.
+          if (error.name !== "AbortError") throw error;
+        }
       }
 
       /** Keep category labels as text; Font Awesome icons are declared on the native options. */
@@ -224,6 +231,8 @@
 
     .home-tools {
       display: grid;
+      view-transition-name: tools;
+      view-transition-group: contain;
       grid-template-columns: minmax(0, 1fr);
       grid-auto-rows: max-content;
       align-content: start;
@@ -333,6 +342,55 @@
 
     .home-copy {
       animation-delay: 0.08s;
+    }
+
+    /* Capture only the gallery, keep the filters interactive, and clip moving cards. */
+    .stream-home {
+      view-transition-name: none;
+    }
+
+    .stream-home::view-transition {
+      pointer-events: none;
+    }
+
+    .stream-home::view-transition-group-children(tools) {
+      overflow: clip;
+    }
+
+    .stream-home::view-transition-group(*) {
+      animation-duration: 0.3s !important;
+      animation-timing-function: ease;
+    }
+
+    .stream-home::view-transition-old(*) {
+      display: none;
+    }
+
+    .stream-home::view-transition-new(*) {
+      animation: none;
+    }
+
+    .stream-home::view-transition-new(*):only-child {
+      animation: home-tool-enter 0.3s ease both;
+    }
+
+    .stream-home::view-transition-old(*):only-child {
+      display: block;
+      animation: home-tool-exit 0.3s ease both;
+    }
+
+    @keyframes home-tool-enter {
+      from {
+        opacity: 0;
+        transform: translateY(0.75rem) scale(0.97);
+      }
+    }
+
+    @keyframes home-tool-exit {
+      to {
+        opacity: 0;
+        transform: translateY(-0.75rem) scale(0.97);
+      }
     }
 
     .stream-home a:hover,

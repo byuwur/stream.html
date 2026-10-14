@@ -225,17 +225,9 @@ Validate settings, encode query parameters, render text safely, and preserve hos
 
 ### Homepage and share previews
 
-The landing generates ready cards from the shared catalog and one HTML template. Folder IDs derive links and prev.jpg; missing previews leave a blank background. The introduction takes one third of desktop width; mobile uses one column.
+The homepage reuses Bootstrap, Select2, Font Awesome, and SPA common styles. On desktop, the introduction and filters occupy one third of the width. The gallery fills the rest: one result fills it, two or three stack in full-width rows, four form quadrants, and five show two above three. Six or more use the scrolling two-column layout, with cards sized to 30% of the viewport height and a minimum height for readability. Short viewports allow scrolling to keep content visible. Search and icon-backed categories stay at the bottom of the introduction; mobile uses a single column. Filtering uses native View Transitions with nested groups to move and resize cards and animate their appearance and disappearance within the gallery. Browsers without those features filter immediately; the explicit motion toggle disables transitions. Resource backgrounds use each folder's `prev.jpg`. `byCommon.randomCTAMessage()` picks the button text and `byCommon.randomAccentColor({ tone: "dark", gradient: true, angle: 180 })` supplies the dark vertical overlays.
 
-Search and icon-backed categories filter the catalog, with the category selector on the left and Find your overlay... beside it. Menus adapt to the available viewport and filter-row width.
-
-One result fills the gallery, two or three stack in full-width rows, four use quadrants, five use two above three, and six or more use a scrolling two-column grid. Short viewports allow scrolling.
-
-Titles and icons are larger; responsive padding, left alignment and wrapping keep content within each card.
-
-Hovering or focusing a card activates its action, nudges the text right, rotates the icon and blurs its preview by 0.25rem while retaining the tint.
-
-Animate.css provides brief entrance fades. The explicit motion toggle disables animation; the operating system preference does not change the requested presentation.
+`byConfigurator.catalog` in `configurator.js` owns tool names, descriptions, categories, icons, readiness, and display order. Its `availableTools` getter excludes entries with `ready: false`; the homepage and every configurator's searchable Select2 tool selector use that list. Adding or removing catalog entries updates the cards, overlay count, selectors, and grid on the next page load. Static hosting does not discover new folders automatically. Controller, Social popup, and Main scene lead the list; other stream essentials follow, then decorative and specialized tools. Categories filter by purpose: Scenes & cameras, Input & interaction, Time & planning, Branding & socials, and Text & information. Selectors show each tool's icon in results and the selected value, with category labels beneath results. Keep the empty `#tool-picker` select and `.home-link` logo in copied configurators; shared setup fills the choices and resolves navigation relative to that script. Logo and footer Home links use the site root on servers and the landing's explicit filename under `file://`.
 
 Sharing metadata uses the static root [prev.jpg](prev.jpg), currently 1920 × 1080. Resource pages use their own preview images. Update the image and its Open Graph/Twitter metadata when changing the presentation; the random browser styling does not generate a new share image.
 
