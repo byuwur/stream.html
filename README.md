@@ -233,6 +233,8 @@ One result fills the gallery, two or three stack in full-width rows, four use qu
 
 Titles and icons are larger; responsive padding, left alignment and wrapping keep content within each card.
 
+Hovering or focusing a card activates its action, nudges the text right, rotates the icon and blurs its preview by 0.25rem while retaining the tint.
+
 Sharing metadata uses the static root [prev.jpg](prev.jpg), currently 1920 × 1080. Resource pages use their own preview images. Update the image and its Open Graph/Twitter metadata when changing the presentation; the random browser styling does not generate a new share image.
 
 ## License
