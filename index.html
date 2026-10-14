@@ -241,6 +241,20 @@
       min-width: 0;
     }
 
+    .home-tool-title {
+      font-size: clamp(1.75rem, 2.5vw, 2.5rem);
+      line-height: 1.2;
+    }
+
+    .home-tool-top>i {
+      font-size: 2.25rem !important;
+    }
+
+    .home-tool-info p {
+      font-size: 0.875rem;
+      line-height: 1.5;
+    }
+
     .catalog-filter {
       grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
     }
@@ -372,6 +386,12 @@
       .home-tool {
         min-height: max(13.5rem, 30vh);
         min-height: max(13.5rem, 30dvh);
+      }
+    }
+
+    @media (min-width: 75rem) {
+      .home-tool {
+        padding: 2.25rem !important;
       }
     }
 
