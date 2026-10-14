@@ -56,7 +56,7 @@ CDN imports use `byuwur/spa.js@v20.1` through jsDelivr. The landing and configur
 - Bare folder and `index.html` URLs open the configurator; URLs with query settings and no hash render the overlay. No `overlay` flag is needed.
 - To edit an existing overlay URL, append `#configure`, keeping its settings. Help hashes also open the configurator.
 - Both modes use the same `index.html`; no redirect is needed. Replace old `controller.html`, `popup.html`, or `main.html` filenames in OBS URLs with `index.html`, keeping their parameters.
-- Navigation retains explicit entry filenames.
+- Hosted navigation and generated overlay URLs use directory paths, such as `controller/?player=1`. Downloaded-file URLs retain `index.html`.
 - **Reset** restores the settings loaded when the form opened. Reopen the bare folder URL for bundled defaults.
 
 Settings live in the URL, with no upload or account storage. Use public display information only. The URL fragment opens the editor and help; it is omitted from generated overlay URLs.

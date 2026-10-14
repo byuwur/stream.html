@@ -263,7 +263,7 @@
     if (!form) return;
     const fields = $(form).find("[name]").get();
     // Servers resolve directory URLs to the landing page; downloaded files need its filename.
-    const homeURL = new URL("index.html", byConfigurator.catalog.root).href;
+    const homeURL = new URL(location.protocol === "file:" ? "index.html" : ".", byConfigurator.catalog.root).href;
     const { settings, fields: parameterRules } = resource;
     let pendingPreview;
 
@@ -1095,7 +1095,7 @@
       jqSelect.on("change", () => {
         const value = jqSelect.val();
         if (value && value !== current) {
-          location.assign(new URL(`${value}/index.html`, byConfigurator.catalog.root).href);
+          location.assign(new URL(`${value}/${location.protocol === "file:" ? "index.html" : ""}`, byConfigurator.catalog.root).href);
         }
       });
     }
@@ -1153,6 +1153,7 @@
         .filter(([name]) => Object.hasOwn(parameterRules, name))
         .map(([name, value]) => [name, typeof value === "object" ? JSON.stringify(value) : String(value)]);
       const url = new URL(location.href);
+      if (url.protocol !== "file:") url.pathname = url.pathname.replace(/\/index\.html$/, "/");
       url.hash = "";
       url.search = new URLSearchParams(values).toString();
       return url;
