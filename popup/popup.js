@@ -324,7 +324,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /** Render safe text and play the elastic square, handle, and icon sequence. */
-  function renderPopup() {
+  async function renderPopup() {
     const { accounts, mode, scale } = settings;
     const popup = document.getElementById("socialHolder");
     if (!accounts.length) return popup.remove();
@@ -347,6 +347,8 @@ document.addEventListener("DOMContentLoaded", () => {
       icon.setAttribute("aria-hidden", "true");
       icons.append(icon);
     }
+
+    await byFont.ready(settings.primaryFont, settings.fontWeight, names.textContent);
     gsap.registerPlugin(MorphSVGPlugin);
     const square = document.getElementById("square");
     const squarePath = square.getAttribute("d");
@@ -355,16 +357,19 @@ document.addEventListener("DOMContentLoaded", () => {
     const incoming = mode === "right" ? "#bigLeft" : "#bigRight";
     const littleOut = mode === "right" ? "#littleRight" : "#littleLeft";
     const littleIn = mode === "right" ? "#littleLeft" : "#littleRight";
-    const textWidth = names.clientWidth;
-    const timeline = gsap.timeline({ repeat: -1, repeatDelay: settings.inbetweenPauseTime });
+    const textWidth = () => names.clientWidth;
+    const timeline = gsap.timeline({ repeat: -1, repeatRefresh: true, repeatDelay: settings.inbetweenPauseTime });
 
-    // Reveal the icon first, stretch its square across the text, then settle both.
+    // Keep the original loop positions when font-dependent measurements refresh.
     timeline
+      .set([names, icons], { y: 0 }, 0)
+      .set("#holder", { y: 0 }, 0)
+      .set("#iconBox, #iconHolder", { x: 0, y: 0 }, 0)
       .set(popup, { autoAlpha: 1 }, 0.3)
       .fromTo("#iconBox", { opacity: 0 }, { duration: 0.6, opacity: 1 })
       .to("#iconHolder", { duration: 0.1, x: direction * 20 })
       .to(square, { duration: 0.2, morphSVG: outgoing }, "-=0.1")
-      .to("#iconBox", { duration: 0.2, x: direction * textWidth }, "-=0.2")
+      .to("#iconBox", { duration: 0.2, x: () => direction * textWidth() }, "-=0.2")
       .to("#iconHolder", { duration: 0.1, x: 0 })
       .to("#iconHolder", { duration: 0.1, x: -direction * 20 })
       .to(square, { duration: 0.2, morphSVG: incoming }, "-=0.1")
@@ -399,7 +404,7 @@ document.addEventListener("DOMContentLoaded", () => {
       .to("#iconBox", { duration: 0.2, x: -direction * 30 }, "-=0.2")
       .to("#iconHolder", { duration: 0.1, x: 0 })
       .to(square, { duration: 0.2, morphSVG: outgoing }, "-=0.1")
-      .to("#iconBox", { duration: 0.3, x: direction * (textWidth + 240) }, "-=0.2")
+      .to("#iconBox", { duration: 0.3, x: () => direction * (textWidth() + 240) }, "-=0.2")
       .to("#textBox", { duration: 0.2, opacity: 0, scaleX: 0, transformOrigin: `${mode} center` }, "-=0.3")
       .set(popup, { autoAlpha: 0 });
 
