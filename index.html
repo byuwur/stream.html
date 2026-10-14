@@ -326,7 +326,39 @@
         min-height: max(15rem, 30dvh);
       }
 
+      /* Few results fill the gallery; intrinsic row sizing keeps longer content readable. */
+      .home-tools:is([data-result-count="1"], [data-result-count="2"], [data-result-count="3"], [data-result-count="4"], [data-result-count="5"]) {
+        grid-template-rows: repeat(2, minmax(max-content, 1fr));
+        align-content: stretch;
+      }
 
+      .home-tools:is([data-result-count="1"], [data-result-count="2"], [data-result-count="3"], [data-result-count="4"], [data-result-count="5"]) .home-tool {
+        min-height: 0;
+      }
+
+      .home-tools:is([data-result-count="1"], [data-result-count="2"], [data-result-count="3"]) {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .home-tools[data-result-count="1"] {
+        grid-template-rows: minmax(max-content, 1fr);
+      }
+
+      .home-tools[data-result-count="3"] {
+        grid-template-rows: repeat(3, minmax(max-content, 1fr));
+      }
+
+      .home-tools[data-result-count="5"] {
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+      }
+
+      .home-tools[data-result-count="5"] .home-tool {
+        grid-column: span 2;
+      }
+
+      .home-tools[data-result-count="5"] .home-tool:is([data-result-index="1"], [data-result-index="2"]) {
+        grid-column: span 3;
+      }
     }
 
     @media (min-width: 48rem) and (max-width: 61.99rem) {

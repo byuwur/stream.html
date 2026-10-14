@@ -229,6 +229,8 @@ The landing generates ready cards from the shared catalog and one HTML template.
 
 Search and icon-backed categories filter the catalog, with the category selector on the left and Find your overlay... beside it. Menus adapt to the available viewport and filter-row width.
 
+One result fills the gallery, two or three stack in full-width rows, four use quadrants, five use two above three, and six or more use a scrolling two-column grid. Short viewports allow scrolling.
+
 Sharing metadata uses the static root [prev.jpg](prev.jpg), currently 1920 × 1080. Resource pages use their own preview images. Update the image and its Open Graph/Twitter metadata when changing the presentation; the random browser styling does not generate a new share image.
 
 ## License
