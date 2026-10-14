@@ -73,7 +73,7 @@
         description: "Gamepad or keyboard. Four skins. Every input on screen.",
         icon: "fa-gamepad",
         category: "interaction",
-        ready: false
+        ready: true
       },
       {
         id: "popup",
