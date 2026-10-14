@@ -409,7 +409,13 @@
         } else {
           control = $(/* HTML */ `<input class="form-control" />`).attr("type", field.type === "number" ? "number" : field.type === "switch" ? "checkbox" : ["entries", "mapping"].includes(field.type) ? "hidden" : "text");
           if (field.type === "number") control.attr("step", field.step || "any");
-          if (field.type === "switch") control.removeClass("form-control").addClass("form-check-input").attr({ value: field.checkedValue ?? 1, "data-unchecked-value": field.uncheckedValue ?? 0 });
+          if (field.type === "switch") {
+            label.addClass("form-switch ps-0");
+            control
+              .removeClass("form-control")
+              .addClass("form-check-input")
+              .attr({ role: "switch", value: field.checkedValue ?? 1, "data-unchecked-value": field.uncheckedValue ?? 0 });
+          }
         }
         if (field.type !== "switch") control.addClass("rounded-0 bg-body-secondary border-secondary-subtle");
         control.attr({ name, id: field.id || `field-${name}`, "data-title": field.label, "data-description": field.description || "" });

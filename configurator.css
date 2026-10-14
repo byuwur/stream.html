@@ -124,6 +124,13 @@ body {
 .bywr-configurator .field-caption {
   font-size: 0.875rem;
 }
+.bywr-configurator .form-switch .form-check-input {
+  width: 2.75rem;
+  height: 1.5rem;
+  margin: 0;
+  flex-shrink: 0;
+  cursor: pointer;
+}
 .bywr-configurator .entry-row .form-select {
   min-width: 0;
   flex-basis: 0;
