@@ -1075,6 +1075,23 @@
       const current = jqSelect.closest(".tool-switcher").data("tool");
       jqSelect.val(byConfigurator.catalog.availableTools.some((tool) => tool.id === current) ? current : "");
 
+      function toolOption(option) {
+        if (!option.id) return option.text;
+        const label = $(/* HTML */ `<span></span>`);
+        $(/* HTML */ `<i></i>`, { class: `fa-solid ${$(option.element).attr("data-icon")} fa-fw me-2`, "aria-hidden": "true" }).appendTo(label);
+        return label.append($(/* HTML */ `<span></span>`, { class: "tool-name", text: option.text }));
+      }
+      /** Keep categories visible without grouping away the homepage's priority order. */
+      function toolResult(option) {
+        const label = toolOption(option);
+        if (option.id) $(/* HTML */ `<small></small>`, { class: "tool-category", text: $(option.element).attr("data-category") }).appendTo(label);
+        return label;
+      }
+      initSelect2(jqSelect, {
+        placeholder: "Choose a tool",
+        templateResult: toolResult,
+        templateSelection: toolOption
+      });
       jqSelect.on("change", () => {
         const value = jqSelect.val();
         if (value && value !== current) {

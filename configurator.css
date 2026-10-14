@@ -277,3 +277,34 @@ body {
     flex: none;
   }
 }
+
+/* Toolbar tool navigation. */
+.bywr-configurator .tool-switcher {
+  width: 18rem;
+  max-width: calc(100vw - 4.5rem);
+}
+.bywr-configurator .tool-switcher :is(.form-select, .select2-selection--single) {
+  background: transparent;
+  color: #fff;
+  border-color: #ffffff80;
+}
+.bywr-configurator .tool-switcher :is(.select2-selection__rendered, .select2-selection__placeholder) {
+  color: #fff;
+}
+.bywr-configurator .tool-switcher .select2-selection__arrow b {
+  border-top-color: #fff;
+}
+.bywr-configurator .tool-switcher .select2-container--open .select2-selection__arrow b {
+  border-top-color: transparent;
+  border-bottom-color: #fff;
+}
+.bywr-configurator .tool-switcher option {
+  color: var(--bs-body-color);
+  background: var(--bs-secondary-bg);
+}
+.bywr-configurator .stream-select2-dropdown .tool-category {
+  display: block;
+  padding-left: 1.75rem;
+  font-size: 0.75rem;
+  opacity: 0.75;
+}
