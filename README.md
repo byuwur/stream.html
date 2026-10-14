@@ -235,6 +235,8 @@ Titles and icons are larger; responsive padding, left alignment and wrapping kee
 
 Hovering or focusing a card activates its action, nudges the text right, rotates the icon and blurs its preview by 0.25rem while retaining the tint.
 
+Animate.css provides brief entrance fades. The explicit motion toggle disables animation; the operating system preference does not change the requested presentation.
+
 Sharing metadata uses the static root [prev.jpg](prev.jpg), currently 1920 × 1080. Resource pages use their own preview images. Update the image and its Open Graph/Twitter metadata when changing the presentation; the random browser styling does not generate a new share image.
 
 ## License

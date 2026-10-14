@@ -36,6 +36,7 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.1/css/bootstrap.min.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.1/css/fontawesome.min.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.1/_common.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.1/css/animate.min.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.1/css/select2.min.css" />
   <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.1/js/jquery.min.js"></script>
   <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.1/_common.js" defer></script>
@@ -45,14 +46,14 @@
   <!-- ===== RESOURCE ===== -->
   <main class="home-layout row g-0 flex-md-nowrap flex-grow-1 overflow-hidden">
     <section class="home-intro col-12 col-md-4 d-flex flex-column gap-4 p-4 p-lg-5 overflow-y-auto" style="background: linear-gradient(180deg, var(--primary-color), var(--bywr-red-dark));" aria-labelledby="site-title">
-      <div class="home-intro-top d-flex align-items-center justify-content-between gap-3">
+      <div class="home-intro-top animate__animated animate__fadeIn d-flex align-items-center justify-content-between gap-3">
         <img class="object-fit-contain" src="https://byuwur.github.io/img/logo.png" alt="" />
         <a class="home-source btn btn-outline-light btn-sm rounded-0 d-inline-flex align-items-center gap-2 px-3 py-2" href="https://github.com/byuwur/stream.html" target="_blank" rel="noopener">
           <i class="fa-brands fa-github" aria-hidden="true"></i> GitHub
           <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i>
         </a>
       </div>
-      <div class="home-copy d-flex flex-column justify-content-center flex-grow-1 gap-3">
+      <div class="home-copy animate__animated animate__fadeIn d-flex flex-column justify-content-center flex-grow-1 gap-3">
         <p class="home-eyebrow small fw-semibold text-uppercase m-0">Free. Forever.</p>
         <h1 id="site-title" class="display-2 fw-medium lh-1 m-0">stream<span class="fw-light">.html</span></h1>
         <p class="home-description lead fw-normal m-0">
@@ -74,7 +75,7 @@
       </div>
     </section>
 
-    <nav class="home-tools col-12 col-md-8 overflow-y-auto" aria-label="Stream tools">
+    <nav class="home-tools animate__animated animate__fadeIn col-12 col-md-8 overflow-y-auto" aria-label="Stream tools">
       <p id="catalog-empty" class="p-4" role="status" hidden>No matching overlays.</p>
     </nav>
     <template id="home-tool-template">
@@ -320,6 +321,20 @@
     }
 
     /* ========== LANDING MOTION AND CARD INTERACTIONS ========== */
+    /* Keep brief fades enabled even when Animate.css applies its reduced-motion rule. */
+    .stream-home .animate__animated {
+      --animate-duration: 0.4s;
+      animation-duration: var(--animate-duration) !important;
+    }
+
+    .stream-home .home-tools {
+      --animate-duration: 0.24s;
+    }
+
+    .home-copy {
+      animation-delay: 0.08s;
+    }
+
     .stream-home a:hover,
     .stream-home a:hover * {
       text-decoration: none !important;
