@@ -5,7 +5,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>stream.html | Free OBS overlays</title>
-  <meta name="description" content="Free OBS browser overlays by BONYUR: controller input, animated social popups, and stream scenes. Configure, preview, and copy the URL into OBS." />
+  <meta name="description" content="Free OBS browser overlays by BONYUR: controller input, social popups, and main scenes. Configure, preview, and copy the URL into OBS." />
   <meta name="author" content="Andrés Trujillo [Mateus] byUwUr" />
   <meta name="robots" content="index, follow, max-image-preview:large" />
   <meta name="theme-color" content="#660000" />
@@ -16,7 +16,7 @@
   <meta property="og:site_name" content="stream.html" />
   <meta property="og:locale" content="en_US" />
   <meta property="og:title" content="stream.html | Free OBS overlays" />
-  <meta property="og:description" content="Free OBS browser overlays by BONYUR: controller input, animated social popups, and stream scenes. Configure, preview, and copy the URL into OBS." />
+  <meta property="og:description" content="Free OBS browser overlays by BONYUR: controller input, social popups, and main scenes. Configure, preview, and copy the URL into OBS." />
   <meta property="og:url" content="https://byuwur.github.io/stream.html" />
   <meta property="og:image" content="https://byuwur.github.io/stream.html/prev.jpg" />
   <meta property="og:image:type" content="image/jpeg" />
@@ -26,7 +26,7 @@
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:creator" content="@byUwUr" />
   <meta name="twitter:title" content="stream.html | Free OBS overlays" />
-  <meta name="twitter:description" content="Free OBS browser overlays by BONYUR: controller input, animated social popups, and stream scenes. Configure, preview, and copy the URL into OBS." />
+  <meta name="twitter:description" content="Free OBS browser overlays by BONYUR: controller input, social popups, and main scenes. Configure, preview, and copy the URL into OBS." />
   <meta name="twitter:image" content="https://byuwur.github.io/stream.html/prev.jpg" />
   <meta name="twitter:image:alt" content="stream.html by BONYUR: free OBS overlays for controller input, social popups, and stream scenes." />
 </head>
@@ -36,80 +36,58 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.1/css/bootstrap.min.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.1/css/fontawesome.min.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.1/_common.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.1/css/select2.min.css" />
   <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.1/js/jquery.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.1/_common.js"></script>
-  <script src="./configurator.js" defer></script> <!-- This <script> is loaded only for caching -->
+  <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.1/_common.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.1/js/select2.full.min.js" defer></script>
+  <script src="./configurator.js" defer></script>
+  <!-- Shared tool categories and icons. -->
   <!-- ===== RESOURCE ===== -->
-  <main class="row g-0 flex-md-nowrap flex-grow-1 overflow-hidden">
-    <section class="home-intro col-12 col-md-6 d-flex flex-column gap-4 p-4 p-lg-5 overflow-y-auto"
-      style="background: linear-gradient(180deg, var(--primary-color), var(--bywr-red-dark));" aria-labelledby="site-title">
+  <main class="home-layout row g-0 flex-md-nowrap flex-grow-1 overflow-hidden">
+    <section class="home-intro col-12 col-md-4 d-flex flex-column gap-4 p-4 p-lg-5 overflow-y-auto" style="background: linear-gradient(180deg, var(--primary-color), var(--bywr-red-dark));" aria-labelledby="site-title">
       <div class="home-intro-top d-flex align-items-center justify-content-between gap-3">
         <img class="object-fit-contain" src="https://byuwur.github.io/img/logo.png" alt="" />
-        <a class="home-source btn btn-outline-light btn-sm rounded-0 d-inline-flex align-items-center gap-2 px-3 py-2"
-          href="https://github.com/byuwur/stream.html" target="_blank" rel="noopener">
+        <a class="home-source btn btn-outline-light btn-sm rounded-0 d-inline-flex align-items-center gap-2 px-3 py-2" href="https://github.com/byuwur/stream.html" target="_blank" rel="noopener">
           <i class="fa-brands fa-github" aria-hidden="true"></i> GitHub
           <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i>
         </a>
       </div>
-      <div class="d-flex flex-column justify-content-center flex-grow-1 gap-3">
+      <div class="home-copy d-flex flex-column justify-content-center flex-grow-1 gap-3">
         <p class="home-eyebrow small fw-semibold text-uppercase m-0">Free. Forever.</p>
         <h1 id="site-title" class="display-2 fw-medium lh-1 m-0">stream<span class="fw-light">.html</span></h1>
-        <p class="home-description lead fw-normal m-0">Browser overlays for your stream. Choose a tool, make it yours, and copy its URL into OBS.</p>
+        <p class="home-description lead fw-normal m-0">
+          <span id="tool-count">Browser overlays</span> for your stream. Choose a tool, make it yours, and copy its URL into OBS.
+        </p>
         <p class="home-motto small fw-semibold text-uppercase m-0">Simple is complicated enough.</p>
       </div>
+
     </section>
 
-    <nav class="home-tools col-12 col-md-6 d-flex flex-column overflow-y-auto" aria-label="Stream tools">
-      <a class="home-tool d-flex flex-column flex-fill flex-shrink-0 gap-3 p-4 p-lg-5 text-white has-background-cover has-overlay bg-pos-top"
-        href="./controller/index.html" style="background-image: url('./controller/prev.jpg');" aria-label="Configure Controller">
-        <div class="overlay" aria-hidden="true"></div>
-        <div class="home-tool-top d-flex align-items-center justify-content-between gap-3">
-          <span class="small fw-semibold text-uppercase">01 | Input</span>
-          <i class="fa-solid fa-gamepad text-large lh-1 m-0" aria-hidden="true"></i>
-        </div>
-        <div class="home-tool-info d-grid gap-2 my-auto">
-          <h2 class="fs-1 fw-medium m-0">Controller</h2>
-          <p class="text-wrap m-0">Gamepad or keyboard. Four skins. Every input on screen.</p>
-        </div>
-        <span class="home-tool-action btn btn-outline-light btn-sm rounded-0 d-inline-flex align-self-end align-items-center gap-2 px-3 py-2 fw-semibold">
-          <span data-home-cta>Configure</span> <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
-        </span>
-      </a>
-      <a class="home-tool d-flex flex-column flex-fill flex-shrink-0 gap-3 p-4 p-lg-5 text-white has-background-cover has-overlay bg-pos-top"
-        href="./popup/index.html" style="background-image: url('./popup/prev.jpg');" aria-label="Configure Social popup">
-        <div class="overlay" aria-hidden="true"></div>
-        <div class="home-tool-top d-flex align-items-center justify-content-between gap-3">
-          <span class="small fw-semibold text-uppercase">02 | Social</span>
-          <i class="fa-solid fa-comment text-large lh-1 m-0" aria-hidden="true"></i>
-        </div>
-        <div class="home-tool-info d-grid gap-2 my-auto">
-          <h2 class="fs-1 fw-medium m-0">Social popup</h2>
-          <p class="text-wrap m-0">Your accounts, one animated popup at a time. Pick from 91 platforms.</p>
-        </div>
-        <span class="home-tool-action btn btn-outline-light btn-sm rounded-0 d-inline-flex align-self-end align-items-center gap-2 px-3 py-2 fw-semibold">
-          <span data-home-cta>Configure</span> <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
-        </span>
-      </a>
-      <a class="home-tool d-flex flex-column flex-fill flex-shrink-0 gap-3 p-4 p-lg-5 text-white has-background-cover has-overlay bg-pos-top"
-        href="./main/index.html" style="background-image: url('./main/prev.jpg');" aria-label="Configure Main scene">
-        <div class="overlay" aria-hidden="true"></div>
-        <div class="home-tool-top d-flex align-items-center justify-content-between gap-3">
-          <span class="small fw-semibold text-uppercase">03 | Scenes</span>
-          <i class="fa-solid fa-clapperboard text-large lh-1 m-0" aria-hidden="true"></i>
-        </div>
-        <div class="home-tool-info d-grid gap-2 my-auto">
-          <h2 class="fs-1 fw-medium m-0">Main scene</h2>
-          <p class="text-wrap m-0">Starting, BRB, ending, and intermission. Make each moment yours.</p>
-        </div>
-        <span class="home-tool-action btn btn-outline-light btn-sm rounded-0 d-inline-flex align-self-end align-items-center gap-2 px-3 py-2 fw-semibold">
-          <span data-home-cta>Configure</span> <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
-        </span>
-      </a>
+    <nav class="home-tools col-12 col-md-8 overflow-y-auto" aria-label="Stream tools">
+      <p id="catalog-empty" class="p-4" role="status" hidden>No matching overlays.</p>
     </nav>
+    <template id="home-tool-template">
+      <a class="home-tool d-flex flex-column gap-2 p-4 text-white has-background-cover has-overlay bg-pos-top">
+        <div class="overlay" aria-hidden="true"></div>
+        <div class="home-tool-top d-flex align-items-center justify-content-between gap-3">
+          <span class="small fw-semibold text-uppercase text-wrap text-break"></span>
+          <i class="flex-shrink-0 lh-1 m-0" aria-hidden="true"></i>
+        </div>
+        <div class="home-tool-info d-grid gap-2 my-auto text-start py-1">
+          <h2 class="home-tool-title fw-medium text-wrap text-break m-0"></h2>
+          <p class="text-wrap m-0"></p>
+        </div>
+        <span class="home-tool-action btn btn-outline-light btn-sm mw-100 rounded-0 d-inline-flex align-self-end align-items-center gap-2 px-3 py-2 fw-semibold">
+          <span class="text-wrap" data-home-cta>Configure</span> <i class="fa-solid fa-arrow-right flex-shrink-0" aria-hidden="true"></i>
+        </span>
+      </a>
+    </template>
   </main>
   <footer class="home-footer d-flex flex-wrap align-items-center justify-content-between gap-3 flex-shrink-0 small border-top border-dark px-4 px-lg-5 py-4">
-    <p class="m-0">&copy; <span id="year-txt">2026</span>, Made with <i class="fa-solid fa-heart" role="img" aria-label="love"></i> by <a class="link-light text-decoration-underline" href="https://byuwur.co" target="_blank"
-        rel="noopener">BONYUR @byUwUr</a></p>
+    <p class="m-0">
+      &copy; <span id="year-txt"></span>, Made with <i class="fa-solid fa-heart" role="img" aria-label="love"></i> by
+      <a class="link-light text-decoration-underline" href="https://byuwur.co" target="_blank" rel="noopener">BONYUR @byUwUr</a>
+    </p>
     <div class="d-flex flex-wrap gap-3">
       <a class="link-light text-decoration-underline" href="https://github.com/byuwur/stream.html/blob/main/LICENSE.md">MIT license</a>
       <a class="link-light text-decoration-underline" href="https://github.com/byuwur/stream.html">Source &amp; contributions <i class="fa-solid fa-arrow-up-right-from-square ms-1" aria-hidden="true"></i></a>
@@ -118,79 +96,119 @@
   </footer>
 
   <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      document.querySelectorAll(".home-tool").forEach((card) => {
-        card.querySelector("[data-home-cta]").textContent = byCommon.randomCTAMessage();
-        card.querySelector(".overlay").style.background = byCommon.randomAccentColor({ tone: "dark", gradient: true, angle: 180 });
+    if (typeof jQuery === "undefined" && !window.jQuery) console.error("Init index.html FAILED. No jQuery found.");
+    else window.jQuery(function () {
+      const $ = window.jQuery;
+      // ==========
+      // ==== SHARED TOOL METADATA ====
+      // ==========
+      const jqGallery = $(".home-tools");
+      const tools = byConfigurator.catalog.availableTools;
+      $("#tool-count").text(`${tools.length} browser overlay${tools.length === 1 ? "" : "s"}`);
+      tools.forEach((tool, index) => {
+        const jqCard = $($("#home-tool-template").prop("content").firstElementChild).clone();
+        const group = byConfigurator.catalog.categories.find(group => group.id === tool.category);
+        jqCard.attr({
+          "data-tool": tool.id, "data-category": tool.category, "aria-label": `Configure ${tool.name}`,
+          href: new URL(`${tool.id}/${location.protocol === "file:" ? "index.html" : ""}`, byConfigurator.catalog.root).href
+        }).css({
+          backgroundImage: `url("${new URL(`${tool.id}/prev.jpg`, byConfigurator.catalog.root).href}")`,
+        });
+        jqCard.find("h2").text(tool.name);
+        jqCard.find("p").text(tool.description);
+        jqCard.find(".home-tool-top span").text(`${String(index + 1).padStart(2, "0")} | ${group.name}`);
+        jqCard.find(".home-tool-top i").attr("class", `fa-solid ${tool.icon} flex-shrink-0 lh-1 m-0`);
+        jqCard.find("[data-home-cta]").text(byCommon.randomCTAMessage());
+        jqCard.find(".overlay").css("background", byCommon.randomAccentColor({ tone: "dark", gradient: true, angle: 180 }));
+        jqCard.attr("data-result-index", index + 1).appendTo(jqGallery);
       });
-      document.getElementById("year-txt").textContent = new Date().getFullYear();
+
+      jqGallery.attr("data-result-count", tools.length);
+      $("#year-txt").text(new Date().getFullYear());
     });
   </script>
   <style>
-    .stream-home a:hover,
-    .stream-home a:hover * {
-      text-decoration: none !important
+    /* ========== HOMEPAGE LAYOUT AND FILTERS ========== */
+    .home-layout,
+    .home-intro,
+    .home-tools {
+      min-height: 0;
+      min-width: 0;
     }
 
+    .home-intro {
+      position: relative;
+    }
+
+    #site-title {
+      font-size: clamp(2rem, 4vw, 4.5rem);
+    }
+
+    .home-tools {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      grid-auto-rows: max-content;
+      align-content: start;
+    }
+
+    #catalog-empty {
+      grid-column: 1 / -1;
+    }
+
+    .home-tool[hidden] {
+      display: none !important;
+    }
+
+    .home-tool {
+      min-height: 15rem;
+      min-width: 0;
+    }
+
+    /* ========== LANDING MOTION AND CARD INTERACTIONS ========== */
     .home-intro-top img {
       width: 4rem;
-      height: 4rem
+      height: 4rem;
     }
 
-    .home-tool>.overlay {
-      box-shadow: inset 0 0 2.5rem #0009, inset 0 0 0 .0625rem #ffffff20;
-      opacity: .8;
-      transition: opacity .2s !important
-    }
-
-    .home-tool-action,
-    .home-tool-action i {
-      transition: transform .2s !important
-    }
-
-    .home-tool:focus-visible>.overlay,
-    .home-tool:hover>.overlay {
-      opacity: .9
-    }
-
-    .home-tool:focus-visible .home-tool-action,
-    .home-tool:hover .home-tool-action {
-      transform: translateY(-.15rem)
-    }
-
-    .home-tool:focus-visible .home-tool-action i,
-    .home-tool:hover .home-tool-action i {
-      transform: translateX(.25rem)
-    }
-
-    .home-tool:focus-visible {
-      outline: currentColor solid .125rem;
-      outline-offset: -0.375rem
-    }
-
-    @media (min-width:48rem) {
+    @media (min-width: 48rem) {
       .stream-home body {
-        height: 100dvh
+        height: 100dvh;
+      }
+
+      .home-tools {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      /* Longer titles can grow without pushing the action outside its card. */
+      .home-tool {
+        min-height: max(15rem, 30vh);
+        min-height: max(15rem, 30dvh);
+      }
+
+
+    }
+
+    @media (min-width: 48rem) and (max-width: 61.99rem) {
+      .home-intro-top img {
+        width: 3rem;
+        height: 3rem;
       }
     }
 
-    @media (max-width:47.99rem) {
+    @media (min-width: 62rem) {
+      .home-tool {
+        min-height: max(13.5rem, 30vh);
+        min-height: max(13.5rem, 30dvh);
+      }
+    }
+
+    @media (max-width: 47.99rem) {
       .home-intro {
-        min-height: 32rem
-      }
-    }
-
-    @media (prefers-reduced-motion:reduce) {
-
-      .home-tool-action,
-      .home-tool-action i,
-      .home-tool>.overlay {
-        transition: none !important
+        min-height: 32rem;
       }
 
-      .home-tool-action,
-      .home-tool-action i {
-        transform: none !important
+      #site-title {
+        font-size: clamp(2.5rem, 11vw, 4.5rem);
       }
     }
   </style>

@@ -225,7 +225,7 @@ Validate settings, encode query parameters, render text safely, and preserve hos
 
 ### Homepage and share previews
 
-The homepage reuses Bootstrap and SPA common styles. Its resource backgrounds use each folder's `prev.jpg` through inline styles. `byCommon.randomCTAMessage()` picks the button text and `byCommon.randomAccentColor({ tone: "dark", gradient: true, angle: 180 })` supplies the dark vertical overlays. The resource panel scrolls independently on desktop as more tools are added.
+The landing generates ready cards from the shared catalog and one HTML template. Folder IDs derive links and prev.jpg; missing previews leave a blank background. The introduction takes one third of desktop width; mobile uses one column.
 
 Sharing metadata uses the static root [prev.jpg](prev.jpg), currently 1920 × 1080. Resource pages use their own preview images. Update the image and its Open Graph/Twitter metadata when changing the presentation; the random browser styling does not generate a new share image.
 
