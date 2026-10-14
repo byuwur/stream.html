@@ -189,6 +189,21 @@ body {
 .bywr-configurator .stream-select2-dropdown .select2-results > .select2-results__options {
   max-height: min(26rem, calc(50vh - 4.5rem));
 }
+.bywr-configurator .font-option {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.bywr-configurator .stream-select2-dropdown .font-option {
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+}
+.bywr-configurator .font-preview {
+  min-height: 2rem;
+  font-size: 1.25rem;
+  overflow-wrap: anywhere;
+}
 .bywr-configurator .preview-panel {
   width: 0;
   flex-basis: 0;

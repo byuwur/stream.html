@@ -38,7 +38,7 @@ Local configurators generate `file:///.../{tool}/index.html?...` URLs. Paste the
 
 Configurators need internet for their CDN libraries. Font-enabled renderers also load the shared SPA.js font helper; Main and Popup load animation libraries and optional remote media. Offline use requires saving those dependencies and updating their script URLs. Installed and system fonts need no Google Fonts request. The Controller renderer uses local files and native JavaScript. Local media paths must exist on the viewing computer.
 
-Font fields accept Google Fonts or installed families; the shared loader requests known families and preserves CSS fallbacks.
+Font controls search a bundled catalog of 350 verified Google Fonts, plus system fonts and custom installed families or CSS stacks. Font names appear in their own typefaces; only selected families and visible dropdown rows request fonts, through the official CSS API with `display=swap`. Supported normal weights share one stylesheet per family per document. Menus adapt to available screen space and open above or below the control automatically. The inline sample and actual overlay preview use the selected family, with system fallbacks if loading fails. Font values remain ordinary URL settings, including when reopening with `#configure` or using Reset.
 
 Overlay animations follow each tool's settings rather than the operating system's reduced-motion preference, keeping previews and OBS output consistent. Explicit Off, None, and Static animation choices still apply where available. Shared `_common.css` and configurator accessibility controls are unchanged.
 

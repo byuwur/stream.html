@@ -523,6 +523,21 @@
       });
     }
 
+    /** Connect declared font fields to the shared picker; the form remains authoritative. */
+    function initFontPickers() {
+      if (!window.byFont || typeof window.byFont.picker !== "function") return;
+      fields.forEach((field, index) => {
+        if (parameterRules[field.name]?.type !== "font") return;
+        fields[index] = byFont.picker(field, {
+          initSelect2,
+          fallback: field.name === "primaryFont" ? "Courier, monospace" : "system-ui, sans-serif",
+          emptyFont: field.name === "primaryFont" ? "Courier New" : "",
+          weight: form.elements.fontWeight || 700,
+          previewText: "Stream preview · Aa Bb 0123456789"
+        });
+      });
+    }
+
     // ==========
     // ==== ORDERED ACCOUNT AND SCHEDULE EDITORS ====
     // ==========
@@ -1178,6 +1193,7 @@
       }
       initTheme();
       initTools();
+      initFontPickers();
       initHelpDialog(initResourceHelp);
       initColorPickers();
       $(form)
