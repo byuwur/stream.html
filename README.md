@@ -2,7 +2,7 @@
 
 ![stream.html preview](prev.jpg)
 
-Free stream overlays, plus the presets and assets I use for streaming. Free. Forever.
+Free stream overlays for controller input, social popups, and main scenes, plus the presets and assets I use for streaming. Free. Forever.
 
 Open a configurator, adjust the settings, and copy its URL into an OBS Browser source. No account, package install, or build step.
 
@@ -10,11 +10,11 @@ Open a configurator, adjust the settings, and copy its URL into an OBS Browser s
 
 ## HTML overlays
 
-| Tool       | What it does                                                                                                     | Configure online                                                    | Local entry point       |
-| ---------- | ---------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- | ----------------------- |
-| Controller | Shows gamepad or keyboard input with Xbox, PlayStation, fight-stick, and GameCube skins.                         | [Controller form](https://byuwur.github.io/stream.html/controller/) | `controller/index.html` |
-| Popup      | Cycles through social handles with animated icons and configurable colors, timing, direction, and scale.         | [Popup form](https://byuwur.github.io/stream.html/popup/)           | `popup/index.html`      |
-| Main scene | Starting, BRB, ending, and intermission scenes with a title, countdown, branding, social accounts, and schedule. | [Main scene form](https://byuwur.github.io/stream.html/main/)       | `main/index.html`       |
+| Tool | What it does | Configure online | Local entry point |
+| --- | --- | --- | --- |
+| Controller | Shows gamepad or keyboard input with Xbox, PlayStation, fight-stick, and GameCube skins. | [Controller form](https://byuwur.github.io/stream.html/controller/) | `controller/index.html` |
+| Popup | Cycles through social handles with animated icons and configurable colors, timing, direction, and scale. | [Popup form](https://byuwur.github.io/stream.html/popup/) | `popup/index.html` |
+| Main scene | Starting, BRB, ending, and intermission scenes with a title, countdown, branding, social accounts, and schedule. | [Main scene form](https://byuwur.github.io/stream.html/main/) | `main/index.html` |
 
 Each tool uses the same `index.html` for its configurator and overlay, with separate markup and styles for each mode. The homepage lets you choose a tool; the forms provide collapsible sections, live previews, and links to parameter help.
 
@@ -32,26 +32,31 @@ Settings sections start expanded and can collapse independently using their head
 
 ### Downloaded use
 
-Download and extract the repository, then open a tool's `index.html`. Each tool has one HTML, one JavaScript, and one CSS file, plus its artwork. Keep the whole tool folder and the parent `configurator.js` and `configurator.css`; one HTML file alone is not a complete bundle.
+Download `stream.html`, then open a tool's `index.html`. Each tool has one HTML, one JavaScript, and one CSS file, plus its artwork. Keep the whole tool folder and the parent `configurator.js` and `configurator.css`. Shared dependencies load from the pinned SPA.js CDN; internet access is needed for those dependencies and Google Fonts. One HTML file alone is not a complete bundle.
 
 Local configurators generate `file:///.../{tool}/index.html?...` URLs. Paste the complete URL into OBS with **Local file** unchecked. The folder must stay at that path on the viewing computer. Basic overlays do not need a web server.
 
-Configurators and animated overlays need internet for CDN libraries, fonts, the default logo, and any remote media. The Controller renderer uses local artwork and native JavaScript. Local media paths must exist on the viewing computer.
+Configurators need internet for their CDN libraries. Font-enabled renderers also load the shared SPA.js font helper; Main and Popup load animation libraries and optional remote media. Offline use requires saving those dependencies and updating their script URLs. Installed and system fonts need no Google Fonts request. The Controller renderer uses local files and native JavaScript. Local media paths must exist on the viewing computer.
 
-| Part                | Dependencies                                                           |
-| ------------------- | ---------------------------------------------------------------------- |
-| Shared configurator | jQuery, Bootstrap, Pickr, Font Awesome, and SPA common styles/helpers. |
-| Controller renderer | Native JavaScript and its controller artwork.                          |
-| Popup renderer      | Native DOM APIs, GSAP, MorphSVG, and Font Awesome brand icons.         |
-| Main renderer       | Native DOM APIs, GSAP, and Font Awesome brand icons.                   |
+Font fields accept Google Fonts or installed families; the shared loader requests known families and preserves CSS fallbacks.
 
-CDN imports use `byuwur/spa.js@v20.1` through jsDelivr, with separate script tags in dependency order. jQuery belongs to the configurator; resource rendering does not use it.
+Overlay animations follow each tool's settings rather than the operating system's reduced-motion preference, keeping previews and OBS output consistent. Explicit Off, None, and Static animation choices still apply where available. Shared `_common.css` and configurator accessibility controls are unchanged.
+
+| Part                | Dependencies                                                                                  |
+| ------------------- | --------------------------------------------------------------------------------------------- |
+| Shared configurator | jQuery, Bootstrap, Select2, Pickr, Font Awesome, and SPA common styles/helpers.               |
+| Controller renderer | Native JavaScript and its controller artwork.                                                 |
+| Popup renderer      | Native DOM APIs, GSAP, MorphSVG, and Font Awesome brand icons.                                |
+| Main renderer       | Native DOM APIs, GSAP, and Font Awesome brand icons.                                          |
+
+CDN imports use `byuwur/spa.js@v20.1` through jsDelivr. The landing and configurators use jQuery for DOM and events. Configurator dependencies are declared with `data-editor-src` and loaded in order only in editor mode. Renderers use native JavaScript, the shared SPA.js font helper where needed, and GSAP/MorphSVG for Main and Popup; they do not load jQuery or editor widgets.
 
 ### Editing an existing URL
 
 - Bare folder and `index.html` URLs open the configurator; URLs with query settings and no hash render the overlay. No `overlay` flag is needed.
 - To edit an existing overlay URL, append `#configure`, keeping its settings. Help hashes also open the configurator.
 - Both modes use the same `index.html`; no redirect is needed. Replace old `controller.html`, `popup.html`, or `main.html` filenames in OBS URLs with `index.html`, keeping their parameters.
+- Navigation retains explicit entry filenames.
 - **Reset** restores the settings loaded when the form opened. Reopen the bare folder URL for bundled defaults.
 
 Settings live in the URL, with no upload or account storage. Use public display information only. The URL fragment opens the editor and help; it is omitted from generated overlay URLs.
@@ -93,7 +98,7 @@ Previous URLs with a `{"mapping":[...]}` wrapper remain supported; newly generat
 
 Add accounts, choose a supported platform and display text, then reorder with the arrows or remove unwanted rows. Multiple accounts can use the same platform.
 
-The selector offers 91 platforms supported by the bundled Font Awesome brand font, including Bluesky, Discord, Mastodon, Threads, TikTok, and X. There is no PNG icon sheet.
+The searchable Select2 selector offers 90+ platforms supported by the bundled Font Awesome brand font, including Bluesky, Discord, Mastodon, Threads, TikTok, and X. Icons appear in both search results and selected values, with a globe fallback for unavailable glyphs. There is no PNG icon sheet.
 
 | Parameter | Accepted values / purpose |
 | --- | --- |
@@ -102,7 +107,7 @@ The selector offers 91 platforms supported by the bundled Font Awesome brand fon
 | `pauseTime`, `inbetweenPauseTime` | Seconds per account and between animation cycles, `0` to `3600`. |
 | `scale` | `0.1` to `5`; scales from the chosen top corner. |
 | `iconBoxColor`, `textBoxColor`, `iconColor`, `fontColor` | CSS colors, such as `#400000` or `#FFFFFF80`; defaults use HEX. |
-| `primaryFont`, `fontWeight` | Font family available on the viewing computer; weight `100` to `900` in steps of 100. |
+| `primaryFont`, `fontWeight` | Google Fonts or an installed font family; weight `100` to `900` in steps of 100. |
 | `fontSizeRem`, `textYOffsetRem` | Text size `0.5` to `6.25` rem (default `4.5`); vertical offset `-6.25` to `6.25` rem. |
 
 Defaults live in `popup/popup.js`: three accounts, five seconds each, with five seconds between cycles. Reset restores the list and order loaded with the form.
@@ -148,7 +153,7 @@ Defaults live in `main/main.js`. Valid URL settings apply to the same settings o
 
 Media fields reference files rather than uploading them. Use public HTTP(S) URLs or paths relative to the resource HTML. Local file URLs require a downloaded overlay; Base64 `data:` URLs are not supported. Fonts must be available on the viewing computer; unavailable choices fall back to Courier, then monospace.
 
-Main's pixel size parameters are converted to rem internally at a root size of 16px. `frameWidth` is supported in the URL even though the form does not expose a field for it.
+Main's pixel size parameters are converted to rem internally at a root size of 16px. `frameWidth` is available in both the form and URL.
 
 ## Program configurations and assets
 
@@ -171,58 +176,52 @@ These folders need their named application or service; they do not use the HTML 
 
 Program exports contain personal settings and machine-specific paths. Back up your settings before importing, and replace devices, paths, and account settings. Do not share stream keys, WebSocket passwords, or private widget URLs.
 
-Shared dependencies use SPA.js v20.1. Main and Popup load its native byFont helper for Google Fonts or installed families, without requiring jQuery for rendering.
-
-byConfigurator.catalog owns tool metadata and priority. availableTools includes only tools marked ready: true. Unfinished tools stay registered with ready: false and are excluded from navigation and generated cards.
-
 ## Development
 
 **Simple is complicated enough.** Keep renderer behavior in the resource, editor behavior in the configurator, and dependencies explicit.
 
-| File                | Responsibility                                                                                                    |
-| ------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| `index.html`        | Homepage, tool links, preview backgrounds, and sharing metadata.                                                  |
-| `configurator.js`   | Page mode, template mounting, form defaults, validation, URL generation, preview, help, theme, and accessibility. |
-| `configurator.css`  | Shared editor styling, including the transparent-preview checkerboard.                                            |
-| `configurator.html` | Working demo with text, number, and HEX color fields; its embedded renderer CSS/JS are examples only.             |
-| `{tool}/index.html` | Separate Resource and Configurator sections, direct imports, and optional custom editor controls.                 |
-| `{tool}/{tool}.js`  | Flat defaults, URL rules, and rendering; native DOM APIs with GSAP/MorphSVG where needed.                         |
-| `{tool}/{tool}.css` | Resource styling and CSS variable defaults matching the renderer's defaults.                                      |
+| File                     | Responsibility                                                                                      |
+| ------------------------ | --------------------------------------------------------------------------------------------------- |
+| `index.html`             | Homepage, tool links, preview backgrounds, and sharing metadata.                                    |
+| `configurator.js`        | Shared catalog, generated editor, widgets, URL generation, preview, help, theme, and accessibility. |
+| `configurator.css`       | Shared editor styling, including the transparent-preview checkerboard.                              |
+| `spa.js@v20.1/_fonts.js` | Shared native font loader and optional picker, loaded once from the pinned jsDelivr CDN.            |
+| `configurator.html`      | Working demo with text, number, and HEX color fields and an inline native renderer.                 |
+| `{tool}/index.html`      | Overlay markup, explicit dependencies, and one empty configurator container.                        |
+| `{tool}/{tool}.js`       | Master field definition, independent page mode, URL parsing, and rendering.                         |
+| `{tool}/{tool}.css`      | Resource styling and CSS variable defaults matching the renderer's defaults.                        |
 
 ### Resource and configurator contract
 
-All first-party setup runs inside top-level `DOMContentLoaded` handlers. Load `configurator.js` first, without `defer`, so it registers before resource handlers and mounts either `overlay-markup` or `editor-markup`. External resource and CDN scripts use `defer` in dependency order. CSS and scripts stay in their corresponding body sections; `data-renderer-style` and `data-editor-style` keep their styles separate.
+Each resource script starts its `DOMContentLoaded` handler with a `resource` object. Its `fields` own public parameter names, defaults, control types, labels, descriptions, and validation. The renderer derives `settings` from those defaults, applies valid query parameters, and publishes `window.byStreamResource = { ...resource, settings, parameterRules: resource.fields }`. Renderer-only values belong in `resource.constants`.
 
-Each resource declares a flat `settings` object and `parameterRules`, applies validated URL values, and publishes `window.byStreamResource = { settings, parameterRules }` before rendering. Render only when `byStreamOverlay` is true. Controller also publishes its raw-input helpers for its mapping editor; its keyboard bindings remain in HTML as `bySettingsKB`.
+Load the shared SPA.js `_fonts.js` helper where needed, then the resource script before `configurator.js`, with `defer`. The resource decides page mode and mounts its own `overlay-markup` template when query parameters are present without a hash. It renders independently if the configurator is missing. Declare editor scripts with `data-editor-src` instead of `src`; the shared configurator loads them in dependency order only in editor mode. Editor styling starts with `media="not all"`; only the configurator enables it. The resource never builds form controls or calls editor helpers.
 
-Rules declare accepted `options`, or a `type` with numeric bounds, `step`, and `maxlength` where applicable. A custom `validate(value)` returns its parsed value on success or `null` on invalid input.
+The HTML needs just `<div id="configurator"></div>` for the editor. Shared setup generates the toolbar, form sections, live preview, footer, and parameter reference from the published definition. It serializes only declared fields and restores the settings loaded from the URL on Reset. `#configure` reopens an overlay URL for editing.
 
-The shared configurator starts automatically when `form[data-configurator]` is present, after resource handlers have published their settings. It populates and edits that same object, and serializes only settings declared in `parameterRules`. Ordinary named fields need no custom initialization or tool registration; `data-tool` is optional metadata.
+`byConfigurator` owns shared editor setup and its tool catalog. `byConfigurator.init()` runs after the resource scripts are ready; calling it again preserves the existing form and handlers. Renderers publish their definitions independently and do not depend on this object.
 
-Custom controls may publish `window.byConfigureResource(resource, editor)` from a handler in the HTML Configurator section. The hook runs after fields receive their initial values and gets:
+| Field metadata                                | Purpose                                                                                                                                 |
+| --------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `type`                                        | `text`, `number`, `url`, `textarea`, `select`, `switch`, `color`, `font`, `entries`, or Controller's `mapping`. |
+| `default`, `label`, `section`, `description`  | Initial value, visible caption, form group, and parameter help.                                                                         |
+| `options`, `labels`                           | Allowed select values and optional human-readable labels keyed by value.                                                                |
+| `min`, `max`, `step`, `maxlength`, `validate` | URL and input constraints. A custom validator returns a parsed value or `null`.                                                         |
+| `checkedValue`, `uncheckedValue`              | Values serialized by a switch.                                                                                                          |
+| `entries`                                     | Ordered-list choices, choice key, text fields, new-entry values, and optional limit; existing resources provide examples.               |
 
-| Editor member                             | Purpose                                                                                                                                                                    |
-| ----------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `generateURL()`                           | Validate fields, apply their values, and update the URL and preview.                                                                                                       |
-| `initEntryEditor(name, entries, options)` | Add, edit, reorder, remove, and reset an ordered list. Keep its hidden named input, `.entry-list`, and `.add-entry` in the same fieldset; Popup and Main show the options. |
-| `platforms`                               | Supported social-platform identifiers and display names.                                                                                                                   |
+The generator uses jQuery for controls and events with the existing Select2, Pickr, Bootstrap, and Font Awesome integrations. Font-enabled pages load the shared SPA.js `_fonts.js` once, before the resource. Its native `byFont.family(value, fallback)` and `byFont.ready()` work without jQuery; picker methods resolve jQuery and Select2 when the configurator initializes them. Only selected fonts and visible dropdown samples are requested. Font loading supports hosted and `file://` use with internet access, independently of the configurator and SPA runtime; no neighboring SPA.js checkout or duplicate font module is required.
 
-The hook may return `parameterDetails` and `initResourceHelp(dialog, titles, closeHelp)` for custom help. Prefix exposed globals with `by`; keep local names and URL parameter names straightforward. No resource-specific branches belong in `configurator.js`.
-
-URL validation is intentionally repeated in each resource and the configurator to avoid extra helper files. Popup, Main, and the configurator also carry matching platform lists. Keep those copies in sync, and keep CSS variable defaults aligned with the resource's `settings` object.
+Custom editor behavior belongs in a separate editor-only script loaded after the shared configurator. Controller's `controller/configurator.js` publishes `byConfigurator.configureResource(resource, editor)` for its mapping UI. The hook receives `generateURL` and the existing control helpers, including `initSelect2`, and may return `initResourceHelp` for additional help panels. Keep renderer behavior in the resource script.
 
 ### Adding another HTML tool
 
-1. Open `configurator.html` for a small demo of the form, fields, and live preview. Its embedded CSS and JS provide the example text, size, and color. Copy this HTML into a new tool folder, rename it to `index.html`, update shared configurator paths from `./` to `../`, and replace the demo with your resource's own CSS and JS files.
-2. Keep the marked Resource, Configurator, and shared page-setup sections in `index.html`. Put overlay markup in the Resource template and editor markup and dependency imports in the Configurator section. Retain the demo's toolbar, preview, and footer IDs while replacing its fields.
-3. Follow the resource contract above. Keep one resource CSS and one JS file beside `index.html`, with the defaults, URL rules, and renderer owned by that resource. Add a custom editor hook only when its controls need one.
-4. Mark the settings form with `data-configurator` and match field names to settings. Put field help in `data-description`; use `data-title` for hidden fields. A rule with `type: "color"` automatically enables HEX Pickr.
-5. Reuse Bootstrap Collapse and `configurator.css`. Give checkbox inputs IDs and matching label `for` attributes, plus `value` and `data-unchecked-value` for their two settings values.
-6. Add the tool to the homepage and HTML navigation menus, include its `prev.jpg`, and update its page metadata and this README. New resources require no changes to `configurator.js`.
+1. Copy `configurator.html` as the tool's `index.html`. Replace the demo markup, CSS, and inline renderer with your resource script. Change shared import paths from `./` to `../`.
+2. Declare the resource's fields, title, description, and preview dimensions in its first object. Keep validation and rendering beside that definition; do not duplicate the form or parameter documentation in HTML.
+3. Preserve the `overlay-markup` template, empty configurator container, and dependency order. Add editor-only code only when the shared field types cannot express a control.
+4. Add the tool's folder ID, name, plain-text description, icon, category, and `ready` flag to `byConfigurator.catalog.tools` at the start of `configurator.js`. The ID determines its directory URL and `prev.jpg` path; missing previews leave a blank background. The homepage generates its card from one template; every configurator uses the same catalog order. Set `ready: false` while a tool is unfinished, then `ready: true` when it is ready. Renderer setup needs no registration.
 
-Validate settings, encode query parameters, render text safely, and preserve both GitHub Pages and downloaded-file use. Keep program presets in their own program folders.
-
-Check JavaScript syntax with `node --check` on the shared configurator and each resource script. Then verify the bare configurator, generated overlay URL, and `#configure` URL over HTTP and `file://`, including Copy URL, Reset, validation, and any custom controls. No build or test runner is bundled with the HTML tools.
+Validate settings, encode query parameters, render text safely, and preserve hosted and downloaded-file use. Check JavaScript syntax with `node --check`. Verify bare configurators, generated URLs, `#configure`, Copy URL, Reset, custom controls, and overlays with `configurator.js` unavailable, over HTTP and `file://`. There is no build step or runtime testing dependency.
 
 ### Homepage and share previews
 

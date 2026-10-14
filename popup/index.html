@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="es" class="bywr-configurator" data-tool="popup">
+<html lang="es" data-tool="popup">
 
 <head>
   <!-- ===== PAGE METADATA ===== -->
@@ -16,9 +16,8 @@
 </head>
 
 <body>
-  <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.1/_fonts.js" defer></script>
   <!-- ===== SHARED PAGE SETUP ===== -->
-  <script src="../configurator.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.1/_fonts.js" defer></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.1/css/fontawesome.min.css" />
 
   <!-- ===== RESOURCE ===== -->
@@ -53,247 +52,19 @@
   </template>
 
   <!-- ===== CONFIGURATOR ===== -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.1/css/bootstrap.min.css" data-editor-style />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.1/css/pickr.min.css" data-editor-style />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.1/_common.css" data-editor-style />
-  <link rel="stylesheet" href="../configurator.css" data-editor-style />
-  <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.1/js/jquery.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.1/js/bootstrap.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.1/js/pickr.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.1/_common.js" defer></script>
-  <!-- Optional hook: runs after defaults populate the form, only in the configurator. -->
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      if (byStreamOverlay) return;
-      window.byConfigureResource = function ({ settings }, { initEntryEditor, platforms }) {
-        initEntryEditor("accounts", settings.accounts, {
-          choices: platforms,
-          choiceKey: "platform",
-          textFields: [["handle", "Handle or display text"]],
-          newEntry: { platform: "twitch", handle: "" }
-        });
-      };
-    });
-  </script>
+  <script data-editor-src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.1/js/jquery.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.1/css/bootstrap.min.css" data-editor-style media="not all" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.1/css/pickr.min.css" data-editor-style media="not all" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.1/_common.css" data-editor-style media="not all" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.1/css/select2.min.css" data-editor-style media="not all" />
+  <link rel="stylesheet" href="../configurator.css" data-editor-style media="not all" />
+  <script data-editor-src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.1/js/select2.full.min.js"></script>
+  <script data-editor-src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.1/js/bootstrap.min.js"></script>
+  <script data-editor-src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.1/js/pickr.min.js"></script>
+  <script data-editor-src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.1/_common.js"></script>
   <!-- Configurator: URL toolbar, settings, preview, and help. -->
-  <template id="editor-markup">
-    <main id="setup" class="d-flex flex-column vh-100 overflow-hidden">
-      <!-- URL toolbar and tool navigation. -->
-      <header class="url-toolbar has-overlay light-links d-flex flex-column gap-2 p-2 bg-primary border-bottom sticky-top flex-shrink-0">
-        <div class="overlay-vertical-inverted pe-none" aria-hidden="true"></div>
-        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
-          <div class="d-flex align-items-center gap-2">
-            <img src="https://byuwur.github.io/img/logo.png" alt="" />
-            <details class="tool-switcher position-relative flex-shrink-0 me-2" data-tool="popup">
-              <summary class="tool-brand list-unstyled d-flex align-items-center gap-2 fw-bold text-nowrap fs-5" aria-label="stream.html tools">
-                <span class="tool-wordmark text-white">stream<span>.html</span></span>
-                <span class="tool-caret text-white" aria-hidden="true">&#9662;</span>
-              </summary>
-              <nav class="dropdown-menu d-none rounded-0 shadow mt-0" aria-label="Tools">
-                <a class="dropdown-item py-2" href="../controller/index.html"><i class="fa-solid fa-gamepad fa-fw me-2" aria-hidden="true"></i>Controller</a>
-                <a class="dropdown-item py-2" href="../popup/index.html"><i class="fa-solid fa-comment fa-fw me-2" aria-hidden="true"></i>Popup</a>
-                <a class="dropdown-item py-2" href="../main/index.html"><i class="fa-solid fa-clapperboard fa-fw me-2" aria-hidden="true"></i>Main scene</a>
-              </nav>
-            </details>
-          </div>
-          <p class="config-credit d-none d-md-block m-0 ms-auto text-end small text-white">
-            &copy;
-            2026, Made with
-            <i class="fa-solid fa-heart text-danger align-middle" role="img" aria-label="love"></i>
-            by
-            <a href="https://byuwur.co" target="_blank" rel="noopener" class="text-white link-body-emphasis">
-              BONYUR @byUwUr
-            </a>
-          </p>
-          <nav class="config-menu d-flex align-items-center gap-2 flex-shrink-0" aria-label="Configurator menu">
-            <button id="theme-toggle" class="theme-toggle rounded-0 border border-light text-white" type="button" disabled title="Loading theme controls" aria-label="Toggle theme" aria-pressed="true">
-              <span aria-hidden="true">&#9790;&#65038; &#9728;&#65038;</span>
-            </button>
-            <a class="btn btn-sm btn-outline-light text-nowrap" href="https://github.com/byuwur/stream.html" target="_blank" rel="noopener" title="Source code">
-              <i class="fa-brands fa-github me-1" aria-hidden="true"></i>
-              GitHub
-            </a>
-          </nav>
-        </div>
-        <div class="d-flex align-items-center gap-2">
-          <label class="url-field flex-grow-1 overflow-hidden text-body form-label d-flex flex-column gap-1 w-100 m-0" for="overlay-url">
-            <span class="visually-hidden">Overlay URL</span>
-            <input id="overlay-url" readonly spellcheck="false" class="form-control rounded-0 bg-body-secondary border-secondary-subtle font-monospace small" />
-          </label>
-          <button id="copy-url" class="btn btn-sm btn-light flex-shrink-0 text-nowrap" type="button">
-            <i class="fa-solid fa-copy me-2" aria-hidden="true"></i>
-            <span class="copy-label">Copy URL</span>
-          </button>
-          <button class="btn btn-sm btn-outline-light flex-shrink-0 text-nowrap" type="reset" form="overlay-form">
-            <i class="fa-solid fa-arrow-rotate-left me-2" aria-hidden="true"></i>
-            Reset
-          </button>
-        </div>
-      </header>
-      <div class="setup-layout row g-0 flex-grow-1 flex-column flex-md-row flex-nowrap overflow-auto">
-        <!-- Editable settings. -->
-        <aside class="settings-panel h-100 flex-shrink-0 col-12 col-md-4 bg-body-tertiary p-3 overflow-y-auto border-end" aria-label="Overlay parameters">
-          <h1 class="h4 mb-1"><i class="fa-solid fa-comment me-2" aria-hidden="true"></i>Social popup</h1>
-          <p class="setup-intro text-body-secondary">
-            Your social accounts, one animated popup at a time.
-          </p>
-          <form id="overlay-form" data-configurator class="accordion">
-            <fieldset class="accordion-item mb-3 border border-secondary-subtle bg-body p-2">
-              <legend class="float-start w-100 fs-6 fw-semibold border-bottom pb-2 mb-2 text-primary">
-                <button id="popup-accounts-toggle" class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#popup-accounts" aria-expanded="true" aria-controls="popup-accounts"><i class="fa-solid fa-users me-2"
-                    aria-hidden="true"></i>Social accounts</button>
-              </legend>
-              <div id="popup-accounts" class="accordion-collapse collapse show" aria-labelledby="popup-accounts-toggle">
-                <input name="accounts" data-title="Social accounts" data-description="Ordered account JSON: up to 100 entries with a supported platform and a handle of up to 160 characters." type="hidden" />
-                <div id="account-list" class="entry-list"></div>
-                <button id="add-account" class="add-entry btn btn-sm btn-primary w-100 mt-2" type="button">
-                  <i class="fa-solid fa-plus me-2" aria-hidden="true"></i>
-                  Add account
-                </button>
-              </div>
-            </fieldset>
-            <fieldset class="accordion-item mb-3 border border-secondary-subtle bg-body p-2">
-              <legend class="float-start w-100 fs-6 fw-semibold border-bottom pb-2 mb-2 text-primary">
-                <button id="popup-animation-toggle" class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#popup-animation" aria-expanded="true" aria-controls="popup-animation"><i
-                    class="fa-solid fa-wand-magic-sparkles me-2" aria-hidden="true"></i>Animation</button>
-              </legend>
-              <div id="popup-animation" class="accordion-collapse collapse show" aria-labelledby="popup-animation-toggle">
-                <label class="form-label d-flex flex-column gap-1 w-100 mb-3">
-                  <span class="field-caption d-flex align-items-center gap-2">
-                    <i class="fa-solid fa-clapperboard fa-fw text-primary" aria-hidden="true"></i>
-                    <span>Direction</span>
-                  </span>
-                  <select name="mode" data-description="Side from which the social popups animate." class="form-select rounded-0 bg-body-secondary border-secondary-subtle">
-                    <option value="right">Right</option>
-                    <option value="left">Left</option>
-                  </select>
-                </label>
-                <label class="form-label d-flex flex-column gap-1 w-100 mb-3">
-                  <span class="field-caption d-flex align-items-center gap-2">
-                    <i class="fa-solid fa-clock fa-fw text-primary" aria-hidden="true"></i>
-                    <span>Seconds per account</span>
-                  </span>
-                  <input name="pauseTime" data-description="Seconds to display each account." data-group="options" type="number" min="0" max="3600" step="any" required
-                    class="form-control rounded-0 bg-body-secondary border-secondary-subtle" />
-                </label>
-                <label class="form-label d-flex flex-column gap-1 w-100 mb-3">
-                  <span class="field-caption d-flex align-items-center gap-2">
-                    <i class="fa-solid fa-hourglass-half fa-fw text-primary" aria-hidden="true"></i>
-                    <span>Seconds between cycles</span>
-                  </span>
-                  <input name="inbetweenPauseTime" data-description="Seconds to wait between animation cycles." data-group="options" type="number" min="0" max="3600" step="any" required
-                    class="form-control rounded-0 bg-body-secondary border-secondary-subtle" />
-                </label>
-                <label class="form-label d-flex flex-column gap-1 w-100 mb-3">
-                  <span class="field-caption d-flex align-items-center gap-2">
-                    <i class="fa-solid fa-up-right-and-down-left-from-center fa-fw text-primary" aria-hidden="true"></i>
-                    <span>Scale</span>
-                  </span>
-                  <input name="scale" data-description="Size multiplier anchored to the selected top corner." type="number" min="0.1" max="5" step="any" required class="form-control rounded-0 bg-body-secondary border-secondary-subtle" />
-                </label>
-              </div>
-            </fieldset>
-            <fieldset class="accordion-item mb-3 border border-secondary-subtle bg-body p-2">
-              <legend class="float-start w-100 fs-6 fw-semibold border-bottom pb-2 mb-2 text-primary">
-                <button id="popup-appearance-toggle" class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#popup-appearance" aria-expanded="true" aria-controls="popup-appearance"><i
-                    class="fa-solid fa-palette me-2" aria-hidden="true"></i>Appearance</button>
-              </legend>
-              <div id="popup-appearance" class="accordion-collapse collapse show" aria-labelledby="popup-appearance-toggle">
-                <label class="form-label d-flex flex-column gap-1 w-100 mb-3">
-                  <span class="field-caption d-flex align-items-center gap-2">
-                    <i class="fa-solid fa-palette fa-fw text-primary" aria-hidden="true"></i>
-                    <span>Icon box color</span>
-                  </span>
-                  <input name="iconBoxColor" data-description="CSS background color of the animated icon box." data-group="colors" type="text" maxlength="160" class="form-control rounded-0 bg-body-secondary border-secondary-subtle" />
-                </label>
-                <label class="form-label d-flex flex-column gap-1 w-100 mb-3">
-                  <span class="field-caption d-flex align-items-center gap-2">
-                    <i class="fa-solid fa-palette fa-fw text-primary" aria-hidden="true"></i>
-                    <span>Text box color</span>
-                  </span>
-                  <input name="textBoxColor" data-description="CSS background color behind the account name." data-group="colors" type="text" maxlength="160" class="form-control rounded-0 bg-body-secondary border-secondary-subtle" />
-                </label>
-                <label class="form-label d-flex flex-column gap-1 w-100 mb-3">
-                  <span class="field-caption d-flex align-items-center gap-2">
-                    <i class="fa-solid fa-palette fa-fw text-primary" aria-hidden="true"></i>
-                    <span>Icon color</span>
-                  </span>
-                  <input name="iconColor" data-description="CSS color of the social icons." data-group="colors" type="text" maxlength="160" class="form-control rounded-0 bg-body-secondary border-secondary-subtle" />
-                </label>
-                <label class="form-label d-flex flex-column gap-1 w-100 mb-3">
-                  <span class="field-caption d-flex align-items-center gap-2">
-                    <i class="fa-solid fa-palette fa-fw text-primary" aria-hidden="true"></i>
-                    <span>Text color</span>
-                  </span>
-                  <input name="fontColor" data-description="CSS color of the account names." data-group="colors" type="text" maxlength="160" class="form-control rounded-0 bg-body-secondary border-secondary-subtle" />
-                </label>
-                <label class="form-label d-flex flex-column gap-1 w-100 mb-3">
-                  <span class="field-caption d-flex align-items-center gap-2">
-                    <i class="fa-solid fa-font fa-fw text-primary" aria-hidden="true"></i>
-                    <span>Font family</span>
-                  </span>
-                  <input name="primaryFont" data-description="Font family to use. It must be available on the viewing computer." data-group="fonts" type="text" maxlength="160"
-                    class="form-control rounded-0 bg-body-secondary border-secondary-subtle" />
-                </label>
-                <label class="form-label d-flex flex-column gap-1 w-100 mb-3">
-                  <span class="field-caption d-flex align-items-center gap-2">
-                    <i class="fa-solid fa-font fa-fw text-primary" aria-hidden="true"></i>
-                    <span>Font weight</span>
-                  </span>
-                  <input name="fontWeight" data-description="Font weight in steps of 100." data-group="fonts" type="number" min="100" max="900" step="100" required class="form-control rounded-0 bg-body-secondary border-secondary-subtle" />
-                </label>
-                <label class="form-label d-flex flex-column gap-1 w-100 mb-3">
-                  <span class="field-caption d-flex align-items-center gap-2">
-                    <i class="fa-solid fa-font fa-fw text-primary" aria-hidden="true"></i>
-                    <span>Font size (rem)</span>
-                  </span>
-                  <input name="fontSizeRem" data-description="Account name size in rem." data-group="fonts" type="number" min="0.5" max="6.25" step="any" required class="form-control rounded-0 bg-body-secondary border-secondary-subtle" />
-                </label>
-                <label class="form-label d-flex flex-column gap-1 w-100 mb-3">
-                  <span class="field-caption d-flex align-items-center gap-2">
-                    <i class="fa-solid fa-font fa-fw text-primary" aria-hidden="true"></i>
-                    <span>Text vertical offset (rem)</span>
-                  </span>
-                  <input name="textYOffsetRem" data-description="Vertical text adjustment in rem." data-group="fonts" type="number" min="-6.25" max="6.25" step="any" required
-                    class="form-control rounded-0 bg-body-secondary border-secondary-subtle" />
-                </label>
-              </div>
-            </fieldset>
-          </form>
-        </aside>
-        <!-- Scaled view of the actual overlay. -->
-        <section class="preview-panel h-100 order-first order-md-last flex-shrink-0 col-12 col-md-8 bg-body p-3 d-flex flex-column gap-2" aria-label="Overlay preview">
-          <header class="preview-toolbar d-flex justify-content-between align-items-center small">
-            <strong><i class="fa-solid fa-eye me-2" aria-hidden="true"></i>Live preview</strong>
-            <a id="preview-url" target="_blank" rel="noopener" class="link-body-emphasis">
-              <i class="fa-solid fa-arrow-up-right-from-square me-2" aria-hidden="true"></i>
-              Open overlay
-            </a>
-          </header>
-          <div id="preview-stage" class="ratio ratio-16x9 flex-grow-1 overflow-hidden border rounded-0 bg-body-secondary">
-            <svg id="preview-viewport" viewBox="0 0 1280 360" role="group" aria-label="Scaled overlay preview">
-              <foreignObject width="100%" height="100%">
-                <iframe id="overlay-preview" class="border-0" title="Social popup preview" allow="autoplay; gamepad *"></iframe>
-              </foreignobject>
-            </svg>
-          </div>
-          <!-- Preview update status and reset guidance. -->
-          <footer class="preview-footer d-flex flex-wrap justify-content-between gap-2 small text-body-secondary">
-            <span id="preview-status">Change a parameter to update the preview.</span>
-            <span id="copy-status" role="status"></span>
-            <p class="setup-help m-0 ms-auto text-end">
-              Reset restores the settings loaded when you opened this page.
-            </p>
-          </footer>
-        </section>
-      </div>
-      <div id="accessibility-preset"></div>
-      <!-- Help navigation. -->
-      <footer class="config-footer border-top p-2 text-body-secondary flex-shrink-0">
-        <nav class="footer-links px-5 text-center" aria-label="Help"></nav>
-      </footer>
-    </main>
-  </template>
+  <div id="configurator"></div>
+  <script src="../configurator.js" defer></script>
 </body>
 
 </html>

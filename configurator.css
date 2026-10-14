@@ -37,10 +37,6 @@ body {
 .bywr-configurator :is(.preview-panel, .config-footer) a:hover * {
   color: var(--primary-foreground) !important;
 }
-.bywr-configurator .dropdown-item.active {
-  color: var(--light-color);
-  background-color: var(--primary-color);
-}
 .bywr-configurator .theme-toggle::after {
   border-radius: 0;
 }
@@ -69,6 +65,11 @@ body {
   border-color: var(--primary-foreground);
   box-shadow: 0 0 0 0.2rem color-mix(in srgb, var(--primary-foreground) 25%, transparent) !important;
 }
+/* Common .has-overlay resets Bootstrap's sticky toolbar position and stacking level. */
+.bywr-configurator .url-toolbar {
+  position: sticky;
+  z-index: 1020;
+}
 .bywr-configurator .url-toolbar img,
 .bywr-configurator .config-help .modal-header img {
   width: 2.25rem;
@@ -85,6 +86,8 @@ body {
 
 /* Settings, ordered entries, and live preview. */
 .bywr-configurator .settings-panel {
+  /* Contain Select2's absolutely positioned hidden fields inside the scrolling panel. */
+  position: relative;
   min-width: 20rem;
   scrollbar-color: var(--bs-border-color) var(--bs-tertiary-bg);
   scrollbar-width: thin;
@@ -121,16 +124,16 @@ body {
 .bywr-configurator .field-caption {
   font-size: 0.875rem;
 }
-.bywr-configurator .form-switch .form-check-input {
-  width: 2.75rem;
-  height: 1.5rem;
-  margin: 0;
-  flex-shrink: 0;
-  cursor: pointer;
-}
 .bywr-configurator .entry-row .form-select {
   min-width: 0;
   flex-basis: 0;
+}
+.bywr-configurator .stream-select2 {
+  min-width: 0;
+}
+.bywr-configurator .entry-row .stream-select2 {
+  flex: 1 1 0;
+  width: 0 !important;
 }
 .bywr-configurator .preview-panel {
   width: 0;

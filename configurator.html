@@ -1,9 +1,9 @@
 <!doctype html>
 <!-- A working base for your next overlay, with example fields and a live preview.
      Copy this HTML into your resource folder.
-     Replace the embedded demo CSS/JS with your resource's own files, set shared imports to ../,
-     and use byConfigureResource(resource, editor) here only if custom editor controls are needed. -->
-<html lang="en" class="bywr-configurator" data-tool="template">
+     Replace the demo CSS and JS with your resource's own files.
+     Set shared imports to ../; keep custom editor behavior in a separate editor-only script. -->
+<html lang="en" data-tool="template">
 
 <head>
   <meta charset="utf-8" />
@@ -14,7 +14,6 @@
 
 <body>
   <!-- ===== SHARED PAGE SETUP ===== -->
-  <script src="./configurator.js"></script>
 
   <!-- ===== RESOURCE DEMO ===== -->
   <template id="overlay-markup">
@@ -39,7 +38,7 @@
 
     #demo-preview {
       --demo-size: 3rem;
-      --demo-color: #FFFFFF;
+      --demo-color: #ffffff;
       display: grid;
       place-items: center;
       box-sizing: border-box;
@@ -71,17 +70,69 @@
   <script>
     // Demo-only JavaScript; keep each real resource's renderer in its own file.
     document.addEventListener("DOMContentLoaded", () => {
+      // ==========
+      // ==== RESOURCE DEFINITION ====
+      // ==========
+
+      /** Defaults, URL constraints, and the field metadata consumed by the optional editor. */
+      const resource = {
+        title: "This is the form.",
+        description: "Your next overlay starts here. Edit a field and watch the demo preview change.",
+        preview: [1280, 720],
+        fields: {
+          message: {
+            type: "textarea",
+            default: "Something awesome starts here.",
+            label: "This is a text field.",
+            section: "This is a section.",
+            description: "Example plain text displayed in the demo preview.",
+            maxlength: 160,
+            icon: "fa-pen",
+            rows: 2
+          },
+          fontSizeRem: {
+            type: "number",
+            default: 3,
+            label: "This is a number field (rem).",
+            section: "This is a section.",
+            description: "Example text size in rem.",
+            min: 0.5,
+            max: 6,
+            step: "any",
+            icon: "fa-font"
+          },
+          textColor: {
+            type: "color",
+            default: "#FFFFFF",
+            label: "This is a color field (HEX).",
+            section: "This is a section.",
+            description: "Example text color. Pickr uses HEX, including alpha.",
+            maxlength: 160,
+            icon: "fa-palette"
+          }
+        },
+      };
+
+      // ==========
+      // ==== URL SETTINGS AND PAGE MODE ====
+      // ==========
+
       const params = new URLSearchParams(location.search);
       const settings = {
-        message: "Something awesome starts here.",
-        fontSizeRem: 3,
-        textColor: "#FFFFFF"
+        ...resource.constants,
+        ...Object.fromEntries(Object.entries(resource.fields).map(([name, field]) => [name, structuredClone(field.default)]))
       };
-      const parameterRules = {
-        message: { type: "text", maxlength: 160 },
-        fontSizeRem: { type: "number", min: 0.5, max: 6, step: "any" },
-        textColor: { type: "color", maxlength: 160 }
-      };
+      const parameterRules = resource.fields;
+      const isOverlay = location.search.length > 1 && !location.hash;
+      window.byStreamOverlay = isOverlay;
+      window.addEventListener("hashchange", () => {
+        if (isOverlay !== (location.search.length > 1 && !location.hash)) location.reload();
+      });
+      if (isOverlay) {
+        document.documentElement.setAttribute("data-overlay", "");
+        document.body.append(document.getElementById("overlay-markup").content.cloneNode(true));
+      }
+
       for (const [name, value] of params) {
         if (!Object.hasOwn(parameterRules, name)) continue;
         const rule = parameterRules[name];
@@ -93,154 +144,30 @@
           settings[name] = number;
         } else settings[name] = value;
       }
-      window.byStreamResource = { settings, parameterRules };
-      if (!byStreamOverlay) return;
+      window.byStreamResource = { ...resource, settings, parameterRules };
+      if (!isOverlay) return;
       const preview = document.getElementById("demo-preview");
       document.getElementById("demo-message").textContent = settings.message;
-      preview.style.setProperty("--demo-size", settings.fontSizeRem + "rem");
+      preview.style.setProperty("--demo-size", `${settings.fontSizeRem}rem`);
       preview.style.setProperty("--demo-color", settings.textColor);
     });
   </script>
 
   <!-- ===== CONFIGURATOR ===== -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.1/css/fontawesome.min.css" data-editor-style />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.1/css/bootstrap.min.css" data-editor-style />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.1/css/pickr.min.css" data-editor-style />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.1/_common.css" data-editor-style />
-  <link rel="stylesheet" href="./configurator.css" data-editor-style />
-  <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.1/js/jquery.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.1/js/bootstrap.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.1/js/pickr.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.1/_common.js" defer></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.1/css/fontawesome.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.1/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.1/css/pickr.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.1/_common.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.1/css/select2.min.css" />
+  <link rel="stylesheet" href="./configurator.css" />
+  <script data-editor-src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.1/js/jquery.min.js"></script>
+  <script data-editor-src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.1/js/select2.full.min.js"></script>
+  <script data-editor-src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.1/js/bootstrap.min.js"></script>
+  <script data-editor-src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.1/js/pickr.min.js"></script>
+  <script data-editor-src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.1/_common.js"></script>
   <!-- Configurator: URL toolbar, settings, preview, and help. -->
-  <template id="editor-markup">
-    <main id="setup" class="d-flex flex-column vh-100 overflow-hidden">
-      <!-- URL toolbar and tool navigation. -->
-      <header class="url-toolbar has-overlay light-links d-flex flex-column gap-2 p-2 bg-primary border-bottom sticky-top flex-shrink-0">
-        <div class="overlay-vertical-inverted pe-none" aria-hidden="true"></div>
-        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
-          <div class="d-flex align-items-center gap-2">
-            <img src="https://byuwur.github.io/img/logo.png" alt="" />
-            <details class="tool-switcher position-relative flex-shrink-0 me-2" data-tool="template">
-              <summary class="tool-brand list-unstyled d-flex align-items-center gap-2 fw-bold text-nowrap fs-5" aria-label="stream.html tools">
-                <span class="tool-wordmark text-white">stream<span>.html</span></span>
-                <span class="tool-caret text-white" aria-hidden="true">&#9662;</span>
-              </summary>
-              <nav class="dropdown-menu d-none rounded-0 shadow mt-0" aria-label="Tools">
-                <a class="dropdown-item py-2" href="./controller/index.html"><i class="fa-solid fa-gamepad fa-fw me-2" aria-hidden="true"></i>Controller</a>
-                <a class="dropdown-item py-2" href="./popup/index.html"><i class="fa-solid fa-comment fa-fw me-2" aria-hidden="true"></i>Popup</a>
-                <a class="dropdown-item py-2" href="./main/index.html"><i class="fa-solid fa-clapperboard fa-fw me-2" aria-hidden="true"></i>Main scene</a>
-              </nav>
-            </details>
-          </div>
-          <p class="config-credit d-none d-md-block m-0 ms-auto text-end small text-white">
-            &copy;
-            2026, Made with
-            <i class="fa-solid fa-heart text-danger align-middle" role="img" aria-label="love"></i>
-            by
-            <a href="https://byuwur.co" target="_blank" rel="noopener" class="text-white link-body-emphasis">
-              BONYUR @byUwUr
-            </a>
-          </p>
-          <nav class="config-menu d-flex align-items-center gap-2 flex-shrink-0" aria-label="Configurator menu">
-            <button id="theme-toggle" class="theme-toggle rounded-0 border border-light text-white" type="button" disabled title="Loading theme controls" aria-label="Toggle theme" aria-pressed="true">
-              <span aria-hidden="true">&#9790;&#65038; &#9728;&#65038;</span>
-            </button>
-            <a class="btn btn-sm btn-outline-light text-nowrap" href="https://github.com/byuwur/stream.html" target="_blank" rel="noopener" title="Source code">
-              <i class="fa-brands fa-github me-1" aria-hidden="true"></i>
-              GitHub
-            </a>
-          </nav>
-        </div>
-        <div class="d-flex align-items-center gap-2">
-          <label class="url-field flex-grow-1 overflow-hidden text-body form-label d-flex flex-column gap-1 w-100 m-0" for="overlay-url">
-            <span class="visually-hidden">Overlay URL</span>
-            <input id="overlay-url" readonly spellcheck="false" class="form-control rounded-0 bg-body-secondary border-secondary-subtle font-monospace small" />
-          </label>
-          <button id="copy-url" class="btn btn-sm btn-light flex-shrink-0 text-nowrap" type="button">
-            <i class="fa-solid fa-copy me-2" aria-hidden="true"></i>
-            <span class="copy-label">Copy URL</span>
-          </button>
-          <button class="btn btn-sm btn-outline-light flex-shrink-0 text-nowrap" type="reset" form="overlay-form">
-            <i class="fa-solid fa-arrow-rotate-left me-2" aria-hidden="true"></i>
-            Reset
-          </button>
-        </div>
-      </header>
-      <div class="setup-layout row g-0 flex-grow-1 flex-column flex-md-row flex-nowrap overflow-auto">
-        <!-- Editable settings. -->
-        <aside class="settings-panel h-100 flex-shrink-0 col-12 col-md-4 bg-body-tertiary p-3 overflow-y-auto border-end" aria-label="Overlay parameters">
-          <h1 class="h4 mb-1"><i class="fa-solid fa-sliders me-2" aria-hidden="true"></i>This is the form.</h1>
-          <p class="setup-intro text-body-secondary">
-            Your next overlay starts here. Edit a field and watch the demo preview change.
-          </p>
-          <form id="overlay-form" data-configurator class="accordion">
-            <fieldset class="accordion-item mb-3 border border-secondary-subtle bg-body p-2">
-              <legend class="float-start w-100 fs-6 fw-semibold border-bottom pb-2 mb-2 text-primary">
-                <button id="demo-fields-toggle" class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#demo-fields" aria-expanded="true" aria-controls="demo-fields">
-                  <i class="fa-solid fa-sliders me-2" aria-hidden="true"></i>This is a section.
-                </button>
-              </legend>
-              <div id="demo-fields" class="accordion-collapse collapse show" aria-labelledby="demo-fields-toggle">
-                <label class="form-label d-flex flex-column gap-1 w-100 mb-3">
-                  <span class="field-caption d-flex align-items-center gap-2">
-                    <i class="fa-solid fa-pen fa-fw text-primary" aria-hidden="true"></i>
-                    <span>This is a text field.</span>
-                  </span>
-                  <textarea name="message" data-description="Example plain text displayed in the demo preview." maxlength="160" rows="2" class="form-control rounded-0 bg-body-secondary border-secondary-subtle"></textarea>
-                </label>
-                <label class="form-label d-flex flex-column gap-1 w-100 mb-3">
-                  <span class="field-caption d-flex align-items-center gap-2">
-                    <i class="fa-solid fa-font fa-fw text-primary" aria-hidden="true"></i>
-                    <span>This is a number field (rem).</span>
-                  </span>
-                  <input name="fontSizeRem" data-description="Example text size in rem." type="number" min="0.5" max="6" step="any" required class="form-control rounded-0 bg-body-secondary border-secondary-subtle" />
-                </label>
-                <label class="form-label d-flex flex-column gap-1 w-100 mb-3">
-                  <span class="field-caption d-flex align-items-center gap-2">
-                    <i class="fa-solid fa-palette fa-fw text-primary" aria-hidden="true"></i>
-                    <span>This is a color field (HEX).</span>
-                  </span>
-                  <input name="textColor" data-description="Example text color. Pickr uses HEX, including alpha." data-group="colors" type="text" maxlength="160" class="form-control rounded-0 bg-body-secondary border-secondary-subtle" />
-                </label>
-              </div>
-            </fieldset>
-          </form>
-        </aside>
-        <!-- Scaled view of the actual overlay. -->
-        <section class="preview-panel h-100 order-first order-md-last flex-shrink-0 col-12 col-md-8 bg-body p-3 d-flex flex-column gap-2" aria-label="Overlay preview">
-          <header class="preview-toolbar d-flex justify-content-between align-items-center small">
-            <strong><i class="fa-solid fa-eye me-2" aria-hidden="true"></i>This is the demo preview.</strong>
-            <a id="preview-url" target="_blank" rel="noopener" class="link-body-emphasis">
-              <i class="fa-solid fa-arrow-up-right-from-square me-2" aria-hidden="true"></i>
-              Open overlay
-            </a>
-          </header>
-          <div id="preview-stage" class="ratio ratio-16x9 flex-grow-1 overflow-hidden border rounded-0 bg-body-secondary">
-            <svg id="preview-viewport" viewBox="0 0 1280 720" role="group" aria-label="Scaled overlay preview">
-              <foreignObject width="100%" height="100%">
-                <iframe id="overlay-preview" class="border-0" title="Demo preview"></iframe>
-              </foreignobject>
-            </svg>
-          </div>
-          <!-- Preview update status and reset guidance. -->
-          <footer class="preview-footer d-flex flex-wrap justify-content-between gap-2 small text-body-secondary">
-            <span id="preview-status">Change a parameter to update the preview.</span>
-            <span id="copy-status" role="status"></span>
-            <p class="setup-help m-0 ms-auto text-end">
-              Reset restores the settings loaded when you opened this page.
-            </p>
-          </footer>
-        </section>
-      </div>
-      <div id="accessibility-preset"></div>
-      <!-- Help navigation. -->
-      <footer class="config-footer border-top p-2 text-body-secondary flex-shrink-0">
-        <nav class="footer-links px-5 text-center" aria-label="Help"></nav>
-      </footer>
-    </main>
-  </template>
-
+  <div id="configurator"></div>
+  <script src="./configurator.js" defer></script>
 </body>
 
 </html>
