@@ -488,10 +488,39 @@
     // ==== SELECT2 CONTROLS ====
     // ==========
 
-    /** Enhance declared selects once; native controls remain authoritative. */
+    /**
+     * Enhance existing controls; retain Select2's automatic above/below positioning.
+     * @param {HTMLSelectElement} select Native control; its value and events are preserved.
+     * @param {Object} [options] Select2 templates and control-specific options.
+     */
     function initSelect2(select, options = {}) {
       const jqSelect = $(select);
-      if ($.fn.select2 && !jqSelect.data("select2")) jqSelect.select2({ width: "100%", ...options });
+      if (!$.fn.select2 || jqSelect.data("select2")) return;
+      jqSelect.select2({
+        width: "100%",
+        dropdownParent: jqSelect.closest(".modal, dialog").length ? jqSelect.closest(".modal, dialog") : $(document.body),
+        dropdownCssClass: "stream-select2-dropdown",
+        ...options
+      });
+      jqSelect.next(".select2-container").addClass("stream-select2");
+      jqSelect.off("select2:open.streamSelect2").on("select2:open.streamSelect2", () => {
+        const widget = jqSelect.data("select2");
+        const fitDropdown = () => {
+          const bounds = widget.$container[0].getBoundingClientRect();
+          if (bounds.bottom <= 0 || bounds.top >= innerHeight) {
+            jqSelect.select2("close");
+            return;
+          }
+          const space = Math.max(bounds.top, innerHeight - bounds.bottom);
+          const searchHeight = widget.dropdown.$dropdown.outerHeight() - widget.$results.outerHeight();
+          widget.$results.css("max-height", Math.max(0, Math.min(416, space - searchHeight - 12)));
+          // Reuse the pinned Select2 adapter so its direction and modal offsets stay in sync.
+          widget.dropdown._positionDropdown();
+        };
+        $(window).on("resize", fitDropdown);
+        jqSelect.one("select2:close.streamSelect2", () => $(window).off("resize", fitDropdown));
+        fitDropdown();
+      });
     }
 
     // ==========
