@@ -227,6 +227,8 @@ Validate settings, encode query parameters, render text safely, and preserve hos
 
 The landing generates ready cards from the shared catalog and one HTML template. Folder IDs derive links and prev.jpg; missing previews leave a blank background. The introduction takes one third of desktop width; mobile uses one column.
 
+Search and icon-backed categories filter the catalog, with the category selector on the left and Find your overlay... beside it. Menus adapt to the available viewport and filter-row width.
+
 Sharing metadata uses the static root [prev.jpg](prev.jpg), currently 1920 × 1080. Resource pages use their own preview images. Update the image and its Open Graph/Twitter metadata when changing the presentation; the random browser styling does not generate a new share image.
 
 ## License
