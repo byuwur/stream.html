@@ -289,7 +289,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const rootStyle = document.documentElement.style;
     // CSS owns appearance; settings only provide its colors, sizes, and offsets.
     const styles = {
-      "font-family": `${settings.primaryFont || '"Courier New"'}, Courier, monospace`,
+      "font-family": byFont.family(settings.primaryFont || "Courier New", "Courier, monospace"),
       "primary-color": settings.primaryTextColor,
       "secondary-color": settings.subTextColor,
       "accent-color": settings.accentColor,

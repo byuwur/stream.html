@@ -45,7 +45,7 @@ Configurators and animated overlays need internet for CDN libraries, fonts, the 
 | Popup renderer      | Native DOM APIs, GSAP, MorphSVG, and Font Awesome brand icons.         |
 | Main renderer       | Native DOM APIs, GSAP, and Font Awesome brand icons.                   |
 
-CDN imports use `byuwur/spa.js@v19.4` through jsDelivr, with separate script tags in dependency order. jQuery belongs to the configurator; resource rendering does not use it.
+CDN imports use `byuwur/spa.js@v20.1` through jsDelivr, with separate script tags in dependency order. jQuery belongs to the configurator; resource rendering does not use it.
 
 ### Editing an existing URL
 
@@ -170,6 +170,8 @@ These folders need their named application or service; they do not use the HTML 
 | `DroidCamDrivers.exe` | Windows driver installer, unrelated to running the HTML overlays. |
 
 Program exports contain personal settings and machine-specific paths. Back up your settings before importing, and replace devices, paths, and account settings. Do not share stream keys, WebSocket passwords, or private widget URLs.
+
+Shared dependencies use SPA.js v20.1. Main and Popup load its native byFont helper for Google Fonts or installed families, without requiring jQuery for rendering.
 
 ## Development
 

@@ -206,7 +206,7 @@ document.addEventListener("DOMContentLoaded", () => {
     popup.classList.add(mode);
     popup.style.transform = `scale(${scale})`;
     for (const name of ["iconBoxColor", "textBoxColor", "iconColor", "fontColor"]) popup.style.setProperty("--" + name, settings[name]);
-    popup.style.setProperty("--font-family", `${settings.primaryFont || '"Courier New"'}, Courier, monospace`);
+    popup.style.setProperty("--font-family", byFont.family(settings.primaryFont || "Courier New", "Courier, monospace"));
     popup.style.setProperty("--font-size", `${settings.fontSizeRem}rem`);
     popup.style.setProperty("--font-weight", settings.fontWeight);
     popup.style.setProperty("--text-offset", `${settings.textYOffsetRem}rem`);
