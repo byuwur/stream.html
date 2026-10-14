@@ -173,6 +173,8 @@ Program exports contain personal settings and machine-specific paths. Back up yo
 
 Shared dependencies use SPA.js v20.1. Main and Popup load its native byFont helper for Google Fonts or installed families, without requiring jQuery for rendering.
 
+byConfigurator.catalog owns tool metadata and priority. availableTools includes only tools marked ready: true. Unfinished tools stay registered with ready: false and are excluded from navigation and generated cards.
+
 ## Development
 
 **Simple is complicated enough.** Keep renderer behavior in the resource, editor behavior in the configurator, and dependencies explicit.

@@ -4,6 +4,225 @@
  * Editor deps: jQuery 4, Bootstrap 5, Pickr, and resource parameter rules.
  */
 
+(function (global) {
+  global.byConfigurator = global.byConfigurator || {};
+  const byConfigurator = global.byConfigurator;
+  const root = new URL(".", document.currentScript.src);
+  byConfigurator.catalog = {
+    // Resolve from this script so links also work in downloaded folders and nested deployments.
+    root,
+    categories: [
+      {
+        id: "scenes",
+        name: "Scenes & cameras",
+        icon: "fa-clapperboard"
+      },
+      {
+        id: "interaction",
+        name: "Input & interaction",
+        icon: "fa-gamepad"
+      },
+      {
+        id: "time",
+        name: "Time & planning",
+        icon: "fa-clock"
+      },
+      {
+        id: "branding",
+        name: "Branding & socials",
+        icon: "fa-tags"
+      },
+      {
+        id: "information",
+        name: "Text & information",
+        icon: "fa-align-left"
+      }
+    ],
+    tools: [
+      {
+        id: "controller",
+        name: "Controller",
+        description: "Gamepad or keyboard. Four skins. Every input on screen.",
+        icon: "fa-gamepad",
+        category: "interaction",
+        ready: false
+      },
+      {
+        id: "popup",
+        name: "Social popup",
+        description: "Your accounts, one animated popup at a time. Pick from 90+ platforms.",
+        icon: "fa-comment",
+        category: "branding",
+        ready: true
+      },
+      {
+        id: "main",
+        name: "Main scene",
+        description: "Starting, BRB, ending, and intermission. Make each moment yours.",
+        icon: "fa-clapperboard",
+        category: "scenes",
+        ready: true
+      },
+      {
+        id: "clock",
+        name: "Clock",
+        description: "Your time, anywhere. Digital, analog, split flap, or beautifully minimal.",
+        icon: "fa-clock",
+        category: "time",
+        ready: false
+      },
+      {
+        id: "timer",
+        name: "Timer / Countdown",
+        description: "A reload-safe countdown or elapsed timer for your next run.",
+        icon: "fa-hourglass-half",
+        category: "time",
+        ready: false
+      },
+      {
+        id: "webcam",
+        name: "Webcam Frame",
+        description: "A clean, transparent frame to place above your camera in OBS.",
+        icon: "fa-video",
+        category: "scenes",
+        ready: false
+      },
+      {
+        id: "ticker",
+        name: "Ticker",
+        description: "News, commands, and reminders in a seamless scrolling strip.",
+        icon: "fa-align-left",
+        category: "information",
+        ready: false
+      },
+      {
+        id: "watermark",
+        name: "Watermark",
+        description: "A signature for your stream. Text, monogram, or your own logo.",
+        icon: "fa-stamp",
+        category: "branding",
+        ready: false
+      },
+      {
+        id: "lower-thirds",
+        name: "Lower Thirds",
+        description: "Introduce a guest, a game, or a moment with a broadcast card.",
+        icon: "fa-id-card",
+        category: "branding",
+        ready: false
+      },
+      {
+        id: "qr",
+        name: "QR / Link Card",
+        description: "A locally generated, scannable link card. Point viewers to something good.",
+        icon: "fa-qrcode",
+        category: "information",
+        ready: false
+      },
+      {
+        id: "reminder",
+        name: "Periodic Reminder",
+        description: "Gentle automatic reminders, on your schedule.",
+        icon: "fa-bell",
+        category: "information",
+        ready: false
+      },
+      {
+        id: "badge",
+        name: "Stream Badge",
+        description: "LIVE. AFK. RECORDING. Give the moment a name.",
+        icon: "fa-tag",
+        category: "branding",
+        ready: false
+      },
+      {
+        id: "credits",
+        name: "Credits Roll",
+        description: "Give your people a proper send-off. Closing credits, made yours.",
+        icon: "fa-scroll",
+        category: "information",
+        ready: false
+      },
+      {
+        id: "schedule",
+        name: "Schedule",
+        description: "What’s on next? A dated run of show with automatic current-segment highlighting.",
+        icon: "fa-calendar-days",
+        category: "time",
+        ready: false
+      },
+      {
+        id: "sponsors",
+        name: "Sponsor Carousel",
+        description: "Spotlight public logos and messages, one partner at a time.",
+        icon: "fa-handshake",
+        category: "branding",
+        ready: false
+      },
+      {
+        id: "info",
+        name: "Info Board",
+        description: "Stream rules, game settings, commands, and the details worth keeping on screen.",
+        icon: "fa-circle-info",
+        category: "information",
+        ready: false
+      },
+      {
+        id: "effects",
+        name: "Screen Effects",
+        description: "A little atmosphere. Rain, snow, confetti, and floating symbols.",
+        icon: "fa-wand-magic-sparkles",
+        category: "scenes",
+        ready: false
+      },
+      {
+        id: "hud",
+        name: "Camera HUD",
+        description: "REC, timecode, and a little nostalgia for your camera view.",
+        icon: "fa-camera",
+        category: "scenes",
+        ready: false
+      },
+      {
+        id: "timeline",
+        name: "Progress Timeline",
+        description: "From a beginning to an ending. Show where you are, and what remains.",
+        icon: "fa-bars-progress",
+        category: "time",
+        ready: false
+      },
+      {
+        id: "randomizer",
+        name: "Randomizer",
+        description: "Pick a challenge, a game, or your next move. A seed makes every draw reproducible.",
+        icon: "fa-shuffle",
+        category: "interaction",
+        ready: false
+      },
+      {
+        id: "quotes",
+        name: "Quote Display",
+        description: "A thought, a tip, a little trivia. Keep the good words coming.",
+        icon: "fa-quote-left",
+        category: "information",
+        ready: false
+      },
+      {
+        id: "shortcuts",
+        name: "Keyboard Shortcut Sheet",
+        description: "Keep the controls in sight. An editable guide, without keyboard monitoring.",
+        icon: "fa-keyboard",
+        category: "interaction",
+        ready: false
+      }
+    ],
+    get availableTools() {
+      return this.tools.filter((tool) => tool.ready !== false);
+    }
+  };
+
+})(window);
+
 document.addEventListener("DOMContentLoaded", () => {
   // Mount the page before resource DOMContentLoaded handlers run.
   const isOverlay = () => location.search.length > 1 && !location.hash;
