@@ -622,7 +622,28 @@
       zhihu: "Zhihu"
     };
 
+    const platformIcons = new Map();
+    function platformIcon(platform) {
+      if (platformIcons.has(platform)) return platformIcons.get(platform);
+      const jqIcon = $(/* HTML */ `<i></i>`)
+        .addClass(Object.hasOwn(configuratorPlatforms, platform) ? `fa-brands fa-${platform}` : "fa-solid fa-globe")
+        .prop("hidden", true)
+        .appendTo(form);
+      const style = getComputedStyle(jqIcon[0], "::before");
+      const supported = style.getPropertyValue("--fa") || !["none", "normal", "", '""'].includes(style.content);
+      const classes = supported ? jqIcon.attr("class") : "fa-solid fa-globe";
+      jqIcon.remove();
+      platformIcons.set(platform, classes);
+      return classes;
+    }
 
+    function platformOption(option) {
+      if (!option.id) return option.text;
+      const jqLabel = $(/* HTML */ `<span class="platform-option"></span>`);
+      $(/* HTML */ `<i></i>`, { class: `${platformIcon(option.id)} fa-fw me-2`, "aria-hidden": "true" }).appendTo(jqLabel);
+      jqLabel.append($(/* HTML */ `<span></span>`).text(option.text));
+      return jqLabel;
+    }
 
     /**
      * Edits an ordered list; the resource validates entries and the configurator owns URL generation.
@@ -678,7 +699,9 @@
             .appendTo(jqRow);
         });
         jqRow.appendTo(jqEditor);
-        if (choices) initSelect2(jqSelect);
+        if (choiceKey === "platform") {
+          initSelect2(jqSelect, { templateResult: platformOption, templateSelection: platformOption });
+        } else if (choices) initSelect2(jqSelect);
         return jqRow;
       }
       // Serialize the current row order for validation and URL generation.
