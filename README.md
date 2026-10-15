@@ -2,239 +2,207 @@
 
 ![stream.html preview](prev.jpg)
 
-Free stream overlays for controller input, social popups, and main scenes, plus the presets and assets I use for streaming. Free. Forever.
-
-Open a configurator, adjust the settings, and copy its URL into an OBS Browser source. No account, package install, or build step.
+Browser overlays for your stream. Choose a tool, make it yours, and copy its URL into OBS. Free. Forever.
 
 [Open stream.html](https://byuwur.github.io/stream.html/) · [Configurator demo](https://byuwur.github.io/stream.html/configurator.html)
 
-## HTML overlays
+## Ready to use
 
-| Tool | What it does | Configure online | Local entry point |
-| --- | --- | --- | --- |
-| Controller | Shows gamepad or keyboard input with Xbox, PlayStation, fight-stick, and GameCube skins. | [Controller form](https://byuwur.github.io/stream.html/controller/) | `controller/index.html` |
-| Popup | Cycles through social handles with animated icons and configurable colors, timing, direction, and scale. | [Popup form](https://byuwur.github.io/stream.html/popup/) | `popup/index.html` |
-| Main scene | Starting, BRB, ending, and intermission scenes with a title, countdown, branding, social accounts, and schedule. | [Main scene form](https://byuwur.github.io/stream.html/main/) | `main/index.html` |
+| Tool | What it does | Local entry point |
+| --- | --- | --- |
+| [Controller](https://byuwur.github.io/stream.html/controller/) | Gamepad or keyboard input. Xbox, PlayStation, fight-stick, and GameCube skins. | `controller/index.html` |
+| [Social popup](https://byuwur.github.io/stream.html/popup/) | Animated account rotation with 90+ platforms, colors, fonts, and timing. | `popup/index.html` |
+| [Main scene](https://byuwur.github.io/stream.html/main/) | Starting, BRB, ending, and intermission scenes with branding, countdown, accounts, and a schedule. | `main/index.html` |
 
-Each tool uses the same `index.html` for its configurator and overlay, with separate markup and styles for each mode. The homepage lets you choose a tool; the forms provide collapsible sections, live previews, and links to parameter help.
+1. Open a tool, adjust its fields, and check the live preview.
+2. Click **Copy URL**.
+3. Add an OBS **Browser** source and paste the URL with **Local file** unchecked.
 
-## Use with OBS
+Use **1920 × 1080** for Main scene. Size Controller and Popup for your layout; the preview shows the actual overlay at a smaller scale. No account, upload, package install, or build step.
 
-1. Open a configurator from the table above.
-2. Replace my example branding, text, handles, and media with yours.
-3. Adjust settings and check the live preview.
-4. Click **Copy URL**.
-5. Add an OBS **Browser** source and paste the URL.
+## Settings stay in the URL
 
-Use **1920 × 1080** for the main scene. Size controller and popup sources for your layout. The preview scales the actual overlay without changing its OBS dimensions.
+- Bare folder or `index.html` URLs open the editor. Query settings without a hash render the overlay.
+- Append `#configure` to edit an existing URL. Help links open the corresponding panel.
+- **Reset** restores what the editor loaded, including imported lists and their order.
+- Invalid form values stop URL generation and keep the last valid preview. Invalid or unknown URL parameters keep the defaults; empty text clears a field.
 
-Settings sections start expanded and can collapse independently using their headings. Switches and their labels are clickable. Color defaults and Pickr use HEX, with eight digits for transparency (`#RRGGBBAA`). Theme preference is saved locally; accessibility controls offer text, motion, font, spacing, contrast, and color adjustments.
+The form handles encoding. Display text stays text, and lists support add, edit, reorder, and remove. Color controls preserve HEX alpha (`#RRGGBBAA`). Theme preference is saved locally. Motion follows the tool's settings; explicit Off, None, and Static choices still apply.
+
+Fonts search 350 Google families, system fonts, and custom installed families or CSS stacks. Selected fonts and visible samples load on demand. The font must be available on the OBS computer; missing families use each tool's fallback.
+
+Media fields reference public HTTP(S) URLs or paths relative to the tool's HTML. Local file URLs require downloaded use. No uploads or Base64 `data:` media URLs. Keep private information out of shared URLs.
 
 ### Downloaded use
 
-Download `stream.html`, then open a tool's `index.html`. Each tool has one HTML, one JavaScript, and one CSS file, plus its artwork. Keep the whole tool folder and the parent `configurator.js` and `configurator.css`. Shared dependencies load from the pinned SPA.js CDN; internet access is needed for those dependencies and Google Fonts. One HTML file alone is not a complete bundle.
+Keep the resource folder and its parent `configurator.js` and `configurator.css`. The shared runtime is required by both the renderer and editor; one HTML file is not a bundle.
 
-Local configurators generate `file:///.../{tool}/index.html?...` URLs. Paste the complete URL into OBS with **Local file** unchecked. The folder must stay at that path on the viewing computer. Basic overlays do not need a web server.
+Open `{tool}/index.html`, then copy the generated `file:///.../{tool}/index.html?...` URL into OBS with **Local file** unchecked. Keep the files at that path. Hosted URLs use directories, such as `controller/?player=1`.
 
-Configurators need internet for their CDN libraries. Font-enabled renderers also load the shared SPA.js font helper; Main and Popup load animation libraries and optional remote media. Offline use requires saving those dependencies and updating their script URLs. Installed and system fonts need no Google Fonts request. The Controller renderer uses local files and native JavaScript. Local media paths must exist on the viewing computer.
+CDN assets are pinned to `spa.js@v20.1`. Editors load jQuery, Bootstrap, Select2, Pickr, and common styles/helpers. Renderers use native JavaScript; Main and Popup also use GSAP, with MorphSVG for Popup. Font-enabled pages use the native `byFont` helper. Offline use needs saved CDN dependencies and updated imports; installed fonts need no Google request. Controller output uses local artwork and the shared runtime.
 
-Font controls search a bundled catalog of 350 verified Google Fonts, plus system fonts and custom installed families or CSS stacks. Font names appear in their own typefaces; only selected families and visible dropdown rows request fonts, through the official CSS API with `display=swap`. Supported normal weights share one stylesheet per family per document. Menus adapt to available screen space and open above or below the control automatically. The inline sample and actual overlay preview use the selected family, with system fallbacks if loading fails. Font values remain ordinary URL settings, including when reopening with `#configure` or using Reset.
+### Older URLs
 
-Overlay animations follow each tool's settings rather than the operating system's reduced-motion preference, keeping previews and OBS output consistent. Explicit Off, None, and Static animation choices still apply where available. Shared `_common.css` and configurator accessibility controls are unchanged.
-
-| Part                | Dependencies                                                                                  |
-| ------------------- | --------------------------------------------------------------------------------------------- |
-| Shared configurator | jQuery, Bootstrap, Select2, Pickr, Font Awesome, and SPA common styles/helpers.               |
-| Controller renderer | Native JavaScript and its controller artwork.                                                 |
-| Popup renderer      | Native DOM APIs, GSAP, MorphSVG, and Font Awesome brand icons.                                |
-| Main renderer       | Native DOM APIs, GSAP, and Font Awesome brand icons.                                          |
-
-CDN imports use `byuwur/spa.js@v20.1` through jsDelivr. The landing and configurators use jQuery for DOM and events. Configurator dependencies are declared with `data-editor-src` and loaded in order only in editor mode. Renderers use native JavaScript, the shared SPA.js font helper where needed, and GSAP/MorphSVG for Main and Popup; they do not load jQuery or editor widgets.
-
-### Editing an existing URL
-
-- Bare folder and `index.html` URLs open the configurator; URLs with query settings and no hash render the overlay. No `overlay` flag is needed.
-- To edit an existing overlay URL, append `#configure`, keeping its settings. Help hashes also open the configurator.
-- Both modes use the same `index.html`; no redirect is needed. Replace old `controller.html`, `popup.html`, or `main.html` filenames in OBS URLs with `index.html`, keeping their parameters.
-- Hosted navigation and generated overlay URLs use directory paths, such as `controller/?player=1`. Downloaded-file URLs retain `index.html`.
-- **Reset** restores the settings loaded when the form opened. Reopen the bare folder URL for bundled defaults.
-
-Settings live in the URL, with no upload or account storage. Use public display information only. The URL fragment opens the editor and help; it is omitted from generated overlay URLs.
-
-Valid URL values override each resource's defaults; missing or invalid values keep them. Empty text clears a field and unknown parameters are ignored. Let the form encode spaces, colors, ampersands, and non-ASCII text. Display text is never executed as HTML.
-
-Invalid form fields stop URL generation and keep the last valid preview. Correct the highlighted fields to enable copying and refresh the preview.
-
-Older per-platform handles, weekday fields, popup account counts, and Popup's `fontSize`/`textYOffset` pixel aliases are ignored. Rebuild those URLs with the account/schedule editors and Popup's rem fields. Main's documented pixel parameters remain supported.
+Replace old `controller.html`, `popup.html`, and `main.html` filenames with the tool's folder, preserving parameters. Controller ignores legacy `scale`. Popup ignores pixel `fontSize`/`textYOffset` aliases, per-platform handles, and account counts. Main ignores old scene `mode`, `showBG`, `hideCountdown`, and weekday fields. Rebuild those settings with the current form.
 
 ## Controller
 
-![Controller overlay and configurator preview](controller/prev.jpg)
+![Controller preview](controller/prev.jpg)
 
-Xbox, PlayStation, fight-stick, and GameCube skins for gamepad or keyboard input. The controller fits the viewport with `0.5rem` vertical margins and respects narrow widths; legacy `scale` is ignored.
+[Example: Player 1, Xbox](https://byuwur.github.io/stream.html/controller/?player=1&skin=1)
 
-Example: [`controller/index.html?player=1&skin=1`](https://byuwur.github.io/stream.html/controller/index.html?player=1&skin=1).
+| Parameter | Meaning |
+| --- | --- |
+| `player` | `1`–`4` for gamepads; `9` for keyboard. Default: `1`. |
+| `skin` | `1` Xbox, `2` PlayStation, `3` fight stick, `4` GameCube. |
+| `opacity` | `0`–`1`. |
+| `offset`, `deadzone` | Stick travel in pixels and deadzone threshold. |
+| `strength`, `curve` | `strength=0` disables trigger meters; `curve=1` enables stick curving. |
+| `rotation` | Maximum steering-wheel rotation in degrees. |
+| `mapping` | Binding array from **Custom Mapping**; `[]` uses standard controls. Older `{"mapping":[...]}` wrappers remain supported. |
 
-| Parameter            | Meaning                                                                                    |
-| -------------------- | ------------------------------------------------------------------------------------------ |
-| `player`             | `1` to `4` for gamepads (default `1`), `9` for keyboard.                                   |
-| `skin`               | `1` Xbox, `2` PlayStation, `3` fight stick, `4` GameCube.                                  |
-| `opacity`            | Display opacity (`0` to `1`).                                                              |
-| `offset`, `deadzone` | Stick movement in pixels and deadzone threshold.                                           |
-| `strength`           | `0` disables trigger strength meters; controlled by the **Disable Strength Meter** toggle. |
-| `curve`              | `1` enables curved stick movement; controlled by the **Enable Stick Curving** toggle.      |
-| `rotation`           | Maximum steering-wheel rotation in degrees.                                                |
-| `mapping`            | JSON array of bindings from the tool's mapping interface; `[]` keeps standard controls.    |
+Press a gamepad button for detection, or **F** for keyboard input. Click the preview or use OBS **Interact** to give it keyboard focus. Default bindings live in `bySettingsKB` inside `controller/index.html`; detection depends on the browser and operating system.
 
-Press a gamepad button to allow detection, or **F** to activate keyboard input. Keyboard input needs page focus: click the preview in the configurator or use OBS **Interact**. Default keyboard bindings are the explicit `bySettingsKB` object in `controller/index.html`. Detection depends on the browser/OBS runtime and operating system.
+**Custom Mapping** lets you choose a base, capture raw inputs, and apply bindings. The renderer polls input and fits the selected skin to the viewport, with `0.5rem` vertical margins.
 
-Open **Custom Mapping** from the help links to choose a mapping base, capture its raw inputs, and apply bindings. This editor builds the mapping JSON; the resource JavaScript polls input and applies the resulting bindings.
+## Social popup
 
-Previous URLs with a `{"mapping":[...]}` wrapper remain supported; newly generated URLs use the binding array directly.
+![Social popup preview](popup/prev.jpg)
 
-## Popup
+Pick a platform, enter its display handle, and reorder the accounts. Repeated platforms are allowed. Brand icons appear in the selector and overlay, with a globe fallback.
 
-![Social popup overlay and configurator preview](popup/prev.jpg)
-
-Add accounts, choose a supported platform and display text, then reorder with the arrows or remove unwanted rows. Multiple accounts can use the same platform.
-
-The searchable Select2 selector offers 90+ platforms supported by the bundled Font Awesome brand font, including Bluesky, Discord, Mastodon, Threads, TikTok, and X. Icons appear in both search results and selected values, with a globe fallback for unavailable glyphs. There is no PNG icon sheet.
-
-| Parameter | Accepted values / purpose |
+| Parameter | Meaning |
 | --- | --- |
 | `mode` | `right` (default) or `left`. |
-| `accounts` | Ordered JSON array, up to 100 entries and 20,000 characters total, each with a supported `platform` and plain-text `handle` of up to 160 characters. The form generates and encodes this parameter. Every entry is displayed; `[]` hides the popup. |
-| `pauseTime`, `inbetweenPauseTime` | Seconds per account and between animation cycles, `0` to `3600`. |
-| `scale` | `0.1` to `5`; scales from the chosen top corner. |
-| `iconBoxColor`, `textBoxColor`, `iconColor`, `fontColor` | CSS colors, such as `#400000` or `#FFFFFF80`; defaults use HEX. |
-| `primaryFont`, `fontWeight` | Google Fonts or an installed font family; weight `100` to `900` in steps of 100. |
-| `fontSizeRem`, `textYOffsetRem` | Text size `0.5` to `6.25` rem (default `4.5`); vertical offset `-6.25` to `6.25` rem. |
+| `accounts` | Up to 100 `{ "platform": "twitch", "handle": "YourChannel" }` entries; 160 characters per handle and 20,000 JSON characters total. `[]` hides the popup. |
+| `pauseTime`, `inbetweenPauseTime` | Seconds per account and between cycles, `0`–`3600`. Defaults: five seconds each. |
+| `scale` | `0.1`–`5`, anchored to the selected top corner. |
+| `iconBoxColor`, `textBoxColor`, `iconColor`, `fontColor` | CSS colors, including HEX alpha. |
+| `primaryFont`, `fontWeight` | Font family; weight `100`–`900` in steps of 100. Fallback: Courier, then monospace. |
+| `fontSizeRem`, `textYOffsetRem` | Text size `0.5`–`6.25` rem (default `4.5`); vertical offset `-6.25`–`6.25` rem. |
 
-Defaults live in `popup/popup.js`: three accounts, five seconds each, with five seconds between cycles. Reset restores the list and order loaded with the form.
-
-Before URL encoding, an account list can look like:
-
-```json
-[
-  { "platform": "twitch", "handle": "YourChannel" },
-  { "platform": "bluesky", "handle": "your.bsky.social" }
-]
-```
-
-Invalid JSON or unsupported platforms use the defaults. Blank handles keep their slots. The chosen font falls back to Courier, then monospace if unavailable.
+Defaults are three accounts. Invalid JSON or unsupported platforms retain those defaults; blank handles keep their slots. Font readiness and refreshed measurements keep repeated animations aligned.
 
 ## Main scene
 
-![Main scene overlay and configurator preview](main/prev.jpg)
+![Main scene preview](main/prev.jpg)
 
-Starting, BRB, ending, and intermission scenes with title, countdown, branding, social accounts, and schedule.
+[Example: Starting soon](https://byuwur.github.io/stream.html/main/?sceneTitle=Starting+soon&tagline=Your+channel&countdownTime=5&displayBranding=no&displaySocial=no)
 
-Social accounts use the same platform selector and add, reorder, and remove controls as Popup, with an additional heading per account. Schedule rows use a weekday selector and editable text, with the same controls. Reset restores both lists as loaded.
-
-Example: [`main/index.html?sceneTitle=Starting+soon&tagline=Your+channel&countdownTime=5&displayBranding=no&displaySocial=no`](https://byuwur.github.io/stream.html/main/index.html?sceneTitle=Starting+soon&tagline=Your+channel&countdownTime=5&displayBranding=no&displaySocial=no).
-
-| Parameter | Accepted values / purpose |
+| Parameter | Meaning |
 | --- | --- |
-| `sceneTitle`, `tagline` | Configurable title (up to 300 characters, with line breaks) and subtitle (up to 160). |
-| `countdownTime` | Minutes, `0` to `1440`; default `4`. |
-| `countdownMessage`, `countdownOverMessage` | Text during and after the countdown. |
-| `displayCountdown`, `displayBranding`, `displaySocial`, `displaySchedule` | `yes` or `no`. Branding controls the logo; title and subtitle remain independent. |
-| `backgroundColor` | CSS background color behind the scene and its media; defaults to transparent HEX `#00000000`. |
-| `primaryFont`, `titleSize`, `subtitleSize` | Font family and title/subtitle sizes (`8` to `200` px). |
-| `primaryTextColor`, `subTextColor`, `accentColor`, `frameColor` | CSS colors. |
-| `frameWidth` | `0` to `100` px. |
-| `logoUrl`, `logoOpacity`, `logoScale` | Optional image URL/path, opacity `0` to `1`, scale `0.1` to `5`. Empty URL uses the default BONYUR logo from `byuwur.github.io`; hide it with `displayBranding=no`. |
-| `backgroundType`, `backgroundUrl` | `video` or `image`, plus an optional media URL/path. No background media is bundled in `main/`. |
-| `backgroundBlur`, `backgroundOverlayOpacity`, `backgroundOverlay` | Blur `0` to `100` px, tint opacity `0` to `1`, and tint CSS color. |
-| `accounts` | Ordered JSON array, up to 100 entries and 20,000 characters total: supported `platform`, plain-text `handle`, and optional `heading` (each text up to 160 characters). Blank handles hide that account; `[]` hides all accounts. |
-| `scheduleEntries` | Ordered JSON array, up to 7 entries and 4,000 characters total: `day` (`monday` through `sunday`) and plain-text `text` of up to 160 characters. Entries may repeat a weekday. `[]` hides the schedule. |
+| `sceneTitle`, `tagline` | Title with line breaks, up to 300 characters; subtitle, up to 160. |
+| `countdownTime`, `countdownMessage`, `countdownOverMessage` | Minutes (`0`–`1440`, default `4`) and text during/after the countdown. |
+| `displayCountdown`, `displayBranding`, `displaySocial`, `displaySchedule`, `displayLabels` | `yes` or `no`. Branding toggles the logo; title and subtitle stay independent. |
+| `primaryFont`, `titleSize`, `subtitleSize` | Font family and text sizes (`8`–`200` px), with Courier/monospace fallback. |
+| `primaryTextColor`, `subTextColor`, `accentColor`, `frameColor`, `contentBackgrounds`, `backgroundColor` | CSS colors. The scene background defaults to transparent `#00000000`. |
+| `frameWidth` | `0`–`100` px, available in the form and URL. |
+| `logoUrl`, `logoOpacity`, `logoScale` | Image URL/path, opacity `0`–`1`, scale `0.1`–`5`. An empty URL uses the BONYUR logo; `displayBranding=no` hides it. |
+| `backgroundType`, `backgroundUrl` | `video` or `image`, with an optional media URL/path. No background media is bundled. |
+| `backgroundBlur`, `backgroundOverlayOpacity`, `backgroundOverlay` | Blur `0`–`100` px, tint opacity `0`–`1`, and tint color. |
+| `accounts` | Popup's account format with an optional `heading` of up to 160 characters. Blank handles and `[]` hide accounts. |
+| `scheduleEntries` | Up to seven `{ "day": "monday", "text": "Your activity" }` rows; weekdays may repeat. Text is limited to 160 characters, JSON to 4,000. `[]` hides the schedule. |
 
-Defaults live in `main/main.js`. Valid URL settings apply to the same settings object. Invalid lists retain bundled defaults. Main no longer uses scene presets: old `mode`, `showBG`, and `hideCountdown` parameters are ignored. Configure the title, `backgroundColor`, and `displayCountdown` directly. byConfigurator.platforms and parseAccounts share supported platform values across both renderers and the editor. Main enables account headings. Automatic follower, donation, and subscriber updates are not connected.
+Accounts and schedule rows use the same list controls. Invalid lists retain defaults. Main's pixel parameters convert to rem at a 16px root. Follower, donation, and subscriber labels are editable display text; live service updates are not connected.
 
-Media fields reference files rather than uploading them. Use public HTTP(S) URLs or paths relative to the resource HTML. Local file URLs require a downloaded overlay; Base64 `data:` URLs are not supported. Fonts must be available on the viewing computer; unavailable choices fall back to Courier, then monospace.
+## Work in progress
 
-Main's pixel size parameters are converted to rem internally at a root size of 16px. `frameWidth` is available in both the form and URL.
+The other 19 tools remain `ready: false`, hidden from the landing and navigation, pending manual testing and review. These are development notes, not a release announcement. Their defaults and full field descriptions live in the local forms.
 
-## Program configurations and assets
-
-These folders need their named application or service; they do not use the HTML configurators.
-
-| Folder / file | Contents and use |
+| Folder | Purpose and useful limits |
 | --- | --- |
-| `alert-box.streamlabs.com/` | Streamlabs Alert Box custom widget: HTML, CSS, JavaScript, custom-field JSON, and sound. Copy the corresponding pieces into the widget editor; service placeholders need Streamlabs to render. |
-| `chat-box.streamlabs.com/` | Streamlabs Chat Box template, styles, script, and custom fields. Configure inside Streamlabs; it is not a standalone chat client. |
-| `dashboard.twitch.tv/` | Twitch dashboard alert HTML/CSS template, including Twitch placeholders. Use in the service's custom alert editor. |
-| `deckboard.app/` | Deckboard `.boardjson` board exports for OBS, camera, and music controls. Import in Deckboard and adapt scene/source names and local paths. |
-| `InputOverlay.OBS/` | Layout JSON and matching image sheets for the OBS Input Overlay plugin. Add them through that plugin; separate from the browser controller. |
-| `obs-studio/` | Personal OBS profile, scene collections, plugin settings, and cached application data. Reference material, not a portable clean installation. Back up your settings before selectively importing and replace account settings, devices, and paths. |
-| `foobar2000.org/` | Portable foobar2000 files, components, profile, and current-song output. This runs the foobar2000 application, not a browser overlay. |
-| `_byuwur.OBS/` | Personal branding, frames, transitions, videos, and editable media projects. |
-| `_generic.OBS/` | Other branding/transition media for OBS scenes. |
-| `_overlays.OBS/` | Game frames, backgrounds, and decorative overlay media. |
-| `_art/` | Placeholder for artwork. |
-| `DroidCamDrivers.exe` | Windows driver installer, unrelated to running the HTML overlays. |
+| `clock` | Digital, analog, flip, or minimal clocks. Up to four zones; blank zone/locale follows OBS. Larger multizone layouts may need a taller source. |
+| `timer` | Duration, deadline, elapsed, or restart timing. Timestamp modes survive reload; restart mode starts over. No shared pause/resume. Milliseconds update at 20 Hz. |
+| `webcam` | Decorative frame above a camera source. Transparent center; it cannot crop or mask the camera. Circle uses the smaller dimension. |
+| `ticker` | Scrolling or rotating messages. Scrolling uses measured repeats; other modes follow wall-clock time. No live feeds. |
+| `watermark` | Text, monogram, or logo. Optional fades follow wall-clock time; paths and fonts must exist in OBS. |
+| `lower-thirds` | Rotating names, subtitles, and optional images. Wall-clock order; no remote triggering. Missing images hide gracefully. |
+| `qr` | QR/link card using Nayuki's MIT encoder. Max 600 characters/1,200 UTF-8 bytes, four quiet-zone modules, opaque colors, and whole modules of at least 3 px. Scan the final broadcast. |
+| `reminder` | Timestamp-driven reminders with IANA quiet hours, including daylight saving. OBS must keep the source running. |
+| `badge` | Custom LIVE/AFK/RECORDING styling. It does not detect stream or recording status. |
+| `credits` | Scrolling categories and names, with optional looping. Speed uses pixels/second; reload starts the roll again. |
+| `schedule` | Dated activities, preserving row order and highlighting every active overlap. End boundaries are exclusive; no calendar integration. |
+| `sponsors` | Rotating public logos and text. No sponsorship service; failed images leave text visible. |
+| `info` | Static information cards. Large boards scroll; shorten text or enlarge the source to show everything. |
+| `effects` | CSS rain, snow, confetti, or symbols. Max 200 particles; low mode caps at 50. Motion Off gives a static pattern. |
+| `hud` | Decorative viewfinder, REC, and live timestamp. CSS grain/scanlines; no camera control or recording. |
+| `timeline` | Timestamp progress. Zero before start, complete at end; reversed/equal ranges show an error. |
+| `randomizer` | Seeded draws may repeat. Manual draws use OBS Interact and update the page URL; OBS restart uses its saved source URL. No remote synchronization. |
+| `quotes` | Configured quotations on a wall-clock rotation. No online quote feed. |
+| `shortcuts` | Static key/action reference and optional QWERTY diagram. It does not monitor keyboard input. |
 
-Program exports contain personal settings and machine-specific paths. Back up your settings before importing, and replace devices, paths, and account settings. Do not share stream keys, WebSocket passwords, or private widget URLs.
+Most draft sources start at **960 × 540**; HUD uses **1280 × 720**. Adjust dimensions and width to fit your scene. Lists allow 40 entries, 160 characters per field, and 8,000 JSON characters unless a tool documents a narrower limit.
+
+Date/time pickers use the editor computer's zone and serialize UTC. Direct timestamp URLs need `Z` or an explicit offset, such as `2026-10-14T18:00:00-05:00`. Generated start times are concrete, so supported timestamp modes survive reload; the OBS computer clock remains authoritative.
 
 ## Development
 
-**Simple is complicated enough.** Keep renderer behavior in the resource, editor behavior in the configurator, and dependencies explicit.
+**Simple is complicated enough.** No build step. Shared setup belongs in `configurator.js`; rendering and tool-specific validation stay beside the resource.
 
-| File                     | Responsibility                                                                                      |
-| ------------------------ | --------------------------------------------------------------------------------------------------- |
-| `index.html`             | Homepage, tool links, preview backgrounds, and sharing metadata.                                    |
-| `configurator.js`        | Shared catalog, generated editor, widgets, URL generation, preview, help, theme, and accessibility. |
-| `configurator.css`       | Shared editor styling, including the transparent-preview checkerboard.                              |
-| `spa.js@v20.1/_fonts.js` | Shared native font loader and optional picker, loaded once from the pinned jsDelivr CDN.            |
-| `configurator.html`      | Working demo with text, number, and HEX color fields and an inline native renderer.                 |
-| `{tool}/index.html`      | Overlay markup, explicit dependencies, and one empty configurator container.                        |
-| `{tool}/{tool}.js`       | Master field definition, local validation, and native rendering.                         |
-| `{tool}/{tool}.css`      | Resource styling and CSS variable defaults matching the renderer's defaults.                        |
+| File | Responsibility |
+| --- | --- |
+| `configurator.js` | Native resource setup, validation, platform data and helpers; jQuery editor, widgets, URLs, help, theme, and tool catalog. |
+| `configurator.css` | Editor layout, Select2 styling, and transparent-preview checkerboard. |
+| `{tool}/index.html` | Overlay template, dependency declarations, and empty editor container. |
+| `{tool}/{tool}.js` | Resource definition and native rendering. |
+| `{tool}/{tool}.css` | Resource appearance. |
+| `spa.js@v20.1/_fonts.js` | Native font loading and optional jQuery/Select2 pickers. |
+| `configurator.html` | Working starter with text, number, and color fields. |
+| `index.html` | Landing, generated cards, filters, animations, and sharing metadata. |
 
-### Resource and configurator contract
+### Resource contract
 
-Each resource script starts its `DOMContentLoaded` handler with a `resource` object. Its `fields` own public parameter names, defaults, control types, labels, descriptions, and validation. byConfigurator.initResource(resource, integrations?) clones defaults, applies URL settings, publishes window.byStreamResource, and returns the settings object. Renderer-only values belong in `resource.constants`.
+Each `DOMContentLoaded` handler declares a `resource` object. `fields` own parameter names, defaults, labels, sections, and constraints; renderer-only values go in `constants`. After declaring local validators/integrations, call `byConfigurator.initResource(resource, integrations?)`. It clones defaults, applies valid URL values, publishes `window.byStreamResource`, sets `window.byStreamOverlay`, and mounts `overlay-markup` in overlay mode. It returns the shared settings object.
 
-Load the shared SPA.js `_fonts.js` helper where needed, then the resource script before `configurator.js`, with `defer`. The shared runtime owns page mode, hash changes, and overlay-markup mounting. The shared configurator.js runtime is required for native validation in both modes. Declare editor scripts with `data-editor-src` instead of `src`; the shared configurator loads them in dependency order only in editor mode. Editor styling starts with `media="not all"`; only the configurator enables it. The resource never builds form controls or calls editor helpers.
+Keep the font helper (when needed), resource script, and `configurator.js` deferred. Native helpers register before resource `DOMContentLoaded` handlers run. Editor scripts use `data-editor-src`; their styles start with `data-editor-style media="not all"`. The runtime loads editor dependencies in order and checks jQuery afterward. Renderers use the native helpers and need no editor widgets.
 
-The HTML needs just `<div id="configurator"></div>` for the editor. Shared setup generates the toolbar, form sections, live preview, footer, and parameter reference from the published definition. It serializes only declared fields and restores the settings loaded from the URL on Reset. `#configure` reopens an overlay URL for editing.
+The HTML needs `<template id="overlay-markup">...</template>` and `<div id="configurator"></div>`. `byConfigurator.init()` generates the toolbar, fields, preview, and parameter help; repeated calls preserve the form and handlers. Only declared fields enter generated URLs. Controller's editor-only `controller/configurator.js` supplies `byConfigurator.configureResource(resource, editor)` for mapping and optional help panels.
 
-`byConfigurator` owns shared editor setup and its tool catalog. `byConfigurator.init()` runs after the resource scripts are ready; calling it again preserves the existing form and handlers. Native parameter helpers register before editor dependencies load; renderers call byConfigurator.applyParameters with their fields and settings.
+| Metadata | Purpose |
+| --- | --- |
+| `type` | `text`, `number`, `url`, `textarea`, `select`, `switch`, `color`, `font`, `datetime`, `timezone`, `entries`, or Controller's `mapping`. |
+| `default`, `label`, `section`, `description` | Initial value, caption, group, and generated help. |
+| `options`, `labels` | Allowed values and display labels. |
+| `min`, `max`, `step`, `maxlength`, `validate` | Constraints; a custom validator returns the parsed value or `null`. |
+| `checkedValue`, `uncheckedValue` | Serialized switch values. |
+| `entries` | Choices/key, text-field definitions, new-entry values, and row limit. |
+| `presets` | Resource-level flag enabling editable appearance presets. |
 
-| Field metadata                                | Purpose                                                                                                                                 |
-| --------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| `type`                                        | `text`, `number`, `url`, `textarea`, `select`, `switch`, `color`, `font`, `datetime`, `timezone`, `entries`, or Controller's `mapping`. |
-| `default`, `label`, `section`, `description`  | Initial value, visible caption, form group, and parameter help.                                                                         |
-| `options`, `labels`                           | Allowed select values and optional human-readable labels keyed by value.                                                                |
-| `min`, `max`, `step`, `maxlength`, `validate` | URL and input constraints. A custom validator returns a parsed value or `null`.                                                         |
-| `checkedValue`, `uncheckedValue`              | Values serialized by a switch.                                                                                                          |
-| `entries`                                     | Ordered-list choices, choice key, text fields, new-entry values, and optional limit; existing resources provide examples.               |
+`byConfigurator.validParameter(fields, name, value)` and `applyParameters(fields, settings, values?)` share the same rules across editors and renderers. Native helpers also provide the platform catalog, account parsing (Main enables headings), locale/zone/timestamp parsing, image URL checks, and clock-aligned `watch()` updates that pause while hidden.
 
-The generator uses jQuery for controls and events with the existing Select2, Pickr, Bootstrap, and Font Awesome integrations. Font-enabled pages load the shared SPA.js `_fonts.js` once, before the resource. Its native `byFont.family(value, fallback)` and `byFont.ready()` work without jQuery; picker methods resolve jQuery and Select2 when the configurator initializes them. Only selected fonts and visible dropdown samples are requested. Font loading supports hosted and `file://` use with internet access, independently of the configurator and SPA runtime; no neighboring SPA.js checkout or duplicate font module is required.
+### Add a tool
 
-Custom editor behavior belongs in a separate editor-only script loaded after the shared configurator. Controller's `controller/configurator.js` publishes `byConfigurator.configureResource(resource, editor)` for its mapping UI. The hook receives `generateURL` and the existing control helpers, including `initSelect2`, and may return `initResourceHelp` for additional help panels. Keep renderer behavior in the resource script.
+1. Copy `configurator.html` to the new folder's `index.html`. Replace its demo markup, CSS, and renderer; change shared imports from `./` to `../`.
+2. Define fields and native rendering; call `byConfigurator.initResource(resource)` before rendering when `byStreamOverlay` is true.
+3. Add its folder ID, name, description, icon, category, and `ready` flag to `byConfigurator.catalog.tools`. Set `ready: true` after review and testing.
 
-Native helpers also share locale, time-zone and timestamp parsing, image URL checks, and watch() updates with visibility/page lifecycle handling.
+The catalog owns order, cards, overlay count, and navigation. IDs derive folder URLs and `prev.jpg`; missing previews leave a blank background. Changes apply on the next page load; static hosting does not discover folders. Categories cover scenes/cameras, input/interaction, time/planning, branding/socials, and text/information.
 
-Appearance presets edit declared fields. Date/time controls use the editor computer's zone and serialize UTC; timezone fields provide IANA suggestions.
+### Landing and checks
 
-### Adding another HTML tool
+The introduction uses one third of desktop width; mobile stacks it above the gallery. Search/categories filter ready tools. One result fills the gallery; two or three stack in full-width rows; four use quadrants; five use two above three; six or more use a scrolling two-column grid. Hover/focus activates the card's action and blurs its preview by `0.25rem`. Animate.css handles entrance fades; View Transitions animate filtering when supported, with immediate filtering as fallback.
 
-1. Copy `configurator.html` as the tool's `index.html`. Replace the demo markup, CSS, and inline renderer with your resource script. Change shared import paths from `./` to `../`.
-2. Declare the resource's fields, title, description, and preview dimensions in its first object. Keep validation and rendering beside that definition; do not duplicate the form or parameter documentation in HTML.
-3. Preserve the `overlay-markup` template, empty configurator container, and dependency order. Add editor-only code only when the shared field types cannot express a control.
-4. Add the tool's folder ID, name, plain-text description, icon, category, and `ready` flag to `byConfigurator.catalog.tools` at the start of `configurator.js`. The ID determines its directory URL and `prev.jpg` path; missing previews leave a blank background. The homepage generates its card from one template; every configurator uses the same catalog order. Set `ready: false` while a tool is unfinished, then `ready: true` when it is ready. Renderer setup needs no registration.
+Cards reuse `byCommon.randomCTAMessage()` and `randomAccentColor()`. Share previews are static: root `prev.jpg` is 1920 × 1080, and tools use their own images. Update Open Graph/Twitter metadata with the images.
 
-Validate settings, encode query parameters, render text safely, and preserve hosted and downloaded-file use. Check JavaScript syntax with `node --check`. Verify bare configurators, generated URLs, `#configure`, Copy URL, Reset, custom controls, and overlays without jQuery or editor widgets, over HTTP and `file://`. There is no build step or runtime testing dependency.
+Run `node --check` on changed scripts. Check HTTP and `file://` editors/renderers, URL round trips, `#configure`, copy/reset, invalid values, lists, fonts, and keyboard mapping. Overlay mode should load native helpers without jQuery or editor widgets. External Playwright/Chrome checks need no dependency installed in this repository; QR scan checks additionally need a decoder. Browser checks do not replace OBS or endurance testing.
 
-### Homepage and share previews
+## Other configurations and assets
 
-The homepage reuses Bootstrap, Select2, Font Awesome, and SPA common styles. On desktop, the introduction and filters occupy one third of the width. The gallery fills the rest: one result fills it, two or three stack in full-width rows, four form quadrants, and five show two above three. Six or more use the scrolling two-column layout, with cards sized to 30% of the viewport height and a minimum height for readability. Short viewports allow scrolling to keep content visible. Search and icon-backed categories stay at the bottom of the introduction; mobile uses a single column. Filtering uses native View Transitions with nested groups to move and resize cards and animate their appearance and disappearance within the gallery. Browsers without those features filter immediately; the explicit motion toggle disables transitions. Resource backgrounds use each folder's `prev.jpg`. `byCommon.randomCTAMessage()` picks the button text and `byCommon.randomAccentColor({ tone: "dark", gradient: true, angle: 180 })` supplies the dark vertical overlays.
+These need their corresponding application or service:
 
-`byConfigurator.catalog` in `configurator.js` owns tool names, descriptions, categories, icons, readiness, and display order. Its `availableTools` getter excludes entries with `ready: false`; the homepage and every configurator's searchable Select2 tool selector use that list. Adding or removing catalog entries updates the cards, overlay count, selectors, and grid on the next page load. Static hosting does not discover new folders automatically. Controller, Social popup, and Main scene lead the list; other stream essentials follow, then decorative and specialized tools. Categories filter by purpose: Scenes & cameras, Input & interaction, Time & planning, Branding & socials, and Text & information. Selectors show each tool's icon in results and the selected value, with category labels beneath results. Keep the empty `#tool-picker` select and `.home-link` logo in copied configurators; shared setup fills the choices and resolves navigation relative to that script. Logo and footer Home links use the site root on servers and the landing's explicit filename under `file://`.
+| Folder / file | Use |
+| --- | --- |
+| `alert-box.streamlabs.com/`, `chat-box.streamlabs.com/` | Streamlabs custom widgets; copy HTML/CSS/JS and fields into the service editor. Chat is not a standalone client. |
+| `dashboard.twitch.tv/` | Twitch alert templates with service placeholders. |
+| `deckboard.app/` | Deckboard board exports; adapt scene names and paths. |
+| `InputOverlay.OBS/` | Layouts and artwork for the OBS Input Overlay plugin, separate from Controller. |
+| `obs-studio/` | Personal profiles, scenes, plugins, and caches; not a portable installation. |
+| `foobar2000.org/` | Player, components, profile, and current-song output. |
+| `_byuwur.OBS/`, `_generic.OBS/`, `_overlays.OBS/`, `_art/` | Branding, transitions, backgrounds, artwork, and editable media. |
+| `DroidCamDrivers.exe` | Windows camera driver installer. |
 
-Sharing metadata uses the static root [prev.jpg](prev.jpg), currently 1920 × 1080. Resource pages use their own preview images. Update the image and its Open Graph/Twitter metadata when changing the presentation; the random browser styling does not generate a new share image.
+Back up your settings before importing exports. Replace devices, local paths, and account settings. Keep stream keys, WebSocket passwords, and private widget URLs out of shared exports.
 
 ## License
 
-Project code: [MIT](LICENSE.md), copyright Andrés Trujillo [Mateus] byUwUr. Bundled libraries, applications, and media keep their own licenses.
+Project code: [MIT](LICENSE.md), copyright Andrés Trujillo [Mateus] byUwUr. Bundled libraries, applications, and media retain their own licenses.
