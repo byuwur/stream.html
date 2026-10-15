@@ -259,9 +259,10 @@
     $("[data-editor-style]").attr("media", "all").prop("disabled", false);
     $("[data-renderer-style]").prop("disabled", true);
     buildConfigurator(resource, jqHost);
-    const form = jqHost.find("form[data-configurator]")[0];
-    if (!form) return;
-    const fields = $(form).find("[name]").get();
+    const jqForm = jqHost.find("form[data-configurator]");
+    if (!jqForm.length) return;
+    const form = jqForm[0];
+    const fields = jqForm.find("[name]").get();
     // Servers resolve directory URLs to the landing page; downloaded files need its filename.
     const homeURL = new URL(location.protocol === "file:" ? "index.html" : ".", byConfigurator.catalog.root).href;
     const { settings, fields: parameterRules } = resource;
@@ -451,7 +452,10 @@
         return false;
       }
       const values = new FormData(form);
-      fields.filter((field) => field.type === "checkbox").forEach((field) => values.set(field.name, field.checked ? field.value : field.dataset.uncheckedValue));
+      jqForm.find(":checkbox").each(function () {
+        const jqField = $(this);
+        values.set(this.name, jqField.prop("checked") ? jqField.val() : jqField.attr("data-unchecked-value"));
+      });
       applyConfiguratorParameters(settings, values);
       const url = settingsURL(settings);
       $("#overlay-url, #url-gen-url").attr("title", url.href).val(url.href);
@@ -496,9 +500,10 @@
     function initSelect2(select, options = {}) {
       const jqSelect = $(select);
       if (!$.fn.select2 || jqSelect.data("select2")) return;
+      const jqParent = jqSelect.closest(".modal, dialog");
       jqSelect.select2({
         width: "100%",
-        dropdownParent: jqSelect.closest(".modal, dialog").length ? jqSelect.closest(".modal, dialog") : $(document.body),
+        dropdownParent: jqParent.length ? jqParent : $("body"),
         dropdownCssClass: "stream-select2-dropdown",
         ...options
       });
@@ -729,7 +734,9 @@
             jqRow.find('[data-action="down"]').prop("disabled", index === jqRows.length - 1);
             const entry = choices ? { [choiceKey]: jqRow.find("select").val() } : {};
             jqRow.find("input").each(function () {
-              entry[$(this).data("field")] = $(this).val();
+              const jqInput = $(this);
+              const value = jqInput.val();
+              entry[jqInput.data("field")] = value;
             });
             return entry;
           })
@@ -773,10 +780,9 @@
         sync();
         generateURL();
       });
-      $(form).on("reset", () => setTimeout(reset, 0));
+      jqForm.on("reset", () => setTimeout(reset, 0));
       reset();
     }
-
 
     // ==========
     // ==== THEME, ACCESSIBILITY, AND COLORS ====
@@ -846,10 +852,12 @@
         `)
         .on("click", "[data-accessibility]", function (event) {
           event.preventDefault();
-          byCommon[this.dataset.accessibility](this.dataset.value);
-          if (this.dataset.accessibility === "accessibilityToggle") {
+          const jqControl = $(this);
+          const method = jqControl.data("accessibility");
+          byCommon[method](jqControl.data("value"));
+          if (method === "accessibilityToggle") {
             const hidden = $("#bywr-accessibility-buttons").hasClass("hide");
-            $(this).attr("aria-expanded", String(!hidden));
+            jqControl.attr("aria-expanded", String(!hidden));
             $("#bywr-accessibility-buttons").prop("inert", hidden);
           }
         })
@@ -874,7 +882,7 @@
           el: jqSwatch.children()[0],
           theme: "classic",
           position: "bottom-start",
-          default: input.value,
+          default: jqInput.val(),
           defaultRepresentation: "HEX",
           components: { preview: true, opacity: true, hue: true, interaction: { input: true, save: true } }
         });
@@ -882,9 +890,10 @@
         let syncing = false;
         // Pickr can emit change while applying a color or its format.
         function syncPicker() {
-          if (!CSS.supports("color", input.value)) return;
+          const value = jqInput.val();
+          if (!CSS.supports("color", value)) return;
           syncing = true;
-          if (picker.setColor(input.value, true)) {
+          if (picker.setColor(value, true)) {
             picker.setColorRepresentation("HEX");
             picker.applyColor(true);
           }
@@ -898,7 +907,7 @@
           })
           .on("save", () => picker.hide());
         jqInput.on("input change", syncPicker);
-        $(input.form).on("reset", () =>
+        jqForm.on("reset", () =>
           setTimeout(() => {
             syncPicker();
             picker.hide();
@@ -978,12 +987,11 @@
       };
       for (const name of Object.keys(parameterRules)) {
         const rule = parameterRules[name] || {};
-        const field = form.elements.namedItem(name);
         const [title, defaultValue, values, example] = [
           rule.label || name,
           typeof rule.default === "object" ? JSON.stringify(rule.default) : (rule.default ?? "Empty"),
           rule.options?.join(", ") || (rule.min !== undefined ? `${rule.min} to ${rule.max}` : acceptedTypes[rule.type] || "Text"),
-          field?.value ?? ""
+          $(form.elements.namedItem(name)).val() ?? ""
         ];
         const jqDefinition = $(/* HTML */ `<section class="definition border mb-3 p-3 bg-body-tertiary"></section>`).appendTo(jqParameters);
         $(/* HTML */ `<h3 class="h5 mb-2 d-flex flex-wrap align-items-center gap-2"></h3>`)
@@ -1165,12 +1173,13 @@
      * @returns {boolean} Whether the control passes custom and native validation.
      */
     function validField(field) {
-      const valid = validConfiguratorParameter(field.name, field.value);
+      const jqField = $(field);
+      const valid = validConfiguratorParameter(field.name, jqField.val() ?? "");
       field.setCustomValidity(valid ? "" : "Enter a valid value for this setting.");
       // Hidden controls are excluded from native validation, including the account JSON.
       const accepted = field.checkValidity() && valid;
       if (!accepted) {
-        const section = $(field).closest(".accordion-collapse")[0];
+        const section = jqField.closest(".accordion-collapse")[0];
         if (section) bootstrap.Collapse.getOrCreateInstance(section, { toggle: false }).show();
       }
       return accepted;
@@ -1179,19 +1188,20 @@
     // Resource scripts publish their definitions before this deferred editor runs.
     try {
       $(fields).each(function () {
+        const jqField = $(this);
         const value = settings[this.name];
-        if (this.type === "checkbox") {
-          const checked = String(value) === $(this).val();
-          $(this).prop({ defaultChecked: checked, checked });
+        if (jqField.is(":checkbox")) {
+          const checked = String(value) === jqField.val();
+          jqField.prop({ defaultChecked: checked, checked });
         } else {
-          $(this).val(typeof value === "object" ? JSON.stringify(value) : value);
-          if (this.tagName === "SELECT")
-            $(this)
+          jqField.val(typeof value === "object" ? JSON.stringify(value) : value);
+          if (jqField.is("select"))
+            jqField
               .find("option")
               .prop("defaultSelected", function () {
                 return this.selected;
               });
-          else $(this).prop("defaultValue", $(this).val());
+          else jqField.prop("defaultValue", jqField.val());
         }
       });
 
@@ -1214,10 +1224,10 @@
       initFontPickers();
       initHelpDialog(initResourceHelp);
       initColorPickers();
-      $(form)
+      jqForm
         .find("select")
         .each((_, select) => initSelect2(select));
-      $(form)
+      jqForm
         .on("input change", generateURL)
         .on("submit", (event) => {
           event.preventDefault();
@@ -1226,7 +1236,7 @@
         })
         .on("reset", () =>
           setTimeout(() => {
-            $(form).find("select").trigger("change.select2");
+            jqForm.find("select").trigger("change.select2");
             generateURL();
           }, 0)
         );
