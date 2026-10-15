@@ -8,11 +8,11 @@ Browser overlays for your stream. Choose a tool, make it yours, and copy its URL
 
 ## Ready to use
 
-| Tool | What it does | Local entry point |
-| --- | --- | --- |
-| [Controller](https://byuwur.github.io/stream.html/controller/) | Gamepad or keyboard input. Xbox, PlayStation, fight-stick, and GameCube skins. | `controller/index.html` |
-| [Social popup](https://byuwur.github.io/stream.html/popup/) | Animated account rotation with 90+ platforms, colors, fonts, and timing. | `popup/index.html` |
-| [Main scene](https://byuwur.github.io/stream.html/main/) | Starting, BRB, ending, and intermission scenes with branding, countdown, accounts, and a schedule. | `main/index.html` |
+| Tool                                                           | What it does                                                                                       | Local entry point       |
+| -------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- | ----------------------- |
+| [Controller](https://byuwur.github.io/stream.html/controller/) | Gamepad or keyboard input. Xbox, PlayStation, fight-stick, and GameCube skins.                     | `controller/index.html` |
+| [Social popup](https://byuwur.github.io/stream.html/popup/)    | Animated account rotation with 90+ platforms, colors, fonts, and timing.                           | `popup/index.html`      |
+| [Main scene](https://byuwur.github.io/stream.html/main/)       | Starting, BRB, ending, and intermission scenes with branding, countdown, accounts, and a schedule. | `main/index.html`       |
 
 1. Open a tool, adjust its fields, and check the live preview.
 2. Click **Copy URL**.
@@ -51,15 +51,15 @@ Replace old `controller.html`, `popup.html`, and `main.html` filenames with the 
 
 [Example: Player 1, Xbox](https://byuwur.github.io/stream.html/controller/?player=1&skin=1)
 
-| Parameter | Meaning |
-| --- | --- |
-| `player` | `1`–`4` for gamepads; `9` for keyboard. Default: `1`. |
-| `skin` | `1` Xbox, `2` PlayStation, `3` fight stick, `4` GameCube. |
-| `opacity` | `0`–`1`. |
-| `offset`, `deadzone` | Stick travel in pixels and deadzone threshold. |
-| `strength`, `curve` | `strength=0` disables trigger meters; `curve=1` enables stick curving. |
-| `rotation` | Maximum steering-wheel rotation in degrees. |
-| `mapping` | Binding array from **Custom Mapping**; `[]` uses standard controls. Older `{"mapping":[...]}` wrappers remain supported. |
+| Parameter            | Meaning                                                                                                                  |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `player`             | `1`–`4` for gamepads; `9` for keyboard. Default: `1`.                                                                    |
+| `skin`               | `1` Xbox, `2` PlayStation, `3` fight stick, `4` GameCube.                                                                |
+| `opacity`            | `0`–`1`.                                                                                                                 |
+| `offset`, `deadzone` | Stick travel in pixels and deadzone threshold.                                                                           |
+| `strength`, `curve`  | `strength=0` disables trigger meters; `curve=1` enables stick curving.                                                   |
+| `rotation`           | Maximum steering-wheel rotation in degrees.                                                                              |
+| `mapping`            | Binding array from **Custom Mapping**; `[]` uses standard controls. Older `{"mapping":[...]}` wrappers remain supported. |
 
 Press a gamepad button for detection, or **F** for keyboard input. Click the preview or use OBS **Interact** to give it keyboard focus. Default bindings live in `bySettingsKB` inside `controller/index.html`; detection depends on the browser and operating system.
 
@@ -71,15 +71,15 @@ Press a gamepad button for detection, or **F** for keyboard input. Click the pre
 
 Pick a platform, enter its display handle, and reorder the accounts. Repeated platforms are allowed. Brand icons appear in the selector and overlay, with a globe fallback.
 
-| Parameter | Meaning |
-| --- | --- |
-| `mode` | `right` (default) or `left`. |
-| `accounts` | Up to 100 `{ "platform": "twitch", "handle": "YourChannel" }` entries; 160 characters per handle and 20,000 JSON characters total. `[]` hides the popup. |
-| `pauseTime`, `inbetweenPauseTime` | Seconds per account and between cycles, `0`–`3600`. Defaults: five seconds each. |
-| `scale` | `0.1`–`5`, anchored to the selected top corner. |
-| `iconBoxColor`, `textBoxColor`, `iconColor`, `fontColor` | CSS colors, including HEX alpha. |
-| `primaryFont`, `fontWeight` | Font family; weight `100`–`900` in steps of 100. Fallback: Courier, then monospace. |
-| `fontSizeRem`, `textYOffsetRem` | Text size `0.5`–`6.25` rem (default `4.5`); vertical offset `-6.25`–`6.25` rem. |
+| Parameter                                                | Meaning                                                                                                                                                  |
+| -------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mode`                                                   | `right` (default) or `left`.                                                                                                                             |
+| `accounts`                                               | Up to 100 `{ "platform": "twitch", "handle": "YourChannel" }` entries; 160 characters per handle and 20,000 JSON characters total. `[]` hides the popup. |
+| `pauseTime`, `inbetweenPauseTime`                        | Seconds per account and between cycles, `0`–`3600`. Defaults: five seconds each.                                                                         |
+| `scale`                                                  | `0.1`–`5`, anchored to the selected top corner.                                                                                                          |
+| `iconBoxColor`, `textBoxColor`, `iconColor`, `fontColor` | CSS colors, including HEX alpha.                                                                                                                         |
+| `primaryFont`, `fontWeight`                              | Font family; weight `100`–`900` in steps of 100. Fallback: Courier, then monospace.                                                                      |
+| `fontSizeRem`, `textYOffsetRem`                          | Text size `0.5`–`6.25` rem (default `4.5`); vertical offset `-6.25`–`6.25` rem.                                                                          |
 
 Defaults are three accounts. Invalid JSON or unsupported platforms retain those defaults; blank handles keep their slots. Font readiness and refreshed measurements keep repeated animations aligned.
 
@@ -109,27 +109,27 @@ Accounts and schedule rows use the same list controls. Invalid lists retain defa
 
 The other 19 tools remain `ready: false`, hidden from the landing and navigation, pending manual testing and review. These are development notes, not a release announcement. Their defaults and full field descriptions live in the local forms.
 
-| Folder | Purpose and useful limits |
-| --- | --- |
-| `clock` | Digital, analog, flip, or minimal clocks. Up to four zones; blank zone/locale follows OBS. Larger multizone layouts may need a taller source. |
-| `timer` | Duration, deadline, elapsed, or restart timing. Timestamp modes survive reload; restart mode starts over. No shared pause/resume. Milliseconds update at 20 Hz. |
-| `webcam` | Decorative frame above a camera source. Transparent center; it cannot crop or mask the camera. Circle uses the smaller dimension. |
-| `ticker` | Scrolling or rotating messages. Scrolling uses measured repeats; other modes follow wall-clock time. No live feeds. |
-| `watermark` | Text, monogram, or logo. Optional fades follow wall-clock time; paths and fonts must exist in OBS. |
-| `lower-thirds` | Rotating names, subtitles, and optional images. Wall-clock order; no remote triggering. Missing images hide gracefully. |
-| `qr` | QR/link card using Nayuki's MIT encoder. Max 600 characters/1,200 UTF-8 bytes, four quiet-zone modules, opaque colors, and whole modules of at least 3 px. Scan the final broadcast. |
-| `reminder` | Timestamp-driven reminders with IANA quiet hours, including daylight saving. OBS must keep the source running. |
-| `badge` | Custom LIVE/AFK/RECORDING styling. It does not detect stream or recording status. |
-| `credits` | Scrolling categories and names, with optional looping. Speed uses pixels/second; reload starts the roll again. |
-| `schedule` | Dated activities, preserving row order and highlighting every active overlap. End boundaries are exclusive; no calendar integration. |
-| `sponsors` | Rotating public logos and text. No sponsorship service; failed images leave text visible. |
-| `info` | Static information cards. Large boards scroll; shorten text or enlarge the source to show everything. |
-| `effects` | CSS rain, snow, confetti, or symbols. Max 200 particles; low mode caps at 50. Motion Off gives a static pattern. |
-| `hud` | Decorative viewfinder, REC, and live timestamp. CSS grain/scanlines; no camera control or recording. |
-| `timeline` | Timestamp progress. Zero before start, complete at end; reversed/equal ranges show an error. |
-| `randomizer` | Seeded draws may repeat. Manual draws use OBS Interact and update the page URL; OBS restart uses its saved source URL. No remote synchronization. |
-| `quotes` | Configured quotations on a wall-clock rotation. No online quote feed. |
-| `shortcuts` | Static key/action reference and optional QWERTY diagram. It does not monitor keyboard input. |
+| Folder         | Purpose and useful limits                                                                                                                                                            |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `clock`        | Digital, analog, flip, or minimal clocks. Up to four zones; blank zone/locale follows OBS. Larger multizone layouts may need a taller source.                                        |
+| `timer`        | Duration, deadline, elapsed, or restart timing. Timestamp modes survive reload; restart mode starts over. No shared pause/resume. Milliseconds update at 20 Hz.                      |
+| `webcam`       | Decorative frame above a camera source. Transparent center; it cannot crop or mask the camera. Circle uses the smaller dimension.                                                    |
+| `ticker`       | Scrolling or rotating messages. Scrolling uses measured repeats; other modes follow wall-clock time. No live feeds.                                                                  |
+| `watermark`    | Text, monogram, or logo. Optional fades follow wall-clock time; paths and fonts must exist in OBS.                                                                                   |
+| `lower-thirds` | Rotating names, subtitles, and optional images. Wall-clock order; no remote triggering. Missing images hide gracefully.                                                              |
+| `qr`           | QR/link card using Nayuki's MIT encoder. Max 600 characters/1,200 UTF-8 bytes, four quiet-zone modules, opaque colors, and whole modules of at least 3 px. Scan the final broadcast. |
+| `reminder`     | Timestamp-driven reminders with IANA quiet hours, including daylight saving. OBS must keep the source running.                                                                       |
+| `badge`        | Custom LIVE/AFK/RECORDING styling. It does not detect stream or recording status.                                                                                                    |
+| `credits`      | Scrolling categories and names, with optional looping. Speed uses pixels/second; reload starts the roll again.                                                                       |
+| `schedule`     | Dated activities, preserving row order and highlighting every active overlap. End boundaries are exclusive; no calendar integration.                                                 |
+| `sponsors`     | Rotating public logos and text. No sponsorship service; failed images leave text visible.                                                                                            |
+| `info`         | Static information cards. Large boards scroll; shorten text or enlarge the source to show everything.                                                                                |
+| `effects`      | CSS rain, snow, confetti, or symbols. Max 200 particles; low mode caps at 50. Motion Off gives a static pattern.                                                                     |
+| `hud`          | Decorative viewfinder, REC, and live timestamp. CSS grain/scanlines; no camera control or recording.                                                                                 |
+| `timeline`     | Timestamp progress. Zero before start, complete at end; reversed/equal ranges show an error.                                                                                         |
+| `randomizer`   | Seeded draws may repeat. Manual draws use OBS Interact and update the page URL; OBS restart uses its saved source URL. No remote synchronization.                                    |
+| `quotes`       | Configured quotations on a wall-clock rotation. No online quote feed.                                                                                                                |
+| `shortcuts`    | Static key/action reference and optional QWERTY diagram. It does not monitor keyboard input.                                                                                         |
 
 Most draft sources start at **960 × 540**; HUD uses **1280 × 720**. Adjust dimensions and width to fit your scene. Lists allow 40 entries, 160 characters per field, and 8,000 JSON characters unless a tool documents a narrower limit.
 
@@ -139,16 +139,16 @@ Date/time pickers use the editor computer's zone and serialize UTC. Direct times
 
 **Simple is complicated enough.** No build step. Shared setup belongs in `configurator.js`; rendering and tool-specific validation stay beside the resource.
 
-| File | Responsibility |
-| --- | --- |
-| `configurator.js` | Native resource setup, validation, platform data and helpers; jQuery editor, widgets, URLs, help, theme, and tool catalog. |
-| `configurator.css` | Editor layout, Select2 styling, and transparent-preview checkerboard. |
-| `{tool}/index.html` | Overlay template, dependency declarations, and empty editor container. |
-| `{tool}/{tool}.js` | Resource definition and native rendering. |
-| `{tool}/{tool}.css` | Resource appearance. |
-| `spa.js@v20.2/_fonts.js` | Native font loading and optional jQuery/Select2 pickers. |
-| `configurator.html` | Working starter with text, number, and color fields. |
-| `index.html` | Landing, generated cards, filters, animations, and sharing metadata. |
+| File                     | Responsibility                                                                                                             |
+| ------------------------ | -------------------------------------------------------------------------------------------------------------------------- |
+| `configurator.js`        | Native resource setup, validation, platform data and helpers; jQuery editor, widgets, URLs, help, theme, and tool catalog. |
+| `configurator.css`       | Editor layout, Select2 styling, and transparent-preview checkerboard.                                                      |
+| `{tool}/index.html`      | Overlay template, dependency declarations, and empty editor container.                                                     |
+| `{tool}/{tool}.js`       | Resource definition and native rendering.                                                                                  |
+| `{tool}/{tool}.css`      | Resource appearance.                                                                                                       |
+| `spa.js@v20.2/_fonts.js` | Native font loading and optional jQuery/Select2 pickers.                                                                   |
+| `configurator.html`      | Working starter with text, number, and color fields.                                                                       |
+| `index.html`             | Landing, generated cards, filters, animations, and sharing metadata.                                                       |
 
 ### Resource contract
 
@@ -158,15 +158,15 @@ Keep the font helper (when needed), resource script, and `configurator.js` defer
 
 The HTML needs `<template id="overlay-markup">...</template>` and `<div id="configurator"></div>`. `byConfigurator.init()` generates the toolbar, fields, preview, and parameter help; repeated calls preserve the form and handlers. Only declared fields enter generated URLs. Controller's editor-only `controller/configurator.js` supplies `byConfigurator.configureResource(resource, editor)` for mapping and optional help panels.
 
-| Metadata | Purpose |
-| --- | --- |
-| `type` | `text`, `number`, `url`, `textarea`, `select`, `switch`, `color`, `font`, `datetime`, `timezone`, `entries`, or Controller's `mapping`. |
-| `default`, `label`, `section`, `description` | Initial value, caption, group, and generated help. |
-| `options`, `labels` | Allowed values and display labels. |
-| `min`, `max`, `step`, `maxlength`, `validate` | Constraints; a custom validator returns the parsed value or `null`. |
-| `checkedValue`, `uncheckedValue` | Serialized switch values. |
-| `entries` | Choices/key, text-field definitions, new-entry values, and row limit. |
-| `presets` | Resource-level flag enabling editable appearance presets. |
+| Metadata                                      | Purpose                                                                                                                                 |
+| --------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `type`                                        | `text`, `number`, `url`, `textarea`, `select`, `switch`, `color`, `font`, `datetime`, `timezone`, `entries`, or Controller's `mapping`. |
+| `default`, `label`, `section`, `description`  | Initial value, caption, group, and generated help.                                                                                      |
+| `options`, `labels`                           | Allowed values and display labels.                                                                                                      |
+| `min`, `max`, `step`, `maxlength`, `validate` | Constraints; a custom validator returns the parsed value or `null`.                                                                     |
+| `checkedValue`, `uncheckedValue`              | Serialized switch values.                                                                                                               |
+| `entries`                                     | Choices/key, text-field definitions, new-entry values, and row limit.                                                                   |
+| `presets`                                     | Resource-level flag enabling editable appearance presets.                                                                               |
 
 `byConfigurator.validParameter(fields, name, value)` and `applyParameters(fields, settings, values?)` share the same rules across editors and renderers. Native helpers also provide the platform catalog, account parsing (Main enables headings), locale/zone/timestamp parsing, image URL checks, and clock-aligned `watch()` updates that pause while hidden.
 
@@ -190,16 +190,15 @@ Run `node --check` on changed scripts. Check HTTP and `file://` editors/renderer
 
 These need their corresponding application or service:
 
-| Folder / file | Use |
-| --- | --- |
-| `alert-box.streamlabs.com/`, `chat-box.streamlabs.com/` | Streamlabs custom widgets; copy HTML/CSS/JS and fields into the service editor. Chat is not a standalone client. |
-| `dashboard.twitch.tv/` | Twitch alert templates with service placeholders. |
-| `deckboard.app/` | Deckboard board exports; adapt scene names and paths. |
-| `InputOverlay.OBS/` | Layouts and artwork for the OBS Input Overlay plugin, separate from Controller. |
-| `obs-studio/` | Personal profiles, scenes, plugins, and caches; not a portable installation. |
-| `foobar2000.org/` | Player, components, profile, and current-song output. |
-| `_byuwur.OBS/`, `_generic.OBS/`, `_overlays.OBS/`, `_art/` | Branding, transitions, backgrounds, artwork, and editable media. |
-| `DroidCamDrivers.exe` | Windows camera driver installer. |
+| Folder / file                                              | Use                                                                                                              |
+| ---------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `alert-box.streamlabs.com/`, `chat-box.streamlabs.com/`    | Streamlabs custom widgets; copy HTML/CSS/JS and fields into the service editor. Chat is not a standalone client. |
+| `dashboard.twitch.tv/`                                     | Twitch alert templates with service placeholders.                                                                |
+| `deckboard.app/`                                           | Deckboard board exports; adapt scene names and paths.                                                            |
+| `InputOverlay.OBS/`                                        | Layouts and artwork for the OBS Input Overlay plugin, separate from Controller.                                  |
+| `obs-studio/`                                              | Personal profiles, scenes, plugins, and caches; not a portable installation.                                     |
+| `foobar2000.org/`                                          | Player, components, profile, and current-song output.                                                            |
+| `_byuwur.OBS/`, `_generic.OBS/`, `_overlays.OBS/`, `_art/` | Branding, transitions, backgrounds, artwork, and editable media.                                                 |
 
 Back up your settings before importing exports. Replace devices, local paths, and account settings. Keep stream keys, WebSocket passwords, and private widget URLs out of shared exports.
 
