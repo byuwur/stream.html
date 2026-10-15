@@ -295,7 +295,7 @@
   // ==== SHARED TOOL CATALOG ====
   // ==========
 
-  /** Shared card and navigation metadata; set ready: false to omit an unfinished tool from both. */
+  /** Shared card and navigation metadata; only ready: true tools are published. */
   byConfigurator.catalog = {
     // Resolve from this script so links also work in downloaded folders and nested deployments.
     root,
@@ -505,7 +505,7 @@
       }
     ],
     get availableTools() {
-      return this.tools.filter((tool) => tool.ready !== false);
+      return this.tools.filter((tool) => tool.ready === true);
     }
   };
 
