@@ -1,7 +1,7 @@
 /**
- * File: controller/controller.gamepad.js
+ * File: controller/controller.js
  * @file Gamepad polling and renderer settings.
- * Deps: embedded bySettingsKB; the renderer does not require the configurator.
+ * Deps: configurator.js and embedded bySettingsKB.
  */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -343,49 +343,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const allowedControllers = { 1: "xbox", 2: "ps", 3: "fight-stick", 4: "gc" };
 
-  // URL validation is repeated in each resource and configurator.js to avoid extra files. Keep the copies in sync.
-  function validParameter(name, value) {
-    if (!Object.hasOwn(parameterRules, name)) return false;
-    const rule = parameterRules[name];
-    if (rule.validate) return rule.validate(value) !== null;
-    if (rule.options && !rule.options.includes(value)) return false;
-    if (rule.maxlength && value.length > Number(rule.maxlength)) return false;
-    if (rule.type === "number") {
-      const number = Number(value);
-      if (!value.trim() || !Number.isFinite(number) || number < Number(rule.min) || number > Number(rule.max)) return false;
-      if (rule.step && rule.step !== "any") {
-        const steps = (number - Number(rule.min)) / Number(rule.step);
-        if (Math.abs(steps - Math.round(steps)) > 1e-8) return false;
-      }
-    }
-    if (rule.type === "color" && !CSS.supports("color", value)) return false;
-    if (name.endsWith("Url") && value) {
-      try {
-        const url = new URL(value, location.href);
-        if (!["http:", "https:", "file:"].includes(url.protocol) || (url.protocol === "file:" && location.protocol !== "file:") || url.username || url.password) return false;
-      } catch {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  /** Apply validated URL values to the declared settings object; invalid values leave it intact. */
-  function applyParameters(settings, values = params) {
-    for (const [name, value] of values) {
-      if (!Object.hasOwn(parameterRules, name)) continue;
-      const rule = parameterRules[name];
-      let parsed;
-      if (rule.validate) parsed = rule.validate(value);
-      else {
-        if (!validParameter(name, value)) continue;
-        parsed = rule.type === "number" ? Number(value) : value;
-      }
-      if (parsed === null) continue;
-      settings[name] = parsed;
-    }
-  }
-
   /** Parse binding arrays or prior wrapped URLs; invalid JSON leaves settings unchanged. */
   function bindingSettings(value) {
     try {
@@ -483,7 +440,7 @@ document.addEventListener("DOMContentLoaded", () => {
     tester.updateGamepads();
   }
 
-  applyParameters(settings);
+  byConfigurator.applyParameters(resource.fields, settings);
   window.byStreamResource = { ...resource, settings, parameterRules, gamepadSupport, buttonValue, copyGamepad };
   gamepadSupport.init();
   if (isOverlay) initController();

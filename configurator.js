@@ -1,18 +1,64 @@
 /**
  * File: configurator.js
- * @file Shared page setup, URL generation, preview, help, theme, and navigation.
+ * @file Shared native resource setup and jQuery editor, preview, help, theme, and navigation.
  * Editor deps: jQuery 4, Bootstrap 5, Select2, Pickr, and resource parameter rules.
  */
 
 /** Own shared editor setup and navigation. */
 (async function (global) {
-  // Bootstrap editor dependencies without requiring them in overlay mode.
-  if (document.getElementById("configurator") && location.search.length > 1 && !location.hash) return;
-
   global.byConfigurator = global.byConfigurator || {};
   const byConfigurator = global.byConfigurator;
   if (byConfigurator.init) return;
   const root = new URL(".", document.currentScript.src);
+
+  // Native helpers are shared with renderers; editor dependencies load only below.
+  /** Validate the declared URL field, retaining the same rules in forms and overlays. */
+  function validParameter(fields, name, value) {
+    if (!Object.hasOwn(fields, name)) return false;
+    const rule = fields[name];
+    if (rule.validate) return rule.validate(value) !== null;
+    if (rule.options && !rule.options.includes(value)) return false;
+    if (rule.maxlength && value.length > Number(rule.maxlength)) return false;
+    if (rule.type === "number") {
+      const number = Number(value);
+      if (!value.trim() || !Number.isFinite(number) || number < Number(rule.min) || number > Number(rule.max)) return false;
+      if (rule.step && rule.step !== "any") {
+        const steps = (number - Number(rule.min)) / Number(rule.step);
+        if (Math.abs(steps - Math.round(steps)) > 1e-8) return false;
+      }
+    }
+    if (rule.type === "color" && !CSS.supports("color", value)) return false;
+    if (name.endsWith("Url") && value) {
+      try {
+        const url = new URL(value, location.href);
+        if (!["http:", "https:", "file:"].includes(url.protocol) || (url.protocol === "file:" && location.protocol !== "file:") || url.username || url.password) return false;
+      } catch {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /** Apply valid settings; invalid and unknown values keep the defaults. */
+  function applyParameters(fields, settings, values = new URLSearchParams(location.search)) {
+    for (const [name, value] of values) {
+      if (!Object.hasOwn(fields, name)) continue;
+      const rule = fields[name];
+      let parsed;
+      if (rule.validate) parsed = rule.validate(value);
+      else {
+        if (!validParameter(fields, name, value)) continue;
+        parsed = rule.type === "number" ? Number(value) : value;
+      }
+      if (parsed === null) continue;
+      settings[name] = parsed;
+    }
+  }
+
+  Object.assign(byConfigurator, { validParameter, applyParameters });
+
+  if (document.getElementById("configurator") && location.search.length > 1 && !location.hash) return;
+
   try {
     for (const source of document.querySelectorAll("script[data-editor-src]")) {
       await new Promise((resolve, reject) => {
@@ -456,7 +502,7 @@
         const jqField = $(this);
         values.set(this.name, jqField.prop("checked") ? jqField.val() : jqField.attr("data-unchecked-value"));
       });
-      applyConfiguratorParameters(settings, values);
+      byConfigurator.applyParameters(parameterRules, settings, values);
       const url = settingsURL(settings);
       $("#overlay-url, #url-gen-url").attr("title", url.href).val(url.href);
       $("#preview-url").attr("href", url.href);
@@ -745,7 +791,7 @@
         jqEditor.find("input").each(function () {
           this.setCustomValidity("");
         });
-        jqEditor.find("input")[0]?.setCustomValidity(validConfiguratorParameter(name, jqOutput.val()) ? "" : "List is too large. Shorten text or remove entries.");
+        jqEditor.find("input")[0]?.setCustomValidity(byConfigurator.validParameter(parameterRules, name, jqOutput.val()) ? "" : "List is too large. Shorten text or remove entries.");
         jqAdd.prop("disabled", jqRows.length >= limit);
       }
       function reset() {
@@ -1112,49 +1158,6 @@
     // ==== NATIVE BROWSER SERVICES ====
     // ==========
 
-    // Repeated in resource scripts so each renderer stays in one JS file. Editor names keep the copies independent.
-    function validConfiguratorParameter(name, value) {
-      if (!Object.hasOwn(parameterRules, name)) return false;
-      const rule = parameterRules[name];
-      if (rule.validate) return rule.validate(value) !== null;
-      if (rule.options && !rule.options.includes(value)) return false;
-      if (rule.maxlength && value.length > Number(rule.maxlength)) return false;
-      if (rule.type === "number") {
-        const number = Number(value);
-        if (!value.trim() || !Number.isFinite(number) || number < Number(rule.min) || number > Number(rule.max)) return false;
-        if (rule.step && rule.step !== "any") {
-          const steps = (number - Number(rule.min)) / Number(rule.step);
-          if (Math.abs(steps - Math.round(steps)) > 1e-8) return false;
-        }
-      }
-      if (rule.type === "color" && !CSS.supports("color", value)) return false;
-      if (name.endsWith("Url") && value) {
-        try {
-          const url = new URL(value, location.href);
-          if (!["http:", "https:", "file:"].includes(url.protocol) || (url.protocol === "file:" && location.protocol !== "file:") || url.username || url.password) return false;
-        } catch {
-          return false;
-        }
-      }
-      return true;
-    }
-
-    /** Apply validated URL or form values to the declared settings object; invalid values leave it intact. */
-    function applyConfiguratorParameters(settings, values) {
-      for (const [name, value] of values) {
-        if (!Object.hasOwn(parameterRules, name)) continue;
-        const rule = parameterRules[name];
-        let parsed;
-        if (rule.validate) parsed = rule.validate(value);
-        else {
-          if (!validConfiguratorParameter(name, value)) continue;
-          parsed = rule.type === "number" ? Number(value) : value;
-        }
-        if (parsed === null) continue;
-        settings[name] = parsed;
-      }
-    }
-
     /** Serialize public settings, including JSON lists and mappings, into an overlay URL. */
     function settingsURL(settings) {
       const values = Object.entries(settings)
@@ -1174,7 +1177,7 @@
      */
     function validField(field) {
       const jqField = $(field);
-      const valid = validConfiguratorParameter(field.name, jqField.val() ?? "");
+      const valid = byConfigurator.validParameter(parameterRules, field.name, jqField.val() ?? "");
       field.setCustomValidity(valid ? "" : "Enter a valid value for this setting.");
       // Hidden controls are excluded from native validation, including the account JSON.
       const accepted = field.checkValidity() && valid;

@@ -133,17 +133,7 @@
         document.body.append(document.getElementById("overlay-markup").content.cloneNode(true));
       }
 
-      for (const [name, value] of params) {
-        if (!Object.hasOwn(parameterRules, name)) continue;
-        const rule = parameterRules[name];
-        if (rule.maxlength && value.length > rule.maxlength) continue;
-        if (rule.type === "color" && !CSS.supports("color", value)) continue;
-        if (rule.type === "number") {
-          const number = Number(value);
-          if (!value.trim() || !Number.isFinite(number) || number < rule.min || number > rule.max) continue;
-          settings[name] = number;
-        } else settings[name] = value;
-      }
+      byConfigurator.applyParameters(resource.fields, settings, params);
       window.byStreamResource = { ...resource, settings, parameterRules };
       if (!isOverlay) return;
       const preview = document.getElementById("demo-preview");
