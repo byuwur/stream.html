@@ -1,7 +1,7 @@
 /**
  * File: popup/popup.js
  * @file Popup parameter validation and animated social-account rendering.
- * Deps: GSAP, MorphSVGPlugin, and SPA.js/_fonts.js.
+ * Deps: configurator.js, GSAP, MorphSVGPlugin, and SPA.js/_fonts.js.
  */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -151,26 +151,6 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     },
   };
-
-  // ==========
-  // ==== URL SETTINGS AND PAGE MODE ====
-  // ==========
-
-  const params = new URLSearchParams(location.search);
-  const settings = {
-    ...resource.constants,
-    ...Object.fromEntries(Object.entries(resource.fields).map(([name, field]) => [name, structuredClone(field.default)]))
-  };
-  const parameterRules = resource.fields;
-  const isOverlay = location.search.length > 1 && !location.hash;
-  window.byStreamOverlay = isOverlay;
-  window.addEventListener("hashchange", () => {
-    if (isOverlay !== (location.search.length > 1 && !location.hash)) location.reload();
-  });
-  if (isOverlay) {
-    document.documentElement.setAttribute("data-overlay", "");
-    document.body.append(document.getElementById("overlay-markup").content.cloneNode(true));
-  }
 
   // Repeated in here and configurator.js so social overlays need no separate platform file. Keep the lists in sync.
   const platforms = {
@@ -371,7 +351,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  byConfigurator.applyParameters(resource.fields, settings);
-  window.byStreamResource = { ...resource, settings, parameterRules };
-  if (isOverlay) renderPopup();
+  const settings = byConfigurator.initResource(resource);
+  if (byStreamOverlay) renderPopup();
 });

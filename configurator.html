@@ -113,29 +113,8 @@
         },
       };
 
-      // ==========
-      // ==== URL SETTINGS AND PAGE MODE ====
-      // ==========
-
-      const params = new URLSearchParams(location.search);
-      const settings = {
-        ...resource.constants,
-        ...Object.fromEntries(Object.entries(resource.fields).map(([name, field]) => [name, structuredClone(field.default)]))
-      };
-      const parameterRules = resource.fields;
-      const isOverlay = location.search.length > 1 && !location.hash;
-      window.byStreamOverlay = isOverlay;
-      window.addEventListener("hashchange", () => {
-        if (isOverlay !== (location.search.length > 1 && !location.hash)) location.reload();
-      });
-      if (isOverlay) {
-        document.documentElement.setAttribute("data-overlay", "");
-        document.body.append(document.getElementById("overlay-markup").content.cloneNode(true));
-      }
-
-      byConfigurator.applyParameters(resource.fields, settings, params);
-      window.byStreamResource = { ...resource, settings, parameterRules };
-      if (!isOverlay) return;
+      const settings = byConfigurator.initResource(resource);
+      if (!byStreamOverlay) return;
       const preview = document.getElementById("demo-preview");
       document.getElementById("demo-message").textContent = settings.message;
       preview.style.setProperty("--demo-size", `${settings.fontSizeRem}rem`);

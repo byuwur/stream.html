@@ -55,7 +55,27 @@
     }
   }
 
-  Object.assign(byConfigurator, { validParameter, applyParameters });
+  /** Mount the active overlay and publish its settings before initializing editor widgets. */
+  function initResource(resource, integrations = {}) {
+    const settings = {
+      ...resource.constants,
+      ...Object.fromEntries(Object.entries(resource.fields).map(([name, field]) => [name, structuredClone(field.default)]))
+    };
+    applyParameters(resource.fields, settings);
+    const overlay = location.search.length > 1 && !location.hash;
+    global.byStreamOverlay = overlay;
+    global.addEventListener("hashchange", () => {
+      if (overlay !== (location.search.length > 1 && !location.hash)) location.reload();
+    });
+    if (overlay) {
+      document.documentElement.setAttribute("data-overlay", "");
+      document.body.append(document.getElementById("overlay-markup").content.cloneNode(true));
+    }
+    global.byStreamResource = { ...resource, settings, parameterRules: resource.fields, ...integrations };
+    return settings;
+  }
+
+  Object.assign(byConfigurator, { validParameter, applyParameters, initResource });
 
   if (document.getElementById("configurator") && location.search.length > 1 && !location.hash) return;
 

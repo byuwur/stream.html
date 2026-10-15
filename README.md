@@ -188,14 +188,14 @@ Program exports contain personal settings and machine-specific paths. Back up yo
 | `spa.js@v20.1/_fonts.js` | Shared native font loader and optional picker, loaded once from the pinned jsDelivr CDN.            |
 | `configurator.html`      | Working demo with text, number, and HEX color fields and an inline native renderer.                 |
 | `{tool}/index.html`      | Overlay markup, explicit dependencies, and one empty configurator container.                        |
-| `{tool}/{tool}.js`       | Master field definition, independent page mode, URL parsing, and rendering.                         |
+| `{tool}/{tool}.js`       | Master field definition, local validation, and native rendering.                         |
 | `{tool}/{tool}.css`      | Resource styling and CSS variable defaults matching the renderer's defaults.                        |
 
 ### Resource and configurator contract
 
-Each resource script starts its `DOMContentLoaded` handler with a `resource` object. Its `fields` own public parameter names, defaults, control types, labels, descriptions, and validation. The renderer derives `settings` from those defaults, applies valid query parameters, and publishes `window.byStreamResource = { ...resource, settings, parameterRules: resource.fields }`. Renderer-only values belong in `resource.constants`.
+Each resource script starts its `DOMContentLoaded` handler with a `resource` object. Its `fields` own public parameter names, defaults, control types, labels, descriptions, and validation. byConfigurator.initResource(resource, integrations?) clones defaults, applies URL settings, publishes window.byStreamResource, and returns the settings object. Renderer-only values belong in `resource.constants`.
 
-Load the shared SPA.js `_fonts.js` helper where needed, then the resource script before `configurator.js`, with `defer`. The resource decides page mode and mounts its own `overlay-markup` template when query parameters are present without a hash. The shared configurator.js runtime is required for native validation in both modes. Declare editor scripts with `data-editor-src` instead of `src`; the shared configurator loads them in dependency order only in editor mode. Editor styling starts with `media="not all"`; only the configurator enables it. The resource never builds form controls or calls editor helpers.
+Load the shared SPA.js `_fonts.js` helper where needed, then the resource script before `configurator.js`, with `defer`. The shared runtime owns page mode, hash changes, and overlay-markup mounting. The shared configurator.js runtime is required for native validation in both modes. Declare editor scripts with `data-editor-src` instead of `src`; the shared configurator loads them in dependency order only in editor mode. Editor styling starts with `media="not all"`; only the configurator enables it. The resource never builds form controls or calls editor helpers.
 
 The HTML needs just `<div id="configurator"></div>` for the editor. Shared setup generates the toolbar, form sections, live preview, footer, and parameter reference from the published definition. It serializes only declared fields and restores the settings loaded from the URL on Reset. `#configure` reopens an overlay URL for editing.
 

@@ -124,26 +124,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
-  // ==========
-  // ==== URL SETTINGS AND PAGE MODE ====
-  // ==========
-
-  const params = new URLSearchParams(location.search);
-  const settings = {
-    ...resource.constants,
-    ...Object.fromEntries(Object.entries(resource.fields).map(([name, field]) => [name, structuredClone(field.default)]))
-  };
-  const parameterRules = resource.fields;
-  const isOverlay = location.search.length > 1 && !location.hash;
-  window.byStreamOverlay = isOverlay;
-  window.addEventListener("hashchange", () => {
-    if (isOverlay !== (location.search.length > 1 && !location.hash)) location.reload();
-  });
-  if (isOverlay) {
-    document.documentElement.setAttribute("data-overlay", "");
-    document.body.append(document.getElementById("overlay-markup").content.cloneNode(true));
-  }
-
   /**
    * Copyright 2012 Google Inc. All Rights Reserved.
    *
@@ -285,13 +265,13 @@ document.addEventListener("DOMContentLoaded", () => {
    */
 
   const tester = {
-    STICK_OFFSET: settings.offset,
-    STICK_CURVING: settings.curve == "1",
-    TRIGGER_DISPLAY_TYPE: Number(settings.strength),
+    STICK_OFFSET: resource.fields.offset.default,
+    STICK_CURVING: resource.fields.curve.default == "1",
+    TRIGGER_DISPLAY_TYPE: Number(resource.fields.strength.default),
     ANALOGUE_BUTTON_THRESHOLD: 0.25,
-    ANALOGUE_STICK_THRESHOLD: settings.deadzone,
+    ANALOGUE_STICK_THRESHOLD: resource.fields.deadzone.default,
     DIGITAL_THRESHOLD: 0.1,
-    ROTATE_BOUNDARY: settings.rotation,
+    ROTATE_BOUNDARY: resource.fields.rotation.default,
     keys: new Set(),
     updateGamepads(pads = []) {
       document.querySelectorAll(".controller").forEach((controller) => {
@@ -440,8 +420,7 @@ document.addEventListener("DOMContentLoaded", () => {
     tester.updateGamepads();
   }
 
-  byConfigurator.applyParameters(resource.fields, settings);
-  window.byStreamResource = { ...resource, settings, parameterRules, gamepadSupport, buttonValue, copyGamepad };
+  const settings = byConfigurator.initResource(resource, { gamepadSupport, buttonValue, copyGamepad });
   gamepadSupport.init();
-  if (isOverlay) initController();
+  if (byStreamOverlay) initController();
 });

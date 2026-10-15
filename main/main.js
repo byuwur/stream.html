@@ -1,7 +1,7 @@
 /**
  * File: main/main.js
  * @file Scene parameter validation, rendering, countdown, and rotating cards.
- * Deps: GSAP and SPA.js/_fonts.js.
+ * Deps: configurator.js, GSAP, and SPA.js/_fonts.js.
  */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -323,26 +323,6 @@ document.addEventListener("DOMContentLoaded", () => {
     },
   };
 
-  // ==========
-  // ==== URL SETTINGS AND PAGE MODE ====
-  // ==========
-
-  const params = new URLSearchParams(location.search);
-  const settings = {
-    ...resource.constants,
-    ...Object.fromEntries(Object.entries(resource.fields).map(([name, field]) => [name, structuredClone(field.default)]))
-  };
-  const parameterRules = resource.fields;
-  const isOverlay = location.search.length > 1 && !location.hash;
-  window.byStreamOverlay = isOverlay;
-  window.addEventListener("hashchange", () => {
-    if (isOverlay !== (location.search.length > 1 && !location.hash)) location.reload();
-  });
-  if (isOverlay) {
-    document.documentElement.setAttribute("data-overlay", "");
-    document.body.append(document.getElementById("overlay-markup").content.cloneNode(true));
-  }
-
   const dayLabels = { monday: "Lunes", tuesday: "Martes", wednesday: "Miércoles", thursday: "Jueves", friday: "Viernes", saturday: "Sábado", sunday: "Domingo" };
 
   // Repeated in here and configurator.js so social overlays need no separate platform file. Keep the lists in sync.
@@ -614,7 +594,6 @@ document.addEventListener("DOMContentLoaded", () => {
     start();
   }
 
-  byConfigurator.applyParameters(resource.fields, settings);
-  window.byStreamResource = { ...resource, settings, parameterRules };
-  if (isOverlay) renderMain();
+  const settings = byConfigurator.initResource(resource);
+  if (byStreamOverlay) renderMain();
 });
