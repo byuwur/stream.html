@@ -183,7 +183,7 @@ body {
   background: var(--bs-tertiary-bg);
 }
 .bywr-configurator .stream-select2-dropdown .select2-results__option--highlighted[aria-selected] {
-  color: var(--primary-foreground);
+  color: var(--light-color);
   background: var(--primary-color);
 }
 .bywr-configurator .stream-select2-dropdown .select2-results > .select2-results__options {
