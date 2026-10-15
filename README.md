@@ -39,7 +39,7 @@ Keep the resource folder and its parent `configurator.js` and `configurator.css`
 
 Open `{tool}/index.html`, then copy the generated `file:///.../{tool}/index.html?...` URL into OBS with **Local file** unchecked. Keep the files at that path. Hosted URLs use directories, such as `controller/?player=1`.
 
-CDN assets are pinned to `spa.js@v20.1`. Editors load jQuery, Bootstrap, Select2, Pickr, and common styles/helpers. Renderers use native JavaScript; Main and Popup also use GSAP, with MorphSVG for Popup. Font-enabled pages use the native `byFont` helper. Offline use needs saved CDN dependencies and updated imports; installed fonts need no Google request. Controller output uses local artwork and the shared runtime.
+CDN assets are pinned to `spa.js@v20.2`. Editors load jQuery, Bootstrap, Select2, Pickr, and common styles/helpers. Renderers use native JavaScript; Main and Popup also use GSAP, with MorphSVG for Popup. Font-enabled pages use the native `byFont` helper. Offline use needs saved CDN dependencies and updated imports; installed fonts need no Google request. Controller output uses local artwork and the shared runtime.
 
 ### Older URLs
 
@@ -146,7 +146,7 @@ Date/time pickers use the editor computer's zone and serialize UTC. Direct times
 | `{tool}/index.html` | Overlay template, dependency declarations, and empty editor container. |
 | `{tool}/{tool}.js` | Resource definition and native rendering. |
 | `{tool}/{tool}.css` | Resource appearance. |
-| `spa.js@v20.1/_fonts.js` | Native font loading and optional jQuery/Select2 pickers. |
+| `spa.js@v20.2/_fonts.js` | Native font loading and optional jQuery/Select2 pickers. |
 | `configurator.html` | Working starter with text, number, and color fields. |
 | `index.html` | Landing, generated cards, filters, animations, and sharing metadata. |
 
