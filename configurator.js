@@ -682,6 +682,7 @@
         control.attr({ name, id: field.id || `field-${name}`, "data-title": field.label, "data-description": field.description || "" });
         for (const key of ["min", "max", "maxlength", "placeholder"]) if (field[key] !== undefined && field[key] !== Infinity) control.attr(key, field[key]);
         control.appendTo(label);
+        if (field.type === "switch") caption.add(control).wrapAll(/* HTML */ `<span class="d-flex align-items-center justify-content-between gap-3"></span>`);
         if (field.description) $(/* HTML */ `<small class="text-body-secondary"></small>`).text(field.description).appendTo(label);
         if (field.type === "entries") {
           const editor = $(/* HTML */ `<div class="entry-editor mb-3"></div>`).appendTo(container);
