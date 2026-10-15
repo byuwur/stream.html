@@ -23,7 +23,7 @@ document.addEventListener("DOMContentLoaded", () => {
         label: "Social accounts",
         section: "Social accounts",
         description: "Ordered account JSON: up to 100 entries with a supported platform and a handle of up to 160 characters.",
-        validate: parseAccounts,
+        validate: byConfigurator.parseAccounts,
         maxlength: 20000,
         entries: { choices: "platforms", choiceKey: "platform", textFields: [["handle", "Handle or display text"]], newEntry: { platform: "twitch", handle: "" } },
         addLabel: "Add account"
@@ -151,114 +151,6 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     },
   };
-
-  // Repeated in here and configurator.js so social overlays need no separate platform file. Keep the lists in sync.
-  const platforms = {
-    "500px": "500px",
-    artstation: "ArtStation",
-    bandcamp: "Bandcamp",
-    behance: "Behance",
-    bilibili: "Bilibili",
-    bitbucket: "Bitbucket",
-    blogger: "Blogger",
-    bluesky: "Bluesky",
-    codepen: "CodePen",
-    dailymotion: "Dailymotion",
-    deezer: "Deezer",
-    delicious: "Delicious",
-    dev: "DEV Community",
-    deviantart: "DeviantArt",
-    digg: "Digg",
-    discord: "Discord",
-    discourse: "Discourse",
-    dribbble: "Dribbble",
-    ello: "Ello",
-    facebook: "Facebook",
-    figma: "Figma",
-    flickr: "Flickr",
-    foursquare: "Foursquare",
-    github: "GitHub",
-    gitlab: "GitLab",
-    goodreads: "Goodreads",
-    "google-scholar": "Google Scholar",
-    "google-plus": "Google+",
-    guilded: "Guilded",
-    "hacker-news": "Hacker News",
-    hashnode: "Hashnode",
-    houzz: "Houzz",
-    instagram: "Instagram",
-    itunes: "iTunes",
-    keybase: "Keybase",
-    "ko-fi": "Ko-fi",
-    lastfm: "Last.fm",
-    letterboxd: "Letterboxd",
-    line: "LINE",
-    linkedin: "LinkedIn",
-    mastodon: "Mastodon",
-    medium: "Medium",
-    meetup: "Meetup",
-    mixcloud: "Mixcloud",
-    mixer: "Mixer",
-    napster: "Napster",
-    odnoklassniki: "Odnoklassniki",
-    orcid: "ORCID",
-    patreon: "Patreon",
-    periscope: "Periscope",
-    pinterest: "Pinterest",
-    pixiv: "pixiv",
-    "product-hunt": "Product Hunt",
-    qq: "QQ",
-    quora: "Quora",
-    ravelry: "Ravelry",
-    reddit: "Reddit",
-    renren: "Renren",
-    researchgate: "ResearchGate",
-    "signal-messenger": "Signal",
-    skype: "Skype",
-    slack: "Slack",
-    snapchat: "Snapchat",
-    soundcloud: "SoundCloud",
-    spotify: "Spotify",
-    "stack-overflow": "Stack Overflow",
-    steam: "Steam",
-    strava: "Strava",
-    stumbleupon: "StumbleUpon",
-    telegram: "Telegram",
-    "tencent-weibo": "Tencent Weibo",
-    threads: "Threads",
-    tiktok: "TikTok",
-    tumblr: "Tumblr",
-    twitch: "Twitch",
-    twitter: "Twitter",
-    unsplash: "Unsplash",
-    viadeo: "Viadeo",
-    viber: "Viber",
-    vimeo: "Vimeo",
-    vine: "Vine",
-    vk: "VK",
-    weixin: "WeChat",
-    weibo: "Weibo",
-    whatsapp: "WhatsApp",
-    "x-twitter": "X",
-    xing: "XING",
-    yammer: "Yammer",
-    yelp: "Yelp",
-    youtube: "YouTube",
-    zhihu: "Zhihu"
-  };
-
-  /** Parses only supported platforms and bounded display text; null keeps the defaults. */
-  function parseAccounts(value) {
-    if (value.length > 20000) return null;
-    try {
-      const entries = JSON.parse(value);
-      if (!Array.isArray(entries) || entries.length > 100) return null;
-      if (!entries.every((entry) => entry && typeof entry.platform === "string" && Object.hasOwn(platforms, entry.platform) && typeof entry.handle === "string" && entry.handle.length <= 160)) return null;
-      return entries.map(({ platform, handle }) => ({ platform, handle }));
-    } catch (error) {
-      return null;
-    }
-  }
 
   /** Render safe text and play the elastic square, handle, and icon sequence. */
   async function renderPopup() {

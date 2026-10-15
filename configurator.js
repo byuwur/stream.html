@@ -12,6 +12,100 @@
   const root = new URL(".", document.currentScript.src);
 
   // Native helpers are shared with renderers; editor dependencies load only below.
+  const platforms = {
+    "500px": "500px",
+    artstation: "ArtStation",
+    bandcamp: "Bandcamp",
+    behance: "Behance",
+    bilibili: "Bilibili",
+    bitbucket: "Bitbucket",
+    blogger: "Blogger",
+    bluesky: "Bluesky",
+    codepen: "CodePen",
+    dailymotion: "Dailymotion",
+    deezer: "Deezer",
+    delicious: "Delicious",
+    dev: "DEV Community",
+    deviantart: "DeviantArt",
+    digg: "Digg",
+    discord: "Discord",
+    discourse: "Discourse",
+    dribbble: "Dribbble",
+    ello: "Ello",
+    facebook: "Facebook",
+    figma: "Figma",
+    flickr: "Flickr",
+    foursquare: "Foursquare",
+    github: "GitHub",
+    gitlab: "GitLab",
+    goodreads: "Goodreads",
+    "google-scholar": "Google Scholar",
+    "google-plus": "Google+",
+    guilded: "Guilded",
+    "hacker-news": "Hacker News",
+    hashnode: "Hashnode",
+    houzz: "Houzz",
+    instagram: "Instagram",
+    itunes: "iTunes",
+    keybase: "Keybase",
+    "ko-fi": "Ko-fi",
+    lastfm: "Last.fm",
+    letterboxd: "Letterboxd",
+    line: "LINE",
+    linkedin: "LinkedIn",
+    mastodon: "Mastodon",
+    medium: "Medium",
+    meetup: "Meetup",
+    mixcloud: "Mixcloud",
+    mixer: "Mixer",
+    napster: "Napster",
+    odnoklassniki: "Odnoklassniki",
+    orcid: "ORCID",
+    patreon: "Patreon",
+    periscope: "Periscope",
+    pinterest: "Pinterest",
+    pixiv: "pixiv",
+    "product-hunt": "Product Hunt",
+    qq: "QQ",
+    quora: "Quora",
+    ravelry: "Ravelry",
+    reddit: "Reddit",
+    renren: "Renren",
+    researchgate: "ResearchGate",
+    "signal-messenger": "Signal",
+    skype: "Skype",
+    slack: "Slack",
+    snapchat: "Snapchat",
+    soundcloud: "SoundCloud",
+    spotify: "Spotify",
+    "stack-overflow": "Stack Overflow",
+    steam: "Steam",
+    strava: "Strava",
+    stumbleupon: "StumbleUpon",
+    telegram: "Telegram",
+    "tencent-weibo": "Tencent Weibo",
+    threads: "Threads",
+    tiktok: "TikTok",
+    tumblr: "Tumblr",
+    twitch: "Twitch",
+    twitter: "Twitter",
+    unsplash: "Unsplash",
+    viadeo: "Viadeo",
+    viber: "Viber",
+    vimeo: "Vimeo",
+    vine: "Vine",
+    vk: "VK",
+    weixin: "WeChat",
+    weibo: "Weibo",
+    whatsapp: "WhatsApp",
+    "x-twitter": "X",
+    xing: "XING",
+    yammer: "Yammer",
+    yelp: "Yelp",
+    youtube: "YouTube",
+    zhihu: "Zhihu"
+  };
+
   /** Validate the declared URL field, retaining the same rules in forms and overlays. */
   function validParameter(fields, name, value) {
     if (!Object.hasOwn(fields, name)) return false;
@@ -75,7 +169,24 @@
     return settings;
   }
 
-  Object.assign(byConfigurator, { validParameter, applyParameters, initResource });
+  /** Main accepts headings; Popup keeps only the platform and display handle. */
+  function parseAccounts(value, withHeading = false) {
+    if (value.length > 20000) return null;
+    try {
+      const entries = JSON.parse(value);
+      if (!Array.isArray(entries) || entries.length > 100) return null;
+      if (!entries.every((entry) =>
+        entry && typeof entry.platform === "string" && Object.hasOwn(platforms, entry.platform) &&
+        typeof entry.handle === "string" && entry.handle.length <= 160 &&
+        (!withHeading || entry.heading === undefined || (typeof entry.heading === "string" && entry.heading.length <= 160))
+      )) return null;
+      return entries.map(({ platform, handle, heading = "" }) => withHeading ? { platform, handle, heading } : { platform, handle });
+    } catch {
+      return null;
+    }
+  }
+
+  Object.assign(byConfigurator, { platforms, validParameter, applyParameters, initResource, parseAccounts });
 
   if (document.getElementById("configurator") && location.search.length > 1 && !location.hash) return;
 
@@ -613,106 +724,11 @@
     // ==== ORDERED ACCOUNT AND SCHEDULE EDITORS ====
     // ==========
 
-    // Repeated in Popup and Main to avoid a platform file. Keep all three lists in sync.
-    const configuratorPlatforms = {
-      "500px": "500px",
-      artstation: "ArtStation",
-      bandcamp: "Bandcamp",
-      behance: "Behance",
-      bilibili: "Bilibili",
-      bitbucket: "Bitbucket",
-      blogger: "Blogger",
-      bluesky: "Bluesky",
-      codepen: "CodePen",
-      dailymotion: "Dailymotion",
-      deezer: "Deezer",
-      delicious: "Delicious",
-      dev: "DEV Community",
-      deviantart: "DeviantArt",
-      digg: "Digg",
-      discord: "Discord",
-      discourse: "Discourse",
-      dribbble: "Dribbble",
-      ello: "Ello",
-      facebook: "Facebook",
-      figma: "Figma",
-      flickr: "Flickr",
-      foursquare: "Foursquare",
-      github: "GitHub",
-      gitlab: "GitLab",
-      goodreads: "Goodreads",
-      "google-scholar": "Google Scholar",
-      "google-plus": "Google+",
-      guilded: "Guilded",
-      "hacker-news": "Hacker News",
-      hashnode: "Hashnode",
-      houzz: "Houzz",
-      instagram: "Instagram",
-      itunes: "iTunes",
-      keybase: "Keybase",
-      "ko-fi": "Ko-fi",
-      lastfm: "Last.fm",
-      letterboxd: "Letterboxd",
-      line: "LINE",
-      linkedin: "LinkedIn",
-      mastodon: "Mastodon",
-      medium: "Medium",
-      meetup: "Meetup",
-      mixcloud: "Mixcloud",
-      mixer: "Mixer",
-      napster: "Napster",
-      odnoklassniki: "Odnoklassniki",
-      orcid: "ORCID",
-      patreon: "Patreon",
-      periscope: "Periscope",
-      pinterest: "Pinterest",
-      pixiv: "pixiv",
-      "product-hunt": "Product Hunt",
-      qq: "QQ",
-      quora: "Quora",
-      ravelry: "Ravelry",
-      reddit: "Reddit",
-      renren: "Renren",
-      researchgate: "ResearchGate",
-      "signal-messenger": "Signal",
-      skype: "Skype",
-      slack: "Slack",
-      snapchat: "Snapchat",
-      soundcloud: "SoundCloud",
-      spotify: "Spotify",
-      "stack-overflow": "Stack Overflow",
-      steam: "Steam",
-      strava: "Strava",
-      stumbleupon: "StumbleUpon",
-      telegram: "Telegram",
-      "tencent-weibo": "Tencent Weibo",
-      threads: "Threads",
-      tiktok: "TikTok",
-      tumblr: "Tumblr",
-      twitch: "Twitch",
-      twitter: "Twitter",
-      unsplash: "Unsplash",
-      viadeo: "Viadeo",
-      viber: "Viber",
-      vimeo: "Vimeo",
-      vine: "Vine",
-      vk: "VK",
-      weixin: "WeChat",
-      weibo: "Weibo",
-      whatsapp: "WhatsApp",
-      "x-twitter": "X",
-      xing: "XING",
-      yammer: "Yammer",
-      yelp: "Yelp",
-      youtube: "YouTube",
-      zhihu: "Zhihu"
-    };
-
     const platformIcons = new Map();
     function platformIcon(platform) {
       if (platformIcons.has(platform)) return platformIcons.get(platform);
       const jqIcon = $(/* HTML */ `<i></i>`)
-        .addClass(Object.hasOwn(configuratorPlatforms, platform) ? `fa-brands fa-${platform}` : "fa-solid fa-globe")
+        .addClass(Object.hasOwn(byConfigurator.platforms, platform) ? `fa-brands fa-${platform}` : "fa-solid fa-globe")
         .prop("hidden", true)
         .appendTo(form);
       const style = getComputedStyle(jqIcon[0], "::before");
@@ -1231,7 +1247,7 @@
       const editor = {
         generateURL,
         initEntryEditor,
-        platforms: configuratorPlatforms,
+        platforms: byConfigurator.platforms,
         initSelect2
       };
       const { initResourceHelp } = byConfigurator.configureResource?.(resource, editor) || {};
@@ -1239,7 +1255,7 @@
         if (field.entries)
           initEntryEditor(name, settings[name], {
             ...field.entries,
-            choices: field.entries.choices === "platforms" ? configuratorPlatforms : field.entries.choices
+            choices: field.entries.choices === "platforms" ? byConfigurator.platforms : field.entries.choices
           });
       }
       initTheme();
