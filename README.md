@@ -203,7 +203,7 @@ The HTML needs just `<div id="configurator"></div>` for the editor. Shared setup
 
 | Field metadata                                | Purpose                                                                                                                                 |
 | --------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| `type`                                        | `text`, `number`, `url`, `textarea`, `select`, `switch`, `color`, `font`, `entries`, or Controller's `mapping`. |
+| `type`                                        | `text`, `number`, `url`, `textarea`, `select`, `switch`, `color`, `font`, `datetime`, `timezone`, `entries`, or Controller's `mapping`. |
 | `default`, `label`, `section`, `description`  | Initial value, visible caption, form group, and parameter help.                                                                         |
 | `options`, `labels`                           | Allowed select values and optional human-readable labels keyed by value.                                                                |
 | `min`, `max`, `step`, `maxlength`, `validate` | URL and input constraints. A custom validator returns a parsed value or `null`.                                                         |
@@ -215,6 +215,8 @@ The generator uses jQuery for controls and events with the existing Select2, Pic
 Custom editor behavior belongs in a separate editor-only script loaded after the shared configurator. Controller's `controller/configurator.js` publishes `byConfigurator.configureResource(resource, editor)` for its mapping UI. The hook receives `generateURL` and the existing control helpers, including `initSelect2`, and may return `initResourceHelp` for additional help panels. Keep renderer behavior in the resource script.
 
 Native helpers also share locale, time-zone and timestamp parsing, image URL checks, and watch() updates with visibility/page lifecycle handling.
+
+Appearance presets edit declared fields. Date/time controls use the editor computer's zone and serialize UTC; timezone fields provide IANA suggestions.
 
 ### Adding another HTML tool
 

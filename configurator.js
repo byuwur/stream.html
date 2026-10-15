@@ -874,13 +874,14 @@
         textFields.forEach(([key, title, type = "text"]) => {
           $(/* HTML */ `<input />`, {
             type,
+            step: type === "datetime-local" ? "1" : undefined,
             maxlength: 160,
             "data-field": key,
             "aria-label": title,
             placeholder: title,
             class: "form-control rounded-0 bg-body-secondary border-secondary-subtle mb-1"
           })
-            .val(entry[key])
+            .val(type === "datetime-local" ? localTimestamp(entry[key]) : entry[key])
             .appendTo(jqRow);
         });
         jqRow.appendTo(jqEditor);
@@ -901,7 +902,7 @@
             jqRow.find("input").each(function () {
               const jqInput = $(this);
               const value = jqInput.val();
-              entry[jqInput.data("field")] = value;
+              entry[jqInput.data("field")] = jqInput.is('[type="datetime-local"]') && value ? utcTimestamp(value) : value;
             });
             return entry;
           })
@@ -947,6 +948,83 @@
       });
       jqForm.on("reset", () => setTimeout(reset, 0));
       reset();
+    }
+
+    function utcTimestamp(value) {
+      const date = new Date(value);
+      return Number.isFinite(date.getTime()) ? date.toISOString() : "";
+    }
+
+    function localTimestamp(value) {
+      const date = new Date(value);
+      if (!Number.isFinite(date.getTime())) return "";
+      return new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, 19);
+    }
+
+    /** Presets edit ordinary declared fields; the URL remains authoritative. */
+    function initAppearancePresets() {
+      const jqLabel = $(/* HTML */ `<label class="form-label w-100"></label>`).text("Appearance preset").prependTo(jqForm);
+      const jqSelect = $(/* HTML */ `<select class="form-select rounded-0 bg-body-secondary border-secondary-subtle mb-3"></select>`).appendTo(jqLabel);
+      for (const [value, title] of [
+        ["", "Custom"],
+        ["studio", "Studio"],
+        ["minimal", "Minimal"],
+        ["light", "Light ink"]
+      ])
+        $(/* HTML */ `<option></option>`).val(value).text(title).appendTo(jqSelect);
+      const presets = {
+        studio: { backgroundColor: "#15151BE6", textColor: "#FFFFFF", accentColor: "#FF626D", shadow: 0.35 },
+        minimal: { backgroundColor: "#00000000", textColor: "#FFFFFF", accentColor: "#FF626D", shadow: 0.5 },
+        light: { backgroundColor: "#FFFFFFE6", textColor: "#15151B", accentColor: "#B51F36", shadow: 0.1 }
+      };
+      jqSelect.on("change", () => {
+        for (const [name, value] of Object.entries(presets[jqSelect.val()] || {})) {
+          const field = form.elements[name];
+          if (!field) continue;
+          $(field).val(value).trigger("change");
+        }
+        generateURL();
+      });
+      jqForm.on("input", () => jqSelect.val("").trigger("change.select2"));
+    }
+
+    /** Native pickers use the editor computer's zone and serialize absolute UTC timestamps. */
+    function initTimestampFields(names) {
+      for (const name of names) {
+        const jqField = $(form.elements[name]);
+        if (!jqField.length) continue;
+        const initial = jqField.val();
+        const title = jqField.closest("label").find(".field-caption").text() || name;
+        jqField.attr({ type: "hidden", "data-title": title });
+        const jqPicker = $(/* HTML */ `<input type="datetime-local" step="1" required />`)
+          .attr({ class: `${jqField.attr("class")} timestamp-picker`, "aria-label": title })
+          .insertBefore(jqField);
+        const jqNote = $(/* HTML */ `<small class="text-body-secondary"></small>`).text("Choose in this computer’s time zone. The URL stores an absolute time.").insertAfter(jqPicker);
+        const jqNow = $(/* HTML */ `<button type="button" class="btn btn-sm btn-outline-primary align-self-start"></button>`).text("Use current time").attr("aria-label", `Use current time for ${title}`).insertAfter(jqNote);
+        const sync = () => jqPicker.val(localTimestamp(jqField.val()));
+        jqPicker.on("input", () => jqField.val(utcTimestamp(jqPicker.val())).trigger("input"));
+        jqNow.on("click", () => {
+          jqField.val(new Date().toISOString());
+          sync();
+          jqField.trigger("input");
+        });
+        // Restore hidden defaults before native Reset and the shared URL refresh.
+        jqForm.on("reset", () => {
+          jqField.val(initial);
+          sync();
+        });
+        sync();
+        jqPicker.prop("defaultValue", jqPicker.val());
+      }
+    }
+
+    function initTimeZoneField(name) {
+      const jqField = $(form.elements[name]);
+      if (!jqField.length) return;
+      const jqList = $(/* HTML */ `<datalist></datalist>`).attr("id", `${name}-zones`).insertAfter(jqField);
+      const zones = Intl.supportedValuesOf?.("timeZone") || ["America/Bogota", "America/New_York", "Europe/London", "Asia/Tokyo"];
+      for (const zone of new Set(["UTC", Intl.DateTimeFormat().resolvedOptions().timeZone, ...zones])) $(/* HTML */ `<option></option>`).val(zone).text(zone).appendTo(jqList);
+      jqField.attr("list", jqList.attr("id"));
     }
 
     // ==========
@@ -1330,6 +1408,9 @@
       const editor = {
         generateURL,
         initEntryEditor,
+        initAppearancePresets,
+        initTimestampFields,
+        initTimeZoneField,
         platforms: byConfigurator.platforms,
         initSelect2
       };
@@ -1340,7 +1421,10 @@
             ...field.entries,
             choices: field.entries.choices === "platforms" ? byConfigurator.platforms : field.entries.choices
           });
+        if (field.type === "timezone") initTimeZoneField(name);
       }
+      if (resource.presets) initAppearancePresets();
+      initTimestampFields(Object.keys(resource.fields).filter((name) => resource.fields[name].type === "datetime"));
       initTheme();
       initTools();
       initFontPickers();
