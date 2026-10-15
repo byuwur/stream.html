@@ -214,6 +214,8 @@ The generator uses jQuery for controls and events with the existing Select2, Pic
 
 Custom editor behavior belongs in a separate editor-only script loaded after the shared configurator. Controller's `controller/configurator.js` publishes `byConfigurator.configureResource(resource, editor)` for its mapping UI. The hook receives `generateURL` and the existing control helpers, including `initSelect2`, and may return `initResourceHelp` for additional help panels. Keep renderer behavior in the resource script.
 
+Native helpers also share locale, time-zone and timestamp parsing, image URL checks, and watch() updates with visibility/page lifecycle handling.
+
 ### Adding another HTML tool
 
 1. Copy `configurator.html` as the tool's `index.html`. Replace the demo markup, CSS, and inline renderer with your resource script. Change shared import paths from `./` to `../`.

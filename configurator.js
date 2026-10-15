@@ -186,7 +186,90 @@
     }
   }
 
-  Object.assign(byConfigurator, { platforms, validParameter, applyParameters, initResource, parseAccounts });
+  function parseZone(value) {
+    if (value.length > 100) return null;
+    if (!value) return "";
+    try {
+      new Intl.DateTimeFormat("en", { timeZone: value }).format();
+      return value;
+    } catch {
+      return null;
+    }
+  }
+
+  function parseLocale(value) {
+    if (value.length > 50) return null;
+    if (!value) return "";
+    try {
+      return Intl.getCanonicalLocales(value)[0] || "";
+    } catch {
+      return null;
+    }
+  }
+
+  function parseZones(value) {
+    if (value.length > 400) return null;
+    const zones = value
+      .split("\n")
+      .map((x) => x.trim())
+      .filter(Boolean);
+    return zones.length <= 3 && zones.every((x) => parseZone(x) !== null) ? zones.join("\n") : null;
+  }
+
+  function parseTimestamp(value) {
+    if (value.length > 40 || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2}(\.\d{1,3})?)?(Z|[+-]\d{2}:\d{2})$/.test(value))
+      return null;
+    const [year, month, day, hour, minute, second = 0] = value
+      .match(/^([0-9]{4})-([0-9]{2})-([0-9]{2})T([0-9]{2}):([0-9]{2})(?::([0-9]{2}))?/)
+      .slice(1)
+      .map(Number);
+    if (
+      month < 1 ||
+      month > 12 ||
+      day < 1 ||
+      day > new Date(Date.UTC(year, month, 0)).getUTCDate() ||
+      hour > 23 ||
+      minute > 59 ||
+      second > 59 ||
+      !Number.isFinite(Date.parse(value))
+    )
+      return null;
+    return value;
+  }
+
+  function safeImage(value) {
+    if (!value) return true;
+    try {
+      const url = new URL(value, location.href);
+      return (
+        ["http:", "https:", "file:"].includes(url.protocol) &&
+        (url.protocol !== "file:" || location.protocol === "file:") &&
+        !url.username &&
+        !url.password
+      );
+    } catch {
+      return false;
+    }
+  }
+
+  /** Align updates with the clock and pause them while the page is hidden. */
+  function watch(update, interval = 1000) {
+    let pending;
+    function resume() {
+      clearTimeout(pending);
+      const keepUpdating = update() !== false;
+      if (keepUpdating && !document.hidden) pending = setTimeout(resume, interval - (Date.now() % interval));
+    }
+    document.addEventListener("visibilitychange", resume);
+    global.addEventListener("pagehide", () => clearTimeout(pending));
+    global.addEventListener("pageshow", resume);
+    resume();
+  }
+
+  Object.assign(byConfigurator, {
+    platforms, validParameter, applyParameters, initResource, parseAccounts,
+    parseZone, parseLocale, parseZones, parseTimestamp, safeImage, watch
+  });
 
   if (document.getElementById("configurator") && location.search.length > 1 && !location.hash) return;
 
