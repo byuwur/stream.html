@@ -26,7 +26,7 @@ Use **1920 × 1080** for Main scene. Size Controller and Popup for your layout; 
 - Append `#configure` to edit an existing URL. Help links open the corresponding panel.
 - **Reset** restores the settings, list order, and compression choices from when the page opened, including after direct URL edits.
 - Form edits and same-tool URL edits apply after a 250 ms pause via SPA.js's shared `debounce()`, updating the form and preview in place. **Enter** or leaving the changed URL field applies immediately; links to another tool navigate then.
-- Editing keeps the browser address unchanged. **Copy URL** shares the current overlay settings.
+- Editing keeps the browser address unchanged. **Copy URL** shares the current overlay settings. Bare tool URLs resume the saved configuration; explicit query settings take priority, including on reload.
 - Invalid form values stop URL generation and keep the last valid preview. Invalid or unknown URL parameters keep the defaults; empty text clears a field.
 
 The form handles encoding. Display text stays text, and lists support add, edit, reorder, and remove. Colors use 3/4/6/8 hex digits without `#`, including alpha: `fontColor=fff`, `backgroundColor=00000000`. Runtime restores `#`; older encoded hashes work. Malformed colors pass to CSS; RGB/HSL/named colors are outside the contract. Theme preference is saved locally. Motion follows the tool's settings; explicit Off, None, and Static choices still apply.
@@ -38,6 +38,8 @@ Media fields reference public HTTP(S) URLs or paths relative to the tool's HTML.
 ### Shorter URLs
 
 Open **Advanced** from the toolbar gear or footer. Compression is raw DEFLATE plus unpadded Base64url; the panel shows length/savings and keeps the readable URL when shorter.
+
+Form values, expanded sections, and Advanced options are remembered per resource. Only valid form values are saved, using the generated query's chosen compression format and readable fallback. Small configurations use a one-year cookie scoped to the resource folder; larger configurations, blocked cookies, and `file://` copies use local storage. Explicit URL settings and compression formats take priority. Overlays use their URL only; invalid or unavailable storage leaves editing usable.
 
 | Mode            | URL representation                                                                                                  |
 | --------------- | ------------------------------------------------------------------------------------------------------------------- |

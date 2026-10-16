@@ -13,8 +13,40 @@
   let resourceReady = Promise.resolve();
   let parameterError = "";
   let compressedFields = new Set();
+  const preferencePath = new URL(".", location.href).pathname;
+  const preferenceKey = `stream.html.settings.${encodeURIComponent(preferencePath)}`;
+  let savedPreferences = { query: "", advanced: null, collapsed: [] };
 
-
+  /** Local storage holds configurations that cannot fit in a cookie and takes precedence. */
+  function readPreferences(fields) {
+    const candidates = [];
+    try {
+      candidates.push(localStorage.getItem(preferenceKey));
+    } catch {}
+    if (location.protocol !== "file:") {
+      try {
+        candidates.push(decodeURIComponent(global.get_cookie(preferenceKey) || "null"));
+      } catch {}
+    }
+    for (const value of candidates) {
+      try {
+        const saved = JSON.parse(value);
+        if (!saved || typeof saved.query !== "string") continue;
+        const advanced = saved.advanced;
+        return {
+          query: saved.query,
+          advanced:
+            advanced && typeof advanced.enabled === "boolean" && ["all", "selected"].includes(advanced.scope) && Array.isArray(advanced.fields)
+              ? { enabled: advanced.enabled, scope: advanced.scope, fields: advanced.fields.filter((name) => typeof name === "string" && Object.hasOwn(fields, name)) }
+              : null,
+          collapsed: Array.isArray(saved.collapsed) ? saved.collapsed.filter((section) => typeof section === "string") : []
+        };
+      } catch {
+        // Ignore invalid saved data and try the other storage location.
+      }
+    }
+    return { query: "", advanced: null, collapsed: [] };
+  }
 
   /** Readable parameters override compressed values before normal field validation. */
   async function readURLParameters(fields, search = location.search) {
@@ -190,15 +222,17 @@
 
   /** Publish decoded settings before widgets; only bare editors restore saved form values. */
   function initResource(resource, integrations = {}) {
-    resourceReady = readURLParameters(resource.fields).then((parameters) => {
+    const overlay = location.search.length > 1 && !location.hash;
+    if (!overlay) savedPreferences = readPreferences(resource.fields);
+    const search = !overlay && !location.search ? savedPreferences.query : location.search;
+    resourceReady = readURLParameters(resource.fields, search).then((parameters) => {
       parameterError = parameters.error;
-      compressedFields = parameters.compressedFields;
+      compressedFields = location.search ? parameters.compressedFields : new Set();
       const settings = {
         ...resource.constants,
         ...Object.fromEntries(Object.entries(resource.fields).map(([name, field]) => [name, structuredClone(field.default)]))
       };
       applyParameters(resource.fields, settings, parameters.values);
-      const overlay = location.search.length > 1 && !location.hash;
       global.byStreamOverlay = overlay;
       global.addEventListener("hashchange", () => {
         if (overlay !== (location.search.length > 1 && !location.hash)) location.reload();
@@ -693,16 +727,19 @@
         const section = field.section || "Settings";
         if (!groups.has(section)) {
           const id = `section-${groups.size}`;
+          const collapsed = savedPreferences.collapsed.includes(section);
           const group = $(/* HTML */ `<fieldset class="accordion-item mb-3 border border-secondary-subtle bg-body p-2"></fieldset>`).appendTo(jqForm);
           const heading = $(/* HTML */ `<button class="accordion-button" type="button" data-bs-toggle="collapse" aria-expanded="true"></button>`)
-            .attr({ id: `${id}-toggle`, "data-bs-target": `#${id}`, "aria-controls": id })
+            .attr({ id: `${id}-toggle`, "data-bs-target": `#${id}`, "aria-controls": id, "aria-expanded": String(!collapsed) })
+            .toggleClass("collapsed", collapsed)
             .text(section);
           if (resource.sectionIcons?.[section]) heading.prepend($(/* HTML */ `<i></i>`).addClass(`${resource.sectionIcons[section]} me-2`).attr("aria-hidden", "true"));
           $(/* HTML */ `<legend class="float-start w-100 fs-6 fw-semibold border-bottom pb-2 mb-2 text-primary"></legend>`).append(heading).appendTo(group);
           groups.set(
             section,
             $(/* HTML */ `<div class="accordion-collapse collapse show"></div>`)
-              .attr({ id, "aria-labelledby": `${id}-toggle` })
+              .attr({ id, "aria-labelledby": `${id}-toggle`, "data-config-section": section })
+              .toggleClass("show", !collapsed)
               .appendTo(group)
           );
         }
@@ -815,6 +852,7 @@
         }
       }
       if (generation !== urlGeneration) return false;
+      savePreferences(url.search.slice(1));
       if (!urlEdited) $("#overlay-url").val(url.href);
       $("#url-summary").text(summary);
       $("#preview-url").attr("href", url.href);
@@ -868,7 +906,7 @@
         return;
       }
       const generation = ++urlGeneration;
-      const parameters = await readURLParameters(parameterRules, url.search);
+      const parameters = await readURLParameters(parameterRules, url.search || savedPreferences.query);
       if (generation !== urlGeneration) return;
       const loaded = {
         ...resource.constants,
@@ -1319,7 +1357,41 @@
     // ==== HELP AND TOOL NAVIGATION ====
     // ==========
 
-
+    function savePreferences(query = savedPreferences.query) {
+      savedPreferences = {
+        query,
+        advanced: {
+          enabled: $("#short-url").prop("checked"),
+          scope: $('input[name="compression-scope"]:checked').val(),
+          fields: $("[data-compress-field]:checked")
+            .map((_, input) => input.value)
+            .get()
+        },
+        collapsed: jqForm
+          .find(".accordion-collapse:not(.show)")
+          .map((_, section) => section.dataset.configSection)
+          .get()
+      };
+      const value = JSON.stringify(savedPreferences);
+      // Scope cookies to the tool folder; a root cookie for every tool would enlarge all requests.
+      const cookie = `${preferenceKey}=${encodeURIComponent(value)};max-age=31536000;path=${preferencePath}`;
+      try {
+        if (location.protocol !== "file:" && cookie.length <= 4000) {
+          document.cookie = cookie;
+          if (global.get_cookie(preferenceKey) === encodeURIComponent(value)) {
+            try {
+              localStorage.removeItem(preferenceKey);
+            } catch {}
+            return;
+          }
+        }
+      } catch {
+        // Try local storage when cookies are unavailable.
+      }
+      try {
+        localStorage.setItem(preferenceKey, value);
+      } catch {}
+    }
 
     function syncCompressionOptions() {
       $("#compression-options").prop("hidden", !$("#short-url").prop("checked"));
@@ -1328,17 +1400,20 @@
 
     function loadCompressionOptions(search, selected, saveDefaults = false) {
       const all = new URLSearchParams(search).has("data");
-      $("#short-url").prop("checked", !$("#short-url").prop("disabled") && (all || selected.size > 0));
+      // A compressed URL declares its own format; otherwise restore this resource's preference.
+      const saved = !all && !selected.size ? savedPreferences.advanced : null;
+      $("#short-url").prop("checked", !$("#short-url").prop("disabled") && (saved ? saved.enabled : all || selected.size > 0));
       $('input[name="compression-scope"]').each(function () {
-        this.checked = this.value === (all || !selected.size ? "all" : "selected");
+        this.checked = this.value === (saved ? saved.scope : all || !selected.size ? "all" : "selected");
       });
       $("[data-compress-field]").each(function () {
         const rule = parameterRules[this.value];
-        this.checked = selected.size ? selected.has(this.value) : typeof rule.default === "object" && rule.default !== null;
+        this.checked = saved ? saved.fields.includes(this.value) : selected.size ? selected.has(this.value) : typeof rule.default === "object" && rule.default !== null;
       });
-      if (saveDefaults) $('#short-url, input[name="compression-scope"], [data-compress-field]').each(function () {
-        this.defaultChecked = this.checked;
-      });
+      if (saveDefaults)
+        $('#short-url, input[name="compression-scope"], [data-compress-field]').each(function () {
+          this.defaultChecked = this.checked;
+        });
       syncCompressionOptions();
     }
 
@@ -1445,6 +1520,7 @@
       });
       jqDialog.on("change", '#short-url, input[name="compression-scope"], [data-compress-field]', () => {
         syncCompressionOptions();
+        savePreferences();
         generateURL();
       });
       $("#compression-search").on("input", function () {
@@ -1721,6 +1797,7 @@
         if (generation === urlGeneration) applyEditedURL(true);
       });
       jqForm
+        .on("shown.bs.collapse hidden.bs.collapse", ".accordion-collapse", () => savePreferences())
         .on("input change", (event) => {
           urlEdited = false;
           const generation = ++urlGeneration;
