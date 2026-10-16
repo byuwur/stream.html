@@ -138,33 +138,26 @@ Invalid lists retain defaults. Pixels convert to rem at a 16px root. Follower/do
 
 ## Work in progress
 
-The other 19 tools remain `ready: false`, hidden from the landing and navigation, pending manual testing and review. These are development notes, not a release announcement. Their defaults and full field descriptions live in the local forms.
+The other 19 tools are `ready: false`, hidden pending manual review/testing. Defaults and field documentation live in their local forms.
 
-| Folder         | Purpose and useful limits                                                                                                                                                            |
-| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `clock`        | Digital, analog, flip, or minimal clocks. Up to four zones; blank zone/locale follows OBS. Larger multizone layouts may need a taller source.                                        |
-| `timer`        | Duration, deadline, elapsed, or restart timing. Timestamp modes survive reload; restart mode starts over. No shared pause/resume. Milliseconds update at 20 Hz.                      |
-| `webcam`       | Decorative frame above a camera source. Transparent center; it cannot crop or mask the camera. Circle uses the smaller dimension.                                                    |
-| `ticker`       | Scrolling or rotating messages. Scrolling uses measured repeats; other modes follow wall-clock time. No live feeds.                                                                  |
-| `watermark`    | Text, monogram, or logo. Optional fades follow wall-clock time; paths and fonts must exist in OBS.                                                                                   |
-| `lower-thirds` | Rotating names, subtitles, and optional images. Wall-clock order; no remote triggering. Missing images hide gracefully.                                                              |
-| `qr`           | QR/link card using Nayuki's MIT encoder. Max 600 characters/1,200 UTF-8 bytes, four quiet-zone modules, opaque colors, and whole modules of at least 3 px. Scan the final broadcast. |
-| `reminder`     | Timestamp-driven reminders with IANA quiet hours, including daylight saving. OBS must keep the source running.                                                                       |
-| `badge`        | Custom LIVE/AFK/RECORDING styling. It does not detect stream or recording status.                                                                                                    |
-| `credits`      | Scrolling categories and names, with optional looping. Speed uses pixels/second; reload starts the roll again.                                                                       |
-| `schedule`     | Dated activities, preserving row order and highlighting every active overlap. End boundaries are exclusive; no calendar integration.                                                 |
-| `sponsors`     | Rotating public logos and text. No sponsorship service; failed images leave text visible.                                                                                            |
-| `info`         | Static information cards. Large boards scroll; shorten text or enlarge the source to show everything.                                                                                |
-| `effects`      | CSS rain, snow, confetti, or symbols. Max 200 particles; low mode caps at 50. Motion Off gives a static pattern.                                                                     |
-| `hud`          | Decorative viewfinder, REC, and live timestamp. CSS grain/scanlines; no camera control or recording.                                                                                 |
-| `timeline`     | Timestamp progress. Zero before start, complete at end; reversed/equal ranges show an error.                                                                                         |
-| `randomizer`   | Seeded draws may repeat. Manual draws use OBS Interact and update the page URL; OBS restart uses its saved source URL. No remote synchronization.                                    |
-| `quotes`       | Configured quotations on a wall-clock rotation. No online quote feed.                                                                                                                |
-| `shortcuts`    | Static key/action reference and optional QWERTY diagram. It does not monitor keyboard input.                                                                                         |
+| Folder                                  | Purpose / limits                                                                                                                              |
+| --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `clock`                                 | Digital/analog/flip/minimal; four zones maximum, blank zone/locale follows OBS.                                                               |
+| `timer`                                 | Duration/deadline/elapsed/restart; timestamp modes survive reload, restart starts over. No shared pause; milliseconds update at 20 Hz.        |
+| `webcam`                                | Decorative frame; does not crop/mask the camera. Circle uses the smaller dimension.                                                           |
+| `ticker`, `quotes`                      | Configured message/quotation rotation; no live feeds.                                                                                         |
+| `watermark`, `lower-thirds`, `sponsors` | Text/logo/name rotations; no remote triggers or sponsorship service. Missing images leave text.                                               |
+| `qr`                                    | Nayuki MIT encoder; 600 characters/1,200 UTF-8 bytes, four-module quiet zone, opaque colors, modules at least 3 px. Scan the final broadcast. |
+| `reminder`                              | Timestamp reminders with IANA quiet hours/DST; keep OBS source running.                                                                       |
+| `badge`, `hud`                          | Decorative status/viewfinder; no stream-status detection or camera/recording control.                                                         |
+| `credits`                               | Scrolling credits/looping; pixels/second speed, reload restarts.                                                                              |
+| `schedule`                              | Ordered dated activities; highlights overlaps, exclusive end times, no calendar service.                                                      |
+| `info`, `shortcuts`                     | Static cards/key reference; large boards scroll, no keyboard monitoring.                                                                      |
+| `effects`                               | CSS particles; maximum 200, low mode 50, Off gives a static pattern.                                                                          |
+| `timeline`                              | Timestamp progress; invalid/reversed ranges show an error.                                                                                    |
+| `randomizer`                            | Seeded draws can repeat. OBS Interact updates the page URL; restart uses OBS's saved URL. No synchronization.                                 |
 
-Most draft sources start at **960 × 540**; HUD uses **1280 × 720**. Adjust dimensions and width to fit your scene. Lists allow 40 entries, 160 characters per field, and 8,000 JSON characters unless a tool documents a narrower limit.
-
-Date/time pickers use the editor computer's zone and serialize UTC. Direct timestamp URLs need `Z` or an explicit offset, such as `2026-10-14T18:00:00-05:00`. Generated start times are concrete, so supported timestamp modes survive reload; the OBS computer clock remains authoritative.
+Most draft sources start at **960 × 540**; HUD uses **1280 × 720**. Lists allow 40 entries, 160 characters/field, and 8,000 JSON characters unless narrower limits apply. Date pickers use the editor's zone and serialize UTC; direct timestamps need `Z` or an offset. OBS's clock controls timing; generated start timestamps survive reload.
 
 ## Development
 

@@ -1,6 +1,7 @@
 /**
  * File: configurator.js
  * @file Shared native resource setup and jQuery editor, preview, help, theme, and navigation.
+ * Native deps: SPA.js _functions.js for URL compression.
  * Editor deps: jQuery 4, Bootstrap 5, Select2, Pickr, and resource parameter rules.
  */
 
@@ -48,7 +49,11 @@
     return { query: "", advanced: null, collapsed: [] };
   }
 
-  /** Readable parameters override compressed values before normal field validation. */
+  /**
+   * Decode URL transport markers; readable parameters override packed values.
+   * Failed compressed values are omitted so resource defaults and valid neighbors survive.
+   * @returns {Promise<{values: URLSearchParams, compressedFields: Set<string>, error: string}>} Decoded values, compressed field names, and a warning (empty on success).
+   */
   async function readURLParameters(fields, search = location.search) {
     const explicit = new URLSearchParams(search);
     const selectedFields = new Set();
@@ -70,6 +75,7 @@
       if (value.startsWith("raw:")) decoded.append(name, value.slice(4));
       else if (value.startsWith("dr:")) {
         try {
+          // Decompression limits use UTF-8 bytes: allow up to four per declared character, capped at 1 MiB.
           const maxBytes = fields[name].maxlength ? Math.min(1048576, Number(fields[name].maxlength) * 4) : 1048576;
           decoded.append(name, await global.decompress_url_data(value.slice(3), maxBytes));
           selectedFields.add(name);
@@ -177,7 +183,7 @@
     zhihu: "Zhihu"
   };
 
-  /** Validate the declared URL field, retaining the same rules in forms and overlays. */
+  /** Validate a declared field; custom validators return parsed data or null to reject it. */
   function validParameter(fields, name, value) {
     if (!Object.hasOwn(fields, name)) return false;
     const rule = fields[name];
@@ -196,7 +202,7 @@
     return true;
   }
 
-  /** Apply valid settings; invalid and unknown values keep the defaults. */
+  /** Mutate settings with valid declared values; missing or invalid parameters keep existing defaults. */
   function applyParameters(fields, settings, values = new URLSearchParams(location.search)) {
     for (const [name, value] of values) {
       if (!Object.hasOwn(fields, name)) continue;
@@ -213,7 +219,13 @@
     }
   }
 
-  /** Publish decoded settings before widgets; only bare editors restore saved form values. */
+  /**
+   * Resolve settings and mount markup in overlay mode; callers must await this before rendering.
+   * Bare editors restore saved values; explicit queries take priority and overlays use their URL only.
+   * @param {Object} resource Declared fields, optional constants, and renderer metadata.
+   * @param {Object} [integrations={}] Resource-specific hooks exposed to the editor.
+   * @returns {Promise<Object>} Validated settings, also published through window.byStreamResource.
+   */
   function initResource(resource, integrations = {}) {
     const overlay = location.search.length > 1 && !location.hash;
     if (!overlay) savedPreferences = readPreferences(resource.fields);
@@ -234,6 +246,7 @@
         document.documentElement.setAttribute("data-overlay", "");
         document.body.append(document.getElementById("overlay-markup").content.cloneNode(true));
         global.addEventListener("keydown", (event) => {
+          // Preview frames must never navigate into a nested configurator.
           if (global !== global.top) return;
           if (event.key !== "F2" || event.repeat || event.defaultPrevented || event.ctrlKey || event.altKey || event.metaKey || event.shiftKey) return;
           if (event.target?.isContentEditable || event.target?.matches?.("input, textarea, select")) return;
@@ -335,6 +348,7 @@
     resume();
   }
 
+  // Expose native renderer helpers before the editor-only jQuery path.
   Object.assign(byConfigurator, {
     platforms,
     validParameter,
@@ -593,7 +607,9 @@
     // Servers resolve directory URLs to the landing page; downloaded files need its filename.
     const homeURL = new URL(location.protocol === "file:" ? "index.html" : ".", byConfigurator.catalog.root).href;
     const { settings, fields: parameterRules } = resource;
+    // One revision invalidates queued edits and in-flight compression or URL decoding.
     let urlGeneration = 0;
+    // Keep typed URL drafts authoritative for Copy, Open, and F2.
     let urlEdited = false;
 
     // ==========
@@ -846,6 +862,7 @@
      */
     async function generateURL(keepURLDraft = false) {
       const generation = ++urlGeneration;
+      // Event handlers can pass a jQuery event; only explicit true preserves the draft.
       urlEdited = keepURLDraft === true;
       $("#overlay-url")[0].setCustomValidity("");
       const valid = fields.map(validField).every(Boolean);
@@ -932,11 +949,16 @@
       }
     }
 
+    /** Hosted folder and index.html links share an editor; file URLs retain their exact paths. */
     function sameResourceURL(url) {
       const pathname = (path) => (location.protocol === "file:" ? path : path.replace(/\/index\.html$/, "/"));
       return url.origin === location.origin && pathname(url.pathname) === pathname(location.pathname);
     }
 
+    /**
+     * Apply same-tool URLs in place; opening another tool requires Enter or a field change.
+     * @param {boolean} [automatic=false] Suppress partial-input errors and preserve the focused draft.
+     */
     async function applyEditedURL(automatic = false) {
       if (!urlEdited) return;
       const url = readEditorURL();
@@ -971,6 +993,7 @@
       await generateURL(automatic);
     }
 
+    /** Resolve action targets from the typed URL, or regenerate from the form when no draft is active. */
     async function currentOverlayURL() {
       if (!urlEdited && !(await generateURL())) {
         form.reportValidity();
@@ -1065,6 +1088,7 @@
         .addClass(Object.hasOwn(byConfigurator.platforms, platform) ? `fa-brands fa-${platform}` : "fa-solid fa-globe")
         .prop("hidden", true)
         .appendTo(form);
+      // Probe the loaded Font Awesome CSS; known platforms may lack a glyph in that version.
       const style = getComputedStyle(jqIcon[0], "::before");
       const supported = style.getPropertyValue("--fa") || !["none", "normal", "", '""'].includes(style.content);
       const classes = supported ? jqIcon.attr("class") : "fa-solid fa-globe";
@@ -1188,6 +1212,7 @@
         sync();
         generateURL();
       });
+      // Native Reset restores controls after its event; rebuild rows on the next task.
       jqForm.on("reset", () => setTimeout(reset, 0));
       jqOutput.on("change", () => reset(settings[name]));
       reset();
@@ -1204,7 +1229,7 @@
       return new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, 19);
     }
 
-    /** Presets edit ordinary declared fields; the URL remains authoritative. */
+    /** Presets reuse ordinary field changes, including validation and URL generation. */
     function initAppearancePresets() {
       const jqLabel = $(/* HTML */ `<label class="form-label w-100"></label>`).text("Appearance preset").prependTo(jqForm);
       const jqSelect = $(/* HTML */ `<select class="form-select rounded-0 bg-body-secondary border-secondary-subtle mb-3"></select>`).appendTo(jqLabel);
@@ -1355,6 +1380,7 @@
     // ==== HELP AND TOOL NAVIGATION ====
     // ==========
 
+    /** Persist UI state with the last valid generated query unless a new valid query is supplied. */
     function savePreferences(query = savedPreferences.query) {
       savedPreferences = {
         query,
@@ -1378,6 +1404,7 @@
           document.cookie = cookie;
           if (global.get_cookie(preferenceKey) === encodeURIComponent(value)) {
             try {
+              // Reads prefer local storage; discard that fallback only after verifying the cookie.
               localStorage.removeItem(preferenceKey);
             } catch {}
             return;
@@ -1396,6 +1423,7 @@
       $("#compression-selection").prop("hidden", $('input[name="compression-scope"]:checked').val() !== "selected");
     }
 
+    /** Restore the link's compression format or saved preferences; capture Reset defaults only at startup. */
     function loadCompressionOptions(search, selected, saveDefaults = false) {
       const all = new URLSearchParams(search).has("data");
       // A compressed URL declares its own format; otherwise restore this resource's preference.
@@ -1699,6 +1727,7 @@
           const url = await currentOverlayURL();
           if (!url) return;
           if (!url.search) {
+            // Overlay mode requires a query; bare tool links otherwise reopen the editor.
             url.search = sameResourceURL(url) && savedPreferences.query ? savedPreferences.query : settingsURL(Object.fromEntries(Object.entries(parameterRules).map(([name, rule]) => [name, rule.default]))).search;
           }
           location.assign(url.href);
@@ -1727,6 +1756,7 @@
           else $("#tool-picker").trigger("focus");
         };
         if (helpOpen) {
+          // Bootstrap ignores hide() during opening; retry after shown, then move focus after hidden.
           jqDialog.one("shown.bs.modal", closeHelp).one("hidden.bs.modal", () => {
             jqDialog.off("shown.bs.modal", closeHelp);
             focusControl();
@@ -1831,6 +1861,7 @@
         .map(([name, value]) => {
           let text = typeof value === "object" ? JSON.stringify(value) : String(value);
           if (parameterRules[name].type === "color") text = text.replace(/^#/, "");
+          // Escape reserved prefixes so literal text survives the URL decoder.
           if (text.startsWith("dr:") || text.startsWith("raw:")) text = `raw:${text}`;
           return [name, text];
         });
@@ -1859,7 +1890,10 @@
       return accepted;
     }
 
-    /** Reflect settings without replacing controls or changing the original Reset values. */
+    /**
+     * Update existing controls; URL imports preserve the opening Reset baseline.
+     * @param {boolean} [saveDefaults=false] Capture initial values as native Reset defaults.
+     */
     function setFields(values, saveDefaults = false) {
       $(fields).each(function () {
         const jqField = $(this);
@@ -1977,6 +2011,7 @@
   };
 
   document.addEventListener("DOMContentLoaded", async () => {
+    // Resource handlers may still be decoding compressed settings when DOMContentLoaded reaches us.
     await resourceReady;
     byConfigurator.init();
   });
