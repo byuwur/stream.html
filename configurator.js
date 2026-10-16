@@ -217,23 +217,12 @@
   }
 
   function parseTimestamp(value) {
-    if (value.length > 40 || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2}(\.\d{1,3})?)?(Z|[+-]\d{2}:\d{2})$/.test(value))
-      return null;
+    if (value.length > 40 || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2}(\.\d{1,3})?)?(Z|[+-]\d{2}:\d{2})$/.test(value)) return null;
     const [year, month, day, hour, minute, second = 0] = value
       .match(/^([0-9]{4})-([0-9]{2})-([0-9]{2})T([0-9]{2}):([0-9]{2})(?::([0-9]{2}))?/)
       .slice(1)
       .map(Number);
-    if (
-      month < 1 ||
-      month > 12 ||
-      day < 1 ||
-      day > new Date(Date.UTC(year, month, 0)).getUTCDate() ||
-      hour > 23 ||
-      minute > 59 ||
-      second > 59 ||
-      !Number.isFinite(Date.parse(value))
-    )
-      return null;
+    if (month < 1 || month > 12 || day < 1 || day > new Date(Date.UTC(year, month, 0)).getUTCDate() || hour > 23 || minute > 59 || second > 59 || !Number.isFinite(Date.parse(value))) return null;
     return value;
   }
 
@@ -267,8 +256,17 @@
   }
 
   Object.assign(byConfigurator, {
-    platforms, validParameter, applyParameters, initResource, parseAccounts,
-    parseZone, parseLocale, parseZones, parseTimestamp, safeImage, watch
+    platforms,
+    validParameter,
+    applyParameters,
+    initResource,
+    parseAccounts,
+    parseZone,
+    parseLocale,
+    parseZones,
+    parseTimestamp,
+    safeImage,
+    watch
   });
 
   if (document.getElementById("configurator") && location.search.length > 1 && !location.hash) return;
@@ -1397,11 +1395,9 @@
         } else {
           jqField.val(typeof value === "object" ? JSON.stringify(value) : value);
           if (jqField.is("select"))
-            jqField
-              .find("option")
-              .prop("defaultSelected", function () {
-                return this.selected;
-              });
+            jqField.find("option").prop("defaultSelected", function () {
+              return this.selected;
+            });
           else jqField.prop("defaultValue", jqField.val());
         }
       });

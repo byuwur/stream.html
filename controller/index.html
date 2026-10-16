@@ -1,113 +1,113 @@
 <!doctype html>
 <html lang="en" data-tool="controller">
+  <head>
+    <!-- ===== PAGE METADATA ===== -->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta property="og:title" content="Controller | stream.HTML" />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="https://byuwur.github.io/stream.html/controller/prev.jpg" />
+    <meta property="og:url" content="https://byuwur.github.io/stream.html/controller" />
+    <meta property="og:site_name" content="stream.HTML" />
+    <meta property="og:description" content="Bring your controller to your stream. Gamepad or keyboard. Four skins. Every input on screen." />
+    <link rel="icon" href="https://byuwur.github.io/img/logo.png" />
+    <title>Controller | stream.HTML</title>
+  </head>
 
-<head>
-  <!-- ===== PAGE METADATA ===== -->
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-  <meta property="og:title" content="Controller | stream.HTML" />
-  <meta property="og:type" content="website" />
-  <meta property="og:image" content="https://byuwur.github.io/stream.html/controller/prev.jpg" />
-  <meta property="og:url" content="https://byuwur.github.io/stream.html/controller" />
-  <meta property="og:site_name" content="stream.HTML" />
-  <meta property="og:description" content="Bring your controller to your stream. Gamepad or keyboard. Four skins. Every input on screen." />
-  <link rel="icon" href="https://byuwur.github.io/img/logo.png" />
-  <title>Controller | stream.HTML</title>
-</head>
+  <body>
+    <!-- ===== SHARED PAGE SETUP ===== -->
 
-<body>
-  <!-- ===== SHARED PAGE SETUP ===== -->
+    <!-- ===== RESOURCE ===== -->
+    <link rel="stylesheet" href="./controller.css" data-renderer-style />
+    <script src="./controller.js" defer></script>
+    <!-- Keyboard bindings stay explicit and independent from URL settings. -->
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        window.bySettingsKB = {
+          id: "Keyboard",
+          buttons: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+          // map: A,  B,  X,  Y, L1, R1, L2, R2,  B,  S, L3, R3, dU, dD, dL, dR,  H,
+          // IDs: 0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15, 16,
+          // key: J,  K,  U,  I,  A,  O,  Z,  L,Tab,Esc, R,  Y,[ ],  S,  Q,  X,  3
+          btns: [74, 75, 85, 73, 65, 79, 90, 76, 9, 27, 82, 89, 32, 83, 81, 88, 51],
+          //   lsH lsV rsH rsV
+          axes: [0, 0, 0, 0],
+          // map:   lsL,   lsR, lsU,  lsD, rsL, rsR, rsU, rsD,
+          // key:  left, right,  up, down,   F,   H,   T,   G
+          axesBtns: [37, 39, 38, 40, 70, 72, 84, 71]
+        };
+      });
+    </script>
+    <!-- Overlay: contains no configurator controls. -->
+    <template id="overlay-markup">
+      <div class="container" id="gamepads">
+        <!-- One artwork template, cloned for each player slot. -->
+        <template id="controller-artwork">
+          <div class="triggers">
+            <span class="trigger left" data-name="button-left-shoulder-bottom"></span>
+            <span class="trigger right" data-name="button-right-shoulder-bottom"></span>
+            <span class="trigger-button left" data-name="button-left-shoulder-bottom-digital"></span>
+            <span class="trigger-button right" data-name="button-right-shoulder-bottom-digital"></span>
+          </div>
+          <div class="bumpers">
+            <span class="bumper left" data-name="button-left-shoulder-top"></span>
+            <span class="bumper right" data-name="button-right-shoulder-top"></span>
+          </div>
+          <div class="touchpad" data-name="touch-pad"></div>
+          <div class="quadrant"></div>
+          <div class="meta" data-name="button-meta"></div>
+          <div class="arrows">
+            <span class="back" data-name="button-select"></span>
+            <span class="start" data-name="button-start"></span>
+          </div>
+          <div class="abxy">
+            <span class="button a" data-name="button-1"></span>
+            <span class="button b" data-name="button-2"></span>
+            <span class="button x" data-name="button-3"></span>
+            <span class="button y" data-name="button-4"></span>
+          </div>
+          <div class="sticks">
+            <span class="stick left" data-name="stick-1"></span>
+            <span class="stick right" data-name="stick-2"></span>
+          </div>
+          <div class="wheels">
+            <span class="wheel left" data-name="stick-1-wheel"></span>
+            <span class="wheel right" data-name="stick-2-wheel"></span>
+          </div>
+          <div class="dpad">
+            <span class="face up" data-name="button-dpad-top"></span>
+            <span class="face down" data-name="button-dpad-bottom"></span>
+            <span class="face left" data-name="button-dpad-left"></span>
+            <span class="face right" data-name="button-dpad-right"></span>
+          </div>
+          <div class="fstick" data-name="arcade-stick"></div>
+        </template>
+        <div class="controller xbox disconnected" id="gamepad-1"></div>
+        <div class="controller xbox disconnected" id="gamepad-2"></div>
+        <div class="controller xbox disconnected" id="gamepad-3"></div>
+        <div class="controller xbox disconnected" id="gamepad-4"></div>
+        <div class="controller xbox disconnected" id="gamepad-9"></div>
+      </div>
+    </template>
 
-  <!-- ===== RESOURCE ===== -->
-  <link rel="stylesheet" href="./controller.css" data-renderer-style />
-  <script src="./controller.js" defer></script>
-  <!-- Keyboard bindings stay explicit and independent from URL settings. -->
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      window.bySettingsKB = {
-        id: "Keyboard",
-        buttons: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        // map: A,  B,  X,  Y, L1, R1, L2, R2,  B,  S, L3, R3, dU, dD, dL, dR,  H,
-        // IDs: 0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15, 16,
-        // key: J,  K,  U,  I,  A,  O,  Z,  L,Tab,Esc, R,  Y,[ ],  S,  Q,  X,  3
-        btns: [74, 75, 85, 73, 65, 79, 90, 76, 9, 27, 82, 89, 32, 83, 81, 88, 51],
-        //   lsH lsV rsH rsV
-        axes: [0, 0, 0, 0],
-        // map:   lsL,   lsR, lsU,  lsD, rsL, rsR, rsU, rsD,
-        // key:  left, right,  up, down,   F,   H,   T,   G
-        axesBtns: [37, 39, 38, 40, 70, 72, 84, 71]
-      };
-    });
-  </script>
-  <!-- Overlay: contains no configurator controls. -->
-  <template id="overlay-markup">
-    <div class="container" id="gamepads">
-      <!-- One artwork template, cloned for each player slot. -->
-      <template id="controller-artwork">
-        <div class="triggers">
-          <span class="trigger left" data-name="button-left-shoulder-bottom"></span>
-          <span class="trigger right" data-name="button-right-shoulder-bottom"></span>
-          <span class="trigger-button left" data-name="button-left-shoulder-bottom-digital"></span>
-          <span class="trigger-button right" data-name="button-right-shoulder-bottom-digital"></span>
-        </div>
-        <div class="bumpers">
-          <span class="bumper left" data-name="button-left-shoulder-top"></span>
-          <span class="bumper right" data-name="button-right-shoulder-top"></span>
-        </div>
-        <div class="touchpad" data-name="touch-pad"></div>
-        <div class="quadrant"></div>
-        <div class="meta" data-name="button-meta"></div>
-        <div class="arrows">
-          <span class="back" data-name="button-select"></span>
-          <span class="start" data-name="button-start"></span>
-        </div>
-        <div class="abxy">
-          <span class="button a" data-name="button-1"></span>
-          <span class="button b" data-name="button-2"></span>
-          <span class="button x" data-name="button-3"></span>
-          <span class="button y" data-name="button-4"></span>
-        </div>
-        <div class="sticks">
-          <span class="stick left" data-name="stick-1"></span>
-          <span class="stick right" data-name="stick-2"></span>
-        </div>
-        <div class="wheels">
-          <span class="wheel left" data-name="stick-1-wheel"></span>
-          <span class="wheel right" data-name="stick-2-wheel"></span>
-        </div>
-        <div class="dpad">
-          <span class="face up" data-name="button-dpad-top"></span>
-          <span class="face down" data-name="button-dpad-bottom"></span>
-          <span class="face left" data-name="button-dpad-left"></span>
-          <span class="face right" data-name="button-dpad-right"></span>
-        </div>
-        <div class="fstick" data-name="arcade-stick"></div>
-      </template>
-      <div class="controller xbox disconnected" id="gamepad-1"></div>
-      <div class="controller xbox disconnected" id="gamepad-2"></div>
-      <div class="controller xbox disconnected" id="gamepad-3"></div>
-      <div class="controller xbox disconnected" id="gamepad-4"></div>
-      <div class="controller xbox disconnected" id="gamepad-9"></div>
-    </div>
-  </template>
+    <!-- ===== CONFIGURATOR ===== -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.2/css/bootstrap.min.css" data-editor-style media="not all" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.2/css/pickr.min.css" data-editor-style media="not all" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.2/_common.css" data-editor-style media="not all" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.2/css/fontawesome.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.2/css/select2.min.css" data-editor-style media="not all" />
+    <link rel="stylesheet" href="../configurator.css" data-editor-style media="not all" />
+    <script data-editor-src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.2/js/jquery.min.js"></script>
 
-  <!-- ===== CONFIGURATOR ===== -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.2/css/bootstrap.min.css" data-editor-style media="not all" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.2/css/pickr.min.css" data-editor-style media="not all" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.2/_common.css" data-editor-style media="not all" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.2/css/fontawesome.min.css" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.2/css/select2.min.css" data-editor-style media="not all" />
-  <link rel="stylesheet" href="../configurator.css" data-editor-style media="not all" />
-  <script data-editor-src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.2/js/jquery.min.js"></script>
-  <script data-editor-src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.2/js/select2.full.min.js"></script>
-  <script data-editor-src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.2/js/bootstrap.min.js"></script>
-  <script data-editor-src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.2/js/pickr.min.js"></script>
-  <script data-editor-src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.2/_common.js"></script>
+    <script data-editor-src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.2/js/select2.full.min.js"></script>
 
-  <!-- Configurator: URL toolbar, settings, preview, and help. -->
-  <div id="configurator"></div>
-  <script src="../configurator.js" defer></script>
-  <script data-editor-src="./configurator.js"></script>
-</body>
+    <script data-editor-src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.2/js/bootstrap.min.js"></script>
+    <script data-editor-src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.2/js/pickr.min.js"></script>
+    <script data-editor-src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.2/_common.js"></script>
 
+    <!-- Configurator: URL toolbar, settings, preview, and help. -->
+    <div id="configurator"></div>
+    <script src="../configurator.js" defer></script>
+    <script data-editor-src="./configurator.js"></script>
+  </body>
 </html>

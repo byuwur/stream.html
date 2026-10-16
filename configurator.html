@@ -4,139 +4,139 @@
      Replace the demo CSS and JS with your resource's own files.
      Set shared imports to ../; keep custom editor behavior in a separate editor-only script. -->
 <html lang="en" data-tool="template">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" href="https://byuwur.github.io/img/logo.png" />
+    <title>Configurator demo | stream.HTML</title>
+  </head>
 
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="icon" href="https://byuwur.github.io/img/logo.png" />
-  <title>Configurator demo | stream.HTML</title>
-</head>
+  <body>
+    <!-- ===== SHARED PAGE SETUP ===== -->
 
-<body>
-  <!-- ===== SHARED PAGE SETUP ===== -->
+    <!-- ===== RESOURCE DEMO ===== -->
+    <template id="overlay-markup">
+      <main id="demo-preview">
+        <div class="demo-card">
+          <p class="demo-label">This is the demo preview.</p>
+          <p id="demo-message"></p>
+          <p class="demo-note">Your resource goes here. The form controls this example.</p>
+        </div>
+      </main>
+    </template>
+    <!-- ./example.css -->
+    <style data-renderer-style>
+      /* Demo-only CSS; keep each real resource's styles in its own file. */
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+        background: transparent;
+        font-size: 16px;
+      }
 
-  <!-- ===== RESOURCE DEMO ===== -->
-  <template id="overlay-markup">
-    <main id="demo-preview">
-      <div class="demo-card">
-        <p class="demo-label">This is the demo preview.</p>
-        <p id="demo-message"></p>
-        <p class="demo-note">Your resource goes here. The form controls this example.</p>
-      </div>
-    </main>
-  </template>
-  <!-- ./example.css -->
-  <style data-renderer-style>
-    /* Demo-only CSS; keep each real resource's styles in its own file. */
-    html,
-    body {
-      height: 100%;
-      margin: 0;
-      background: transparent;
-      font-size: 16px;
-    }
+      #demo-preview {
+        --demo-size: 3rem;
+        --demo-color: #ffffff;
+        display: grid;
+        place-items: center;
+        box-sizing: border-box;
+        min-height: 100%;
+        padding: 2rem;
+        font-family: system-ui, sans-serif;
+        text-align: center;
+        color: var(--demo-color);
+      }
 
-    #demo-preview {
-      --demo-size: 3rem;
-      --demo-color: #ffffff;
-      display: grid;
-      place-items: center;
-      box-sizing: border-box;
-      min-height: 100%;
-      padding: 2rem;
-      font-family: system-ui, sans-serif;
-      text-align: center;
-      color: var(--demo-color);
-    }
+      .demo-label,
+      .demo-note {
+        margin: 1rem 0;
+        font-size: 1rem;
+        line-height: 1.5;
+        opacity: 0.65;
+      }
 
-    .demo-label,
-    .demo-note {
-      margin: 1rem 0;
-      font-size: 1rem;
-      line-height: 1.5;
-      opacity: 0.65;
-    }
+      #demo-message {
+        margin: 0;
+        font-size: var(--demo-size);
+        font-weight: 700;
+        line-height: 1.2;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+      }
+    </style>
+    <!-- ./example.js -->
+    <script>
+      // Demo-only JavaScript; keep each real resource's renderer in its own file.
+      document.addEventListener("DOMContentLoaded", () => {
+        // ==========
+        // ==== RESOURCE DEFINITION ====
+        // ==========
 
-    #demo-message {
-      margin: 0;
-      font-size: var(--demo-size);
-      font-weight: 700;
-      line-height: 1.2;
-      white-space: pre-wrap;
-      overflow-wrap: anywhere;
-    }
-  </style>
-  <!-- ./example.js -->
-  <script>
-    // Demo-only JavaScript; keep each real resource's renderer in its own file.
-    document.addEventListener("DOMContentLoaded", () => {
-      // ==========
-      // ==== RESOURCE DEFINITION ====
-      // ==========
-
-      /** Defaults, URL constraints, and the field metadata consumed by the optional editor. */
-      const resource = {
-        title: "This is the form.",
-        description: "Your next overlay starts here. Edit a field and watch the demo preview change.",
-        preview: [1280, 720],
-        fields: {
-          message: {
-            type: "textarea",
-            default: "Something awesome starts here.",
-            label: "This is a text field.",
-            section: "This is a section.",
-            description: "Example plain text displayed in the demo preview.",
-            maxlength: 160,
-            icon: "fa-pen",
-            rows: 2
-          },
-          fontSizeRem: {
-            type: "number",
-            default: 3,
-            label: "This is a number field (rem).",
-            section: "This is a section.",
-            description: "Example text size in rem.",
-            min: 0.5,
-            max: 6,
-            step: "any",
-            icon: "fa-font"
-          },
-          textColor: {
-            type: "color",
-            default: "#FFFFFF",
-            label: "This is a color field (HEX).",
-            section: "This is a section.",
-            description: "Example text color. Pickr uses HEX, including alpha.",
-            maxlength: 160,
-            icon: "fa-palette"
+        /** Defaults, URL constraints, and the field metadata consumed by the optional editor. */
+        const resource = {
+          title: "This is the form.",
+          description: "Your next overlay starts here. Edit a field and watch the demo preview change.",
+          preview: [1280, 720],
+          fields: {
+            message: {
+              type: "textarea",
+              default: "Something awesome starts here.",
+              label: "This is a text field.",
+              section: "This is a section.",
+              description: "Example plain text displayed in the demo preview.",
+              maxlength: 160,
+              icon: "fa-pen",
+              rows: 2
+            },
+            fontSizeRem: {
+              type: "number",
+              default: 3,
+              label: "This is a number field (rem).",
+              section: "This is a section.",
+              description: "Example text size in rem.",
+              min: 0.5,
+              max: 6,
+              step: "any",
+              icon: "fa-font"
+            },
+            textColor: {
+              type: "color",
+              default: "#FFFFFF",
+              label: "This is a color field (HEX).",
+              section: "This is a section.",
+              description: "Example text color. Pickr uses HEX, including alpha.",
+              maxlength: 160,
+              icon: "fa-palette"
+            }
           }
-        },
-      };
+        };
 
-      const settings = byConfigurator.initResource(resource);
-      if (!byStreamOverlay) return;
-      const preview = document.getElementById("demo-preview");
-      document.getElementById("demo-message").textContent = settings.message;
-      preview.style.setProperty("--demo-size", `${settings.fontSizeRem}rem`);
-      preview.style.setProperty("--demo-color", settings.textColor);
-    });
-  </script>
+        const settings = byConfigurator.initResource(resource);
+        if (!byStreamOverlay) return;
+        const preview = document.getElementById("demo-preview");
+        document.getElementById("demo-message").textContent = settings.message;
+        preview.style.setProperty("--demo-size", `${settings.fontSizeRem}rem`);
+        preview.style.setProperty("--demo-color", settings.textColor);
+      });
+    </script>
 
-  <!-- ===== CONFIGURATOR ===== -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.2/css/fontawesome.min.css" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.2/css/bootstrap.min.css" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.2/css/pickr.min.css" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.2/_common.css" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.2/css/select2.min.css" />
-  <link rel="stylesheet" href="./configurator.css" />
-  <script data-editor-src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.2/js/jquery.min.js"></script>
-  <script data-editor-src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.2/js/select2.full.min.js"></script>
-  <script data-editor-src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.2/js/bootstrap.min.js"></script>
-  <script data-editor-src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.2/js/pickr.min.js"></script>
-  <script data-editor-src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.2/_common.js"></script>
-  <!-- Configurator: URL toolbar, settings, preview, and help. -->
-  <div id="configurator"></div>
-  <script src="./configurator.js" defer></script>
-</body>
+    <!-- ===== CONFIGURATOR ===== -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.2/css/fontawesome.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.2/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.2/css/pickr.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.2/_common.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.2/css/select2.min.css" />
+    <link rel="stylesheet" href="./configurator.css" />
+    <script data-editor-src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.2/js/jquery.min.js"></script>
 
+    <script data-editor-src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.2/js/select2.full.min.js"></script>
+
+    <script data-editor-src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.2/js/bootstrap.min.js"></script>
+    <script data-editor-src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.2/js/pickr.min.js"></script>
+    <script data-editor-src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.2/_common.js"></script>
+    <!-- Configurator: URL toolbar, settings, preview, and help. -->
+    <div id="configurator"></div>
+    <script src="./configurator.js" defer></script>
+  </body>
 </html>

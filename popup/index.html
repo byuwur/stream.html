@@ -1,70 +1,70 @@
 <!doctype html>
 <html lang="es" data-tool="popup">
+  <head>
+    <!-- ===== PAGE METADATA ===== -->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta property="og:title" content="Popup Scene | stream.HTML" />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="https://byuwur.github.io/stream.html/popup/prev.jpg" />
+    <meta property="og:url" content="https://byuwur.github.io/stream.html/popup" />
+    <meta property="og:site_name" content="stream.HTML" />
+    <meta property="og:description" content="Bring your brand to your stream. Your accounts, one animated popup at a time. Pick from 90+ platforms." />
+    <link rel="icon" href="https://byuwur.github.io/img/logo.png" />
+    <title>Popup Scene | stream.HTML</title>
+  </head>
 
-<head>
-  <!-- ===== PAGE METADATA ===== -->
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-  <meta property="og:title" content="Popup Scene | stream.HTML" />
-  <meta property="og:type" content="website" />
-  <meta property="og:image" content="https://byuwur.github.io/stream.html/popup/prev.jpg" />
-  <meta property="og:url" content="https://byuwur.github.io/stream.html/popup" />
-  <meta property="og:site_name" content="stream.HTML" />
-  <meta property="og:description" content="Bring your brand to your stream. Your accounts, one animated popup at a time. Pick from 90+ platforms." />
-  <link rel="icon" href="https://byuwur.github.io/img/logo.png" />
-  <title>Popup Scene | stream.HTML</title>
-</head>
+  <body>
+    <!-- ===== SHARED PAGE SETUP ===== -->
+    <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.2/_fonts.js" defer></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.2/css/fontawesome.min.css" />
 
-<body>
-  <!-- ===== SHARED PAGE SETUP ===== -->
-  <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.2/_fonts.js" defer></script>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.2/css/fontawesome.min.css" />
-
-  <!-- ===== RESOURCE ===== -->
-  <link rel="stylesheet" href="./popup.css" data-renderer-style />
-  <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.2/js/gsap.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.2/js/morphSVGplugin.min.js" defer></script>
-  <script src="./popup.js" defer></script>
-  <!-- Overlay: contains no configurator controls. -->
-  <template id="overlay-markup">
-    <div id="socialHolder">
-      <div id="holder">
-        <div id="iconBox">
-          <!-- The hidden paths are targets for the visible square to morph into. -->
-          <svg id="svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 140" aria-hidden="true">
-            <path id="square" d="M120,120H70H20V70V20h50h50v50V120z" />
-            <path id="littleLeft" d="M120,20c0,0-6.5,19-6.5,50s6.5,50,6.5,50H70H20c0,0-5.8-19-5.8-50S20,20,20,20h50H120z" />
-            <path id="littleRight" d="M20,120c0,0,6.5-19,6.5-50S20,20,20,20h50h50c0,0,5.8,19,5.8,50s-5.8,50-5.8,50H70H20z" />
-            <path id="bigRight" d="M20,120c0,0,6.6-13.1,6.6-50.2S20,20,20,20h50h50c0,0,17.9,12.7,17.9,49.8S120,120,120,120H70H20z" />
-            <path id="bigLeft" d="M120,20c0,0-6.6,13.1-6.6,50.2S120,120,120,120H70H20c0,0-17.9-12.7-17.9-49.8S20,20,20,20h50H120z" />
-            <path id="bigDown" d="M20,20c0,0,12.8,6.6,50,6.6s50-6.6,50-6.6v50v50c0,0-12.8,18.3-50,18.3S20,120,20,120V70V20z" />
-            <path id="bigUp" d="M120,120c0,0-12.8-6.6-50-6.6S20,120,20,120V70V20c0,0,12.8-18.3,50-18.3S120,20,120,20v50V120z" />
-          </svg>
-          <div id="iconHolder" aria-hidden="true">
-            <div id="icons"></div>
+    <!-- ===== RESOURCE ===== -->
+    <link rel="stylesheet" href="./popup.css" data-renderer-style />
+    <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.2/js/gsap.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.2/js/morphSVGplugin.min.js" defer></script>
+    <script src="./popup.js" defer></script>
+    <!-- Overlay: contains no configurator controls. -->
+    <template id="overlay-markup">
+      <div id="socialHolder">
+        <div id="holder">
+          <div id="iconBox">
+            <!-- The hidden paths are targets for the visible square to morph into. -->
+            <svg id="svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 140" aria-hidden="true">
+              <path id="square" d="M120,120H70H20V70V20h50h50v50V120z" />
+              <path id="littleLeft" d="M120,20c0,0-6.5,19-6.5,50s6.5,50,6.5,50H70H20c0,0-5.8-19-5.8-50S20,20,20,20h50H120z" />
+              <path id="littleRight" d="M20,120c0,0,6.5-19,6.5-50S20,20,20,20h50h50c0,0,5.8,19,5.8,50s-5.8,50-5.8,50H70H20z" />
+              <path id="bigRight" d="M20,120c0,0,6.6-13.1,6.6-50.2S20,20,20,20h50h50c0,0,17.9,12.7,17.9,49.8S120,120,120,120H70H20z" />
+              <path id="bigLeft" d="M120,20c0,0-6.6,13.1-6.6,50.2S120,120,120,120H70H20c0,0-17.9-12.7-17.9-49.8S20,20,20,20h50H120z" />
+              <path id="bigDown" d="M20,20c0,0,12.8,6.6,50,6.6s50-6.6,50-6.6v50v50c0,0-12.8,18.3-50,18.3S20,120,20,120V70V20z" />
+              <path id="bigUp" d="M120,120c0,0-12.8-6.6-50-6.6S20,120,20,120V70V20c0,0,12.8-18.3,50-18.3S120,20,120,20v50V120z" />
+            </svg>
+            <div id="iconHolder" aria-hidden="true">
+              <div id="icons"></div>
+            </div>
+          </div>
+          <div id="textBox">
+            <div id="nameHolder"></div>
           </div>
         </div>
-        <div id="textBox">
-          <div id="nameHolder"></div>
-        </div>
       </div>
-    </div>
-  </template>
+    </template>
 
-  <!-- ===== CONFIGURATOR ===== -->
-  <script data-editor-src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.2/js/jquery.min.js"></script>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.2/css/bootstrap.min.css" data-editor-style media="not all" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.2/css/pickr.min.css" data-editor-style media="not all" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.2/_common.css" data-editor-style media="not all" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.2/css/select2.min.css" data-editor-style media="not all" />
-  <link rel="stylesheet" href="../configurator.css" data-editor-style media="not all" />
-  <script data-editor-src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.2/js/select2.full.min.js"></script>
-  <script data-editor-src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.2/js/bootstrap.min.js"></script>
-  <script data-editor-src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.2/js/pickr.min.js"></script>
-  <script data-editor-src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.2/_common.js"></script>
-  <!-- Configurator: URL toolbar, settings, preview, and help. -->
-  <div id="configurator"></div>
-  <script src="../configurator.js" defer></script>
-</body>
+    <!-- ===== CONFIGURATOR ===== -->
+    <script data-editor-src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.2/js/jquery.min.js"></script>
 
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.2/css/bootstrap.min.css" data-editor-style media="not all" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.2/css/pickr.min.css" data-editor-style media="not all" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.2/_common.css" data-editor-style media="not all" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.2/css/select2.min.css" data-editor-style media="not all" />
+    <link rel="stylesheet" href="../configurator.css" data-editor-style media="not all" />
+    <script data-editor-src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.2/js/select2.full.min.js"></script>
+
+    <script data-editor-src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.2/js/bootstrap.min.js"></script>
+    <script data-editor-src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.2/js/pickr.min.js"></script>
+    <script data-editor-src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.2/_common.js"></script>
+    <!-- Configurator: URL toolbar, settings, preview, and help. -->
+    <div id="configurator"></div>
+    <script src="../configurator.js" defer></script>
+  </body>
 </html>

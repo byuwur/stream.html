@@ -1,105 +1,105 @@
 <!doctype html>
 <html lang="es" data-tool="main">
+  <head>
+    <!-- ===== PAGE METADATA ===== -->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta property="og:title" content="Main Scene | stream.HTML" />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="https://byuwur.github.io/stream.html/main/prev.jpg" />
+    <meta property="og:url" content="https://byuwur.github.io/stream.html/main" />
+    <meta property="og:site_name" content="stream.HTML" />
+    <meta property="og:description" content="Bring your brand to your stream. Starting, BRB, ending, and intermission. Make each moment yours." />
+    <link rel="icon" href="https://byuwur.github.io/img/logo.png" />
+    <title>Main Scene | stream.HTML</title>
+  </head>
 
-<head>
-  <!-- ===== PAGE METADATA ===== -->
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-  <meta property="og:title" content="Main Scene | stream.HTML" />
-  <meta property="og:type" content="website" />
-  <meta property="og:image" content="https://byuwur.github.io/stream.html/main/prev.jpg" />
-  <meta property="og:url" content="https://byuwur.github.io/stream.html/main" />
-  <meta property="og:site_name" content="stream.HTML" />
-  <meta property="og:description" content="Bring your brand to your stream. Starting, BRB, ending, and intermission. Make each moment yours." />
-  <link rel="icon" href="https://byuwur.github.io/img/logo.png" />
-  <title>Main Scene | stream.HTML</title>
-</head>
+  <body>
+    <!-- ===== SHARED PAGE SETUP ===== -->
 
-<body>
-  <!-- ===== SHARED PAGE SETUP ===== -->
+    <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.2/_fonts.js" defer></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.2/css/fontawesome.min.css" />
 
-  <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.2/_fonts.js" defer></script>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.2/css/fontawesome.min.css" />
-
-  <!-- ===== RESOURCE ===== -->
-  <link rel="stylesheet" href="./main.css" data-renderer-style />
-  <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.2/js/gsap.min.js" defer></script>
-  <script src="./main.js" defer></script>
-  <!-- Overlay: contains no configurator controls. -->
-  <template id="overlay-markup">
-    <div id="scene">
-      <!-- Background media, tint, and frame. -->
-      <div id="bg">
-        <div id="image">
-          <img alt="" onerror="this.hidden = true" />
+    <!-- ===== RESOURCE ===== -->
+    <link rel="stylesheet" href="./main.css" data-renderer-style />
+    <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.2/js/gsap.min.js" defer></script>
+    <script src="./main.js" defer></script>
+    <!-- Overlay: contains no configurator controls. -->
+    <template id="overlay-markup">
+      <div id="scene">
+        <!-- Background media, tint, and frame. -->
+        <div id="bg">
+          <div id="image">
+            <img alt="" onerror="this.hidden = true" />
+          </div>
+          <div id="video">
+            <video autoplay loop muted></video>
+          </div>
+          <div id="overlay"></div>
+          <div id="frame"></div>
         </div>
-        <div id="video">
-          <video autoplay loop muted></video>
+        <!-- Logo, title, and subtitle. -->
+        <div id="branding">
+          <div id="brandImg"></div>
+          <span id="title"></span>
+          <span id="subtitle"></span>
         </div>
-        <div id="overlay"></div>
-        <div id="frame"></div>
+        <!-- Rotating social accounts and schedule. -->
+        <div id="updates">
+          <div id="social"></div>
+          <div id="schedule">
+            <div id="week" class="item"></div>
+          </div>
+        </div>
+        <div id="list">
+          <div id="one" class="event">
+            <div class="borderLeft"></div>
+            <div id="followName" class="name">&nbsp;</div>
+            <div id="followLine" class="type"></div>
+          </div>
+          <div id="two" class="event">
+            <div class="borderLeft"></div>
+            <div id="tipName" class="name">&nbsp;</div>
+            <div id="tipLine" class="type"></div>
+          </div>
+          <div id="three" class="event">
+            <div class="borderLeft"></div>
+            <div id="bigTipName" class="name">&nbsp;</div>
+            <div id="bigTipLine" class="type"></div>
+          </div>
+          <div id="four" class="event">
+            <div class="borderLeft"></div>
+            <div id="subName" class="name">&nbsp;</div>
+            <div id="subLine" class="type"></div>
+          </div>
+        </div>
+        <!-- Countdown and completion message. -->
+        <div id="countdown">
+          <div id="timer">
+            <div id="time"></div>
+            <div id="message"></div>
+            <div id="endMessage" hidden></div>
+          </div>
+        </div>
       </div>
-      <!-- Logo, title, and subtitle. -->
-      <div id="branding">
-        <div id="brandImg"></div>
-        <span id="title"></span>
-        <span id="subtitle"></span>
-      </div>
-      <!-- Rotating social accounts and schedule. -->
-      <div id="updates">
-        <div id="social"></div>
-        <div id="schedule">
-          <div id="week" class="item"></div>
-        </div>
-      </div>
-      <div id="list">
-        <div id="one" class="event">
-          <div class="borderLeft"></div>
-          <div id="followName" class="name">&nbsp;</div>
-          <div id="followLine" class="type"></div>
-        </div>
-        <div id="two" class="event">
-          <div class="borderLeft"></div>
-          <div id="tipName" class="name">&nbsp;</div>
-          <div id="tipLine" class="type"></div>
-        </div>
-        <div id="three" class="event">
-          <div class="borderLeft"></div>
-          <div id="bigTipName" class="name">&nbsp;</div>
-          <div id="bigTipLine" class="type"></div>
-        </div>
-        <div id="four" class="event">
-          <div class="borderLeft"></div>
-          <div id="subName" class="name">&nbsp;</div>
-          <div id="subLine" class="type"></div>
-        </div>
-      </div>
-      <!-- Countdown and completion message. -->
-      <div id="countdown">
-        <div id="timer">
-          <div id="time"></div>
-          <div id="message"></div>
-          <div id="endMessage" hidden></div>
-        </div>
-      </div>
-    </div>
-  </template>
+    </template>
 
-  <!-- ===== CONFIGURATOR ===== -->
-  <script data-editor-src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.2/js/jquery.min.js"></script>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.2/css/bootstrap.min.css" data-editor-style media="not all" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.2/css/pickr.min.css" data-editor-style media="not all" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.2/_common.css" data-editor-style media="not all" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.2/css/select2.min.css" data-editor-style media="not all" />
-  <link rel="stylesheet" href="../configurator.css" data-editor-style media="not all" />
-  <script data-editor-src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.2/js/select2.full.min.js"></script>
-  <script data-editor-src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.2/js/bootstrap.min.js"></script>
-  <script data-editor-src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.2/js/pickr.min.js"></script>
-  <script data-editor-src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.2/_common.js"></script>
+    <!-- ===== CONFIGURATOR ===== -->
+    <script data-editor-src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.2/js/jquery.min.js"></script>
 
-  <!-- Configurator: URL toolbar, settings, preview, and help. -->
-  <div id="configurator"></div>
-  <script src="../configurator.js" defer></script>
-</body>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.2/css/bootstrap.min.css" data-editor-style media="not all" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.2/css/pickr.min.css" data-editor-style media="not all" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.2/_common.css" data-editor-style media="not all" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.2/css/select2.min.css" data-editor-style media="not all" />
+    <link rel="stylesheet" href="../configurator.css" data-editor-style media="not all" />
+    <script data-editor-src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.2/js/select2.full.min.js"></script>
 
+    <script data-editor-src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.2/js/bootstrap.min.js"></script>
+    <script data-editor-src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.2/js/pickr.min.js"></script>
+    <script data-editor-src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.2/_common.js"></script>
+
+    <!-- Configurator: URL toolbar, settings, preview, and help. -->
+    <div id="configurator"></div>
+    <script src="../configurator.js" defer></script>
+  </body>
 </html>
