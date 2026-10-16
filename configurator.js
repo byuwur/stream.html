@@ -160,7 +160,6 @@
         if (Math.abs(steps - Math.round(steps)) > 1e-8) return false;
       }
     }
-    if (rule.type === "color" && !CSS.supports("color", value)) return false;
     if (name.endsWith("Url") && value) {
       try {
         const url = new URL(value, location.href);
@@ -184,6 +183,7 @@
         parsed = rule.type === "number" ? Number(value) : value;
       }
       if (parsed === null) continue;
+      if (rule.type === "color") parsed = `#${String(parsed).replace(/^#/, "")}`;
       settings[name] = parsed;
     }
   }
@@ -1219,7 +1219,7 @@
           el: jqSwatch.children()[0],
           theme: "classic",
           position: "bottom-start",
-          default: jqInput.val(),
+          default: parameterRules[input.name].default,
           defaultRepresentation: "HEX",
           components: { preview: true, opacity: true, hue: true, interaction: { input: true, save: true } }
         });
@@ -1227,8 +1227,8 @@
         let syncing = false;
         // Pickr can emit change while applying a color or its format.
         function syncPicker() {
-          const value = jqInput.val();
-          if (!CSS.supports("color", value)) return;
+          const text = jqInput.val();
+          const value = `#${text.replace(/^#/, "")}`;
           syncing = true;
           if (picker.setColor(value, true)) {
             picker.setColorRepresentation("HEX");
@@ -1325,8 +1325,8 @@
 
                 </section>
                 <section data-panel="params" hidden>
-                  <p> Settings are stored in the generated URL. Use the documented values below; missing values use the tool's defaults. Use public display information only. </p>
-                  <p>Colors use 3, 4, 6, or 8 hex digits without <code>#</code>; malformed colors are left to the browser. In Advanced, compress all settings into <code>data</code> or keep selected field names with <code>dr:</code> values. Prefix literal text beginning with <code>dr:</code> or <code>raw:</code> with <code>raw:</code>.</p>
+                  <p>Settings are stored in the generated URL. Use the documented values below; missing values use the tool's defaults. Use public display information only.</p>
+                  <p>Colors use 3, 4, 6, or 8 hex digits without <code>#</code>; malformed colors are left to the browser.</p>
                   <div class="help-parameters"></div>
                 </section>
                 <section data-panel="advanced" hidden>
@@ -1570,6 +1570,7 @@
         .filter(([name]) => Object.hasOwn(parameterRules, name))
         .map(([name, value]) => {
           let text = typeof value === "object" ? JSON.stringify(value) : String(value);
+          if (parameterRules[name].type === "color") text = text.replace(/^#/, "");
           if (text.startsWith("dr:") || text.startsWith("raw:")) text = `raw:${text}`;
           return [name, text];
         });
