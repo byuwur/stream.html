@@ -4,7 +4,7 @@
  * Deps: configurator.js and embedded bySettingsKB.
  */
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   // ==========
   // ==== RESOURCE DEFINITION ====
   // ==========
@@ -420,7 +420,7 @@ document.addEventListener("DOMContentLoaded", () => {
     tester.updateGamepads();
   }
 
-  const settings = byConfigurator.initResource(resource, { gamepadSupport, buttonValue, copyGamepad });
+  const settings = await byConfigurator.initResource(resource, { gamepadSupport, buttonValue, copyGamepad });
   gamepadSupport.init();
   if (byStreamOverlay) initController();
 });

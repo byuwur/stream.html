@@ -33,6 +33,12 @@ Fonts search 350 Google families, system fonts, and custom installed families or
 
 Media fields reference public HTTP(S) URLs or paths relative to the tool's HTML. Local file URLs require downloaded use. No uploads or Base64 `data:` media URLs. Keep private information out of shared URLs.
 
+Plain values need no marker. Escape literal text starting with `dr:` or `raw:` as `raw:<original text>`; generated links do this automatically. `#configure` restores compression choices. Invalid compressed fields retain defaults without discarding valid neighbors; Advanced shows a warning.
+
+Whole-query decoding is capped at one MiB. Individual values use the field's UTF-8 text limit, allowing up to four bytes per character, capped at one MiB. Media remains referenced by URL.
+
+Each tool imports [SPA.js v20.5 `_functions.js`](https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.5/_functions.js) with a regular HTML script tag before `configurator.js`. For offline use, save the helper and update its `src`. These helpers need no jQuery/SPA initialization. Browsers without native raw-DEFLATE support can use readable links.
+
 ### Downloaded use
 
 Keep the resource folder and its parent `configurator.js` and `configurator.css`. The shared runtime is required by both the renderer and editor; one HTML file is not a bundle.

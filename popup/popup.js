@@ -4,7 +4,7 @@
  * Deps: configurator.js, GSAP, MorphSVGPlugin, and SPA.js/_fonts.js.
  */
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   // ==========
   // ==== RESOURCE DEFINITION ====
   // ==========
@@ -243,6 +243,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  const settings = byConfigurator.initResource(resource);
+  const settings = await byConfigurator.initResource(resource);
   if (byStreamOverlay) renderPopup();
 });

@@ -11,6 +11,44 @@
   if (byConfigurator.init) return;
   const root = new URL(".", document.currentScript.src);
 
+  let resourceReady = Promise.resolve();
+  let parameterError = "";
+  let compressedFields = new Set();
+
+  /** Readable parameters override compressed values before normal field validation. */
+  async function readURLParameters(fields, search = location.search) {
+    const explicit = new URLSearchParams(search);
+    const selectedFields = new Set();
+    let errorMessage = "";
+    let values = explicit;
+    if (explicit.has("data")) {
+      try {
+        const compressed = new URLSearchParams(await global.decompress_url_data(explicit.get("data")));
+        values = new URLSearchParams([...compressed].filter(([name]) => !explicit.has(name)));
+        for (const [name, value] of explicit) values.append(name, value);
+      } catch (error) {
+        errorMessage = "Unable to read the shorter URL. Defaults and readable parameters were loaded.";
+        console.warn(errorMessage, error);
+      }
+    }
+    const decoded = new URLSearchParams();
+    for (const [name, value] of values) {
+      if (!Object.hasOwn(fields, name)) continue;
+      if (value.startsWith("raw:")) decoded.append(name, value.slice(4));
+      else if (value.startsWith("dr:")) {
+        try {
+          const maxBytes = fields[name].maxlength ? Math.min(1048576, Number(fields[name].maxlength) * 4) : 1048576;
+          decoded.append(name, await global.decompress_url_data(value.slice(3), maxBytes));
+          selectedFields.add(name);
+        } catch (error) {
+          errorMessage = "Some compressed fields could not be read. Their defaults were retained.";
+          console.warn(`Unable to read compressed parameter ${name}:`, error);
+        }
+      } else decoded.append(name, value);
+    }
+    return { values: decoded, compressedFields: selectedFields, error: errorMessage };
+  }
+
   // Native helpers are shared with renderers; editor dependencies load only below.
   const platforms = {
     "500px": "500px",
@@ -151,22 +189,27 @@
 
   /** Mount the active overlay and publish its settings before initializing editor widgets. */
   function initResource(resource, integrations = {}) {
-    const settings = {
-      ...resource.constants,
-      ...Object.fromEntries(Object.entries(resource.fields).map(([name, field]) => [name, structuredClone(field.default)]))
-    };
-    applyParameters(resource.fields, settings);
-    const overlay = location.search.length > 1 && !location.hash;
-    global.byStreamOverlay = overlay;
-    global.addEventListener("hashchange", () => {
-      if (overlay !== (location.search.length > 1 && !location.hash)) location.reload();
+    resourceReady = readURLParameters(resource.fields).then((parameters) => {
+      parameterError = parameters.error;
+      compressedFields = parameters.compressedFields;
+      const settings = {
+        ...resource.constants,
+        ...Object.fromEntries(Object.entries(resource.fields).map(([name, field]) => [name, structuredClone(field.default)]))
+      };
+      applyParameters(resource.fields, settings, parameters.values);
+      const overlay = location.search.length > 1 && !location.hash;
+      global.byStreamOverlay = overlay;
+      global.addEventListener("hashchange", () => {
+        if (overlay !== (location.search.length > 1 && !location.hash)) location.reload();
+      });
+      if (overlay) {
+        document.documentElement.setAttribute("data-overlay", "");
+        document.body.append(document.getElementById("overlay-markup").content.cloneNode(true));
+      }
+      global.byStreamResource = { ...resource, settings, parameterRules: resource.fields, ...integrations };
+      return settings;
     });
-    if (overlay) {
-      document.documentElement.setAttribute("data-overlay", "");
-      document.body.append(document.getElementById("overlay-markup").content.cloneNode(true));
-    }
-    global.byStreamResource = { ...resource, settings, parameterRules: resource.fields, ...integrations };
-    return settings;
+    return resourceReady;
   }
 
   /** Main accepts headings; Popup keeps only the platform and display handle. */
@@ -1347,11 +1390,15 @@
     function settingsURL(settings) {
       const values = Object.entries(settings)
         .filter(([name]) => Object.hasOwn(parameterRules, name))
-        .map(([name, value]) => [name, typeof value === "object" ? JSON.stringify(value) : String(value)]);
+        .map(([name, value]) => {
+          let text = typeof value === "object" ? JSON.stringify(value) : String(value);
+          if (text.startsWith("dr:") || text.startsWith("raw:")) text = `raw:${text}`;
+          return [name, text];
+        });
       const url = new URL(location.href);
       if (url.protocol !== "file:") url.pathname = url.pathname.replace(/\/index\.html$/, "/");
       url.hash = "";
-      url.search = new URLSearchParams(values).toString();
+      url.search = new URLSearchParams(values).toString().replace(/=raw%3A/g, "=raw:");
       return url;
     }
 
@@ -1448,6 +1495,8 @@
     }
   };
 
-  // jQuery ready also handles dependencies that finish loading after DOMContentLoaded.
-  $(byConfigurator.init);
+  document.addEventListener("DOMContentLoaded", async () => {
+    await resourceReady;
+    byConfigurator.init();
+  });
 })(window);
