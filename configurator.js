@@ -791,6 +791,7 @@
           $(/* HTML */ `<div class="entry-list"></div>`).appendTo(editor);
           $(/* HTML */ `<button type="button" class="add-entry btn btn-sm btn-outline-primary w-100"></button>`)
             .text(field.addLabel || "Add entry")
+            .prepend(/* HTML */ `<i class="fa-solid fa-plus me-2" aria-hidden="true"></i>`)
             .appendTo(editor);
         }
         if (field.type === "mapping") $(/* HTML */ `<a href="#remap"></a>`).text("Configure input mapping").appendTo(label);
