@@ -412,14 +412,18 @@ window.byConfigurator.configureResource = function ({ settings, gamepadSupport, 
     $(`#gamepad-map-${id}`).addClass("active");
   });
 
-  $("form[data-configurator]").on("reset", () => setTimeout(() => {
+  $("#mapping-input").on("change", () => {
     cancelCapture?.();
-    $("#mapping-input").val(initialMapping);
-    generateURL();
     if ($.fn.select2) $("#mappings select.select2-hidden-accessible").select2("destroy");
     $("#mappings").empty();
     createUIFromMapping(settings.mapping);
     $("#mapping-config").trigger("change");
+  });
+
+  $("form[data-configurator]").on("reset", () => setTimeout(() => {
+    $("#mapping-input").val(initialMapping);
+    generateURL();
+    $("#mapping-input").triggerHandler("change");
   }, 0));
 
   createUIFromMapping(settings.mapping);

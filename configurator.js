@@ -561,6 +561,7 @@
     const { settings, fields: parameterRules } = resource;
     let pendingPreview;
     let urlGeneration = 0;
+    let urlEdited = false;
 
     // ==========
     // ==== GENERATED FORM ====
@@ -601,7 +602,14 @@
             <div class="d-flex align-items-center gap-2">
               <label class="url-field flex-grow-1 overflow-hidden text-body form-label d-flex flex-column gap-1 w-100 m-0" for="overlay-url">
                 <span class="visually-hidden">Overlay URL</span>
-                <input id="overlay-url" readonly="" spellcheck="false" class="form-control rounded-0 bg-body-secondary border-secondary-subtle font-monospace small" />
+                <input
+                  id="overlay-url"
+                  type="url"
+                  spellcheck="false"
+                  autocomplete="off"
+                  class="form-control rounded-0 bg-body-secondary border-secondary-subtle font-monospace small"
+                  aria-describedby="copy-status"
+                  title="URL edits apply after typing pauses. Press Enter or leave the field to apply immediately." />
               </label>
               <button id="copy-url" class="btn btn-sm btn-light flex-shrink-0 text-nowrap" type="button">
                 <i class="fa-solid fa-copy me-2" aria-hidden="true"></i>
@@ -754,12 +762,14 @@
      */
     async function generateURL() {
       const generation = ++urlGeneration;
+      urlEdited = false;
+      $("#overlay-url")[0].setCustomValidity("");
       clearTimeout(pendingPreview);
       const valid = fields.map(validField).every(Boolean);
       if (!valid) {
-        $("#overlay-url, #url-gen-url").val("");
+        $("#overlay-url").val("");
         $("#preview-url").removeAttr("href");
-        $("#copy-url, #url-gen-copy").prop("disabled", true);
+        $("#copy-url").prop("disabled", true);
         $("#url-summary").text("Fix the highlighted parameter to generate a URL.");
         updateOverlayPreview(null);
         return false;
@@ -774,11 +784,13 @@
       let url = readableURL;
       let summary = `${url.href.length.toLocaleString()} characters. Parameters remain readable.`;
       const scope = $('input[name="compression-scope"]:checked').val();
-      const selected = $("[data-compress-field]:checked").map((_, input) => input.value).get();
+      const selected = $("[data-compress-field]:checked")
+        .map((_, input) => input.value)
+        .get();
       if ($("#short-url").prop("checked") && scope === "selected" && !selected.length) {
         summary = `${url.href.length.toLocaleString()} characters. Select at least one field to compress.`;
       } else if ($("#short-url").prop("checked")) {
-        $("#copy-url, #url-gen-copy").prop("disabled", true);
+        $("#copy-url").prop("disabled", true);
         $("#url-summary").text("Generating a shorter URL...");
         try {
           const shorterURL = new URL(readableURL);
@@ -805,12 +817,12 @@
         }
       }
       if (generation !== urlGeneration) return false;
-      $("#overlay-url, #url-gen-url").attr("title", url.href).val(url.href);
+      $("#overlay-url").val(url.href);
       $("#url-summary").text(summary);
       $("#preview-url").attr("href", url.href);
-      $("#copy-url .copy-label, #url-gen-copy .copy-label").text("Copy URL");
+      $("#copy-url .copy-label").text("Copy URL");
       $("#copy-status").text("");
-      $("#copy-url, #url-gen-copy").prop("disabled", false);
+      $("#copy-url").prop("disabled", false);
       updateOverlayPreview(url.href);
       return true;
     }
@@ -824,20 +836,80 @@
       }
     }
 
+    function readEditorURL() {
+      const input = $("#overlay-url")[0];
+      input.setCustomValidity("");
+      try {
+        const url = new URL(input.value);
+        if (!byConfigurator.safeImage(url.href)) throw new Error("Invalid overlay URL");
+        return url;
+      } catch {
+        input.setCustomValidity("Enter a complete HTTP(S) overlay URL, or a local file URL when using downloaded tools.");
+        return null;
+      }
+    }
 
+    function sameResourceURL(url) {
+      const pathname = (path) => (location.protocol === "file:" ? path : path.replace(/\/index\.html$/, "/"));
+      return url.origin === location.origin && pathname(url.pathname) === pathname(location.pathname);
+    }
 
+    async function applyEditedURL(automatic = false) {
+      if (!urlEdited) return;
+      const url = readEditorURL();
+      if (!url) {
+        if (!automatic) $("#overlay-url")[0].reportValidity();
+        return;
+      }
+      if (!sameResourceURL(url)) {
+        if (automatic) {
+          $("#copy-status").text("Press Enter or leave the field to open another tool.");
+          return;
+        }
+        url.hash = "configure";
+        location.assign(url.href);
+        return;
+      }
+      const generation = ++urlGeneration;
+      const parameters = await readURLParameters(parameterRules, url.search);
+      if (generation !== urlGeneration) return;
+      const loaded = {
+        ...resource.constants,
+        ...Object.fromEntries(Object.entries(parameterRules).map(([name, field]) => [name, structuredClone(field.default)]))
+      };
+      byConfigurator.applyParameters(parameterRules, loaded, parameters.values);
+      // Keep this document and its widget lifetimes; only the preview loads a new overlay.
+      Object.assign(settings, loaded);
+      setFields(settings);
+      // Synchronize widgets without bubbling a separate URL generation for every field.
+      $(fields).each((_, field) => $(field).triggerHandler("change"));
+      loadCompressionOptions(url.search, url.search ? parameters.compressedFields : new Set());
+      $("#url-load-error").text(parameters.error).prop("hidden", !parameters.error);
+      await generateURL(automatic);
+    }
 
-
-
-
-
+    async function currentOverlayURL() {
+      if (!urlEdited && !(await generateURL())) {
+        form.reportValidity();
+        return null;
+      }
+      const url = readEditorURL();
+      if (!url) {
+        $("#overlay-url")[0].reportValidity();
+        return null;
+      }
+      url.hash = "";
+      return url;
+    }
 
     async function copyURL() {
-      if (!(await generateURL())) return form.reportValidity();
-      const jqOutput = $("#overlay-url, #url-gen-url");
+      const url = await currentOverlayURL();
+      if (!url) return;
+      const jqOutput = $("#overlay-url");
+      jqOutput.val(url.href);
       try {
-        await navigator.clipboard.writeText(jqOutput.val());
-        $("#copy-url .copy-label, #url-gen-copy .copy-label, #copy-status").text("Copied!");
+        await navigator.clipboard.writeText(url.href);
+        $("#copy-url .copy-label, #copy-status").text("Copied!");
       } catch {
         jqOutput.trigger("focus").trigger("select");
         $("#copy-status").text("Press Ctrl+C (or Command+C) to copy the selected URL.");
@@ -940,13 +1012,10 @@
       const initial = entries.map((entry) => ({ ...entry }));
       jqOutput.prop("defaultValue", JSON.stringify(initial));
 
-      function updateIcon(jqRow) {
-        jqRow.find(".entry-icon").attr("class", "entry-icon text-primary fa-fw fa-solid fa-calendar-days");
-      }
       function addRow(entry) {
         const jqRow = $(/* HTML */ `<div class="entry-row p-2 mb-2 border border-secondary-subtle bg-body-tertiary"></div>`).html(/* HTML */ `
           <div class="d-flex align-items-center gap-1 mb-1">
-            <i class="entry-icon" aria-hidden="true"></i>
+            <i class="entry-icon text-primary fa-fw fa-solid fa-calendar-days" aria-hidden="true"></i>
             <select class="form-select rounded-0 bg-body-secondary border-secondary-subtle flex-grow-1" aria-label="${choiceKey === "platform" ? "Platform" : "Day"}"></select>
             <div class="btn-group flex-shrink-0" role="group" aria-label="Entry controls">
               <button type="button" class="btn btn-sm btn-outline-primary" data-action="up" aria-label="Move entry up" title="Move up">
@@ -966,7 +1035,6 @@
         if (choiceKey === "platform") jqRow.find(".entry-icon").remove();
         Object.entries(choices || {}).forEach(([value, title]) => $(/* HTML */ `<option></option>`).val(value).text(title).appendTo(jqSelect));
         jqSelect.val(entry[choiceKey]);
-        if (choices) updateIcon(jqRow);
         textFields.forEach(([key, title, type = "text"]) => {
           $(/* HTML */ `<input />`, {
             type,
@@ -1010,31 +1078,26 @@
         jqEditor.find("input")[0]?.setCustomValidity(byConfigurator.validParameter(parameterRules, name, jqOutput.val()) ? "" : "List is too large. Shorten text or remove entries.");
         jqAdd.prop("disabled", jqRows.length >= limit);
       }
-      function reset() {
+      function reset(entries = initial) {
         jqEditor.find("select").each(function () {
           if ($(this).data("select2")) $(this).select2("close").select2("destroy");
         });
         jqEditor.empty();
-        initial.forEach(addRow);
+        entries.forEach(addRow);
         sync();
       }
-      jqEditor
-        .on("input change", "input, select", function () {
-          if ($(this).is("select")) updateIcon($(this).closest(".entry-row"));
-          sync();
-        })
-        .on("click", "[data-action]", function () {
-          const jqRow = $(this).closest(".entry-row");
-          const action = $(this).data("action");
-          if (action === "remove") {
-            const jqSelect = jqRow.find("select");
-            if (jqSelect.data("select2")) jqSelect.select2("close").select2("destroy");
-            jqRow.remove();
-          } else if (action === "up") jqRow.insertBefore(jqRow.prev());
-          else jqRow.insertAfter(jqRow.next());
-          sync();
-          generateURL();
-        });
+      jqEditor.on("input change", "input, select", sync).on("click", "[data-action]", function () {
+        const jqRow = $(this).closest(".entry-row");
+        const action = $(this).data("action");
+        if (action === "remove") {
+          const jqSelect = jqRow.find("select");
+          if (jqSelect.data("select2")) jqSelect.select2("close").select2("destroy");
+          jqRow.remove();
+        } else if (action === "up") jqRow.insertBefore(jqRow.prev());
+        else jqRow.insertAfter(jqRow.next());
+        sync();
+        generateURL();
+      });
       jqAdd.on("click", () => {
         if (jqEditor.children().length >= limit) return;
         const jqRow = addRow(newEntry);
@@ -1043,6 +1106,7 @@
         generateURL();
       });
       jqForm.on("reset", () => setTimeout(reset, 0));
+      jqOutput.on("change", () => reset(settings[name]));
       reset();
     }
 
@@ -1098,6 +1162,7 @@
         const jqNote = $(/* HTML */ `<small class="text-body-secondary"></small>`).text("Choose in this computer’s time zone. The URL stores an absolute time.").insertAfter(jqPicker);
         const jqNow = $(/* HTML */ `<button type="button" class="btn btn-sm btn-outline-primary align-self-start"></button>`).text("Use current time").attr("aria-label", `Use current time for ${title}`).insertAfter(jqNote);
         const sync = () => jqPicker.val(localTimestamp(jqField.val()));
+        jqField.on("change", sync);
         jqPicker.on("input", () => jqField.val(utcTimestamp(jqPicker.val())).trigger("input"));
         jqNow.on("click", () => {
           jqField.val(new Date().toISOString());
@@ -1599,18 +1664,19 @@
       return accepted;
     }
 
-
-
-    // Resource scripts publish their definitions before this deferred editor runs.
-    try {
+    /** Reflect settings without replacing controls or changing the original Reset values. */
+    function setFields(values, saveDefaults = false) {
       $(fields).each(function () {
         const jqField = $(this);
-        const value = settings[this.name];
+        const value = values[this.name];
         if (jqField.is(":checkbox")) {
           const checked = String(value) === jqField.val();
-          jqField.prop({ defaultChecked: checked, checked });
+          jqField.prop("checked", checked);
+          if (saveDefaults) jqField.prop("defaultChecked", checked);
         } else {
+          if (parameterRules[this.name].type === "font" && jqField.is("select") && ![...this.options].some((option) => option.value === value)) this.add(new Option(value, value));
           jqField.val(typeof value === "object" ? JSON.stringify(value) : value);
+          if (!saveDefaults) return;
           if (jqField.is("select"))
             jqField.find("option").prop("defaultSelected", function () {
               return this.selected;
@@ -1618,6 +1684,11 @@
           else jqField.prop("defaultValue", jqField.val());
         }
       });
+    }
+
+    // Resource scripts publish their definitions before this deferred editor runs.
+    try {
+      setFields(settings, true);
 
       const editor = {
         generateURL,
@@ -1667,6 +1738,23 @@
       $("#copy-url")
         .on("click", copyURL)
         .on("mouseleave focusout", () => $("#copy-url .copy-label").text("Copy URL"));
+      $("#overlay-url")
+        .on("input", function () {
+          urlEdited = true;
+          urlGeneration++;
+          clearTimeout(pendingPreview);
+          const url = readEditorURL();
+          if (url) url.hash = "";
+          $("#preview-url").attr("href", url?.href || null);
+          $("#copy-url").prop("disabled", !url);
+          $("#copy-status").text("Press Enter or leave the field to apply URL changes.");
+        })
+        .on("change", applyEditedURL)
+        .on("keydown", (event) => {
+          if (event.key !== "Enter" || event.originalEvent?.isComposing) return;
+          event.preventDefault();
+          applyEditedURL();
+        });
       $(window)
         .on("pagehide", () => {
           urlGeneration++;

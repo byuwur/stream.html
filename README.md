@@ -24,7 +24,9 @@ Use **1920 × 1080** for Main scene. Size Controller and Popup for your layout; 
 
 - Bare folder or `index.html` URLs open the editor. Query settings without a hash render the overlay.
 - Append `#configure` to edit an existing URL. Help links open the corresponding panel.
-- **Reset** restores what the editor loaded, including imported lists and their order.
+- **Reset** restores the settings, list order, and compression choices from when the page opened, including after direct URL edits.
+- Edit the generated URL and press **Enter** or leave the field to update the form and preview in place. Links to another tool navigate when applied.
+- Editing keeps the browser address unchanged. **Copy URL** shares the current overlay settings.
 - Invalid form values stop URL generation and keep the last valid preview. Invalid or unknown URL parameters keep the defaults; empty text clears a field.
 
 The form handles encoding. Display text stays text, and lists support add, edit, reorder, and remove. Colors use 3/4/6/8 hex digits without `#`, including alpha: `fontColor=fff`, `backgroundColor=00000000`. Runtime restores `#`; older encoded hashes work. Malformed colors pass to CSS; RGB/HSL/named colors are outside the contract. Theme preference is saved locally. Motion follows the tool's settings; explicit Off, None, and Static choices still apply.
