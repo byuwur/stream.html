@@ -23,6 +23,7 @@ Use **1920 × 1080** for Main scene. Size Controller and Popup for your layout; 
 ## Settings stay in the URL
 
 - Bare folder or `index.html` URLs open the editor. Query settings without a hash render the overlay.
+- In the configurator, press **F1** to open **About**.
 - Press **F2** to switch between the configurator and its current overlay, or append `#configure` to edit a link. In OBS, use **Interact** first. F2 is ignored in preview frames, with modifiers/repeats, and while typing in overlay controls.
 - **Reset** restores the settings, list order, and compression choices from when the page opened, including after direct URL edits.
 - Form edits and same-tool URL edits apply after a 250 ms pause via SPA.js's shared `debounce()`, updating the form and preview in place. **Enter** or leaving the changed URL field applies immediately; links to another tool navigate then.
@@ -34,6 +35,25 @@ The form handles encoding. Display text stays text, and lists support add, edit,
 Fonts search 350 Google families, system fonts, and custom installed families or CSS stacks. Selected fonts and visible samples load on demand. The font must be available on the OBS computer; missing families use each tool's fallback.
 
 Media fields reference public HTTP(S) URLs or paths relative to the tool's HTML. Local file URLs require downloaded use. No uploads or Base64 `data:` media URLs. Keep private information out of shared URLs.
+
+### Keyboard shortcuts
+
+About includes the shortcut reference. Focus the configurator to use these:
+
+| Shortcut            | Action                                          |
+| ------------------- | ----------------------------------------------- |
+| `F1`                | Open About.                                     |
+| `F2`                | Switch between configurator and overlay.        |
+| `Alt+Shift+P`       | Open Parameters.                                |
+| `Alt+Shift+A`       | Open Advanced options.                          |
+| `Alt+Shift+O`       | Open the current overlay in a new tab.          |
+| `Alt+Shift+C`       | Copy the overlay URL.                           |
+| `Alt+Shift+U`       | Focus and select the overlay URL.               |
+| `Alt+Shift+M`       | Open the tool picker.                           |
+| `Esc`               | Close the current dialog, popover, or dropdown. |
+| `Tab` / `Shift+Tab` | Move between controls.                          |
+
+`F2` switches modes on standalone pages and is ignored inside previews. F3/F4 retain browser actions. Modified or repeated function keys, repeated shortcuts, and IME composition are ignored.
 
 ### Shorter URLs
 

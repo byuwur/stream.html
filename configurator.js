@@ -620,7 +620,7 @@
                   <img src="https://byuwur.github.io/img/logo.png" alt="" />
                 </a>
                 <div class="tool-switcher position-relative flex-shrink-0 me-2" data-tool="template">
-                  <select id="tool-picker" class="form-select rounded-0" aria-label="Choose a tool"></select>
+                  <select id="tool-picker" class="form-select rounded-0" aria-label="Choose a tool" aria-keyshortcuts="Alt+Shift+M"></select>
                 </div>
               </div>
               <p class="config-credit d-none d-md-block m-0 ms-auto text-end small text-white">
@@ -648,10 +648,11 @@
                   spellcheck="false"
                   autocomplete="off"
                   class="form-control rounded-0 bg-body-secondary border-secondary-subtle font-monospace small"
+                  aria-keyshortcuts="Alt+Shift+U"
                   aria-describedby="copy-status"
                   title="URL edits apply after typing pauses. Press Enter or leave the field to apply immediately." />
               </label>
-              <button id="copy-url" class="btn btn-sm btn-light flex-shrink-0 text-nowrap" type="button">
+              <button id="copy-url" class="btn btn-sm btn-light flex-shrink-0 text-nowrap" type="button" aria-keyshortcuts="Alt+Shift+C">
                 <i class="fa-solid fa-copy me-2" aria-hidden="true"></i>
                 <span class="copy-label">Copy URL</span>
               </button>
@@ -669,6 +670,7 @@
                 data-bs-fallback-placements='["bottom"]'
                 title="Advanced options"
                 aria-label="Advanced options"
+                aria-keyshortcuts="Alt+Shift+A"
                 aria-controls="config-help"
                 aria-haspopup="dialog">
                 <i class="fa-solid fa-gear" aria-hidden="true"></i>
@@ -686,7 +688,7 @@
             <section class="preview-panel h-100 order-first order-md-last flex-shrink-0 col-12 col-md-8 bg-body p-3 d-flex flex-column gap-2" aria-label="Overlay preview">
               <header class="preview-toolbar d-flex justify-content-between align-items-center small">
                 <strong><i class="fa-solid fa-eye me-2" aria-hidden="true"></i>Live preview</strong>
-                <a id="preview-url" target="_blank" rel="noopener" class="link-body-emphasis">
+                <a id="preview-url" target="_blank" rel="noopener" class="link-body-emphasis" aria-keyshortcuts="Alt+Shift+O">
                   <i class="fa-solid fa-arrow-up-right-from-square me-2" aria-hidden="true"></i>
                   Open overlay
                 </a>
@@ -1435,10 +1437,10 @@
             <div class="modal-content rounded-0">
               <nav class="d-flex flex-wrap align-items-center gap-2 p-3 bg-dark text-white modal-header flex-shrink-0" aria-label="Configurator sections">
                 <a href="https://byuwur.github.io/" target="_blank" rel="noopener" aria-label="[Mateus] byUwUr"><img src="https://byuwur.github.io/img/logo.png" alt="" /></a>
-                <button class="btn btn-sm btn-outline-light border-0" type="button" data-section="info"> <i class="fa-solid fa-circle-info me-1" aria-hidden="true"></i>Info </button>
+                <button class="btn btn-sm btn-outline-light border-0" type="button" data-section="info" aria-keyshortcuts="F1"> <i class="fa-solid fa-circle-info me-1" aria-hidden="true"></i>Info </button>
                 <button class="btn btn-sm btn-outline-light border-0" type="button" data-section="obs"> <i class="fa-solid fa-desktop me-1" aria-hidden="true"></i>Use with OBS </button>
-                <button class="btn btn-sm btn-outline-light border-0" type="button" data-section="params"> <i class="fa-solid fa-file-lines me-1" aria-hidden="true"></i>Parameters </button>
-                <button class="btn btn-sm btn-outline-light border-0" type="button" data-section="advanced"> <i class="fa-solid fa-gear me-1" aria-hidden="true"></i>Advanced </button>
+                <button class="btn btn-sm btn-outline-light border-0" type="button" data-section="params" aria-keyshortcuts="Alt+Shift+P"> <i class="fa-solid fa-file-lines me-1" aria-hidden="true"></i>Parameters </button>
+                <button class="btn btn-sm btn-outline-light border-0" type="button" data-section="advanced" aria-keyshortcuts="Alt+Shift+A"> <i class="fa-solid fa-gear me-1" aria-hidden="true"></i>Advanced </button>
                 <button type="button" class="help-close btn btn-sm btn-outline-light border-0 ms-auto fs-4" aria-label="Close dialog"> &times; </button>
               </nav>
               <header class="p-4 bg-primary text-white flex-shrink-0"><h2 class="h2 m-0" id="help-title"></h2></header>
@@ -1457,6 +1459,62 @@
                     <a href="https://github.com/byuwur/stream.html" target="_blank" rel="noopener" class="link-body-emphasis">source code</a>
                     to use the overlays locally. Keep each tool's assets together. Libraries and configurator styling load from jsDelivr and require internet access.
                   </p>
+                <section class="mt-4 pt-3 border-top border-secondary-subtle" aria-labelledby="keyboard-shortcuts-title">
+                    <h3 id="keyboard-shortcuts-title" class="h5 mb-3"><i class="fa-solid fa-keyboard me-2" aria-hidden="true"></i>Keyboard shortcuts</h3>
+                    <div class="table-responsive">
+                      <table class="table table-sm align-middle mb-2" aria-labelledby="keyboard-shortcuts-title">
+                        <thead>
+                          <tr>
+                            <th scope="col">Shortcut</th>
+                            <th scope="col">Action</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr>
+                            <th scope="row" class="fw-normal text-nowrap"><kbd>F1</kbd></th>
+                            <td>Open About and this shortcut reference</td>
+                          </tr>
+                          <tr>
+                            <th scope="row" class="fw-normal text-nowrap"><kbd>F2</kbd></th>
+                            <td>Switch between configurator and overlay mode</td>
+                          </tr>
+                          <tr>
+                            <th scope="row" class="fw-normal text-nowrap"><kbd>Alt</kbd> + <kbd>Shift</kbd> + <kbd>P</kbd></th>
+                            <td>Open Parameters</td>
+                          </tr>
+                          <tr>
+                            <th scope="row" class="fw-normal text-nowrap"><kbd>Alt</kbd> + <kbd>Shift</kbd> + <kbd>A</kbd></th>
+                            <td>Open Advanced options</td>
+                          </tr>
+                          <tr>
+                            <th scope="row" class="fw-normal text-nowrap"><kbd>Alt</kbd> + <kbd>Shift</kbd> + <kbd>O</kbd></th>
+                            <td>Open the current overlay in a new tab</td>
+                          </tr>
+                          <tr>
+                            <th scope="row" class="fw-normal text-nowrap"><kbd>Alt</kbd> + <kbd>Shift</kbd> + <kbd>C</kbd></th>
+                            <td>Copy the overlay URL</td>
+                          </tr>
+                          <tr>
+                            <th scope="row" class="fw-normal text-nowrap"><kbd>Alt</kbd> + <kbd>Shift</kbd> + <kbd>U</kbd></th>
+                            <td>Focus and select the overlay URL</td>
+                          </tr>
+                          <tr>
+                            <th scope="row" class="fw-normal text-nowrap"><kbd>Alt</kbd> + <kbd>Shift</kbd> + <kbd>M</kbd></th>
+                            <td>Open the tool picker</td>
+                          </tr>
+                          <tr>
+                            <th scope="row" class="fw-normal text-nowrap"><kbd>Esc</kbd></th>
+                            <td>Close the current dialog, popover, or dropdown</td>
+                          </tr>
+                          <tr>
+                            <th scope="row" class="fw-normal text-nowrap"><kbd>Tab</kbd> / <kbd>Shift</kbd> + <kbd>Tab</kbd></th>
+                            <td>Move between controls</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                    <p class="small text-body-secondary mb-0">Focus the configurator to use its shortcuts.</p>
+                  </section>
                 </section>
                 <section data-panel="obs" hidden>
                   <ol class="ps-4">
@@ -1598,7 +1656,7 @@
         }
       }
 
-      const titles = { info: "Info", obs: "Use with OBS", params: "Parameters", advanced: "Advanced options" };
+      const titles = { info: "About", obs: "Use with OBS", params: "Parameters", advanced: "Advanced options" };
       initResourceHelp?.(jqDialog[0], titles, closeHelp);
       function showSection(section) {
         popover?.hide();
@@ -1617,14 +1675,52 @@
         showSection($(this).data("section"));
       });
       $(document).on("keydown", async (event) => {
-        if (event.key !== "F2" || event.originalEvent?.repeat || event.originalEvent?.isComposing || event.isDefaultPrevented() || event.ctrlKey || event.metaKey || event.altKey || event.shiftKey || global !== global.top) return;
-        event.preventDefault();
-        const url = await currentOverlayURL();
-        if (!url) return;
-        if (!url.search) {
-          url.search = sameResourceURL(url) && savedPreferences.query ? savedPreferences.query : settingsURL(Object.fromEntries(Object.entries(parameterRules).map(([name, rule]) => [name, rule.default]))).search;
+        if (event.originalEvent?.repeat || event.originalEvent?.isComposing || event.isDefaultPrevented() || event.ctrlKey || event.metaKey) return;
+        if (event.key === "F1" && !event.altKey && !event.shiftKey) {
+          event.preventDefault();
+          showSection("info");
+          return;
         }
-        location.assign(url.href);
+        if (event.key === "F2" && !event.altKey && !event.shiftKey) {
+          if (global !== global.top) return;
+          event.preventDefault();
+          const url = await currentOverlayURL();
+          if (!url) return;
+          if (!url.search) {
+            url.search = sameResourceURL(url) && savedPreferences.query ? savedPreferences.query : settingsURL(Object.fromEntries(Object.entries(parameterRules).map(([name, rule]) => [name, rule.default]))).search;
+          }
+          location.assign(url.href);
+          return;
+        }
+        if (!event.altKey || !event.shiftKey || !["KeyP", "KeyA", "KeyO", "KeyC", "KeyU", "KeyM"].includes(event.code)) return;
+        event.preventDefault();
+        switch (event.code) {
+          case "KeyP":
+            showSection("params");
+            return;
+          case "KeyA":
+            showSection("advanced");
+            return;
+          case "KeyO":
+            if ($("#copy-url").prop("disabled")) return urlEdited ? $("#overlay-url")[0].reportValidity() : form.reportValidity();
+            $("#preview-url")[0].click();
+            return;
+          case "KeyC":
+            await copyURL();
+            return;
+        }
+        const focusControl = () => {
+          if (event.code === "KeyU") $("#overlay-url").trigger("focus").trigger("select");
+          else if ($("#tool-picker").data("select2")) $("#tool-picker").select2("open");
+          else $("#tool-picker").trigger("focus");
+        };
+        if (helpOpen) {
+          jqDialog.one("shown.bs.modal", closeHelp).one("hidden.bs.modal", () => {
+            jqDialog.off("shown.bs.modal", closeHelp);
+            focusControl();
+          });
+          closeHelp();
+        } else focusControl();
       });
       jqDialog.find(".help-close").on("click", closeHelp);
       jqDialog
