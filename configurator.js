@@ -5,7 +5,7 @@
  */
 
 /** Own shared editor setup and navigation. */
-(async function (global) {
+(function (global) {
   global.byConfigurator = global.byConfigurator || {};
   const byConfigurator = global.byConfigurator;
   if (byConfigurator.init) return;
@@ -271,22 +271,11 @@
 
   if (document.getElementById("configurator") && location.search.length > 1 && !location.hash) return;
 
-  try {
-    for (const source of document.querySelectorAll("script[data-editor-src]")) {
-      await new Promise((resolve, reject) => {
-        const script = document.createElement("script");
-        script.src = source.dataset.editorSrc;
-        script.onload = resolve;
-        script.onerror = () => reject(new Error(`Unable to load ${script.src}`));
-        document.head.append(script);
-      });
-    }
-  } catch (error) {
-    console.error("Unable to load configurator dependencies:", error);
+  if (typeof global.jQuery !== "function") {
+    console.error("Unable to load configurator dependencies: jQuery is unavailable.");
     document.body.textContent = "Unable to load the configurator. Check your internet connection, then reload.";
     return;
   }
-  if (typeof jQuery === "undefined" && !global.jQuery) return console.error("Init configurator.js FAILED. No jQuery found.");
   const $ = global.jQuery;
 
   // ==========

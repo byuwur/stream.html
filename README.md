@@ -170,6 +170,8 @@ The HTML needs `<template id="overlay-markup">...</template>` and `<div id="conf
 
 `byConfigurator.validParameter(fields, name, value)` and `applyParameters(fields, settings, values?)` share the same rules across editors and renderers. Native helpers also provide the platform catalog, account parsing (Main enables headings), locale/zone/timestamp parsing, image URL checks, and clock-aligned `watch()` updates that pause while hidden.
 
+HTML needs `<template id="overlay-markup">...</template>` and `<div id="configurator"></div>`. Declare scripts with `src` and `defer` in dependency order: jQuery before its plugins, Popper before Bootstrap, and `_functions.js` before `configurator.js`. Deferred scripts execute in document order before `DOMContentLoaded`; initialization awaits decoded resource settings. Editor styles start with `data-editor-style media="not all"` and activate only in configure mode.
+
 ### Add a tool
 
 1. Copy `configurator.html` to the new folder's `index.html`. Replace its demo markup, CSS, and renderer; change shared imports from `./` to `../`.

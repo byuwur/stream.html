@@ -68,7 +68,7 @@
     <!-- ./example.js -->
     <script>
       // Demo-only JavaScript; keep each real resource's renderer in its own file.
-      document.addEventListener("DOMContentLoaded", () => {
+      document.addEventListener("DOMContentLoaded", async () => {
         // ==========
         // ==== RESOURCE DEFINITION ====
         // ==========
@@ -112,7 +112,7 @@
           }
         };
 
-        const settings = byConfigurator.initResource(resource);
+        const settings = await byConfigurator.initResource(resource);
         if (!byStreamOverlay) return;
         const preview = document.getElementById("demo-preview");
         document.getElementById("demo-message").textContent = settings.message;
@@ -128,13 +128,13 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.5/_common.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.5/css/select2.min.css" />
     <link rel="stylesheet" href="./configurator.css" />
-    <script data-editor-src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.5/js/jquery.min.js"></script>
-
-    <script data-editor-src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.5/js/select2.full.min.js"></script>
-
-    <script data-editor-src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.5/js/bootstrap.min.js"></script>
-    <script data-editor-src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.5/js/pickr.min.js"></script>
-    <script data-editor-src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.5/_common.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.5/js/jquery.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.5/_functions.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.5/js/select2.full.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.5/js/popper.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.5/js/bootstrap.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.5/js/pickr.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.5/_common.js" defer></script>
     <!-- Configurator: URL toolbar, settings, preview, and help. -->
     <div id="configurator"></div>
     <script src="./configurator.js" defer></script>
