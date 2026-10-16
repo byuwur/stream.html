@@ -83,6 +83,13 @@ body {
 .bywr-configurator .config-help ol li {
   margin-bottom: 0.75rem;
 }
+.bywr-configurator .compression-fields {
+  max-height: 18rem;
+  overflow: auto;
+}
+.bywr-configurator .compression-fields [hidden] {
+  display: none !important;
+}
 
 /* Settings, ordered entries, and live preview. */
 .bywr-configurator .settings-panel {

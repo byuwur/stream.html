@@ -10,10 +10,11 @@
   const byConfigurator = global.byConfigurator;
   if (byConfigurator.init) return;
   const root = new URL(".", document.currentScript.src);
-
   let resourceReady = Promise.resolve();
   let parameterError = "";
   let compressedFields = new Set();
+
+
 
   /** Readable parameters override compressed values before normal field validation. */
   async function readURLParameters(fields, search = location.search) {
@@ -49,7 +50,7 @@
     return { values: decoded, compressedFields: selectedFields, error: errorMessage };
   }
 
-  // Native helpers are shared with renderers; editor dependencies load only below.
+  // Native helpers are shared with renderers; editor setup starts below.
   const platforms = {
     "500px": "500px",
     artstation: "ArtStation",
@@ -187,7 +188,7 @@
     }
   }
 
-  /** Mount the active overlay and publish its settings before initializing editor widgets. */
+  /** Publish decoded settings before widgets; only bare editors restore saved form values. */
   function initResource(resource, integrations = {}) {
     resourceReady = readURLParameters(resource.fields).then((parameters) => {
       parameterError = parameters.error;
@@ -218,12 +219,19 @@
     try {
       const entries = JSON.parse(value);
       if (!Array.isArray(entries) || entries.length > 100) return null;
-      if (!entries.every((entry) =>
-        entry && typeof entry.platform === "string" && Object.hasOwn(platforms, entry.platform) &&
-        typeof entry.handle === "string" && entry.handle.length <= 160 &&
-        (!withHeading || entry.heading === undefined || (typeof entry.heading === "string" && entry.heading.length <= 160))
-      )) return null;
-      return entries.map(({ platform, handle, heading = "" }) => withHeading ? { platform, handle, heading } : { platform, handle });
+      if (
+        !entries.every(
+          (entry) =>
+            entry &&
+            typeof entry.platform === "string" &&
+            Object.hasOwn(platforms, entry.platform) &&
+            typeof entry.handle === "string" &&
+            entry.handle.length <= 160 &&
+            (!withHeading || entry.heading === undefined || (typeof entry.heading === "string" && entry.heading.length <= 160))
+        )
+      )
+        return null;
+      return entries.map(({ platform, handle, heading = "" }) => (withHeading ? { platform, handle, heading } : { platform, handle }));
     } catch {
       return null;
     }
@@ -273,12 +281,7 @@
     if (!value) return true;
     try {
       const url = new URL(value, location.href);
-      return (
-        ["http:", "https:", "file:"].includes(url.protocol) &&
-        (url.protocol !== "file:" || location.protocol === "file:") &&
-        !url.username &&
-        !url.password
-      );
+      return ["http:", "https:", "file:"].includes(url.protocol) && (url.protocol !== "file:" || location.protocol === "file:") && !url.username && !url.password;
     } catch {
       return false;
     }
@@ -557,6 +560,7 @@
     const homeURL = new URL(location.protocol === "file:" ? "index.html" : ".", byConfigurator.catalog.root).href;
     const { settings, fields: parameterRules } = resource;
     let pendingPreview;
+    let urlGeneration = 0;
 
     // ==========
     // ==== GENERATED FORM ====
@@ -607,6 +611,20 @@
                 <i class="fa-solid fa-arrow-rotate-left me-2" aria-hidden="true"></i>
                 Reset
               </button>
+              <button
+                id="advanced-options"
+                class="btn btn-sm btn-outline-light flex-shrink-0"
+                type="button"
+                data-section="advanced"
+                data-bs-toggle="tooltip"
+                data-bs-placement="bottom"
+                data-bs-fallback-placements='["bottom"]'
+                title="Advanced options"
+                aria-label="Advanced options"
+                aria-controls="config-help"
+                aria-haspopup="dialog">
+                <i class="fa-solid fa-gear" aria-hidden="true"></i>
+              </button>
             </div>
           </header>
           <div class="setup-layout row g-0 flex-grow-1 flex-column flex-md-row flex-nowrap overflow-auto">
@@ -643,7 +661,7 @@
           <div id="accessibility-preset"></div>
           <!-- Help navigation. -->
           <footer class="config-footer border-top p-2 text-body-secondary flex-shrink-0">
-            <nav class="footer-links px-5 text-center" aria-label="Page navigation"></nav>
+            <nav class="footer-links text-center" aria-label="Page navigation"></nav>
           </footer>
         </main>
       `);
@@ -730,15 +748,19 @@
     // ==== URL GENERATION AND PREVIEW ====
     // ==========
     /**
-     * Validates the form, updates its overlay URL, and schedules the preview refresh.
-     * @returns {boolean} Whether every field passed validation.
+     * Validates the form and updates its overlay URL and preview.
+     * @param {boolean} [keepURLDraft=false] Preserve the URL text during automatic application.
+     * @returns {Promise<boolean>} Whether the latest URL was generated from valid fields.
      */
-    function generateURL() {
+    async function generateURL() {
+      const generation = ++urlGeneration;
+      clearTimeout(pendingPreview);
       const valid = fields.map(validField).every(Boolean);
       if (!valid) {
         $("#overlay-url, #url-gen-url").val("");
         $("#preview-url").removeAttr("href");
         $("#copy-url, #url-gen-copy").prop("disabled", true);
+        $("#url-summary").text("Fix the highlighted parameter to generate a URL.");
         updateOverlayPreview(null);
         return false;
       }
@@ -748,8 +770,43 @@
         values.set(this.name, jqField.prop("checked") ? jqField.val() : jqField.attr("data-unchecked-value"));
       });
       byConfigurator.applyParameters(parameterRules, settings, values);
-      const url = settingsURL(settings);
+      const readableURL = settingsURL(settings);
+      let url = readableURL;
+      let summary = `${url.href.length.toLocaleString()} characters. Parameters remain readable.`;
+      const scope = $('input[name="compression-scope"]:checked').val();
+      const selected = $("[data-compress-field]:checked").map((_, input) => input.value).get();
+      if ($("#short-url").prop("checked") && scope === "selected" && !selected.length) {
+        summary = `${url.href.length.toLocaleString()} characters. Select at least one field to compress.`;
+      } else if ($("#short-url").prop("checked")) {
+        $("#copy-url, #url-gen-copy").prop("disabled", true);
+        $("#url-summary").text("Generating a shorter URL...");
+        try {
+          const shorterURL = new URL(readableURL);
+          if (scope === "selected") {
+            for (const name of selected) {
+              const value = readableURL.searchParams.get(name);
+              const text = value.startsWith("raw:") ? value.slice(4) : value;
+              shorterURL.searchParams.set(name, `dr:${await global.compress_url_data(text)}`);
+            }
+          } else {
+            const compressed = await global.compress_url_data(readableURL.search.slice(1));
+            shorterURL.search = new URLSearchParams({ data: compressed }).toString();
+          }
+          shorterURL.search = shorterURL.search.replace(/=(dr|raw)%3A/g, "=$1:");
+          if (shorterURL.href.length < readableURL.href.length) {
+            url = shorterURL;
+            const saving = Math.round((1 - url.href.length / readableURL.href.length) * 100);
+            summary = `${url.href.length.toLocaleString()} characters · ${saving}% shorter.`;
+            summary += scope === "selected" ? ` ${selected.length} ${selected.length === 1 ? "field" : "fields"} compressed; other parameters stay readable.` : " All settings are included.";
+          } else summary = `${url.href.length.toLocaleString()} characters. The readable URL is already shorter.`;
+        } catch (error) {
+          console.warn("Unable to shorten the overlay URL:", error);
+          summary = `Shorter URLs are unavailable. Using the readable URL (${url.href.length.toLocaleString()} characters).`;
+        }
+      }
+      if (generation !== urlGeneration) return false;
       $("#overlay-url, #url-gen-url").attr("title", url.href).val(url.href);
+      $("#url-summary").text(summary);
       $("#preview-url").attr("href", url.href);
       $("#copy-url .copy-label, #url-gen-copy .copy-label").text("Copy URL");
       $("#copy-status").text("");
@@ -758,7 +815,7 @@
       return true;
     }
 
-    // Keep the last valid preview; wait for typing to pause before restarting its animations.
+    // Editing is debounced before URL generation; keep the last valid preview on invalid input.
     function updateOverlayPreview(url) {
       clearTimeout(pendingPreview);
       $("#preview-status").text(url ? "Changes update automatically." : "Fix the highlighted parameter to update the preview.");
@@ -767,8 +824,16 @@
       }
     }
 
+
+
+
+
+
+
+
+
     async function copyURL() {
-      if (!generateURL()) return form.reportValidity();
+      if (!(await generateURL())) return form.reportValidity();
       const jqOutput = $("#overlay-url, #url-gen-url");
       try {
         await navigator.clipboard.writeText(jqOutput.val());
@@ -1062,7 +1127,7 @@
     // ==== THEME, ACCESSIBILITY, AND COLORS ====
     // ==========
 
-    /** Theme and accessibility behavior belong to SPA.php's byCommon. */
+    /** Persist the editor preference; byCommon applies the theme and button state. */
     function initTheme() {
       let theme = "dark";
       try {
@@ -1078,7 +1143,6 @@
       }
       const button = $("#theme-toggle")[0];
       byCommon.toggleTheme(document.documentElement, { theme, button });
-      initAccessibility();
       $(button)
         .prop("disabled", false)
         .on("click", () => {
@@ -1091,7 +1155,6 @@
         });
     }
 
-    /** Builds the shared SPA.php controls; byCommon owns their behavior and state. */
     function initAccessibility() {
       const controls = [
         ["accessibilityText", "plus", "Increase text", "magnifying-glass-plus"],
@@ -1143,7 +1206,7 @@
         });
     }
 
-    /** Keep Pickr, editable CSS colors, and form Reset in sync without discarding alpha. */
+    /** Keep Pickr, editable hex colors, and form Reset in sync without discarding alpha. */
     function initColorPickers() {
       for (const input of fields) {
         if (parameterRules[input.name]?.type !== "color") continue;
@@ -1194,21 +1257,45 @@
     // ==== HELP AND TOOL NAVIGATION ====
     // ==========
 
+
+
+    function syncCompressionOptions() {
+      $("#compression-options").prop("hidden", !$("#short-url").prop("checked"));
+      $("#compression-selection").prop("hidden", $('input[name="compression-scope"]:checked').val() !== "selected");
+    }
+
+    function loadCompressionOptions(search, selected, saveDefaults = false) {
+      const all = new URLSearchParams(search).has("data");
+      $("#short-url").prop("checked", !$("#short-url").prop("disabled") && (all || selected.size > 0));
+      $('input[name="compression-scope"]').each(function () {
+        this.checked = this.value === (all || !selected.size ? "all" : "selected");
+      });
+      $("[data-compress-field]").each(function () {
+        const rule = parameterRules[this.value];
+        this.checked = selected.size ? selected.has(this.value) : typeof rule.default === "object" && rule.default !== null;
+      });
+      if (saveDefaults) $('#short-url, input[name="compression-scope"], [data-compress-field]').each(function () {
+        this.defaultChecked = this.checked;
+      });
+      syncCompressionOptions();
+    }
+
     /**
      * Builds the Bootstrap help modal and synchronizes its sections with URL hashes.
      * @param {function(HTMLElement, Object<string, string>, Function): void} [initResourceHelp] Adds extra help panels and sections.
      */
     function initHelpDialog(initResourceHelp) {
-      const jqDialog = $(/* HTML */ `<div class="config-help modal fade" tabindex="-1" aria-labelledby="help-title"></div>`)
+      const jqDialog = $(/* HTML */ `<div id="config-help" class="config-help modal fade" tabindex="-1" aria-labelledby="help-title"></div>`)
         .html(/* HTML */ `
           <div class="modal-dialog modal-lg modal-dialog-scrollable">
             <div class="modal-content rounded-0">
-              <nav class="d-flex flex-wrap align-items-center gap-2 p-3 bg-dark text-white modal-header flex-shrink-0" aria-label="Help sections">
+              <nav class="d-flex flex-wrap align-items-center gap-2 p-3 bg-dark text-white modal-header flex-shrink-0" aria-label="Configurator sections">
                 <a href="https://byuwur.github.io/" target="_blank" rel="noopener" aria-label="[Mateus] byUwUr"><img src="https://byuwur.github.io/img/logo.png" alt="" /></a>
                 <button class="btn btn-sm btn-outline-light border-0" type="button" data-section="info"> <i class="fa-solid fa-circle-info me-1" aria-hidden="true"></i>Info </button>
                 <button class="btn btn-sm btn-outline-light border-0" type="button" data-section="obs"> <i class="fa-solid fa-desktop me-1" aria-hidden="true"></i>Use with OBS </button>
                 <button class="btn btn-sm btn-outline-light border-0" type="button" data-section="params"> <i class="fa-solid fa-file-lines me-1" aria-hidden="true"></i>Parameters </button>
-                <button type="button" class="help-close btn btn-sm btn-outline-light border-0 ms-auto fs-4" aria-label="Close help"> &times; </button>
+                <button class="btn btn-sm btn-outline-light border-0" type="button" data-section="advanced"> <i class="fa-solid fa-gear me-1" aria-hidden="true"></i>Advanced </button>
+                <button type="button" class="help-close btn btn-sm btn-outline-light border-0 ms-auto fs-4" aria-label="Close dialog"> &times; </button>
               </nav>
               <header class="p-4 bg-primary text-white flex-shrink-0"><h2 class="h2 m-0" id="help-title"></h2></header>
               <article class="modal-body p-4 overflow-y-auto">
@@ -1235,11 +1322,40 @@
                   </ol>
                   <p class="help-dimensions"></p>
                   <p> For a downloaded overlay, paste the complete <code>file:///</code> URL with <strong>Local file</strong> unchecked. Keep the folder at that location. </p>
-                  <p> To edit settings later, append <code>#configure</code> to the overlay URL. Reset restores the settings loaded when you opened the form. </p>
+
                 </section>
                 <section data-panel="params" hidden>
                   <p> Settings are stored in the generated URL. Use the documented values below; missing values use the tool's defaults. Use public display information only. </p>
+                  <p>Colors use 3, 4, 6, or 8 hex digits without <code>#</code>; malformed colors are left to the browser. In Advanced, compress all settings into <code>data</code> or keep selected field names with <code>dr:</code> values. Prefix literal text beginning with <code>dr:</code> or <code>raw:</code> with <code>raw:</code>.</p>
                   <div class="help-parameters"></div>
+                </section>
+                <section data-panel="advanced" hidden>
+                  <h3 class="h5">URL options</h3>
+                  <div class="form-check form-switch d-flex align-items-center gap-3 p-0 mb-3">
+                    <input id="short-url" class="form-check-input float-none m-0 flex-shrink-0" type="checkbox" role="switch" aria-describedby="short-url-help url-summary" />
+                    <label class="form-check-label fw-semibold" for="short-url">Shorter URL</label>
+                  </div>
+                  <p id="short-url-help" class="text-body-secondary">Compress all settings or choose individual fields. Turn this off to keep parameters readable. The readable link is kept whenever it is shorter.</p>
+                  <fieldset id="compression-options" class="border-0 p-0 m-0 mb-3" hidden>
+                    <legend class="fs-6 fw-semibold mb-2">What to compress</legend>
+                    <div class="d-flex flex-wrap gap-3 mb-3">
+                      <label class="d-flex align-items-center gap-2"><input class="form-check-input m-0" type="radio" name="compression-scope" value="all" />All settings</label>
+                      <label class="d-flex align-items-center gap-2"><input class="form-check-input m-0" type="radio" name="compression-scope" value="selected" />Selected fields</label>
+                    </div>
+                    <p class="small text-body-secondary">All settings uses one <code>data</code> parameter. Selected fields keep their own names, such as <code>accounts=dr:…</code>.</p>
+                    <div id="compression-selection" hidden>
+                      <p id="compression-fields-help" class="small text-body-secondary">Checked fields keep their parameter names and get a compressed value. Unchecked fields remain directly editable in the URL.</p>
+                      <label class="form-label w-100" for="compression-search">Find a field
+                        <input id="compression-search" type="search" class="form-control mt-1" placeholder="Search by label or parameter" />
+                      </label>
+                      <div id="compression-field-list" class="compression-fields border p-3" aria-describedby="compression-fields-help"></div>
+                      <p id="compression-empty" class="small mt-2 mb-0" hidden>No matching fields.</p>
+                    </div>
+                  </fieldset>
+                  <p id="url-summary" class="fw-semibold" role="status" aria-live="polite"></p>
+                  <p>All formats restore the same settings. Image and video URLs still point to their files; the media stays separate.</p>
+
+                  <p id="url-load-error" class="text-danger mt-3 mb-0" role="alert" hidden></p>
                 </section>
               </article>
             </div>
@@ -1247,11 +1363,63 @@
         `)
         .appendTo("body");
       const modal = bootstrap.Modal.getOrCreateInstance(jqDialog[0]);
+      const popover = null;
+      const groups = new Map();
+      Object.entries(parameterRules).forEach(([name, rule], index) => {
+        const section = rule.section || "Settings";
+        if (!groups.has(section)) {
+          const group = $(/* HTML */ `<fieldset class="border-0 p-0 m-0 mb-3"></fieldset>`).appendTo("#compression-field-list");
+          $(/* HTML */ `<legend class="fs-6 fw-semibold mb-2"></legend>`).text(section).appendTo(group);
+          groups.set(section, group);
+        }
+        const label = $(/* HTML */ `<label class="compression-field d-flex align-items-start gap-2 mb-2"></label>`).appendTo(groups.get(section));
+        $(/* HTML */ `<input class="form-check-input float-none m-0 mt-1 flex-shrink-0" type="checkbox" data-compress-field />`)
+          .attr({ id: `compress-field-${index}`, value: name })
+          .appendTo(label);
+        const caption = $(/* HTML */ `<span class="text-break"></span>`)
+          .text(rule.label || name)
+          .appendTo(label);
+        $(/* HTML */ `<code class="d-block small"></code>`).text(name).appendTo(caption);
+      });
+      jqDialog.on("change", '#short-url, input[name="compression-scope"], [data-compress-field]', () => {
+        syncCompressionOptions();
+        generateURL();
+      });
+      $("#compression-search").on("input", function () {
+        const term = this.value.trim().toLowerCase();
+        $(".compression-field").each(function () {
+          this.hidden = !this.textContent.toLowerCase().includes(term);
+        });
+        for (const group of groups.values())
+          group.prop(
+            "hidden",
+            group
+              .find(".compression-field")
+              .get()
+              .every((label) => label.hidden)
+          );
+        $("#compression-empty").prop(
+          "hidden",
+          [...groups.values()].some((group) => !group.prop("hidden"))
+        );
+      });
+      if (typeof CompressionStream !== "function" || typeof DecompressionStream !== "function") {
+        $("#short-url").prop({ checked: false, disabled: true });
+        $("#short-url-help").append(" Shorter URLs are not supported by this browser.");
+      }
+      loadCompressionOptions(location.search, compressedFields, true);
+      if (parameterError) $("#url-load-error").text(parameterError).prop("hidden", false);
+      $("#advanced-options").on("click", () => {
+        bootstrap.Tooltip.getInstance($("#advanced-options")[0])?.hide();
+        showSection("advanced");
+      });
+      if (typeof global.Popper?.createPopper === "function") byCommon.initBootstrap({ tooltipsOnly: true, root: jqHost[0] });
+      else $("#advanced-options").removeAttr("data-bs-toggle");
       const previewSize = $("#preview-viewport")[0].viewBox.baseVal;
       jqDialog.find(".help-dimensions").text(`The preview uses ${previewSize.width} x ${previewSize.height} pixels. Use those source dimensions as a starting point and adjust them to your layout.`);
       const jqParameters = jqDialog.find(".help-parameters");
       const acceptedTypes = {
-        color: "CSS color",
+        color: "Hex color: 3, 4, 6, or 8 digits; omit # in URLs",
         url: "URL or relative asset path",
         font: "Font family or CSS font stack",
         datetime: "Absolute ISO 8601 timestamp",
@@ -1263,9 +1431,9 @@
         const rule = parameterRules[name] || {};
         const [title, defaultValue, values, example] = [
           rule.label || name,
-          typeof rule.default === "object" ? JSON.stringify(rule.default) : (rule.default ?? "Empty"),
+          rule.type === "color" ? String(rule.default).replace(/^#/, "") : typeof rule.default === "object" ? JSON.stringify(rule.default) : (rule.default ?? "Empty"),
           rule.options?.join(", ") || (rule.min !== undefined ? `${rule.min} to ${rule.max}` : acceptedTypes[rule.type] || "Text"),
-          $(form.elements.namedItem(name)).val() ?? ""
+          rule.type === "color" ? String($(form.elements.namedItem(name)).val()).replace(/^#/, "") : ($(form.elements.namedItem(name)).val() ?? "")
         ];
         const jqDefinition = $(/* HTML */ `<section class="definition border mb-3 p-3 bg-body-tertiary"></section>`).appendTo(jqParameters);
         $(/* HTML */ `<h3 class="h5 mb-2 d-flex flex-wrap align-items-center gap-2"></h3>`)
@@ -1285,9 +1453,11 @@
         }
       }
 
-      const titles = { info: "Information", obs: "Use with OBS", params: "Parameters" };
+      const titles = { info: "Info", obs: "Use with OBS", params: "Parameters", advanced: "Advanced options" };
       initResourceHelp?.(jqDialog[0], titles, closeHelp);
       function showSection(section) {
+        popover?.hide();
+        if (!jqDialog.hasClass("show")) helpTrigger = document.activeElement;
         jqDialog.find("#help-title").text(titles[section]);
         jqDialog.find("[data-panel]").prop("hidden", true).filter(`[data-panel="${section}"]`).prop("hidden", false);
         jqDialog.find("[data-section]").removeClass("active").removeAttr("aria-current").filter(`[data-section="${section}"]`).addClass("active").attr("aria-current", "page");
@@ -1303,7 +1473,15 @@
       });
       jqDialog.find(".help-close").on("click", closeHelp);
       jqDialog
+        .on("show.bs.modal", () => {
+          helpOpen = true;
+        })
+        .on("hidden.bs.modal", () => {
+          helpOpen = false;
+          if (helpTrigger?.isConnected) helpTrigger.focus();
+        })
         .on("hide.bs.modal", () => {
+          popover?.hide();
           // Keep imported URLs in editor mode when help closes and the page is reloaded.
           if (titles[location.hash.slice(1)]) history.replaceState(null, "", `${location.pathname + location.search}${location.search.length > 1 ? "#configure" : ""}`);
         })
@@ -1320,7 +1498,7 @@
 
       const jqLinks = $(/* HTML */ `<p class="small m-0"></p>`).appendTo(".footer-links");
       $(/* HTML */ `<a></a>`, { href: homeURL, text: "Home", class: "link-body-emphasis" }).appendTo(jqLinks);
-      const sections = { params: "Parameter reference", obs: "Use with OBS", info: "About" };
+      const sections = { params: "Parameter reference", obs: "Use with OBS", advanced: "Advanced", info: "About" };
       Object.entries(titles).forEach(([section, title]) => {
         if (!Object.hasOwn(sections, section)) sections[section] = title;
       });
@@ -1420,6 +1598,8 @@
       return accepted;
     }
 
+
+
     // Resource scripts publish their definitions before this deferred editor runs.
     try {
       $(fields).each(function () {
@@ -1459,13 +1639,12 @@
       if (resource.presets) initAppearancePresets();
       initTimestampFields(Object.keys(resource.fields).filter((name) => resource.fields[name].type === "datetime"));
       initTheme();
+      initAccessibility();
       initTools();
       initFontPickers();
       initHelpDialog(initResourceHelp);
       initColorPickers();
-      jqForm
-        .find("select")
-        .each((_, select) => initSelect2(select));
+      jqForm.find("select").each((_, select) => initSelect2(select));
       jqForm
         .on("input change", generateURL)
         .on("submit", (event) => {
@@ -1476,18 +1655,23 @@
         .on("reset", () =>
           setTimeout(() => {
             jqForm.find("select").trigger("change.select2");
-            generateURL();
+            $('#short-url, input[name="compression-scope"], [data-compress-field]').each(function () {
+              this.checked = this.defaultChecked;
+            });
+            if ($("#short-url").prop("disabled")) $("#short-url").prop("checked", false);
+            $("#compression-search").val("").trigger("input");
+            $("#short-url").trigger("change");
           }, 0)
         );
-      $("#copy-url, #url-gen-copy, #url-gen-url")
+      $("#copy-url")
         .on("click", copyURL)
-        .on("mouseleave focusout", () => $("#copy-url .copy-label, #url-gen-copy .copy-label").text("Copy URL"));
+        .on("mouseleave focusout", () => $("#copy-url .copy-label").text("Copy URL"));
       $(window)
-        .on("pagehide", () => clearTimeout(pendingPreview))
-        .on("pageshow", () => {
-          const url = $("#overlay-url, #url-gen-url").val();
-          if (url) updateOverlayPreview(url);
-        });
+        .on("pagehide", () => {
+          urlGeneration++;
+          clearTimeout(pendingPreview);
+        })
+        .on("pageshow", generateURL);
       generateURL();
     } catch (error) {
       console.error("Error loading configurator:", error);

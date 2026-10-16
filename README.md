@@ -33,6 +33,15 @@ Fonts search 350 Google families, system fonts, and custom installed families or
 
 Media fields reference public HTTP(S) URLs or paths relative to the tool's HTML. Local file URLs require downloaded use. No uploads or Base64 `data:` media URLs. Keep private information out of shared URLs.
 
+### Shorter URLs
+
+Open **Advanced** from the toolbar gear or footer. Compression is raw DEFLATE plus unpadded Base64url; the panel shows length/savings and keeps the readable URL when shorter.
+
+| Mode            | URL representation                                                                                                  |
+| --------------- | ------------------------------------------------------------------------------------------------------------------- |
+| All settings    | `?data=<compressed ordinary query string>`; readable parameters alongside it override packed values.                |
+| Selected fields | `?accounts=dr:<token>&mode=left`; checked fields compress independently and keep their names. Others stay editable. |
+
 Plain values need no marker. Escape literal text starting with `dr:` or `raw:` as `raw:<original text>`; generated links do this automatically. `#configure` restores compression choices. Invalid compressed fields retain defaults without discarding valid neighbors; Advanced shows a warning.
 
 Whole-query decoding is capped at one MiB. Individual values use the field's UTF-8 text limit, allowing up to four bytes per character, capped at one MiB. Media remains referenced by URL.
