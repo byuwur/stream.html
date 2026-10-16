@@ -23,7 +23,7 @@ Use **1920 × 1080** for Main scene. Size Controller and Popup for your layout; 
 ## Settings stay in the URL
 
 - Bare folder or `index.html` URLs open the editor. Query settings without a hash render the overlay.
-- Append `#configure` to edit an existing URL. Help links open the corresponding panel.
+- Press **F2** to switch between the configurator and its current overlay, or append `#configure` to edit a link. In OBS, use **Interact** first. F2 is ignored in preview frames, with modifiers/repeats, and while typing in overlay controls.
 - **Reset** restores the settings, list order, and compression choices from when the page opened, including after direct URL edits.
 - Form edits and same-tool URL edits apply after a 250 ms pause via SPA.js's shared `debounce()`, updating the form and preview in place. **Enter** or leaving the changed URL field applies immediately; links to another tool navigate then.
 - Editing keeps the browser address unchanged. **Copy URL** shares the current overlay settings. Bare tool URLs resume the saved configuration; explicit query settings take priority, including on reload.

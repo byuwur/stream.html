@@ -240,6 +240,13 @@
       if (overlay) {
         document.documentElement.setAttribute("data-overlay", "");
         document.body.append(document.getElementById("overlay-markup").content.cloneNode(true));
+        global.addEventListener("keydown", (event) => {
+          if (global !== global.top) return;
+          if (event.key !== "F2" || event.repeat || event.defaultPrevented || event.ctrlKey || event.altKey || event.metaKey || event.shiftKey) return;
+          if (event.target?.isContentEditable || event.target?.matches?.("input, textarea, select")) return;
+          event.preventDefault();
+          location.hash = "configure";
+        });
       }
       global.byStreamResource = { ...resource, settings, parameterRules: resource.fields, ...integrations };
       return settings;
@@ -1459,7 +1466,7 @@
                   </ol>
                   <p class="help-dimensions"></p>
                   <p> For a downloaded overlay, paste the complete <code>file:///</code> URL with <strong>Local file</strong> unchecked. Keep the folder at that location. </p>
-
+                  <p> To edit settings later, focus the overlay and press <kbd>F2</kbd>, or append <code>#configure</code> to its URL. In OBS, use <strong>Interact</strong> to focus it first. Reset restores the settings loaded when you opened the form. </p>
                 </section>
                 <section data-panel="params" hidden>
                   <p>Settings are stored in the generated URL. Use the documented values below; missing values use the tool's defaults. Use public display information only.</p>
@@ -1491,7 +1498,7 @@
                   </fieldset>
                   <p id="url-summary" class="fw-semibold" role="status" aria-live="polite"></p>
                   <p>All formats restore the same settings. Image and video URLs still point to their files; the media stays separate.</p>
-
+                  <p class="mb-0">To edit a saved overlay, focus it and press <kbd>F2</kbd>, or append <code>#configure</code> to its URL. Readable parameters added to a shorter link override its stored settings.</p>
                   <p id="url-load-error" class="text-danger mt-3 mb-0" role="alert" hidden></p>
                 </section>
               </article>
@@ -1608,6 +1615,16 @@
       }
       jqDialog.on("click", "[data-section]", function () {
         showSection($(this).data("section"));
+      });
+      $(document).on("keydown", async (event) => {
+        if (event.key !== "F2" || event.originalEvent?.repeat || event.originalEvent?.isComposing || event.isDefaultPrevented() || event.ctrlKey || event.metaKey || event.altKey || event.shiftKey || global !== global.top) return;
+        event.preventDefault();
+        const url = await currentOverlayURL();
+        if (!url) return;
+        if (!url.search) {
+          url.search = sameResourceURL(url) && savedPreferences.query ? savedPreferences.query : settingsURL(Object.fromEntries(Object.entries(parameterRules).map(([name, rule]) => [name, rule.default]))).search;
+        }
+        location.assign(url.href);
       });
       jqDialog.find(".help-close").on("click", closeHelp);
       jqDialog
