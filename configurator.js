@@ -10,6 +10,7 @@
   global.byConfigurator = global.byConfigurator || {};
   const byConfigurator = global.byConfigurator;
   if (byConfigurator.init) return;
+  byConfigurator.VERSION = "6.2";
   const root = new URL(".", document.currentScript.src);
   let resourceReady = Promise.resolve();
   let parameterError = "";
@@ -764,7 +765,11 @@
             </div>
           </div>
           <!-- Help navigation. -->
-          <footer class="config-footer border-top p-2 text-body-secondary flex-shrink-0">
+          <footer class="config-footer position-relative border-top p-2 text-body-secondary flex-shrink-0">
+            <small class="config-info"
+              ><a href="https://github.com/byuwur/stream.html" target="_blank" rel="noopener noreferrer">stream.html</a> · configurator v${byConfigurator.VERSION} · resource v${resource.version} ·
+              <a href="https://byuwur.co" target="_blank" rel="noopener noreferrer">@byUwUr</a></small
+            >
             <nav class="footer-links px-5 text-center" aria-label="Page navigation"></nav>
           </footer>
         </main>

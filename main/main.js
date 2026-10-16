@@ -11,6 +11,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   /** Defaults, URL constraints, and the field metadata consumed by the optional editor. */
   const resource = {
+    version: "1.0",
     title: "Main scene",
     description: "Set up your starting, BRB, ending, or intermission scene.",
     preview: [1920,1080],
