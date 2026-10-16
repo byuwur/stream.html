@@ -1226,9 +1226,10 @@
           if (!field) continue;
           $(field).val(value).trigger("change");
         }
-        generateURL();
       });
-      jqForm.on("input", () => jqSelect.val("").trigger("change.select2"));
+      jqForm.on("input", (event) => {
+        if (event.target !== jqSelect[0]) jqSelect.val("").trigger("change.select2");
+      });
     }
 
     /** Native pickers use the editor computer's zone and serialize absolute UTC timestamps. */
