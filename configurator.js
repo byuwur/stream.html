@@ -1773,13 +1773,10 @@
 
       const jqLinks = $(/* HTML */ `<p class="small m-0"></p>`).appendTo(".footer-links");
       $(/* HTML */ `<a></a>`, { href: homeURL, text: "Home", class: "link-body-emphasis" }).appendTo(jqLinks);
-      const sections = { params: "Parameter reference", obs: "Use with OBS", advanced: "Advanced", info: "About" };
-      Object.entries(titles).forEach(([section, title]) => {
-        if (!Object.hasOwn(sections, section)) sections[section] = title;
-      });
-      Object.entries(sections).forEach(([section, title]) => {
+      jqDialog.find(".modal-header [data-section]").each((_, tab) => {
+        const section = tab.dataset.section;
         jqLinks.append(" \u00b7 ");
-        $(/* HTML */ `<a></a>`, { href: `#${section}`, text: title, class: "link-body-emphasis" }).appendTo(jqLinks);
+        $(/* HTML */ `<a></a>`, { href: `#${section}`, text: section === "params" ? "Parameter reference" : tab.textContent.trim(), class: "link-body-emphasis" }).appendTo(jqLinks);
       });
       $(document).on("click", 'a[href^="#"]', function (event) {
         const section = $(this).attr("href").slice(1);
