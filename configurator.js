@@ -708,10 +708,55 @@
               </footer>
             </section>
           </div>
-          <div id="accessibility-preset"></div>
+          <div id="bywr-accessibility" class="uncolor-links">
+            <a href="javascript:byCommon.accessibilityToggle();" role="button" data-bs-toggle="tooltip" title="Accessibility tools" aria-label="Accessibility tools" aria-controls="bywr-accessibility-buttons">
+              <i class="fa-solid fa-universal-access" aria-hidden="true"></i>
+            </a>
+            <div id="bywr-accessibility-buttons" class="hide">
+              <a href="javascript:byCommon.accessibilityText('plus');" role="button" data-bs-toggle="tooltip" title="Increase text" aria-label="Increase text">
+                <i class="fa-solid fa-magnifying-glass-plus" aria-hidden="true"></i>
+              </a>
+              <a href="javascript:byCommon.accessibilityText();" role="button" data-bs-toggle="tooltip" title="Reset text" aria-label="Reset text">
+                <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+              </a>
+              <a href="javascript:byCommon.accessibilityText('minus');" role="button" data-bs-toggle="tooltip" title="Decrease text" aria-label="Decrease text">
+                <i class="fa-solid fa-magnifying-glass-minus" aria-hidden="true"></i>
+              </a>
+              <a href="javascript:byCommon.accessibilityMotion();" role="button" data-bs-toggle="tooltip" title="Reduce motion" aria-label="Reduce motion">
+                <i class="fa-solid fa-wind" aria-hidden="true"></i>
+              </a>
+              <a href="javascript:byCommon.accessibilityDyslexia();" role="button" data-bs-toggle="tooltip" title="Dyslexia font" aria-label="Dyslexia font">
+                <i class="fa-solid fa-font" aria-hidden="true"></i>
+              </a>
+              <a href="javascript:byCommon.accessibilityWordSpacing();" role="button" data-bs-toggle="tooltip" title="Word spacing" aria-label="Word spacing">
+                <i class="fa-solid fa-text-width" aria-hidden="true"></i>
+              </a>
+              <a href="javascript:byCommon.accessibilityHighlightLinks();" role="button" data-bs-toggle="tooltip" title="Highlight links" aria-label="Highlight links">
+                <i class="fa-solid fa-link" aria-hidden="true"></i>
+              </a>
+              <a href="javascript:byCommon.accessibilityHighContrast();" role="button" data-bs-toggle="tooltip" title="High contrast" aria-label="High contrast">
+                <i class="fa-solid fa-circle-half-stroke" aria-hidden="true"></i>
+              </a>
+              <a href="javascript:byCommon.accessibilityHighContrast('invertchropia');" role="button" data-bs-toggle="tooltip" title="Invert colors" aria-label="Invert colors">
+                <i class="fa-solid fa-droplet" aria-hidden="true"></i>
+              </a>
+              <a href="javascript:byCommon.accessibilityHighContrast('monochropia');" role="button" data-bs-toggle="tooltip" title="Grayscale" aria-label="Grayscale">
+                <i class="fa-solid fa-droplet-slash" aria-hidden="true"></i>
+              </a>
+              <a href="javascript:byCommon.accessibilityHighContrast('protanopia');" role="button" data-bs-toggle="tooltip" title="Protanopia filter" aria-label="Protanopia filter">
+                <i class="fa-solid fa-eye" aria-hidden="true"></i>
+              </a>
+              <a href="javascript:byCommon.accessibilityHighContrast('deuteranopia');" role="button" data-bs-toggle="tooltip" title="Deuteranopia filter" aria-label="Deuteranopia filter">
+                <i class="fa-solid fa-eye-slash" aria-hidden="true"></i>
+              </a>
+              <a href="javascript:byCommon.accessibilityHighContrast('tritanopia');" role="button" data-bs-toggle="tooltip" title="Tritanopia filter" aria-label="Tritanopia filter">
+                <i class="fa-solid fa-eye-low-vision" aria-hidden="true"></i>
+              </a>
+            </div>
+          </div>
           <!-- Help navigation. -->
           <footer class="config-footer border-top p-2 text-body-secondary flex-shrink-0">
-            <nav class="footer-links text-center" aria-label="Page navigation"></nav>
+            <nav class="footer-links px-5 text-center" aria-label="Page navigation"></nav>
           </footer>
         </main>
       `);
@@ -1261,57 +1306,6 @@
             localStorage.setItem("stream.html.theme", selected);
           } catch {
             // The toggle still works without persistence.
-          }
-        });
-    }
-
-    function initAccessibility() {
-      const controls = [
-        ["accessibilityText", "plus", "Increase text", "magnifying-glass-plus"],
-        ["accessibilityText", "", "Reset text", "magnifying-glass"],
-        ["accessibilityText", "minus", "Decrease text", "magnifying-glass-minus"],
-        ["accessibilityMotion", "", "Reduce motion", "wind"],
-        ["accessibilityDyslexia", "", "Dyslexia font", "font"],
-        ["accessibilityWordSpacing", "", "Word spacing", "text-width"],
-        ["accessibilityHighlightLinks", "", "Highlight links", "link"],
-        ["accessibilityHighContrast", "high-contrast", "High contrast", "circle-half-stroke"],
-        ["accessibilityHighContrast", "invertchropia", "Invert colors", "droplet"],
-        ["accessibilityHighContrast", "monochropia", "Grayscale", "droplet-slash"],
-        ["accessibilityHighContrast", "protanopia", "Protanopia filter", "eye"],
-        ["accessibilityHighContrast", "deuteranopia", "Deuteranopia filter", "eye"],
-        ["accessibilityHighContrast", "tritanopia", "Tritanopia filter", "eye-low-vision"]
-      ];
-      $("#accessibility-preset")
-        .html(/* HTML */ `
-          <aside id="bywr-accessibility" aria-label="Accessibility tools">
-            <a href="#" role="button" data-accessibility="accessibilityToggle" aria-controls="bywr-accessibility-buttons" aria-expanded="false" aria-label="Accessibility tools" title="Accessibility tools"
-              ><i class="fa-solid fa-universal-access" aria-hidden="true"></i
-            ></a>
-            <div id="bywr-accessibility-buttons" class="hide" inert>
-              ${controls
-                .map(
-                  ([method, value, title, icon]) =>
-                    /* HTML */ `<a href="#" role="button" data-accessibility="${method}" data-value="${value}" aria-label="${title}" title="${title}"><i class="fa-solid fa-${icon}" aria-hidden="true"></i></a>`
-                )
-                .join("")}
-            </div>
-          </aside>
-        `)
-        .on("click", "[data-accessibility]", function (event) {
-          event.preventDefault();
-          const jqControl = $(this);
-          const method = jqControl.data("accessibility");
-          byCommon[method](jqControl.data("value"));
-          if (method === "accessibilityToggle") {
-            const hidden = $("#bywr-accessibility-buttons").hasClass("hide");
-            jqControl.attr("aria-expanded", String(!hidden));
-            $("#bywr-accessibility-buttons").prop("inert", hidden);
-          }
-        })
-        .on("keydown", "[data-accessibility]", function (event) {
-          if (event.key === " ") {
-            event.preventDefault();
-            $(this).trigger("click");
           }
         });
     }
@@ -1918,7 +1912,6 @@
       if (resource.presets) initAppearancePresets();
       initTimestampFields(Object.keys(resource.fields).filter((name) => resource.fields[name].type === "datetime"));
       initTheme();
-      initAccessibility();
       initTools();
       initFontPickers();
       initHelpDialog(initResourceHelp);

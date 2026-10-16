@@ -275,19 +275,11 @@ body {
   border-color: #777;
   border-style: dashed;
 }
-/* SPA.php accessibility controls stay above the footer. */
+/* Keep the shared controls clear of footer content and their menu within the viewport. */
 .bywr-configurator #bywr-accessibility {
   top: auto;
-  bottom: 1rem;
+  bottom: 0.5rem;
   flex-direction: column-reverse;
-}
-.bywr-configurator #bywr-accessibility-buttons {
-  max-height: 65vh;
-  overflow-y: auto;
-  flex-wrap: nowrap;
-}
-.bywr-configurator #bywr-accessibility a {
-  background-color: var(--primary-color);
 }
 @media (max-width: 48rem) {
   .bywr-configurator .settings-panel,
