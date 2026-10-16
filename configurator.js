@@ -559,7 +559,6 @@
     // Servers resolve directory URLs to the landing page; downloaded files need its filename.
     const homeURL = new URL(location.protocol === "file:" ? "index.html" : ".", byConfigurator.catalog.root).href;
     const { settings, fields: parameterRules } = resource;
-    let pendingPreview;
     let urlGeneration = 0;
     let urlEdited = false;
 
@@ -760,11 +759,10 @@
      * @param {boolean} [keepURLDraft=false] Preserve the URL text during automatic application.
      * @returns {Promise<boolean>} Whether the latest URL was generated from valid fields.
      */
-    async function generateURL() {
+    async function generateURL(keepURLDraft = false) {
       const generation = ++urlGeneration;
-      urlEdited = false;
+      urlEdited = keepURLDraft === true;
       $("#overlay-url")[0].setCustomValidity("");
-      clearTimeout(pendingPreview);
       const valid = fields.map(validField).every(Boolean);
       if (!valid) {
         $("#overlay-url").val("");
@@ -817,7 +815,7 @@
         }
       }
       if (generation !== urlGeneration) return false;
-      $("#overlay-url").val(url.href);
+      if (!urlEdited) $("#overlay-url").val(url.href);
       $("#url-summary").text(summary);
       $("#preview-url").attr("href", url.href);
       $("#copy-url .copy-label").text("Copy URL");
@@ -829,10 +827,9 @@
 
     // Editing is debounced before URL generation; keep the last valid preview on invalid input.
     function updateOverlayPreview(url) {
-      clearTimeout(pendingPreview);
       $("#preview-status").text(url ? "Changes update automatically." : "Fix the highlighted parameter to update the preview.");
       if (url && $("#overlay-preview").attr("src") !== url) {
-        pendingPreview = setTimeout(() => $("#overlay-preview").attr("src", url), 300);
+        $("#overlay-preview").attr("src", url);
       }
     }
 
@@ -1717,8 +1714,20 @@
       initHelpDialog(initResourceHelp);
       initColorPickers();
       jqForm.find("select").each((_, select) => initSelect2(select));
+      const generateURLDebounced = global.debounce((generation) => {
+        if (generation === urlGeneration) generateURL();
+      });
+      const applyURLDebounced = global.debounce((generation) => {
+        if (generation === urlGeneration) applyEditedURL(true);
+      });
       jqForm
-        .on("input change", generateURL)
+        .on("input change", (event) => {
+          urlEdited = false;
+          const generation = ++urlGeneration;
+          if (!event.originalEvent?.isComposing) generateURLDebounced(generation);
+        })
+        .on("compositionstart", () => urlGeneration++)
+        .on("compositionend", () => generateURLDebounced(++urlGeneration))
         .on("submit", (event) => {
           event.preventDefault();
           generateURL();
@@ -1739,17 +1748,19 @@
         .on("click", copyURL)
         .on("mouseleave focusout", () => $("#copy-url .copy-label").text("Copy URL"));
       $("#overlay-url")
-        .on("input", function () {
+        .on("input", function (event) {
           urlEdited = true;
           urlGeneration++;
-          clearTimeout(pendingPreview);
           const url = readEditorURL();
           if (url) url.hash = "";
           $("#preview-url").attr("href", url?.href || null);
           $("#copy-url").prop("disabled", !url);
-          $("#copy-status").text("Press Enter or leave the field to apply URL changes.");
+          $("#copy-status").text(url ? "URL changes apply after typing pauses." : "Enter a complete overlay URL.");
+          if (!event.originalEvent?.isComposing) applyURLDebounced(urlGeneration);
         })
-        .on("change", applyEditedURL)
+        .on("compositionstart", () => urlGeneration++)
+        .on("compositionend", () => applyURLDebounced(urlGeneration))
+        .on("change", () => applyEditedURL())
         .on("keydown", (event) => {
           if (event.key !== "Enter" || event.originalEvent?.isComposing) return;
           event.preventDefault();
@@ -1758,7 +1769,6 @@
       $(window)
         .on("pagehide", () => {
           urlGeneration++;
-          clearTimeout(pendingPreview);
         })
         .on("pageshow", generateURL);
       generateURL();

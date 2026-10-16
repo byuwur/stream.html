@@ -25,7 +25,7 @@ Use **1920 × 1080** for Main scene. Size Controller and Popup for your layout; 
 - Bare folder or `index.html` URLs open the editor. Query settings without a hash render the overlay.
 - Append `#configure` to edit an existing URL. Help links open the corresponding panel.
 - **Reset** restores the settings, list order, and compression choices from when the page opened, including after direct URL edits.
-- Edit the generated URL and press **Enter** or leave the field to update the form and preview in place. Links to another tool navigate when applied.
+- Form edits and same-tool URL edits apply after a 250 ms pause via SPA.js's shared `debounce()`, updating the form and preview in place. **Enter** or leaving the changed URL field applies immediately; links to another tool navigate then.
 - Editing keeps the browser address unchanged. **Copy URL** shares the current overlay settings.
 - Invalid form values stop URL generation and keep the last valid preview. Invalid or unknown URL parameters keep the defaults; empty text clears a field.
 
