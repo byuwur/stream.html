@@ -1437,29 +1437,30 @@
             <div class="modal-content rounded-0">
               <nav class="d-flex flex-wrap align-items-center gap-2 p-3 bg-dark text-white modal-header flex-shrink-0" aria-label="Configurator sections">
                 <a href="https://byuwur.github.io/" target="_blank" rel="noopener" aria-label="[Mateus] byUwUr"><img src="https://byuwur.github.io/img/logo.png" alt="" /></a>
-                <button class="btn btn-sm btn-outline-light border-0" type="button" data-section="info" aria-keyshortcuts="F1"> <i class="fa-solid fa-circle-info me-1" aria-hidden="true"></i>Info </button>
-                <button class="btn btn-sm btn-outline-light border-0" type="button" data-section="obs"> <i class="fa-solid fa-desktop me-1" aria-hidden="true"></i>Use with OBS </button>
-                <button class="btn btn-sm btn-outline-light border-0" type="button" data-section="params" aria-keyshortcuts="Alt+Shift+P"> <i class="fa-solid fa-file-lines me-1" aria-hidden="true"></i>Parameters </button>
-                <button class="btn btn-sm btn-outline-light border-0" type="button" data-section="advanced" aria-keyshortcuts="Alt+Shift+A"> <i class="fa-solid fa-gear me-1" aria-hidden="true"></i>Advanced </button>
-                <button type="button" class="help-close btn btn-sm btn-outline-light border-0 ms-auto fs-4" aria-label="Close dialog"> &times; </button>
+                <button class="btn btn-sm btn-outline-light border-0" type="button" data-section="info" aria-keyshortcuts="F1"><i class="fa-solid fa-circle-info me-1" aria-hidden="true"></i>About</button>
+                <button class="btn btn-sm btn-outline-light border-0" type="button" data-section="obs"><i class="fa-solid fa-desktop me-1" aria-hidden="true"></i>Use with OBS</button>
+                <button class="btn btn-sm btn-outline-light border-0" type="button" data-section="params" aria-keyshortcuts="Alt+Shift+P"><i class="fa-solid fa-file-lines me-1" aria-hidden="true"></i>Parameters</button>
+                <button class="btn btn-sm btn-outline-light border-0" type="button" data-section="advanced" aria-keyshortcuts="Alt+Shift+A"><i class="fa-solid fa-gear me-1" aria-hidden="true"></i>Advanced</button>
+                <button type="button" class="help-close btn btn-sm btn-outline-light border-0 ms-auto fs-4" aria-label="Close dialog">&times;</button>
               </nav>
-              <header class="p-4 bg-primary text-white flex-shrink-0"><h2 class="h2 m-0" id="help-title"></h2></header>
-              <article class="modal-body p-4 overflow-y-auto">
+              <header class="help-heading px-3 px-md-4 py-3 text-white flex-shrink-0"><h2 class="h2 m-0" id="help-title"></h2></header>
+              <article class="modal-body p-3 p-md-4 overflow-y-auto">
                 <section data-panel="info">
                   <p>
                     Made by
-                    <a href="https://byuwur.github.io/" target="_blank" rel="noopener" class="link-body-emphasis">[Mateus] byUwUr</a>. Free. Forever.
+                    <a href="https://byuwur.github.io/" target="_blank" rel="noopener"><img class="inline-logo" src="https://byuwur.github.io/img/favicon.png" alt="" />[Mateus] byUwUr</a>. Free. Forever.
                   </p>
                   <p>
-                    You can <a href="https://streamlabs.com/byuwur" target="_blank" rel="noopener" class="link-body-emphasis">tip</a>,
-                    <a href="https://twitch.tv/byuwur" target="_blank" rel="noopener" class="link-body-emphasis">subscribe</a> or <a href="https://paypal.me/byuwur" target="_blank" rel="noopener" class="link-body-emphasis">donate</a>.
+                    You can <a href="https://streamlabs.com/byuwur" target="_blank" rel="noopener"><i class="fa-solid fa-hand-holding-heart" aria-hidden="true"></i>tip</a>,
+                    <a href="https://twitch.tv/byuwur" target="_blank" rel="noopener"><i class="fa-brands fa-twitch" aria-hidden="true"></i>subscribe</a> or
+                    <a href="https://paypal.me/byuwur" target="_blank" rel="noopener"><i class="fa-brands fa-paypal" aria-hidden="true"></i>donate</a>.
                   </p>
                   <p>
                     Download the
-                    <a href="https://github.com/byuwur/stream.html" target="_blank" rel="noopener" class="link-body-emphasis">source code</a>
+                    <a href="https://github.com/byuwur/stream.html" target="_blank" rel="noopener"><i class="fa-brands fa-github" aria-hidden="true"></i>source code</a>
                     to use the overlays locally. Keep each tool's assets together. Libraries and configurator styling load from jsDelivr and require internet access.
                   </p>
-                <section class="mt-4 pt-3 border-top border-secondary-subtle" aria-labelledby="keyboard-shortcuts-title">
+                  <section class="mt-4 pt-3 border-top border-secondary-subtle" aria-labelledby="keyboard-shortcuts-title">
                     <h3 id="keyboard-shortcuts-title" class="h5 mb-3"><i class="fa-solid fa-keyboard me-2" aria-hidden="true"></i>Keyboard shortcuts</h3>
                     <div class="table-responsive">
                       <table class="table table-sm align-middle mb-2" aria-labelledby="keyboard-shortcuts-title">
@@ -1523,8 +1524,8 @@
                     <li>In OBS, add a <strong>Browser</strong> source and paste the link into its <strong>URL</strong> field.</li>
                   </ol>
                   <p class="help-dimensions"></p>
-                  <p> For a downloaded overlay, paste the complete <code>file:///</code> URL with <strong>Local file</strong> unchecked. Keep the folder at that location. </p>
-                  <p> To edit settings later, focus the overlay and press <kbd>F2</kbd>, or append <code>#configure</code> to its URL. In OBS, use <strong>Interact</strong> to focus it first. Reset restores the settings loaded when you opened the form. </p>
+                  <p>For a downloaded overlay, paste the complete <code>file:///</code> URL with <strong>Local file</strong> unchecked. Keep the folder at that location.</p>
+                  <p>To edit settings later, focus the overlay and press <kbd>F2</kbd>, or append <code>#configure</code> to its URL.</p>
                 </section>
                 <section data-panel="params" hidden>
                   <p>Settings are stored in the generated URL. Use the documented values below; missing values use the tool's defaults. Use public display information only.</p>
@@ -1532,31 +1533,44 @@
                   <div class="help-parameters"></div>
                 </section>
                 <section data-panel="advanced" hidden>
-                  <h3 class="h5">URL options</h3>
-                  <div class="form-check form-switch d-flex align-items-center gap-3 p-0 mb-3">
+                  <h3 class="h5 mb-3">URL options</h3>
+                  <div class="form-check form-switch d-flex align-items-center gap-3 p-0 mb-2">
                     <input id="short-url" class="form-check-input float-none m-0 flex-shrink-0" type="checkbox" role="switch" aria-describedby="short-url-help url-summary" />
                     <label class="form-check-label fw-semibold" for="short-url">Shorter URL</label>
                   </div>
-                  <p id="short-url-help" class="text-body-secondary">Compress all settings or choose individual fields. Turn this off to keep parameters readable. The readable link is kept whenever it is shorter.</p>
-                  <fieldset id="compression-options" class="border-0 p-0 m-0 mb-3" hidden>
-                    <legend class="fs-6 fw-semibold mb-2">What to compress</legend>
+                  <fieldset id="compression-options" class="border-0 p-0 m-0 mb-4" hidden>
+                    <legend class="fs-6 fw-semibold mb-2">
+                      What to compress
+                      <button
+                        id="compression-help"
+                        class="btn btn-sm border-0 text-body-secondary p-1 ms-1"
+                        type="button"
+                        data-bs-toggle="popover"
+                        data-bs-placement="bottom"
+                        data-bs-title="Compression options"
+                        data-bs-content="All settings uses one data parameter. Selected fields keep their parameter names and get a dr: compressed value. Unchecked fields remain directly editable in the URL. Readable parameters added to an all-settings link override its stored settings."
+                        aria-label="How compression options work">
+                        <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+                      </button>
+                    </legend>
                     <div class="d-flex flex-wrap gap-3 mb-3">
                       <label class="d-flex align-items-center gap-2"><input class="form-check-input m-0" type="radio" name="compression-scope" value="all" />All settings</label>
                       <label class="d-flex align-items-center gap-2"><input class="form-check-input m-0" type="radio" name="compression-scope" value="selected" />Selected fields</label>
                     </div>
-                    <p class="small text-body-secondary">All settings uses one <code>data</code> parameter. Selected fields keep their own names, such as <code>accounts=dr:…</code>.</p>
                     <div id="compression-selection" hidden>
-                      <p id="compression-fields-help" class="small text-body-secondary">Checked fields keep their parameter names and get a compressed value. Unchecked fields remain directly editable in the URL.</p>
-                      <label class="form-label w-100" for="compression-search">Find a field
+                      <label class="form-label w-100" for="compression-search"
+                        >Find a field
                         <input id="compression-search" type="search" class="form-control mt-1" placeholder="Search by label or parameter" />
                       </label>
-                      <div id="compression-field-list" class="compression-fields border p-3" aria-describedby="compression-fields-help"></div>
+                      <div id="compression-field-list" class="compression-fields border p-3"></div>
                       <p id="compression-empty" class="small mt-2 mb-0" hidden>No matching fields.</p>
                     </div>
                   </fieldset>
-                  <p id="url-summary" class="fw-semibold" role="status" aria-live="polite"></p>
-                  <p>All formats restore the same settings. Image and video URLs still point to their files; the media stays separate.</p>
-                  <p class="mb-0">To edit a saved overlay, focus it and press <kbd>F2</kbd>, or append <code>#configure</code> to its URL. Readable parameters added to a shorter link override its stored settings.</p>
+                  <p id="url-summary" class="fw-semibold mb-3" role="status" aria-live="polite"></p>
+                  <aside class="p-3 bg-body-tertiary border-start border-3 border-primary" aria-label="Edit a saved overlay">
+                    <p class="fw-semibold mb-1"><i class="fa-solid fa-keyboard me-2" aria-hidden="true"></i>Edit a saved overlay</p>
+                    <p class="mb-0">Focus the overlay and press <kbd>F2</kbd>, or append <code>#configure</code> to its URL.</p>
+                  </aside>
                   <p id="url-load-error" class="text-danger mt-3 mb-0" role="alert" hidden></p>
                 </section>
               </article>
@@ -1565,7 +1579,16 @@
         `)
         .appendTo("body");
       const modal = bootstrap.Modal.getOrCreateInstance(jqDialog[0]);
-      const popover = null;
+      const helpButton = $("#compression-help");
+      const popover = typeof global.Popper?.createPopper === "function" ? bootstrap.Popover.getOrCreateInstance(helpButton[0], { trigger: "focus", container: jqDialog[0], animation: false }) : null;
+      if (!popover) helpButton.removeAttr("data-bs-toggle").attr("title", helpButton.attr("data-bs-content"));
+      helpButton.on("keydown", (event) => {
+        if (event.key !== "Escape" || !popover || !helpButton.attr("aria-describedby")) return;
+        event.stopPropagation();
+        popover.hide();
+      });
+      let helpTrigger;
+      let helpOpen = false;
       const groups = new Map();
       Object.entries(parameterRules).forEach(([name, rule], index) => {
         const section = rule.section || "Settings";

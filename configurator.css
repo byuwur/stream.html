@@ -17,6 +17,7 @@ body {
   --bs-border-radius-lg: 0;
   --preview-grid-a: #ddd;
   --preview-grid-b: #eee;
+  --about-link-color: #5e5b78;
 }
 .bywr-configurator[data-bs-theme="dark"] {
   --bs-body-bg: #111;
@@ -28,6 +29,7 @@ body {
   --bs-border-color: #555;
   --preview-grid-a: #202020;
   --preview-grid-b: #292929;
+  --about-link-color: #aaa6bf;
 }
 .bywr-configurator body {
   font-family: Archivo, system-ui, sans-serif;
@@ -75,6 +77,24 @@ body {
   width: 2.25rem;
   height: 2.25rem;
   object-fit: contain;
+}
+.bywr-configurator .config-help .help-heading {
+  background: #3b1010;
+}
+/* Popper owns the popover position; shared transitions would animate it from the corner. */
+.bywr-configurator .config-help .popover,
+.bywr-configurator .config-help .popover-arrow {
+  transition: none !important;
+}
+.bywr-configurator .config-help [data-panel="info"] a,
+.bywr-configurator .config-help [data-panel="info"] a:hover * {
+  color: var(--about-link-color) !important;
+  text-underline-offset: 0.2em;
+}
+.bywr-configurator .config-help [data-panel="info"] a:focus-visible {
+  text-decoration: underline !important;
+  outline: 2px solid currentColor;
+  outline-offset: 3px;
 }
 .bywr-configurator .config-help ol {
   list-style: decimal;
