@@ -192,14 +192,7 @@
         if (Math.abs(steps - Math.round(steps)) > 1e-8) return false;
       }
     }
-    if (name.endsWith("Url") && value) {
-      try {
-        const url = new URL(value, location.href);
-        if (!["http:", "https:", "file:"].includes(url.protocol) || (url.protocol === "file:" && location.protocol !== "file:") || url.username || url.password) return false;
-      } catch {
-        return false;
-      }
-    }
+    if (name.endsWith("Url") && !safeImage(value)) return false;
     return true;
   }
 
