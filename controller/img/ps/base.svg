@@ -7,72 +7,55 @@
             .st0 {
             fill: #ff69f8;
             }
-
             .st1 {
             fill: #10111a;
             }
-
             .st2 {
             fill: #121212;
             }
-
             .st3 {
             fill: #080808;
             }
-
             .st4 {
             fill: #fff;
             }
-
             .st5 {
             fill: #f66;
             }
-
             .st6 {
             fill: #1f1f1f;
             }
-
             .st7 {
             fill: #202020;
             }
-
             .st8 {
             opacity: 0;
             }
-
             .st9 {
             fill: #40e2a0;
             }
-
             .st10 {
             fill: #13161f;
             }
-
             .st11 {
             fill: #0f0f0f;
             }
-
             .st12 {
             fill: #1a1a1a;
             }
-
             .st13 {
             isolation: isolate;
             opacity: .2;
             }
-
             .st14 {
             fill: #0f1015;
             }
-
             .st15 {
             fill: #7cb2e8;
             }
-
             .st16 {
             fill: #0a0a0a;
             }
-
             .st17 {
             fill: #101010;
             }

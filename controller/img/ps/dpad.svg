@@ -7,15 +7,12 @@
             isolation: isolate;
             opacity: .2;
             }
-
             .st1 {
             fill: #fff;
             }
-
             .st2 {
             fill: #1a1a1a;
             }
-
             .st3 {
             fill: #e6e6e6;
             }

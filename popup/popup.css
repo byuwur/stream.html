@@ -9,7 +9,6 @@
   --font-weight: 700;
   --text-offset: 0rem;
 }
-
 html {
   font-size: 16px;
 }
@@ -17,7 +16,6 @@ body {
   margin: 0;
   overflow: hidden;
 }
-
 #socialHolder {
   position: absolute;
   top: 0;
@@ -62,7 +60,6 @@ body {
   position: relative;
   top: var(--text-offset);
 }
-
 /* The square sits inside a larger SVG so its curves have room to stretch. */
 #iconBox {
   position: absolute;

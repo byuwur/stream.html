@@ -6,84 +6,64 @@
             .st0 {
             fill: #141414;
             }
-
             .st1 {
             fill: #1a1615;
             }
-
             .st2 {
             fill: #050505;
             }
-
             .st3 {
             fill: #0d0808;
             }
-
             .st4 {
             fill: none;
             }
-
             .st5 {
             fill: #1c1c1c;
             }
-
             .st6 {
             fill: #171717;
             }
-
             .st7 {
             fill: #120b0b;
             }
-
             .st8 {
             stroke: #120b0b;
             }
-
             .st8, .st9 {
             stroke-width: 2px;
             }
-
             .st8, .st9, .st10 {
             stroke-miterlimit: 10;
             }
-
             .st11 {
             fill: #0d0d0d;
             }
-
             .st9 {
             fill: #080808;
             stroke: #140c0c;
             }
-
             .st12 {
             fill: #0f0f0f;
             }
-
             .st13 {
             fill: #1a1a1a;
             }
-
             .st14 {
             fill: #191919;
             }
-
             .st15 {
             fill: #6d6b6c;
             }
-
             .st16 {
             fill: #292929;
             }
-
             .st17, .st10 {
             fill: #0a0a0a;
             }
-
             .st18 {
             fill: #242424;
             }
-
             .st10 {
             stroke: #000;
             }

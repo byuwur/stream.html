@@ -14,12 +14,10 @@
   --background-opacity: 0;
   --background-blur: 0rem;
   --background-scale: 1;
-
   --socialMediaScale: 1.25;
   --labelsScale: 1.25;
   --scheduleScale: 1.25;
   --countdownScale: 1.25;
-
   --titleSize: 4.5rem;
   --titleVerticalOffset: -0.5rem;
   --subtitleSize: 3rem;
@@ -35,7 +33,6 @@
   --countdownEndMessageSize: 4rem;
   --countdownEndMessageVerticalOffset: 0rem;
 }
-
 html {
   font-size: 16px;
 }
@@ -56,7 +53,6 @@ body {
   font-weight: 700;
   color: var(--primary-color);
 }
-
 /* Full scene and background. */
 #scene,
 #overlay {
@@ -89,7 +85,6 @@ body {
   background: var(--background-tint);
   opacity: var(--background-opacity);
 }
-
 /* Logo, title, and subtitle. */
 #branding {
   position: absolute;
@@ -122,7 +117,6 @@ body {
   font-size: var(--subtitleSize);
   transform: translateY(var(--subtitleVerticalOffset));
 }
-
 /* Social accounts and schedule; GSAP owns their entrance, exit, and rotation. */
 #updates {
   position: absolute;
@@ -232,7 +226,6 @@ body {
   line-height: var(--labelHeaderSize);
   transform: translateY(var(--labelHeaderVerticalOffset));
 }
-
 /* Countdown and its completion message. */
 #countdown {
   position: absolute;

@@ -221,15 +221,12 @@
         min-height: 0;
         min-width: 0;
       }
-
       .home-intro {
         position: relative;
       }
-
       #site-title {
         font-size: clamp(2rem, 4vw, 4.5rem);
       }
-
       .home-tools {
         display: grid;
         view-transition-name: tools;
@@ -238,54 +235,43 @@
         grid-auto-rows: max-content;
         align-content: start;
       }
-
       #catalog-empty {
         grid-column: 1 / -1;
       }
-
       .home-tool[hidden] {
         display: none !important;
       }
-
       .home-tool {
         min-height: 15rem;
         min-width: 0;
       }
-
       .home-tool-title {
         font-size: clamp(1.75rem, 2.5vw, 2.5rem);
         line-height: 1.2;
       }
-
       .home-tool-top > i {
         font-size: 2.25rem !important;
       }
-
       .home-tool-info p {
         font-size: 0.875rem;
         line-height: 1.5;
       }
-
       .catalog-filter {
         grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
       }
-
       .catalog-filter label {
         min-width: 0;
       }
-
       /* Common transitions make Select2's hidden native control overflow during initialization. */
       .stream-home .select2-hidden-accessible,
       .stream-home .select2-container,
       .stream-home .select2-container * {
         transition: none !important;
       }
-
       .stream-home .select2-container {
         min-width: 0;
         max-width: 100%;
       }
-
       .stream-home .select2-selection--single {
         height: auto !important;
         min-height: 2.375rem;
@@ -293,117 +279,94 @@
         border: 0.05rem solid var(--bs-secondary);
         border-radius: var(--bs-border-radius);
       }
-
       .stream-home .select2-selection--single .select2-selection__rendered {
         padding: 0.375rem 2rem 0.375rem 0.75rem;
         line-height: 1.5 !important;
         color: var(--light-color);
       }
-
       .stream-home .select2-selection--single .select2-selection__arrow {
         height: 100% !important;
         right: 0.5rem;
       }
-
       .stream-home .select2-container--focus .select2-selection,
       .stream-home .select2-container--open .select2-selection {
         border-color: var(--primary-foreground);
         box-shadow: 0 0 0 0.2rem color-mix(in srgb, var(--primary-foreground) 25%, transparent);
       }
-
       .stream-home .home-category-dropdown {
         background: var(--dark-color);
         color: var(--light-color);
         border-color: var(--bs-secondary);
       }
-
       .stream-home .home-category-dropdown .select2-results__option {
         padding-right: 1.25rem;
       }
-
       .stream-home .home-category-dropdown .select2-results__option--selected {
         background: var(--bs-secondary-bg);
       }
-
       .stream-home .home-category-dropdown .select2-results__option--highlighted[aria-selected] {
         background: var(--primary-color);
         color: var(--light-color);
       }
-
       /* ========== LANDING MOTION AND CARD INTERACTIONS ========== */
       /* Keep brief fades enabled even when Animate.css applies its reduced-motion rule. */
       .stream-home .animate__animated {
         --animate-duration: 0.4s;
         animation-duration: var(--animate-duration) !important;
       }
-
       .stream-home .home-tools {
         --animate-duration: 0.24s;
       }
-
       .home-copy {
         animation-delay: 0.08s;
       }
-
       /* Capture only the gallery, keep the filters interactive, and clip moving cards. */
       .stream-home {
         view-transition-name: none;
       }
-
       .stream-home::view-transition {
         pointer-events: none;
       }
-
       .stream-home::view-transition-group-children(tools) {
         overflow: clip;
       }
-
       .stream-home::view-transition-group(*) {
         animation-duration: 0.3s !important;
         animation-timing-function: ease;
       }
-
       .stream-home::view-transition-old(*) {
         display: none;
       }
-
       .stream-home::view-transition-new(*) {
         animation: none;
       }
-
       .stream-home::view-transition-new(*):only-child {
         animation: home-tool-enter 0.3s ease both;
       }
-
       .stream-home::view-transition-old(*):only-child {
         display: block;
         animation: home-tool-exit 0.3s ease both;
       }
-
       @keyframes home-tool-enter {
         from {
           opacity: 0;
           transform: translateY(0.75rem) scale(0.97);
         }
       }
-
       @keyframes home-tool-exit {
         to {
           opacity: 0;
           transform: translateY(-0.75rem) scale(0.97);
         }
       }
-
       .stream-home a:hover,
       .stream-home a:hover * {
         text-decoration: none !important;
       }
-
       .home-intro-top img {
         width: 4rem;
         height: 4rem;
       }
-
       /* Blur beneath the translucent tint; filtering the tint itself leaves the image sharp. */
       .home-tool::before {
         content: "";
@@ -414,11 +377,9 @@
         backdrop-filter: none;
         transition: backdrop-filter 0.2s ease !important;
       }
-
       .home-tool:is(:hover, :focus-visible)::before {
         backdrop-filter: blur(0.25rem);
       }
-
       .home-tool > .overlay {
         box-shadow:
           inset 0 0 2.5rem #0009,
@@ -426,7 +387,6 @@
         opacity: 0.8;
         transition: box-shadow 0.2s ease !important;
       }
-
       .home-tool-action,
       .home-tool-action i,
       .home-tool-info,
@@ -437,56 +397,45 @@
           transform 0.2s ease,
           background-color 0.2s ease !important;
       }
-
       .home-intro-top img:hover {
         transform: translateY(-0.125rem) rotate(-3deg);
       }
-
       .home-source:is(:hover, :focus-visible) {
         transform: translateY(-0.125rem);
       }
-
       .home-tool:is(:hover, :focus-visible) .home-tool-info {
         transform: translateX(0.15rem);
       }
-
       .home-tool:is(:hover, :focus-visible) .home-tool-top > i {
         transform: rotate(-7.5deg) scale(1.1);
       }
-
       .home-tool:focus-visible > .overlay,
       .home-tool:hover > .overlay {
         box-shadow:
           inset 0 0 2.5rem #0009,
           inset 0 0 0 0.125rem #ffffff80;
       }
-
       .home-tool:focus-visible .home-tool-action,
       .home-tool:hover .home-tool-action {
         transform: translateY(-0.2rem);
         background-color: var(--light-color);
         border-color: var(--light-color);
       }
-
       .home-tool:is(:hover, :focus-visible) .home-tool-action,
       .home-tool:is(:hover, :focus-visible) .home-tool-action * {
         color: var(--dark-color) !important;
       }
-
       .home-tool:focus-visible .home-tool-action i,
       .home-tool:hover .home-tool-action i {
         transform: translateX(0.3rem);
       }
-
       .home-tool:active .home-tool-action {
         transform: translateY(-0.05rem) scale(0.99);
       }
-
       .home-tool:focus-visible {
         outline: currentColor solid 0.125rem;
         outline-offset: -0.375rem;
       }
-
       /* The explicit accessibility toggle still disables landing motion. */
       .stream-home.no-motion *,
       .stream-home.no-motion .home-tool::before,
@@ -496,82 +445,66 @@
         animation: none !important;
         transition: none !important;
       }
-
       @media (min-width: 48rem) {
         .stream-home body {
           height: 100dvh;
         }
-
         .home-tools {
           grid-template-columns: repeat(2, minmax(0, 1fr));
         }
-
         /* Longer titles can grow without pushing the action outside its card. */
         .home-tool {
           min-height: max(15rem, 30vh);
           min-height: max(15rem, 30dvh);
         }
-
         /* Few results fill the gallery; intrinsic row sizing keeps longer content readable. */
         .home-tools:is([data-result-count="1"], [data-result-count="2"], [data-result-count="3"], [data-result-count="4"], [data-result-count="5"]) {
           grid-template-rows: repeat(2, minmax(max-content, 1fr));
           align-content: stretch;
         }
-
         .home-tools:is([data-result-count="1"], [data-result-count="2"], [data-result-count="3"], [data-result-count="4"], [data-result-count="5"]) .home-tool {
           min-height: 0;
         }
-
         .home-tools:is([data-result-count="1"], [data-result-count="2"], [data-result-count="3"]) {
           grid-template-columns: minmax(0, 1fr);
         }
-
         .home-tools[data-result-count="1"] {
           grid-template-rows: minmax(max-content, 1fr);
         }
-
         .home-tools[data-result-count="3"] {
           grid-template-rows: repeat(3, minmax(max-content, 1fr));
         }
-
         .home-tools[data-result-count="5"] {
           grid-template-columns: repeat(6, minmax(0, 1fr));
         }
-
         .home-tools[data-result-count="5"] .home-tool {
           grid-column: span 2;
         }
-
         .home-tools[data-result-count="5"] .home-tool:is([data-result-index="1"], [data-result-index="2"]) {
           grid-column: span 3;
         }
       }
-
       @media (min-width: 48rem) and (max-width: 61.99rem) {
         .home-intro-top img {
           width: 3rem;
           height: 3rem;
         }
       }
-
       @media (min-width: 62rem) {
         .home-tool {
           min-height: max(13.5rem, 30vh);
           min-height: max(13.5rem, 30dvh);
         }
       }
-
       @media (min-width: 75rem) {
         .home-tool {
           padding: 2.25rem !important;
         }
       }
-
       @media (max-width: 47.99rem) {
         .home-intro {
           min-height: 32rem;
         }
-
         #site-title {
           font-size: clamp(2.5rem, 11vw, 4.5rem);
         }

@@ -6,35 +6,27 @@
             .st0 {
             fill: #f0f0f0;
             }
-
             .st1 {
             fill: #edf4f4;
             }
-
             .st2 {
             fill: #e5e5e5;
             }
-
             .st3 {
             fill: #e3e3e3;
             }
-
             .st4 {
             fill: #dbdbdb;
             }
-
             .st5 {
             fill: #d6d6d6;
             }
-
             .st6 {
             fill: #ebebeb;
             }
-
             .st7 {
             fill: #e8e8e8;
             }
-
             .st8 {
             fill: #e6e6e6;
             }

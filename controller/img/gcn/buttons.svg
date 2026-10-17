@@ -6,37 +6,29 @@
             .st0 {
             fill: #181818;
             }
-
             .st1 {
             opacity: 0;
             }
-
             .st2 {
             fill: #fff;
             }
-
             .st3 {
             fill: none;
             stroke: #fff;
             stroke-miterlimit: 10;
             }
-
             .st4 {
             fill: #ceb43b;
             }
-
             .st5 {
             fill: #13e8d3;
             }
-
             .st6 {
             opacity: .1;
             }
-
             .st7 {
             opacity: .8;
             }
-
             .st8 {
             fill: #b22f35;
             }

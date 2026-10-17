@@ -8,7 +8,6 @@
             stroke: #fff;
             stroke-miterlimit: 10;
             }
-
             .st1 {
             fill: #929493;
             }

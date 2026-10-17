@@ -6,23 +6,18 @@
             .st0 {
             fill: #121212;
             }
-
             .st1 {
             fill: #f0f0f0;
             }
-
             .st2 {
             fill: #444;
             }
-
             .st3 {
             fill: #333;
             }
-
             .st4 {
             fill: #ebebeb;
             }
-
             .st5 {
             fill: #ededed;
             }

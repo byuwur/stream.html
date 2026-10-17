@@ -6,43 +6,33 @@
             .st0 {
             fill: #39b54a;
             }
-
             .st1 {
             fill: #0071bc;
             }
-
             .st2 {
             fill: #141414;
             }
-
             .st3 {
             fill: #fff;
             }
-
             .st4 {
             fill: #c64ab5;
             }
-
             .st5 {
             isolation: isolate;
             }
-
             .st6 {
             fill: #3ed8d2;
             }
-
             .st7 {
             fill: #c1272d;
             }
-
             .st8 {
             fill: #ff8e43;
             }
-
             .st9 {
             fill: #fcee21;
             }
-
             .st10 {
             fill: #0311de;
             }

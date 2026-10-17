@@ -8,7 +8,6 @@ body {
   color: #fff;
   background: var(--primary-color);
 }
-
 /* Configurator themes. */
 .bywr-configurator {
   --secondary-color: #000;
@@ -127,7 +126,6 @@ body {
 .bywr-configurator .compression-fields [hidden] {
   display: none !important;
 }
-
 /* Settings, ordered entries, and live preview. */
 .bywr-configurator .settings-panel {
   /* Contain Select2's absolutely positioned hidden fields inside the scrolling panel. */
@@ -298,7 +296,6 @@ body {
     flex: none;
   }
 }
-
 /* Toolbar tool navigation. */
 .bywr-configurator .tool-switcher {
   width: 18rem;

@@ -6,11 +6,9 @@
             .st0 {
             fill: #fff;
             }
-
             .st1 {
             fill: red;
             }
-
             .st2 {
             opacity: 0;
             }

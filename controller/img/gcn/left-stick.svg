@@ -6,11 +6,9 @@
             .st0 {
             opacity: .4;
             }
-
             .st1 {
             opacity: .3;
             }
-
             .st2 {
             fill: #e8e8e8;
             }

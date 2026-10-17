@@ -6,26 +6,21 @@
             .st0 {
             fill: #ffd710;
             }
-
             .st1 {
             opacity: .8;
             }
-
             .st2 {
             opacity: .1;
             }
-
             .st2, .st3 {
             isolation: isolate;
             }
-
             .st3 {
             fill: none;
             opacity: 0;
             stroke: #000;
             stroke-miterlimit: 10;
             }
-
             .st4 {
             opacity: .4;
             }

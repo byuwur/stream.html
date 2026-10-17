@@ -6,20 +6,16 @@
             .st0 {
             opacity: .1;
             }
-
             .st0, .st1 {
             isolation: isolate;
             }
-
             .st1 {
             fill: #fff;
             opacity: 0;
             }
-
             .st2 {
             fill: #c1272d;
             }
-
             .st3 {
             fill: #1a1a1a;
             }

@@ -21,7 +21,6 @@
   --altTransform: left center;
   --altBgOpacity: calc(100 * 0.01);
 }
-
 html,
 body {
   padding: 0;
@@ -30,7 +29,6 @@ body {
   text-align: var(--textAlign);
   animation: 10s alert-animation ease-in-out forwards;
 }
-
 @keyframes alert-animation {
   0% {
     opacity: 0;
@@ -49,13 +47,11 @@ body {
     transform: translateX(-1500px);
   }
 }
-
 #alertHolder {
   position: absolute;
   font-size: 0;
   opacity: 1;
 }
-
 .left {
   left: var(--xOffset);
 }
@@ -68,12 +64,10 @@ body {
 .bottom {
   bottom: var(--yOffset);
 }
-
 .center {
   left: 50%;
   transform: translateX(-50%);
 }
-
 #main,
 .alt {
   padding: var(--padding);
@@ -82,7 +76,6 @@ body {
   position: relative;
   word-wrap: break-word;
 }
-
 #mainText img {
   height: var(--mainFS);
   width: auto;
@@ -90,7 +83,6 @@ body {
   padding: 0;
   float: left;
 }
-
 #main {
   color: var(--mainColor);
   font-size: var(--mainFS);
@@ -100,7 +92,6 @@ body {
   border-top: 0px solid #006688;
   border-bottom: 10px solid #006688;
 }
-
 .alt {
   color: var(--altColor);
   font-size: var(--altFS);
@@ -108,7 +99,6 @@ body {
   font-weight: var(--altFW);
   transform-origin: var(--altTransform);
 }
-
 .bg {
   position: absolute;
   top: 0;
@@ -117,33 +107,27 @@ body {
   height: 100%;
   z-index: 1;
 }
-
 #main .bg {
   background: var(--mainBg);
   opacity: var(--mainBgOpacity);
 }
-
 .alt .bg {
   background: var(--altBg);
   opacity: var(--altBgOpacity);
 }
-
 #mainText,
 .altText {
   z-index: 999;
   position: relative;
 }
-
 .above #altBelow {
   display: none;
   visibility: hidden;
 }
-
 .below #altAbove {
   display: none;
   visibility: hidden;
 }
-
 #messageHolder {
   color: #fff;
   text-shadow:
@@ -158,11 +142,9 @@ body {
   opacity: 1;
   font-size: var(--altFS);
 }
-
 #messageHolder > * > img {
   max-height: var(--altFS);
 }
-
 .alert-image {
   position: absolute;
   right: 0;
