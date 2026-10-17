@@ -86,7 +86,7 @@ body {
 /* Common .has-overlay resets Bootstrap's sticky toolbar position and stacking level. */
 .bywr-configurator .url-toolbar {
   position: sticky;
-  z-index: 1020;
+  z-index: 999;
 }
 .bywr-configurator .url-toolbar img,
 .bywr-configurator .config-help .modal-header img {
@@ -278,7 +278,7 @@ body {
 /* Keep the shared controls clear of footer content and their menu within the viewport. */
 .bywr-configurator #bywr-accessibility {
   top: auto;
-  bottom: 0.5rem;
+  bottom: 0.25rem;
   flex-direction: column-reverse;
 }
 @media (max-width: 48rem) {
