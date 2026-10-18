@@ -10,7 +10,7 @@ body {
   display: block;
 }
 .controller.disconnected {
-  opacity: 0.1 !important;
+  opacity: 0.05 !important;
 }
 /* Xbox artwork. */
 .controller {
