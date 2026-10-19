@@ -21,7 +21,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     fields: {
       accounts: {
         type: "entries",
-        default: [{ platform: "twitch", handle: "/byUwUr" }, { platform: "youtube", handle: "@byUwUr" }],
+        default: [
+          { platform: "twitch", handle: "/byUwUr" },
+          { platform: "youtube", handle: "@byUwUr" }
+        ],
         label: "Social accounts",
         section: "Social accounts",
         description: "Ordered account rows with platform and handle. Platforms may repeat; up to 100 rows, 160 characters per handle.",
@@ -141,8 +144,32 @@ document.addEventListener("DOMContentLoaded", async () => {
         step: "any",
         icon: "fa-up-right-and-down-left-from-center"
       },
-      cornerInset: { type: "number", default: "", optional: true, label: "Corner inset (px)", section: "Size & placement", min: -1000, max: 1000, step: "any", styleSelector: "#socialHolder", styleProperty: "margin-inline", styleUnit: "px" },
-      textPadding: { type: "number", default: "", optional: true, label: "Text horizontal padding (px)", section: "Size & placement", min: 0, max: 1000, step: "any", styleSelector: "#nameHolder", styleProperty: "padding-inline", styleUnit: "px" },
+      cornerInset: {
+        type: "number",
+        default: "",
+        optional: true,
+        label: "Corner inset (px)",
+        section: "Size & placement",
+        min: -1000,
+        max: 1000,
+        step: "any",
+        styleSelector: "#socialHolder",
+        styleProperty: "margin-inline",
+        styleUnit: "px"
+      },
+      textPadding: {
+        type: "number",
+        default: "",
+        optional: true,
+        label: "Text horizontal padding (px)",
+        section: "Size & placement",
+        min: 0,
+        max: 1000,
+        step: "any",
+        styleSelector: "#nameHolder",
+        styleProperty: "padding-inline",
+        styleUnit: "px"
+      },
       textYOffset: {
         type: "number",
         default: 0,
@@ -160,7 +187,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         icon: ["Social icon", "#icons > i", ["size"]]
       }),
       ...byConfigurator.surfaceFields({ textSurface: ["Text box", "#textBox", ["border", "radius", "shadow"]] }),
-      ...byConfigurator.filterFields("popupFilter", "Popup", "#socialHolder"),
+      ...byConfigurator.filterFields("popupFilter", "Popup", "#socialHolder")
     }
   };
 
