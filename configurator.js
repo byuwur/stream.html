@@ -191,6 +191,9 @@
     if (rule.validate) return rule.validate(value) !== null;
     if (rule.options && !Object.hasOwn(rule.options, value)) return false;
     if (rule.maxlength && value.length > Number(rule.maxlength)) return false;
+    if (rule.optional && value === "") return true;
+    if (rule.type === "color" && !CSS.supports("color", `#${value.replace(/^#/, "")}`)) return false;
+    if (rule.styleProperty && rule.type === "text" && !CSS.supports(rule.styleProperty, value)) return false;
     if (rule.type === "number") {
       const number = Number(value);
       if (!value.trim() || !Number.isFinite(number) || number < Number(rule.min) || number > Number(rule.max)) return false;
@@ -212,10 +215,10 @@
       if (rule.validate) parsed = rule.validate(value);
       else {
         if (!validParameter(fields, name, value)) continue;
-        parsed = rule.type === "number" ? Number(value) : value;
+        parsed = rule.type === "number" && value !== "" ? Number(value) : value;
       }
       if (parsed === null) continue;
-      if (rule.type === "color") parsed = `#${String(parsed).replace(/^#/, "")}`;
+      if (rule.type === "color" && !(rule.optional && parsed === "")) parsed = `#${String(parsed).replace(/^#/, "")}`;
       settings[name] = parsed;
     }
   }
@@ -263,9 +266,11 @@
   /**
    * Resolve settings and mount markup in overlay mode; callers must await this before rendering.
    * Bare editors restore saved values; explicit queries take priority and overlays use their URL only.
-   * @param {Object} resource Declared fields, optional constants, and renderer metadata.
+   * Clone field defaults, apply accepted URL values, then publish settings and integrations together.
+   * The editor's resourceReady promise and the renderer's await share this same initialization.
+   * @param {ResourceDefinition} resource Declared fields, optional constants, and renderer metadata.
    * @param {Object} [integrations={}] Resource-specific hooks exposed to the editor.
-   * @returns {Promise<Object>} Validated settings, also published through window.byStreamResource.
+   * @returns {Promise<ResourceSettings>} Validated settings, also published through window.byStreamResource.
    */
   function initResource(resource, integrations = {}) {
     const overlay = location.search.length > 1 && !location.hash;
@@ -274,10 +279,7 @@
     resourceReady = readURLParameters(resource.fields, search).then((parameters) => {
       parameterError = parameters.error;
       compressedFields = location.search ? parameters.compressedFields : new Set();
-      const settings = {
-        ...resource.constants,
-        ...Object.fromEntries(Object.entries(resource.fields).map(([name, field]) => [name, structuredClone(field.default)]))
-      };
+      const settings = { ...resource.constants, ...Object.fromEntries(Object.entries(resource.fields).map(([name, field]) => [name, structuredClone(field.default)])) };
       applyParameters(resource.fields, settings, parameters.values);
       global.byStreamOverlay = overlay;
       global.addEventListener("hashchange", () => {
@@ -286,6 +288,27 @@
       if (overlay) {
         document.documentElement.setAttribute("data-overlay", "");
         document.body.append(document.getElementById("overlay-markup").content.cloneNode(true));
+        // Metadata-driven CSS is emitted once; selectors also cover rows a renderer creates later.
+        const overrides = [];
+        for (const [name, field] of Object.entries(resource.fields)) {
+          if (!field.styleSelector || (!field.styleValue && settings[name] === (field.styleAutomatic ?? ""))) continue;
+          const value = field.styleValue ? field.styleValue(settings) : field.type === "font" ? byFont.family(settings[name], '"Courier New", Courier, monospace') : `${settings[name]}${field.styleUnit || ""}`;
+          if (value !== "") overrides.push([field, value]);
+        }
+        if (overrides.length) {
+          const style = document.createElement("style");
+          document.body.append(style);
+          for (const parent of new Set(overrides.map(([field]) => field.styleParent).filter(Boolean))) {
+            const index = style.sheet.insertRule(`:where(${parent}) {}`, style.sheet.cssRules.length);
+            style.sheet.cssRules[index].style.setProperty("display", "flex", "important");
+            style.sheet.cssRules[index].style.setProperty("flex-direction", "column");
+          }
+          for (const [field, value] of overrides) {
+            const index = style.sheet.insertRule(`${field.styleSelector} {}`, style.sheet.cssRules.length);
+            // Explicit overrides also apply to rotating rows and inline renderer styles.
+            style.sheet.cssRules[index].style.setProperty(field.styleProperty, value, "important");
+          }
+        }
         global.addEventListener("keydown", (event) => {
           // Preview frames must never navigate into a nested configurator.
           if (global !== global.top) return;
@@ -880,6 +903,7 @@
         if (field.type !== "switch") control.addClass("rounded-0 bg-body-secondary border-secondary-subtle");
         control.attr({ name, id: field.id || `field-${name}`, "data-title": field.label, "data-description": field.description || "" });
         for (const key of ["min", "max", "maxlength", "placeholder"]) if (field[key] !== undefined && field[key] !== Infinity) control.attr(key, field[key]);
+        if (field.optional && !field.placeholder) control.attr("placeholder", "Automatic");
         control.appendTo(label);
         if (field.type === "switch") caption.add(control).wrapAll(/* HTML */ `<span class="d-flex align-items-center justify-content-between gap-3"></span>`);
         if (field.description) $(/* HTML */ `<small class="text-body-secondary"></small>`).text(field.description).appendTo(label);
@@ -1410,7 +1434,10 @@
         });
     }
 
-    /** Keep Pickr, editable hex colors, and form Reset in sync without discarding alpha. */
+    /**
+     * Keep Pickr, editable hex colors, and form Reset in sync without discarding alpha.
+     * @returns {void}
+     */
     function initColorPickers() {
       for (const input of fields) {
         if (parameterRules[input.name]?.type !== "color") continue;
@@ -1418,21 +1445,26 @@
         const title = `${jqInput.closest("label").text().trim() || input.name} picker`;
         const jqSwatch = $(/* HTML */ `<span class="input-group-text p-1"><span></span></span>`);
         jqInput.wrap(/* HTML */ `<span class="input-group"></span>`).before(jqSwatch);
-        jqInput.addClass("font-monospace").attr("placeholder", "#RRGGBB or #RRGGBBAA");
+        const optional = parameterRules[input.name].optional;
+        jqInput.addClass("font-monospace").attr("placeholder", optional ? "Automatic" : "#RRGGBB or #RRGGBBAA");
         const picker = Pickr.create({
           el: jqSwatch.children()[0],
           theme: "classic",
           position: "bottom-start",
-          default: parameterRules[input.name].default,
+          default: parameterRules[input.name].default || "#FFFFFF",
           defaultRepresentation: "HEX",
-          components: { preview: true, opacity: true, hue: true, interaction: { input: true, save: true } }
+          components: { preview: true, opacity: true, hue: true, interaction: { input: true, save: true, clear: !!optional } }
         });
         $(picker.getRoot().button).attr({ "aria-label": title, title });
         let syncing = false;
         // Pickr can emit change while applying a color or its format.
+        /**
+         * Reflect the canonical color value in the Pickr widget without creating a separate settings value.
+         * @returns {void}
+         */
         function syncPicker() {
           const text = jqInput.val();
-          const value = `#${text.replace(/^#/, "")}`;
+          const value = optional && !text ? null : `#${text.replace(/^#/, "")}`;
           syncing = true;
           if (picker.setColor(value, true)) {
             picker.setColorRepresentation("HEX");
@@ -1443,10 +1475,13 @@
         picker
           .on("init", syncPicker)
           .on("change", (color) => {
-            if (syncing) return;
+            if (syncing || !color) return;
             jqInput.val(color.toHEXA().toString()).trigger("input");
           })
-          .on("save", () => picker.hide());
+          .on("save", () => picker.hide())
+          .on("clear", () => {
+            if (optional) jqInput.val("").trigger("input");
+          });
         jqInput.on("input change", syncPicker);
         jqForm.on("reset", () =>
           setTimeout(() => {
