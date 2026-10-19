@@ -107,7 +107,11 @@
               description: "Example text color. Pickr uses HEX, including alpha.",
               maxlength: 160,
               icon: "fa-palette"
-            }
+            },
+            ...byConfigurator.textFields({
+              heading: ["Demo heading", ".demo-label"],
+              note: ["Demo note", ".demo-note"]
+            })
           }
         };
 
@@ -128,6 +132,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.6/css/select2.min.css" />
     <link rel="stylesheet" href="./configurator.css" />
     <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.6/js/jquery.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.6/_fonts.js" defer></script>
     <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.6/_functions.js" defer></script>
     <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.6/js/select2.full.min.js" defer></script>
     <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.6/js/popper.min.js" defer></script>

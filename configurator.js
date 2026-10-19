@@ -265,6 +265,127 @@
   }
 
   /**
+   * Declare per-element typography while retaining the resource's base appearance by default.
+   * Elements map IDs to [label, selector, optional size/color list]; other typography is always added.
+   * Size 0 and empty overrides preserve authored styles. Explicit lengths use pixels, opacity uses %.
+   * @param {Object<string, Array>} elements Element IDs also prefix the generated URL field names.
+   * @param {Object<string, Array<string>>} [conditions={}] Optional when condition for each element ID.
+   * @returns {ResourceFields} Fresh typography fields keyed by their URL parameter names.
+   * @example textFields({ heading: ["Heading", ".heading"] }, { heading: ["showHeading", "yes"] })
+   */
+  function textFields(elements, conditions = {}) {
+    const result = {};
+    for (const [name, [label, selector, properties = ["size", "color"]]] of Object.entries(elements)) {
+      const fields = {};
+      const section = `${label} text`;
+      if (properties.includes("size"))
+        fields[`${name}FontSize`] = {
+          type: "number",
+          default: 0,
+          label: `${label} size (px)`,
+          section,
+          description: "Use 0 for the automatic size.",
+          min: 0,
+          max: 400,
+          step: "any",
+          styleSelector: selector,
+          styleProperty: "font-size",
+          styleUnit: "px",
+          styleAutomatic: 0
+        };
+      if (properties.includes("color"))
+        fields[`${name}Color`] = {
+          type: "color",
+          default: "",
+          label: `${label} color`,
+          section,
+          description: "Leave empty to use the base palette.",
+          maxlength: 80,
+          optional: true,
+          styleSelector: selector,
+          styleProperty: "color"
+        };
+      Object.assign(fields, {
+        [`${name}Font`]: { type: "font", default: "", optional: true, label: `${label} font`, section, maxlength: 100, styleSelector: selector, styleProperty: "font-family" },
+        [`${name}Weight`]: {
+          type: "select",
+          default: "",
+          label: `${label} weight`,
+          section,
+          options: { "": "Automatic", 300: "Light", 400: "Regular", 500: "Medium", 600: "Semibold", 700: "Bold", 800: "Extra bold", 900: "Black" },
+          styleSelector: selector,
+          styleProperty: "font-weight"
+        },
+        [`${name}Style`]: {
+          type: "select",
+          default: "",
+          label: `${label} style`,
+          section,
+          subsection: "Typography details",
+          options: { "": "Automatic", normal: "Normal", italic: "Italic" },
+          styleSelector: selector,
+          styleProperty: "font-style"
+        },
+        [`${name}Case`]: {
+          type: "select",
+          default: "",
+          label: `${label} case`,
+          section,
+          subsection: "Typography details",
+          options: { "": "Automatic", none: "As written", uppercase: "UPPERCASE", lowercase: "lowercase", capitalize: "Capitalize" },
+          styleSelector: selector,
+          styleProperty: "text-transform"
+        },
+        [`${name}Tracking`]: {
+          type: "number",
+          default: "",
+          optional: true,
+          label: `${label} letter spacing (px)`,
+          section,
+          subsection: "Typography details",
+          min: -20,
+          max: 100,
+          step: "any",
+          styleSelector: selector,
+          styleProperty: "letter-spacing",
+          styleUnit: "px"
+        },
+        [`${name}LineHeight`]: {
+          type: "number",
+          default: "",
+          optional: true,
+          label: `${label} line height (px)`,
+          section,
+          subsection: "Typography details",
+          min: 0,
+          max: 1000,
+          step: "any",
+          styleSelector: selector,
+          styleProperty: "line-height",
+          styleUnit: "px"
+        },
+        [`${name}Opacity`]: {
+          type: "number",
+          default: "",
+          optional: true,
+          label: `${label} opacity (%)`,
+          section,
+          subsection: "Typography details",
+          min: 0,
+          max: 100,
+          step: "any",
+          styleSelector: selector,
+          styleProperty: "opacity",
+          styleUnit: "%"
+        }
+      });
+      Object.assign(fields, shadowFields(`${name}TextShadow`, label, selector, "text-shadow", section));
+      Object.assign(result, whenFields(conditions[name], fields));
+    }
+    return result;
+  }
+
+  /**
    * Declare two independent layers, both Off by default, using ordinary validated URL fields.
    * The first shadow field owns styleValue(), which reads every layer's settings and builds one CSS value.
    * Box/text shadows use comma-separated layers; filter shadows use repeated drop-shadow() functions.
@@ -608,6 +729,7 @@
     shadowFields,
     filterFields,
     fadeFields,
+    textFields,
     initResource,
     parseAccounts,
     parseZone,

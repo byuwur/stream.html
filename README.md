@@ -188,6 +188,8 @@ Inactive controls are disabled and do not block validation. Overlays treat inact
 
 Shadows and glows have independent switches, both Off by default. Enable either or both, with separate colors, softness, and spread where supported. Default Off values are omitted from generated URLs.
 
+`byConfigurator.textFields()` declares per-element fonts, sizes, weight, spacing, line height, colors, opacity, and shadows. Size `0` and empty overrides preserve authored styles.
+
 ### Add a tool
 
 1. Copy `configurator.html` into the tool folder; replace demo markup/styles/rendering and change shared imports to `../`.
