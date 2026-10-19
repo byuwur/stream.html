@@ -28,7 +28,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         label: "Social accounts",
         section: "Social accounts",
         description: "Ordered account rows with platform and handle. Platforms may repeat; up to 100 rows, 160 characters per handle.",
-        validate: byConfigurator.parseAccounts,
+        validate: byStream.parseAccounts,
         maxlength: 20000,
         entries: { choices: "platforms", choiceKey: "platform", textFields: [["handle", "Handle or display text"]], newEntry: { platform: "twitch", handle: "" } },
         addLabel: "Add account"
@@ -181,13 +181,13 @@ document.addEventListener("DOMContentLoaded", async () => {
         step: "any",
         icon: "fa-font"
       },
-      ...byConfigurator.placementFields("#socialHolder"),
-      ...byConfigurator.textFields({ accountName: ["Account name", "#nameHolder .name", []] }),
-      ...byConfigurator.textFields({
+      ...byStream.placementFields("#socialHolder"),
+      ...byStream.textFields({ accountName: ["Account name", "#nameHolder .name", []] }),
+      ...byStream.textFields({
         icon: ["Social icon", "#icons > i", ["size"]]
       }),
-      ...byConfigurator.surfaceFields({ textSurface: ["Text box", "#textBox", ["border", "radius", "shadow"]] }),
-      ...byConfigurator.filterFields("popupFilter", "Popup", "#socialHolder")
+      ...byStream.surfaceFields({ textSurface: ["Text box", "#textBox", ["border", "radius", "shadow"]] }),
+      ...byStream.filterFields("popupFilter", "Popup", "#socialHolder")
     }
   };
 
@@ -286,6 +286,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
-  const settings = await byConfigurator.initResource(resource);
+  const settings = await byStream.initResource(resource);
   if (byStreamOverlay) renderPopup();
 });

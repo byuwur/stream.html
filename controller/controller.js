@@ -170,8 +170,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         styleValue: (settings) => `calc(50% + ${settings.verticalPosition}px)`
       },
       fitMargin: { type: "number", default: 8, label: "Fit margin (px)", section: "Size & placement", min: 0, max: 1000, step: "any" },
-      ...byConfigurator.placementFields(".controller"),
-      ...byConfigurator.filterFields("artworkFilter", "Artwork", ".controller")
+      ...byStream.placementFields(".controller"),
+      ...byStream.filterFields("artworkFilter", "Artwork", ".controller")
     }
   };
 
@@ -487,7 +487,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     tester.updateGamepads();
   }
 
-  const settings = await byConfigurator.initResource(resource, { gamepadSupport, buttonValue, copyGamepad });
+  const settings = await byStream.initResource(resource, { gamepadSupport, buttonValue, copyGamepad });
   gamepadSupport.init();
   if (byStreamOverlay) initController();
 });

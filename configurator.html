@@ -14,6 +14,9 @@
   <body>
     <!-- ===== SHARED PAGE SETUP ===== -->
 
+    <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.6/_fonts.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.6/_functions.js" defer></script>
+    <script src="./resource.js" defer></script>
     <!-- ===== RESOURCE DEMO ===== -->
     <template id="overlay-markup">
       <main id="demo-preview">
@@ -108,14 +111,14 @@
               maxlength: 160,
               icon: "fa-palette"
             },
-            ...byConfigurator.textFields({
+            ...byStream.textFields({
               heading: ["Demo heading", ".demo-label"],
               note: ["Demo note", ".demo-note"]
             })
           }
         };
 
-        const settings = await byConfigurator.initResource(resource);
+        const settings = await byStream.initResource(resource);
         if (!byStreamOverlay) return;
         const preview = document.getElementById("demo-preview");
         document.getElementById("demo-message").textContent = settings.message;
@@ -132,8 +135,6 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.6/css/select2.min.css" />
     <link rel="stylesheet" href="./configurator.css" />
     <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.6/js/jquery.min.js" defer></script>
-    <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.6/_fonts.js" defer></script>
-    <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.6/_functions.js" defer></script>
     <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.6/js/select2.full.min.js" defer></script>
     <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.6/js/popper.min.js" defer></script>
     <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.6/js/bootstrap.min.js" defer></script>

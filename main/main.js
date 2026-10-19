@@ -61,7 +61,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         step: "any",
         icon: "fa-hashtag"
       },
-      countdownFormat: { type: "select", default: "stopwatch", label: "Countdown format", section: "Countdown", when: ["displayCountdown", "yes"], options: byConfigurator.durationFormats },
+      countdownFormat: { type: "select", default: "stopwatch", label: "Countdown format", section: "Countdown", when: ["displayCountdown", "yes"], options: byStream.durationFormats },
       countdownMessage: {
         type: "text",
         default: "cuenta regresiva tramadora",
@@ -211,7 +211,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         section: "Social accounts",
         when: ["displaySocial", "yes"],
         description: "Ordered account rows with platform, handle, and heading. Platforms may repeat; up to 100 rows, 160 characters per text field.",
-        validate: (value) => byConfigurator.parseAccounts(value, true),
+        validate: (value) => byStream.parseAccounts(value, true),
         maxlength: 20000,
         entries: {
           choices: "platforms",
@@ -347,7 +347,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       opacity: { type: "number", default: "", optional: true, label: "Scene opacity (%)", section: "Appearance", min: 0, max: 100, step: "any", styleSelector: "#scene", styleProperty: "opacity", styleUnit: "%" },
       frameInset: { type: "number", default: "", optional: true, label: "Frame inset (px)", section: "Size & placement", min: -1000, max: 1000, step: "any", styleSelector: "#frame", styleProperty: "inset", styleUnit: "px" },
-      ...byConfigurator.placementFields("#scene"),
+      ...byStream.placementFields("#scene"),
       titleVerticalOffset: { type: "number", default: -8, label: "Title vertical offset (px)", section: "Size & placement", subsection: "Title and subtitle position", min: -1080, max: 1080, step: "any" },
       subtitleVerticalOffset: { type: "number", default: 128, label: "Subtitle vertical offset (px)", section: "Size & placement", subsection: "Title and subtitle position", min: -1080, max: 1080, step: "any" },
       countdownScale: { type: "number", default: 125, label: "Countdown scale (%)", section: "Size & placement", when: ["displayCountdown", "yes"], subsection: "Countdown position", min: -500, max: 500, step: "any" },
@@ -489,10 +489,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         max: 1080,
         step: "any"
       },
-      ...byConfigurator.whenFields(["displaySchedule", "yes"], byConfigurator.layoutFields("#week", {}, "week")),
-      ...byConfigurator.whenFields(["displaySocial", "yes"], byConfigurator.layoutFields("#social .network", { socialIcon: ["Social icon", "#social .icon"], socialCopy: ["Account text", "#social .inner"] }, "social")),
+      ...byStream.whenFields(["displaySchedule", "yes"], byStream.layoutFields("#week", {}, "week")),
+      ...byStream.whenFields(["displaySocial", "yes"], byStream.layoutFields("#social .network", { socialIcon: ["Social icon", "#social .icon"], socialCopy: ["Account text", "#social .inner"] }, "social")),
       animationSpeed: { type: "number", default: 100, label: "Social animation speed (%)", section: "Animation", when: ["displaySocial", "yes"], min: 0, max: 500, step: "any" },
-      ...byConfigurator.textFields(
+      ...byStream.textFields(
         {
           title: ["Title", "#title", ["color"]],
           subtitle: ["Subtitle", "#subtitle", ["color"]],
@@ -520,7 +520,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           eventHeading: ["displayLabels", "yes"]
         }
       ),
-      ...byConfigurator.surfaceFields(
+      ...byStream.surfaceFields(
         {
           socialCard: ["Social card", "#social .network"],
           scheduleCard: ["Schedule card", "#schedule .day"],
@@ -529,7 +529,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         },
         { socialCard: ["displaySocial", "yes"], scheduleCard: ["displaySchedule", "yes"], eventCard: ["displayLabels", "yes"] }
       ),
-      ...byConfigurator.filterFields("sceneFilter", "Scene", "#scene")
+      ...byStream.filterFields("sceneFilter", "Scene", "#scene")
     },
     constants: {
       labelNameSize: 24,
@@ -661,7 +661,7 @@ document.addEventListener("DOMContentLoaded", async () => {
      */
     function updateCountdown() {
       const remaining = Math.max(0, Math.ceil((deadline - Date.now()) / 1000));
-      time.textContent = byConfigurator.formatDuration(remaining, settings.countdownFormat, false);
+      time.textContent = byStream.formatDuration(remaining, settings.countdownFormat, false);
       if (remaining === 0) {
         clearInterval(countdownTimer);
         time.hidden = true;
@@ -709,6 +709,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     start();
   }
 
-  const settings = await byConfigurator.initResource(resource);
+  const settings = await byStream.initResource(resource);
   if (byStreamOverlay) renderMain();
 });
