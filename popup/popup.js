@@ -63,12 +63,12 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       scale: {
         type: "number",
-        default: 1,
-        label: "Scale",
+        default: 100,
+        label: "Scale (%)",
         section: "Animation",
-        description: "Size multiplier anchored to the selected top corner.",
-        min: 0.1,
-        max: 5,
+        description: "100% is the original size. Negative values flip both axes.",
+        min: -500,
+        max: 500,
         step: "any",
         icon: "fa-up-right-and-down-left-from-center"
       },
@@ -161,7 +161,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const names = document.getElementById("nameHolder");
     const icons = document.getElementById("icons");
     popup.classList.add(mode);
-    popup.style.transform = `scale(${scale})`;
+    popup.style.transform = `scale(${scale / 100})`;
     for (const name of ["iconBoxColor", "textBoxColor", "iconColor", "fontColor"]) popup.style.setProperty(`--${name}`, settings[name]);
     popup.style.setProperty("--font-family", byFont.family(settings.primaryFont || "Courier New", "Courier, monospace"));
     popup.style.setProperty("--font-size", `${settings.fontSize}px`);

@@ -182,24 +182,24 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       logoOpacity: {
         type: "number",
-        default: 0.05,
-        label: "Logo opacity",
+        default: 5,
+        label: "Logo opacity (%)",
         section: "Appearance",
-        description: "Logo opacity, from transparent to fully opaque.",
+        description: "Opacity from 0% (transparent) to 100% (opaque).",
         min: 0,
-        max: 1,
+        max: 100,
         step: "any",
         icon: "fa-hashtag",
         when: ["displayBranding", "yes"]
       },
       logoScale: {
         type: "number",
-        default: 1,
-        label: "Logo scale",
+        default: 100,
+        label: "Logo scale (%)",
         section: "Appearance",
-        description: "Multiplier applied to the logo size.",
-        min: 0.1,
-        max: 5,
+        description: "100% is the original size. Negative values flip both axes.",
+        min: -500,
+        max: 500,
         step: "any",
         icon: "fa-hashtag",
         when: ["displayBranding", "yes"]
@@ -245,11 +245,11 @@ document.addEventListener("DOMContentLoaded", async () => {
       backgroundOverlayOpacity: {
         type: "number",
         default: 0,
-        label: "Background tint opacity",
+        label: "Background tint opacity (%)",
         section: "Appearance",
-        description: "Opacity of the tint over the background.",
+        description: "Opacity from 0% (transparent) to 100% (opaque).",
         min: 0,
-        max: 1,
+        max: 100,
         step: "any",
         icon: "fa-hashtag"
       },
@@ -317,17 +317,17 @@ document.addEventListener("DOMContentLoaded", async () => {
       countdownFormat: { type: "select", default: "stopwatch", label: "Countdown format", section: "Scene", when: ["displayCountdown", "yes"], options: byConfigurator.durationFormats }
     },
     constants: {
-      backgroundScale: 1,
+      backgroundScale: 100,
       contentBackgrounds: "#FFFFFF1A",
       displayLabels: "no",
       labelOneHeading: "¡Suscriptor más reciente!",
       labelTwoHeading: "Más gastón:",
       labelThreeHeading: "Último gastón:",
       labelFourHeading: "Nuevo Yogurt:",
-      socialMediaScale: 1.25,
-      labelsScale: 1.25,
-      scheduleScale: 1.25,
-      countdownScale: 1.25,
+      socialMediaScale: 125,
+      labelsScale: 125,
+      scheduleScale: 125,
+      countdownScale: 125,
       titleVerticalOffset: -8,
       subtitleVerticalOffset: 128,
       labelNameSize: 24,
@@ -381,17 +381,17 @@ document.addEventListener("DOMContentLoaded", async () => {
       "background-color": settings.backgroundColor,
       "background-tint": settings.backgroundOverlay,
       "frame-width": `${settings.frameWidth}px`,
-      "logo-opacity": settings.logoOpacity,
-      "logo-scale": settings.logoScale,
-      "background-opacity": settings.backgroundOverlayOpacity,
+      "logo-opacity": settings.logoOpacity / 100,
+      "logo-scale": settings.logoScale / 100,
+      "background-opacity": settings.backgroundOverlayOpacity / 100,
       "background-blur": `${settings.backgroundBlur}px`,
-      "background-scale": settings.backgroundScale
+      "background-scale": settings.backgroundScale / 100
     };
     for (const [name, value] of Object.entries(styles)) rootStyle.setProperty(`--${name}`, value);
     for (const [name, value] of Object.entries(settings)) {
       if (name.endsWith("Size") || name.endsWith("Offset")) rootStyle.setProperty(`--${name}`, `${value}px`);
     }
-    for (const name of ["socialMediaScale", "labelsScale", "scheduleScale", "countdownScale"]) rootStyle.setProperty(`--${name}`, settings[name]);
+    for (const name of ["socialMediaScale", "labelsScale", "scheduleScale", "countdownScale"]) rootStyle.setProperty(`--${name}`, settings[name] / 100);
 
     function setText(id, value) {
       document.getElementById(id).textContent = value ?? "";

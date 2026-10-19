@@ -41,15 +41,15 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       opacity: {
         type: "number",
-        default: 1,
-        label: "Opacity:",
+        default: 100,
+        label: "Opacity (%)",
         section: "Input",
-        description: "Opacity, from fully transparent to fully opaque.",
+        description: "Opacity from 0% (transparent) to 100% (opaque).",
         min: 0,
-        max: 1,
+        max: 100,
         id: "opacity-input",
         icon: "fa-circle-half-stroke",
-        placeholder: "0.0 to 1.0"
+        placeholder: "0 to 100"
       },
       offset: {
         type: "number",
@@ -65,15 +65,15 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       deadzone: {
         type: "number",
-        default: 0.25,
-        label: "Deadzone:",
+        default: 25,
+        label: "Deadzone (%)",
         section: "Input",
         description: "Ignores stick movement below this threshold.",
         min: 0,
-        max: 1,
+        max: 100,
         id: "deadzone-input",
         icon: "fa-bullseye",
-        placeholder: "0.0 to 1.0"
+        placeholder: "0 to 100"
       },
       strength: {
         type: "switch",
@@ -269,7 +269,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     STICK_CURVING: resource.fields.curve.default == "1",
     TRIGGER_DISPLAY_TYPE: Number(resource.fields.strength.default),
     ANALOGUE_BUTTON_THRESHOLD: 0.25,
-    ANALOGUE_STICK_THRESHOLD: resource.fields.deadzone.default,
+    ANALOGUE_STICK_THRESHOLD: resource.fields.deadzone.default / 100,
     DIGITAL_THRESHOLD: 0.1,
     ROTATE_BOUNDARY: resource.fields.rotation.default,
     keys: new Set(),
@@ -396,14 +396,14 @@ document.addEventListener("DOMContentLoaded", async () => {
       controller.append(template.content.cloneNode(true));
       controller.classList.remove("xbox");
       controller.classList.add(allowedControllers[settings.skin]);
-      controller.style.opacity = settings.opacity;
+      controller.style.opacity = settings.opacity / 100;
     });
     for (const [name, property] of [
       ["offset", "STICK_OFFSET"],
       ["deadzone", "ANALOGUE_STICK_THRESHOLD"],
       ["rotation", "ROTATE_BOUNDARY"]
     ]) {
-      tester[property] = settings[name];
+      tester[property] = name === "deadzone" ? settings[name] / 100 : settings[name];
     }
     tester.TRIGGER_DISPLAY_TYPE = Number(settings.strength);
     tester.STICK_CURVING = settings.curve === "1";

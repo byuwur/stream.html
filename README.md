@@ -81,7 +81,9 @@ Pages import jQuery, Popper, Bootstrap, Select2, Pickr, and common assets direct
 
 ### Older URLs
 
-Replace `controller.html`, `popup.html`, or `main.html` with its tool folder, preserving parameters. Rebuild retired settings in the form: Controller `scale`; Popup pixel font/offset aliases, per-platform handles/account counts; Main scene `mode`, `showBG`, `hideCountdown`, and weekday fields.
+Replace `controller.html`, `popup.html`, or `main.html` with its tool folder. Rebuild retired settings in the form: Controller `scale`; Popup `fontSizeRem`/`textYOffsetRem` (now `fontSize`/`textYOffset` in pixels), per-platform handles/account counts; Main scene `mode`, `showBG`, `hideCountdown`, and weekday fields.
+
+Current URLs use percentages for opacity, deadzone, and scale: `100` means 100%, and `25` means 25%. Replace older fractional values explicitly; they are not converted. Social accounts use ordered rows so platforms may repeat; Main schedule entries use weekday maps. Unsupported list shapes retain defaults rather than being migrated. The form and Parameters dialog show the current fields and accepted values.
 
 ## Controller
 
@@ -93,8 +95,8 @@ Replace `controller.html`, `popup.html`, or `main.html` with its tool folder, pr
 | -------------------- | ----------------------------------------------------------------------------------- |
 | `player`             | Gamepads `1`–`4` (default `1`); keyboard `9`.                                       |
 | `skin`               | `1` Xbox, `2` PlayStation, `3` fight stick, `4` GameCube.                           |
-| `opacity`            | `0`–`1`.                                                                            |
-| `offset`, `deadzone` | Stick travel in pixels; deadzone threshold.                                         |
+| `opacity` | `0`–`100`%; default `100`. |
+| `offset`, `deadzone` | Stick travel in pixels; deadzone `0`–`100`% (default `25`). |
 | `strength`, `curve`  | `strength=0` disables trigger meters; `curve=1` enables stick curving.              |
 | `rotation`           | Maximum steering-wheel rotation in degrees.                                         |
 | `mapping`            | Custom Mapping binding array; `[]` uses defaults. Legacy `{"mapping":[...]}` works. |
@@ -112,7 +114,7 @@ Choose platforms, handles, and order. Repeated platforms are allowed. Brand icon
 | `mode`                                                   | `right` (default) or `left`.                                                                                                    |
 | `accounts` | Ordered rows, e.g. `[{"platform":"twitch","handle":"/byUwUr"},{"platform":"twitch","handle":"/byUwUr_es"}]`; up to 100 accounts, 160 characters/handle, 20,000 JSON characters. `[]` hides it. |
 | `pauseTime`, `inbetweenPauseTime`                        | Seconds/account and between cycles: `0`–`3600`, default `5` each.                                                               |
-| `scale`                                                  | `0.1`–`5`, anchored to the selected top corner.                                                                                 |
+| `scale` | `-500`–`500`%, anchored to the selected top corner; `100` keeps the original size. |
 | `iconBoxColor`, `textBoxColor`, `iconColor`, `fontColor` | Hex colors without `#`.                                                                                                         |
 | `primaryFont`, `fontWeight`                              | Family and weight `100`–`900`, step `100`; Courier/monospace fallback.                                                          |
 | `fontSize`, `textYOffset` | Size `8`–`100` px (default `72`); offset `-100`–`100` px. |
@@ -133,9 +135,9 @@ Invalid JSON/platforms retain the three default accounts; blank handles keep the
 | `primaryFont`, `titleSize`, `subtitleSize` | Family and sizes `8`–`200` px; Courier/monospace fallback. |
 | `primaryTextColor`, `subTextColor`, `accentColor`, `frameColor`, `contentBackgrounds`, `backgroundColor` | Hex without `#`; background defaults to transparent `00000000`. |
 | `frameWidth` | `0`–`100` px. |
-| `logoUrl`, `logoOpacity`, `logoScale` | Image URL/path, opacity `0`–`1`, scale `0.1`–`5`. Empty URL uses BONYUR. |
-| `backgroundType`, `backgroundUrl` | `video`/`image` and media URL/path; no bundled background media. |
-| `backgroundBlur`, `backgroundOverlayOpacity`, `backgroundOverlay` | Blur `0`–`100` px, tint opacity `0`–`1`, tint color. |
+| `logoUrl`, `logoOpacity`, `logoScale` | Image URL/path, opacity `0`–`100`% (default `5`), scale `-500`–`500`% (default `100`). Empty URL uses BONYUR. |
+| `backgroundType`, `backgroundUrl`, `backgroundScale` | `video`/`image`, media URL/path, and scale `-500`–`500`%. No bundled background media. |
+| `backgroundBlur`, `backgroundOverlayOpacity`, `backgroundOverlay` | Blur `0`–`100` px, tint opacity `0`–`100`%, tint color. |
 | `accounts` | Ordered rows with `platform`, `handle`, and `heading`; platforms may repeat. Up to 100 rows, 160 characters per text field, 20,000 JSON characters. Blank handles/`[]` hide accounts. |
 | `scheduleEntries` | Weekday-to-text map, e.g. `{"monday":"Activity"}`; up to seven days, 160 characters/text, 4,000 JSON characters. `{}` hides it. |
 | `countdownFormat` | `stopwatch` (total minutes/seconds, default), `clock`, `hours`, `units`, or total `seconds`. |
@@ -194,6 +196,8 @@ Shadows and glows have independent switches, both Off by default. Enable either 
 `byConfigurator.textFields()` declares per-element fonts, sizes, weight, spacing, line height, colors, opacity, and shadows. Size `0` and empty overrides preserve authored styles.
 
 Resource size and offset controls use pixels, including the configurator demo. The configurator interface keeps its rem-based styling.
+
+Resource size and offset controls use pixels, including the configurator demo. The configurator interface keeps its rem-based styling. Opacity, effect strength, and other bounded percentages use `0`–`100`; scale uses `-500`–`500`, where `100` preserves size and negative values flip both axes. URL values use these same units.
 
 ### Add a tool
 

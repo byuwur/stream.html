@@ -168,7 +168,7 @@ window.byConfigurator.configureResource = function ({ settings, gamepadSupport, 
     jqItem.text(value).css("opacity", 0.6 + Math.abs(value) * 0.4);
     if (!capture || capture.player !== player || disabledInputs.has(`${player}:${type}:${id}`)) return;
     const previous = type === "buttons" ? buttonValue(capture.snapshot.buttons?.[id]) : capture.snapshot.axes?.[id] ?? 0;
-    const threshold = type === "buttons" ? 0.25 : settings.deadzone;
+    const threshold = type === "buttons" ? 0.25 : settings.deadzone / 100;
     if (capture.mode !== "value" && Math.abs(previous - value) <= threshold) return;
     const typeName = type === "buttons" ? "Button" : "Axis";
     const config = { choiceType: type, choice: id };
