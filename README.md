@@ -33,6 +33,8 @@ The form handles encoding and list add/edit/reorder/remove. Colors use 3/4/6/8 h
 
 Fonts include 350 Google families, system fonts, and installed families/CSS stacks. Fonts and visible samples load on demand; OBS needs access to the chosen font or uses the tool's fallback. Theme preference is local; explicit motion Off/None/Static settings apply.
 
+Main offers countdown formats for hours/minutes/seconds, total minutes, total seconds, or unit labels. Formats change the display, not the countdown duration.
+
 Media fields reference public HTTP(S) URLs or paths relative to the tool HTML. Local file URLs need downloaded use. No uploads or Base64 `data:` media. Keep private information out of shared URLs.
 
 ### Keyboard shortcuts
@@ -136,6 +138,7 @@ Invalid JSON/platforms retain the three default accounts; blank handles keep the
 | `backgroundBlur`, `backgroundOverlayOpacity`, `backgroundOverlay` | Blur `0`–`100` px, tint opacity `0`–`1`, tint color. |
 | `accounts` | Ordered rows with `platform`, `handle`, and `heading`; platforms may repeat. Up to 100 rows, 160 characters per text field, 20,000 JSON characters. Blank handles/`[]` hide accounts. |
 | `scheduleEntries` | Weekday-to-text map, e.g. `{"monday":"Activity"}`; up to seven days, 160 characters/text, 4,000 JSON characters. `{}` hides it. |
+| `countdownFormat` | `stopwatch` (total minutes/seconds, default), `clock`, `hours`, `units`, or total `seconds`. |
 
 Invalid lists retain defaults. Pixels convert to rem at a 16px root. Follower/donation/subscriber labels are editable text, without live service updates.
 

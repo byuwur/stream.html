@@ -313,7 +313,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         },
         addLabel: "Add day",
         when: ["displaySchedule", "yes"]
-      }
+      },
+      countdownFormat: { type: "select", default: "stopwatch", label: "Countdown format", section: "Scene", when: ["displayCountdown", "yes"], options: byConfigurator.durationFormats }
     },
     constants: {
       backgroundScale: 1,
@@ -455,7 +456,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     let countdownTimer;
     function updateCountdown() {
       const remaining = Math.max(0, Math.ceil((deadline - Date.now()) / 1000));
-      time.textContent = `${Math.floor(remaining / 60)}:${String(remaining % 60).padStart(2, "0")}`;
+      time.textContent = byConfigurator.formatDuration(remaining, settings.countdownFormat, false);
       if (remaining === 0) {
         clearInterval(countdownTimer);
         time.hidden = true;

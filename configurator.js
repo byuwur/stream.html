@@ -736,6 +736,134 @@
     };
   }
 
+  const dateFormats = {
+    locale: "Locale default",
+    "yyyy-MM-dd": "2026-10-18 (yyyy-MM-dd)",
+    "yyyy/MM/dd": "2026/10/18 (yyyy/MM/dd)",
+    "dd/MM/yyyy": "18/10/2026 (dd/MM/yyyy)",
+    "MM/dd/yyyy": "10/18/2026 (MM/dd/yyyy)",
+    "dd.MM.yyyy": "18.10.2026 (dd.MM.yyyy)",
+    "dd-MM-yyyy": "18-10-2026 (dd-MM-yyyy)",
+    "dd MMM yyyy": "18 Oct 2026 (dd MMM yyyy)",
+    "MMM dd, yyyy": "Oct 18, 2026 (MMM dd, yyyy)",
+    "MMMM dd, yyyy": "October 18, 2026 (MMMM dd, yyyy)"
+  };
+
+  const timeFormats = {
+    locale: "Locale default",
+    "HH:mm:ss": "23:45:06 (HH:mm:ss)",
+    "HH:mm": "23:45 (HH:mm)",
+    "H:mm": "3:45 (H:mm)",
+    "hh:mm:ss a": "11:45:06 PM (hh:mm:ss a)",
+    "hh:mm a": "11:45 PM (hh:mm a)",
+    "h:mm a": "3:45 PM (h:mm a)"
+  };
+
+  const durationFormats = { clock: "01:02:03 (hours:minutes:seconds)", stopwatch: "62:03 (minutes:seconds)", hours: "01:02 (hours:minutes)", units: "1h 2m 03s", seconds: "3723 (total seconds)" };
+
+  /**
+   * Declare display formats, optional regional choices, and an optional date visibility condition.
+   * @param {Object} [options={}] Options that configure this operation.
+   * @param {boolean} [options.locale=false] Include a locale selector.
+   * @param {boolean} [options.timeZone=false] Include a time-zone selector.
+   * @param {string} [options.dateFormat="locale"] Default date pattern.
+   * @param {string} [options.timeFormat="locale"] Default time-of-day pattern.
+   * @param {unknown} options.dateWhen Visibility condition for date-related controls.
+   * @returns {ResourceFields} Fresh locale, time-zone, and date/time format fields.
+   */
+  function dateTimeFields({ locale = false, timeZone = false, dateFormat = "locale", timeFormat = "locale", dateWhen } = {}) {
+    const fields = {
+      dateFormat: {
+        type: "select",
+        default: dateFormat,
+        label: "Date format",
+        section: "Date & time",
+        ...(dateWhen ? { when: dateWhen } : {}),
+        description: "Patterns use Gregorian dates. Month names follow the selected locale.",
+        options: dateFormats
+      },
+      timeFormat: {
+        type: "select",
+        default: timeFormat,
+        label: "Time of day format",
+        section: "Date & time",
+        description: "Choose a 12- or 24-hour pattern, with or without seconds. Locale default keeps the resource's usual format.",
+        options: timeFormats
+      }
+    };
+    if (locale) fields.locale = { type: "locale", default: "", label: "Locale", section: "Date & time", validate: parseLocale, maxlength: 50 };
+    if (timeZone) fields.timeZone = { type: "timezone", default: "", label: "Time zone", section: "Date & time", validate: parseZone, maxlength: 100 };
+    return fields;
+  }
+
+  /**
+   * Return the format()/formatToParts() interface used by resource renderers.
+   * Locale default delegates to Intl; explicit patterns keep Gregorian/Latin digits and chosen separators.
+   * Callers supply Intl options, such as timeZone and the locale-default date/time parts.
+   * @param {string} pattern Selected date/time pattern.
+   * @param {string} locale Locale tag, or whether to declare the locale field.
+   * @param {Intl.DateTimeFormatOptions} options Intl options used by the locale-default formatter.
+   * @returns {Intl.DateTimeFormat|Object} An Intl-compatible formatter exposing format() and formatToParts().
+   */
+  function dateTimeFormatter(pattern, locale, options) {
+    if (pattern === "locale") return new Intl.DateTimeFormat(locale || undefined, options);
+    const types = { yyyy: "year", MMMM: "month", MMM: "month", MM: "month", dd: "day", HH: "hour", hh: "hour", H: "hour", h: "hour", mm: "minute", ss: "second", a: "dayPeriod" };
+    const tokens = pattern.split(/(yyyy|MMMM|MMM|MM|dd|HH|hh|H|h|mm|ss|a)/).filter(Boolean);
+    const formatter = new Intl.DateTimeFormat(locale || undefined, {
+      ...options,
+      calendar: "gregory",
+      numberingSystem: "latn",
+      ...(pattern.includes("yyyy") ? { year: "numeric", month: pattern.includes("MMMM") ? "long" : pattern.includes("MMM") ? "short" : "2-digit", day: "2-digit" } : {}),
+      ...(/[Hh]/.test(pattern) ? { hour: /HH|hh/.test(pattern) ? "2-digit" : "numeric", minute: "2-digit", second: pattern.includes("ss") ? "2-digit" : undefined, hourCycle: pattern.includes("h") ? "h12" : "h23" } : {})
+    });
+    /**
+     * Return the locale-formatted parts used to assemble the selected date/time pattern.
+     * @param {Date|number} value Date or timestamp to format.
+     * @returns {Array<unknown>}
+     */
+    function formatToParts(value) {
+      const parts = Object.fromEntries(formatter.formatToParts(value).map(({ type, value }) => [type, value]));
+      return tokens.map((token) => {
+        const type = types[token] || "literal";
+        let value = types[token] ? parts[type] : token;
+        if (["yyyy", "MM", "dd", "HH", "hh", "mm", "ss"].includes(token)) value = value.padStart(token === "yyyy" ? 4 : 2, "0");
+        if (token === "H" || token === "h") value = String(Number(value));
+        return { type, value };
+      });
+    }
+    return {
+      formatToParts,
+      format: (value) =>
+        formatToParts(value)
+          .map((part) => part.value)
+          .join("")
+    };
+  }
+
+  /**
+   * Format elapsed seconds, not a calendar time: total-minute/second modes do not wrap at midnight.
+   * Callers supply whole seconds and an optional 0-999 millisecond fraction; null hides the fraction.
+   * @param {number} total Total seconds to format.
+   * @param {string} [format="clock"] Selected display format.
+   * @param {boolean} [showDays=true] Include whole days in formats that support them.
+   * @param {null} [milliseconds=null] Optional fractional milliseconds.
+   * @returns {string} Formatted duration; total-minute and total-second modes do not wrap at midnight.
+   */
+  function formatDuration(total, format = "clock", showDays = true, milliseconds = null) {
+    const days = showDays ? Math.floor(total / 86400) : 0;
+    const hours = showDays ? Math.floor(total / 3600) % 24 : Math.floor(total / 3600);
+    const minutes = Math.floor(total / 60) % 60,
+      seconds = total % 60;
+    const pad = (value) => String(value).padStart(2, "0"),
+      prefix = days ? `${days}d ` : "";
+    const fraction = milliseconds === null ? "" : `.${String(milliseconds).padStart(3, "0")}`;
+    if (format === "seconds") return `${total}${fraction}`;
+    if (format === "stopwatch") return `${Math.floor(total / 60)}:${pad(seconds)}${fraction}`;
+    if (format === "hours") return `${prefix}${pad(hours)}:${pad(minutes)}`;
+    if (format === "units") return `${prefix}${hours ? `${hours}h ` : ""}${minutes}m ${pad(seconds)}${fraction}s`;
+    return `${prefix}${pad(hours)}:${pad(minutes)}:${pad(seconds)}${fraction}`;
+  }
+
   /**
    * Build the readable overlay URL shared by editor actions and native resource interactions.
    * Only declared fields are emitted. urlRequired keeps overlay mode/timestamp anchors even at defaults.
@@ -942,6 +1070,10 @@
     insetFields,
     layoutFields,
     transitionFields,
+    dateTimeFields,
+    dateTimeFormatter,
+    durationFormats,
+    formatDuration,
     initResource,
     parseAccounts,
     parseZone,
