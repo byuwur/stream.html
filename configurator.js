@@ -1004,7 +1004,9 @@
 
     /**
      * Apply same-tool URLs in place; opening another tool requires Enter or a field change.
+     * Rebuild from resource defaults so omitted fields reset, while preserving this page's opening Reset baseline.
      * @param {boolean} [automatic=false] Suppress partial-input errors and preserve the focused draft.
+     * @returns {Promise<boolean|undefined>} The resulting asynchronous value.
      */
     async function applyEditedURL(automatic = false) {
       if (!urlEdited) return;
@@ -1025,10 +1027,7 @@
       const generation = ++urlGeneration;
       const parameters = await readURLParameters(parameterRules, url.search);
       if (generation !== urlGeneration) return;
-      const loaded = {
-        ...resource.constants,
-        ...Object.fromEntries(Object.entries(parameterRules).map(([name, field]) => [name, structuredClone(field.default)]))
-      };
+      const loaded = { ...resource.constants, ...Object.fromEntries(Object.entries(parameterRules).map(([name, field]) => [name, structuredClone(field.default)])) };
       byConfigurator.applyParameters(parameterRules, loaded, parameters.values);
       // Keep this document and its widget lifetimes; only the preview loads a new overlay.
       Object.assign(settings, loaded);
@@ -1037,12 +1036,18 @@
       $(fields).each((_, field) => $(field).triggerHandler("change"));
       loadCompressionOptions(url.search, url.search ? parameters.compressedFields : new Set());
       $("#url-load-error").text(parameters.error).prop("hidden", !parameters.error);
-      await generateURL(automatic);
+      return generateURL(automatic);
     }
 
-    /** Resolve action targets from the typed URL, or regenerate from the form when no draft is active. */
+    /**
+     * Resolve action targets from the typed URL, or regenerate from the form when no draft is active.
+     * @returns {Promise<URL|null>} The resulting asynchronous value.
+     */
     async function currentOverlayURL() {
-      if (!urlEdited && !(await generateURL())) {
+      if (urlEdited) {
+        const draft = readEditorURL();
+        if (draft && sameResourceURL(draft) && !(await applyEditedURL())) return null;
+      } else if (!(await generateURL())) {
         form.reportValidity();
         return null;
       }
