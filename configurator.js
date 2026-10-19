@@ -121,6 +121,7 @@
       try {
         const saved = JSON.parse(value);
         if (!saved || typeof saved.query !== "string") continue;
+        // Drop saved UI references to fields that this resource no longer declares.
         const advanced = saved.advanced;
         return {
           query: saved.query,
@@ -151,6 +152,7 @@
     const selectedFields = new Set();
     let errorMessage = "";
     let values = explicit;
+    // Expand the whole query first, then let readable parameters replace matching packed values.
     if (explicit.has("data")) {
       try {
         const compressed = new URLSearchParams(await global.decompress_url_data(explicit.get("data")));
@@ -162,6 +164,7 @@
       }
     }
     const decoded = new URLSearchParams();
+    // Decode fields independently so one broken compressed value does not discard valid neighbors.
     for (const [name, value] of values) {
       if (!Object.hasOwn(fields, name)) continue;
       if (value.startsWith("raw:")) decoded.append(name, value.slice(4));
@@ -301,6 +304,7 @@
   function validParameter(fields, name, value) {
     if (!Object.hasOwn(fields, name)) return false;
     const rule = fields[name];
+    // A resource validator owns acceptance for its custom format, including structured list values.
     if (rule.validate) return rule.validate(value) !== null;
     if (rule.options && !Object.hasOwn(rule.options, value)) return false;
     if (rule.maxlength && value.length > Number(rule.maxlength)) return false;
@@ -312,6 +316,7 @@
       if (!value.trim() || !Number.isFinite(number) || number < Number(rule.min) || number > Number(rule.max)) return false;
       if (rule.step && rule.step !== "any") {
         const steps = (number - Number(rule.min)) / Number(rule.step);
+        // Decimal increments can produce tiny rounding errors even at valid step boundaries.
         if (Math.abs(steps - Math.round(steps)) > 1e-8) return false;
       }
     }
@@ -332,6 +337,7 @@
     if (!when) return true;
     const [parent, ...values] = when;
     const value = String(settings[parent]);
+    // Matching the immediate parent is insufficient if an earlier ancestor is inactive.
     return (values.length ? values.includes(value) : value !== "") && fieldEnabled(fields, settings, parent);
   }
 
@@ -350,6 +356,7 @@
       if (!Object.hasOwn(fields, name)) continue;
       const rule = fields[name];
       if (value === "") {
+        // Structured defaults must not become mutable aliases of the field declaration.
         settings[name] = structuredClone(rule.default);
         continue;
       }
@@ -363,6 +370,7 @@
       if (rule.type === "color" && !(rule.optional && parsed === "")) parsed = `#${String(parsed).replace(/^#/, "")}`;
       settings[name] = parsed;
     }
+    // Resolve availability after applying every parameter, regardless of its order in the URL.
     for (const [name, field] of Object.entries(fields)) {
       if (!fieldEnabled(fields, settings, name)) settings[name] = field.type === "switch" ? field.uncheckedValue : structuredClone(field.default);
     }
@@ -384,7 +392,7 @@
   /**
    * Declare per-element typography while retaining the resource's base appearance by default.
    * Elements map IDs to [label, selector, optional size/color list]; other typography is always added.
-   * Size 0 and empty overrides preserve authored styles. Explicit lengths use pixels, opacity uses %.
+   * Size 0 and neutral generated defaults preserve authored styles. Lengths use pixels, opacity uses %.
    * @param {Object<string, Array>} elements Element IDs also prefix the generated URL field names.
    * @param {Object<string, Array<string>>} [conditions={}] Optional when condition for each element ID.
    * @returns {ResourceFields} Fresh typography fields keyed by their URL parameter names.
@@ -392,6 +400,7 @@
    */
   function textFields(elements, conditions = {}) {
     const result = {};
+    // Prefix each element's controls with its ID so reusable field groups keep independent values.
     for (const [name, [label, selector, properties = ["size", "color"]]] of Object.entries(elements)) {
       const fields = {};
       const section = `${label} text`;
@@ -497,6 +506,7 @@
         }
       });
       Object.assign(fields, shadowFields(`${name}TextShadow`, label, selector, "text-shadow", section));
+      // Keep each effect's own toggle condition; only top-level controls inherit the element condition.
       Object.assign(result, whenFields(conditions[name], fields));
     }
     return initializeDefaults(result);
@@ -513,6 +523,7 @@
     const result = {};
     for (const [name, [label, selector, properties = ["background", "border", "radius", "padding", "shadow"]]] of Object.entries(elements)) {
       const fields = {};
+      // Every generated override targets the same element, but only requested properties get controls.
       const shared = { default: "", optional: true, section: `${label} surface`, styleSelector: selector };
       if (properties.includes("background")) fields[`${name}Background`] = { ...shared, type: "color", label: `${label} background`, maxlength: 80, styleProperty: "background-color" };
       if (properties.includes("padding")) fields[`${name}Padding`] = { ...shared, type: "number", label: `${label} padding (px)`, min: 0, max: 300, step: "any", styleProperty: "padding", styleUnit: "px" };
@@ -624,6 +635,7 @@
       styleSelector: selector,
       styleProperty: property,
       styleValue: (settings) => {
+        // One writer combines both enabled layers; separate CSS rules would replace each other.
         const layers = [];
         for (const [key, x, y] of [
           [name, settings[`${name}X`], settings[`${name}Y`]],
@@ -635,6 +647,7 @@
           if (property === "box-shadow" && settings[`${key}Inset`] === "yes") value = `inset ${value}`;
           layers.push(property === "filter" ? `drop-shadow(${value})` : value);
         }
+        // Filter functions use spaces; text-shadow and box-shadow lists use commas.
         return layers.join(property === "filter" ? " " : ", ") || "none";
       }
     });
@@ -688,6 +701,7 @@
       const mode = settings[`${name}Mode`];
       const dropShadow = shadow?.(settings) || "";
       const values = mode === "custom" ? Object.entries(adjustments).map(([key, { filter, unit }]) => `${filter}(${settings[`${name}${key}`]}${unit})`) : [];
+      // Shadow/glow toggles remain usable even when the color and blur adjustments are Off.
       if (dropShadow && dropShadow !== "none") values.push(dropShadow);
       return values.join(" ") || (mode || dropShadow ? "none" : "");
     };
@@ -724,7 +738,7 @@
   }
 
   /**
-   * Declare signed pixel edge overrides; zero leaves an edge unchanged, all zero preserves CSS.
+   * Declare signed pixel edge overrides; all zero preserves CSS, otherwise zero edges become auto.
    * @param {string} name Field or item identifier.
    * @param {string} label Human-readable label.
    * @param {string} selector CSS selector identifying the target elements.
@@ -751,6 +765,7 @@
       styleProperty: "inset",
       styleValue: (settings) => {
         const values = ["Top", "Right", "Bottom", "Left"].map((side) => settings[`${name}${side}`]);
+        // Keep base CSS when all edges are neutral; a partial override releases the other edges to auto.
         return values.every((value) => value === 0) ? "" : values.map((value) => (value === 0 ? "auto" : `${value}px`)).join(" ");
       }
     });
@@ -929,6 +944,7 @@
    */
   function dateTimeFormatter(pattern, locale, options) {
     if (pattern === "locale") return new Intl.DateTimeFormat(locale || undefined, options);
+    // Intl supplies localized parts; the selected pattern controls their order and literal separators.
     const types = { yyyy: "year", MMMM: "month", MMM: "month", MM: "month", dd: "day", HH: "hour", hh: "hour", H: "hour", h: "hour", mm: "minute", ss: "second", a: "dayPeriod" };
     const tokens = pattern.split(/(yyyy|MMMM|MMM|MM|dd|HH|hh|H|h|mm|ss|a)/).filter(Boolean);
     const formatter = new Intl.DateTimeFormat(locale || undefined, {
@@ -972,6 +988,7 @@
    * @returns {string} Formatted duration; total-minute and total-second modes do not wrap at midnight.
    */
   function formatDuration(total, format = "clock", showDays = true, milliseconds = null) {
+    // With days hidden, hours keep accumulating instead of wrapping at 24.
     const days = showDays ? Math.floor(total / 86400) : 0;
     const hours = showDays ? Math.floor(total / 3600) % 24 : Math.floor(total / 3600);
     const minutes = Math.floor(total / 60) % 60,
@@ -1005,11 +1022,13 @@
     const values = Object.entries(settings)
       .filter(([name, value]) => {
         if (!Object.hasOwn(parameterRules, name)) return false;
+        // Required parameters keep default configurations in overlay mode even when nothing was edited.
         if (resource.urlRequired.includes(name)) return true;
         if (!fieldEnabled(parameterRules, settings, name)) return false;
         const rule = parameterRules[name];
         if (rule.type === "font" && value === "") return false;
         if (rule.type === "color") {
+          // Let CSS equate short/long hex spellings before deciding whether this is a real override.
           color.color = value;
           const current = color.color;
           color.color = rule.default;
@@ -1039,8 +1058,10 @@
    */
   function initializeDefaults(fields) {
     for (const [name, field] of Object.entries(fields)) {
+      // Explicit zero, false, and structured values belong to the resource and must survive unchanged.
       if (field.default !== "" && field.default !== undefined && field.default !== null) continue;
       if (field.type === "number") {
+        // Percent scale/opacity use 100 as neutral; clamp other zero fallbacks to the field's range.
         const value = /(?:Opacity|Scale)$|^(?:opacity|scale)$/.test(name) ? 100 : 0;
         field.default = Math.max(Number(field.min ?? 0), Math.min(Number(field.max ?? Infinity), value));
       } else if (field.type === "color") field.default = /background/i.test(name) || field.styleProperty === "background-color" ? "#00000000" : "#FFFFFF";
@@ -1053,6 +1074,7 @@
       else if (field.type === "url") field.default = "https://byuwur.github.io/img/logo.png";
       else if (field.options) field.default = field.styleProperty === "font-weight" ? "400" : Object.hasOwn(field.options, "none") ? "none" : Object.keys(field.options)[0];
       else field.default = "byUwUr";
+      // Retain the neutral CSS baseline if a resource later replaces a generated field's default.
       if (field.styleSelector && !field.styleValue) field.styleDefault = field.default;
     }
     return fields;
@@ -1071,10 +1093,12 @@
     initializeDefaults(resource.fields);
     const overlay = location.search.length > 1 && !location.hash;
     if (!overlay) savedPreferences = readPreferences(resource.fields);
+    // Saved edits resume only on bare editor URLs; overlays and explicit links use their own query.
     const search = !overlay && !location.search ? savedPreferences.query : location.search;
     resourceReady = readURLParameters(resource.fields, search).then((parameters) => {
       parameterError = parameters.error;
       compressedFields = location.search ? parameters.compressedFields : new Set();
+      // Resolve one settings object for both consumers before either the renderer or editor starts.
       const settings = { ...resource.constants, ...Object.fromEntries(Object.entries(resource.fields).map(([name, field]) => [name, structuredClone(field.default)])) };
       applyParameters(resource.fields, settings, parameters.values);
       global.byStreamOverlay = overlay;
@@ -1094,6 +1118,7 @@
         if (overrides.length) {
           const style = document.createElement("style");
           document.body.append(style);
+          // Ordering needs a flex parent even when the resource's original layout did not use one.
           for (const parent of new Set(overrides.map(([field]) => field.styleParent).filter(Boolean))) {
             const index = style.sheet.insertRule(`:where(${parent}) {}`, style.sheet.cssRules.length);
             style.sheet.cssRules[index].style.setProperty("display", "flex", "important");
@@ -1205,6 +1230,7 @@
    */
   function parseTimestamp(value) {
     if (value.length > 40 || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2}(\.\d{1,3})?)?(Z|[+-]\d{2}:\d{2})$/.test(value)) return null;
+    // Date.parse can normalize impossible days; check the written calendar values before accepting it.
     const [year, month, day, hour, minute, second = 0] = value
       .match(/^([0-9]{4})-([0-9]{2})-([0-9]{2})T([0-9]{2}):([0-9]{2})(?::([0-9]{2}))?/)
       .slice(1)
@@ -1221,6 +1247,7 @@
   function safeImage(value) {
     if (!value) return true;
     try {
+      // Resolve relative paths against the resource page and reject local files from hosted pages.
       const url = new URL(value, location.href);
       return ["http:", "https:", "file:"].includes(url.protocol) && (url.protocol !== "file:" || location.protocol === "file:") && !url.username && !url.password;
     } catch {
@@ -1238,8 +1265,10 @@
   function watch(update, interval = 1000) {
     let pending;
     function resume() {
+      // Visibility and page events replace the pending tick rather than starting another loop.
       clearTimeout(pending);
       const keepUpdating = update() !== false;
+      // Align the next tick to the clock boundary instead of adding a full interval after rendering.
       if (keepUpdating && !document.hidden) pending = setTimeout(resume, interval - (Date.now() % interval));
     }
     document.addEventListener("visibilitychange", resume);
@@ -1608,6 +1637,7 @@
     const resource = window.byStreamResource;
     const jqHost = $("#configurator");
     if (!jqHost.length || !resource || window.byStreamOverlay || jqHost.find("form[data-configurator]").length) return;
+    // Switch styles before measuring widgets; renderer styles must not affect the editor shell.
     $("html").addClass("bywr-configurator configure");
     $("body").attr("class", "bg-body text-body m-0");
     $("[data-editor-style]").attr("media", "all").prop("disabled", false);
@@ -1812,6 +1842,7 @@
       jqHost.find(".setup-intro").text(resource.description);
       jqHost.find("#preview-viewport").attr("viewBox", `0 0 ${resource.preview.join(" ")}`);
       jqHost.find("#overlay-preview").attr({ title: `${resource.title} preview`, allow: resource.previewAllow || "" });
+      // Create groups on first use instead of sorting; resource declaration order is the display order.
       const groups = new Map();
       const subsections = new Map();
       const jqForm = jqHost.find("form");
@@ -1883,6 +1914,7 @@
           }
         }
         if (field.type !== "switch") control.addClass("rounded-0 bg-body-secondary border-secondary-subtle");
+        // These named controls remain the serialization source even when widgets replace their UI.
         control.attr({ name, id: field.id || `field-${name}`, "data-title": field.label, "data-description": field.description || "" });
         for (const key of ["min", "max", "maxlength", "placeholder"]) if (field[key] !== undefined && field[key] !== Infinity) control.attr(key, field[key]);
         if (field.optional && !field.placeholder) control.attr("placeholder", field.default === "" ? "Off" : String(field.default));
@@ -1914,12 +1946,14 @@
      * @returns {Promise<boolean>} Whether the latest URL was generated from valid fields.
      */
     async function generateURL(keepURLDraft = false) {
+      // Restoring a value can emit change events; capture the revision after those handlers finish.
       fields.forEach(restoreEmptyField);
       const generation = ++urlGeneration;
       // Event handlers can pass a jQuery event; only explicit true preserves the draft.
       urlEdited = keepURLDraft === true;
       $("#overlay-url")[0].setCustomValidity("");
       syncFieldVisibility();
+      // Check every field so all invalid sections are revealed, rather than stopping at the first.
       const valid = fields.map(validField).every(Boolean);
       if (!valid) {
         $("#overlay-url").val("");
@@ -1935,6 +1969,7 @@
         values.set(input.name, value);
       }
       byConfigurator.applyParameters(parameterRules, settings, values);
+      // Always derive compression from the same sparse readable URL used by ordinary links.
       const readableURL = settingsURL(resource, settings);
       let url = readableURL;
       let summary = `${url.href.length.toLocaleString()} characters. Parameters remain readable.`;
@@ -1972,6 +2007,7 @@
           summary = `Shorter URLs are unavailable. Using the readable URL (${url.href.length.toLocaleString()} characters).`;
         }
       }
+      // Compression can finish out of order; only the latest edit may publish or save its URL.
       if (generation !== urlGeneration) return false;
       savePreferences(url.search.slice(1));
       if (!urlEdited) $("#overlay-url").val(url.href);
@@ -2046,6 +2082,7 @@
       const generation = ++urlGeneration;
       const parameters = await readURLParameters(parameterRules, url.search);
       if (generation !== urlGeneration) return;
+      // Omitted parameters reset to defaults instead of inheriting values from the previous form.
       const loaded = { ...resource.constants, ...Object.fromEntries(Object.entries(parameterRules).map(([name, field]) => [name, structuredClone(field.default)])) };
       byConfigurator.applyParameters(parameterRules, loaded, parameters.values);
       // Keep this document and its widget lifetimes; only the preview loads a new overlay.
@@ -2063,6 +2100,7 @@
      * @returns {Promise<URL|null>} The resulting asynchronous value.
      */
     async function currentOverlayURL() {
+      // Copy/Open must honor a typed URL draft instead of silently regenerating the old form URL.
       if (urlEdited) {
         const draft = readEditorURL();
         if (draft && sameResourceURL(draft) && !(await applyEditedURL())) return null;
@@ -2150,6 +2188,7 @@
       if (!window.byFont || typeof window.byFont.picker !== "function") return;
       fields.forEach((field, index) => {
         if (parameterRules[field.name]?.type !== "font") return;
+        // The picker may replace the original node; later validation must use the replacement control.
         fields[index] = byFont.picker(field, {
           initSelect2,
           fallback: '"Courier New", Courier, monospace',
@@ -2219,6 +2258,7 @@
       const jqSection = jqOutput.closest(".entry-editor");
       const jqEditor = jqSection.find(".entry-list");
       const jqAdd = jqSection.find(".add-entry");
+      // Keep the opening value separate from editable rows so Reset can rebuild it without mutation.
       const initial = structuredClone(entries);
       const map = !Array.isArray(initial);
       const strings = typeof newEntry === "string";
@@ -2287,6 +2327,7 @@
        */
       function sync() {
         const jqRows = jqEditor.children();
+        // Serialize DOM order back into the original map, string-array, or object-array shape.
         const values = jqRows.get().map((row, index) => {
           const jqRow = $(row);
           jqRow.find('[data-action="up"]').prop("disabled", index === 0);
@@ -2308,6 +2349,7 @@
           });
           return entry;
         });
+        // Repeated platform rows are valid arrays; duplicate map keys would silently erase earlier rows.
         const duplicate = map && new Set(values.map(([key]) => key)).size !== values.length;
         jqOutput.val(duplicate ? "" : JSON.stringify(map ? Object.fromEntries(values) : values));
         jqEditor.find("input").each(function () {
@@ -2317,6 +2359,7 @@
         jqAdd.prop("disabled", jqRows.length >= limit);
       }
       function reset(entries = initial) {
+        // Destroy Select2 before removing rows so detached dropdowns and widget handlers are cleaned up.
         jqEditor.find("select").each(function () {
           if ($(this).data("select2")) $(this).select2("close").select2("destroy");
         });
@@ -2419,6 +2462,7 @@
         if (!jqField.length) continue;
         const initial = jqField.val();
         const title = jqField.closest("label").find(".field-caption").text() || name;
+        // The visible picker uses local wall time; the named hidden input keeps absolute UTC for URLs.
         jqField.attr({ type: "hidden", "data-title": title });
         const jqPicker = $(/* HTML */ `<input type="datetime-local" step="1" required />`)
           .attr({ class: `${jqField.attr("class")} timestamp-picker`, "aria-label": title })
@@ -2486,6 +2530,7 @@
       const multiple = parameterRules[name].type === "timezones";
       const validate = locale ? parseLocale : parseZone;
       const placeholder = multiple ? "Choose up to three time zones" : locale ? "Browser locale" : "OBS computer time zone";
+      // Build display labels once per picker kind; URLs still contain only the original locale/zone IDs.
       if (!regionalChoices.has(locale)) {
         const codes = locale
           ? [...navigator.languages, ...localeCodes]
@@ -2525,6 +2570,7 @@
         event.stopPropagation();
         let value = jqSelect.val();
         if (multiple) {
+          // Keep surviving selections in their prior order, then append newly selected zones.
           const selected = value || [];
           const previous = jqField
             .val()
@@ -2614,6 +2660,7 @@
         function syncPicker() {
           const text = jqInput.val();
           const value = optional && !text ? null : `#${text.replace(/^#/, "")}`;
+          // Programmatic picker updates must not feed back into a new canonical input change.
           syncing = true;
           if (picker.setColor(value, true)) {
             picker.setColorRepresentation("HEX");
@@ -2651,6 +2698,7 @@
      * @returns {void}
      */
     function savePreferences(query = savedPreferences.query) {
+      // Section/compression edits reuse the last accepted query, never an invalid in-progress form.
       savedPreferences = {
         query,
         advanced: {
@@ -2899,6 +2947,7 @@
       let helpTrigger;
       let helpOpen = false;
       const groups = new Map();
+      // Build compression choices from the same field metadata as the form, preserving its groups.
       Object.entries(parameterRules).forEach(([name, rule], index) => {
         const section = rule.section || "Settings";
         if (!groups.has(section)) {
@@ -2972,6 +3021,7 @@
       else $("#advanced-options").removeAttr("data-bs-toggle");
       const previewSize = $("#preview-viewport")[0].viewBox.baseVal;
       jqDialog.find(".help-dimensions").text(`The preview uses ${previewSize.width} x ${previewSize.height} pixels. Use those source dimensions as a starting point and adjust them to your layout.`);
+      // Generate defaults, constraints, and examples from live rules so help stays aligned with resources.
       const jqParameters = jqDialog.find(".help-parameters");
       const acceptedTypes = {
         color: "Hex color: 3, 4, 6, or 8 digits; omit # in URLs",
@@ -3024,6 +3074,7 @@
        */
       function showSection(section) {
         popover?.hide();
+        // Switching tabs in an open dialog must not replace the element that should regain focus.
         if (!jqDialog.hasClass("show")) helpTrigger = document.activeElement;
         jqDialog.find("#help-title").text(titles[section]);
         jqDialog.find("[data-panel]").prop("hidden", true).filter(`[data-panel="${section}"]`).prop("hidden", false);
@@ -3191,6 +3242,7 @@
      * @returns {void}
      */
     function syncFieldVisibility() {
+      // Availability follows current form drafts; settings still contains the last accepted values.
       const values = Object.fromEntries(fields.map((input) => [input.name, input.type === "checkbox" ? (input.checked ? input.value : input.dataset.uncheckedValue) : input.value]));
       for (const input of fields) {
         if (!parameterRules[input.name].when) continue;
@@ -3198,6 +3250,7 @@
         $(input).siblings(".timestamp-picker, [data-regional-picker]").prop("disabled", input.disabled);
         $(input).closest(".conditional-field").prop("hidden", input.disabled);
       }
+      // Hide empty headings too, so disabled descendants do not leave blank groups in the form.
       jqForm.find(".field-subsection, [data-config-section]").each((_, container) => {
         const empty = !$(container)
           .find("[name]")
@@ -3222,6 +3275,7 @@
       const value = rule.default;
       const text = typeof value === "object" ? JSON.stringify(value) : String(value);
       if (text === "") return;
+      // Imported/custom defaults may not exist in a picker's initial option list.
       if (field.tagName === "SELECT" && ![...field.options].some((option) => option.value === text)) field.add(new Option(text, text));
       $(field).val(text).trigger("change");
     }
@@ -3233,6 +3287,7 @@
      */
     function validField(field) {
       if (field.disabled) {
+        // A hidden dependent field must not keep an earlier error active or block URL generation.
         field.setCustomValidity("");
         return true;
       }
@@ -3267,6 +3322,7 @@
         } else {
           if (parameterRules[this.name].type === "font" && jqField.is("select") && ![...this.options].some((option) => option.value === value)) this.add(new Option(value, value));
           jqField.val(typeof value === "object" ? JSON.stringify(value) : value);
+          // Imports update current values; only initial setup may change the native Reset baseline.
           if (!saveDefaults) return;
           if (jqField.is("select"))
             jqField.find("option").prop("defaultSelected", function () {
@@ -3312,6 +3368,7 @@
       initHelpDialog(initResourceHelp);
       initColorPickers();
       jqForm.find("select").each((_, select) => initSelect2(select));
+      // Both editing paths share a revision so queued form work cannot overwrite a newer URL draft.
       const generateURLDebounced = global.debounce((generation) => {
         if (generation === urlGeneration) generateURL();
       });
@@ -3371,6 +3428,7 @@
         });
       $(window)
         .on("pagehide", () => {
+          // Invalidate asynchronous work while leaving the document, including before bfcache storage.
           urlGeneration++;
         })
         .on("pageshow", generateURL);
