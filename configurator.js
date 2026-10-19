@@ -717,6 +717,26 @@
   }
 
   /**
+   * Shared cycle timings; the named parent must offer fade/slide modes for conditional controls.
+   * @param {string} [parent="transition"] Element that receives the created content.
+   * @returns {ResourceFields} Fresh duration, delay, and easing fields controlled by the transition mode.
+   */
+  function transitionFields(parent = "transition") {
+    return {
+      transitionDuration: { type: "number", default: 450, label: "Transition duration (ms)", section: "Animation", when: [parent, "fade", "slide"], min: 0, max: 10000, step: "any" },
+      transitionEasing: {
+        type: "select",
+        default: "linear",
+        label: "Transition easing",
+        section: "Animation",
+        when: [parent, "fade", "slide"],
+        options: { linear: "Linear", ease: "Ease", "ease-in": "Ease in", "ease-out": "Ease out", "ease-in-out": "Ease in and out" }
+      },
+      slideDistance: { type: "number", default: 24, label: "Slide distance (px)", section: "Animation", when: [parent, "slide"], min: -1000, max: 1000, step: "any" }
+    };
+  }
+
+  /**
    * Build the readable overlay URL shared by editor actions and native resource interactions.
    * Only declared fields are emitted. urlRequired keeps overlay mode/timestamp anchors even at defaults.
    * Inactive optional fields and defaults are omitted; CSS normalizes equivalent colors, and JSON comparison preserves data order.
@@ -921,6 +941,7 @@
     offsetFields,
     insetFields,
     layoutFields,
+    transitionFields,
     initResource,
     parseAccounts,
     parseZone,
