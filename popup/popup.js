@@ -23,7 +23,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         default: [ { platform: "twitch", handle: "/byUwUr" }, { platform: "youtube", handle: "@byUwUr" }, { platform: "instagram", handle: "@byUwUr" } ],
         label: "Social accounts",
         section: "Social accounts",
-        description: "Ordered account JSON: up to 100 entries with a supported platform and a handle of up to 160 characters.",
+        description: "Ordered account rows with platform and handle. Platforms may repeat; up to 100 rows, 160 characters per handle.",
         validate: byConfigurator.parseAccounts,
         maxlength: 20000,
         entries: { choices: "platforms", choiceKey: "platform", textFields: [["handle", "Handle or display text"]], newEntry: { platform: "twitch", handle: "" } },

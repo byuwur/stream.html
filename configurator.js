@@ -261,25 +261,24 @@
     return resourceReady;
   }
 
-  /** Main accepts headings; Popup keeps only the platform and display handle. */
+  /**
+   * Validate ordered account rows without changing their order or deduplicating platforms.
+   * Main requires a heading on each row; Popup uses platform and handle only. Invalid data returns null.
+   * @param {string} value Raw form or URL value to validate or format.
+   * @param {boolean} [withHeading=false] Require a heading string on each Main scene account row.
+   * @returns {Array<Object>|null} Accepted account rows; null rejects unsupported data without converting it.
+   */
   function parseAccounts(value, withHeading = false) {
     if (value.length > 20000) return null;
     try {
       const entries = JSON.parse(value);
-      if (!Array.isArray(entries) || entries.length > 100) return null;
-      if (
-        !entries.every(
-          (entry) =>
-            entry &&
-            typeof entry.platform === "string" &&
-            Object.hasOwn(platforms, entry.platform) &&
-            typeof entry.handle === "string" &&
-            entry.handle.length <= 160 &&
-            (!withHeading || entry.heading === undefined || (typeof entry.heading === "string" && entry.heading.length <= 160))
-        )
+      return Array.isArray(entries) && entries.length <= 100 && entries.every((entry) =>
+        entry && typeof entry.platform === "string" && Object.hasOwn(platforms, entry.platform) &&
+        typeof entry.handle === "string" && entry.handle.length <= 160 &&
+        (!withHeading || (typeof entry.heading === "string" && entry.heading.length <= 160))
       )
-        return null;
-      return entries.map(({ platform, handle, heading = "" }) => (withHeading ? { platform, handle, heading } : { platform, handle }));
+        ? entries
+        : null;
     } catch {
       return null;
     }
@@ -1110,19 +1109,35 @@
     }
 
     /**
-     * Edits an ordered list; the resource validates entries and the configurator owns URL generation.
+     * Edit rows while preserving the resource's declared JSON shape in one hidden field.
+     * Initial data selects map versus array; newEntry selects string versus object rows for arrays.
+     * Maps require unique keys, and visible row order becomes serialized data order.
+     * The resource validates the final value; this widget owns editing and serialization only.
      * @param {string} name Hidden form field holding the serialized list.
-     * @param {Array<Object>} entries Initial entries, restored on Reset.
+     * @param {Object|Array<Object|string>} entries Initial map or array, restored on Reset.
      * @param {Object} options Optional choices/key, text field key/label/type triples, defaults, and row limit.
+     * @param {Object<string, string>} options.choices Stored choice IDs mapped to their displayed labels.
+     * @param {string} options.choiceKey Entry property that stores the chosen ID.
+     * @param {Array<Array<string>>} options.textFields Entry property names paired with their labels.
+     * @param {Object} options.newEntry Initial value for a newly added entry.
+     * @param {number} [options.limit=100] Maximum number of accepted entries.
+     * @returns {void}
      */
     function initEntryEditor(name, entries, { choices, choiceKey, textFields, newEntry, limit = 100 }) {
       const jqOutput = $(form.elements[name]);
       const jqSection = jqOutput.closest(".entry-editor");
       const jqEditor = jqSection.find(".entry-list");
       const jqAdd = jqSection.find(".add-entry");
-      const initial = entries.map((entry) => ({ ...entry }));
+      const initial = structuredClone(entries);
+      const map = !Array.isArray(initial);
+      const strings = typeof newEntry === "string";
       jqOutput.prop("defaultValue", JSON.stringify(initial));
 
+      /**
+       * Append one editable entry row and bind its changes to the canonical serialized field.
+       * @param {unknown} entry One entry in the declared content format.
+       * @returns {jQuery} The appended editor row.
+       */
       function addRow(entry) {
         const jqRow = $(/* HTML */ `<div class="entry-row p-2 mb-2 border border-secondary-subtle bg-body-tertiary"></div>`).html(/* HTML */ `
           <div class="d-flex align-items-center gap-1 mb-1">
@@ -1145,9 +1160,10 @@
         if (!choices) jqRow.find("select, .entry-icon").remove();
         if (choiceKey === "platform") jqRow.find(".entry-icon").remove();
         Object.entries(choices || {}).forEach(([value, title]) => $(/* HTML */ `<option></option>`).val(value).text(title).appendTo(jqSelect));
-        jqSelect.val(entry[choiceKey]);
-        textFields.forEach(([key, title, type = "text"]) => {
-          $(/* HTML */ `<input />`, {
+        jqSelect.val(map ? entry[0] : entry[choiceKey]);
+        textFields.forEach(([key, title, type = "text"], index) => {
+          const value = map ? entry[choices ? 1 : index] : strings ? entry : entry[key];
+          const input = $(/* HTML */ `<input />`, {
             type,
             step: type === "datetime-local" ? "1" : undefined,
             maxlength: 160,
@@ -1156,7 +1172,7 @@
             placeholder: title,
             class: "form-control rounded-0 bg-body-secondary border-secondary-subtle mb-1"
           })
-            .val(type === "datetime-local" ? localTimestamp(entry[key]) : entry[key])
+            .val(type === "datetime-local" ? localTimestamp(value) : value)
             .appendTo(jqRow);
         });
         jqRow.appendTo(jqEditor);
@@ -1166,27 +1182,39 @@
         return jqRow;
       }
       // Serialize the current row order for validation and URL generation.
+      /**
+       * Synchronize the enhanced control with its canonical input value.
+       * @returns {void}
+       */
       function sync() {
         const jqRows = jqEditor.children();
-        const values = jqRows
-          .map(function (index) {
-            const jqRow = $(this);
-            jqRow.find('[data-action="up"]').prop("disabled", index === 0);
-            jqRow.find('[data-action="down"]').prop("disabled", index === jqRows.length - 1);
-            const entry = choices ? { [choiceKey]: jqRow.find("select").val() } : {};
-            jqRow.find("input").each(function () {
-              const jqInput = $(this);
-              const value = jqInput.val();
-              entry[jqInput.data("field")] = jqInput.is('[type="datetime-local"]') && value ? utcTimestamp(value) : value;
-            });
-            return entry;
-          })
-          .get();
-        jqOutput.val(JSON.stringify(values));
+        const values = jqRows.get().map((row, index) => {
+          const jqRow = $(row);
+          jqRow.find('[data-action="up"]').prop("disabled", index === 0);
+          jqRow.find('[data-action="down"]').prop("disabled", index === jqRows.length - 1);
+          if (map)
+            return [
+              ...(choices ? [jqRow.find("select").val()] : []),
+              ...jqRow
+                .find("input")
+                .get()
+                .map((input) => input.value)
+            ];
+          if (strings) return jqRow.find("input").val();
+          const entry = choices ? { [choiceKey]: jqRow.find("select").val() } : {};
+          jqRow.find("input").each(function () {
+            const jqInput = $(this);
+            const value = jqInput.val();
+            entry[jqInput.data("field")] = jqInput.is('[type="datetime-local"]') && value ? utcTimestamp(value) : value;
+          });
+          return entry;
+        });
+        const duplicate = map && new Set(values.map(([key]) => key)).size !== values.length;
+        jqOutput.val(duplicate ? "" : JSON.stringify(map ? Object.fromEntries(values) : values));
         jqEditor.find("input").each(function () {
           this.setCustomValidity("");
         });
-        jqEditor.find("input")[0]?.setCustomValidity(byConfigurator.validParameter(parameterRules, name, jqOutput.val()) ? "" : "List is too large. Shorten text or remove entries.");
+        jqEditor.find("input")[0]?.setCustomValidity(duplicate ? "Use a different key for each row." : byConfigurator.validParameter(parameterRules, name, jqOutput.val()) ? "" : "Invalid list. Check the entries or remove rows.");
         jqAdd.prop("disabled", jqRows.length >= limit);
       }
       function reset(entries = initial) {
@@ -1194,7 +1222,7 @@
           if ($(this).data("select2")) $(this).select2("close").select2("destroy");
         });
         jqEditor.empty();
-        entries.forEach(addRow);
+        (map ? Object.entries(entries) : entries).forEach(addRow);
         sync();
       }
       jqEditor.on("input change", "input, select", sync).on("click", "[data-action]", function () {
@@ -1671,7 +1699,7 @@
         font: "Font family or CSS font stack",
         datetime: "Absolute ISO 8601 timestamp",
         timezone: "IANA time zone; empty uses the local zone",
-        entries: "Ordered JSON array",
+        entries: "JSON matching this field's default structure",
         mapping: "Input mapping JSON array"
       };
       for (const name of Object.keys(parameterRules)) {

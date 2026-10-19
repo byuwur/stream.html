@@ -271,7 +271,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         default: [ { platform: "twitch", handle: "/byUwUr", heading: "Stream casi todos los días" }, { platform: "youtube", handle: "[Mateus] @byUwUr", heading: "VODs todas las semanas" }, { platform: "instagram", handle: "@byUwUr", heading: "Fotos de vez en cuando" } ],
         label: "Social accounts",
         section: "Social accounts",
-        description: "Ordered account JSON: up to 100 entries with a supported platform, handle, and optional heading of up to 160 characters each.",
+        description: "Ordered account rows with platform, handle, and heading. Platforms may repeat; up to 100 rows, 160 characters per text field.",
         validate: (value) => byConfigurator.parseAccounts(value, true),
         maxlength: 20000,
         entries: { choices: "platforms", choiceKey: "platform", textFields: [["handle", "Handle or display text"], ["heading", "Heading"]], newEntry: { platform: "twitch", handle: "", heading: "" } },
@@ -290,13 +290,19 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       scheduleEntries: {
         type: "entries",
-        default: [ { day: "monday", text: "" }, { day: "tuesday", text: "" }, { day: "wednesday", text: "" }, { day: "thursday", text: "" }, { day: "friday", text: "" }, { day: "saturday", text: "" }, { day: "sunday", text: "" } ],
+        default: { monday: "", tuesday: "", wednesday: "", thursday: "", friday: "", saturday: "", sunday: "" },
         label: "Schedule",
         section: "Schedule",
-        description: "Ordered schedule JSON: up to 7 entries with a weekday and schedule text of up to 160 characters.",
+        description: "Weekday-to-text JSON map. Up to seven days, 160 characters per value.",
         validate: parseScheduleEntries,
         maxlength: 4000,
-        entries: { choices: { monday: "Monday", tuesday: "Tuesday", wednesday: "Wednesday", thursday: "Thursday", friday: "Friday", saturday: "Saturday", sunday: "Sunday" }, choiceKey: "day", textFields: [["text", "Schedule text"]], newEntry: { day: "monday", text: "" }, limit: 7 },
+        entries: {
+          choices: { monday: "Monday", tuesday: "Tuesday", wednesday: "Wednesday", thursday: "Thursday", friday: "Friday", saturday: "Saturday", sunday: "Sunday" },
+          choiceKey: "day",
+          textFields: [["text", "Schedule text"]],
+          newEntry: ["monday", ""],
+          limit: 7
+        },
         addLabel: "Add day"
       }
     },
@@ -329,15 +335,23 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const dayLabels = { monday: "Lunes", tuesday: "Martes", wednesday: "Miércoles", thursday: "Jueves", friday: "Viernes", saturday: "Sábado", sunday: "Domingo" };
 
-  /** An explicit empty schedule hides the section; invalid input retains defaults. */
+  /**
+   * An explicit empty schedule hides the section; invalid input retains defaults.
+   * @param {unknown} value Value supplied by the caller.
+   * @returns {unknown}
+   */
   function parseScheduleEntries(value) {
     if (value.length > 4000) return null;
     try {
       const entries = JSON.parse(value);
-      if (!Array.isArray(entries) || entries.length > 7) return null;
-      if (!entries.every((entry) => entry && typeof entry.day === "string" && Object.hasOwn(dayLabels, entry.day) && typeof entry.text === "string" && entry.text.length <= 160)) return null;
-      return entries.map(({ day, text }) => ({ day, text }));
-    } catch (error) {
+      return entries &&
+        typeof entries === "object" &&
+        !Array.isArray(entries) &&
+        Object.keys(entries).length <= 7 &&
+        Object.entries(entries).every(([day, text]) => Object.hasOwn(dayLabels, day) && typeof text === "string" && text.length <= 160)
+        ? entries
+        : null;
+    } catch {
       return null;
     }
   }
@@ -406,7 +420,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       item.querySelector(".socialName").textContent = handle;
       document.getElementById("social").append(item);
     }
-    for (const { day, text } of scheduleEntries) {
+    for (const [day, text] of Object.entries(scheduleEntries)) {
       const entry = document.createElement("div");
       entry.className = "day";
       entry.innerHTML = /* HTML */ `
@@ -421,7 +435,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const sections = {
       brandImg: settings.displayBranding === "yes",
       list: settings.displayLabels === "yes",
-      schedule: settings.displaySchedule === "yes" && scheduleEntries.length > 0,
+      schedule: settings.displaySchedule === "yes" && Object.keys(scheduleEntries).length > 0,
       countdown: settings.displayCountdown === "yes",
       social: settings.displaySocial === "yes" && accounts.some((entry) => entry.handle)
     };

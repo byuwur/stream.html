@@ -100,12 +100,12 @@ Press a gamepad button for detection or **F** for keyboard input. Focus the prev
 
 ![Social popup preview](popup/prev.jpg)
 
-Choose platforms, handles, and order; repeated platforms are allowed. Brand icons use a globe fallback.
+Choose platforms, handles, and order. Repeated platforms are allowed. Brand icons use a globe fallback.
 
 | Parameter                                                | Meaning                                                                                                                         |
 | -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
 | `mode`                                                   | `right` (default) or `left`.                                                                                                    |
-| `accounts`                                               | Up to 100 `{"platform":"twitch","handle":"YourChannel"}` entries; 160 characters/handle, 20,000 JSON characters. `[]` hides it. |
+| `accounts` | Ordered rows, e.g. `[{"platform":"twitch","handle":"/byUwUr"},{"platform":"twitch","handle":"/byUwUr_es"}]`; up to 100 accounts, 160 characters/handle, 20,000 JSON characters. `[]` hides it. |
 | `pauseTime`, `inbetweenPauseTime`                        | Seconds/account and between cycles: `0`–`3600`, default `5` each.                                                               |
 | `scale`                                                  | `0.1`–`5`, anchored to the selected top corner.                                                                                 |
 | `iconBoxColor`, `textBoxColor`, `iconColor`, `fontColor` | Hex colors without `#`.                                                                                                         |
@@ -131,8 +131,8 @@ Invalid JSON/platforms retain the three default accounts; blank handles keep the
 | `logoUrl`, `logoOpacity`, `logoScale` | Image URL/path, opacity `0`–`1`, scale `0.1`–`5`. Empty URL uses BONYUR. |
 | `backgroundType`, `backgroundUrl` | `video`/`image` and media URL/path; no bundled background media. |
 | `backgroundBlur`, `backgroundOverlayOpacity`, `backgroundOverlay` | Blur `0`–`100` px, tint opacity `0`–`1`, tint color. |
-| `accounts` | Popup format plus optional `heading` up to 160 characters. Blank handles/`[]` hide accounts. |
-| `scheduleEntries` | Up to seven `{"day":"monday","text":"Activity"}` rows; repeated weekdays allowed. 160 characters/text, 4,000 JSON characters. `[]` hides it. |
+| `accounts` | Ordered rows with `platform`, `handle`, and `heading`; platforms may repeat. Up to 100 rows, 160 characters per text field, 20,000 JSON characters. Blank handles/`[]` hide accounts. |
+| `scheduleEntries` | Weekday-to-text map, e.g. `{"monday":"Activity"}`; up to seven days, 160 characters/text, 4,000 JSON characters. `{}` hides it. |
 
 Invalid lists retain defaults. Pixels convert to rem at a 16px root. Follower/donation/subscriber labels are editable text, without live service updates.
 
@@ -174,6 +174,8 @@ HTML needs `<template id="overlay-markup">...</template>` and `<div id="configur
 Field `options` maps stored IDs to displayed labels.
 
 Binary settings use `type: "switch"` with explicit checked/unchecked values.
+
+Each list uses its declared format directly: simple messages are string arrays, unique pairs are maps such as `{"monday":"Activity"}`, and social accounts or other repeated rows use object arrays. Unsupported formats retain defaults; no format conversion is performed. Map keys must be unique, and integer keys follow JavaScript's numeric ordering.
 
 ### Add a tool
 
