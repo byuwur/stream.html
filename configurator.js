@@ -265,6 +265,151 @@
   }
 
   /**
+   * Declare two independent layers, both Off by default, using ordinary validated URL fields.
+   * The first shadow field owns styleValue(), which reads every layer's settings and builds one CSS value.
+   * Box/text shadows use comma-separated layers; filter shadows use repeated drop-shadow() functions.
+   * @param {string} name Field or item identifier.
+   * @param {string} label Human-readable label.
+   * @param {string} selector CSS selector identifying the target elements.
+   * @param {string} property box-shadow, text-shadow, or filter; only box-shadow supports spread/inset.
+   * @param {string} [section=`${label} effects`] Section identifier or label.
+   * @returns {ResourceFields} Fresh independent shadow and glow fields with their compound CSS writer.
+   */
+  function shadowFields(name, label, selector, property = "box-shadow", section = `${label} effects`) {
+    const shared = { section, subsection: "Shadow / glow" };
+    const toggle = { type: "switch", default: "no", checkedValue: "yes", uncheckedValue: "no", options: { yes: "On", no: "Off" } };
+    const fields = {};
+    for (const [key, title, color] of [
+      [name, "Shadow", "#00000080"],
+      [`${name}Glow`, "Glow", "#FFFFFF80"]
+    ]) {
+      const active = { ...shared, when: [key, "yes"] };
+      fields[key] = { ...shared, ...toggle, label: title, icon: key === name ? "fa-cloud" : "fa-wand-magic-sparkles" };
+      Object.assign(fields, {
+        [`${key}Color`]: { ...active, type: "color", default: color, label: `${title} color and transparency`, icon: "fa-palette", maxlength: 80 },
+        [`${key}Blur`]: { ...active, type: "number", default: key === name ? 12 : 20, label: `${title} blur / softness (px)`, icon: "fa-cloud", min: 0, max: 300, step: "any" }
+      });
+      if (key === name)
+        Object.assign(fields, {
+          [`${key}X`]: { ...active, type: "number", default: 0, label: "Horizontal distance (px)", icon: "fa-arrows-left-right", min: -1000, max: 1000, step: "any" },
+          [`${key}Y`]: { ...active, type: "number", default: 4, label: "Vertical distance (px)", icon: "fa-arrows-up-down", min: -1000, max: 1000, step: "any" }
+        });
+      if (property === "box-shadow")
+        Object.assign(fields, {
+          [`${key}Spread`]: { ...active, type: "number", default: 0, label: `${title} spread (px)`, icon: "fa-expand", min: -300, max: 300, step: "any" },
+          [`${key}Inset`]: { ...active, ...toggle, label: `Inner ${title.toLowerCase()}`, icon: "fa-compress" }
+        });
+    }
+    Object.assign(fields[name], {
+      styleSelector: selector,
+      styleProperty: property,
+      styleValue: (settings) => {
+        const layers = [];
+        for (const [key, x, y] of [
+          [name, settings[`${name}X`], settings[`${name}Y`]],
+          [`${name}Glow`, 0, 0]
+        ]) {
+          if (settings[key] !== "yes") continue;
+          const spread = property === "box-shadow" ? ` ${settings[`${key}Spread`]}px` : "";
+          let value = `${x}px ${y}px ${settings[`${key}Blur`]}px${spread} ${settings[`${key}Color`]}`;
+          if (property === "box-shadow" && settings[`${key}Inset`] === "yes") value = `inset ${value}`;
+          layers.push(property === "filter" ? `drop-shadow(${value})` : value);
+        }
+        return layers.join(property === "filter" ? " " : ", ") || "none";
+      }
+    });
+    return fields;
+  }
+
+  /**
+   * Declare numeric filter adjustments, optionally targeting the backdrop instead of the element.
+   * Normal filters combine adjustments and shadow/glow into one property so neither overwrites the other.
+   * @param {string} name Field or item identifier.
+   * @param {string} label Human-readable label.
+   * @param {string} selector CSS selector identifying the target elements.
+   * @param {boolean} [backdrop=false] Apply filters to the backdrop instead of the element.
+   * @returns {ResourceFields} Fresh filter fields with one compound CSS writer.
+   */
+  function filterFields(name, label, selector, backdrop = false) {
+    const section = `${label} effects`;
+    const shared = { section, subsection: backdrop ? "Backdrop filters" : "Color and blur" };
+    const fields = {
+      [`${name}Mode`]: {
+        ...shared,
+        type: "select",
+        default: "",
+        label: "Filters",
+        icon: "fa-sliders",
+        options: { "": "Automatic", none: "Off", custom: "Custom" },
+        styleSelector: selector,
+        styleProperty: backdrop ? "backdrop-filter" : "filter"
+      }
+    };
+    const adjustments = {
+      Blur: { label: "Blur (px)", filter: "blur", default: 0, max: 100, unit: "px", icon: "fa-cloud" },
+      Brightness: { label: "Brightness (%)", filter: "brightness", default: 100, max: 100, unit: "%", icon: "fa-sun" },
+      Contrast: { label: "Contrast (%)", filter: "contrast", default: 100, max: 100, unit: "%", icon: "fa-circle-half-stroke" },
+      Saturation: { label: "Saturation (%)", filter: "saturate", default: 100, max: 100, unit: "%", icon: "fa-droplet" },
+      Grayscale: { label: "Grayscale (%)", filter: "grayscale", default: 0, max: 100, unit: "%", icon: "fa-circle-half-stroke" },
+      Sepia: { label: "Sepia (%)", filter: "sepia", default: 0, max: 100, unit: "%", icon: "fa-image" },
+      Invert: { label: "Invert (%)", filter: "invert", default: 0, max: 100, unit: "%", icon: "fa-circle-half-stroke" },
+      Hue: { label: "Hue rotation (degrees)", filter: "hue-rotate", default: 0, min: -360, max: 360, unit: "deg", icon: "fa-palette" }
+    };
+    for (const [key, { filter, unit, ...rule }] of Object.entries(adjustments)) fields[`${name}${key}`] = { ...shared, when: [`${name}Mode`, "custom"], type: "number", min: 0, step: "any", ...rule };
+    let shadow;
+    if (!backdrop) {
+      const shadows = shadowFields(`${name}Shadow`, label, selector, "filter", section);
+      shadow = shadows[`${name}Shadow`].styleValue;
+      // The mode field below writes the combined filter; avoid a second shadow-only CSS rule.
+      delete shadows[`${name}Shadow`].styleSelector;
+      Object.assign(fields, shadows);
+    }
+    fields[`${name}Mode`].styleValue = (settings) => {
+      const mode = settings[`${name}Mode`];
+      const dropShadow = shadow?.(settings) || "";
+      const values = mode === "custom" ? Object.entries(adjustments).map(([key, { filter, unit }]) => `${filter}(${settings[`${name}${key}`]}${unit})`) : [];
+      if (dropShadow && dropShadow !== "none") values.push(dropShadow);
+      return values.join(" ") || (mode || dropShadow ? "none" : "");
+    };
+    return fields;
+  }
+
+  /**
+   * Declare an optional edge mask from percentage stops; only Custom exposes its controls.
+   * @param {string} name Field or item identifier.
+   * @param {string} label Human-readable label.
+   * @param {string} selector CSS selector identifying the target elements.
+   * @param {string} [direction="horizontal"] Direction used by the layout or effect.
+   * @returns {ResourceFields} Fresh edge-fade mode and percentage-stop fields.
+   */
+  function fadeFields(name, label, selector, direction = "horizontal") {
+    const shared = { section: "Details", subsection: label };
+    const active = { ...shared, when: [`${name}Mode`, "custom"] };
+    return {
+      [`${name}Mode`]: {
+        ...shared,
+        type: "select",
+        default: "",
+        label: "Edge fade",
+        icon: "fa-droplet",
+        options: { "": "Automatic", none: "Off", custom: "Custom" },
+        styleSelector: selector,
+        styleProperty: "mask-image",
+        styleValue: (settings) => {
+          const mode = settings[`${name}Mode`];
+          if (!mode) return "";
+          if (mode === "none") return "none";
+          const edge = settings[`${name}Direction`] === "vertical" ? "to bottom" : "to right";
+          return `linear-gradient(${edge}, transparent, #000 ${settings[`${name}Start`]}%, #000 ${100 - settings[`${name}End`]}%, transparent)`;
+        }
+      },
+      [`${name}Direction`]: { ...active, type: "select", default: direction, label: "Fade direction", icon: "fa-up-down-left-right", options: { horizontal: "Left and right", vertical: "Top and bottom" } },
+      [`${name}Start`]: { ...active, type: "number", default: 10, label: "Start fade (%)", icon: "fa-arrow-right-to-bracket", min: 0, max: 100, step: "any" },
+      [`${name}End`]: { ...active, type: "number", default: 10, label: "End fade (%)", icon: "fa-arrow-right-from-bracket", min: 0, max: 100, step: "any" }
+    };
+  }
+
+  /**
    * Build the readable overlay URL shared by editor actions and native resource interactions.
    * Only declared fields are emitted. urlRequired keeps overlay mode/timestamp anchors even at defaults.
    * Inactive optional fields and defaults are omitted; CSS normalizes equivalent colors, and JSON comparison preserves data order.
@@ -460,6 +605,9 @@
     applyParameters,
     settingsURL,
     whenFields,
+    shadowFields,
+    filterFields,
+    fadeFields,
     initResource,
     parseAccounts,
     parseZone,

@@ -186,6 +186,8 @@ Declare a nonempty `resource.urlRequired` array of field names that always belon
 
 Inactive controls are disabled and do not block validation. Overlays treat inactive switches as Off, reset other inactive settings to their declared defaults, and skip their style overrides. Their drafts return when re-enabled in the current editor. Inactive fields are omitted from generated URLs unless explicitly required by the resource.
 
+Shadows and glows have independent switches, both Off by default. Enable either or both, with separate colors, softness, and spread where supported. Default Off values are omitted from generated URLs.
+
 ### Add a tool
 
 1. Copy `configurator.html` into the tool folder; replace demo markup/styles/rendering and change shared imports to `../`.
