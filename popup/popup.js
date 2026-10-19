@@ -21,7 +21,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     fields: {
       accounts: {
         type: "entries",
-        default: [ { platform: "twitch", handle: "/byUwUr" }, { platform: "youtube", handle: "@byUwUr" }, { platform: "instagram", handle: "@byUwUr" } ],
+        default: [{ platform: "twitch", handle: "/byUwUr" }, { platform: "youtube", handle: "@byUwUr" }],
         label: "Social accounts",
         section: "Social accounts",
         description: "Ordered account rows with platform and handle. Platforms may repeat; up to 100 rows, 160 characters per handle.",
@@ -74,7 +74,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       iconBoxColor: {
         type: "color",
-        default: "#400000",
+        default: "#300",
         label: "Icon box color",
         section: "Appearance",
         description: "CSS background color of the animated icon box.",
@@ -101,7 +101,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       fontColor: {
         type: "color",
-        default: "#400000",
+        default: "#300",
         label: "Text color",
         section: "Appearance",
         description: "CSS color of the account names.",
@@ -119,7 +119,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       fontWeight: {
         type: "number",
-        default: 700,
+        default: 600,
         label: "Font weight",
         section: "Appearance",
         description: "Font weight in steps of 100.",
@@ -163,7 +163,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     popup.classList.add(mode);
     popup.style.transform = `scale(${scale / 100})`;
     for (const name of ["iconBoxColor", "textBoxColor", "iconColor", "fontColor"]) popup.style.setProperty(`--${name}`, settings[name]);
-    popup.style.setProperty("--font-family", byFont.family(settings.primaryFont || "Courier New", "Courier, monospace"));
+    popup.style.setProperty("--font-family", byFont.family(settings.primaryFont || "Courier New", '"Courier New", Courier, monospace'));
     popup.style.setProperty("--font-size", `${settings.fontSize}px`);
     popup.style.setProperty("--font-weight", settings.fontWeight);
     popup.style.setProperty("--text-offset", `${settings.textYOffset}px`);

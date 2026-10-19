@@ -132,7 +132,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       accentColor: {
         type: "color",
-        default: "#400000",
+        default: "#300",
         label: "Accent color",
         section: "Appearance",
         description: "CSS color used for accents.",
@@ -141,7 +141,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       frameColor: {
         type: "color",
-        default: "#400000",
+        default: "#300",
         label: "Frame color",
         section: "Appearance",
         description: "CSS color of the scene border.",
@@ -150,7 +150,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       frameWidth: {
         type: "number",
-        default: 10,
+        default: 2,
         label: "Frame width (px)",
         section: "Appearance",
         description: "Scene border thickness in pixels.",
@@ -372,7 +372,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const rootStyle = document.documentElement.style;
     // CSS owns appearance; settings only provide its colors, sizes, and offsets.
     const styles = {
-      "font-family": byFont.family(settings.primaryFont || "Courier New", "Courier, monospace"),
+      "font-family": byFont.family(settings.primaryFont || "Courier New", '"Courier New", Courier, monospace'),
       "primary-color": settings.primaryTextColor,
       "secondary-color": settings.subTextColor,
       "accent-color": settings.accentColor,

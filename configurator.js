@@ -1916,8 +1916,8 @@
         if (parameterRules[field.name]?.type !== "font") return;
         fields[index] = byFont.picker(field, {
           initSelect2,
-          fallback: field.name === "primaryFont" ? "Courier, monospace" : "system-ui, sans-serif",
-          emptyFont: field.name === "primaryFont" ? "Courier New" : "",
+          fallback: '"Courier New", Courier, monospace',
+          emptyFont: parameterRules[field.name].default,
           weight: form.elements.fontWeight || 700,
           previewText: "Stream preview · Aa Bb 0123456789"
         });
@@ -2128,9 +2128,9 @@
       ])
         $(/* HTML */ `<option></option>`).val(value).text(title).appendTo(jqSelect);
       const presets = {
-        studio: { backgroundColor: "#15151BE6", textColor: "#FFFFFF", accentColor: "#FF626D", shadow: 0.35 },
-        minimal: { backgroundColor: "#00000000", textColor: "#FFFFFF", accentColor: "#FF626D", shadow: 0.5 },
-        light: { backgroundColor: "#FFFFFFE6", textColor: "#15151B", accentColor: "#B51F36", shadow: 0.1 }
+        studio: { backgroundColor: "#202020E6", textColor: "#FFFFFF", accentColor: "#D9D9D9" },
+        minimal: { backgroundColor: "#00000000", textColor: "#FFFFFF", accentColor: "#D9D9D9" },
+        light: { backgroundColor: "#FFFFFFE6", textColor: "#202020", accentColor: "#404040" }
       };
       jqSelect.on("change", () => {
         for (const [name, value] of Object.entries(presets[jqSelect.val()] || {})) {

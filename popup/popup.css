@@ -1,12 +1,12 @@
 /* Match popup.js defaults; inline settings override these values. */
 :root {
-  --iconBoxColor: #400000;
+  --iconBoxColor: #300;
   --textBoxColor: #ffffff;
   --iconColor: #ffffff;
-  --fontColor: #400000;
+  --fontColor: #300;
   --font-family: "Courier New", Courier, monospace;
   --font-size: 72px;
-  --font-weight: 700;
+  --font-weight: 600;
   --text-offset: 0px;
 }
 html {

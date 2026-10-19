@@ -3,12 +3,12 @@
   --font-family: "Courier New", Courier, monospace;
   --primary-color: #ffffff;
   --secondary-color: #c9c9c9;
-  --accent-color: #400000;
-  --frame-color: #400000;
+  --accent-color: #300;
+  --frame-color: #300;
   --content-background: #ffffff1a;
   --background-color: #00000000;
   --background-tint: #36353a;
-  --frame-width: 10px;
+  --frame-width: 2px;
   --logo-opacity: 0.05;
   --logo-scale: 1;
   --background-opacity: 0;
@@ -50,7 +50,7 @@ body {
   height: 1080px;
   overflow: hidden;
   font-family: var(--font-family);
-  font-weight: 700;
+  font-weight: 600;
   color: var(--primary-color);
 }
 /* Full scene and background. */

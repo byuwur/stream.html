@@ -35,6 +35,8 @@ Fonts include 350 Google families, system fonts, and installed families/CSS stac
 
 Main offers countdown formats for hours/minutes/seconds, total minutes, total seconds, or unit labels. Formats change the display, not the countdown duration.
 
+Default resource text uses `"Courier New", Courier, monospace`, mostly black/white/gray colors, modest rounded corners, and no panel shadows, glows, or decorative pulsing. The configurator UI uses Archivo from `_common.css`; selecting a resource font changes the overlay and its font sample only. Main and Popup use the byUwUr dark red `#300` accent, and the byUwUr examples remain. Explicit supported settings override these defaults. Other fonts, colors, motion, and effects remain available in the controls.
+
 Media fields reference public HTTP(S) URLs or paths relative to the tool HTML. Local file URLs need downloaded use. No uploads or Base64 `data:` media. Keep private information out of shared URLs.
 
 ### Keyboard shortcuts
@@ -116,10 +118,10 @@ Choose platforms, handles, and order. Repeated platforms are allowed. Brand icon
 | `pauseTime`, `inbetweenPauseTime`                        | Seconds/account and between cycles: `0`–`3600`, default `5` each.                                                               |
 | `scale` | `-500`–`500`%, anchored to the selected top corner; `100` keeps the original size. |
 | `iconBoxColor`, `textBoxColor`, `iconColor`, `fontColor` | Hex colors without `#`.                                                                                                         |
-| `primaryFont`, `fontWeight`                              | Family and weight `100`–`900`, step `100`; Courier/monospace fallback.                                                          |
+| `primaryFont`, `fontWeight` | Font family and weight `100`–`900`, step `100` (default `600`); Courier/monospace fallback. |
 | `fontSize`, `textYOffset` | Size `8`–`100` px (default `72`); offset `-100`–`100` px. |
 
-Invalid JSON/platforms retain the three default accounts; blank handles keep their slots. Font readiness and remeasurement keep animation aligned.
+Invalid JSON/platforms retain the two byUwUr default accounts; blank handles keep their slots. Font readiness and remeasurement keep animation aligned.
 
 ## Main scene
 
@@ -132,9 +134,9 @@ Invalid JSON/platforms retain the three default accounts; blank handles keep the
 | `sceneTitle`, `tagline` | Multiline title up to 300 characters; subtitle up to 160. |
 | `countdownTime`, `countdownMessage`, `countdownOverMessage` | Minutes `0`–`1440` (default `4`); during/after messages. |
 | `displayCountdown`, `displayBranding`, `displaySocial`, `displaySchedule`, `displayLabels` | `yes`/`no`. Branding hides only the logo. |
-| `primaryFont`, `titleSize`, `subtitleSize` | Family and sizes `8`–`200` px; Courier/monospace fallback. |
+| `primaryFont`, `titleSize`, `subtitleSize` | Font family and sizes `8`–`200` px; Courier/monospace fallback. |
 | `primaryTextColor`, `subTextColor`, `accentColor`, `frameColor`, `contentBackgrounds`, `backgroundColor` | Hex without `#`; background defaults to transparent `00000000`. |
-| `frameWidth` | `0`–`100` px. |
+| `frameWidth`, `frameInset` | Border thickness `0`–`100` px (default `2`); optional signed inset in pixels. |
 | `logoUrl`, `logoOpacity`, `logoScale` | Image URL/path, opacity `0`–`100`% (default `5`), scale `-500`–`500`% (default `100`). Empty URL uses BONYUR. |
 | `backgroundType`, `backgroundUrl`, `backgroundScale` | `video`/`image`, media URL/path, and scale `-500`–`500`%. No bundled background media. |
 | `backgroundBlur`, `backgroundOverlayOpacity`, `backgroundOverlay` | Blur `0`–`100` px, tint opacity `0`–`100`%, tint color. |
