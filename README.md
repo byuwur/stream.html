@@ -24,6 +24,7 @@ Open a tool, adjust its fields, check the preview, then **Copy URL** into an OBS
 - Form edits and same-tool URL edits apply after a 250 ms pause via SPA.js's shared `debounce()`, updating the form and preview in place. **Enter** or leaving the changed URL field applies immediately; links to another tool navigate then.
 - Editing keeps the browser address unchanged. **Copy URL** shares the current overlay settings. Bare tool URLs resume the saved configuration; explicit query settings take priority, including on reload.
 - **Reset** restores the settings, list order, and compression choices from when the page opened, including after direct URL edits.
+- **Advanced → Restore resource defaults** clears this resource's saved configuration and reloads the defaults declared in its JavaScript.
 - Invalid form values keep the last valid preview and stop URL generation. Invalid/unknown URL values retain defaults; empty text clears a field.
 
 Generated links include only values that differ from the declared defaults, plus each resource's explicit `urlRequired` fields. Automatic/default appearance values are omitted, and missing parameters use resource defaults. Controller always includes `player` and `skin`; Popup includes `accounts`; Main includes `sceneTitle`. Empty text that clears a nonempty default stays in the URL. Imports use defaults for missing values; opening a bare editor still resumes saved preferences.

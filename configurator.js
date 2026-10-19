@@ -1670,6 +1670,11 @@
                     <p class="mb-0">Focus the overlay and press <kbd>F2</kbd>, or append <code>#configure</code> to its URL.</p>
                   </aside>
                   <p id="url-load-error" class="text-danger mt-3 mb-0" role="alert" hidden></p>
+                  <div class="border-top mt-4 pt-4">
+                    <h3 class="h5 mb-2">Resource defaults</h3>
+                    <p>Restore every setting for this resource and clear its saved configuration.</p>
+                    <button id="restore-defaults" class="btn btn-outline-danger" type="button"><i class="fa-solid fa-rotate-left me-2" aria-hidden="true"></i>Restore resource defaults</button>
+                  </div>
                 </section>
               </article>
             </div>
@@ -1708,6 +1713,20 @@
         syncCompressionOptions();
         savePreferences();
         generateURL();
+      });
+      $("#restore-defaults").on("click", () => {
+        urlGeneration++;
+        try {
+          localStorage.removeItem(preferenceKey);
+        } catch {}
+        try {
+          document.cookie = `${preferenceKey}=;max-age=0;path=${preferencePath}`;
+        } catch {}
+        const url = new URL(location.href);
+        url.search = "";
+        url.hash = "configure";
+        history.replaceState(null, "", url);
+        location.reload();
       });
       $("#compression-search").on("input", function () {
         const term = this.value.trim().toLowerCase();
