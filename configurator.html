@@ -35,21 +35,21 @@
         font-size: 16px;
       }
       #demo-preview {
-        --demo-size: 3rem;
+        --demo-size: 48px;
         --demo-color: #ffffff;
         display: grid;
         place-items: center;
         box-sizing: border-box;
         min-height: 100%;
-        padding: 2rem;
+        padding: 32px;
         font-family: system-ui, sans-serif;
         text-align: center;
         color: var(--demo-color);
       }
       .demo-label,
       .demo-note {
-        margin: 1rem 0;
-        font-size: 1rem;
+        margin: 16px 0;
+        font-size: 16px;
         line-height: 1.5;
         opacity: 0.65;
       }
@@ -88,14 +88,14 @@
               icon: "fa-pen",
               rows: 2
             },
-            fontSizeRem: {
+            fontSize: {
               type: "number",
-              default: 3,
-              label: "This is a number field (rem).",
+              default: 48,
+              label: "This is a number field (px).",
               section: "This is a section.",
-              description: "Example text size in rem.",
-              min: 0.5,
-              max: 6,
+              description: "Example text size in pixels.",
+              min: 8,
+              max: 96,
               step: "any",
               icon: "fa-font"
             },
@@ -119,7 +119,7 @@
         if (!byStreamOverlay) return;
         const preview = document.getElementById("demo-preview");
         document.getElementById("demo-message").textContent = settings.message;
-        preview.style.setProperty("--demo-size", `${settings.fontSizeRem}rem`);
+        preview.style.setProperty("--demo-size", `${settings.fontSize}px`);
         preview.style.setProperty("--demo-color", settings.textColor);
       });
     </script>

@@ -304,8 +304,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       const active = Math.hypot(horizontal, vertical) >= this.ANALOGUE_STICK_THRESHOLD;
       const x = active ? horizontal * this.STICK_OFFSET : 0;
       const y = active ? vertical * this.STICK_OFFSET : 0;
-      stick.style.marginLeft = `${x / 16}rem`;
-      stick.style.marginTop = `${y / 16}rem`;
+      stick.style.marginLeft = `${x}px`;
+      stick.style.marginTop = `${y}px`;
       if (this.STICK_CURVING) stick.style.transform = `rotateX(${-y}deg) rotateY(${x}deg)`;
       const wheel = document.querySelector(`#gamepad-${player} [data-name="${name}-wheel"]`);
       if (wheel) wheel.style.transform = `rotate(${horizontal * this.ROTATE_BOUNDARY}deg)`;

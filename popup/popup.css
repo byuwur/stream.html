@@ -5,9 +5,9 @@
   --iconColor: #ffffff;
   --fontColor: #400000;
   --font-family: "Courier New", Courier, monospace;
-  --font-size: 4.5rem;
+  --font-size: 72px;
   --font-weight: 700;
-  --text-offset: 0rem;
+  --text-offset: 0px;
 }
 html {
   font-size: 16px;
@@ -34,8 +34,8 @@ body {
 }
 #holder {
   position: absolute;
-  height: 6.25rem;
-  line-height: 6.25rem;
+  height: 100px;
+  line-height: 100px;
 }
 .right #holder {
   right: 0;
@@ -45,17 +45,17 @@ body {
 }
 #textBox {
   overflow: hidden;
-  height: 6.25rem;
+  height: 100px;
   background: var(--textBoxColor);
   color: var(--fontColor);
 }
 #nameHolder {
-  padding: 0 1.25rem;
+  padding: 0 20px;
 }
 .name {
   display: block;
-  height: 6.25rem;
-  line-height: 6.25rem;
+  height: 100px;
+  line-height: 100px;
   white-space: nowrap;
   position: relative;
   top: var(--text-offset);
@@ -63,21 +63,21 @@ body {
 /* The square sits inside a larger SVG so its curves have room to stretch. */
 #iconBox {
   position: absolute;
-  top: -1.25rem;
-  width: 8.75rem;
-  height: 8.75rem;
+  top: -20px;
+  width: 140px;
+  height: 140px;
   color: var(--iconColor);
 }
 .left #iconBox {
-  right: -7.5rem;
+  right: -120px;
 }
 .right #iconBox {
-  left: -7.5rem;
+  left: -120px;
 }
 #svg {
   position: absolute;
-  width: 8.75rem;
-  height: 8.75rem;
+  width: 140px;
+  height: 140px;
   fill: var(--iconBoxColor);
 }
 #svg path:not(#square) {
@@ -85,10 +85,10 @@ body {
 }
 #iconHolder {
   position: absolute;
-  top: 0.625rem;
-  left: 0.625rem;
-  width: 7.5rem;
-  height: 7.5rem;
+  top: 10px;
+  left: 10px;
+  width: 120px;
+  height: 120px;
   overflow: hidden;
   transform: scale(0.75);
 }
@@ -96,7 +96,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 7.5rem;
-  height: 7.5rem;
-  font-size: 6.25rem;
+  width: 120px;
+  height: 120px;
+  font-size: 100px;
 }

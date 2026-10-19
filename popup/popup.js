@@ -128,25 +128,25 @@ document.addEventListener("DOMContentLoaded", async () => {
         step: 100,
         icon: "fa-font"
       },
-      fontSizeRem: {
+      fontSize: {
         type: "number",
-        default: 4.5,
-        label: "Font size (rem)",
+        default: 72,
+        label: "Font size (px)",
         section: "Appearance",
-        description: "Account name size in rem.",
-        min: 0.5,
-        max: 6.25,
+        description: "Account name size in pixels.",
+        min: 8,
+        max: 100,
         step: "any",
         icon: "fa-font"
       },
-      textYOffsetRem: {
+      textYOffset: {
         type: "number",
         default: 0,
-        label: "Text vertical offset (rem)",
+        label: "Text vertical offset (px)",
         section: "Appearance",
-        description: "Vertical text adjustment in rem.",
-        min: -6.25,
-        max: 6.25,
+        description: "Vertical text adjustment in pixels.",
+        min: -100,
+        max: 100,
         step: "any",
         icon: "fa-font"
       }
@@ -164,9 +164,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     popup.style.transform = `scale(${scale})`;
     for (const name of ["iconBoxColor", "textBoxColor", "iconColor", "fontColor"]) popup.style.setProperty(`--${name}`, settings[name]);
     popup.style.setProperty("--font-family", byFont.family(settings.primaryFont || "Courier New", "Courier, monospace"));
-    popup.style.setProperty("--font-size", `${settings.fontSizeRem}rem`);
+    popup.style.setProperty("--font-size", `${settings.fontSize}px`);
     popup.style.setProperty("--font-weight", settings.fontWeight);
-    popup.style.setProperty("--text-offset", `${settings.textYOffsetRem}rem`);
+    popup.style.setProperty("--text-offset", `${settings.textYOffset}px`);
     for (const { platform, handle } of accounts) {
       const name = document.createElement("span");
       name.className = "name";
@@ -219,8 +219,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         .to("#iconHolder", { duration: 0.1, y: 15 })
         .to(square, { duration: 0.2, morphSVG: "#bigDown" }, "-=0.1")
         .to("#iconBox", { duration: 0.2, y: 20 }, "-=0.2")
-        .set(names, { y: `${-index * 6.25}rem` }, "-=0.1")
-        .set(icons, { y: `${-index * 7.5}rem` }, "-=0.1")
+        .set(names, { y: `${-index * 100}px` }, "-=0.1")
+        .set(icons, { y: `${-index * 120}px` }, "-=0.1")
         .to("#holder", { duration: 0.2, y: 8 }, "-=0.1")
         .to("#holder", { duration: 0.2, y: 0 })
         .to(square, { duration: 0.2, morphSVG: squarePath }, "-=0.1")

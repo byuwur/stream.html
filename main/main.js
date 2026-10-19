@@ -380,16 +380,16 @@ document.addEventListener("DOMContentLoaded", async () => {
       "content-background": settings.contentBackgrounds,
       "background-color": settings.backgroundColor,
       "background-tint": settings.backgroundOverlay,
-      "frame-width": `${settings.frameWidth / 16}rem`,
+      "frame-width": `${settings.frameWidth}px`,
       "logo-opacity": settings.logoOpacity,
       "logo-scale": settings.logoScale,
       "background-opacity": settings.backgroundOverlayOpacity,
-      "background-blur": `${settings.backgroundBlur / 16}rem`,
+      "background-blur": `${settings.backgroundBlur}px`,
       "background-scale": settings.backgroundScale
     };
     for (const [name, value] of Object.entries(styles)) rootStyle.setProperty(`--${name}`, value);
     for (const [name, value] of Object.entries(settings)) {
-      if (name.endsWith("Size") || name.endsWith("Offset")) rootStyle.setProperty(`--${name}`, `${value / 16}rem`);
+      if (name.endsWith("Size") || name.endsWith("Offset")) rootStyle.setProperty(`--${name}`, `${value}px`);
     }
     for (const name of ["socialMediaScale", "labelsScale", "scheduleScale", "countdownScale"]) rootStyle.setProperty(`--${name}`, settings[name]);
 
@@ -474,15 +474,15 @@ document.addEventListener("DOMContentLoaded", async () => {
       const card = gsap.timeline();
       card
         .set(item, { autoAlpha: 1 })
-        .fromTo(item, { clipPath: "inset(-0.125rem 100% 0 0)" }, { clipPath: "inset(-0.125rem 0% 0 0)", duration: 0.6 }, 0)
+        .fromTo(item, { clipPath: "inset(-2px 100% 0 0)" }, { clipPath: "inset(-2px 0% 0 0)", duration: 0.6 }, 0)
         .fromTo(border, { scaleX: 0, transformOrigin: "left center" }, { scaleX: 1, duration: 0.5 }, 0)
-        .fromTo(details, { x: "-3.75rem", opacity: 0 }, { x: 0, opacity: 1, duration: 0.7, stagger: { amount: 0.2 } }, 0.4)
-        .to(details, { x: "-3.75rem", opacity: 0, duration: 0.7, stagger: { amount: 0.2 } }, 8.7)
+        .fromTo(details, { x: "-60px", opacity: 0 }, { x: 0, opacity: 1, duration: 0.7, stagger: { amount: 0.2 } }, 0.4)
+        .to(details, { x: "-60px", opacity: 0, duration: 0.7, stagger: { amount: 0.2 } }, 8.7)
         .to(border, { scaleX: 0, duration: 0.5 }, 9.5)
-        .to(item, { clipPath: "inset(-0.125rem 100% 0 0)", duration: 0.6 }, 9.4)
+        .to(item, { clipPath: "inset(-2px 100% 0 0)", duration: 0.6 }, 9.4)
         .set(item, { autoAlpha: 0 }, 10);
       if (icon) {
-        card.fromTo(icon, { x: "-2.5rem", opacity: 0 }, { x: 0, opacity: 1, duration: 0.6 }, 0.4).to(icon, { x: "-2.5rem", opacity: 0, duration: 0.6 }, 9);
+        card.fromTo(icon, { x: "-40px", opacity: 0 }, { x: 0, opacity: 1, duration: 0.6 }, 0.4).to(icon, { x: "-40px", opacity: 0, duration: 0.6 }, 9);
       }
       animation.add(card, "+=1");
     });

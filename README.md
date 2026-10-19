@@ -115,7 +115,7 @@ Choose platforms, handles, and order. Repeated platforms are allowed. Brand icon
 | `scale`                                                  | `0.1`–`5`, anchored to the selected top corner.                                                                                 |
 | `iconBoxColor`, `textBoxColor`, `iconColor`, `fontColor` | Hex colors without `#`.                                                                                                         |
 | `primaryFont`, `fontWeight`                              | Family and weight `100`–`900`, step `100`; Courier/monospace fallback.                                                          |
-| `fontSizeRem`, `textYOffsetRem`                          | Size `0.5`–`6.25` rem (default `4.5`); offset `-6.25`–`6.25` rem.                                                               |
+| `fontSize`, `textYOffset` | Size `8`–`100` px (default `72`); offset `-100`–`100` px. |
 
 Invalid JSON/platforms retain the three default accounts; blank handles keep their slots. Font readiness and remeasurement keep animation aligned.
 
@@ -140,7 +140,7 @@ Invalid JSON/platforms retain the three default accounts; blank handles keep the
 | `scheduleEntries` | Weekday-to-text map, e.g. `{"monday":"Activity"}`; up to seven days, 160 characters/text, 4,000 JSON characters. `{}` hides it. |
 | `countdownFormat` | `stopwatch` (total minutes/seconds, default), `clock`, `hours`, `units`, or total `seconds`. |
 
-Invalid lists retain defaults. Pixels convert to rem at a 16px root. Follower/donation/subscriber labels are editable text, without live service updates.
+Invalid lists retain defaults. Follower/donation/subscriber labels are editable text, without live service updates.
 
 ## Work in progress
 
@@ -192,6 +192,8 @@ Inactive controls are disabled and do not block validation. Overlays treat inact
 Shadows and glows have independent switches, both Off by default. Enable either or both, with separate colors, softness, and spread where supported. Default Off values are omitted from generated URLs.
 
 `byConfigurator.textFields()` declares per-element fonts, sizes, weight, spacing, line height, colors, opacity, and shadows. Size `0` and empty overrides preserve authored styles.
+
+Resource size and offset controls use pixels, including the configurator demo. The configurator interface keeps its rem-based styling.
 
 ### Add a tool
 
