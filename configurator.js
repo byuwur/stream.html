@@ -337,7 +337,7 @@
 
   /**
    * Apply valid declared values to the supplied settings object in place.
-   * Callers seed defaults first; missing, unknown, and invalid parameters leave that state intact.
+   * Callers seed defaults first; empty values restore declared defaults, while missing/invalid values leave that state intact.
    * Numbers and custom data are parsed here, and accepted colors regain their leading #.
    * Inactive switches use their Off value; other inactive settings fall back to declared defaults.
    * @param {ResourceFields} fields Declared resource fields and their validation metadata.
@@ -349,6 +349,10 @@
     for (const [name, value] of values) {
       if (!Object.hasOwn(fields, name)) continue;
       const rule = fields[name];
+      if (value === "") {
+        settings[name] = structuredClone(rule.default);
+        continue;
+      }
       let parsed;
       if (rule.validate) parsed = rule.validate(value);
       else {
@@ -412,7 +416,7 @@
           default: "",
           label: `${label} color`,
           section,
-          description: "Leave empty to use the base palette.",
+          description: "Clearing the field restores its default color.",
           maxlength: 80,
           optional: true,
           styleSelector: selector,
@@ -1910,6 +1914,7 @@
      * @returns {Promise<boolean>} Whether the latest URL was generated from valid fields.
      */
     async function generateURL(keepURLDraft = false) {
+      fields.forEach(restoreEmptyField);
       const generation = ++urlGeneration;
       // Event handlers can pass a jQuery event; only explicit true preserves the draft.
       urlEdited = keepURLDraft === true;
@@ -3204,6 +3209,24 @@
     }
 
     /**
+     * Restore a cleared canonical control from resource defaults, then resynchronize its widgets.
+     * Incomplete numeric input (such as a minus sign) is invalid input, not a request to reset.
+     * List/mapping editors own their hidden values, including empty sentinels for invalid drafts.
+     * @param {HTMLInputElement|HTMLSelectElement|HTMLTextAreaElement} field Named form control.
+     * @returns {void}
+     */
+    function restoreEmptyField(field) {
+      if (field.value !== "" || field.type === "checkbox" || field.validity.badInput) return;
+      const rule = parameterRules[field.name];
+      if (["entries", "mapping"].includes(rule.type)) return;
+      const value = rule.default;
+      const text = typeof value === "object" ? JSON.stringify(value) : String(value);
+      if (text === "") return;
+      if (field.tagName === "SELECT" && ![...field.options].some((option) => option.value === text)) field.add(new Option(text, text));
+      $(field).val(text).trigger("change");
+    }
+
+    /**
      * Sets a field's validation message using the active renderer's parameter rules.
      * @param {HTMLInputElement|HTMLSelectElement|HTMLTextAreaElement} field Named form control.
      * @returns {boolean} Whether the control passes custom and native validation.
@@ -3296,6 +3319,9 @@
         if (generation === urlGeneration) applyEditedURL(true);
       });
       jqForm
+        .on("focusout", "[name]", function () {
+          if (parameterRules[this.name]) restoreEmptyField(this);
+        })
         .on("change", syncFieldVisibility)
         .on("shown.bs.collapse hidden.bs.collapse", ".accordion-collapse", () => savePreferences())
         .on("input change", (event) => {
