@@ -420,6 +420,54 @@
   }
 
   /**
+   * Declare signed pixel offsets/origins, percentage scale, and rotation in degrees.
+   * @param {string} selector CSS selector identifying the target elements.
+   * @returns {ResourceFields} Fresh scale, rotation, origin, and signed pixel-offset fields.
+   */
+  function placementFields(selector) {
+    const shared = { default: "", optional: true, section: "Size & placement", styleSelector: selector };
+    return {
+      visualScale: { ...shared, type: "number", label: "Visual scale (%)", description: "100% is the original size. Negative values flip both axes.", min: -500, max: 500, step: "any", styleProperty: "scale", styleUnit: "%" },
+      tilt: { ...shared, type: "number", label: "Tilt (degrees)", min: -360, max: 360, step: "any", styleProperty: "rotate", styleUnit: "deg" },
+      ...offsetFields("visualOffset", "Visual offset", selector),
+      transformOrigin: {
+        ...shared,
+        subsection: "Scale / tilt origin",
+        type: "select",
+        label: "Scale / tilt origin",
+        options: {
+          "": "Automatic",
+          center: "Center",
+          "top left": "Top left",
+          top: "Top",
+          "top right": "Top right",
+          left: "Left",
+          right: "Right",
+          "bottom left": "Bottom left",
+          bottom: "Bottom",
+          "bottom right": "Bottom right",
+          custom: "Custom coordinates"
+        },
+        styleProperty: "transform-origin",
+        styleValue: (settings) => (settings.transformOrigin === "custom" ? `${settings.originX}px ${settings.originY}px` : settings.transformOrigin)
+      },
+      originX: {
+        section: shared.section,
+        subsection: "Scale / tilt origin",
+        when: ["transformOrigin", "custom"],
+        type: "number",
+        default: 50,
+        label: "Horizontal origin (px)",
+        icon: "fa-arrows-left-right",
+        min: -2000,
+        max: 2000,
+        step: "any"
+      },
+      originY: { section: shared.section, subsection: "Scale / tilt origin", when: ["transformOrigin", "custom"], type: "number", default: 50, label: "Vertical origin (px)", icon: "fa-arrows-up-down", min: -2000, max: 2000, step: "any" }
+    };
+  }
+
+  /**
    * Declare two independent layers, both Off by default, using ordinary validated URL fields.
    * The first shadow field owns styleValue(), which reads every layer's settings and builds one CSS value.
    * Box/text shadows use comma-separated layers; filter shadows use repeated drop-shadow() functions.
@@ -530,6 +578,69 @@
   }
 
   /**
+   * Declare translate offsets in pixels; both blank preserve CSS, one blank axis becomes zero.
+   * @param {string} name Field or item identifier.
+   * @param {string} label Human-readable label.
+   * @param {string} selector CSS selector identifying the target elements.
+   * @param {string} [section="Size & placement"] Section identifier or label.
+   * @returns {ResourceFields} Fresh signed horizontal and vertical pixel-offset fields.
+   */
+  function offsetFields(name, label, selector, section = "Size & placement") {
+    const shared = { section, subsection: label };
+    return {
+      [`${name}X`]: {
+        ...shared,
+        type: "number",
+        default: "",
+        optional: true,
+        label: "Horizontal offset (px)",
+        icon: "fa-arrows-left-right",
+        min: -2000,
+        max: 2000,
+        step: "any",
+        styleSelector: selector,
+        styleProperty: "translate",
+        styleValue: (settings) => (settings[`${name}X`] === "" && settings[`${name}Y`] === "" ? "" : `${settings[`${name}X`] || 0}px ${settings[`${name}Y`] || 0}px`)
+      },
+      [`${name}Y`]: { ...shared, type: "number", default: "", optional: true, label: "Vertical offset (px)", icon: "fa-arrows-up-down", min: -2000, max: 2000, step: "any" }
+    };
+  }
+
+  /**
+   * Declare signed pixel edge distances; blank edges become auto, all blank preserve CSS.
+   * @param {string} name Field or item identifier.
+   * @param {string} label Human-readable label.
+   * @param {string} selector CSS selector identifying the target elements.
+   * @returns {ResourceFields} Fresh edge-position fields with one inset writer.
+   */
+  function insetFields(name, label, selector) {
+    const shared = { section: "Size & placement", subsection: label };
+    const fields = {};
+    for (const side of ["Top", "Right", "Bottom", "Left"])
+      fields[`${name}${side}`] = {
+        ...shared,
+        type: "number",
+        default: "",
+        optional: true,
+        label: `${side} distance (px)`,
+        icon: ["Top", "Bottom"].includes(side) ? "fa-arrows-up-down" : "fa-arrows-left-right",
+        min: -2000,
+        max: 2000,
+        step: "any",
+        description: "Leave empty for automatic placement."
+      };
+    Object.assign(fields[`${name}Top`], {
+      styleSelector: selector,
+      styleProperty: "inset",
+      styleValue: (settings) => {
+        const values = ["Top", "Right", "Bottom", "Left"].map((side) => settings[`${name}${side}`]);
+        return values.every((value) => value === "") ? "" : values.map((value) => (value === "" ? "auto" : `${value}px`)).join(" ");
+      }
+    });
+    return fields;
+  }
+
+  /**
    * Declare an optional edge mask from percentage stops; only Custom exposes its controls.
    * @param {string} name Field or item identifier.
    * @param {string} label Human-readable label.
@@ -562,6 +673,47 @@
       [`${name}Start`]: { ...active, type: "number", default: 10, label: "Start fade (%)", icon: "fa-arrow-right-to-bracket", min: 0, max: 100, step: "any" },
       [`${name}End`]: { ...active, type: "number", default: 10, label: "End fade (%)", icon: "fa-arrow-right-from-bracket", min: 0, max: 100, step: "any" }
     };
+  }
+
+  /**
+   * Declare flex arrangement, spacing/wrapping, and child order without changing content data order.
+   * styleParent tells initResource() to enable flex only when an explicit layout override is applied.
+   * @param {string} selector Container selector for the composition overrides.
+   * @param {Object<string, Array<string>>} elements Child IDs mapped to [label, selector].
+   * @param {string} [prefix="content"] Separates fields and subsections for multiple layouts in one resource.
+   * @param {Object<string, Array<string>>} [conditions={}] Optional conditions for individual child order controls.
+   * @returns {ResourceFields} Fresh composition and per-element order/placement fields.
+   */
+  function layoutFields(selector, elements, prefix = "content", conditions = {}) {
+    const label = `${prefix[0].toUpperCase()}${prefix.slice(1)}`;
+    const shared = { default: "", optional: true, section: "Composition", ...(prefix !== "content" ? { subsection: `${label} layout` } : {}), styleParent: selector };
+    const fields = {
+      [`${prefix}Direction`]: {
+        ...shared,
+        type: "select",
+        label: `${label} arrangement`,
+        options: { "": "Automatic", column: "Stacked", row: "Single row", "column-reverse": "Stacked, reversed", "row-reverse": "Single row, reversed" },
+        styleSelector: selector,
+        styleProperty: "flex-direction"
+      },
+      [`${prefix}Gap`]: { ...shared, type: "number", label: `${label} gap (px)`, min: 0, max: 300, step: "any", styleSelector: selector, styleProperty: "gap", styleUnit: "px" },
+      [`${prefix}Wrap`]: { ...shared, type: "select", label: `${label} wrapping`, options: { "": "Automatic", nowrap: "Single line", wrap: "Wrap to fit" }, styleSelector: selector, styleProperty: "flex-wrap" }
+    };
+    for (const [name, [elementLabel, child]] of Object.entries(elements))
+      fields[`${name}Order`] = {
+        ...shared,
+        subsection: `${label} element order`,
+        ...(conditions[name] ? { when: conditions[name] } : {}),
+        type: "number",
+        label: `${elementLabel} order`,
+        description: "Lower values appear first. Empty preserves the original order.",
+        min: -100,
+        max: 100,
+        step: 1,
+        styleSelector: child,
+        styleProperty: "order"
+      };
+    return fields;
   }
 
   /**
@@ -765,6 +917,10 @@
     fadeFields,
     textFields,
     surfaceFields,
+    placementFields,
+    offsetFields,
+    insetFields,
+    layoutFields,
     initResource,
     parseAccounts,
     parseZone,
