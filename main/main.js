@@ -47,7 +47,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         min: 0,
         max: 1440,
         step: "any",
-        icon: "fa-hashtag"
+        icon: "fa-hashtag",
+        when: ["displayCountdown", "yes"]
       },
       displayCountdown: {
         type: "switch",
@@ -67,7 +68,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         section: "Scene",
         description: "Message displayed while the timer runs.",
         maxlength: 160,
-        icon: "fa-pen"
+        icon: "fa-pen",
+        when: ["displayCountdown", "yes"]
       },
       countdownOverMessage: {
         type: "text",
@@ -76,7 +78,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         section: "Scene",
         description: "Message displayed when the timer finishes.",
         maxlength: 160,
-        icon: "fa-pen"
+        icon: "fa-pen",
+        when: ["displayCountdown", "yes"]
       },
       primaryFont: {
         type: "font",
@@ -174,7 +177,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         section: "Appearance",
         description: "Image URL or relative path. Empty keeps the bundled logo.",
         maxlength: 160,
-        icon: "fa-pen"
+        icon: "fa-pen",
+        when: ["displayBranding", "yes"]
       },
       logoOpacity: {
         type: "number",
@@ -185,7 +189,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         min: 0,
         max: 1,
         step: "any",
-        icon: "fa-hashtag"
+        icon: "fa-hashtag",
+        when: ["displayBranding", "yes"]
       },
       logoScale: {
         type: "number",
@@ -196,7 +201,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         min: 0.1,
         max: 5,
         step: "any",
-        icon: "fa-hashtag"
+        icon: "fa-hashtag",
+        when: ["displayBranding", "yes"]
       },
       backgroundColor: {
         type: "color",
@@ -276,7 +282,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         validate: (value) => byConfigurator.parseAccounts(value, true),
         maxlength: 20000,
         entries: { choices: "platforms", choiceKey: "platform", textFields: [["handle", "Handle or display text"], ["heading", "Heading"]], newEntry: { platform: "twitch", handle: "", heading: "" } },
-        addLabel: "Add account"
+        addLabel: "Add account",
+        when: ["displaySocial", "yes"]
       },
       displaySchedule: {
         type: "switch",
@@ -304,7 +311,8 @@ document.addEventListener("DOMContentLoaded", async () => {
           newEntry: ["monday", ""],
           limit: 7
         },
-        addLabel: "Add day"
+        addLabel: "Add day",
+        when: ["displaySchedule", "yes"]
       }
     },
     constants: {

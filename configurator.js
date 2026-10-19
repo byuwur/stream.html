@@ -206,6 +206,22 @@
     return true;
   }
 
+  /**
+   * Resolve a field's when chain for both the editor and native overlays.
+   * Conditions reference existing fields and must not form cycles.
+   * @param {ResourceFields} fields Declared resource fields.
+   * @param {ResourceSettings} settings Current form or validated resource values.
+   * @param {string} name Field whose availability is checked.
+   * @returns {boolean} Whether the field and all its ancestors are active.
+   */
+  function fieldEnabled(fields, settings, name) {
+    const when = fields[name].when;
+    if (!when) return true;
+    const [parent, ...values] = when;
+    const value = String(settings[parent]);
+    return (values.length ? values.includes(value) : value !== "") && fieldEnabled(fields, settings, parent);
+  }
+
   /** Mutate settings with valid declared values; missing or invalid parameters keep existing defaults. */
   function applyParameters(fields, settings, values = new URLSearchParams(location.search)) {
     for (const [name, value] of values) {
@@ -221,6 +237,19 @@
       if (rule.type === "color" && !(rule.optional && parsed === "")) parsed = `#${String(parsed).replace(/^#/, "")}`;
       settings[name] = parsed;
     }
+  }
+
+  /**
+   * Attach a shared availability condition to fields that do not already have one.
+   * Nested controls retain their own parent, such as blur -> shadow -> visible element.
+   * fieldEnabled() follows that chain; groups must include the nested parent control.
+   * @param {Array<string>} when Parent field followed by allowed values; parent alone means nonempty.
+   * @param {Object} fields Fresh field declarations to update and return.
+   * @returns {ResourceFields} The same fields object after adding conditions only where they were absent.
+   */
+  function whenFields(when, fields) {
+    if (when) for (const field of Object.values(fields)) field.when ||= when;
+    return fields;
   }
 
   /**
@@ -417,6 +446,7 @@
     validParameter,
     applyParameters,
     settingsURL,
+    whenFields,
     initResource,
     parseAccounts,
     parseZone,
@@ -943,6 +973,7 @@
       jqHost.find("#preview-viewport").attr("viewBox", `0 0 ${resource.preview.join(" ")}`);
       jqHost.find("#overlay-preview").attr({ title: `${resource.title} preview`, allow: resource.previewAllow || "" });
       const groups = new Map();
+      const subsections = new Map();
       const jqForm = jqHost.find("form");
       for (const [name, field] of Object.entries(resource.fields)) {
         const section = field.section || "Settings";
@@ -968,7 +999,23 @@
               .appendTo(group)
           );
         }
-        const container = groups.get(section);
+        let container = groups.get(section);
+        if (field.subsection) {
+          const key = `${section}:${field.subsection}`;
+          if (!subsections.has(key)) {
+            const details = $(/* HTML */ `<details class="field-subsection border-top pt-2 mb-3"></details>`).appendTo(container);
+            $(/* HTML */ `<summary class="fw-semibold text-primary mb-2"></summary>`)
+              .text(field.subsection)
+              .prepend(
+                $(/* HTML */ `<i></i>`)
+                  .addClass(`fa-solid ${fieldIcon(field.subsection)} fa-fw me-2`)
+                  .attr("aria-hidden", "true")
+              )
+              .appendTo(details);
+            subsections.set(key, $(/* HTML */ `<div class="pt-2"></div>`).appendTo(details));
+          }
+          container = subsections.get(key);
+        }
         const label = $(/* HTML */ `<label class="form-label d-flex flex-column gap-1 w-100 mb-3"></label>`).appendTo(container);
         const caption = $(/* HTML */ `<span class="field-caption"></span>`)
           .text(field.label || name)
@@ -1012,6 +1059,7 @@
             .appendTo(editor);
         }
         if (field.type === "mapping") $(/* HTML */ `<a href="#remap"></a>`).text("Configure input mapping").appendTo(label);
+        if (field.when) (field.type === "entries" ? label.closest(".entry-editor") : label).wrap(/* HTML */ `<div class="conditional-field"></div>`);
       }
     }
 
@@ -1030,6 +1078,7 @@
       // Event handlers can pass a jQuery event; only explicit true preserves the draft.
       urlEdited = keepURLDraft === true;
       $("#overlay-url")[0].setCustomValidity("");
+      syncFieldVisibility();
       const valid = fields.map(validField).every(Boolean);
       if (!valid) {
         $("#overlay-url").val("");
@@ -1039,11 +1088,11 @@
         updateOverlayPreview(null);
         return false;
       }
-      const values = new FormData(form);
-      jqForm.find(":checkbox").each(function () {
-        const jqField = $(this);
-        values.set(this.name, jqField.prop("checked") ? jqField.val() : jqField.attr("data-unchecked-value"));
-      });
+      const values = new URLSearchParams();
+      for (const input of fields) {
+        const value = input.type === "checkbox" ? (input.checked ? input.value : input.dataset.uncheckedValue) : input.value;
+        values.set(input.name, value);
+      }
       byConfigurator.applyParameters(parameterRules, settings, values);
       const readableURL = settingsURL(resource, settings);
       let url = readableURL;
@@ -2118,17 +2167,45 @@
 
 
     /**
+     * Use the shared when rules to disable and hide inactive fields and their descendants.
+     * Controls retain drafts for re-enabling.
+     * @returns {void}
+     */
+    function syncFieldVisibility() {
+      const values = Object.fromEntries(fields.map((input) => [input.name, input.type === "checkbox" ? (input.checked ? input.value : input.dataset.uncheckedValue) : input.value]));
+      for (const input of fields) {
+        if (!parameterRules[input.name].when) continue;
+        input.disabled = !fieldEnabled(parameterRules, values, input.name);
+        $(input).siblings(".timestamp-picker, [data-regional-picker]").prop("disabled", input.disabled);
+        $(input).closest(".conditional-field").prop("hidden", input.disabled);
+      }
+      jqForm.find(".field-subsection, [data-config-section]").each((_, container) => {
+        const empty = !$(container)
+          .find("[name]")
+          .toArray()
+          .some((input) => !input.disabled);
+        const target = $(container).is("[data-config-section]") ? $(container).closest("fieldset") : $(container);
+        target.prop("hidden", empty);
+      });
+    }
+
+    /**
      * Sets a field's validation message using the active renderer's parameter rules.
      * @param {HTMLInputElement|HTMLSelectElement|HTMLTextAreaElement} field Named form control.
      * @returns {boolean} Whether the control passes custom and native validation.
      */
     function validField(field) {
+      if (field.disabled) {
+        field.setCustomValidity("");
+        return true;
+      }
       const jqField = $(field);
       const valid = byConfigurator.validParameter(parameterRules, field.name, jqField.val() ?? "");
       field.setCustomValidity(valid ? "" : "Enter a valid value for this setting.");
       // Hidden controls are excluded from native validation, including the account JSON.
       const accepted = field.checkValidity() && valid;
       if (!accepted) {
+        jqField.parents("details").prop("open", true);
         const section = jqField.closest(".accordion-collapse")[0];
         if (section) bootstrap.Collapse.getOrCreateInstance(section, { toggle: false }).show();
       }
@@ -2197,6 +2274,7 @@
         if (generation === urlGeneration) applyEditedURL(true);
       });
       jqForm
+        .on("change", syncFieldVisibility)
         .on("shown.bs.collapse hidden.bs.collapse", ".accordion-collapse", () => savePreferences())
         .on("input change", (event) => {
           urlEdited = false;
