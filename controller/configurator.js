@@ -10,7 +10,8 @@
  * @param {unknown} editor.initSelect2 Init select2.
  * @returns {unknown}
  */
-window.byConfigurator.configureResource = function ({ settings, gamepadSupport, buttonValue, copyGamepad }, { generateURL, initSelect2 }) {
+// The optional configurator may be removed while this editor extension remains imported.
+if (window.byConfigurator) window.byConfigurator.configureResource = function ({ settings, gamepadSupport, buttonValue, copyGamepad }, { generateURL, initSelect2 }) {
   if (typeof jQuery === "undefined" && !window.jQuery) return console.error("Init controller/configurator.js FAILED. No jQuery found.");
   const $ = window.jQuery;
   // Mapping markup belongs to this editor extension, never to the overlay renderer.
