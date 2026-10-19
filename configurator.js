@@ -189,7 +189,7 @@
     if (!Object.hasOwn(fields, name)) return false;
     const rule = fields[name];
     if (rule.validate) return rule.validate(value) !== null;
-    if (rule.options && !rule.options.includes(value)) return false;
+    if (rule.options && !Object.hasOwn(rule.options, value)) return false;
     if (rule.maxlength && value.length > Number(rule.maxlength)) return false;
     if (rule.type === "number") {
       const number = Number(value);
@@ -823,11 +823,7 @@
         let control;
         if (field.type === "select") {
           control = $(/* HTML */ `<select class="form-select"></select>`);
-          for (const value of field.options)
-            $(/* HTML */ `<option></option>`)
-              .val(value)
-              .text(field.labels?.[value] || value)
-              .appendTo(control);
+          for (const [value, title] of Object.entries(field.options)) $(/* HTML */ `<option></option>`).val(value).text(title).appendTo(control);
         } else if (field.type === "textarea") {
           control = $(/* HTML */ `<textarea class="form-control"></textarea>`).attr("rows", field.rows || 3);
         } else {
@@ -1683,7 +1679,7 @@
         const [title, defaultValue, values, example] = [
           rule.label || name,
           rule.type === "color" ? String(rule.default).replace(/^#/, "") : typeof rule.default === "object" ? JSON.stringify(rule.default) : (rule.default ?? "Empty"),
-          rule.options?.join(", ") || (rule.min !== undefined ? `${rule.min} to ${rule.max}` : acceptedTypes[rule.type] || "Text"),
+          (rule.options && Object.keys(rule.options).join(", ")) || (rule.min !== undefined ? `${rule.min} to ${rule.max}` : acceptedTypes[rule.type] || "Text"),
           rule.type === "color" ? String($(form.elements.namedItem(name)).val()).replace(/^#/, "") : ($(form.elements.namedItem(name)).val() ?? "")
         ];
         const jqDefinition = $(/* HTML */ `<section class="definition border mb-3 p-3 bg-body-tertiary"></section>`).appendTo(jqParameters);

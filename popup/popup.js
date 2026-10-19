@@ -35,9 +35,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         label: "Direction",
         section: "Animation",
         description: "Side from which the social popups animate.",
-        options: ["right", "left"],
-        icon: "fa-clapperboard",
-        labels: {"right":"Right","left":"Left"}
+        options: { right: "Right", left: "Left" },
+        icon: "fa-clapperboard"
       },
       pauseTime: {
         type: "number",

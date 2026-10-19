@@ -24,10 +24,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         label: "Player Number:",
         section: "Input",
         description: "Gamepad number, or 9 for keyboard input. Defaults to player 1.",
-        options: ["1", "2", "3", "4", "9"],
+        options: { 1: "Player 1", 2: "Player 2", 3: "Player 3", 4: "Player 4", 9: "Keyboard" },
         id: "player-input",
-        icon: "fa-user",
-        labels: { 1: "Player 1", 2: "Player 2", 3: "Player 3", 4: "Player 4", 9: "Keyboard" }
+        icon: "fa-user"
       },
       skin: {
         type: "select",
@@ -35,10 +34,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         label: "Skin:",
         section: "Input",
         description: "Controller artwork: 1 Xbox, 2 PlayStation, 3 fight stick, 4 GameCube. Defaults to Xbox.",
-        options: ["1", "2", "3", "4"],
+        options: { 1: "Xbox (1)", 2: "PlayStation (2)", 3: "Fight Stick (3)", 4: "GameCube (4)" },
         id: "skin-input",
-        icon: "fa-gamepad",
-        labels: { 1: "Xbox (1)", 2: "PlayStation (2)", 3: "Fight Stick (3)", 4: "GameCube (4)" }
+        icon: "fa-gamepad"
       },
       opacity: {
         type: "number",
@@ -82,7 +80,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         label: "Disable Strength Meter:",
         section: "Input",
         description: "Set to 0 to disable trigger strength meters.",
-        options: ["0", "1"],
+        options: { 0: "0", 1: "1" },
         id: "strength-input",
         icon: "fa-gauge-high",
         checkedValue: "0",
@@ -94,7 +92,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         label: "Enable Stick Curving:",
         section: "Input",
         description: "Set to 1 to enable curved stick movement.",
-        options: ["0", "1"],
+        options: { 0: "0", 1: "1" },
         id: "curve-input",
         icon: "fa-wave-square",
         checkedValue: "1",

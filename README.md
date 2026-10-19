@@ -171,6 +171,8 @@ HTML needs `<template id="overlay-markup">...</template>` and `<div id="configur
 
 `byConfigurator.init()` generates controls, preview, and parameter help; repeat calls preserve the form/handlers. Only declared fields enter URLs. `byConfigurator.validParameter(fields, name, value)` and `byConfigurator.applyParameters(fields, settings, values?)` share validation; custom validators return a parsed value or `null`. See the starter and existing resources for field metadata. Controller's `byConfigurator.configureResource(resource, editor)` adds mapping/help panels. Native helpers supply platforms/accounts, dates/zones, image checks, and clock-aligned `watch()` updates that pause while hidden.
 
+Field `options` maps stored IDs to displayed labels.
+
 ### Add a tool
 
 1. Copy `configurator.html` into the tool folder; replace demo markup/styles/rendering and change shared imports to `../`.

@@ -54,9 +54,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         label: "Countdown",
         section: "Scene",
         description: "Shows or hides the countdown area.",
-        options: ["yes", "no"],
-        icon: "fa-list",
-        labels: {"yes":"Show","no":"Hide"}
+        options: { yes: "Show", no: "Hide" },
+        icon: "fa-list"
       },
       countdownMessage: {
         type: "text",
@@ -160,9 +159,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         label: "Logo",
         section: "Appearance",
         description: "Shows or hides the logo independently of the title.",
-        options: ["yes", "no"],
-        icon: "fa-list",
-        labels: {"yes":"Show","no":"Hide"}
+        options: { yes: "Show", no: "Hide" },
+        icon: "fa-list"
       },
       logoUrl: {
         type: "text",
@@ -210,9 +208,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         label: "Background type",
         section: "Appearance",
         description: "Selects image or video background media.",
-        options: ["video", "image"],
-        icon: "fa-list",
-        labels: {"video":"Video","image":"Image"}
+        options: { video: "Video", image: "Image" },
+        icon: "fa-list"
       },
       backgroundUrl: {
         type: "text",
@@ -260,9 +257,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         label: "Social accounts",
         section: "Social accounts",
         description: "Shows or hides the social account area.",
-        options: ["yes", "no"],
-        icon: "fa-list",
-        labels: {"yes":"Show","no":"Hide"}
+        options: { yes: "Show", no: "Hide" },
+        icon: "fa-list"
       },
       accounts: {
         type: "entries",
@@ -281,9 +277,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         label: "Schedule",
         section: "Schedule",
         description: "Shows or hides the weekly schedule.",
-        options: ["yes", "no"],
-        icon: "fa-list",
-        labels: {"yes":"Show","no":"Hide"}
+        options: { yes: "Show", no: "Hide" },
+        icon: "fa-list"
       },
       scheduleEntries: {
         type: "entries",
