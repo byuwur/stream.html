@@ -85,7 +85,7 @@
   global.byConfigurator = global.byConfigurator || {};
   const byConfigurator = global.byConfigurator;
   if (byConfigurator.initialized) return;
-  byConfigurator.VERSION = "6.2";
+  byConfigurator.VERSION = "7"; // 2026-10-18
   const root = new URL(".", document.currentScript.src);
 
   // ==========
