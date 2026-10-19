@@ -1586,6 +1586,7 @@
     let urlGeneration = 0;
     // Keep typed URL drafts authoritative for Copy, Open, and F2.
     let urlEdited = false;
+    let previewURL = "";
 
     // ==========
     // ==== GENERATED FORM ====
@@ -1947,8 +1948,10 @@
     // Editing is debounced before URL generation; keep the last valid preview on invalid input.
     function updateOverlayPreview(url) {
       $("#preview-status").text(url ? "Changes update automatically." : "Fix the highlighted parameter to update the preview.");
-      if (url && $("#overlay-preview").attr("src") !== url) {
-        $("#overlay-preview").attr("src", url);
+      if (url && previewURL !== url) {
+        // Preview refreshes must not add steps to browser Back/Forward navigation.
+        $("#overlay-preview")[0].contentWindow.location.replace(url);
+        previewURL = url;
       }
     }
 
