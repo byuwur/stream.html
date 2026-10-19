@@ -145,7 +145,7 @@ Invalid JSON/platforms retain the two byUwUr default accounts; blank handles kee
 | `primaryTextColor`, `subTextColor`, `accentColor`, `frameColor`, `contentBackgrounds`, `backgroundColor` | Hex without `#`; background defaults to transparent `00000000`, accent/frame to `300`. |
 | `frameWidth`, `frameInset` | Border thickness `0`–`100` px (default `2`); optional signed inset in pixels. |
 | `logoUrl`, `logoOpacity`, `logoScale` | Image URL/path, opacity `0`–`100`% (default `5`), scale `-500`–`500`% (default `100`). Empty URL uses BONYUR. |
-| `backgroundType`, `backgroundUrl`, `backgroundScale` | `video`/`image`, media URL/path, and scale `-500`–`500`%. No bundled background media. |
+| `displayBackground`, `backgroundType`, `backgroundUrl`, `backgroundScale` | Media toggle (Off by default), `image`/`video`, media URL/path, and scale `-500`–`500`%. Enable the toggle to show media; the default URL is the BONYUR logo. |
 | `backgroundBlur`, `backgroundOverlayOpacity`, `backgroundOverlay` | Blur `0`–`100` px, tint opacity `0`–`100`%, tint color. |
 | `accounts` | Ordered rows with `platform`, `handle`, and `heading`; platforms may repeat. Up to 100 rows, 160 characters per text field, 20,000 JSON characters. Blank handles/`[]` hide accounts. |
 | `scheduleEntries` | Weekday-to-text map, e.g. `{"monday":"Activity"}`; up to seven days, 160 characters/text, 4,000 JSON characters. `{}` hides it. |

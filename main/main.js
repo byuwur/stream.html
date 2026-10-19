@@ -82,10 +82,12 @@ document.addEventListener("DOMContentLoaded", async () => {
         maxlength: 160,
         icon: "fa-pen"
       },
+      displayBackground: { type: "switch", default: "no", label: "Background media", section: "Background", checkedValue: "yes", uncheckedValue: "no", options: { yes: "On", no: "Off" } },
       backgroundType: {
         type: "select",
-        default: "video",
+        default: "image",
         label: "Background type",
+        when: ["displayBackground", "yes"],
         section: "Background",
         description: "Selects image or video background media.",
         options: { video: "Video", image: "Image" },
@@ -93,8 +95,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       backgroundUrl: {
         type: "text",
-        default: "",
+        default: "https://byuwur.github.io/img/logo.png",
         label: "Background URL or relative path",
+        when: ["displayBackground", "yes"],
         section: "Background",
         description: "Public media URL or relative file path. Does not upload a file.",
         maxlength: 160,
@@ -465,7 +468,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (settings.logoUrl) brand.style.backgroundImage = `url(${JSON.stringify(settings.logoUrl)})`;
     const background = document.querySelector(settings.backgroundType === "video" ? "#video video" : "#image img");
     document.getElementById(settings.backgroundType === "video" ? "image" : "video").remove();
-    if (settings.backgroundUrl) background.src = settings.backgroundUrl;
+    if (settings.displayBackground === "yes") background.src = settings.backgroundUrl;
+    else background.parentElement.hidden = true;
 
     for (const { platform, handle, heading } of accounts) {
       if (!handle) continue;
