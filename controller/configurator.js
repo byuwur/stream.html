@@ -460,7 +460,15 @@ window.byConfigurator.configureResource = function ({ settings, gamepadSupport, 
           jqLabel.addClass("form-switch ps-0");
           $(this).attr("role", "switch");
         }
-        $(this).wrap(jqLabel).after($(/* HTML */ `<span></span>`).text($(this).attr("title")));
+        const title = $(this).attr("title");
+        const icon = { Buttons: "fa-gamepad", Axes: "fa-up-down-left-right", "D-Pad": "fa-up-down-left-right", "Axes configuration": "fa-sliders", Disable: "fa-ban" }[title];
+        $(this)
+          .wrap(jqLabel)
+          .after(
+            $(/* HTML */ `<span></span>`)
+              .text(title)
+              .prepend($(/* HTML */ `<i></i>`).addClass(`fa-solid ${icon} me-1`).attr("aria-hidden", "true"))
+          );
       });
       initMappingControls(jqPanel);
       $(/* HTML */ `<button type="button" data-section="remap" class="btn btn-sm btn-outline-light border-0"><i class="fa-solid fa-gamepad me-1" aria-hidden="true"></i>Custom Mapping</button>`)
@@ -477,7 +485,14 @@ window.byConfigurator.configureResource = function ({ settings, gamepadSupport, 
    * @returns {void}
    */
   function initMappingControls(jqPanel) {
-    initSelect2(jqPanel.find("#player-base"));
+    function mappingOption(option) {
+      if (!option.element) return option.text;
+      const name = option.element.parentElement.name;
+      const icon = { axes: "fa-up-down-left-right", "fix-type": "fa-sliders" }[name] || "fa-gamepad";
+      return $(/* HTML */ `<span></span>`).append($(/* HTML */ `<i></i>`).addClass(`fa-solid ${icon} fa-fw me-2`).attr("aria-hidden", "true"), document.createTextNode(option.text));
+    }
+    const options = { templateResult: mappingOption, templateSelection: mappingOption };
+    initSelect2(jqPanel.find("#player-base"), options);
     jqPanel.find("#mapping-config > .template, .raw-outputs.template").addClass("d-none");
     /**
      * Updates mapping visibility and disabled states from the selected options.
@@ -486,15 +501,24 @@ window.byConfigurator.configureResource = function ({ settings, gamepadSupport, 
     function updateMappingControls() {
       jqPanel.find("#mappings .form-group").each(function () {
         const jqGroup = $(this);
-        jqGroup.find("select").each((_, select) => initSelect2(select));
+        jqGroup.find("select").each((_, select) => initSelect2(select, options));
         const type = jqGroup.find('input[type="radio"]:checked').val();
         const fixAxes = jqGroup.find(".axes-config").prop("checked");
         const disabled = jqGroup.find(".disable-item").prop("checked");
         jqGroup.children("select").each(function () {
-          $(this).toggleClass("d-none", this.name !== type).next(".select2-container").toggleClass("d-none", this.name !== type);
+          $(this)
+            .toggleClass("d-none", this.name !== type)
+            .next(".select2-container")
+            .toggleClass("d-none", this.name !== type);
         });
-        jqGroup.children("button").eq(1).toggleClass("d-none", type !== "axes" || fixAxes);
-        jqGroup.find(".axes-config").closest("label").toggleClass("d-none", type === "dpad");
+        jqGroup
+          .children("button")
+          .eq(1)
+          .toggleClass("d-none", type !== "axes" || fixAxes);
+        jqGroup
+          .find(".axes-config")
+          .closest("label")
+          .toggleClass("d-none", type === "dpad");
         jqGroup.find(".fix-axes").toggleClass("d-none", !fixAxes || type === "dpad");
         jqGroup.find(".fix-dpad").toggleClass("d-none", type !== "dpad");
         jqGroup.find("button").prop("disabled", disabled);

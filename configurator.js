@@ -444,6 +444,86 @@
   // ==========
 
   /** Shared card and navigation metadata; only ready: true tools are published. */
+  /**
+   * Explicit resource icons take priority; shared controls use their property or purpose.
+   * @param {string} name Field or item identifier.
+   * @param {Partial<ResourceField>} [field={}] Metadata whose icon, type, and label guide the fallback.
+   * @returns {string} Font Awesome icon class selected from explicit metadata or the shared field rules.
+   */
+  function fieldIcon(name, field = {}) {
+    if (field.icon) return field.icon;
+    const properties = {
+      "font-size": "fa-text-height",
+      "font-family": "fa-font",
+      "font-weight": "fa-bold",
+      "font-style": "fa-italic",
+      "text-transform": "fa-font",
+      "letter-spacing": "fa-text-width",
+      "line-height": "fa-arrows-up-down",
+      opacity: "fa-circle-half-stroke",
+      "background-color": "fa-fill-drip",
+      "border-width": "fa-border-all",
+      "border-style": "fa-border-all",
+      "border-color": "fa-palette",
+      "border-radius": "fa-square",
+      padding: "fa-compress",
+      "padding-inline": "fa-compress",
+      gap: "fa-arrows-left-right-to-line",
+      order: "fa-arrow-down-short-wide",
+      width: "fa-arrows-left-right",
+      "max-width": "fa-arrows-left-right",
+      height: "fa-arrows-up-down",
+      "max-height": "fa-arrows-up-down",
+      left: "fa-arrow-left",
+      right: "fa-arrow-right",
+      top: "fa-arrow-up",
+      bottom: "fa-arrow-down",
+      "margin-inline": "fa-arrows-left-right",
+      rotate: "fa-rotate",
+      scale: "fa-expand",
+      "transform-origin": "fa-bullseye",
+      "flex-direction": "fa-up-down-left-right",
+      "flex-wrap": "fa-layer-group",
+      "justify-content": "fa-align-center",
+      "align-items": "fa-align-center",
+      "animation-duration": "fa-clock",
+      "animation-delay": "fa-hourglass-half",
+      "animation-iteration-count": "fa-repeat"
+    };
+    if (properties[field.styleProperty]) return properties[field.styleProperty];
+    const types = { color: "fa-palette", font: "fa-font", datetime: "fa-calendar-days", timezone: "fa-earth-americas", timezones: "fa-earth-americas", locale: "fa-language", entries: "fa-list", mapping: "fa-gamepad" };
+    if (types[field.type]) return types[field.type];
+    for (const [pattern, icon] of [
+      [/url|image|logo/i, "fa-image"],
+      [/icon|symbol|separator/i, "fa-icons"],
+      [/heading|title/i, "fa-heading"],
+      [/account|handle|platform/i, "fa-at"],
+      [/keyboard|keys|shortcut/i, "fa-keyboard"],
+      [/button/i, "fa-hand-pointer"],
+      [/date|weekday|schedule/i, "fa-calendar-days"],
+      [/time|duration|pause|delay|interval|hour|seconds|quiet/i, "fa-clock"],
+      [/color|gradient|hue|tint/i, "fa-palette"],
+      [/opacity|strength/i, "fa-circle-half-stroke"],
+      [/shadow|glow|blur/i, "fa-cloud"],
+      [/font|weight|text|label|message|content|closing/i, "fa-font"],
+      [/width|horizontal|offsetx|left|right/i, "fa-arrows-left-right"],
+      [/height|vertical|offsety|top|bottom/i, "fa-arrows-up-down"],
+      [/position|offset|placement|anchor/i, "fa-up-down-left-right"],
+      [/size|radius|padding|margin|distance|length/i, "fa-ruler"],
+      [/angle|rotate|tilt/i, "fa-rotate"],
+      [/scale|zoom/i, "fa-expand"],
+      [/speed|curve|ease/i, "fa-gauge-high"],
+      [/animation|motion|pulse|effect|transition/i, "fa-wand-magic-sparkles"],
+      [/loop|repeat|cycle/i, "fa-repeat"],
+      [/layout|composition|align|style|mode|shape/i, "fa-layer-group"],
+      [/show|display|visible/i, "fa-eye"],
+      [/count|number|seed|round|density/i, "fa-hashtag"],
+      [/name|player/i, "fa-user"]
+    ])
+      if (pattern.test(name)) return icon;
+    return { switch: "fa-toggle-on", select: "fa-list", number: "fa-sliders", text: "fa-font", textarea: "fa-align-left" }[field.type] || "fa-sliders";
+  }
+
   byConfigurator.catalog = {
     // Resolve from this script so links also work in downloaded folders and nested deployments.
     root,
@@ -683,7 +763,14 @@
     // ==== GENERATED FORM ====
     // ==========
 
-    /** Build the shared shell and native controls; existing widgets enhance them afterward. */
+    /**
+     * Build the shell and native controls directly from resource.fields insertion order.
+     * Sections/subsections group their first appearance; resource declarations keep related fields contiguous.
+     * Widgets enhance these same controls afterward. Conditional list wrappers include the whole editor.
+     * @param {ResourceDefinition} resource Resource metadata, field definitions, defaults, and current settings.
+     * @param {jQuery} jqHost jQuery wrapper for the configurator host.
+     * @returns {void}
+     */
     function buildConfigurator(resource, jqHost) {
       jqHost.html(/* HTML */ `
         <main id="setup" class="d-flex flex-column vh-100 overflow-hidden">
@@ -867,7 +954,11 @@
             .attr({ id: `${id}-toggle`, "data-bs-target": `#${id}`, "aria-controls": id, "aria-expanded": String(!collapsed) })
             .toggleClass("collapsed", collapsed)
             .text(section);
-          if (resource.sectionIcons?.[section]) heading.prepend($(/* HTML */ `<i></i>`).addClass(`${resource.sectionIcons[section]} me-2`).attr("aria-hidden", "true"));
+          heading.prepend(
+            $(/* HTML */ `<i></i>`)
+              .addClass(`${resource.sectionIcons?.[section] || `fa-solid ${fieldIcon(section)}`} me-2`)
+              .attr("aria-hidden", "true")
+          );
           $(/* HTML */ `<legend class="float-start w-100 fs-6 fw-semibold border-bottom pb-2 mb-2 text-primary"></legend>`).append(heading).appendTo(group);
           groups.set(
             section,
@@ -882,7 +973,11 @@
         const caption = $(/* HTML */ `<span class="field-caption"></span>`)
           .text(field.label || name)
           .appendTo(label);
-        if (field.icon) caption.prepend($(/* HTML */ `<i></i>`).addClass(`fa-solid ${field.icon} fa-fw text-primary me-2`).attr("aria-hidden", "true"));
+        caption.prepend(
+          $(/* HTML */ `<i></i>`)
+            .addClass(`fa-solid ${fieldIcon(name, field)} fa-fw text-primary me-2`)
+            .attr("aria-hidden", "true")
+        );
         let control;
         if (field.type === "select") {
           control = $(/* HTML */ `<select class="form-select"></select>`);
@@ -909,7 +1004,7 @@
         if (field.description) $(/* HTML */ `<small class="text-body-secondary"></small>`).text(field.description).appendTo(label);
         if (field.type === "entries") {
           const editor = $(/* HTML */ `<div class="entry-editor mb-3"></div>`).appendTo(container);
-          label.addClass("d-none").appendTo(editor);
+          label.appendTo(editor);
           $(/* HTML */ `<div class="entry-list"></div>`).appendTo(editor);
           $(/* HTML */ `<button type="button" class="add-entry btn btn-sm btn-outline-primary w-100"></button>`)
             .text(field.addLabel || "Add entry")
@@ -1243,10 +1338,18 @@
             "data-field": key,
             "aria-label": title,
             placeholder: title,
-            class: "form-control rounded-0 bg-body-secondary border-secondary-subtle mb-1"
+            class: "form-control rounded-0 bg-body-secondary border-secondary-subtle"
           })
             .val(type === "datetime-local" ? localTimestamp(value) : value)
             .appendTo(jqRow);
+          input.wrap(/* HTML */ `<span class="input-group mb-1"></span>`);
+          $(/* HTML */ `<span class="input-group-text"></span>`)
+            .append(
+              $(/* HTML */ `<i></i>`)
+                .addClass(`fa-solid ${fieldIcon(key, { type })} fa-fw`)
+                .attr("aria-hidden", "true")
+            )
+            .insertBefore(input);
         });
         jqRow.appendTo(jqEditor);
         if (choiceKey === "platform") {
@@ -1336,7 +1439,10 @@
 
     /** Presets reuse ordinary field changes, including validation and URL generation. */
     function initAppearancePresets() {
-      const jqLabel = $(/* HTML */ `<label class="form-label w-100"></label>`).text("Appearance preset").prependTo(jqForm);
+      const jqLabel = $(/* HTML */ `<label class="form-label w-100"></label>`)
+        .text("Appearance preset")
+        .prepend($(/* HTML */ `<i class="fa-solid fa-palette fa-fw me-2" aria-hidden="true"></i>`))
+        .prependTo(jqForm);
       const jqSelect = $(/* HTML */ `<select class="form-select rounded-0 bg-body-secondary border-secondary-subtle mb-3"></select>`).appendTo(jqLabel);
       for (const [value, title] of [
         ["", "Custom"],
@@ -1362,7 +1468,11 @@
       });
     }
 
-    /** Native pickers use the editor computer's zone and serialize absolute UTC timestamps. */
+    /**
+     * Native pickers use the editor computer's zone and serialize absolute UTC timestamps.
+     * @param {Array<string>} names Field names to initialize.
+     * @returns {void}
+     */
     function initTimestampFields(names) {
       for (const name of names) {
         const jqField = $(form.elements[name]);
@@ -1374,7 +1484,11 @@
           .attr({ class: `${jqField.attr("class")} timestamp-picker`, "aria-label": title })
           .insertBefore(jqField);
         const jqNote = $(/* HTML */ `<small class="text-body-secondary"></small>`).text("Choose in this computer’s time zone. The URL stores an absolute time.").insertAfter(jqPicker);
-        const jqNow = $(/* HTML */ `<button type="button" class="btn btn-sm btn-outline-primary align-self-start"></button>`).text("Use current time").attr("aria-label", `Use current time for ${title}`).insertAfter(jqNote);
+        const jqNow = $(/* HTML */ `<button type="button" class="btn btn-sm btn-outline-primary align-self-start"></button>`)
+          .text("Use current time")
+          .prepend($(/* HTML */ `<i class="fa-solid fa-clock me-2" aria-hidden="true"></i>`))
+          .attr("aria-label", `Use current time for ${title}`)
+          .insertAfter(jqNote);
         const sync = () => jqPicker.val(localTimestamp(jqField.val()));
         jqField.on("change", sync);
         jqPicker.on("input", () => jqField.val(utcTimestamp(jqPicker.val())).trigger("input"));
@@ -1669,7 +1783,7 @@
                   <h3 class="h5 mb-3">URL options</h3>
                   <div class="form-check form-switch d-flex align-items-center gap-3 p-0 mb-2">
                     <input id="short-url" class="form-check-input float-none m-0 flex-shrink-0" type="checkbox" role="switch" aria-describedby="short-url-help url-summary" />
-                    <label class="form-check-label fw-semibold" for="short-url">Shorter URL</label>
+                    <label class="form-check-label fw-semibold" for="short-url"><i class="fa-solid fa-compress fa-fw me-2" aria-hidden="true"></i>Shorter URL</label>
                   </div>
                   <fieldset id="compression-options" class="border-0 p-0 m-0 mb-4" hidden>
                     <legend class="fs-6 fw-semibold mb-2">
@@ -1687,12 +1801,14 @@
                       </button>
                     </legend>
                     <div class="d-flex flex-wrap gap-3 mb-3">
-                      <label class="d-flex align-items-center gap-2"><input class="form-check-input m-0" type="radio" name="compression-scope" value="all" />All settings</label>
-                      <label class="d-flex align-items-center gap-2"><input class="form-check-input m-0" type="radio" name="compression-scope" value="selected" />Selected fields</label>
+                      <label class="d-flex align-items-center gap-2"><input class="form-check-input m-0" type="radio" name="compression-scope" value="all" /><i class="fa-solid fa-compress" aria-hidden="true"></i>All settings</label>
+                      <label class="d-flex align-items-center gap-2"
+                        ><input class="form-check-input m-0" type="radio" name="compression-scope" value="selected" /><i class="fa-solid fa-list-check" aria-hidden="true"></i>Selected fields</label
+                      >
                     </div>
                     <div id="compression-selection" hidden>
                       <label class="form-label w-100" for="compression-search"
-                        >Find a field
+                        ><i class="fa-solid fa-magnifying-glass fa-fw me-2" aria-hidden="true"></i>Find a field
                         <input id="compression-search" type="search" class="form-control mt-1" placeholder="Search by label or parameter" />
                       </label>
                       <div id="compression-field-list" class="compression-fields border p-3"></div>
@@ -1741,6 +1857,11 @@
           .appendTo(label);
         const caption = $(/* HTML */ `<span class="text-break"></span>`)
           .text(rule.label || name)
+          .prepend(
+            $(/* HTML */ `<i></i>`)
+              .addClass(`fa-solid ${fieldIcon(name, rule)} fa-fw me-2`)
+              .attr("aria-hidden", "true")
+          )
           .appendTo(label);
         $(/* HTML */ `<code class="d-block small"></code>`).text(name).appendTo(caption);
       });
@@ -1816,6 +1937,11 @@
         const jqDefinition = $(/* HTML */ `<section class="definition border mb-3 p-3 bg-body-tertiary"></section>`).appendTo(jqParameters);
         $(/* HTML */ `<h3 class="h5 mb-2 d-flex flex-wrap align-items-center gap-2"></h3>`)
           .text(title)
+          .prepend(
+            $(/* HTML */ `<i></i>`)
+              .addClass(`fa-solid ${fieldIcon(name, rule)} fa-fw`)
+              .attr("aria-hidden", "true")
+          )
           .append($(/* HTML */ `<code class="d-inline-block bg-secondary-subtle text-primary border p-1"></code>`).text(`${name}=`))
           .appendTo(jqDefinition);
         $(/* HTML */ `<div class="codeblock bg-black text-white border p-2 mb-3 font-monospace text-break lh-lg"></div>`)
