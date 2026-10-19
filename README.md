@@ -144,7 +144,7 @@ Invalid JSON/platforms retain the two byUwUr default accounts; blank handles kee
 | `primaryFont`, `titleSize`, `subtitleSize` | Font family and sizes `8`–`200` px; Courier/monospace fallback. |
 | `primaryTextColor`, `subTextColor`, `accentColor`, `frameColor`, `contentBackgrounds`, `backgroundColor` | Hex without `#`; background defaults to transparent `00000000`, accent/frame to `300`. |
 | `frameWidth`, `frameInset` | Border thickness `0`–`100` px (default `2`); optional signed inset in pixels. |
-| `logoUrl`, `logoOpacity`, `logoScale` | Image URL/path, opacity `0`–`100`% (default `5`), scale `-500`–`500`% (default `100`). Empty URL uses BONYUR. |
+| `logoUrl`, `logoOpacity`, `logoScale` | Image URL/path (default `https://byuwur.github.io/img/logo.png`), opacity `0`–`100`% (default `5`), scale `-500`–`500`% (default `100`). |
 | `displayBackground`, `backgroundType`, `backgroundUrl`, `backgroundScale` | Media toggle (Off by default), `image`/`video`, media URL/path, and scale `-500`–`500`%. Enable the toggle to show media; the default URL is the BONYUR logo. |
 | `backgroundBlur`, `backgroundOverlayOpacity`, `backgroundOverlay` | Blur `0`–`100` px, tint opacity `0`–`100`%, tint color. |
 | `accounts` | Ordered rows with `platform`, `handle`, and `heading`; platforms may repeat. Up to 100 rows, 160 characters per text field, 20,000 JSON characters. Blank handles/`[]` hide accounts. |
@@ -174,6 +174,8 @@ Declare sections, subsections, and fields in display order: primary content and 
 Resource size and offset controls use pixels, including the configurator demo. The configurator interface keeps its rem-based styling. Opacity, deadzone, fades, grayscale, sepia, and invert use `0`–`100`%. Animation speed, brightness, contrast, and saturation accept `0`–`500`%, with `100` as normal. Scale uses `-500`–`500`%, where `100` preserves size and negative values flip both axes. URL values use these same units.
 
 Field `options` maps stored IDs to displayed labels. Binary settings use `type: "switch"` with explicit checked/unchecked values. Every field has an icon, with explicit `icon` metadata taking priority over the shared property/purpose choices. `byConfigurator.textFields()` declares per-element typography, color, opacity, and shadow controls; size `0` and other empty overrides follow the base appearance. `surfaceFields()`, `placementFields()`, and `layoutFields()` declare optional surface, transform, and element-order controls. Empty optional overrides are omitted from generated URLs. Lower order values appear first; changing order enables a flex layout.
+
+Declare image paths in resource field defaults; renderers read the resolved settings instead of embedding fallback image paths in CSS or markup.
 
 Shadows, glows, filters, offsets, element edges, and fades use numeric inputs, color pickers, and choices in dedicated subsections. Position and offset controls accept positive and negative values. Inactive effect controls are hidden and disabled; selecting a custom effect reveals its settings. Raw CSS-string parameters are no longer fields and fall back to defaults. The `shadowFields()`, `filterFields()`, `offsetFields()`, `insetFields()`, and `fadeFields()` helpers declare these ordinary URL fields.
 

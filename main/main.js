@@ -157,11 +157,11 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       logoUrl: {
         type: "text",
-        default: "",
+        default: "https://byuwur.github.io/img/logo.png",
         label: "Logo URL or relative image path",
         section: "Branding",
         when: ["displayBranding", "yes"],
-        description: "Image URL or relative path. Empty keeps the bundled logo.",
+        description: "Image URL or relative path. Clearing restores the default logo URL.",
         maxlength: 160,
         icon: "fa-pen"
       },
@@ -465,7 +465,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     setText("subLine", settings.labelFourHeading);
 
     const brand = document.getElementById("brandImg");
-    if (settings.logoUrl) brand.style.backgroundImage = `url(${JSON.stringify(settings.logoUrl)})`;
+    brand.style.backgroundImage = `url(${JSON.stringify(settings.logoUrl)})`;
     const background = document.querySelector(settings.backgroundType === "video" ? "#video video" : "#image img");
     document.getElementById(settings.backgroundType === "video" ? "image" : "video").remove();
     if (settings.displayBackground === "yes") background.src = settings.backgroundUrl;

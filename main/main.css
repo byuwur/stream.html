@@ -96,7 +96,7 @@ body {
   position: absolute;
   width: 1920px;
   height: 500px;
-  background: url("https://byuwur.github.io/img/logo.png") center / contain no-repeat;
+  background: center / contain no-repeat;
   opacity: var(--logo-opacity);
   transform: scale(var(--logo-scale));
 }
