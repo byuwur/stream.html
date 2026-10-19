@@ -57,7 +57,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         label: "Stick Offset: (px)",
         section: "Input",
         description: "Maximum stick travel in pixels.",
-        min: 0,
+        min: -1000,
         max: Infinity,
         id: "offset-input",
         icon: "fa-up-down-left-right",
@@ -120,7 +120,39 @@ document.addEventListener("DOMContentLoaded", async () => {
         validate: bindingSettings,
         id: "mapping-input",
         help: "remap"
-      }
+      },
+      mirror: { type: "switch", default: "no", label: "Mirror artwork", section: "Appearance", checkedValue: "yes", uncheckedValue: "no", options: { yes: "Yes", no: "No" } },
+      backgroundColor: { type: "color", default: "", optional: true, label: "Background", section: "Appearance", maxlength: 80, styleSelector: "body", styleProperty: "background-color" },
+      disconnectedOpacity: {
+        type: "number",
+        default: "",
+        optional: true,
+        label: "Disconnected opacity (%)",
+        section: "Appearance",
+        min: 0,
+        max: 100,
+        step: "any",
+        styleSelector: ".controller.disconnected",
+        styleProperty: "opacity",
+        styleUnit: "%"
+      },
+      horizontalPosition: {
+        type: "number",
+        default: "",
+        optional: true,
+        label: "Horizontal position (px)",
+        section: "Size & placement",
+        min: -2000,
+        max: 2000,
+        step: "any",
+        styleSelector: ".controller",
+        styleProperty: "left",
+        styleUnit: "px"
+      },
+      verticalPosition: { type: "number", default: "", optional: true, label: "Vertical position (px)", section: "Size & placement", min: -2000, max: 2000, step: "any", styleSelector: ".controller", styleProperty: "top", styleUnit: "px" },
+      fitMargin: { type: "number", default: 8, label: "Fit margin (px)", section: "Size & placement", min: 0, max: 1000, step: "any" },
+      ...byConfigurator.placementFields(".controller"),
+      ...byConfigurator.filterFields("artworkFilter", "Artwork", ".controller")
     }
   };
 
@@ -411,9 +443,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     active.classList.add("active");
     active.querySelector(".quadrant").classList.add(`p${settings.player === "9" ? 9 : Number(settings.player) - 1}`);
     function fitController() {
-      const margin = parseFloat(getComputedStyle(document.documentElement).fontSize) * 0.5;
+      const margin = settings.fitMargin;
       const scale = Math.max(0, Math.min((innerHeight - margin * 2) / active.offsetHeight, innerWidth / active.offsetWidth));
-      active.style.transform = `translate(-50%, -50%) scale(${scale})`;
+      active.style.transform = `translate(-50%, -50%) scale(${settings.mirror === "yes" ? -scale : scale}, ${scale})`;
     }
     fitController();
     window.addEventListener("resize", fitController);

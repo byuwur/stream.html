@@ -102,6 +102,8 @@ Current URLs use percentages for opacity, deadzone, and scale: `100` means 100%,
 | `strength`, `curve`  | `strength=0` disables trigger meters; `curve=1` enables stick curving.              |
 | `rotation`           | Maximum steering-wheel rotation in degrees.                                         |
 | `mapping`            | Custom Mapping binding array; `[]` uses defaults. Legacy `{"mapping":[...]}` works. |
+| `mirror`, `fitMargin` | Mirror artwork horizontally; vertical fit margin in pixels (default `8`). |
+| `horizontalPosition`, `verticalPosition` | Optional signed pixel positions. Empty keeps automatic placement. |
 
 Press a gamepad button for detection or **F** for keyboard input. Focus the preview/OBS Interact first. Defaults live in `bySettingsKB` in `controller/index.html`; detection depends on browser/OS. **Custom Mapping** chooses a base and captures bindings. Skins fit the viewport with `0.5rem` vertical margins.
 
