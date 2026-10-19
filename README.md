@@ -206,6 +206,8 @@ Resource size and offset controls use pixels, including the configurator demo. T
 
 Resource size and offset controls use pixels, including the configurator demo. The configurator interface keeps its rem-based styling. Opacity, effect strength, and other bounded percentages use `0`–`100`; scale uses `-500`–`500`, where `100` preserves size and negative values flip both axes. URL values use these same units.
 
+Declare sections, subsections, and fields in display order: primary content and behavior first, then common appearance, size and placement, composition, and detailed styling or effects. Keep related fields together; appearance presets belong in Appearance.
+
 ### Add a tool
 
 1. Copy `configurator.html` into the tool folder; replace demo markup/styles/rendering and change shared imports to `../`.

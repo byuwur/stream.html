@@ -14,9 +14,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     version: "1.0",
     title: "Main scene",
     description: "Set up your starting, BRB, ending, or intermission scene.",
-    preview: [1920,1080],
+    preview: [1920, 1080],
     urlRequired: ["sceneTitle"],
-    sectionIcons: {"Scene":"fa-solid fa-clapperboard","Appearance":"fa-solid fa-palette","Social accounts":"fa-solid fa-users","Schedule":"fa-solid fa-calendar-days"},
+    sectionIcons: { Scene: "fa-solid fa-clapperboard", Appearance: "fa-solid fa-palette", "Social accounts": "fa-solid fa-users", Schedule: "fa-solid fa-calendar-days" },
     previewAllow: "autoplay; gamepad *",
     fields: {
       sceneTitle: {
@@ -38,55 +38,237 @@ document.addEventListener("DOMContentLoaded", async () => {
         maxlength: 160,
         icon: "fa-quote-left"
       },
-      countdownTime: {
-        type: "number",
-        default: 4,
-        label: "Countdown (minutes)",
-        section: "Scene",
-        description: "Duration of the countdown in minutes.",
-        min: 0,
-        max: 1440,
-        step: "any",
-        icon: "fa-hashtag",
-        when: ["displayCountdown", "yes"]
-      },
       displayCountdown: {
         type: "switch",
         default: "yes",
         label: "Countdown",
-        section: "Scene",
+        section: "Countdown",
         description: "Shows or hides the countdown area.",
-        options: { yes: "Show", no: "Hide" },
-        icon: "fa-list",
         checkedValue: "yes",
-        uncheckedValue: "no"
+        uncheckedValue: "no",
+        options: { yes: "Show", no: "Hide" },
+        icon: "fa-list"
       },
+      countdownTime: {
+        type: "number",
+        default: 4,
+        label: "Countdown (minutes)",
+        section: "Countdown",
+        when: ["displayCountdown", "yes"],
+        description: "Duration of the countdown in minutes.",
+        min: 0,
+        max: 1440,
+        step: "any",
+        icon: "fa-hashtag"
+      },
+      countdownFormat: { type: "select", default: "stopwatch", label: "Countdown format", section: "Countdown", when: ["displayCountdown", "yes"], options: byConfigurator.durationFormats },
       countdownMessage: {
         type: "text",
         default: "cuenta regresiva tramadora",
         label: "Countdown message",
-        section: "Scene",
+        section: "Countdown",
+        when: ["displayCountdown", "yes"],
         description: "Message displayed while the timer runs.",
         maxlength: 160,
-        icon: "fa-pen",
-        when: ["displayCountdown", "yes"]
+        icon: "fa-pen"
       },
       countdownOverMessage: {
         type: "text",
         default: "Vamo' a vé'.",
         label: "Finished message",
-        section: "Scene",
+        section: "Countdown",
+        when: ["displayCountdown", "yes"],
         description: "Message displayed when the timer finishes.",
         maxlength: 160,
-        icon: "fa-pen",
-        when: ["displayCountdown", "yes"]
+        icon: "fa-pen"
       },
+      backgroundType: {
+        type: "select",
+        default: "video",
+        label: "Background type",
+        section: "Background",
+        description: "Selects image or video background media.",
+        options: { video: "Video", image: "Image" },
+        icon: "fa-list"
+      },
+      backgroundUrl: {
+        type: "text",
+        default: "",
+        label: "Background URL or relative path",
+        section: "Background",
+        description: "Public media URL or relative file path. Does not upload a file.",
+        maxlength: 160,
+        icon: "fa-pen"
+      },
+      backgroundColor: {
+        type: "color",
+        default: "#00000000",
+        label: "Background color",
+        section: "Background",
+        description: "Background color behind the scene and its media. Transparent by default.",
+        maxlength: 160,
+        icon: "fa-palette"
+      },
+      backgroundScale: { type: "number", default: 100, label: "Background scale (%)", section: "Background", min: -500, max: 500, step: "any" },
+      backgroundBlur: {
+        type: "number",
+        default: 0,
+        label: "Background blur (px)",
+        section: "Background",
+        description: "Background blur radius in pixels.",
+        min: 0,
+        max: 100,
+        step: "any",
+        icon: "fa-hashtag"
+      },
+      backgroundOverlay: {
+        type: "color",
+        default: "#36353A",
+        label: "Background tint color",
+        section: "Background",
+        description: "Color of the background tint.",
+        maxlength: 160,
+        icon: "fa-palette"
+      },
+      backgroundOverlayOpacity: {
+        type: "number",
+        default: 0,
+        label: "Background tint opacity (%)",
+        section: "Background",
+        description: "Opacity from 0% (transparent) to 100% (opaque).",
+        min: 0,
+        max: 100,
+        step: "any",
+        icon: "fa-hashtag"
+      },
+      displayBranding: {
+        type: "switch",
+        default: "yes",
+        label: "Logo",
+        section: "Branding",
+        description: "Shows or hides the logo independently of the title.",
+        checkedValue: "yes",
+        uncheckedValue: "no",
+        options: { yes: "Show", no: "Hide" },
+        icon: "fa-list"
+      },
+      logoUrl: {
+        type: "text",
+        default: "",
+        label: "Logo URL or relative image path",
+        section: "Branding",
+        when: ["displayBranding", "yes"],
+        description: "Image URL or relative path. Empty keeps the bundled logo.",
+        maxlength: 160,
+        icon: "fa-pen"
+      },
+      logoScale: {
+        type: "number",
+        default: 100,
+        label: "Logo scale (%)",
+        section: "Branding",
+        when: ["displayBranding", "yes"],
+        description: "100% is the original size. Negative values flip both axes.",
+        min: -500,
+        max: 500,
+        step: "any",
+        icon: "fa-hashtag"
+      },
+      logoOpacity: {
+        type: "number",
+        default: 5,
+        label: "Logo opacity (%)",
+        section: "Branding",
+        when: ["displayBranding", "yes"],
+        description: "Opacity from 0% (transparent) to 100% (opaque).",
+        min: 0,
+        max: 100,
+        step: "any",
+        icon: "fa-hashtag"
+      },
+      displaySocial: {
+        type: "switch",
+        default: "yes",
+        label: "Social accounts",
+        section: "Social accounts",
+        description: "Shows or hides the social account area.",
+        checkedValue: "yes",
+        uncheckedValue: "no",
+        options: { yes: "Show", no: "Hide" },
+        icon: "fa-list"
+      },
+      accounts: {
+        type: "entries",
+        default: [
+          { platform: "twitch", handle: "/byUwUr", heading: "Stream casi todos los días" },
+          { platform: "youtube", handle: "[Mateus] @byUwUr", heading: "VODs todas las semanas" },
+          { platform: "instagram", handle: "@byUwUr", heading: "Fotos de vez en cuando" }
+        ],
+        label: "Social accounts",
+        section: "Social accounts",
+        when: ["displaySocial", "yes"],
+        description: "Ordered account rows with platform, handle, and heading. Platforms may repeat; up to 100 rows, 160 characters per text field.",
+        validate: (value) => byConfigurator.parseAccounts(value, true),
+        maxlength: 20000,
+        entries: {
+          choices: "platforms",
+          choiceKey: "platform",
+          textFields: [
+            ["handle", "Handle or display text"],
+            ["heading", "Heading"]
+          ],
+          newEntry: { platform: "twitch", handle: "", heading: "" }
+        },
+        addLabel: "Add account"
+      },
+      displaySchedule: {
+        type: "switch",
+        default: "no",
+        label: "Schedule",
+        section: "Schedule",
+        description: "Shows or hides the weekly schedule.",
+        checkedValue: "yes",
+        uncheckedValue: "no",
+        options: { yes: "Show", no: "Hide" },
+        icon: "fa-list"
+      },
+      scheduleEntries: {
+        type: "entries",
+        default: { monday: "", tuesday: "", wednesday: "", thursday: "", friday: "", saturday: "", sunday: "" },
+        label: "Schedule",
+        section: "Schedule",
+        when: ["displaySchedule", "yes"],
+        description: "Weekday-to-text JSON map. Up to seven days, 160 characters per value.",
+        validate: parseScheduleEntries,
+        maxlength: 4000,
+        entries: {
+          choices: { monday: "Monday", tuesday: "Tuesday", wednesday: "Wednesday", thursday: "Thursday", friday: "Friday", saturday: "Saturday", sunday: "Sunday" },
+          choiceKey: "day",
+          textFields: [["text", "Schedule text"]],
+          newEntry: ["monday", ""],
+          limit: 7
+        },
+        addLabel: "Add day"
+      },
+      displayLabels: {
+        type: "switch",
+        default: "no",
+        label: "Event labels",
+        section: "Event labels",
+        checkedValue: "yes",
+        uncheckedValue: "no",
+        options: { yes: "Show", no: "Hide" }
+      },
+      labelOneHeading: { type: "text", default: "¡Suscriptor más reciente!", label: "First event heading", section: "Event labels", when: ["displayLabels", "yes"], maxlength: 160 },
+      labelTwoHeading: { type: "text", default: "Más gastón:", label: "Second event heading", section: "Event labels", when: ["displayLabels", "yes"], maxlength: 160 },
+      labelThreeHeading: { type: "text", default: "Último gastón:", label: "Third event heading", section: "Event labels", when: ["displayLabels", "yes"], maxlength: 160 },
+      labelFourHeading: { type: "text", default: "Nuevo Yogurt:", label: "Fourth event heading", section: "Event labels", when: ["displayLabels", "yes"], maxlength: 160 },
       primaryFont: {
         type: "font",
         default: "Courier New",
         label: "Font family",
         section: "Appearance",
-        description: "Search Google Fonts or use an installed font. Online fonts need internet; Courier provides a fallback.",
+        description: "Search Google Fonts or use an installed font. Online fonts need internet; system fonts provide a fallback.",
         maxlength: 160,
         icon: "fa-font"
       },
@@ -115,9 +297,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       primaryTextColor: {
         type: "color",
         default: "#FFFFFF",
-        label: "Text color (CSS color)",
+        label: "Text color",
         section: "Appearance",
-        description: "CSS color used for primary text.",
+        description: "Color used for primary text.",
         maxlength: 160,
         icon: "fa-palette"
       },
@@ -126,7 +308,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         default: "#C9C9C9",
         label: "Secondary text color",
         section: "Appearance",
-        description: "CSS color used for secondary text.",
+        description: "Color used for secondary text.",
         maxlength: 160,
         icon: "fa-palette"
       },
@@ -135,16 +317,17 @@ document.addEventListener("DOMContentLoaded", async () => {
         default: "#300",
         label: "Accent color",
         section: "Appearance",
-        description: "CSS color used for accents.",
+        description: "Color used for accents.",
         maxlength: 160,
         icon: "fa-palette"
       },
+      contentBackgrounds: { type: "color", default: "#FFFFFF1A", label: "Card backgrounds", section: "Appearance", maxlength: 80 },
       frameColor: {
         type: "color",
         default: "#300",
         label: "Frame color",
         section: "Appearance",
-        description: "CSS color of the scene border.",
+        description: "Color of the scene border.",
         maxlength: 160,
         icon: "fa-palette"
       },
@@ -159,177 +342,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         step: "any",
         icon: "fa-hashtag"
       },
-      displayBranding: {
-        type: "switch",
-        default: "yes",
-        label: "Logo",
-        section: "Appearance",
-        description: "Shows or hides the logo independently of the title.",
-        options: { yes: "Show", no: "Hide" },
-        icon: "fa-list",
-        checkedValue: "yes",
-        uncheckedValue: "no"
-      },
-      logoUrl: {
-        type: "text",
-        default: "",
-        label: "Logo URL or relative image path",
-        section: "Appearance",
-        description: "Image URL or relative path. Empty keeps the bundled logo.",
-        maxlength: 160,
-        icon: "fa-pen",
-        when: ["displayBranding", "yes"]
-      },
-      logoOpacity: {
-        type: "number",
-        default: 5,
-        label: "Logo opacity (%)",
-        section: "Appearance",
-        description: "Opacity from 0% (transparent) to 100% (opaque).",
-        min: 0,
-        max: 100,
-        step: "any",
-        icon: "fa-hashtag",
-        when: ["displayBranding", "yes"]
-      },
-      logoScale: {
-        type: "number",
-        default: 100,
-        label: "Logo scale (%)",
-        section: "Appearance",
-        description: "100% is the original size. Negative values flip both axes.",
-        min: -500,
-        max: 500,
-        step: "any",
-        icon: "fa-hashtag",
-        when: ["displayBranding", "yes"]
-      },
-      backgroundColor: {
-        type: "color",
-        default: "#00000000",
-        label: "Background color",
-        section: "Appearance",
-        description: "CSS background color behind the scene and its media. Transparent by default.",
-        maxlength: 160,
-        icon: "fa-palette"
-      },
-      backgroundType: {
-        type: "select",
-        default: "video",
-        label: "Background type",
-        section: "Appearance",
-        description: "Selects image or video background media.",
-        options: { video: "Video", image: "Image" },
-        icon: "fa-list"
-      },
-      backgroundUrl: {
-        type: "text",
-        default: "",
-        label: "Background URL or relative path",
-        section: "Appearance",
-        description: "Public media URL or relative file path. Does not upload a file.",
-        maxlength: 160,
-        icon: "fa-pen"
-      },
-      backgroundBlur: {
-        type: "number",
-        default: 0,
-        label: "Background blur (px)",
-        section: "Appearance",
-        description: "Background blur radius in pixels.",
-        min: 0,
-        max: 100,
-        step: "any",
-        icon: "fa-hashtag"
-      },
-      backgroundOverlayOpacity: {
-        type: "number",
-        default: 0,
-        label: "Background tint opacity (%)",
-        section: "Appearance",
-        description: "Opacity from 0% (transparent) to 100% (opaque).",
-        min: 0,
-        max: 100,
-        step: "any",
-        icon: "fa-hashtag"
-      },
-      backgroundOverlay: {
-        type: "color",
-        default: "#36353A",
-        label: "Background tint color",
-        section: "Appearance",
-        description: "CSS color of the background tint.",
-        maxlength: 160,
-        icon: "fa-palette"
-      },
-      displaySocial: {
-        type: "switch",
-        default: "yes",
-        label: "Social accounts",
-        section: "Social accounts",
-        description: "Shows or hides the social account area.",
-        options: { yes: "Show", no: "Hide" },
-        icon: "fa-list",
-        checkedValue: "yes",
-        uncheckedValue: "no"
-      },
-      accounts: {
-        type: "entries",
-        default: [ { platform: "twitch", handle: "/byUwUr", heading: "Stream casi todos los días" }, { platform: "youtube", handle: "[Mateus] @byUwUr", heading: "VODs todas las semanas" }, { platform: "instagram", handle: "@byUwUr", heading: "Fotos de vez en cuando" } ],
-        label: "Social accounts",
-        section: "Social accounts",
-        description: "Ordered account rows with platform, handle, and heading. Platforms may repeat; up to 100 rows, 160 characters per text field.",
-        validate: (value) => byConfigurator.parseAccounts(value, true),
-        maxlength: 20000,
-        entries: { choices: "platforms", choiceKey: "platform", textFields: [["handle", "Handle or display text"], ["heading", "Heading"]], newEntry: { platform: "twitch", handle: "", heading: "" } },
-        addLabel: "Add account",
-        when: ["displaySocial", "yes"]
-      },
-      displaySchedule: {
-        type: "switch",
-        default: "no",
-        label: "Schedule",
-        section: "Schedule",
-        description: "Shows or hides the weekly schedule.",
-        options: { yes: "Show", no: "Hide" },
-        icon: "fa-list",
-        checkedValue: "yes",
-        uncheckedValue: "no"
-      },
-      scheduleEntries: {
-        type: "entries",
-        default: { monday: "", tuesday: "", wednesday: "", thursday: "", friday: "", saturday: "", sunday: "" },
-        label: "Schedule",
-        section: "Schedule",
-        description: "Weekday-to-text JSON map. Up to seven days, 160 characters per value.",
-        validate: parseScheduleEntries,
-        maxlength: 4000,
-        entries: {
-          choices: { monday: "Monday", tuesday: "Tuesday", wednesday: "Wednesday", thursday: "Thursday", friday: "Friday", saturday: "Saturday", sunday: "Sunday" },
-          choiceKey: "day",
-          textFields: [["text", "Schedule text"]],
-          newEntry: ["monday", ""],
-          limit: 7
-        },
-        addLabel: "Add day",
-        when: ["displaySchedule", "yes"]
-      },
-      countdownFormat: { type: "select", default: "stopwatch", label: "Countdown format", section: "Scene", when: ["displayCountdown", "yes"], options: byConfigurator.durationFormats },
-      backgroundScale: { type: "number", default: 100, label: "Background scale (%)", section: "Background", min: -500, max: 500, step: "any" },
-      displayLabels: {
-        type: "switch",
-        default: "no",
-        label: "Event labels",
-        section: "Event labels",
-        checkedValue: "yes",
-        uncheckedValue: "no",
-        options: { yes: "Show", no: "Hide" }
-      },
-      labelOneHeading: { type: "text", default: "¡Suscriptor más reciente!", label: "First event heading", section: "Event labels", when: ["displayLabels", "yes"], maxlength: 160 },
-      labelTwoHeading: { type: "text", default: "Más gastón:", label: "Second event heading", section: "Event labels", when: ["displayLabels", "yes"], maxlength: 160 },
-      labelThreeHeading: { type: "text", default: "Último gastón:", label: "Third event heading", section: "Event labels", when: ["displayLabels", "yes"], maxlength: 160 },
-      labelFourHeading: { type: "text", default: "Nuevo Yogurt:", label: "Fourth event heading", section: "Event labels", when: ["displayLabels", "yes"], maxlength: 160 },
-      contentBackgrounds: { type: "color", default: "#FFFFFF1A", label: "Card backgrounds", section: "Appearance", maxlength: 80 },
       opacity: { type: "number", default: "", optional: true, label: "Scene opacity (%)", section: "Appearance", min: 0, max: 100, step: "any", styleSelector: "#scene", styleProperty: "opacity", styleUnit: "%" },
       frameInset: { type: "number", default: "", optional: true, label: "Frame inset (px)", section: "Size & placement", min: -1000, max: 1000, step: "any", styleSelector: "#frame", styleProperty: "inset", styleUnit: "px" },
       ...byConfigurator.placementFields("#scene"),
@@ -373,7 +385,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         eventCard: ["Event card", "#list .event"],
         sceneFrame: ["Scene frame", "#frame", ["radius", "shadow"]]
       }, { socialCard: ["displaySocial", "yes"], scheduleCard: ["displaySchedule", "yes"], eventCard: ["displayLabels", "yes"] }),
-      ...byConfigurator.filterFields("sceneFilter", "Scene", "#scene")
+      ...byConfigurator.filterFields("sceneFilter", "Scene", "#scene"),
     },
     constants: {
       labelNameSize: 24,
@@ -381,7 +393,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       countdownTimeSize: 64,
       countdownMessageSize: 24,
       countdownEndMessageSize: 64
-    },
+    }
   };
 
   const dayLabels = { monday: "Lunes", tuesday: "Martes", wednesday: "Miércoles", thursday: "Jueves", friday: "Viernes", saturday: "Sábado", sunday: "Domingo" };

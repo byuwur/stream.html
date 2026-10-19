@@ -14,9 +14,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     version: "1.0",
     title: "Social popup",
     description: "Your social accounts, one animated popup at a time.",
-    preview: [1280,360],
+    preview: [1280, 360],
     urlRequired: ["accounts"],
-    sectionIcons: {"Social accounts":"fa-solid fa-users","Animation":"fa-solid fa-wand-magic-sparkles","Appearance":"fa-solid fa-palette"},
+    sectionIcons: { "Social accounts": "fa-solid fa-users", Animation: "fa-solid fa-wand-magic-sparkles", Appearance: "fa-solid fa-palette" },
     previewAllow: "autoplay; gamepad *",
     fields: {
       accounts: {
@@ -30,20 +30,11 @@ document.addEventListener("DOMContentLoaded", async () => {
         entries: { choices: "platforms", choiceKey: "platform", textFields: [["handle", "Handle or display text"]], newEntry: { platform: "twitch", handle: "" } },
         addLabel: "Add account"
       },
-      mode: {
-        type: "select",
-        default: "right",
-        label: "Direction",
-        section: "Animation",
-        description: "Side from which the social popups animate.",
-        options: { right: "Right", left: "Left" },
-        icon: "fa-clapperboard"
-      },
       pauseTime: {
         type: "number",
         default: 5,
         label: "Seconds per account",
-        section: "Animation",
+        section: "Playback",
         description: "Seconds to display each account.",
         min: 0,
         max: 3600,
@@ -54,78 +45,30 @@ document.addEventListener("DOMContentLoaded", async () => {
         type: "number",
         default: 5,
         label: "Seconds between cycles",
-        section: "Animation",
+        section: "Playback",
         description: "Seconds to wait between animation cycles.",
         min: 0,
         max: 3600,
         step: "any",
         icon: "fa-hourglass-half"
       },
-      scale: {
-        type: "number",
-        default: 100,
-        label: "Scale (%)",
-        section: "Animation",
-        description: "100% is the original size. Negative values flip both axes.",
-        min: -500,
-        max: 500,
-        step: "any",
-        icon: "fa-up-right-and-down-left-from-center"
+      mode: {
+        type: "select",
+        default: "right",
+        label: "Direction",
+        section: "Playback",
+        description: "Side from which the social popups animate.",
+        options: { right: "Right", left: "Left" },
+        icon: "fa-clapperboard"
       },
-      iconBoxColor: {
-        type: "color",
-        default: "#300",
-        label: "Icon box color",
-        section: "Appearance",
-        description: "CSS background color of the animated icon box.",
-        maxlength: 160,
-        icon: "fa-palette"
-      },
-      textBoxColor: {
-        type: "color",
-        default: "#FFFFFF",
-        label: "Text box color",
-        section: "Appearance",
-        description: "CSS background color behind the account name.",
-        maxlength: 160,
-        icon: "fa-palette"
-      },
-      iconColor: {
-        type: "color",
-        default: "#FFFFFF",
-        label: "Icon color",
-        section: "Appearance",
-        description: "CSS color of the social icons.",
-        maxlength: 160,
-        icon: "fa-palette"
-      },
-      fontColor: {
-        type: "color",
-        default: "#300",
-        label: "Text color",
-        section: "Appearance",
-        description: "CSS color of the account names.",
-        maxlength: 160,
-        icon: "fa-palette"
-      },
+      animationSpeed: { type: "number", default: 100, label: "Animation speed (%)", section: "Playback", min: 0, max: 100, step: "any" },
       primaryFont: {
         type: "font",
         default: "Courier New",
         label: "Font family",
         section: "Appearance",
-        description: "Search Google Fonts or use an installed font. Online fonts need internet; Courier provides a fallback.",
+        description: "Search Google Fonts or use an installed font. Online fonts need internet; system fonts provide a fallback.",
         maxlength: 160,
-        icon: "fa-font"
-      },
-      fontWeight: {
-        type: "number",
-        default: 600,
-        label: "Font weight",
-        section: "Appearance",
-        description: "Font weight in steps of 100.",
-        min: 100,
-        max: 900,
-        step: 100,
         icon: "fa-font"
       },
       fontSize: {
@@ -139,29 +82,86 @@ document.addEventListener("DOMContentLoaded", async () => {
         step: "any",
         icon: "fa-font"
       },
+      fontWeight: {
+        type: "number",
+        default: 600,
+        label: "Font weight",
+        section: "Appearance",
+        description: "Font weight in steps of 100.",
+        min: 100,
+        max: 900,
+        step: 100,
+        icon: "fa-font"
+      },
+      fontColor: {
+        type: "color",
+        default: "#300",
+        label: "Text color",
+        section: "Appearance",
+        description: "CSS color of the account names.",
+        maxlength: 160,
+        icon: "fa-palette"
+      },
+      iconColor: {
+        type: "color",
+        default: "#FFFFFF",
+        label: "Icon color",
+        section: "Appearance",
+        description: "CSS color of the social icons.",
+        maxlength: 160,
+        icon: "fa-palette"
+      },
+      textBoxColor: {
+        type: "color",
+        default: "#FFFFFF",
+        label: "Text box color",
+        section: "Appearance",
+        description: "CSS background color behind the account name.",
+        maxlength: 160,
+        icon: "fa-palette"
+      },
+      iconBoxColor: {
+        type: "color",
+        default: "#300",
+        label: "Icon box color",
+        section: "Appearance",
+        description: "CSS background color of the animated icon box.",
+        maxlength: 160,
+        icon: "fa-palette"
+      },
+      opacity: { type: "number", default: "", optional: true, label: "Popup opacity (%)", section: "Appearance", min: 0, max: 100, step: "any" },
+      scale: {
+        type: "number",
+        default: 100,
+        label: "Scale (%)",
+        section: "Size & placement",
+        description: "100% is the original size. Negative values flip both axes.",
+        min: -500,
+        max: 500,
+        step: "any",
+        icon: "fa-up-right-and-down-left-from-center"
+      },
+      cornerInset: { type: "number", default: "", optional: true, label: "Corner inset (px)", section: "Size & placement", min: -1000, max: 1000, step: "any", styleSelector: "#socialHolder", styleProperty: "margin-inline", styleUnit: "px" },
+      textPadding: { type: "number", default: "", optional: true, label: "Text horizontal padding (px)", section: "Size & placement", min: 0, max: 1000, step: "any", styleSelector: "#nameHolder", styleProperty: "padding-inline", styleUnit: "px" },
       textYOffset: {
         type: "number",
         default: 0,
         label: "Text vertical offset (px)",
-        section: "Appearance",
+        section: "Size & placement",
         description: "Vertical text adjustment in pixels.",
         min: -100,
         max: 100,
         step: "any",
         icon: "fa-font"
       },
-      animationSpeed: { type: "number", default: 100, label: "Animation speed (%)", section: "Playback", min: 0, max: 100, step: "any" },
-      opacity: { type: "number", default: "", optional: true, label: "Popup opacity (%)", section: "Appearance", min: 0, max: 100, step: "any" },
-      cornerInset: { type: "number", default: "", optional: true, label: "Corner inset (px)", section: "Size & placement", min: -1000, max: 1000, step: "any", styleSelector: "#socialHolder", styleProperty: "margin-inline", styleUnit: "px" },
-      textPadding: { type: "number", default: "", optional: true, label: "Text horizontal padding (px)", section: "Size & placement", min: 0, max: 1000, step: "any", styleSelector: "#nameHolder", styleProperty: "padding-inline", styleUnit: "px" },
       ...byConfigurator.placementFields("#socialHolder"),
       ...byConfigurator.textFields({ accountName: ["Account name", "#nameHolder .name", []] }),
       ...byConfigurator.textFields({
         icon: ["Social icon", "#icons > i", ["size"]]
       }),
       ...byConfigurator.surfaceFields({ textSurface: ["Text box", "#textBox", ["border", "radius", "shadow"]] }),
-      ...byConfigurator.filterFields("popupFilter", "Popup", "#socialHolder")
-    },
+      ...byConfigurator.filterFields("popupFilter", "Popup", "#socialHolder"),
+    }
   };
 
   /** Render safe text and play the elastic square, handle, and icon sequence. */
