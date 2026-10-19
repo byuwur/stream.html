@@ -143,6 +143,7 @@ body {
 }
 .network {
   display: flex;
+  flex-direction: row;
   align-items: center;
   gap: 10px;
   padding: 10px 48px 10px 10px;
@@ -182,6 +183,7 @@ body {
 }
 #week {
   display: flex;
+  flex-direction: row;
   gap: 24px;
 }
 .day {

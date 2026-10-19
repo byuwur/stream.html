@@ -145,6 +145,7 @@ Invalid JSON/platforms retain the two byUwUr default accounts; blank handles kee
 | `accounts` | Ordered rows with `platform`, `handle`, and `heading`; platforms may repeat. Up to 100 rows, 160 characters per text field, 20,000 JSON characters. Blank handles/`[]` hide accounts. |
 | `scheduleEntries` | Weekday-to-text map, e.g. `{"monday":"Activity"}`; up to seven days, 160 characters/text, 4,000 JSON characters. `{}` hides it. |
 | `countdownFormat` | `stopwatch` (total minutes/seconds, default), `clock`, `hours`, `units`, or total `seconds`. |
+| `animationSpeed` | Social animation speed `0`–`100`%; `100` is normal and `0` pauses animation. |
 
 Invalid lists retain defaults. Follower/donation/subscriber labels are editable text, without live service updates.
 

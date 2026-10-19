@@ -314,32 +314,73 @@ document.addEventListener("DOMContentLoaded", async () => {
         addLabel: "Add day",
         when: ["displaySchedule", "yes"]
       },
-      countdownFormat: { type: "select", default: "stopwatch", label: "Countdown format", section: "Scene", when: ["displayCountdown", "yes"], options: byConfigurator.durationFormats }
+      countdownFormat: { type: "select", default: "stopwatch", label: "Countdown format", section: "Scene", when: ["displayCountdown", "yes"], options: byConfigurator.durationFormats },
+      backgroundScale: { type: "number", default: 100, label: "Background scale (%)", section: "Background", min: -500, max: 500, step: "any" },
+      displayLabels: {
+        type: "switch",
+        default: "no",
+        label: "Event labels",
+        section: "Event labels",
+        checkedValue: "yes",
+        uncheckedValue: "no",
+        options: { yes: "Show", no: "Hide" }
+      },
+      labelOneHeading: { type: "text", default: "¡Suscriptor más reciente!", label: "First event heading", section: "Event labels", when: ["displayLabels", "yes"], maxlength: 160 },
+      labelTwoHeading: { type: "text", default: "Más gastón:", label: "Second event heading", section: "Event labels", when: ["displayLabels", "yes"], maxlength: 160 },
+      labelThreeHeading: { type: "text", default: "Último gastón:", label: "Third event heading", section: "Event labels", when: ["displayLabels", "yes"], maxlength: 160 },
+      labelFourHeading: { type: "text", default: "Nuevo Yogurt:", label: "Fourth event heading", section: "Event labels", when: ["displayLabels", "yes"], maxlength: 160 },
+      contentBackgrounds: { type: "color", default: "#FFFFFF1A", label: "Card backgrounds", section: "Appearance", maxlength: 80 },
+      opacity: { type: "number", default: "", optional: true, label: "Scene opacity (%)", section: "Appearance", min: 0, max: 100, step: "any", styleSelector: "#scene", styleProperty: "opacity", styleUnit: "%" },
+      frameInset: { type: "number", default: "", optional: true, label: "Frame inset (px)", section: "Size & placement", min: -1000, max: 1000, step: "any", styleSelector: "#frame", styleProperty: "inset", styleUnit: "px" },
+      ...byConfigurator.placementFields("#scene"),
+      titleVerticalOffset: { type: "number", default: -8, label: "Title vertical offset (px)", section: "Size & placement", subsection: "Title and subtitle position", min: -1080, max: 1080, step: "any" },
+      subtitleVerticalOffset: { type: "number", default: 128, label: "Subtitle vertical offset (px)", section: "Size & placement", subsection: "Title and subtitle position", min: -1080, max: 1080, step: "any" },
+      countdownScale: { type: "number", default: 125, label: "Countdown scale (%)", section: "Size & placement", when: ["displayCountdown", "yes"], subsection: "Countdown position", min: -500, max: 500, step: "any" },
+      countdownRight: { type: "number", default: "", optional: true, label: "Countdown right (px)", section: "Size & placement", when: ["displayCountdown", "yes"], subsection: "Countdown position", min: -1000, max: 1000, step: "any", styleSelector: "#countdown", styleProperty: "right", styleUnit: "px" },
+      countdownBottom: { type: "number", default: "", optional: true, label: "Countdown bottom (px)", section: "Size & placement", when: ["displayCountdown", "yes"], subsection: "Countdown position", min: -1000, max: 1000, step: "any", styleSelector: "#countdown", styleProperty: "bottom", styleUnit: "px" },
+      countdownTimeVerticalOffset: { type: "number", default: 0, label: "Countdown vertical offset (px)", section: "Size & placement", when: ["displayCountdown", "yes"], subsection: "Countdown position", min: -1080, max: 1080, step: "any" },
+      countdownMessageVerticalOffset: { type: "number", default: 0, label: "Countdown message vertical offset (px)", section: "Size & placement", when: ["displayCountdown", "yes"], subsection: "Countdown position", min: -1080, max: 1080, step: "any" },
+      countdownEndMessageVerticalOffset: { type: "number", default: 0, label: "Completion message vertical offset (px)", section: "Size & placement", when: ["displayCountdown", "yes"], subsection: "Countdown position", min: -1080, max: 1080, step: "any" },
+      socialMediaScale: { type: "number", default: 125, label: "Social scale (%)", section: "Size & placement", when: ["displaySocial", "yes"], subsection: "Social accounts position", min: -500, max: 500, step: "any" },
+      updatesLeft: { type: "number", default: "", optional: true, label: "Updates left (px)", section: "Size & placement", when: ["displaySocial", "yes"], subsection: "Social accounts position", min: -1000, max: 1000, step: "any", styleSelector: "#updates", styleProperty: "left", styleUnit: "px" },
+      updatesTop: { type: "number", default: "", optional: true, label: "Updates top (px)", section: "Size & placement", when: ["displaySocial", "yes"], subsection: "Social accounts position", min: -1000, max: 1000, step: "any", styleSelector: "#updates", styleProperty: "top", styleUnit: "px" },
+      scheduleScale: { type: "number", default: 125, label: "Schedule scale (%)", section: "Size & placement", when: ["displaySchedule", "yes"], subsection: "Schedule position", min: -500, max: 500, step: "any" },
+      labelsScale: { type: "number", default: 125, label: "Event labels scale (%)", section: "Size & placement", when: ["displayLabels", "yes"], subsection: "Event labels position", min: -500, max: 500, step: "any" },
+      eventsLeft: { type: "number", default: "", optional: true, label: "Event labels left (px)", section: "Size & placement", when: ["displayLabels", "yes"], subsection: "Event labels position", min: -1000, max: 1000, step: "any", styleSelector: "#list", styleProperty: "left", styleUnit: "px" },
+      eventsBottom: { type: "number", default: "", optional: true, label: "Event labels bottom (px)", section: "Size & placement", when: ["displayLabels", "yes"], subsection: "Event labels position", min: -1000, max: 1000, step: "any", styleSelector: "#list", styleProperty: "bottom", styleUnit: "px" },
+      labelNameVerticalOffset: { type: "number", default: 0, label: "Event name vertical offset (px)", section: "Size & placement", when: ["displayLabels", "yes"], subsection: "Event labels position", min: -1080, max: 1080, step: "any" },
+      labelHeaderVerticalOffset: { type: "number", default: 4, label: "Event heading vertical offset (px)", section: "Size & placement", when: ["displayLabels", "yes"], subsection: "Event labels position", min: -1080, max: 1080, step: "any" },
+      ...byConfigurator.whenFields(["displaySchedule", "yes"], byConfigurator.layoutFields("#week", {}, "week")),
+      ...byConfigurator.whenFields(["displaySocial", "yes"], byConfigurator.layoutFields("#social .network", { socialIcon: ["Social icon", "#social .icon"], socialCopy: ["Account text", "#social .inner"] }, "social")),
+      animationSpeed: { type: "number", default: 100, label: "Social animation speed (%)", section: "Animation", when: ["displaySocial", "yes"], min: 0, max: 100, step: "any" },
+      ...byConfigurator.textFields({
+        title: ["Title", "#title", ["color"]],
+        subtitle: ["Subtitle", "#subtitle", ["color"]],
+        socialHeading: ["Social heading", "#social .socialHead"],
+        socialName: ["Social name", "#social .socialName"],
+        socialIcon: ["Social icon", "#social .icon"],
+        scheduleDay: ["Schedule day", "#schedule .scheduleHead"],
+        scheduleTime: ["Schedule time", "#schedule .scheduleTime"],
+        eventName: ["Event name", "#list .name"],
+        eventHeading: ["Event heading", "#list .type"],
+        countdown: ["Countdown", "#time"],
+        countdownMessage: ["Countdown message", "#message"],
+        countdownEnd: ["Finished message", "#endMessage"]
+      }, { countdown: ["displayCountdown", "yes"], countdownMessage: ["displayCountdown", "yes"], countdownEnd: ["displayCountdown", "yes"], socialHeading: ["displaySocial", "yes"], socialName: ["displaySocial", "yes"], socialIcon: ["displaySocial", "yes"], scheduleDay: ["displaySchedule", "yes"], scheduleTime: ["displaySchedule", "yes"], eventName: ["displayLabels", "yes"], eventHeading: ["displayLabels", "yes"] }),
+      ...byConfigurator.surfaceFields({
+        socialCard: ["Social card", "#social .network"],
+        scheduleCard: ["Schedule card", "#schedule .day"],
+        eventCard: ["Event card", "#list .event"],
+        sceneFrame: ["Scene frame", "#frame", ["radius", "shadow"]]
+      }, { socialCard: ["displaySocial", "yes"], scheduleCard: ["displaySchedule", "yes"], eventCard: ["displayLabels", "yes"] }),
+      ...byConfigurator.filterFields("sceneFilter", "Scene", "#scene")
     },
     constants: {
-      backgroundScale: 100,
-      contentBackgrounds: "#FFFFFF1A",
-      displayLabels: "no",
-      labelOneHeading: "¡Suscriptor más reciente!",
-      labelTwoHeading: "Más gastón:",
-      labelThreeHeading: "Último gastón:",
-      labelFourHeading: "Nuevo Yogurt:",
-      socialMediaScale: 125,
-      labelsScale: 125,
-      scheduleScale: 125,
-      countdownScale: 125,
-      titleVerticalOffset: -8,
-      subtitleVerticalOffset: 128,
       labelNameSize: 24,
-      labelNameVerticalOffset: 0,
       labelHeaderSize: 12,
-      labelHeaderVerticalOffset: 4,
       countdownTimeSize: 64,
-      countdownTimeVerticalOffset: 0,
       countdownMessageSize: 24,
-      countdownMessageVerticalOffset: 0,
-      countdownEndMessageSize: 64,
-      countdownEndMessageVerticalOffset: 0
+      countdownEndMessageSize: 64
     },
   };
 
@@ -486,6 +527,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
       animation.add(card, "+=1");
     });
+    animation?.timeScale(settings.animationSpeed / 100);
     function start() {
       if (time) {
         if (Date.now() < deadline) countdownTimer = setInterval(updateCountdown, 1000);
