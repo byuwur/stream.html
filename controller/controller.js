@@ -144,18 +144,31 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       horizontalPosition: {
         type: "number",
-        default: "",
+        default: 0,
         optional: true,
         label: "Horizontal position (px)",
+        description: "Pixel offset from the viewport center.",
         section: "Size & placement",
         min: -2000,
         max: 2000,
         step: "any",
         styleSelector: ".controller",
         styleProperty: "left",
-        styleUnit: "px"
+        styleValue: (settings) => `calc(50% + ${settings.horizontalPosition}px)`
       },
-      verticalPosition: { type: "number", default: "", optional: true, label: "Vertical position (px)", section: "Size & placement", min: -2000, max: 2000, step: "any", styleSelector: ".controller", styleProperty: "top", styleUnit: "px" },
+      verticalPosition: {
+        type: "number",
+        default: 0,
+        label: "Vertical position (px)",
+        section: "Size & placement",
+        description: "Pixel offset from the viewport center.",
+        min: -2000,
+        max: 2000,
+        step: "any",
+        styleSelector: ".controller",
+        styleProperty: "top",
+        styleValue: (settings) => `calc(50% + ${settings.verticalPosition}px)`
+      },
       fitMargin: { type: "number", default: 8, label: "Fit margin (px)", section: "Size & placement", min: 0, max: 1000, step: "any" },
       ...byConfigurator.placementFields(".controller"),
       ...byConfigurator.filterFields("artworkFilter", "Artwork", ".controller")

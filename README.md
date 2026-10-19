@@ -95,17 +95,17 @@ Current URLs use percentages for opacity, deadzone, and scale: `100` means 100%,
 
 [Example: Player 1, Xbox](https://byuwur.github.io/stream.html/controller/?player=1&skin=1)
 
-| Parameter | Meaning |
-| --- | --- |
-| `player` | Gamepads `1`–`4` (default `1`); keyboard `9`. |
-| `skin` | `1` Xbox, `2` PlayStation, `3` fight stick, `4` GameCube. |
-| `opacity` | `0`–`100`%; default `100`. |
-| `offset`, `deadzone` | Stick travel in pixels; deadzone `0`–`100`% (default `25`). |
-| `strength`, `curve` | `strength=0` disables trigger meters; `curve=1` enables stick curving. |
-| `rotation` | Maximum steering-wheel rotation in degrees. |
-| `mapping` | Custom Mapping binding array; `[]` uses defaults. Legacy `{"mapping":[...]}` works. |
-| `mirror`, `fitMargin` | Mirror artwork horizontally; vertical fit margin in pixels (default `8`). |
-| `horizontalPosition`, `verticalPosition` | Optional signed pixel positions. Empty keeps automatic placement. |
+| Parameter                                | Meaning                                                                             |
+| ---------------------------------------- | ----------------------------------------------------------------------------------- |
+| `player`                                 | Gamepads `1`–`4` (default `1`); keyboard `9`.                                       |
+| `skin`                                   | `1` Xbox, `2` PlayStation, `3` fight stick, `4` GameCube.                           |
+| `opacity`                                | `0`–`100`%; default `100`.                                                          |
+| `offset`, `deadzone`                     | Stick travel in pixels; deadzone `0`–`100`% (default `25`).                         |
+| `strength`, `curve`                      | `strength=0` disables trigger meters; `curve=1` enables stick curving.              |
+| `rotation`                               | Maximum steering-wheel rotation in degrees.                                         |
+| `mapping`                                | Custom Mapping binding array; `[]` uses defaults. Legacy `{"mapping":[...]}` works. |
+| `mirror`, `fitMargin`                    | Mirror artwork horizontally; vertical fit margin in pixels (default `8`).           |
+| `horizontalPosition`, `verticalPosition` | Signed pixel offsets from the viewport center; both default to `0`.                 |
 
 Press a gamepad button for detection or **F** for keyboard input. Focus the preview/OBS Interact first. Keyboard defaults live in `bySettingsKB` in `controller/index.html`; detection depends on browser/OS. **Custom Mapping** chooses a base and captures bindings. Skins fit the viewport automatically. Appearance controls also expose background, disconnected opacity, scale, tilt, offsets, and artwork filters.
 
