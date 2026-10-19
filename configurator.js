@@ -1,17 +1,98 @@
 /**
  * File: configurator.js
  * @file Shared native resource setup and jQuery editor, preview, help, theme, and navigation.
- * Native deps: SPA.js _functions.js for URL compression.
+ * Native deps: SPA.js _functions.js for URL compression; _fonts.js for font overrides.
  * Editor deps: jQuery 4, Bootstrap 5, Select2, Pickr, and resource parameter rules.
+ *
+ * Execution paths:
+ * - Overlays register the native helpers, resolve URL settings, and mount resource markup.
+ * - The landing page uses the catalog without building a resource form.
+ * - Resource editors wait for initResource(), then build and enhance the declared fields.
+ *
+ * File map, in source order:
+ * 1. Resource state, URL decoding, and field validation.
+ * 2. Field factories, date/time formats, and native resource setup.
+ * 3. Value validators, clock services, public helpers, and the editor dependency boundary.
+ * 4. Tool catalog, editor shell, URL/preview synchronization, and field widgets.
+ * 5. Saved preferences, help/navigation, conditional validation, and editor startup.
+ *
+ * Resource scripts own defaults, accepted values, field order, and rendering.
+ * This file consumes that metadata; widgets do not define a second settings format.
  */
 
-/** Own shared editor setup and navigation. */
+/**
+ * @typedef {string|number|boolean|Array<unknown>|Object|null} ResourceValue
+ */
+
+/**
+ * Field metadata is shared by URL validation, native styling, and the optional editor.
+ * Resource scripts own defaults and order; widgets enhance this same contract.
+ * @typedef {Object} ResourceField
+ * @property {string} type Control/value kind: text, multiline, number, select, switch, color, font, entries, mapping, timestamp, locale, timezone, or timezones.
+ * @property {ResourceValue} default Value used when its URL parameter is absent or rejected.
+ * @property {string} label Human-readable control label.
+ * @property {string} [description] Help text shown beside the control and in parameter help.
+ * @property {string} [section] Top-level group; insertion order determines display order.
+ * @property {string} [subsection] Nested control group inside the section.
+ * @property {string} [id] Explicit HTML control identifier.
+ * @property {string} [icon] Font Awesome icon class; overrides the shared icon rule.
+ * @property {Object<string, string>} [options] Stored option IDs mapped to displayed labels.
+ * @property {function(string): (ResourceValue|null)} [validate] Return accepted data or null to reject; no format migration is performed.
+ * @property {boolean} [optional] Accept an empty string before numeric/color validation.
+ * @property {number} [min] Minimum accepted numeric value.
+ * @property {number} [max] Maximum accepted numeric value.
+ * @property {number|string} [step] Numeric increment or "any".
+ * @property {number} [maxlength] Maximum accepted text or serialized-content length.
+ * @property {string} [checkedValue] Serialized value when a switch is on.
+ * @property {string} [uncheckedValue] Serialized value when a switch is off.
+ * @property {Array<string>} [when] Parent field and allowed values; a parent alone requires nonempty text. Inactive ancestors disable descendants and their overrides.
+ * @property {Object} [entries] Row-editor choices, choiceKey, textFields, newEntry, limit, and addLabel; map selects a key/value representation.
+ * @property {string} [styleSelector] Native elements affected by the override, including rows created later.
+ * @property {string} [styleProperty] CSS property written by the override.
+ * @property {string} [styleUnit] Unit appended to scalar settings, such as px, deg, or %.
+ * @property {ResourceValue} [styleAutomatic] Sentinel that keeps authored CSS; defaults to an empty string.
+ * @property {function(ResourceSettings): string} [styleValue] Compound CSS writer; empty output keeps authored CSS.
+ * @property {string} [styleParent] Container that needs flex layout when an order/layout override is applied.
+ */
+
+/** @typedef {Object<string, ResourceField>} ResourceFields */
+/** @typedef {Object<string, ResourceValue>} ResourceSettings */
+
+/**
+ * One resource owns its field defaults, accepted values, and renderer.
+ * initResource() publishes its validated settings before either overlay rendering or editor setup.
+ * @typedef {Object} ResourceDefinition
+ * @property {string} version Resource version shown by the editor.
+ * @property {string} title Resource title.
+ * @property {string} description Resource purpose shown above its settings.
+ * @property {Array<number>} preview Preview width and height in pixels.
+ * @property {ResourceFields} fields Parameter definitions in display order.
+ * @property {Array<string>} urlRequired Parameters retained even at defaults to enable overlay mode and preserve anchors/content.
+ * @property {Object<string, ResourceValue>} [constants] Renderer-only defaults excluded from URL fields.
+ * @property {Object<string, string>} [sectionIcons] Explicit icons for top-level sections.
+ * @property {boolean|Object} [presets] Whether the editor exposes shared or resource-specific appearance presets.
+ * @property {string} [previewAllow] iframe permissions required by this resource.
+ * @property {ResourceSettings} [settings] Validated settings published by initResource().
+ * @property {ResourceFields} [parameterRules] Published alias of fields for editor integrations.
+ */
+
+/**
+ * Share resource services across overlays, the landing page, and the optional editor.
+ * @param {Window} global Global.
+ * @returns {void}
+ */
 (function (global) {
   global.byConfigurator = global.byConfigurator || {};
   const byConfigurator = global.byConfigurator;
   if (byConfigurator.initialized) return;
   byConfigurator.VERSION = "6.2";
   const root = new URL(".", document.currentScript.src);
+
+  // ==========
+  // ==== RESOURCE STATE AND URL INPUT ====
+  // ==========
+
+  // initResource() replaces this promise; the final DOMContentLoaded handler awaits it.
   let resourceReady = Promise.resolve();
   let parameterError = "";
   let compressedFields = new Set();
@@ -19,7 +100,13 @@
   const preferenceKey = `stream.html.settings.${encodeURIComponent(preferencePath)}`;
   let savedPreferences = { query: "", advanced: null, collapsed: [] };
 
-  /** Local storage holds configurations that cannot fit in a cookie and takes precedence. */
+  /**
+   * Read this resource's editor preferences, validating stored UI state against its fields.
+   * Local storage takes precedence over cookies because it also holds oversized/file:// saves.
+   * Values remain encoded in query until initResource() passes them through URL validation.
+   * @param {ResourceFields} fields Declared resource fields and their validation metadata.
+   * @returns {{query: string, advanced: {enabled: boolean, scope: string, fields: Array<string>}|null, collapsed: Array<string>}} Accepted editor preferences, or empty preferences when neither storage location is valid.
+   */
   function readPreferences(fields) {
     const candidates = [];
     try {
@@ -53,6 +140,10 @@
   /**
    * Decode URL transport markers; readable parameters override packed values.
    * Failed compressed values are omitted so resource defaults and valid neighbors survive.
+   * data packs the whole query; dr: packs one field; raw: escapes a literal reserved prefix.
+   * This only decodes transport. applyParameters() validates and assigns resource values later.
+   * @param {ResourceFields} fields Declared resource fields and their validation metadata.
+   * @param {string} [search=location.search] Encoded query string to decode.
    * @returns {Promise<{values: URLSearchParams, compressedFields: Set<string>, error: string}>} Decoded values, compressed field names, and a warning (empty on success).
    */
   async function readURLParameters(fields, search = location.search) {
@@ -89,7 +180,7 @@
     return { values: decoded, compressedFields: selectedFields, error: errorMessage };
   }
 
-  // Native helpers are shared with renderers; editor setup starts below.
+  // Stored platform IDs stay separate from display names and Font Awesome icon lookup.
   const platforms = {
     "500px": "500px",
     artstation: "ArtStation",
@@ -184,7 +275,29 @@
     zhihu: "Zhihu"
   };
 
-  /** Validate a declared field; custom validators return parsed data or null to reject it. */
+  // ==========
+  // ==== FIELD VALIDATION AND DECLARATIONS ====
+  // ==========
+
+  /* Field metadata is the shared contract between resource scripts, native CSS, and the editor:
+   * type/default/validate define accepted values; options maps stored IDs to displayed labels.
+   * section/subsection and declaration order define form placement; when defines field availability.
+   * styleSelector/styleProperty target a native CSS override, with styleUnit appended to scalar values.
+   * styleAutomatic marks a value that preserves authored CSS (otherwise the sentinel is an empty string).
+   * styleValue(settings) builds compound CSS from several validated fields instead of appending a unit.
+   * styleParent enables a flex container when a layout override is present.
+   * Helpers below return ordinary field declarations; resource JS remains the owner of their defaults.
+   */
+
+  /**
+   * Validate a raw form/URL string without changing settings.
+   * Custom validators accept by returning parsed data, including empty strings, or reject with null.
+   * options keys are wire values; optional empty values bypass numeric/color checks.
+   * @param {ResourceFields} fields Declared resource fields and their validation metadata.
+   * @param {string} name Field or item identifier.
+   * @param {string} value Raw form or URL value to validate or format.
+   * @returns {boolean} Whether the raw value satisfies its declared field constraints.
+   */
   function validParameter(fields, name, value) {
     if (!Object.hasOwn(fields, name)) return false;
     const rule = fields[name];
@@ -736,6 +849,11 @@
     };
   }
 
+  // ==========
+  // ==== DATE, TIME, AND DURATION FORMATS ====
+  // ==========
+
+  // Keys are stored patterns; labels are examples for the editor and parameter reference.
   const dateFormats = {
     locale: "Locale default",
     "yyyy-MM-dd": "2026-10-18 (yyyy-MM-dd)",
@@ -864,6 +982,10 @@
     return `${prefix}${pad(hours)}:${pad(minutes)}:${pad(seconds)}${fraction}`;
   }
 
+  // ==========
+  // ==== RESOURCE URLS AND NATIVE LIFECYCLE ====
+  // ==========
+
   /**
    * Build the readable overlay URL shared by editor actions and native resource interactions.
    * Only declared fields are emitted. urlRequired keeps overlay mode/timestamp anchors even at defaults.
@@ -966,6 +1088,10 @@
     return resourceReady;
   }
 
+  // ==========
+  // ==== VALUE VALIDATORS AND CLOCK SERVICE ====
+  // ==========
+
   /**
    * Validate ordered account rows without changing their order or deduplicating platforms.
    * Main requires a heading on each row; Popup uses platform and handle only. Invalid data returns null.
@@ -989,6 +1115,11 @@
     }
   }
 
+  /**
+   * Accept an Intl-supported time zone or empty for the OBS computer's zone; null rejects it.
+   * @param {string} value Raw form or URL value to validate or format.
+   * @returns {string|null} The accepted zone or empty automatic value; null rejects unsupported input.
+   */
   function parseZone(value) {
     if (value.length > 100) return null;
     if (!value) return "";
@@ -1000,6 +1131,11 @@
     }
   }
 
+  /**
+   * Canonicalize a valid BCP 47 tag; empty follows the browser locale and null rejects invalid input.
+   * @param {string} value Raw form or URL value to validate or format.
+   * @returns {string|null} The canonical locale or empty automatic value; null rejects invalid input.
+   */
   function parseLocale(value) {
     if (value.length > 50) return null;
     if (!value) return "";
@@ -1010,6 +1146,11 @@
     }
   }
 
+  /**
+   * Validate the newline-backed, ordered list used by the additional-zone multi-select.
+   * @param {string} value Raw form or URL value to validate or format.
+   * @returns {string|null} Up to three accepted zones in their original order, separated by newlines; null rejects invalid input.
+   */
   function parseZones(value) {
     if (value.length > 400) return null;
     const zones = value
@@ -1019,6 +1160,11 @@
     return zones.length <= 3 && zones.every((x) => parseZone(x) !== null) ? zones.join("\n") : null;
   }
 
+  /**
+   * Require a real ISO date/time with Z or an explicit offset; return its original string or null.
+   * @param {string} value Raw form or URL value to validate or format.
+   * @returns {string|null} The accepted ISO timestamp with an explicit offset; null rejects impossible or unsupported input.
+   */
   function parseTimestamp(value) {
     if (value.length > 40 || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2}(\.\d{1,3})?)?(Z|[+-]\d{2}:\d{2})$/.test(value)) return null;
     const [year, month, day, hour, minute, second = 0] = value
@@ -1029,6 +1175,11 @@
     return value;
   }
 
+  /**
+   * Allow empty, relative, or HTTP(S) media; file: is accepted only from a downloaded file: page.
+   * @param {string} value Raw form or URL value to validate or format.
+   * @returns {boolean} Whether the media value is empty or uses an allowed protocol and local-file boundary.
+   */
   function safeImage(value) {
     if (!value) return true;
     try {
@@ -1039,7 +1190,13 @@
     }
   }
 
-  /** Align updates with the clock and pause them while the page is hidden. */
+  /**
+   * Run one clock-aligned update loop and suspend scheduled ticks while the document is hidden.
+   * Visibility/pageshow events refresh immediately. Returning false stops scheduling until a later resume.
+   * @param {function(): (boolean|void)} update Refresh callback; false pauses scheduling until a later visibility/pageshow event.
+   * @param {number} [interval=1000] Update interval in milliseconds.
+   * @returns {void} Registers one visibility-aware loop; it does not expose a cancellation handle.
+   */
   function watch(update, interval = 1000) {
     let pending;
     function resume() {
@@ -1053,21 +1210,25 @@
     resume();
   }
 
-  // Expose native renderer helpers before the editor-only jQuery path.
+  // ==========
+  // ==== PUBLIC HELPERS AND EDITOR DEPENDENCY BOUNDARY ====
+  // ==========
+
+  // Publish these before DOMContentLoaded so resource handlers can declare fields in either mode.
   Object.assign(byConfigurator, {
     platforms,
     validParameter,
     applyParameters,
     settingsURL,
     whenFields,
-    shadowFields,
-    filterFields,
-    fadeFields,
     textFields,
     surfaceFields,
     placementFields,
+    shadowFields,
+    filterFields,
     offsetFields,
     insetFields,
+    fadeFields,
     layoutFields,
     transitionFields,
     dateTimeFields,
@@ -1084,6 +1245,7 @@
     watch
   });
 
+  // Overlay pages need all helpers above, but skip the catalog, widgets, and editor handlers below.
   if (document.getElementById("configurator") && location.search.length > 1 && !location.hash) {
     byConfigurator.initialized = true;
     return;
@@ -1096,11 +1258,6 @@
   }
   const $ = global.jQuery;
 
-  // ==========
-  // ==== SHARED TOOL CATALOG ====
-  // ==========
-
-  /** Shared card and navigation metadata; only ready: true tools are published. */
   /**
    * Explicit resource icons take priority; shared controls use their property or purpose.
    * @param {string} name Field or item identifier.
@@ -1181,6 +1338,11 @@
     return { switch: "fa-toggle-on", select: "fa-list", number: "fa-sliders", text: "fa-font", textarea: "fa-align-left" }[field.type] || "fa-sliders";
   }
 
+  // ==========
+  // ==== SHARED TOOL CATALOG ====
+  // ==========
+
+  /** Shared card and navigation metadata; only ready: true tools are published. */
   byConfigurator.catalog = {
     // Resolve from this script so links also work in downloaded folders and nested deployments.
     root,
@@ -1394,7 +1556,16 @@
     }
   };
 
-  /** Build the active resource editor once; renderers and the landing need no form. */
+  // ==========
+  // ==== RESOURCE EDITOR LIFECYCLE ====
+  // ==========
+
+  /**
+   * Build the active resource editor once after initResource() publishes validated settings.
+   * The DOM controls own pending form edits; settings holds the last accepted resource values.
+   * URL drafts temporarily take precedence for actions. Landing/overlay pages never build this form.
+   * @returns {void}
+   */
   byConfigurator.init = function () {
     const resource = window.byStreamResource;
     const jqHost = $("#configurator");
@@ -1781,6 +1952,10 @@
       }
     }
 
+    /**
+     * Validate the URL draft and allowed protocol; sameResourceURL() decides whether to import it here.
+     * @returns {URL|null} Accepted URL, or null after marking the URL input invalid.
+     */
     function readEditorURL() {
       const input = $("#overlay-url")[0];
       input.setCustomValidity("");
@@ -1794,7 +1969,11 @@
       }
     }
 
-    /** Hosted folder and index.html links share an editor; file URLs retain their exact paths. */
+    /**
+     * Hosted folder and index.html links share an editor; file URLs retain their exact paths.
+     * @param {URL} url Parsed overlay URL.
+     * @returns {boolean} Whether the URL resolves to this resource on the current origin.
+     */
     function sameResourceURL(url) {
       const pathname = (path) => (location.protocol === "file:" ? path : path.replace(/\/index\.html$/, "/"));
       return url.origin === location.origin && pathname(url.pathname) === pathname(location.pathname);
@@ -1858,6 +2037,10 @@
       return url;
     }
 
+    /**
+     * Resolve drafts/validation before copying; select the URL for manual copy if clipboard access fails.
+     * @returns {Promise<void>}
+     */
     async function copyURL() {
       const url = await currentOverlayURL();
       if (!url) return;
@@ -1878,8 +2061,9 @@
 
     /**
      * Enhance existing controls; retain Select2's automatic above/below positioning.
-     * @param {HTMLSelectElement} select Native control; its value and events are preserved.
+     * @param {HTMLSelectElement|jQuery} select Native control or its jQuery wrapper; its value and events are preserved.
      * @param {Object} [options] Select2 templates and control-specific options.
+     * @returns {void} Enhances the existing control in place; repeated initialization is ignored.
      */
     function initSelect2(select, options = {}) {
       const jqSelect = $(select);
@@ -1894,6 +2078,10 @@
       jqSelect.next(".select2-container").addClass("stream-select2");
       jqSelect.off("select2:open.streamSelect2").on("select2:open.streamSelect2", () => {
         const widget = jqSelect.data("select2");
+        /**
+         * Keep the open Select2 dropdown within the visible viewport.
+         * @returns {void}
+         */
         const fitDropdown = () => {
           const bounds = widget.$container[0].getBoundingClientRect();
           if (bounds.bottom <= 0 || bounds.top >= innerHeight) {
@@ -1912,7 +2100,10 @@
       });
     }
 
-    /** Connect declared font fields to the shared picker; the form remains authoritative. */
+    /**
+     * Connect declared font fields to the shared picker; the form remains authoritative.
+     * @returns {void}
+     */
     function initFontPickers() {
       if (!window.byFont || typeof window.byFont.picker !== "function") return;
       fields.forEach((field, index) => {
@@ -1928,10 +2119,15 @@
     }
 
     // ==========
-    // ==== ORDERED ACCOUNT AND SCHEDULE EDITORS ====
+    // ==== ORDERED LIST AND MAP EDITORS ====
     // ==========
 
     const platformIcons = new Map();
+    /**
+     * Build a platform icon, falling back to a globe when its Font Awesome glyph is unavailable.
+     * @param {string} platform Supported social platform identifier.
+     * @returns {jQuery} jQuery wrapper for the affected elements.
+     */
     function platformIcon(platform) {
       if (platformIcons.has(platform)) return platformIcons.get(platform);
       const jqIcon = $(/* HTML */ `<i></i>`)
@@ -2105,18 +2301,35 @@
       reset();
     }
 
+    // ==========
+    // ==== APPEARANCE, TIMESTAMP, AND REGIONAL WIDGETS ====
+    // ==========
+
+    /**
+     * Convert the datetime-local editor value to the absolute UTC string stored in settings.
+     * @param {string} value Raw form or URL value to validate or format.
+     * @returns {string} Absolute ISO timestamp, or an empty string when the local input is invalid.
+     */
     function utcTimestamp(value) {
       const date = new Date(value);
       return Number.isFinite(date.getTime()) ? date.toISOString() : "";
     }
 
+    /**
+     * Convert an absolute timestamp to this computer's wall time for datetime-local controls.
+     * @param {string} value Raw form or URL value to validate or format.
+     * @returns {string} Local datetime-local text, or an empty string for an invalid timestamp.
+     */
     function localTimestamp(value) {
       const date = new Date(value);
       if (!Number.isFinite(date.getTime())) return "";
       return new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, 19);
     }
 
-    /** Presets reuse ordinary field changes, including validation and URL generation. */
+    /**
+     * Presets reuse ordinary field changes, including validation and URL generation.
+     * @returns {void}
+     */
     function initAppearancePresets() {
       const jqLabel = $(/* HTML */ `<label class="form-label w-100"></label>`)
         .text("Appearance preset")
@@ -2291,11 +2504,10 @@
     // ==== THEME, ACCESSIBILITY, AND COLORS ====
     // ==========
 
-    // ==========
-    // ==== THEME, ACCESSIBILITY, AND COLORS ====
-    // ==========
-
-    /** Persist the editor preference; byCommon applies the theme and button state. */
+    /**
+     * Persist the editor preference; byCommon applies the theme and button state.
+     * @returns {void}
+     */
     function initTheme() {
       let theme = "dark";
       try {
@@ -2382,10 +2594,14 @@
     }
 
     // ==========
-    // ==== HELP AND TOOL NAVIGATION ====
+    // ==== EDITOR PREFERENCES AND COMPRESSION ====
     // ==========
 
-    /** Persist UI state with the last valid generated query unless a new valid query is supplied. */
+    /**
+     * Persist UI state with the last valid generated query unless a new valid query is supplied.
+     * @param {string} [query=savedPreferences.query] Query string or query data for this operation.
+     * @returns {void}
+     */
     function savePreferences(query = savedPreferences.query) {
       savedPreferences = {
         query,
@@ -2423,12 +2639,22 @@
       } catch {}
     }
 
+    /**
+     * Show compression controls for the selected mode without changing any resource field values.
+     * @returns {void}
+     */
     function syncCompressionOptions() {
       $("#compression-options").prop("hidden", !$("#short-url").prop("checked"));
       $("#compression-selection").prop("hidden", $('input[name="compression-scope"]:checked').val() !== "selected");
     }
 
-    /** Restore the link's compression format or saved preferences; capture Reset defaults only at startup. */
+    /**
+     * Restore the link's compression format or saved preferences; capture Reset defaults only at startup.
+     * @param {string} search Encoded query string to decode.
+     * @param {Set<string>} selected Field names using individual URL compression.
+     * @param {boolean} [saveDefaults=false] Also replace the native Reset baseline.
+     * @returns {void}
+     */
     function loadCompressionOptions(search, selected, saveDefaults = false) {
       const all = new URLSearchParams(search).has("data");
       // A compressed URL declares its own format; otherwise restore this resource's preference.
@@ -2448,9 +2674,15 @@
       syncCompressionOptions();
     }
 
+    // ==========
+    // ==== HELP DIALOG AND PARAMETER REFERENCE ====
+    // ==========
+
     /**
-     * Builds the Bootstrap help modal and synchronizes its sections with URL hashes.
+     * Build one help modal, generate parameter documentation, and bind editor shortcuts/hash navigation.
+     * Shared panels come from this file; resource integrations may extend the modal through initResourceHelp.
      * @param {function(HTMLElement, Object<string, string>, Function): void} [initResourceHelp] Adds extra help panels and sections.
+     * @returns {void}
      */
     function initHelpDialog(initResourceHelp) {
       const jqDialog = $(/* HTML */ `<div id="config-help" class="config-help modal fade" tabindex="-1" aria-labelledby="help-title"></div>`)
@@ -2645,6 +2877,7 @@
         savePreferences();
         generateURL();
       });
+      // Factory reset clears persisted state and reloads; normal form Reset keeps the opening baseline.
       $("#restore-defaults").on("click", () => {
         urlGeneration++;
         try {
@@ -2736,6 +2969,11 @@
 
       const titles = { info: "About", obs: "Use with OBS", params: "Parameters", advanced: "Advanced options" };
       initResourceHelp?.(jqDialog[0], titles, closeHelp);
+      /**
+       * Open the requested help panel and synchronize the navigation hash.
+       * @param {string} section Section identifier or label.
+       * @returns {void}
+       */
       function showSection(section) {
         popover?.hide();
         if (!jqDialog.hasClass("show")) helpTrigger = document.activeElement;
@@ -2847,7 +3085,10 @@
     // ==== TOOL NAVIGATION ====
     // ==========
 
-    /** Search and navigate the homepage's tool order without adding navigation to overlay settings. */
+    /**
+     * Search and navigate the homepage's tool order without adding navigation to overlay settings.
+     * @returns {void}
+     */
     function initTools() {
       $(".home-link").attr("href", homeURL);
       const jqSelect = $("#tool-picker").empty();
@@ -2869,7 +3110,11 @@
         $(/* HTML */ `<i></i>`, { class: `fa-solid ${$(option.element).attr("data-icon")} fa-fw me-2`, "aria-hidden": "true" }).appendTo(label);
         return label.append($(/* HTML */ `<span></span>`, { class: "tool-name", text: option.text }));
       }
-      /** Keep categories visible without grouping away the homepage's priority order. */
+      /**
+       * Keep categories visible without grouping away the homepage's priority order.
+       * @param {Object} option Select2 option data.
+       * @returns {jQuery|string}
+       */
       function toolResult(option) {
         const label = toolOption(option);
         if (option.id) $(/* HTML */ `<small></small>`, { class: "tool-category", text: $(option.element).attr("data-category") }).appendTo(label);
@@ -2889,10 +3134,8 @@
     }
 
     // ==========
-    // ==== NATIVE BROWSER SERVICES ====
+    // ==== FIELD VISIBILITY AND VALIDATION ====
     // ==========
-
-
 
     /**
      * Use the shared when rules to disable and hide inactive fields and their descendants.
@@ -2942,7 +3185,10 @@
 
     /**
      * Update existing controls; URL imports preserve the opening Reset baseline.
+     * Only startup passes saveDefaults=true; later imports must not overwrite native defaultValue/defaultChecked.
+     * @param {ResourceSettings} values Accepted settings to reflect in the existing form controls.
      * @param {boolean} [saveDefaults=false] Capture initial values as native Reset defaults.
+     * @returns {void}
      */
     function setFields(values, saveDefaults = false) {
       $(fields).each(function () {
@@ -2965,10 +3211,15 @@
       });
     }
 
-    // Resource scripts publish their definitions before this deferred editor runs.
+    // ==========
+    // ==== EDITOR STARTUP AND EVENT HANDLERS ====
+    // ==========
+
+    // Capture Reset defaults before widgets replace controls, then enhance fields and bind edits once.
     try {
       setFields(settings, true);
 
+      // Resource editor extensions reuse these services instead of creating separate widget/URL lifecycles.
       const editor = {
         generateURL,
         initEntryEditor,

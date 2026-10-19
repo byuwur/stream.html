@@ -33,9 +33,11 @@ The form handles encoding and list add/edit/reorder/remove. Colors use 3/4/6/8 h
 
 Fonts include 350 Google families, system fonts, and installed families/CSS stacks. Fonts and visible samples load on demand; OBS needs access to the chosen font or uses the tool's fallback. Theme preference is local; explicit motion Off/None/Static settings apply.
 
-Main offers countdown formats for hours/minutes/seconds, total minutes, total seconds, or unit labels. Formats change the display, not the countdown duration.
-
 Default resource text uses `"Courier New", Courier, monospace`, mostly black/white/gray colors, modest rounded corners, and no panel shadows, glows, or decorative pulsing. The configurator UI uses Archivo from `_common.css`; selecting a resource font changes the overlay and its font sample only. Main and Popup use the byUwUr dark red `#300` accent, and the byUwUr examples remain. Explicit supported settings override these defaults. Other fonts, colors, motion, and effects remain available in the controls.
+
+Shadows and glows have independent switches, both Off by default. Enable either or both, with separate colors, softness, and spread where supported. Default Off values are omitted from generated URLs.
+
+Main offers countdown formats for hours/minutes/seconds, total minutes, total seconds, or unit labels. Formats change the display, not the countdown duration.
 
 Media fields reference public HTTP(S) URLs or paths relative to the tool HTML. Local file URLs need downloaded use. No uploads or Base64 `data:` media. Keep private information out of shared URLs.
 
@@ -77,9 +79,9 @@ Each tool imports [SPA.js v20.6 `_functions.js`](https://cdn.jsdelivr.net/gh/byu
 
 ### Downloaded use
 
-Keep the tool folder plus parent `configurator.js`/`configurator.css`; a single HTML file is not a bundle. Open `{tool}/index.html` and paste its generated `file:///.../index.html?...` URL into OBS with **Local file** unchecked. Keep those paths stable. Hosted links use tool directories.
+Keep the tool folder plus parent `configurator.js`/`configurator.css`; overlay initialization still lives in `configurator.js`. A single HTML file is not a bundle. Open `{tool}/index.html` and paste its generated `file:///.../index.html?...` URL into OBS with **Local file** unchecked. Keep those paths stable. Hosted links use tool directories.
 
-Pages import jQuery, Popper, Bootstrap, Select2, Pickr, and common assets directly in HTML, pinned to `spa.js@v20.5`. Editor setup runs only in configure mode; renderers use native JavaScript. Main/Popup also use GSAP and Popup uses MorphSVG. Font-enabled pages use native `byFont`. Offline use requires saved CDN dependencies and updated `src`/`href` paths.
+Pages import jQuery, Popper, Bootstrap, Select2, Pickr, and common assets directly in HTML, pinned to `spa.js@v20.6`. Editor setup runs only in configure mode; renderers use native JavaScript. Main/Popup also use GSAP and Popup uses MorphSVG. Font-enabled pages use native `byFont`. Offline use requires saved CDN dependencies and updated `src`/`href` paths.
 
 ### Older URLs
 
@@ -93,19 +95,19 @@ Current URLs use percentages for opacity, deadzone, and scale: `100` means 100%,
 
 [Example: Player 1, Xbox](https://byuwur.github.io/stream.html/controller/?player=1&skin=1)
 
-| Parameter            | Meaning                                                                             |
-| -------------------- | ----------------------------------------------------------------------------------- |
-| `player`             | Gamepads `1`–`4` (default `1`); keyboard `9`.                                       |
-| `skin`               | `1` Xbox, `2` PlayStation, `3` fight stick, `4` GameCube.                           |
+| Parameter | Meaning |
+| --- | --- |
+| `player` | Gamepads `1`–`4` (default `1`); keyboard `9`. |
+| `skin` | `1` Xbox, `2` PlayStation, `3` fight stick, `4` GameCube. |
 | `opacity` | `0`–`100`%; default `100`. |
 | `offset`, `deadzone` | Stick travel in pixels; deadzone `0`–`100`% (default `25`). |
-| `strength`, `curve`  | `strength=0` disables trigger meters; `curve=1` enables stick curving.              |
-| `rotation`           | Maximum steering-wheel rotation in degrees.                                         |
-| `mapping`            | Custom Mapping binding array; `[]` uses defaults. Legacy `{"mapping":[...]}` works. |
+| `strength`, `curve` | `strength=0` disables trigger meters; `curve=1` enables stick curving. |
+| `rotation` | Maximum steering-wheel rotation in degrees. |
+| `mapping` | Custom Mapping binding array; `[]` uses defaults. Legacy `{"mapping":[...]}` works. |
 | `mirror`, `fitMargin` | Mirror artwork horizontally; vertical fit margin in pixels (default `8`). |
 | `horizontalPosition`, `verticalPosition` | Optional signed pixel positions. Empty keeps automatic placement. |
 
-Press a gamepad button for detection or **F** for keyboard input. Focus the preview/OBS Interact first. Defaults live in `bySettingsKB` in `controller/index.html`; detection depends on browser/OS. **Custom Mapping** chooses a base and captures bindings. Skins fit the viewport with `0.5rem` vertical margins.
+Press a gamepad button for detection or **F** for keyboard input. Focus the preview/OBS Interact first. Keyboard defaults live in `bySettingsKB` in `controller/index.html`; detection depends on browser/OS. **Custom Mapping** chooses a base and captures bindings. Skins fit the viewport automatically. Appearance controls also expose background, disconnected opacity, scale, tilt, offsets, and artwork filters.
 
 ## Social popup
 
@@ -113,19 +115,19 @@ Press a gamepad button for detection or **F** for keyboard input. Focus the prev
 
 Choose platforms, handles, and order. Repeated platforms are allowed. Brand icons use a globe fallback.
 
-| Parameter                                                | Meaning                                                                                                                         |
-| -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| `mode`                                                   | `right` (default) or `left`.                                                                                                    |
+| Parameter | Meaning |
+| --- | --- |
+| `mode` | `right` (default) or `left`. |
 | `accounts` | Ordered rows, e.g. `[{"platform":"twitch","handle":"/byUwUr"},{"platform":"twitch","handle":"/byUwUr_es"}]`; up to 100 accounts, 160 characters/handle, 20,000 JSON characters. `[]` hides it. |
-| `pauseTime`, `inbetweenPauseTime`                        | Seconds/account and between cycles: `0`–`3600`, default `5` each.                                                               |
+| `pauseTime`, `inbetweenPauseTime` | Seconds/account and between cycles: `0`–`3600`, default `5` each. |
+| `animationSpeed` | Playback speed `0`–`100`%; `100` is normal and `0` pauses animation. |
 | `scale` | `-500`–`500`%, anchored to the selected top corner; `100` keeps the original size. |
-| `iconBoxColor`, `textBoxColor`, `iconColor`, `fontColor` | Hex colors without `#`.                                                                                                         |
+| `iconBoxColor`, `textBoxColor`, `iconColor`, `fontColor` | Hex colors without `#`; defaults use `#300` and white. |
 | `primaryFont`, `fontWeight` | Font family and weight `100`–`900`, step `100` (default `600`); Courier/monospace fallback. |
 | `fontSize`, `textYOffset` | Size `8`–`100` px (default `72`); offset `-100`–`100` px. |
-| `animationSpeed` | Playback speed `0`–`100`%; `100` is normal and `0` pauses animation. |
 | `opacity`, `cornerInset`, `textPadding` | Optional opacity `0`–`100`%, signed corner inset, and horizontal text padding in pixels. |
 
-Invalid JSON/platforms retain the two byUwUr default accounts; blank handles keep their slots. Font readiness and remeasurement keep animation aligned.
+Invalid JSON/platforms retain the two byUwUr default accounts; blank handles keep their slots. Font readiness and remeasurement keep animation aligned. Separate account-name and icon typography, text-box borders/shadows, placement, and filters are available in the form.
 
 ## Main scene
 
@@ -137,76 +139,51 @@ Invalid JSON/platforms retain the two byUwUr default accounts; blank handles kee
 | --- | --- |
 | `sceneTitle`, `tagline` | Multiline title up to 300 characters; subtitle up to 160. |
 | `countdownTime`, `countdownMessage`, `countdownOverMessage` | Minutes `0`–`1440` (default `4`); during/after messages. |
-| `displayCountdown`, `displayBranding`, `displaySocial`, `displaySchedule`, `displayLabels` | `yes`/`no`. Branding hides only the logo. |
+| `countdownFormat` | `stopwatch` (total minutes/seconds, default), `clock`, `hours`, `units`, or total `seconds`. |
+| `displayCountdown`, `displayBranding`, `displaySocial`, `displaySchedule`, `displayLabels` | `yes`/`no` toggles. Branding hides only the logo. |
 | `primaryFont`, `titleSize`, `subtitleSize` | Font family and sizes `8`–`200` px; Courier/monospace fallback. |
-| `primaryTextColor`, `subTextColor`, `accentColor`, `frameColor`, `contentBackgrounds`, `backgroundColor` | Hex without `#`; background defaults to transparent `00000000`. |
+| `primaryTextColor`, `subTextColor`, `accentColor`, `frameColor`, `contentBackgrounds`, `backgroundColor` | Hex without `#`; background defaults to transparent `00000000`, accent/frame to `300`. |
 | `frameWidth`, `frameInset` | Border thickness `0`–`100` px (default `2`); optional signed inset in pixels. |
 | `logoUrl`, `logoOpacity`, `logoScale` | Image URL/path, opacity `0`–`100`% (default `5`), scale `-500`–`500`% (default `100`). Empty URL uses BONYUR. |
 | `backgroundType`, `backgroundUrl`, `backgroundScale` | `video`/`image`, media URL/path, and scale `-500`–`500`%. No bundled background media. |
 | `backgroundBlur`, `backgroundOverlayOpacity`, `backgroundOverlay` | Blur `0`–`100` px, tint opacity `0`–`100`%, tint color. |
 | `accounts` | Ordered rows with `platform`, `handle`, and `heading`; platforms may repeat. Up to 100 rows, 160 characters per text field, 20,000 JSON characters. Blank handles/`[]` hide accounts. |
 | `scheduleEntries` | Weekday-to-text map, e.g. `{"monday":"Activity"}`; up to seven days, 160 characters/text, 4,000 JSON characters. `{}` hides it. |
-| `countdownFormat` | `stopwatch` (total minutes/seconds, default), `clock`, `hours`, `units`, or total `seconds`. |
 | `animationSpeed` | Social animation speed `0`–`100`%; `100` is normal and `0` pauses animation. |
 
-Invalid lists retain defaults. Follower/donation/subscriber labels are editable text, without live service updates.
-
-## Work in progress
-
-The other 19 tools are `ready: false`, hidden pending manual review/testing. Defaults and field documentation live in their local forms.
-
-| Folder                                  | Purpose / limits                                                                                                                              |
-| --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| `clock`                                 | Digital/analog/flip/minimal; four zones maximum, blank zone/locale follows OBS.                                                               |
-| `timer`                                 | Duration/deadline/elapsed/restart; timestamp modes survive reload, restart starts over. No shared pause; milliseconds update at 20 Hz.        |
-| `webcam`                                | Decorative frame; does not crop/mask the camera. Circle uses the smaller dimension.                                                           |
-| `ticker`, `quotes`                      | Configured message/quotation rotation; no live feeds.                                                                                         |
-| `watermark`, `lower-thirds`, `sponsors` | Text/logo/name rotations; no remote triggers or sponsorship service. Missing images leave text.                                               |
-| `qr`                                    | Nayuki MIT encoder; 600 characters/1,200 UTF-8 bytes, four-module quiet zone, opaque colors, modules at least 3 px. Scan the final broadcast. |
-| `reminder`                              | Timestamp reminders with IANA quiet hours/DST; keep OBS source running.                                                                       |
-| `badge`, `hud`                          | Decorative status/viewfinder; no stream-status detection or camera/recording control.                                                         |
-| `credits`                               | Scrolling credits/looping; pixels/second speed, reload restarts.                                                                              |
-| `schedule`                              | Ordered dated activities; highlights overlaps, exclusive end times, no calendar service.                                                      |
-| `info`, `shortcuts`                     | Static cards/key reference; large boards scroll, no keyboard monitoring.                                                                      |
-| `effects`                               | CSS particles; maximum 200, low mode 50, Off gives a static pattern.                                                                          |
-| `timeline`                              | Timestamp progress; invalid/reversed ranges show an error.                                                                                    |
-| `randomizer`                            | Seeded draws can repeat. OBS Interact updates the page URL; restart uses OBS's saved URL. No synchronization.                                 |
-
-Most draft sources start at **960 × 540**; HUD uses **1280 × 720**. Lists allow 40 entries, 160 characters/field, and 8,000 JSON characters unless narrower limits apply. Date pickers use the editor's zone and serialize UTC; direct timestamps need `Z` or an offset. OBS's clock controls timing; generated start timestamps survive reload.
+Invalid lists retain defaults. Individual controls cover title/subtitle, countdown and completion text, social names/icons, schedule text, event headings, card surfaces, and scene filters. Each visible section has its own positioning or scale controls where applicable. Follower/donation/subscriber labels are editable text, without live service updates.
 
 ## Development
 
-Shared setup belongs in `configurator.js`; tool definitions/rendering and CSS live in `{tool}/{tool}.js` and `.css`. `configurator.css` owns editor styling; `configurator.html` is the starter. The root `index.html` renders the catalog.
+Shared setup and native overlay helpers belong in `configurator.js`; its JSDoc defines `ResourceField`, `ResourceFields`, `ResourceSettings`, and `ResourceDefinition`, with detailed contracts for reusable utilities and non-obvious behavior. Resources declare their fields and defaults, then use those shared helpers instead of duplicating editor behavior. Tool definitions/rendering and CSS live in `{tool}/{tool}.js` and `.css`. `configurator.css` owns editor styling; `configurator.html` is the starter. The root `index.html` renders the catalog.
 
 ### Resource contract
 
 In an async `DOMContentLoaded` handler, define `resource.fields` with parameter names, types, defaults, labels, sections, descriptions, and constraints. Put renderer-only values in `constants`, then call `await byConfigurator.initResource(resource, integrations?)` before rendering. It decodes/validates URL settings, clones defaults, publishes `window.byStreamResource`/`window.byStreamOverlay`, mounts `overlay-markup` in overlay mode, and resolves to shared settings.
 
-HTML needs `<template id="overlay-markup">...</template>` and `<div id="configurator"></div>`. Declare scripts with `src` and `defer` in dependency order: jQuery before its plugins, Popper before Bootstrap, and `_functions.js` before `configurator.js`. Deferred scripts execute in document order before `DOMContentLoaded`; initialization awaits decoded resource settings. Editor styles start with `data-editor-style media="not all"` and activate only in configure mode.
-
-`byConfigurator.init()` generates controls, preview, and parameter help; repeat calls preserve the form/handlers. Only declared fields enter URLs. `byConfigurator.validParameter(fields, name, value)` and `byConfigurator.applyParameters(fields, settings, values?)` share validation; custom validators return a parsed value or `null`. See the starter and existing resources for field metadata. Controller's `byConfigurator.configureResource(resource, editor)` adds mapping/help panels. Native helpers supply platforms/accounts, dates/zones, image checks, and clock-aligned `watch()` updates that pause while hidden.
-
-Field `options` maps stored IDs to displayed labels.
-
-Binary settings use `type: "switch"` with explicit checked/unchecked values.
-
-Each list uses its declared format directly: simple messages are string arrays, unique pairs are maps such as `{"monday":"Activity"}`, and social accounts or other repeated rows use object arrays. Unsupported formats retain defaults; no format conversion is performed. Map keys must be unique, and integer keys follow JavaScript's numeric ordering.
-
 Declare a nonempty `resource.urlRequired` array of field names that always belong in generated links, including when they use defaults. This keeps overlay URLs query-based without emitting unrelated defaults. Include timestamps or scheduled entries whose initial values must survive reloads. Other values are compared against `field.default`; object/array order is preserved, and equivalent hex color spellings compare as the same color. Declare concrete valid defaults directly.
 
 `byConfigurator.settingsURL(resource, settings)` builds the same readable URL for editor actions and native resource interactions, including after importing a compressed URL.
 
-Inactive controls are disabled and do not block validation. Overlays treat inactive switches as Off, reset other inactive settings to their declared defaults, and skip their style overrides. Their drafts return when re-enabled in the current editor. Inactive fields are omitted from generated URLs unless explicitly required by the resource.
+HTML needs `<template id="overlay-markup">...</template>` and `<div id="configurator"></div>`. Declare scripts with `src` and `defer` in dependency order: jQuery before its plugins, Popper before Bootstrap, and `_functions.js` before `configurator.js`. Deferred scripts execute in document order before `DOMContentLoaded`; initialization awaits decoded resource settings. Editor styles start with `data-editor-style media="not all"` and activate only in configure mode. Overlay mode uses the native setup path in `configurator.js` and skips editor initialization; keep that script when downloading a resource.
 
-Shadows and glows have independent switches, both Off by default. Enable either or both, with separate colors, softness, and spread where supported. Default Off values are omitted from generated URLs.
+`byConfigurator.init()` generates controls, preview, and parameter help; repeat calls preserve the form/handlers. Only declared fields enter URLs. `byConfigurator.validParameter(fields, name, value)` and `byConfigurator.applyParameters(fields, settings, values?)` share validation; custom validators return a parsed value or `null`. See the starter and existing resources for field metadata. Controller's `byConfigurator.configureResource(resource, editor)` adds mapping/help panels. Native helpers supply platforms/accounts, dates/zones, image checks, and clock-aligned `watch()` updates that pause while hidden.
 
-`byConfigurator.textFields()` declares per-element fonts, sizes, weight, spacing, line height, colors, opacity, and shadows. Size `0` and empty overrides preserve authored styles.
-
-Resource size and offset controls use pixels, including the configurator demo. The configurator interface keeps its rem-based styling.
+Declare sections, subsections, and fields in display order: primary content and behavior first, then common appearance, size and placement, composition, and detailed styling or effects. Keep related fields together; appearance presets belong in Appearance.
 
 Resource size and offset controls use pixels, including the configurator demo. The configurator interface keeps its rem-based styling. Opacity, effect strength, and other bounded percentages use `0`–`100`; scale uses `-500`–`500`, where `100` preserves size and negative values flip both axes. URL values use these same units.
 
-Declare sections, subsections, and fields in display order: primary content and behavior first, then common appearance, size and placement, composition, and detailed styling or effects. Keep related fields together; appearance presets belong in Appearance.
+Field `options` maps stored IDs to displayed labels. Binary settings use `type: "switch"` with explicit checked/unchecked values. Every field has an icon, with explicit `icon` metadata taking priority over the shared property/purpose choices. `byConfigurator.textFields()` declares per-element typography, color, opacity, and shadow controls; size `0` and other empty overrides follow the base appearance. `surfaceFields()`, `placementFields()`, and `layoutFields()` declare optional surface, transform, and element-order controls. Empty optional overrides are omitted from generated URLs. Lower order values appear first; changing order enables a flex layout.
+
+Shadows, glows, filters, offsets, element edges, and fades use numeric inputs, color pickers, and choices in dedicated subsections. Position and offset controls accept positive and negative values. Inactive effect controls are hidden and disabled; selecting a custom effect reveals its settings. Raw CSS-string parameters are no longer fields and fall back to defaults. The `shadowFields()`, `filterFields()`, `offsetFields()`, `insetFields()`, and `fadeFields()` helpers declare these ordinary URL fields.
+
+They use `styleSelector`, `styleProperty`, and either `styleUnit` or a `styleValue(settings)` function to build the CSS after validation, including for rotating content and downloaded overlays.
+
+Field `subsection` groups related controls. `when: [fieldName, ...values]` shows a field only for those parent values; omitting values requires nonempty parent text. Hidden parents also hide their descendants. Inactive controls are disabled and do not block validation. Their drafts return when re-enabled in the current editor, but overlays treat inactive switches as Off, reset other inactive settings to their declared defaults, and skip their style overrides. Inactive fields are omitted from generated URLs unless explicitly required by the resource. Conditions reference existing fields and must not form cycles. Empty subsections and sections are hidden. `whenFields(condition, fields)` applies one condition to a group. `textFields(elements, conditions)` and `surfaceFields(elements, conditions)` accept conditions keyed by element name.
+
+Shared `dateTimeFields()` and `dateTimeFormatter()` helpers support presets such as `yyyy/MM/dd`, `dd/MM/yyyy`, `HH:mm`, and `hh:mm:ss a`. Numeric dates use the Gregorian calendar; month names follow the locale. `timezone`, `timezones`, and `locale` field types use searchable Select2 controls with UTC offsets or language/region labels; extra-zone selection preserves order and allows up to three zones. `durationFormats` and `formatDuration()` format elapsed seconds without wrapping total-minute/second modes at midnight. `transitionFields()` declares transition timing, easing, and signed slide distance. These helpers remain in the shared framework for resources to opt into.
+
+Each list uses its declared format directly: simple messages are string arrays, unique pairs are maps such as `{"monday":"Activity"}`, and social accounts or other repeated rows use object arrays. Unsupported formats retain defaults; no format conversion is performed. Map keys must be unique, and integer keys follow JavaScript's numeric ordering.
 
 ### Add a tool
 
@@ -218,7 +195,7 @@ The catalog owns order, cards/count, and navigation; static hosting does not dis
 
 ### Landing and checks
 
-Search/categories filter ready tools; the responsive gallery supports keyboard focus. Run `node --check` on changed scripts. Check HTTP/`file://`, URL round trips, F2/`#configure`, copy/reset, invalid values, lists, fonts, and keyboard mapping. Confirm overlay mode skips editor initialization. External Playwright/Chrome checks require no repository dependency; QR checks need a decoder. Test OBS and endurance separately.
+Search/categories filter ready tools; the responsive gallery supports keyboard focus. Run `node --check` on changed scripts. Check HTTP/`file://`, URL round trips, F2/`#configure`, copy/reset, invalid values, lists, fonts, and keyboard mapping. Confirm overlay mode skips editor initialization. Check that hidden fields are disabled, their values do not affect overlays or URLs, and re-enabling them restores valid editor drafts. External Playwright/Chrome checks require no repository dependency. Test OBS and endurance separately.
 
 ## Other configurations and assets
 

@@ -164,7 +164,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   };
 
-  /** Render safe text and play the elastic square, handle, and icon sequence. */
+  /**
+   * Render safe text and play the elastic square, handle, and icon sequence.
+   * @returns {Promise<void>}
+   */
   async function renderPopup() {
     const { accounts, mode, scale } = settings;
     const popup = document.getElementById("socialHolder");

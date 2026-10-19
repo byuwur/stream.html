@@ -361,7 +361,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const allowedControllers = { 1: "xbox", 2: "ps", 3: "fight-stick", 4: "gc" };
 
-  /** Parse binding arrays or prior wrapped URLs; invalid JSON leaves settings unchanged. */
+  /**
+   * Parse binding arrays or prior wrapped URLs; invalid JSON leaves settings unchanged.
+   * @param {unknown} value Value supplied by the caller.
+   * @returns {Array<unknown>|null}
+   */
   function bindingSettings(value) {
     try {
       const result = JSON.parse(value);
@@ -374,7 +378,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   function buttonValue(button) {
     return Number(button?.value ?? button ?? 0);
   }
-  /** Gamepad properties are browser accessors, so copy their values explicitly. */
+  /**
+   * Gamepad properties are browser accessors, so copy their values explicitly.
+   * @param {Gamepad} pad Gamepad snapshot whose input values are read.
+   * @returns {Object} Plain snapshot of the gamepad ID, index, buttons, and axes.
+   */
   function copyGamepad(pad) {
     return {
       id: pad.id,
@@ -391,7 +399,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (binding.choiceOperand === "-") return Math.max(0, -value);
     return value;
   }
-  /** Reads every binding from the original pad; mappings never alter another binding's source. */
+  /**
+   * Reads every binding from the original pad; mappings never alter another binding's source.
+   * @param {Gamepad} pad Gamepad snapshot whose input values are read.
+   * @returns {Object}
+   */
   function remapGamepad(pad) {
     const result = copyGamepad(pad);
     for (const binding of settings.mapping) {
@@ -428,6 +440,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     return result;
   }
 
+  /**
+   * Mount the selected controller artwork and configure its input display.
+   * @returns {void}
+   */
   function initController() {
     const template = document.getElementById("controller-artwork");
     document.querySelectorAll(".controller").forEach((controller) => {

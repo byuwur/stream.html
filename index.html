@@ -152,7 +152,11 @@
           // ==== SEARCH AND CATEGORY FILTERS ====
           // ==========
 
-          /** Move and resize matching cards; read the latest inputs when overlapping transitions update. */
+          /**
+           * Move and resize matching cards; read the latest inputs when overlapping transitions update.
+           * @param {boolean} [animate=true] Animate.
+           * @returns {Promise<unknown>} The resulting asynchronous value.
+           */
           async function filterTools(animate = true) {
             const update = () => {
               const query = $("#tool-search").val().trim().toLocaleLowerCase();
@@ -177,7 +181,11 @@
             }
           }
 
-          /** Keep category labels as text; Font Awesome icons are declared on the native options. */
+          /**
+           * Keep category labels as text; Font Awesome icons are declared on the native options.
+           * @param {Object} option Select2 option data.
+           * @returns {unknown}
+           */
           function categoryOption(option) {
             if (!option.id) return option.text;
             const icon = $(option.element).attr("data-icon") || "fa-layer-group";
@@ -198,7 +206,10 @@
               templateSelection: categoryOption
             });
             const widget = jqCategory.data("select2");
-            /** Show every category when it fits; keep scrolling within the available viewport space. */
+            /**
+             * Show every category when it fits; keep scrolling within the available viewport space.
+             * @returns {void}
+             */
             function fitCategoryDropdown() {
               if (!widget.isOpen()) return;
               const bounds = widget.$container[0].getBoundingClientRect();

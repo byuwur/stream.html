@@ -1,4 +1,15 @@
-/** Controller-only mapping controls; loaded after the shared configurator. */
+/**
+ * Controller-only mapping controls; loaded after the shared configurator.
+ * @param {Object} resource Renderer settings and controller integrations.
+ * @param {Object<string, unknown>} resource.settings Validated resource values; helpers may read or update this shared object.
+ * @param {unknown} resource.gamepadSupport Gamepad support.
+ * @param {unknown} resource.buttonValue Button value.
+ * @param {unknown} resource.copyGamepad Copy gamepad.
+ * @param {Object} editor Shared editor callbacks.
+ * @param {unknown} editor.generateURL Generate url.
+ * @param {unknown} editor.initSelect2 Init select2.
+ * @returns {unknown}
+ */
 window.byConfigurator.configureResource = function ({ settings, gamepadSupport, buttonValue, copyGamepad }, { generateURL, initSelect2 }) {
   if (typeof jQuery === "undefined" && !window.jQuery) return console.error("Init controller/configurator.js FAILED. No jQuery found.");
   const $ = window.jQuery;
@@ -130,6 +141,11 @@ window.byConfigurator.configureResource = function ({ settings, gamepadSupport, 
   let capture = null;
   const disabledInputs = new Set();
 
+  /**
+   * Refresh the mapping editor's connected-controller choices.
+   * @param {unknown} pads Pads.
+   * @returns {void}
+   */
   function updateRawControllers(pads) {
     disabledInputs.clear();
     $("#output-display > .raw-outputs:not(.template)").remove();
@@ -164,6 +180,14 @@ window.byConfigurator.configureResource = function ({ settings, gamepadSupport, 
     $("#mapping-status").text(connected ? "Select a controller and capture its inputs below." : "Press a gamepad button or F for keyboard input.");
   }
 
+  /**
+   * Display the latest raw buttons and axes in the mapping editor.
+   * @param {unknown} type Type.
+   * @param {unknown} value Value supplied by the caller.
+   * @param {number} player Player slot to update.
+   * @param {string|number} id Stable identifier of the target item.
+   * @returns {void}
+   */
   function updateRawInput(type, value, player, id) {
     const jqItem = $(`#gamepad-map-${player} [data-name="${type === "buttons" ? "button" : "axis"}-${id}"]`);
     if (!jqItem.length) return;
@@ -193,7 +217,10 @@ window.byConfigurator.configureResource = function ({ settings, gamepadSupport, 
   const mappingTemplate = $("#mapping-config .template .form-group");
   const mappingID = $("#mapping-config");
 
-  /** Each cloned row needs a distinct radio group; captures stay attached to that row. */
+  /**
+   * Each cloned row needs a distinct radio group; captures stay attached to that row.
+   * @returns {unknown}
+   */
   function createMapEntry() {
     const newMap = mappingTemplate.clone();
     newMap.find("[type=radio]").attr("name", `targetType-${++mappingRowID}`);
@@ -220,6 +247,11 @@ window.byConfigurator.configureResource = function ({ settings, gamepadSupport, 
     $(this).parent().after(newMap);
   });
 
+  /**
+   * Build mapping rows from the accepted binding array.
+   * @param {unknown} bindings Bindings.
+   * @returns {void}
+   */
   function createUIFromMapping(bindings) {
     $.each(bindings, function (key, value) {
       const currentItem = createMapEntry();
@@ -257,6 +289,11 @@ window.byConfigurator.configureResource = function ({ settings, gamepadSupport, 
     });
   }
 
+  /**
+   * Reflect captured input values in the selected mapping row.
+   * @param {unknown} currentItem Current item.
+   * @returns {void}
+   */
   function setButtonValues(currentItem) {
     currentItem.find('[data-object]:not([data-object=""])').each(function () {
       const dataObject = JSON.parse($(this).attr("data-object"));
@@ -276,7 +313,12 @@ window.byConfigurator.configureResource = function ({ settings, gamepadSupport, 
 
   let cancelCapture;
 
-  /** One capture owns monitoring. Starting another cancels the previous listener and timeout. */
+  /**
+   * One capture owns monitoring. Starting another cancels the previous listener and timeout.
+   * @param {jQuery} jqButton Jq button.
+   * @param {string|Object} mode Requested operation or display mode.
+   * @returns {unknown}
+   */
   function buttonCapture(jqButton, mode) {
     cancelCapture?.();
     const player = Number($("#player-base").val());
@@ -321,11 +363,21 @@ window.byConfigurator.configureResource = function ({ settings, gamepadSupport, 
     buttonCapture(rootThis, buttonType);
   });
 
-  /** Return only complete bindings and report missing inputs on their own rows. */
+  /**
+   * Return only complete bindings and report missing inputs on their own rows.
+   * @returns {Array<unknown>}
+   */
   function createMapping() {
     const mapGroup = $("#mappings .form-group");
     mapGroup.find(".map-message").remove();
 
+    /**
+     * Describe the selected binding source for the mapping editor.
+     * @param {string} message Message to display or report.
+     * @param {jQuery} jqThis Jq this.
+     * @param {unknown} type Type.
+     * @returns {string}
+     */
     function mapMsg(message, jqThis, type) {
       jqThis.prepend(/* HTML */ `<div class="map-message ${type}"><span>${message}</span></div>`);
     }

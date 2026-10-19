@@ -419,7 +419,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
-  /** Apply scene settings, then run the countdown and rotate visible cards. */
+  /**
+   * Apply scene settings, then run the countdown and rotate visible cards.
+   * @returns {void}
+   */
   function renderMain() {
     const { accounts, scheduleEntries } = settings;
     const rootStyle = document.documentElement.style;
@@ -507,6 +510,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     const time = document.getElementById("time");
     const deadline = Date.now() + settings.countdownTime * 60000;
     let countdownTimer;
+    /**
+     * Update countdown.
+     * @returns {void}
+     */
     function updateCountdown() {
       const remaining = Math.max(0, Math.ceil((deadline - Date.now()) / 1000));
       time.textContent = byConfigurator.formatDuration(remaining, settings.countdownFormat, false);
