@@ -384,8 +384,8 @@
         text-decoration: none !important;
       }
       .home-intro-top img {
-        width: 4rem;
-        height: 4rem;
+        width: 3rem;
+        height: 3rem;
       }
       /* Blur beneath the translucent tint; filtering the tint itself leaves the image sharp. */
       .home-tool::before {
@@ -411,14 +411,15 @@
       .home-tool-action i,
       .home-tool-info,
       .home-tool-top > i,
-      .home-intro-top img,
+      .stream-home .inline-logo,
+      .portfolio-link img,
       .home-source {
         transition:
           transform 0.2s ease,
           background-color 0.2s ease !important;
       }
-      .home-intro-top img:hover {
-        transform: translateY(-0.125rem) rotate(-3deg);
+      .stream-home:not(.no-motion) :is(#site-title .inline-logo, .portfolio-link img):hover {
+        transform: translateY(-0.125rem) rotate(8deg);
       }
       .home-source:is(:hover, :focus-visible) {
         transform: translateY(-0.125rem);
