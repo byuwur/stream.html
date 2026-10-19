@@ -11,7 +11,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   /** Defaults, URL constraints, and the field metadata consumed by the optional editor. */
   const resource = {
-    version: "1.0",
+    version: "1.1", // 2026-10-19
     title: "Controller",
     description: "Show gamepad or keyboard input. The controller fits the viewport automatically. Click the preview, then press a gamepad button or F for keyboard input.",
     preview: [1280, 720],
