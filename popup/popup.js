@@ -149,7 +149,18 @@ document.addEventListener("DOMContentLoaded", async () => {
         max: 100,
         step: "any",
         icon: "fa-font"
-      }
+      },
+      animationSpeed: { type: "number", default: 100, label: "Animation speed (%)", section: "Playback", min: 0, max: 100, step: "any" },
+      opacity: { type: "number", default: "", optional: true, label: "Popup opacity (%)", section: "Appearance", min: 0, max: 100, step: "any" },
+      cornerInset: { type: "number", default: "", optional: true, label: "Corner inset (px)", section: "Size & placement", min: -1000, max: 1000, step: "any", styleSelector: "#socialHolder", styleProperty: "margin-inline", styleUnit: "px" },
+      textPadding: { type: "number", default: "", optional: true, label: "Text horizontal padding (px)", section: "Size & placement", min: 0, max: 1000, step: "any", styleSelector: "#nameHolder", styleProperty: "padding-inline", styleUnit: "px" },
+      ...byConfigurator.placementFields("#socialHolder"),
+      ...byConfigurator.textFields({ accountName: ["Account name", "#nameHolder .name", []] }),
+      ...byConfigurator.textFields({
+        icon: ["Social icon", "#icons > i", ["size"]]
+      }),
+      ...byConfigurator.surfaceFields({ textSurface: ["Text box", "#textBox", ["border", "radius", "shadow"]] }),
+      ...byConfigurator.filterFields("popupFilter", "Popup", "#socialHolder")
     },
   };
 
@@ -195,7 +206,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       .set([names, icons], { y: 0 }, 0)
       .set("#holder", { y: 0 }, 0)
       .set("#iconBox, #iconHolder", { x: 0, y: 0 }, 0)
-      .set(popup, { autoAlpha: 1 }, 0.3)
+      .set(popup, { autoAlpha: settings.opacity === "" ? 1 : settings.opacity / 100 }, 0.3)
       .fromTo("#iconBox", { opacity: 0 }, { duration: 0.6, opacity: 1 })
       .to("#iconHolder", { duration: 0.1, x: direction * 20 })
       .to(square, { duration: 0.2, morphSVG: outgoing }, "-=0.1")
@@ -238,6 +249,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       .to("#textBox", { duration: 0.2, opacity: 0, scaleX: 0, transformOrigin: `${mode} center` }, "-=0.3")
       .set(popup, { autoAlpha: 0 });
 
+    timeline.timeScale(settings.animationSpeed / 100);
     window.addEventListener("pagehide", () => timeline.pause());
     window.addEventListener("pageshow", (event) => {
       if (event.persisted) timeline.restart();

@@ -122,6 +122,8 @@ Choose platforms, handles, and order. Repeated platforms are allowed. Brand icon
 | `iconBoxColor`, `textBoxColor`, `iconColor`, `fontColor` | Hex colors without `#`.                                                                                                         |
 | `primaryFont`, `fontWeight` | Font family and weight `100`–`900`, step `100` (default `600`); Courier/monospace fallback. |
 | `fontSize`, `textYOffset` | Size `8`–`100` px (default `72`); offset `-100`–`100` px. |
+| `animationSpeed` | Playback speed `0`–`100`%; `100` is normal and `0` pauses animation. |
+| `opacity`, `cornerInset`, `textPadding` | Optional opacity `0`–`100`%, signed corner inset, and horizontal text padding in pixels. |
 
 Invalid JSON/platforms retain the two byUwUr default accounts; blank handles keep their slots. Font readiness and remeasurement keep animation aligned.
 
