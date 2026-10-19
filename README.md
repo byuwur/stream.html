@@ -184,6 +184,8 @@ Declare a nonempty `resource.urlRequired` array of field names that always belon
 
 `byConfigurator.settingsURL(resource, settings)` builds the same readable URL for editor actions and native resource interactions, including after importing a compressed URL.
 
+Inactive controls are disabled and do not block validation. Overlays treat inactive switches as Off, reset other inactive settings to their declared defaults, and skip their style overrides. Their drafts return when re-enabled in the current editor. Inactive fields are omitted from generated URLs unless explicitly required by the resource.
+
 ### Add a tool
 
 1. Copy `configurator.html` into the tool folder; replace demo markup/styles/rendering and change shared imports to `../`.

@@ -222,7 +222,16 @@
     return (values.length ? values.includes(value) : value !== "") && fieldEnabled(fields, settings, parent);
   }
 
-  /** Mutate settings with valid declared values; missing or invalid parameters keep existing defaults. */
+  /**
+   * Apply valid declared values to the supplied settings object in place.
+   * Callers seed defaults first; missing, unknown, and invalid parameters leave that state intact.
+   * Numbers and custom data are parsed here, and accepted colors regain their leading #.
+   * Inactive switches use their Off value; other inactive settings fall back to declared defaults.
+   * @param {ResourceFields} fields Declared resource fields and their validation metadata.
+   * @param {ResourceSettings} settings Validated resource values; helpers may read or update this shared object.
+   * @param {URLSearchParams} [values=new URLSearchParams(location.search)] Values to validate and apply.
+   * @returns {void} Updates accepted values and resets inactive settings in place.
+   */
   function applyParameters(fields, settings, values = new URLSearchParams(location.search)) {
     for (const [name, value] of values) {
       if (!Object.hasOwn(fields, name)) continue;
@@ -236,6 +245,9 @@
       if (parsed === null) continue;
       if (rule.type === "color" && !(rule.optional && parsed === "")) parsed = `#${String(parsed).replace(/^#/, "")}`;
       settings[name] = parsed;
+    }
+    for (const [name, field] of Object.entries(fields)) {
+      if (!fieldEnabled(fields, settings, name)) settings[name] = field.type === "switch" ? field.uncheckedValue : structuredClone(field.default);
     }
   }
 
@@ -268,6 +280,7 @@
       .filter(([name, value]) => {
         if (!Object.hasOwn(parameterRules, name)) return false;
         if (resource.urlRequired.includes(name)) return true;
+        if (!fieldEnabled(parameterRules, settings, name)) return false;
         const rule = parameterRules[name];
         if (rule.type === "font" && value === "") return false;
         if (rule.type === "color") {
@@ -320,7 +333,7 @@
         // Metadata-driven CSS is emitted once; selectors also cover rows a renderer creates later.
         const overrides = [];
         for (const [name, field] of Object.entries(resource.fields)) {
-          if (!field.styleSelector || (!field.styleValue && settings[name] === (field.styleAutomatic ?? ""))) continue;
+          if (!field.styleSelector || !fieldEnabled(resource.fields, settings, name) || (!field.styleValue && settings[name] === (field.styleAutomatic ?? ""))) continue;
           const value = field.styleValue ? field.styleValue(settings) : field.type === "font" ? byFont.family(settings[name], '"Courier New", Courier, monospace') : `${settings[name]}${field.styleUnit || ""}`;
           if (value !== "") overrides.push([field, value]);
         }
@@ -2168,7 +2181,7 @@
 
     /**
      * Use the shared when rules to disable and hide inactive fields and their descendants.
-     * Controls retain drafts for re-enabling.
+     * Controls retain drafts for re-enabling; applyParameters() resets their effective renderer values.
      * @returns {void}
      */
     function syncFieldVisibility() {
