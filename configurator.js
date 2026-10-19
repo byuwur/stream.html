@@ -1656,7 +1656,7 @@
         if (field.type === "select") {
           control = $(/* HTML */ `<select class="form-select"></select>`);
           for (const [value, title] of Object.entries(field.options)) $(/* HTML */ `<option></option>`).val(value).text(title).appendTo(control);
-        } else if (field.type === "textarea") {
+        } else if (["textarea", "timezones"].includes(field.type)) {
           control = $(/* HTML */ `<textarea class="form-control"></textarea>`).attr("rows", field.rows || 3);
         } else {
           control = $(/* HTML */ `<input class="form-control" />`).attr("type", field.type === "number" ? "number" : field.type === "switch" ? "checkbox" : ["entries", "mapping"].includes(field.type) ? "hidden" : "text");
@@ -2183,14 +2183,110 @@
       }
     }
 
-    function initTimeZoneField(name) {
-      const jqField = $(form.elements[name]);
-      if (!jqField.length) return;
-      const jqList = $(/* HTML */ `<datalist></datalist>`).attr("id", `${name}-zones`).insertAfter(jqField);
-      const zones = Intl.supportedValuesOf?.("timeZone") || ["America/Bogota", "America/New_York", "Europe/London", "Asia/Tokyo"];
-      for (const zone of new Set(["UTC", Intl.DateTimeFormat().resolvedOptions().timeZone, ...zones])) $(/* HTML */ `<option></option>`).val(zone).text(zone).appendTo(jqList);
-      jqField.attr("list", jqList.attr("id"));
+    const localeCodes = `af-ZA am-ET ar-AE ar-BH ar-DZ ar-EG ar-IQ ar-JO ar-KW ar-LB ar-LY ar-MA ar-OM ar-QA ar-SA ar-SD ar-SY ar-TN ar-YE
+      as-IN az-AZ be-BY bg-BG bn-BD bn-IN bo-CN bs-BA ca-ES cs-CZ cy-GB da-DK de-AT de-CH de-DE de-LI de-LU
+      el-CY el-GR en-AU en-CA en-GB en-GH en-HK en-IE en-IN en-KE en-NG en-NZ en-PH en-PK en-SG en-US en-ZA
+      es-AR es-BO es-CL es-CO es-CR es-CU es-DO es-EC es-ES es-GQ es-GT es-HN es-MX es-NI es-PA es-PE es-PR es-PY es-SV es-US es-UY es-VE
+      et-EE eu-ES fa-IR fi-FI fil-PH fo-FO fr-BE fr-CA fr-CH fr-FR fr-LU ga-IE gl-ES gu-IN ha-NG he-IL hi-IN hr-HR hu-HU hy-AM
+      id-ID ig-NG is-IS it-CH it-IT ja-JP ka-GE kk-KZ km-KH kn-IN ko-KR ky-KG lo-LA lt-LT lv-LV mk-MK ml-IN mn-MN mr-IN ms-MY mt-MT my-MM
+      nb-NO ne-NP nl-BE nl-NL nn-NO or-IN pa-IN pl-PL ps-AF pt-AO pt-BR pt-MZ pt-PT ro-MD ro-RO ru-RU si-LK sk-SK sl-SI so-SO sq-AL
+      sr-Cyrl-RS sr-Latn-RS sv-FI sv-SE sw-KE sw-TZ ta-IN ta-LK te-IN th-TH tr-TR uk-UA ur-PK uz-UZ vi-VN yo-NG zh-CN zh-HK zh-SG zh-TW zu-ZA`.split(/\s+/);
+    const regionalChoices = new Map();
+
+    /**
+     * Keep IANA identifiers and locale tags in URLs; descriptions belong only to the picker.
+     * @param {string} value Raw form or URL value to validate or format.
+     * @param {string} locale Locale tag, or whether to declare the locale field.
+     * @returns {string}
+     */
+    function regionalLabel(value, locale) {
+      if (locale) {
+        const description = new Intl.DisplayNames("en", { type: "language", languageDisplay: "standard" }).of(new Intl.Locale(value).baseName).replace(/\s\((.*)\)$/, " - $1");
+        return `${value} (${description})`;
+      }
+      const offset = new Intl.DateTimeFormat("en", { timeZone: value, timeZoneName: "longOffset" }).formatToParts().find((part) => part.type === "timeZoneName").value;
+      return `${value} (${offset === "GMT" ? "+00:00" : offset.replace("GMT", "")})`;
     }
+
+    /**
+     * Enhance a hidden canonical field with a searchable zone, locale, or multi-zone Select2 control.
+     * The hidden field owns serialization; labels are display-only and Reset/imports resynchronize the picker.
+     * Multi-zone selection preserves the user's selection order and stores it as newline-separated IDs.
+     * @param {string} name Field or item identifier.
+     * @returns {void}
+     */
+    function initRegionalField(name) {
+      const jqField = $(form.elements[name]);
+      if (!jqField.length || jqField.next("[data-regional-picker]").length) return;
+      const locale = parameterRules[name].type === "locale";
+      const multiple = parameterRules[name].type === "timezones";
+      const validate = locale ? parseLocale : parseZone;
+      const placeholder = multiple ? "Choose up to three time zones" : locale ? "Browser locale (automatic)" : "OBS computer time zone (automatic)";
+      if (!regionalChoices.has(locale)) {
+        const codes = locale
+          ? [...navigator.languages, ...localeCodes]
+          : ["UTC", Intl.DateTimeFormat().resolvedOptions().timeZone, ...(Intl.supportedValuesOf?.("timeZone") || ["America/Bogota", "America/New_York", "Europe/London", "Asia/Tokyo"])];
+        regionalChoices.set(
+          locale,
+          [...new Set(codes)].sort().map((value) => [value, regionalLabel(value, locale)])
+        );
+      }
+      const jqSelect = $(/* HTML */ `<select class="form-select rounded-0 bg-body-secondary border-secondary-subtle"></select>`)
+        .attr({ id: `${jqField.attr("id")}-picker`, "data-regional-picker": name, "aria-label": parameterRules[name].label })
+        .prop("multiple", multiple)
+        .insertAfter(jqField);
+      if (!multiple) jqSelect.append(new Option(placeholder, ""));
+      for (const [value, label] of regionalChoices.get(locale)) jqSelect.append(new Option(label, value));
+      jqField.prop("hidden", true);
+
+      /**
+       * Synchronize the enhanced control with its canonical input value.
+       * @returns {void}
+       */
+      const sync = () => {
+        const values = multiple ? jqField.val().split("\n").filter(Boolean) : [jqField.val()];
+        for (const value of values) {
+          let option = [...jqSelect[0].options].find((option) => option.value === value);
+          if (!option) {
+            option = new Option(regionalLabel(value, locale), value);
+            jqSelect.append(option);
+          }
+          // DOM order controls the order of Select2's multiple selections.
+          if (multiple) jqSelect.append(option);
+        }
+        jqSelect.val(multiple ? values : values[0]).trigger("change.select2");
+      };
+      jqField.on("change", sync);
+      jqSelect.on("change", (event) => {
+        event.stopPropagation();
+        let value = jqSelect.val();
+        if (multiple) {
+          const selected = value || [];
+          const previous = jqField
+            .val()
+            .split("\n")
+            .filter((zone) => selected.includes(zone));
+          value = [...previous, ...selected.filter((zone) => !previous.includes(zone))].join("\n");
+        }
+        jqField.val(value).trigger("change");
+      });
+      initSelect2(jqSelect, {
+        placeholder,
+        allowClear: true,
+        maximumSelectionLength: multiple ? 3 : 0,
+        tags: true,
+        createTag: ({ term }) => {
+          const value = validate(term.trim());
+          return value ? { id: value, text: regionalLabel(value, locale) } : null;
+        }
+      });
+      jqForm.on("reset", () => setTimeout(sync, 0));
+      sync();
+    }
+
+    // ==========
+    // ==== THEME, ACCESSIBILITY, AND COLORS ====
+    // ==========
 
     // ==========
     // ==== THEME, ACCESSIBILITY, AND COLORS ====
@@ -2599,6 +2695,8 @@
         font: "Font family or CSS font stack",
         datetime: "Absolute ISO 8601 timestamp",
         timezone: "IANA time zone; empty uses the local zone",
+        timezones: "Up to three IANA time zones, separated by newlines",
+        locale: "BCP 47 locale tag; empty uses the browser locale",
         entries: "JSON matching this field's default structure",
         mapping: "Input mapping JSON array"
       };
@@ -2873,7 +2971,7 @@
         initEntryEditor,
         initAppearancePresets,
         initTimestampFields,
-        initTimeZoneField,
+        initTimeZoneField: initRegionalField,
         platforms: byConfigurator.platforms,
         initSelect2
       };
@@ -2884,7 +2982,7 @@
             ...field.entries,
             choices: field.entries.choices === "platforms" ? byConfigurator.platforms : field.entries.choices
           });
-        if (field.type === "timezone") initTimeZoneField(name);
+        if (["timezone", "timezones", "locale"].includes(field.type)) initRegionalField(name);
       }
       if (resource.presets) initAppearancePresets();
       initTimestampFields(Object.keys(resource.fields).filter((name) => resource.fields[name].type === "datetime"));
