@@ -135,7 +135,9 @@ window.byConfigurator.configureResource = function ({ settings, gamepadSupport, 
     $("#output-display > .raw-outputs:not(.template)").remove();
     const jqBase = $("#player-base");
     const selected = jqBase.val();
-    jqBase.find("option").prop("disabled", function () { return $(this).val() !== "None"; });
+    jqBase.find("option").prop("disabled", function () {
+      return $(this).val() !== "None";
+    });
     for (const [index, pad] of Object.entries(pads)) {
       const player = Number(index) === 9 ? 9 : Number(index) + 1;
       const jqOption = jqBase.find(`option[value="${player}"]`);
@@ -167,7 +169,7 @@ window.byConfigurator.configureResource = function ({ settings, gamepadSupport, 
     if (!jqItem.length) return;
     jqItem.text(value).css("opacity", 0.6 + Math.abs(value) * 0.4);
     if (!capture || capture.player !== player || disabledInputs.has(`${player}:${type}:${id}`)) return;
-    const previous = type === "buttons" ? buttonValue(capture.snapshot.buttons?.[id]) : capture.snapshot.axes?.[id] ?? 0;
+    const previous = type === "buttons" ? buttonValue(capture.snapshot.buttons?.[id]) : (capture.snapshot.axes?.[id] ?? 0);
     const threshold = type === "buttons" ? 0.25 : settings.deadzone / 100;
     if (capture.mode !== "value" && Math.abs(previous - value) <= threshold) return;
     const typeName = type === "buttons" ? "Button" : "Axis";
@@ -177,8 +179,8 @@ window.byConfigurator.configureResource = function ({ settings, gamepadSupport, 
     $(capture.button).trigger("GamepadPressed", [detail]);
   }
 
-  $(document).on("controller-connections", event => updateRawControllers(event.originalEvent.detail));
-  $(document).on("controller-input", event => {
+  $(document).on("controller-connections", (event) => updateRawControllers(event.originalEvent.detail));
+  $(document).on("controller-input", (event) => {
     for (const [index, pad] of Object.entries(event.originalEvent.detail)) {
       const player = Number(index) === 9 ? 9 : Number(index) + 1;
       pad.buttons.forEach((button, id) => updateRawInput("buttons", buttonValue(button), player, id));
@@ -303,8 +305,7 @@ window.byConfigurator.configureResource = function ({ settings, gamepadSupport, 
         }
       } else {
         const row = jqButton.closest(".form-group");
-        const name = row.find(".axes-config").prop("checked") || row.find('[type="radio"]:checked').val() === "dpad"
-          ? `${input.typeName} ${input.config.choice}` : input.fullname;
+        const name = row.find(".axes-config").prop("checked") || row.find('[type="radio"]:checked').val() === "dpad" ? `${input.typeName} ${input.config.choice}` : input.fullname;
         jqButton.attr("data-object", JSON.stringify(input.config)).data("previous-value", name);
         finish();
       }
@@ -420,11 +421,13 @@ window.byConfigurator.configureResource = function ({ settings, gamepadSupport, 
     $("#mapping-config").trigger("change");
   });
 
-  $("form[data-configurator]").on("reset", () => setTimeout(() => {
-    $("#mapping-input").val(initialMapping);
-    generateURL();
-    $("#mapping-input").triggerHandler("change");
-  }, 0));
+  $("form[data-configurator]").on("reset", () =>
+    setTimeout(() => {
+      $("#mapping-input").val(initialMapping);
+      generateURL();
+      $("#mapping-input").triggerHandler("change");
+    }, 0)
+  );
 
   createUIFromMapping(settings.mapping);
 
@@ -441,11 +444,13 @@ window.byConfigurator.configureResource = function ({ settings, gamepadSupport, 
     const jqMapping = $("#remap article");
     if (jqMapping.length) {
       titles.remap = "Custom Mapping";
-      $(/* HTML */ `<p>Controller input is based on <a href="https://github.com/html5rocks/www.html5rocks.com/tree/master/content/tutorials/doodles/gamepad/static/gamepad-tester" target="_blank" rel="noopener">Gamepad.js and Tester.js</a> by Marcin Wichary.</p>`)
-        .appendTo($(dialog).find('[data-panel="info"]'));
-      const jqPanel = $(/* HTML */ `<section data-panel="remap" hidden></section>`)
-        .append(jqMapping.contents())
-        .appendTo($(dialog).find("article"));
+      $(
+        /* HTML */ `<p>
+          Controller input is based on <a href="https://github.com/html5rocks/www.html5rocks.com/tree/master/content/tutorials/doodles/gamepad/static/gamepad-tester" target="_blank" rel="noopener">Gamepad.js and Tester.js</a> by Marcin
+          Wichary.
+        </p>`
+      ).appendTo($(dialog).find('[data-panel="info"]'));
+      const jqPanel = $(/* HTML */ `<section data-panel="remap" hidden></section>`).append(jqMapping.contents()).appendTo($(dialog).find("article"));
       jqPanel.find("select").addClass("form-select w-auto");
       jqPanel.find("button").addClass("btn btn-outline-secondary btn-sm");
       jqPanel.find("input").addClass("form-check-input");
@@ -454,7 +459,7 @@ window.byConfigurator.configureResource = function ({ settings, gamepadSupport, 
       jqPanel.find(".map-control").addClass("btn btn-outline-primary my-3");
       jqPanel.find(".del-config").text("Remove").addClass("btn btn-outline-danger btn-sm");
       jqPanel.find(".add-config").text("Add").addClass("btn btn-outline-secondary btn-sm");
-      jqPanel.find('.form-group > input').each(function () {
+      jqPanel.find(".form-group > input").each(function () {
         const jqLabel = $(/* HTML */ `<label class="small me-2 d-inline-flex align-items-center gap-2"></label>`);
         if (this.type === "checkbox") {
           jqLabel.addClass("form-switch ps-0");
@@ -471,12 +476,10 @@ window.byConfigurator.configureResource = function ({ settings, gamepadSupport, 
           );
       });
       initMappingControls(jqPanel);
-      $(/* HTML */ `<button type="button" data-section="remap" class="btn btn-sm btn-outline-light border-0"><i class="fa-solid fa-gamepad me-1" aria-hidden="true"></i>Custom Mapping</button>`)
-        .insertBefore($(dialog).find(".help-close"));
+      $(/* HTML */ `<button type="button" data-section="remap" class="btn btn-sm btn-outline-light border-0"><i class="fa-solid fa-gamepad me-1" aria-hidden="true"></i>Custom Mapping</button>`).insertBefore($(dialog).find(".help-close"));
       $("#remap").remove();
       $(document).on("mapping-applied", closeHelp);
     }
-
   }
 
   /**
