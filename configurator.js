@@ -1436,8 +1436,8 @@
             <div class="overlay-vertical-inverted pe-none" aria-hidden="true"></div>
             <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
               <div class="d-flex align-items-center gap-2">
-                <a class="home-link flex-shrink-0" href="./" aria-label="Home">
-                  <img src="https://byuwur.github.io/img/logo.png" alt="" />
+                <a class="home-link flex-shrink-0" href="./" aria-label="stream.html home">
+                  <img src="https://byuwur.github.io/stream.html/stream.html.png" alt="" />
                 </a>
                 <div class="tool-switcher position-relative flex-shrink-0 me-2" data-tool="template">
                   <select id="tool-picker" class="form-select rounded-0" aria-label="Choose a tool" aria-keyshortcuts="Alt+Shift+M"></select>
@@ -1449,13 +1449,16 @@
                 by
                 <a href="https://byuwur.co" target="_blank" rel="noopener" class="text-white link-body-emphasis"> BONYUR @byUwUr </a>
               </p>
-              <nav class="config-menu d-flex align-items-center gap-2 flex-shrink-0" aria-label="Configurator menu">
+              <nav class="config-menu d-flex align-items-center gap-2 flex-shrink-0 ms-auto ms-lg-0" aria-label="Configurator menu">
                 <button id="theme-toggle" class="theme-toggle rounded-0 border border-light text-white" type="button" disabled="" title="Loading theme controls" aria-label="Toggle theme" aria-pressed="true">
                   <span aria-hidden="true">☾︎ ☀︎</span>
                 </button>
                 <a class="btn btn-sm btn-outline-light text-nowrap" href="https://github.com/byuwur/stream.html" target="_blank" rel="noopener" title="Source code">
                   <i class="fa-brands fa-github me-1" aria-hidden="true"></i>
                   GitHub
+                </a>
+                <a class="portfolio-link d-inline-flex align-items-center" href="https://byuwur.co" target="_blank" rel="noopener" aria-label="Visit BONYUR's portfolio" title="BONYUR @byUwUr">
+                  <img src="https://byuwur.github.io/img/logo.png" alt="" />
                 </a>
               </nav>
             </div>

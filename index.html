@@ -9,7 +9,7 @@
     <meta name="robots" content="index, follow, max-image-preview:large" />
     <meta name="theme-color" content="#660000" />
     <link rel="canonical" href="https://byuwur.github.io/stream.html/" />
-    <link rel="icon" href="https://byuwur.github.io/img/logo.png" />
+    <link rel="icon" href="https://byuwur.github.io/stream.html/stream.html.png" />
     <!-- SEO -->
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="stream.html" />
@@ -46,15 +46,20 @@
     <main class="home-layout row g-0 flex-md-nowrap flex-grow-1 overflow-hidden">
       <section class="home-intro col-12 col-md-4 d-flex flex-column gap-4 p-4 p-lg-5 overflow-y-auto" style="background: linear-gradient(180deg, var(--primary-color), var(--bywr-red-dark))" aria-labelledby="site-title">
         <div class="home-intro-top animate__animated animate__fadeIn d-flex align-items-center justify-content-between gap-3">
-          <img class="object-fit-contain" src="https://byuwur.github.io/img/logo.png" alt="" />
           <a class="home-source btn btn-outline-light btn-sm rounded-0 d-inline-flex align-items-center gap-2 px-3 py-2" href="https://github.com/byuwur/stream.html" target="_blank" rel="noopener">
             <i class="fa-brands fa-github" aria-hidden="true"></i> GitHub
             <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i>
           </a>
+          <a class="portfolio-link d-inline-flex align-items-center flex-shrink-0" href="https://byuwur.co" target="_blank" rel="noopener" aria-label="Visit BONYUR's portfolio" title="BONYUR @byUwUr">
+            <img class="object-fit-contain" src="https://byuwur.github.io/img/logo.png" alt="" />
+          </a>
         </div>
         <div class="home-copy animate__animated animate__fadeIn d-flex flex-column justify-content-center flex-grow-1 gap-3">
           <p class="home-eyebrow small fw-semibold text-uppercase m-0">Free. Forever.</p>
-          <h1 id="site-title" class="display-2 fw-medium lh-1 m-0">stream<span class="fw-light">.html</span></h1>
+          <h1 id="site-title" class="display-2 fw-medium lh-1 m-0 d-flex align-items-center gap-2">
+            <img class="inline-logo m-0 flex-shrink-0" src="https://byuwur.github.io/stream.html/stream.html.png" alt="" />
+            <span class="text-nowrap">stream<span class="fw-light">.html</span></span>
+          </h1>
           <p class="home-description lead fw-normal m-0"><span id="tool-count">Browser overlays</span> for your stream. Choose a tool, make it yours, and copy its URL into OBS.</p>
           <p class="home-motto small fw-semibold text-uppercase m-0">Simple is complicated enough.</p>
         </div>
@@ -225,7 +230,11 @@
         position: relative;
       }
       #site-title {
-        font-size: clamp(2rem, 4vw, 4.5rem);
+        font-size: clamp(1.75rem, 3.5vw, 4.5rem);
+      }
+      #site-title .inline-logo {
+        width: 1em;
+        max-height: 1em;
       }
       .home-tools {
         display: grid;
