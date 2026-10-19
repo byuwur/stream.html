@@ -364,7 +364,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       labelHeaderVerticalOffset: { type: "number", default: 4, label: "Event heading vertical offset (px)", section: "Size & placement", when: ["displayLabels", "yes"], subsection: "Event labels position", min: -1080, max: 1080, step: "any" },
       ...byConfigurator.whenFields(["displaySchedule", "yes"], byConfigurator.layoutFields("#week", {}, "week")),
       ...byConfigurator.whenFields(["displaySocial", "yes"], byConfigurator.layoutFields("#social .network", { socialIcon: ["Social icon", "#social .icon"], socialCopy: ["Account text", "#social .inner"] }, "social")),
-      animationSpeed: { type: "number", default: 100, label: "Social animation speed (%)", section: "Animation", when: ["displaySocial", "yes"], min: 0, max: 100, step: "any" },
+      animationSpeed: { type: "number", default: 100, label: "Social animation speed (%)", section: "Animation", when: ["displaySocial", "yes"], min: 0, max: 500, step: "any" },
       ...byConfigurator.textFields({
         title: ["Title", "#title", ["color"]],
         subtitle: ["Subtitle", "#subtitle", ["color"]],

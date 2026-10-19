@@ -663,9 +663,9 @@
     };
     const adjustments = {
       Blur: { label: "Blur (px)", filter: "blur", default: 0, max: 100, unit: "px", icon: "fa-cloud" },
-      Brightness: { label: "Brightness (%)", filter: "brightness", default: 100, max: 100, unit: "%", icon: "fa-sun" },
-      Contrast: { label: "Contrast (%)", filter: "contrast", default: 100, max: 100, unit: "%", icon: "fa-circle-half-stroke" },
-      Saturation: { label: "Saturation (%)", filter: "saturate", default: 100, max: 100, unit: "%", icon: "fa-droplet" },
+      Brightness: { label: "Brightness (%)", filter: "brightness", default: 100, max: 500, unit: "%", icon: "fa-sun" },
+      Contrast: { label: "Contrast (%)", filter: "contrast", default: 100, max: 500, unit: "%", icon: "fa-circle-half-stroke" },
+      Saturation: { label: "Saturation (%)", filter: "saturate", default: 100, max: 500, unit: "%", icon: "fa-droplet" },
       Grayscale: { label: "Grayscale (%)", filter: "grayscale", default: 0, max: 100, unit: "%", icon: "fa-circle-half-stroke" },
       Sepia: { label: "Sepia (%)", filter: "sepia", default: 0, max: 100, unit: "%", icon: "fa-image" },
       Invert: { label: "Invert (%)", filter: "invert", default: 0, max: 100, unit: "%", icon: "fa-circle-half-stroke" },

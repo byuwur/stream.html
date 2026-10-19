@@ -61,7 +61,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         options: { right: "Right", left: "Left" },
         icon: "fa-clapperboard"
       },
-      animationSpeed: { type: "number", default: 100, label: "Animation speed (%)", section: "Playback", min: 0, max: 100, step: "any" },
+      animationSpeed: { type: "number", default: 100, label: "Animation speed (%)", section: "Playback", min: 0, max: 500, step: "any" },
       primaryFont: {
         type: "font",
         default: "Courier New",

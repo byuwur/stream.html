@@ -120,7 +120,7 @@ Choose platforms, handles, and order. Repeated platforms are allowed. Brand icon
 | `mode` | `right` (default) or `left`. |
 | `accounts` | Ordered rows, e.g. `[{"platform":"twitch","handle":"/byUwUr"},{"platform":"twitch","handle":"/byUwUr_es"}]`; up to 100 accounts, 160 characters/handle, 20,000 JSON characters. `[]` hides it. |
 | `pauseTime`, `inbetweenPauseTime` | Seconds/account and between cycles: `0`–`3600`, default `5` each. |
-| `animationSpeed` | Playback speed `0`–`100`%; `100` is normal and `0` pauses animation. |
+| `animationSpeed` | Playback speed `0`–`500`%; `100` is normal and `0` pauses animation. |
 | `scale` | `-500`–`500`%, anchored to the selected top corner; `100` keeps the original size. |
 | `iconBoxColor`, `textBoxColor`, `iconColor`, `fontColor` | Hex colors without `#`; defaults use `#300` and white. |
 | `primaryFont`, `fontWeight` | Font family and weight `100`–`900`, step `100` (default `600`); Courier/monospace fallback. |
@@ -149,7 +149,7 @@ Invalid JSON/platforms retain the two byUwUr default accounts; blank handles kee
 | `backgroundBlur`, `backgroundOverlayOpacity`, `backgroundOverlay` | Blur `0`–`100` px, tint opacity `0`–`100`%, tint color. |
 | `accounts` | Ordered rows with `platform`, `handle`, and `heading`; platforms may repeat. Up to 100 rows, 160 characters per text field, 20,000 JSON characters. Blank handles/`[]` hide accounts. |
 | `scheduleEntries` | Weekday-to-text map, e.g. `{"monday":"Activity"}`; up to seven days, 160 characters/text, 4,000 JSON characters. `{}` hides it. |
-| `animationSpeed` | Social animation speed `0`–`100`%; `100` is normal and `0` pauses animation. |
+| `animationSpeed` | Social animation speed `0`–`500`%; `100` is normal and `0` pauses animation. |
 
 Invalid lists retain defaults. Individual controls cover title/subtitle, countdown and completion text, social names/icons, schedule text, event headings, card surfaces, and scene filters. Each visible section has its own positioning or scale controls where applicable. Follower/donation/subscriber labels are editable text, without live service updates.
 
@@ -171,7 +171,7 @@ HTML needs `<template id="overlay-markup">...</template>` and `<div id="configur
 
 Declare sections, subsections, and fields in display order: primary content and behavior first, then common appearance, size and placement, composition, and detailed styling or effects. Keep related fields together; appearance presets belong in Appearance.
 
-Resource size and offset controls use pixels, including the configurator demo. The configurator interface keeps its rem-based styling. Opacity, effect strength, and other bounded percentages use `0`–`100`; scale uses `-500`–`500`, where `100` preserves size and negative values flip both axes. URL values use these same units.
+Resource size and offset controls use pixels, including the configurator demo. The configurator interface keeps its rem-based styling. Opacity, deadzone, fades, grayscale, sepia, and invert use `0`–`100`%. Animation speed, brightness, contrast, and saturation accept `0`–`500`%, with `100` as normal. Scale uses `-500`–`500`%, where `100` preserves size and negative values flip both axes. URL values use these same units.
 
 Field `options` maps stored IDs to displayed labels. Binary settings use `type: "switch"` with explicit checked/unchecked values. Every field has an icon, with explicit `icon` metadata taking priority over the shared property/purpose choices. `byConfigurator.textFields()` declares per-element typography, color, opacity, and shadow controls; size `0` and other empty overrides follow the base appearance. `surfaceFields()`, `placementFields()`, and `layoutFields()` declare optional surface, transform, and element-order controls. Empty optional overrides are omitted from generated URLs. Lower order values appear first; changing order enables a flex layout.
 
