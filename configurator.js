@@ -9,7 +9,7 @@
 (function (global) {
   global.byConfigurator = global.byConfigurator || {};
   const byConfigurator = global.byConfigurator;
-  if (byConfigurator.init) return;
+  if (byConfigurator.initialized) return;
   byConfigurator.VERSION = "6.2";
   const root = new URL(".", document.currentScript.src);
   let resourceReady = Promise.resolve();
@@ -364,7 +364,10 @@
     watch
   });
 
-  if (document.getElementById("configurator") && location.search.length > 1 && !location.hash) return;
+  if (document.getElementById("configurator") && location.search.length > 1 && !location.hash) {
+    byConfigurator.initialized = true;
+    return;
+  }
 
   if (typeof global.jQuery !== "function") {
     console.error("Unable to load configurator dependencies: jQuery is unavailable.");
@@ -2020,4 +2023,5 @@
     await resourceReady;
     byConfigurator.init();
   });
+  byConfigurator.initialized = true;
 })(window);
