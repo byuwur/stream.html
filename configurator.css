@@ -329,7 +329,7 @@ body {
   color: #fff;
   border-color: #ffffff80;
 }
-.bywr-configurator .tool-switcher :is(.select2-selection__rendered, .select2-selection__placeholder) {
+.bywr-configurator .tool-switcher .select2-selection--single :is(.select2-selection__rendered, .select2-selection__placeholder) {
   color: #fff;
 }
 .bywr-configurator .tool-switcher .select2-selection__arrow b {
