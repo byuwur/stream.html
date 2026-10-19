@@ -386,6 +386,40 @@
   }
 
   /**
+   * Declare optional surface controls and independent shadow/glow layers.
+   * Elements map IDs to [label, selector, optional property list]. Empty overrides preserve CSS.
+   * @param {Object<string, Array>} elements Properties: background, border, radius, padding, shadow.
+   * @param {Object<string, Array<string>>} [conditions={}] Visibility conditions keyed by element ID.
+   * @returns {ResourceFields} Fresh background, border, padding, radius, and effect field definitions.
+   */
+  function surfaceFields(elements, conditions = {}) {
+    const result = {};
+    for (const [name, [label, selector, properties = ["background", "border", "radius", "padding", "shadow"]]] of Object.entries(elements)) {
+      const fields = {};
+      const shared = { default: "", optional: true, section: `${label} surface`, styleSelector: selector };
+      if (properties.includes("background")) fields[`${name}Background`] = { ...shared, type: "color", label: `${label} background`, maxlength: 80, styleProperty: "background-color" };
+      if (properties.includes("padding")) fields[`${name}Padding`] = { ...shared, type: "number", label: `${label} padding (px)`, min: 0, max: 300, step: "any", styleProperty: "padding", styleUnit: "px" };
+      if (properties.includes("radius")) fields[`${name}Radius`] = { ...shared, type: "number", label: `${label} corner radius (px)`, min: 0, max: 1000, step: "any", styleProperty: "border-radius", styleUnit: "px" };
+      if (properties.includes("border"))
+        Object.assign(fields, {
+          [`${name}BorderWidth`]: { ...shared, subsection: "Border", type: "number", label: `${label} border width (px)`, min: 0, max: 100, step: "any", styleProperty: "border-width", styleUnit: "px" },
+          [`${name}BorderColor`]: { ...shared, subsection: "Border", type: "color", label: `${label} border color`, maxlength: 80, styleProperty: "border-color" },
+          [`${name}BorderStyle`]: {
+            ...shared,
+            subsection: "Border",
+            type: "select",
+            label: `${label} border style`,
+            options: { "": "Automatic", none: "None", solid: "Solid", dashed: "Dashed", dotted: "Dotted", double: "Double" },
+            styleProperty: "border-style"
+          }
+        });
+      if (properties.includes("shadow")) Object.assign(fields, shadowFields(`${name}Shadow`, label, selector, "box-shadow", shared.section));
+      Object.assign(result, whenFields(conditions[name], fields));
+    }
+    return result;
+  }
+
+  /**
    * Declare two independent layers, both Off by default, using ordinary validated URL fields.
    * The first shadow field owns styleValue(), which reads every layer's settings and builds one CSS value.
    * Box/text shadows use comma-separated layers; filter shadows use repeated drop-shadow() functions.
@@ -730,6 +764,7 @@
     filterFields,
     fadeFields,
     textFields,
+    surfaceFields,
     initResource,
     parseAccounts,
     parseZone,
