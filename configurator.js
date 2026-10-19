@@ -29,7 +29,7 @@
  * Resource scripts own defaults and order; widgets enhance this same contract.
  * @typedef {Object} ResourceField
  * @property {string} type Control/value kind: text, multiline, number, select, switch, color, font, entries, mapping, timestamp, locale, timezone, or timezones.
- * @property {ResourceValue} default Value used when its URL parameter is absent or rejected.
+ * @property {ResourceValue} [default] Resource default; missing/empty scalars receive a neutral default before use.
  * @property {string} label Human-readable control label.
  * @property {string} [description] Help text shown beside the control and in parameter help.
  * @property {string} [section] Top-level group; insertion order determines display order.
@@ -50,7 +50,7 @@
  * @property {string} [styleSelector] Native elements affected by the override, including rows created later.
  * @property {string} [styleProperty] CSS property written by the override.
  * @property {string} [styleUnit] Unit appended to scalar settings, such as px, deg, or %.
- * @property {ResourceValue} [styleAutomatic] Sentinel that keeps authored CSS; defaults to an empty string.
+ * @property {ResourceValue} [styleDefault] Neutral generated value that leaves authored CSS unchanged.
  * @property {function(ResourceSettings): string} [styleValue] Compound CSS writer; empty output keeps authored CSS.
  * @property {string} [styleParent] Container that needs flex layout when an order/layout override is applied.
  */
@@ -283,7 +283,7 @@
    * type/default/validate define accepted values; options maps stored IDs to displayed labels.
    * section/subsection and declaration order define form placement; when defines field availability.
    * styleSelector/styleProperty target a native CSS override, with styleUnit appended to scalar values.
-   * styleAutomatic marks a value that preserves authored CSS (otherwise the sentinel is an empty string).
+   * styleDefault marks a neutral generated value; resource-specific defaults can override it.
    * styleValue(settings) builds compound CSS from several validated fields instead of appending a unit.
    * styleParent enables a flex container when a layout override is present.
    * Helpers below return ordinary field declarations; resource JS remains the owner of their defaults.
@@ -395,16 +395,16 @@
         fields[`${name}FontSize`] = {
           type: "number",
           default: 0,
-          label: `${label} size (px)`,
+          label: `${label} size override (px)`,
           section,
-          description: "Use 0 for the automatic size.",
+          description: "Use 0 to turn off the size override and keep the base size.",
           min: 0,
           max: 400,
           step: "any",
           styleSelector: selector,
           styleProperty: "font-size",
           styleUnit: "px",
-          styleAutomatic: 0
+          styleDefault: 0
         };
       if (properties.includes("color"))
         fields[`${name}Color`] = {
@@ -423,29 +423,29 @@
         [`${name}Weight`]: {
           type: "select",
           default: "",
-          label: `${label} weight`,
+          label: `${label} weight override`,
           section,
-          options: { "": "Automatic", 300: "Light", 400: "Regular", 500: "Medium", 600: "Semibold", 700: "Bold", 800: "Extra bold", 900: "Black" },
+          options: { 300: "Light", 400: "Regular", 500: "Medium", 600: "Semibold", 700: "Bold", 800: "Extra bold", 900: "Black" },
           styleSelector: selector,
           styleProperty: "font-weight"
         },
         [`${name}Style`]: {
           type: "select",
           default: "",
-          label: `${label} style`,
+          label: `${label} style override`,
           section,
           subsection: "Typography details",
-          options: { "": "Automatic", normal: "Normal", italic: "Italic" },
+          options: { normal: "Normal", italic: "Italic" },
           styleSelector: selector,
           styleProperty: "font-style"
         },
         [`${name}Case`]: {
           type: "select",
           default: "",
-          label: `${label} case`,
+          label: `${label} case override`,
           section,
           subsection: "Typography details",
-          options: { "": "Automatic", none: "As written", uppercase: "UPPERCASE", lowercase: "lowercase", capitalize: "Capitalize" },
+          options: { none: "As written", uppercase: "UPPERCASE", lowercase: "lowercase", capitalize: "Capitalize" },
           styleSelector: selector,
           styleProperty: "text-transform"
         },
@@ -495,12 +495,12 @@
       Object.assign(fields, shadowFields(`${name}TextShadow`, label, selector, "text-shadow", section));
       Object.assign(result, whenFields(conditions[name], fields));
     }
-    return result;
+    return initializeDefaults(result);
   }
 
   /**
    * Declare optional surface controls and independent shadow/glow layers.
-   * Elements map IDs to [label, selector, optional property list]. Empty overrides preserve CSS.
+   * Elements map IDs to [label, selector, optional property list]. Neutral defaults preserve CSS.
    * @param {Object<string, Array>} elements Properties: background, border, radius, padding, shadow.
    * @param {Object<string, Array<string>>} [conditions={}] Visibility conditions keyed by element ID.
    * @returns {ResourceFields} Fresh background, border, padding, radius, and effect field definitions.
@@ -521,15 +521,15 @@
             ...shared,
             subsection: "Border",
             type: "select",
-            label: `${label} border style`,
-            options: { "": "Automatic", none: "None", solid: "Solid", dashed: "Dashed", dotted: "Dotted", double: "Double" },
+            label: `${label} border style override`,
+            options: { none: "Off", hidden: "Hidden", solid: "Solid", dashed: "Dashed", dotted: "Dotted", double: "Double" },
             styleProperty: "border-style"
           }
         });
       if (properties.includes("shadow")) Object.assign(fields, shadowFields(`${name}Shadow`, label, selector, "box-shadow", shared.section));
       Object.assign(result, whenFields(conditions[name], fields));
     }
-    return result;
+    return initializeDefaults(result);
   }
 
   /**
@@ -539,7 +539,7 @@
    */
   function placementFields(selector) {
     const shared = { default: "", optional: true, section: "Size & placement", styleSelector: selector };
-    return {
+    return initializeDefaults({
       visualScale: { ...shared, type: "number", label: "Visual scale (%)", description: "100% is the original size. Negative values flip both axes.", min: -500, max: 500, step: "any", styleProperty: "scale", styleUnit: "%" },
       tilt: { ...shared, type: "number", label: "Tilt (degrees)", min: -360, max: 360, step: "any", styleProperty: "rotate", styleUnit: "deg" },
       ...offsetFields("visualOffset", "Visual offset", selector),
@@ -547,9 +547,9 @@
         ...shared,
         subsection: "Scale / tilt origin",
         type: "select",
-        label: "Scale / tilt origin",
+        label: "Scale / tilt origin override",
         options: {
-          "": "Automatic",
+          none: "Off",
           center: "Center",
           "top left": "Top left",
           top: "Top",
@@ -562,7 +562,7 @@
           custom: "Custom coordinates"
         },
         styleProperty: "transform-origin",
-        styleValue: (settings) => (settings.transformOrigin === "custom" ? `${settings.originX}px ${settings.originY}px` : settings.transformOrigin)
+        styleValue: (settings) => (settings.transformOrigin === "none" ? "" : settings.transformOrigin === "custom" ? `${settings.originX}px ${settings.originY}px` : settings.transformOrigin)
       },
       originX: {
         section: shared.section,
@@ -577,7 +577,7 @@
         step: "any"
       },
       originY: { section: shared.section, subsection: "Scale / tilt origin", when: ["transformOrigin", "custom"], type: "number", default: 50, label: "Vertical origin (px)", icon: "fa-arrows-up-down", min: -2000, max: 2000, step: "any" }
-    };
+    });
   }
 
   /**
@@ -653,10 +653,10 @@
       [`${name}Mode`]: {
         ...shared,
         type: "select",
-        default: "",
+        default: "none",
         label: "Filters",
         icon: "fa-sliders",
-        options: { "": "Automatic", none: "Off", custom: "Custom" },
+        options: { none: "Off", custom: "Custom" },
         styleSelector: selector,
         styleProperty: backdrop ? "backdrop-filter" : "filter"
       }
@@ -691,7 +691,7 @@
   }
 
   /**
-   * Declare translate offsets in pixels; both blank preserve CSS, one blank axis becomes zero.
+   * Declare signed pixel offsets; zero on both axes preserves the resource's base placement.
    * @param {string} name Field or item identifier.
    * @param {string} label Human-readable label.
    * @param {string} selector CSS selector identifying the target elements.
@@ -700,7 +700,7 @@
    */
   function offsetFields(name, label, selector, section = "Size & placement") {
     const shared = { section, subsection: label };
-    return {
+    return initializeDefaults({
       [`${name}X`]: {
         ...shared,
         type: "number",
@@ -713,14 +713,14 @@
         step: "any",
         styleSelector: selector,
         styleProperty: "translate",
-        styleValue: (settings) => (settings[`${name}X`] === "" && settings[`${name}Y`] === "" ? "" : `${settings[`${name}X`] || 0}px ${settings[`${name}Y`] || 0}px`)
+        styleValue: (settings) => (!settings[`${name}X`] && !settings[`${name}Y`] ? "" : `${settings[`${name}X`]}px ${settings[`${name}Y`]}px`)
       },
       [`${name}Y`]: { ...shared, type: "number", default: "", optional: true, label: "Vertical offset (px)", icon: "fa-arrows-up-down", min: -2000, max: 2000, step: "any" }
-    };
+    });
   }
 
   /**
-   * Declare signed pixel edge distances; blank edges become auto, all blank preserve CSS.
+   * Declare signed pixel edge overrides; zero leaves an edge unchanged, all zero preserves CSS.
    * @param {string} name Field or item identifier.
    * @param {string} label Human-readable label.
    * @param {string} selector CSS selector identifying the target elements.
@@ -740,17 +740,17 @@
         min: -2000,
         max: 2000,
         step: "any",
-        description: "Leave empty for automatic placement."
+        description: "Use 0 to keep the resource's edge placement."
       };
     Object.assign(fields[`${name}Top`], {
       styleSelector: selector,
       styleProperty: "inset",
       styleValue: (settings) => {
         const values = ["Top", "Right", "Bottom", "Left"].map((side) => settings[`${name}${side}`]);
-        return values.every((value) => value === "") ? "" : values.map((value) => (value === "" ? "auto" : `${value}px`)).join(" ");
+        return values.every((value) => value === 0) ? "" : values.map((value) => (value === 0 ? "auto" : `${value}px`)).join(" ");
       }
     });
-    return fields;
+    return initializeDefaults(fields);
   }
 
   /**
@@ -768,10 +768,10 @@
       [`${name}Mode`]: {
         ...shared,
         type: "select",
-        default: "",
+        default: "none",
         label: "Edge fade",
         icon: "fa-droplet",
-        options: { "": "Automatic", none: "Off", custom: "Custom" },
+        options: { none: "Off", custom: "Custom" },
         styleSelector: selector,
         styleProperty: "mask-image",
         styleValue: (settings) => {
@@ -804,13 +804,13 @@
       [`${prefix}Direction`]: {
         ...shared,
         type: "select",
-        label: `${label} arrangement`,
-        options: { "": "Automatic", column: "Stacked", row: "Single row", "column-reverse": "Stacked, reversed", "row-reverse": "Single row, reversed" },
+        label: `${label} arrangement override`,
+        options: { none: "Off", column: "Stacked", row: "Single row", "column-reverse": "Stacked, reversed", "row-reverse": "Single row, reversed" },
         styleSelector: selector,
         styleProperty: "flex-direction"
       },
       [`${prefix}Gap`]: { ...shared, type: "number", label: `${label} gap (px)`, min: 0, max: 300, step: "any", styleSelector: selector, styleProperty: "gap", styleUnit: "px" },
-      [`${prefix}Wrap`]: { ...shared, type: "select", label: `${label} wrapping`, options: { "": "Automatic", nowrap: "Single line", wrap: "Wrap to fit" }, styleSelector: selector, styleProperty: "flex-wrap" }
+      [`${prefix}Wrap`]: { ...shared, type: "select", label: `${label} wrapping override`, options: { none: "Off", nowrap: "Single line", wrap: "Wrap to fit" }, styleSelector: selector, styleProperty: "flex-wrap" }
     };
     for (const [name, [elementLabel, child]] of Object.entries(elements))
       fields[`${name}Order`] = {
@@ -826,7 +826,7 @@
         styleSelector: child,
         styleProperty: "order"
       };
-    return fields;
+    return initializeDefaults(fields);
   }
 
   /**
@@ -855,7 +855,7 @@
 
   // Keys are stored patterns; labels are examples for the editor and parameter reference.
   const dateFormats = {
-    locale: "Locale default",
+    locale: "Localized date",
     "yyyy-MM-dd": "2026-10-18 (yyyy-MM-dd)",
     "yyyy/MM/dd": "2026/10/18 (yyyy/MM/dd)",
     "dd/MM/yyyy": "18/10/2026 (dd/MM/yyyy)",
@@ -868,7 +868,7 @@
   };
 
   const timeFormats = {
-    locale: "Locale default",
+    locale: "Localized time",
     "HH:mm:ss": "23:45:06 (HH:mm:ss)",
     "HH:mm": "23:45 (HH:mm)",
     "H:mm": "3:45 (H:mm)",
@@ -905,13 +905,13 @@
         default: timeFormat,
         label: "Time of day format",
         section: "Date & time",
-        description: "Choose a 12- or 24-hour pattern, with or without seconds. Locale default keeps the resource's usual format.",
+        description: "Choose a 12- or 24-hour pattern, with or without seconds. Localized time uses the resource's locale and hour settings.",
         options: timeFormats
       }
     };
     if (locale) fields.locale = { type: "locale", default: "", label: "Locale", section: "Date & time", validate: parseLocale, maxlength: 50 };
     if (timeZone) fields.timeZone = { type: "timezone", default: "", label: "Time zone", section: "Date & time", validate: parseZone, maxlength: 100 };
-    return fields;
+    return initializeDefaults(fields);
   }
 
   /**
@@ -1028,6 +1028,33 @@
   }
 
   /**
+   * Fill missing scalar defaults before URL validation and form construction.
+   * Resource values, including zero and false, take precedence over these neutral fallbacks.
+   * @param {ResourceFields} fields Resource-owned field definitions, updated in place.
+   * @returns {ResourceFields} The same definitions, with concrete defaults assigned.
+   */
+  function initializeDefaults(fields) {
+    for (const [name, field] of Object.entries(fields)) {
+      if (field.default !== "" && field.default !== undefined && field.default !== null) continue;
+      if (field.type === "number") {
+        const value = /(?:Opacity|Scale)$|^(?:opacity|scale)$/.test(name) ? 100 : 0;
+        field.default = Math.max(Number(field.min ?? 0), Math.min(Number(field.max ?? Infinity), value));
+      } else if (field.type === "color") field.default = /background/i.test(name) || field.styleProperty === "background-color" ? "#00000000" : "#FFFFFF";
+      else if (field.type === "font") field.default = "Courier New";
+      else if (field.type === "timezone") field.default = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      else if (field.type === "timezones") field.default = "UTC";
+      else if (field.type === "locale") field.default = navigator.language;
+      else if (field.type === "datetime") field.default = new Date().toISOString();
+      else if (["entries", "mapping"].includes(field.type)) field.default = [];
+      else if (field.type === "url") field.default = "https://byuwur.github.io/img/logo.png";
+      else if (field.options) field.default = field.styleProperty === "font-weight" ? "400" : Object.hasOwn(field.options, "none") ? "none" : Object.keys(field.options)[0];
+      else field.default = "byUwUr";
+      if (field.styleSelector && !field.styleValue) field.styleDefault = field.default;
+    }
+    return fields;
+  }
+
+  /**
    * Resolve settings and mount markup in overlay mode; callers must await this before rendering.
    * Bare editors restore saved values; explicit queries take priority and overlays use their URL only.
    * Clone field defaults, apply accepted URL values, then publish settings and integrations together.
@@ -1037,6 +1064,7 @@
    * @returns {Promise<ResourceSettings>} Validated settings, also published through window.byStreamResource.
    */
   function initResource(resource, integrations = {}) {
+    initializeDefaults(resource.fields);
     const overlay = location.search.length > 1 && !location.hash;
     if (!overlay) savedPreferences = readPreferences(resource.fields);
     const search = !overlay && !location.search ? savedPreferences.query : location.search;
@@ -1055,7 +1083,7 @@
         // Metadata-driven CSS is emitted once; selectors also cover rows a renderer creates later.
         const overrides = [];
         for (const [name, field] of Object.entries(resource.fields)) {
-          if (!field.styleSelector || !fieldEnabled(resource.fields, settings, name) || (!field.styleValue && settings[name] === (field.styleAutomatic ?? ""))) continue;
+          if (!field.styleSelector || !fieldEnabled(resource.fields, settings, name) || (!field.styleValue && settings[name] === field.styleDefault)) continue;
           const value = field.styleValue ? field.styleValue(settings) : field.type === "font" ? byFont.family(settings[name], '"Courier New", Courier, monospace') : `${settings[name]}${field.styleUnit || ""}`;
           if (value !== "") overrides.push([field, value]);
         }
@@ -1103,11 +1131,17 @@
     if (value.length > 20000) return null;
     try {
       const entries = JSON.parse(value);
-      return Array.isArray(entries) && entries.length <= 100 && entries.every((entry) =>
-        entry && typeof entry.platform === "string" && Object.hasOwn(platforms, entry.platform) &&
-        typeof entry.handle === "string" && entry.handle.length <= 160 &&
-        (!withHeading || (typeof entry.heading === "string" && entry.heading.length <= 160))
-      )
+      return Array.isArray(entries) &&
+        entries.length <= 100 &&
+        entries.every(
+          (entry) =>
+            entry &&
+            typeof entry.platform === "string" &&
+            Object.hasOwn(platforms, entry.platform) &&
+            typeof entry.handle === "string" &&
+            entry.handle.length <= 160 &&
+            (!withHeading || (typeof entry.heading === "string" && entry.heading.length <= 160))
+        )
         ? entries
         : null;
     } catch {
@@ -1847,7 +1881,7 @@
         if (field.type !== "switch") control.addClass("rounded-0 bg-body-secondary border-secondary-subtle");
         control.attr({ name, id: field.id || `field-${name}`, "data-title": field.label, "data-description": field.description || "" });
         for (const key of ["min", "max", "maxlength", "placeholder"]) if (field[key] !== undefined && field[key] !== Infinity) control.attr(key, field[key]);
-        if (field.optional && !field.placeholder) control.attr("placeholder", "Automatic");
+        if (field.optional && !field.placeholder) control.attr("placeholder", field.default === "" ? "Off" : String(field.default));
         control.appendTo(label);
         if (field.type === "switch") caption.add(control).wrapAll(/* HTML */ `<span class="d-flex align-items-center justify-content-between gap-3"></span>`);
         if (field.description) $(/* HTML */ `<small class="text-body-secondary"></small>`).text(field.description).appendTo(label);
@@ -2118,6 +2152,12 @@
           weight: form.elements.fontWeight || 700,
           previewText: "Stream preview · Aa Bb 0123456789"
         });
+        const empty = [...fields[index].options].find((option) => option.value === "");
+        if (empty) {
+          if (parameterRules[field.name].default === "") empty.text = "Off";
+          else empty.remove();
+          $(fields[index]).trigger("change.select2");
+        }
       });
     }
 
@@ -2440,7 +2480,7 @@
       const locale = parameterRules[name].type === "locale";
       const multiple = parameterRules[name].type === "timezones";
       const validate = locale ? parseLocale : parseZone;
-      const placeholder = multiple ? "Choose up to three time zones" : locale ? "Browser locale (automatic)" : "OBS computer time zone (automatic)";
+      const placeholder = multiple ? "Choose up to three time zones" : locale ? "Browser locale" : "OBS computer time zone";
       if (!regionalChoices.has(locale)) {
         const codes = locale
           ? [...navigator.languages, ...localeCodes]
@@ -2550,7 +2590,7 @@
         const jqSwatch = $(/* HTML */ `<span class="input-group-text p-1"><span></span></span>`);
         jqInput.wrap(/* HTML */ `<span class="input-group"></span>`).before(jqSwatch);
         const optional = parameterRules[input.name].optional;
-        jqInput.addClass("font-monospace").attr("placeholder", optional ? "Automatic" : "#RRGGBB or #RRGGBBAA");
+        jqInput.addClass("font-monospace").attr("placeholder", optional && !parameterRules[input.name].default ? "Off" : parameterRules[input.name].default);
         const picker = Pickr.create({
           el: jqSwatch.children()[0],
           theme: "classic",

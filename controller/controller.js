@@ -131,7 +131,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       backgroundColor: { type: "color", default: "", optional: true, label: "Background", section: "Appearance", maxlength: 80, styleSelector: "body", styleProperty: "background-color" },
       disconnectedOpacity: {
         type: "number",
-        default: "",
+        default: 5,
         optional: true,
         label: "Disconnected opacity (%)",
         section: "Appearance",
