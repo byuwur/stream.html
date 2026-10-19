@@ -26,6 +26,8 @@ Open a tool, adjust its fields, check the preview, then **Copy URL** into an OBS
 - **Reset** restores the settings, list order, and compression choices from when the page opened, including after direct URL edits.
 - Invalid form values keep the last valid preview and stop URL generation. Invalid/unknown URL values retain defaults; empty text clears a field.
 
+Generated links include only values that differ from the declared defaults, plus each resource's explicit `urlRequired` fields. Automatic/default appearance values are omitted, and missing parameters use resource defaults. Controller always includes `player` and `skin`; Popup includes `accounts`; Main includes `sceneTitle`. Empty text that clears a nonempty default stays in the URL. Imports use defaults for missing values; opening a bare editor still resumes saved preferences.
+
 The form handles encoding and list add/edit/reorder/remove. Colors use 3/4/6/8 hex digits without `#`, including alpha: `fontColor=fff`, `backgroundColor=00000000`. Runtime restores `#`; older encoded hashes work. Malformed colors pass to CSS; RGB/HSL/named colors are outside the contract.
 
 Fonts include 350 Google families, system fonts, and installed families/CSS stacks. Fonts and visible samples load on demand; OBS needs access to the chosen font or uses the tool's fallback. Theme preference is local; explicit motion Off/None/Static settings apply.
@@ -176,6 +178,10 @@ Field `options` maps stored IDs to displayed labels.
 Binary settings use `type: "switch"` with explicit checked/unchecked values.
 
 Each list uses its declared format directly: simple messages are string arrays, unique pairs are maps such as `{"monday":"Activity"}`, and social accounts or other repeated rows use object arrays. Unsupported formats retain defaults; no format conversion is performed. Map keys must be unique, and integer keys follow JavaScript's numeric ordering.
+
+Declare a nonempty `resource.urlRequired` array of field names that always belong in generated links, including when they use defaults. This keeps overlay URLs query-based without emitting unrelated defaults. Include timestamps or scheduled entries whose initial values must survive reloads. Other values are compared against `field.default`; object/array order is preserved, and equivalent hex color spellings compare as the same color. Declare concrete valid defaults directly.
+
+`byConfigurator.settingsURL(resource, settings)` builds the same readable URL for editor actions and native resource interactions, including after importing a compressed URL.
 
 ### Add a tool
 

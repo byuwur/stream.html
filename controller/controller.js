@@ -15,6 +15,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     title: "Controller",
     description: "Show gamepad or keyboard input. The controller fits the viewport automatically. Click the preview, then press a gamepad button or F for keyboard input.",
     preview: [1280, 720],
+    urlRequired: ["player", "skin"],
     sectionIcons: { Input: "fa-solid fa-gamepad" },
     previewAllow: "autoplay; gamepad *",
     fields: {

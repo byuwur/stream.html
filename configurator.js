@@ -221,6 +221,46 @@
   }
 
   /**
+   * Build the readable overlay URL shared by editor actions and native resource interactions.
+   * Only declared fields are emitted. urlRequired keeps overlay mode/timestamp anchors even at defaults.
+   * Inactive optional fields and defaults are omitted; CSS normalizes equivalent colors, and JSON comparison preserves data order.
+   * Compression is applied later by generateURL(), after this canonical readable query exists.
+   * @param {ResourceDefinition} resource Resource metadata, field definitions, defaults, and current settings.
+   * @param {ResourceSettings} settings Validated resource values; helpers may read or update this shared object.
+   * @returns {URL} Readable overlay URL containing required fields and nondefault values.
+   */
+  function settingsURL(resource, settings) {
+    const parameterRules = resource.fields;
+    const color = document.createElement("span").style;
+    const values = Object.entries(settings)
+      .filter(([name, value]) => {
+        if (!Object.hasOwn(parameterRules, name)) return false;
+        if (resource.urlRequired.includes(name)) return true;
+        const rule = parameterRules[name];
+        if (rule.type === "font" && value === "") return false;
+        if (rule.type === "color") {
+          color.color = value;
+          const current = color.color;
+          color.color = rule.default;
+          return current !== color.color;
+        }
+        return JSON.stringify(value) !== JSON.stringify(rule.default);
+      })
+      .map(([name, value]) => {
+        let text = typeof value === "object" ? JSON.stringify(value) : String(value);
+        if (parameterRules[name].type === "color") text = text.replace(/^#/, "");
+        // Escape reserved prefixes so literal text survives the URL decoder.
+        if (text.startsWith("dr:") || text.startsWith("raw:")) text = `raw:${text}`;
+        return [name, text];
+      });
+    const url = new URL(location.href);
+    if (url.protocol !== "file:") url.pathname = url.pathname.replace(/\/index\.html$/, "/");
+    url.hash = "";
+    url.search = new URLSearchParams(values).toString().replace(/=raw%3A/g, "=raw:");
+    return url;
+  }
+
+  /**
    * Resolve settings and mount markup in overlay mode; callers must await this before rendering.
    * Bare editors restore saved values; explicit queries take priority and overlays use their URL only.
    * @param {Object} resource Declared fields, optional constants, and renderer metadata.
@@ -353,6 +393,7 @@
     platforms,
     validParameter,
     applyParameters,
+    settingsURL,
     initResource,
     parseAccounts,
     parseZone,
@@ -860,6 +901,8 @@
     // ==========
     /**
      * Validates the form and updates its overlay URL and preview.
+     * Commit accepted form values to settings, build a sparse readable URL, then optionally compress it.
+     * Publish/save only the latest generation; slower async work must not replace newer edits or drafts.
      * @param {boolean} [keepURLDraft=false] Preserve the URL text during automatic application.
      * @returns {Promise<boolean>} Whether the latest URL was generated from valid fields.
      */
@@ -883,15 +926,16 @@
         values.set(this.name, jqField.prop("checked") ? jqField.val() : jqField.attr("data-unchecked-value"));
       });
       byConfigurator.applyParameters(parameterRules, settings, values);
-      const readableURL = settingsURL(settings);
+      const readableURL = settingsURL(resource, settings);
       let url = readableURL;
       let summary = `${url.href.length.toLocaleString()} characters. Parameters remain readable.`;
       const scope = $('input[name="compression-scope"]:checked').val();
       const selected = $("[data-compress-field]:checked")
         .map((_, input) => input.value)
-        .get();
+        .get()
+        .filter((name) => readableURL.searchParams.has(name));
       if ($("#short-url").prop("checked") && scope === "selected" && !selected.length) {
-        summary = `${url.href.length.toLocaleString()} characters. Select at least one field to compress.`;
+        summary = `${url.href.length.toLocaleString()} characters. Select a field included in the URL to compress.`;
       } else if ($("#short-url").prop("checked")) {
         $("#copy-url").prop("disabled", true);
         $("#url-summary").text("Generating a shorter URL...");
@@ -912,7 +956,7 @@
             url = shorterURL;
             const saving = Math.round((1 - url.href.length / readableURL.href.length) * 100);
             summary = `${url.href.length.toLocaleString()} characters · ${saving}% shorter.`;
-            summary += scope === "selected" ? ` ${selected.length} ${selected.length === 1 ? "field" : "fields"} compressed; other parameters stay readable.` : " All settings are included.";
+            summary += scope === "selected" ? ` ${selected.length} ${selected.length === 1 ? "field" : "fields"} compressed; other parameters stay readable.` : " Required fields and overrides are included.";
           } else summary = `${url.href.length.toLocaleString()} characters. The readable URL is already shorter.`;
         } catch (error) {
           console.warn("Unable to shorten the overlay URL:", error);
@@ -979,7 +1023,7 @@
         return;
       }
       const generation = ++urlGeneration;
-      const parameters = await readURLParameters(parameterRules, url.search || savedPreferences.query);
+      const parameters = await readURLParameters(parameterRules, url.search);
       if (generation !== urlGeneration) return;
       const loaded = {
         ...resource.constants,
@@ -1760,7 +1804,7 @@
           if (!url) return;
           if (!url.search) {
             // Overlay mode requires a query; bare tool links otherwise reopen the editor.
-            url.search = sameResourceURL(url) && savedPreferences.query ? savedPreferences.query : settingsURL(Object.fromEntries(Object.entries(parameterRules).map(([name, rule]) => [name, rule.default]))).search;
+            url.search = sameResourceURL(url) && savedPreferences.query ? savedPreferences.query : settingsURL(resource, Object.fromEntries(Object.entries(parameterRules).map(([name, rule]) => [name, rule.default]))).search;
           }
           location.assign(url.href);
           return;
@@ -1886,23 +1930,7 @@
     // ==== NATIVE BROWSER SERVICES ====
     // ==========
 
-    /** Serialize public settings, including JSON lists and mappings, into an overlay URL. */
-    function settingsURL(settings) {
-      const values = Object.entries(settings)
-        .filter(([name]) => Object.hasOwn(parameterRules, name))
-        .map(([name, value]) => {
-          let text = typeof value === "object" ? JSON.stringify(value) : String(value);
-          if (parameterRules[name].type === "color") text = text.replace(/^#/, "");
-          // Escape reserved prefixes so literal text survives the URL decoder.
-          if (text.startsWith("dr:") || text.startsWith("raw:")) text = `raw:${text}`;
-          return [name, text];
-        });
-      const url = new URL(location.href);
-      if (url.protocol !== "file:") url.pathname = url.pathname.replace(/\/index\.html$/, "/");
-      url.hash = "";
-      url.search = new URLSearchParams(values).toString().replace(/=raw%3A/g, "=raw:");
-      return url;
-    }
+
 
     /**
      * Sets a field's validation message using the active renderer's parameter rules.

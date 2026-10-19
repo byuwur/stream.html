@@ -15,6 +15,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     title: "Social popup",
     description: "Your social accounts, one animated popup at a time.",
     preview: [1280,360],
+    urlRequired: ["accounts"],
     sectionIcons: {"Social accounts":"fa-solid fa-users","Animation":"fa-solid fa-wand-magic-sparkles","Appearance":"fa-solid fa-palette"},
     previewAllow: "autoplay; gamepad *",
     fields: {

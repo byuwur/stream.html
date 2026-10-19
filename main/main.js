@@ -15,6 +15,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     title: "Main scene",
     description: "Set up your starting, BRB, ending, or intermission scene.",
     preview: [1920,1080],
+    urlRequired: ["sceneTitle"],
     sectionIcons: {"Scene":"fa-solid fa-clapperboard","Appearance":"fa-solid fa-palette","Social accounts":"fa-solid fa-users","Schedule":"fa-solid fa-calendar-days"},
     previewAllow: "autoplay; gamepad *",
     fields: {
