@@ -49,13 +49,15 @@ document.addEventListener("DOMContentLoaded", async () => {
         icon: "fa-hashtag"
       },
       displayCountdown: {
-        type: "select",
+        type: "switch",
         default: "yes",
         label: "Countdown",
         section: "Scene",
         description: "Shows or hides the countdown area.",
         options: { yes: "Show", no: "Hide" },
-        icon: "fa-list"
+        icon: "fa-list",
+        checkedValue: "yes",
+        uncheckedValue: "no"
       },
       countdownMessage: {
         type: "text",
@@ -154,13 +156,15 @@ document.addEventListener("DOMContentLoaded", async () => {
         icon: "fa-hashtag"
       },
       displayBranding: {
-        type: "select",
+        type: "switch",
         default: "yes",
         label: "Logo",
         section: "Appearance",
         description: "Shows or hides the logo independently of the title.",
         options: { yes: "Show", no: "Hide" },
-        icon: "fa-list"
+        icon: "fa-list",
+        checkedValue: "yes",
+        uncheckedValue: "no"
       },
       logoUrl: {
         type: "text",
@@ -252,13 +256,15 @@ document.addEventListener("DOMContentLoaded", async () => {
         icon: "fa-palette"
       },
       displaySocial: {
-        type: "select",
+        type: "switch",
         default: "yes",
         label: "Social accounts",
         section: "Social accounts",
         description: "Shows or hides the social account area.",
         options: { yes: "Show", no: "Hide" },
-        icon: "fa-list"
+        icon: "fa-list",
+        checkedValue: "yes",
+        uncheckedValue: "no"
       },
       accounts: {
         type: "entries",
@@ -272,13 +278,15 @@ document.addEventListener("DOMContentLoaded", async () => {
         addLabel: "Add account"
       },
       displaySchedule: {
-        type: "select",
+        type: "switch",
         default: "no",
         label: "Schedule",
         section: "Schedule",
         description: "Shows or hides the weekly schedule.",
         options: { yes: "Show", no: "Hide" },
-        icon: "fa-list"
+        icon: "fa-list",
+        checkedValue: "yes",
+        uncheckedValue: "no"
       },
       scheduleEntries: {
         type: "entries",

@@ -173,6 +173,8 @@ HTML needs `<template id="overlay-markup">...</template>` and `<div id="configur
 
 Field `options` maps stored IDs to displayed labels.
 
+Binary settings use `type: "switch"` with explicit checked/unchecked values.
+
 ### Add a tool
 
 1. Copy `configurator.html` into the tool folder; replace demo markup/styles/rendering and change shared imports to `../`.
