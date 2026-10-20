@@ -1447,11 +1447,9 @@
      * @returns {void}
      */
     function initAppearancePresets() {
-      const jqLabel = $(/* HTML */ `<label class="form-label w-100"></label>`)
-        .text("Appearance preset")
-        .prepend($(/* HTML */ `<i class="fa-solid fa-palette fa-fw me-2" aria-hidden="true"></i>`))
-        .prependTo(jqForm.find('[data-config-section="Appearance"]'));
-      const jqSelect = $(/* HTML */ `<select class="form-select rounded-0 bg-body-secondary border-secondary-subtle mb-3"></select>`).appendTo(jqLabel);
+      const jqLabel = $(/* HTML */ `<label class="config-field form-label d-flex flex-column gap-1 w-100 mb-3"></label>`).prependTo(jqForm.find('[data-config-section="Appearance"]').children(".accordion-body"));
+      $(/* HTML */ `<span class="field-caption small"></span>`).text("Appearance preset").prepend($(/* HTML */ `<i class="fa-solid fa-palette fa-fw text-primary me-2" aria-hidden="true"></i>`)).appendTo(jqLabel);
+      const jqSelect = $(/* HTML */ `<select class="form-select rounded-0 bg-body-secondary border-secondary-subtle"></select>`).appendTo(jqLabel);
       for (const [value, title] of [
         ["", "Custom"],
         ["studio", "Studio"],
