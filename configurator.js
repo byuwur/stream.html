@@ -94,6 +94,110 @@
   const $ = global.jQuery;
 
   /**
+   * Measure changed containers together, interpolate their heights, then restore natural sizing.
+   * Bootstrap retains height ownership during collapse transitions; newer measurements supersede old ones.
+   * @param {Map<HTMLElement, number>} containers Open containers mapped to their heights before content changes.
+   * @returns {void}
+   */
+  function resizeContainers(containers) {
+    const targets = [...containers].map(([element, previousHeight]) => ({ container: $(element), previousHeight })).filter(({ container }) => container.is(":visible") && !container.closest(".collapsing").length);
+    targets.forEach(({ container }) => container.removeData("heightEffect").removeClass("motion-resize").css("height", ""));
+    const changed = targets.map((target) => ({ ...target, height: target.container[0].getBoundingClientRect().height })).filter(({ height, previousHeight }) => Math.abs(height - previousHeight) >= 0.5);
+    if (!changed.length) return;
+    changed.forEach(({ container, previousHeight }) => container.css("height", `${previousHeight.toFixed(2)}px`));
+    void changed[0].container[0].offsetHeight;
+    changed.forEach(({ container, height }) => container.addClass("motion-resize").css("height", `${height.toFixed(2)}px`));
+    changed.forEach(({ container }) => {
+      const animations = container[0].getAnimations().filter((item) => item.transitionProperty === "height");
+      const effect = Promise.allSettled(animations.map((item) => item.finished)).then(() => {
+        if (container.data("heightEffect") !== effect) return;
+        container.removeData("heightEffect").removeClass("motion-resize").css("height", "");
+      });
+      container.data("heightEffect", effect);
+    });
+  }
+
+  /**
+   * Slide and fade one surface through the same batch path used for conditional fields.
+   * @param {HTMLElement|jQuery} element One panel, menu, or conditional field wrapper.
+   * @param {boolean} visible Requested final visibility.
+   * @returns {Promise<boolean>} Whether this request completed rather than being superseded.
+   */
+  function setVisible(element, visible) {
+    return setVisibility([[element, visible]]);
+  }
+
+  /**
+   * Separate reads from writes so sibling fields share one container resize and animation start.
+   * Departing content becomes inert immediately; each surface retains its own latest-request cleanup.
+   * @param {Array<[HTMLElement|jQuery, boolean]>} changes Surfaces paired with their requested visibility.
+   * @returns {Promise<boolean>} Whether every request completed without being superseded.
+   */
+  function setVisibility(changes) {
+    const targets = [];
+    const pending = [];
+    const containers = new Map();
+    for (const [element, visible] of changes) {
+      const target = $(element);
+      if (!target.length) {
+        pending.push(Promise.resolve(false));
+        continue;
+      }
+      const showing = !target.prop("hidden") && !target.hasClass("animate__fadeOut");
+      if (showing === visible) {
+        const effect = target.data("visibilityEffect");
+        if (effect) pending.push(effect);
+        continue;
+      }
+      const container = target.parent().closest(".subsection-collapse.show, .accordion-collapse.show, .modal-content, .entry-list")[0];
+      if (visible && container && !containers.has(container)) containers.set(container, container.getBoundingClientRect().height);
+      targets.push({ target, visible, container, height: visible ? 0 : target[0].getBoundingClientRect().height });
+    }
+    if (!targets.length) return Promise.all(pending).then((results) => results.every(Boolean));
+    targets.forEach(({ target, visible, height }) => {
+      target.css("block-size", visible ? "" : `${height.toFixed(2)}px`);
+      target.off(".fieldReveal").removeClass("motion-enter animate__animated animate__fadeIn animate__fadeOut").toggleClass("motion-enter", visible).prop({ hidden: false, inert: !visible });
+    });
+    void targets[0].target[0].offsetWidth;
+    targets.forEach(({ target, visible }) => target.addClass(`animate__animated animate__${visible ? "fadeIn" : "fadeOut"}`));
+    resizeContainers(containers);
+    const animations = targets.flatMap(({ target, visible }) => target[0].getAnimations().filter((item) => item.animationName === (visible ? "fadeIn" : "fadeOut")));
+    const finished = Promise.allSettled(animations.map((item) => item.finished)).then(() => {
+      const current = targets.filter((item) => item.target.data("visibilityEffect") === item.effect);
+      const heights = new Map();
+      current.forEach(({ visible, container }) => {
+        if (!visible && container && !heights.has(container)) heights.set(container, container.getBoundingClientRect().height);
+      });
+      current.forEach((item) => {
+        item.target.prop("hidden", !item.visible).css("block-size", "").removeClass("motion-enter animate__animated animate__fadeIn animate__fadeOut").removeData("visibilityEffect");
+        item.finished = true;
+      });
+      resizeContainers(heights);
+    });
+    targets.forEach((item) => {
+      item.effect = finished.then(() => item.finished === true);
+      item.target.data("visibilityEffect", item.effect);
+      pending.push(item.effect);
+    });
+    return Promise.all(pending).then((results) => results.every(Boolean));
+  }
+
+  /**
+   * Keep feedback text visible until its exit finishes; a newer message cancels that exit.
+   * @param {HTMLElement|jQuery|string} element Feedback element or selector.
+   * @param {string} message Text to display; empty text hides the feedback.
+   * @returns {void}
+   */
+  function setMessage(element, message) {
+    const target = $(element);
+    if (message) target.text(message);
+    setVisible(target, !!message).then((finished) => {
+      if (finished && target.prop("hidden")) target.text("");
+    });
+  }
+
+
+  /**
    * Explicit resource icons take priority; shared controls use their property or purpose.
    * @param {string} name Field or item identifier.
    * @param {Partial<ResourceField>} [field={}] Metadata whose icon, type, and label guide the fallback.
@@ -438,7 +542,7 @@
      */
     function buildConfigurator(resource, jqHost) {
       jqHost.html(/* HTML */ `
-        <main id="setup" class="d-flex flex-column vh-100 overflow-hidden">
+        <main id="setup" class="animate__animated animate__fadeIn d-flex flex-column vh-100 overflow-hidden">
           <!-- URL toolbar and tool navigation. -->
           <header class="url-toolbar has-overlay light-links d-flex flex-column gap-2 p-2 bg-primary border-bottom sticky-top flex-shrink-0">
             <div class="overlay-vertical-inverted pe-none" aria-hidden="true"></div>
@@ -534,16 +638,16 @@
               <!-- Preview update status and reset guidance. -->
               <footer class="preview-footer d-flex flex-wrap justify-content-between gap-2 small text-body-secondary">
                 <span id="preview-status">Change a parameter to update the preview.</span>
-                <span id="copy-status" role="status"></span>
+                <span id="copy-status" role="status" hidden></span>
                 <p class="setup-help m-0 ms-auto text-end">Reset restores the settings loaded when you opened this page.</p>
               </footer>
             </section>
           </div>
           <div id="bywr-accessibility" class="uncolor-links bottom-0 flex-column-reverse">
-            <a href="javascript:byCommon.accessibilityToggle();" role="button" data-bs-toggle="tooltip" title="Accessibility tools" aria-label="Accessibility tools" aria-controls="bywr-accessibility-buttons">
+            <a href="#" id="accessibility-toggle" role="button" aria-expanded="false" data-bs-toggle="tooltip" title="Accessibility tools" aria-label="Accessibility tools" aria-controls="bywr-accessibility-buttons">
               <i class="fa-solid fa-universal-access" aria-hidden="true"></i>
             </a>
-            <div id="bywr-accessibility-buttons" class="hide">
+            <div id="bywr-accessibility-buttons" hidden>
               <a href="javascript:byCommon.accessibilityText('plus');" role="button" data-bs-toggle="tooltip" title="Increase text" aria-label="Increase text">
                 <i class="fa-solid fa-magnifying-glass-plus" aria-hidden="true"></i>
               </a>
@@ -786,7 +890,7 @@
       $("#url-summary").text(summary);
       $("#preview-url").attr("href", url.href);
       $("#copy-url .copy-label").text("Copy URL");
-      $("#copy-status").text("");
+      setMessage("#copy-status", "");
       $("#copy-url").prop("disabled", false);
       updateOverlayPreview(url.href);
       return true;
@@ -844,7 +948,7 @@
       }
       if (!sameResourceURL(url)) {
         if (automatic) {
-          $("#copy-status").text("Press Enter or leave the field to open another tool.");
+          setMessage("#copy-status", "Press Enter or leave the field to open another tool.");
           return;
         }
         url.hash = "configure";
@@ -900,10 +1004,11 @@
       jqOutput.val(url.href);
       try {
         await navigator.clipboard.writeText(url.href);
-        $("#copy-url .copy-label, #copy-status").text("Copied!");
+        $("#copy-url .copy-label").text("Copied!");
+        setMessage("#copy-status", "Copied!");
       } catch {
         jqOutput.trigger("focus").trigger("select");
-        $("#copy-status").text("Press Ctrl+C (or Command+C) to copy the selected URL.");
+        setMessage("#copy-status", "Press Ctrl+C (or Command+C) to copy the selected URL.");
       }
     }
 
@@ -1091,6 +1196,8 @@
         if (choiceKey === "platform") {
           initSelect2(jqSelect, { templateResult: platformOption, templateSelection: platformOption });
         } else if (choices) initSelect2(jqSelect);
+        jqRow.prop("hidden", true);
+        setVisible(jqRow, true);
         return jqRow;
       }
       // Serialize the current row order for validation and URL generation.
@@ -1099,7 +1206,7 @@
        * @returns {void}
        */
       function sync() {
-        const jqRows = jqEditor.children();
+        const jqRows = jqEditor.children(":not([inert])");
         // Serialize DOM order back into the original map, string-array, or object-array shape.
         const values = jqRows.get().map((row, index) => {
           const jqRow = $(row);
@@ -1125,13 +1232,14 @@
         // Repeated platform rows are valid arrays; duplicate map keys would silently erase earlier rows.
         const duplicate = map && new Set(values.map(([key]) => key)).size !== values.length;
         jqOutput.val(duplicate ? "" : JSON.stringify(map ? Object.fromEntries(values) : values));
-        jqEditor.find("input").each(function () {
+        jqRows.find("input").each(function () {
           this.setCustomValidity("");
         });
-        jqEditor.find("input")[0]?.setCustomValidity(duplicate ? "Use a different key for each row." : byStream.validParameter(parameterRules, name, jqOutput.val()) ? "" : "Invalid list. Check the entries or remove rows.");
+        jqRows.find("input")[0]?.setCustomValidity(duplicate ? "Use a different key for each row." : byStream.validParameter(parameterRules, name, jqOutput.val()) ? "" : "Invalid list. Check the entries or remove rows.");
         jqAdd.prop("disabled", jqRows.length >= limit);
       }
       function reset(entries = initial) {
+        const height = jqEditor[0].getBoundingClientRect().height;
         // Destroy Select2 before removing rows so detached dropdowns and widget handlers are cleaned up.
         jqEditor.find("select").each(function () {
           if ($(this).data("select2")) $(this).select2("close").select2("destroy");
@@ -1139,21 +1247,27 @@
         jqEditor.empty();
         (map ? Object.entries(entries) : entries).forEach(addRow);
         sync();
+        resizeContainers(new Map([[jqEditor[0], height]]));
       }
       jqEditor.on("input change", "input, select", sync).on("click", "[data-action]", function () {
         const jqRow = $(this).closest(".entry-row");
         const action = $(this).data("action");
         if (action === "remove") {
-          const jqSelect = jqRow.find("select");
-          if (jqSelect.data("select2")) jqSelect.select2("close").select2("destroy");
-          jqRow.remove();
-        } else if (action === "up") jqRow.insertBefore(jqRow.prev());
-        else jqRow.insertAfter(jqRow.next());
+          jqRow.find("input, select, button").prop("disabled", true);
+          setVisible(jqRow, false).then((finished) => {
+            if (!finished) return;
+            const jqSelect = jqRow.find("select");
+            if (jqSelect.data("select2")) jqSelect.select2("close").select2("destroy");
+            jqRow.remove();
+            sync();
+          });
+        } else if (action === "up") jqRow.insertBefore(jqRow.prevAll(":not([inert])").first());
+        else jqRow.insertAfter(jqRow.nextAll(":not([inert])").first());
         sync();
         generateURL();
       });
       jqAdd.on("click", () => {
-        if (jqEditor.children().length >= limit) return;
+        if (jqEditor.children(":not([inert])").length >= limit) return;
         const jqRow = addRow(newEntry);
         jqRow.find(".select2-selection, select:not(.select2-hidden-accessible), input").first().trigger("focus");
         sync();
@@ -1513,8 +1627,8 @@
      * @returns {void}
      */
     function syncCompressionOptions() {
-      $("#compression-options").prop("hidden", !$("#short-url").prop("checked"));
-      $("#compression-selection").prop("hidden", $('input[name="compression-scope"]:checked').val() !== "selected");
+      setVisible($("#compression-options"), $("#short-url").prop("checked"));
+      setVisible($("#compression-selection"), $('input[name="compression-scope"]:checked').val() === "selected");
     }
 
     /**
@@ -1567,7 +1681,7 @@
                 <button type="button" class="help-close btn btn-sm btn-outline-light border-0 ms-auto fs-4" aria-label="Close dialog">&times;</button>
               </nav>
               <header class="help-heading bg-primary px-3 px-md-4 py-3 text-white flex-shrink-0"><h2 class="h2 m-0" id="help-title"></h2></header>
-              <article class="modal-body p-3 p-md-4 overflow-y-auto">
+              <article class="modal-body d-grid align-content-start p-3 p-md-4 overflow-y-auto">
                 <section data-panel="info">
                   <p>
                     Made by
@@ -1840,21 +1954,38 @@
 
       const titles = { info: "About", obs: "Use with OBS", params: "Parameters", advanced: "Advanced options" };
       initResourceHelp?.(jqDialog[0], titles, closeHelp);
+      jqDialog.find("[data-panel]").addClass("motion-layer");
+      let helpSectionGeneration = 0;
       /**
        * Open the requested help panel and synchronize the navigation hash.
        * @param {string} section Section identifier or label.
-       * @returns {void}
+       * @returns {Promise<void>} Resolves after selecting the requested page or a newer request supersedes it.
        */
-      function showSection(section) {
+      async function showSection(section) {
+        if (jqDialog.hasClass("show") && jqDialog.find('[data-section][aria-current="page"]').data("section") === section) return;
+        const generation = ++helpSectionGeneration;
         popover?.hide();
         // Switching tabs in an open dialog must not replace the element that should regain focus.
         if (!jqDialog.hasClass("show")) helpTrigger = document.activeElement;
         jqDialog.find("#help-title").text(titles[section]);
-        jqDialog.find("[data-panel]").prop("hidden", true).filter(`[data-panel="${section}"]`).prop("hidden", false);
         jqDialog.find("[data-section]").removeClass("active").removeAttr("aria-current").filter(`[data-section="${section}"]`).addClass("active").attr("aria-current", "page");
-        jqDialog.find("article").scrollTop(0);
-        modal.show();
         if (location.hash !== `#${section}`) location.hash = section;
+        const panels = jqDialog.find("[data-panel]");
+        if (!jqDialog.hasClass("show")) {
+          panels.prop({ hidden: true, inert: true }).filter(`[data-panel="${section}"]`).prop({ hidden: false, inert: false });
+          modal.show();
+          return;
+        }
+        // Exit before entering so text from different help pages never overlaps.
+        await Promise.all(
+          panels
+            .filter(`[data-panel!="${section}"]`)
+            .get()
+            .map((panel) => setVisible(panel, false))
+        );
+        if (generation !== helpSectionGeneration || !jqDialog.hasClass("show")) return;
+        jqDialog.find("article").scrollTop(0);
+        setVisible(panels.filter(`[data-panel="${section}"]`), true);
       }
       function closeHelp() {
         modal.hide();
@@ -2007,8 +2138,33 @@
     }
 
     // ==========
-    // ==== FIELD VISIBILITY AND VALIDATION ====
+    // ==== EDITOR MOTION, FIELD VISIBILITY AND VALIDATION ====
     // ==========
+
+    /**
+     * Reveal visible field groups with the library fade and a short horizontal transition.
+     * One layout read starts the whole batch; completed effects remove their temporary classes.
+     * @param {HTMLElement|jQuery} container Newly opened group or conditional field wrapper.
+     * @returns {void}
+     */
+    function revealFields(container) {
+      const controls = $(container)
+        .find(".config-field")
+        .addBack(".config-field")
+        .filter(function () {
+          // A closed group can briefly have dimensions while editor styles are still loading.
+          return $(this).is(":visible") && !$(this).parents("[hidden], [inert], .collapse:not(.show)").length;
+        });
+      if (!controls.length) return;
+      controls.off(".fieldReveal").removeClass("animate__animated animate__fadeIn").addClass("motion-enter");
+      void controls[0].offsetWidth;
+      controls.addClass("animate__animated animate__fadeIn").on("animationend.fieldReveal animationcancel.fieldReveal", function (event) {
+        if (event.target !== this) return;
+        // A replay can cancel an earlier effect; a hidden field needs cleanup instead.
+        if (event.type === "animationcancel" && $(this).is(":visible")) return;
+        $(this).off(".fieldReveal").removeClass("motion-enter animate__animated animate__fadeIn");
+      });
+    }
 
     /**
      * Expand or collapse either group type, applying the latest request after an active transition.
@@ -2035,11 +2191,13 @@
     function syncFieldVisibility() {
       // Availability follows current form drafts; settings still contains the last accepted values.
       const values = Object.fromEntries(fields.map((input) => [input.name, input.type === "checkbox" ? (input.checked ? input.value : input.dataset.uncheckedValue) : input.value]));
+      const changes = [];
       for (const input of fields) {
         if (!parameterRules[input.name].when) continue;
         input.disabled = !fieldEnabled(parameterRules, values, input.name);
         $(input).siblings(".timestamp-picker, [data-regional-picker]").prop("disabled", input.disabled);
-        $(input).closest(".conditional-field").prop("hidden", input.disabled);
+        const wrapper = $(input).closest(".conditional-field");
+        changes.push([wrapper, !input.disabled]);
       }
       // Hide empty headings too, so disabled descendants do not leave blank groups in the form.
       jqForm.find(".field-subsection, [data-config-section]").each((_, container) => {
@@ -2048,8 +2206,9 @@
           .toArray()
           .some((input) => !input.disabled);
         const target = $(container).is("[data-config-section]") ? $(container).closest(".accordion-item") : $(container);
-        target.prop("hidden", empty);
+        changes.push([target, !empty]);
       });
+      setVisibility(changes);
     }
 
     /**
@@ -2151,6 +2310,13 @@
       }
       if (resource.presets) initAppearancePresets();
       initTimestampFields(Object.keys(resource.fields).filter((name) => resource.fields[name].type === "datetime"));
+      $("#accessibility-toggle").on("click", function (event) {
+        event.preventDefault();
+        const menu = $("#bywr-accessibility-buttons");
+        const visible = menu.prop("hidden") || menu.hasClass("animate__fadeOut");
+        setVisible(menu, visible);
+        $(this).attr("aria-expanded", String(visible));
+      });
       initTheme();
       initTools();
       initFontPickers();
@@ -2169,6 +2335,14 @@
           if (parameterRules[this.name]) restoreEmptyField(this);
         })
         .on("change", syncFieldVisibility)
+        .on("show.bs.collapse hide.bs.collapse", ".accordion-collapse, .subsection-collapse", function (event) {
+          if (event.target === this) $(this).removeData("heightEffect").removeClass("motion-resize");
+        })
+        .on("show.bs.collapse", ".accordion-collapse, .subsection-collapse", function (event) {
+          if (event.target !== this) return;
+          // Bootstrap makes the content visible after show; begin field feedback before the next paint.
+          requestAnimationFrame(() => revealFields(this));
+        })
         .on("shown.bs.collapse hidden.bs.collapse", ".accordion-collapse", () => savePreferences())
         .on("input change", (event) => {
           urlEdited = false;
@@ -2204,7 +2378,7 @@
           if (url) url.hash = "";
           $("#preview-url").attr("href", url?.href || null);
           $("#copy-url").prop("disabled", !url);
-          $("#copy-status").text(url ? "URL changes apply after typing pauses." : "Enter a complete overlay URL.");
+          setMessage("#copy-status", url ? "URL changes apply after typing pauses." : "Enter a complete overlay URL.");
           if (!event.originalEvent?.isComposing) applyURLDebounced(urlGeneration);
         })
         .on("compositionstart", () => urlGeneration++)
@@ -2222,6 +2396,7 @@
         })
         .on("pageshow", generateURL);
       generateURL();
+      revealFields(jqForm);
     } catch (error) {
       console.error("Error loading configurator:", error);
       $("body").text("Unable to load the tool. Check your internet connection and keep its local files together, then reload.");

@@ -17,6 +17,8 @@ body {
   --preview-grid-a: #ddd;
   --preview-grid-b: #eee;
   --about-link-color: #5e5b78;
+  --settings-motion-duration: 0.25s;
+  --settings-collapse-duration: 0.2s;
 }
 .bywr-configurator[data-bs-theme="dark"] {
   --bs-body-bg: #111;
@@ -78,8 +80,59 @@ body {
 .bywr-configurator [hidden] {
   display: none !important;
 }
+.bywr-configurator :is(.animate__animated, .fade):not(.modal-backdrop) {
+  translate: 0;
+  transition:
+    opacity var(--settings-motion-duration) ease-out,
+    translate var(--settings-motion-duration) ease-out !important;
+  @starting-style {
+    translate: -0.5rem;
+  }
+}
+.bywr-configurator .animate__animated.animate__fadeIn {
+  animation: fadeIn var(--settings-motion-duration) ease-out 1 both !important;
+}
+.bywr-configurator .animate__animated.animate__fadeOut {
+  animation: fadeOut var(--settings-motion-duration) ease-out 1 both !important;
+}
+.bywr-configurator .animate__animated.animate__fadeOut,
+.bywr-configurator .fade:not(.show):not(.modal-backdrop) {
+  translate: -0.5rem;
+}
+.bywr-configurator .settings-panel .collapsing {
+  transition: height var(--settings-collapse-duration) ease-out !important;
+}
+.bywr-configurator .motion-resize {
+  overflow: clip;
+  transition: height var(--settings-motion-duration) ease-out !important;
+}
 .bywr-configurator .settings-panel .accordion {
   --bs-accordion-btn-focus-box-shadow: 0 0 0 0.2rem color-mix(in srgb, var(--primary-foreground) 25%, transparent);
+}
+/* Apply the entry offset immediately; only the return to rest should transition. */
+.bywr-configurator .motion-enter {
+  translate: -0.5rem;
+  transition: none !important;
+}
+.bywr-configurator .motion-enter.animate__fadeIn {
+  translate: 0;
+  transition: translate var(--settings-motion-duration) ease-out !important;
+}
+.bywr-configurator :is(.btn, .accordion-button, .form-control, .form-select, .form-check-input, .select2-selection, .pcr-button, a) {
+  transition:
+    color var(--settings-motion-duration) ease-out,
+    background-color var(--settings-motion-duration) ease-out,
+    border-color var(--settings-motion-duration) ease-out,
+    box-shadow var(--settings-motion-duration) ease-out,
+    background-position var(--settings-motion-duration) ease-out !important;
+}
+.bywr-configurator .modal-backdrop.fade {
+  transition: opacity var(--settings-motion-duration) ease-out !important;
+}
+/* Bootstrap's vertical dialog entry would combine with the shared horizontal motion. */
+.bywr-configurator .modal.fade .modal-dialog {
+  transform: none;
+  transition: none !important;
 }
 .bywr-configurator .settings-panel .accordion-button:hover {
   background-color: var(--bs-tertiary-bg) !important;
@@ -92,9 +145,16 @@ body {
   border-bottom: 1px solid currentColor;
   background-image: none;
   transform: rotate(45deg);
+  transition: transform var(--settings-motion-duration) ease-out !important;
 }
 .bywr-configurator .settings-panel .accordion-button:not(.collapsed)::after {
   transform: rotate(-135deg);
+}
+/* Settings, ordered entries, and live preview. */
+.bywr-configurator .motion-layer {
+  grid-area: 1 / 1;
+  align-self: start;
+  min-width: 0;
 }
 .bywr-configurator .settings-panel {
   min-width: 20rem;
@@ -241,20 +301,4 @@ body {
   padding-left: 1.75rem;
   font-size: 0.75rem;
   opacity: 0.75;
-}
-.bywr-configurator :is(.setup-layout, .settings-panel, .preview-panel, .form-control, .form-select) {
-  transition:
-    background-color 0.15s,
-    border-color 0.15s !important;
-}
-/* Popper owns the popover position; shared transitions would animate it from the corner. */
-.bywr-configurator .config-help .popover,
-.bywr-configurator .config-help .popover-arrow {
-  transition: none !important;
-}
-/* Common styles animate width; Select2 measures and positions menus synchronously. */
-.bywr-configurator [data-font-picker],
-.bywr-configurator :is(.stream-select2, .stream-select2-dropdown),
-.bywr-configurator :is(.stream-select2, .stream-select2-dropdown) * {
-  transition: none !important;
 }

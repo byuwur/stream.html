@@ -334,6 +334,27 @@
       .stream-home .animate__animated {
         --animate-duration: 0.4s;
         animation-duration: var(--animate-duration) !important;
+        translate: 0;
+        transition: translate 0.3s ease-out !important;
+        @starting-style {
+          translate: -0.5rem;
+        }
+      }
+      .stream-home .home-category-dropdown.animate__fadeIn {
+        animation: fadeIn 0.3s ease-out 1 both !important;
+      }
+      .stream-home .animate__fadeOut {
+        animation: fadeOut 0.3s ease-out 1 both !important;
+        translate: -0.5rem;
+        transition: translate 0.3s ease-out !important;
+      }
+      .stream-home .motion-enter {
+        translate: -0.5rem;
+        transition: none !important;
+      }
+      .stream-home .motion-enter.animate__fadeIn {
+        translate: 0;
+        transition: translate 0.3s ease-out !important;
       }
       .stream-home .home-tools {
         --animate-duration: 0.24s;
@@ -371,13 +392,13 @@
       @keyframes home-tool-enter {
         from {
           opacity: 0;
-          transform: translateY(0.75rem) scale(0.97);
+          transform: translateX(-0.5rem);
         }
       }
       @keyframes home-tool-exit {
         to {
           opacity: 0;
-          transform: translateY(-0.75rem) scale(0.97);
+          transform: translateX(-0.5rem);
         }
       }
       .stream-home a:hover,
