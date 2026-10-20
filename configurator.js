@@ -6,7 +6,7 @@
  * Removing this script leaves resource rendering functional.
  *
  * File map: overlay editing shortcut; preferences and the query preparation hook;
- * field icons and catalog; generated form; URL/preview updates and widgets;
+ * field icons and catalog; generated form and JSON editor; URL/preview updates and widgets;
  * help/navigation; conditional validation and editor startup.
  */
 (function (global) {
@@ -502,7 +502,7 @@
   /**
    * Build the active resource editor once after initResource() publishes validated settings.
    * The DOM controls own pending form edits; settings holds the last accepted resource values.
-   * URL drafts temporarily take precedence for actions. Landing/overlay pages never build this form.
+   * JSON and URL drafts temporarily take precedence for actions. Landing/overlay pages never build this form.
    * @returns {void}
    */
   byConfigurator.init = function () {
@@ -524,9 +524,13 @@
     const { settings, fields: parameterRules } = resource;
     // One revision invalidates queued edits and in-flight compression or URL decoding.
     let urlGeneration = 0;
+    let acceptedGeneration = -1;
+    let preparedJSON = { overrides: "{}", all: "{}" };
     // Keep typed URL drafts authoritative for Copy, Open, and F2.
     let urlEdited = false;
+    let jsonEdited = false;
     let previewURL = "";
+    const jsonInput = $("#settings-json")[0];
 
     // ==========
     // ==== GENERATED FORM ====
@@ -614,10 +618,43 @@
           </header>
           <div class="setup-layout row g-0 flex-grow-1 flex-column flex-md-row flex-nowrap overflow-auto">
             <!-- Editable settings. -->
-            <aside class="settings-panel position-relative h-100 flex-shrink-0 col-12 col-md-4 bg-body-tertiary p-3 overflow-y-auto border-end" aria-label="Overlay parameters">
-              <h1 class="h4 mb-1"><i class="fa-solid fa-sliders me-2" aria-hidden="true"></i>This is the form.</h1>
-              <p class="setup-intro text-body-secondary">Your next overlay starts here. Edit a field and watch the demo preview change.</p>
-              <form id="overlay-form" data-configurator="" class="accordion"></form>
+            <aside class="settings-panel d-flex flex-column position-relative h-100 flex-shrink-0 col-12 col-md-4 bg-body-tertiary overflow-y-auto border-end" aria-label="Overlay parameters">
+              <div class="settings-toolbar flex-shrink-0 sticky-top bg-body-tertiary border-bottom p-3">
+                <div class="d-flex align-items-center justify-content-between gap-2">
+                  <div class="btn-group btn-group-sm" role="group" aria-label="Settings editor">
+                    <button class="btn btn-outline-primary active" type="button" data-settings-view="form" aria-pressed="true" aria-controls="overlay-form">Form</button>
+                    <button class="btn btn-outline-secondary" type="button" data-settings-view="json" aria-pressed="false" aria-controls="settings-json-panel">JSON</button>
+                  </div>
+                  <div class="d-grid">
+                    <div id="form-actions" class="motion-layer d-flex gap-2">
+                      <button class="btn btn-sm btn-outline-secondary" type="button" data-expand-sections="true" data-bs-toggle="tooltip" title="Expand All" aria-label="Expand All">
+                        <i class="fa-solid fa-angles-down" aria-hidden="true"></i>
+                      </button>
+                      <button class="btn btn-sm btn-outline-secondary" type="button" data-expand-sections="false" data-bs-toggle="tooltip" title="Collapse All" aria-label="Collapse All">
+                        <i class="fa-solid fa-angles-up" aria-hidden="true"></i>
+                      </button>
+                    </div>
+                    <button id="copy-json" class="motion-layer btn btn-sm btn-outline-secondary" type="button" hidden><i class="fa-solid fa-copy me-2" aria-hidden="true"></i>Copy</button>
+                  </div>
+                </div>
+                <label id="json-options" class="form-switch d-flex align-items-center justify-content-between gap-3 ps-0 mt-3 mb-0" hidden>
+                  <span><i class="fa-solid fa-list-check text-primary me-2" aria-hidden="true"></i>Show all fields</span>
+                  <input id="json-all-fields" class="form-check-input fs-4 m-0 flex-shrink-0" type="checkbox" role="switch" />
+                </label>
+              </div>
+              <div class="settings-content d-flex flex-column flex-grow-1 p-3">
+                <h1 class="h4 flex-shrink-0 mb-1"><i class="fa-solid fa-sliders me-2" aria-hidden="true"></i>This is the form.</h1>
+                <p class="setup-intro flex-shrink-0 text-body-secondary">Your next overlay starts here. Edit a field and watch the demo preview change.</p>
+                <div class="settings-editors d-grid flex-grow-1 position-relative">
+                  <form id="overlay-form" data-configurator="" class="settings-editor accordion"></form>
+                  <div id="settings-json-panel" class="settings-editor" hidden>
+                    <label class="visually-hidden" for="settings-json">Overlay settings JSON</label>
+                    <textarea id="settings-json" class="form-control rounded-0 bg-body-secondary font-monospace" rows="20" maxlength="1048576" spellcheck="false" wrap="off" aria-describedby="json-error json-status"></textarea>
+                    <p id="json-error" class="small text-danger mt-2 mb-0" role="status" hidden></p>
+                    <p id="json-status" class="small text-body-secondary mt-2 mb-0" role="status" hidden></p>
+                  </div>
+                </div>
+              </div>
             </aside>
             <!-- Scaled view of the actual overlay. -->
             <section class="preview-panel h-100 order-first order-md-last col-12 col-md bg-body p-3 d-flex flex-column gap-2" aria-label="Overlay preview">
@@ -815,13 +852,20 @@
     // ==== URL GENERATION AND PREVIEW ====
     // ==========
     /**
-     * Validates the form and updates its overlay URL and preview.
-     * Commit accepted form values to settings, build a sparse readable URL, then optionally compress it.
+     * Validate the active form/JSON input and update its overlay URL and preview.
+     * Commit accepted values to settings, build a sparse readable URL, then optionally compress it.
      * Publish/save only the latest generation; slower async work must not replace newer edits or drafts.
      * @param {boolean} [keepURLDraft=false] Preserve the URL text during automatic application.
      * @returns {Promise<boolean>} Whether the latest URL was generated from valid fields.
      */
     async function generateURL(keepURLDraft = false) {
+      // JSON is another input surface for the same controls, never a separate settings store.
+      let jsonValid = true;
+      if (jsonEdited) {
+        const values = readJSONParameters();
+        jsonValid = values !== null;
+        if (jsonValid) loadSettings(values);
+      }
       // Restoring a value can emit change events; capture the revision after those handlers finish.
       fields.forEach(restoreEmptyField);
       const generation = ++urlGeneration;
@@ -830,7 +874,7 @@
       $("#overlay-url")[0].setCustomValidity("");
       syncFieldVisibility();
       // Check every field so all invalid sections are revealed, rather than stopping at the first.
-      const valid = fields.map(validField).every(Boolean);
+      const valid = fields.map(validField).every(Boolean) && jsonValid;
       if (!valid) {
         $("#overlay-url").val("");
         $("#preview-url").removeAttr("href");
@@ -892,8 +936,73 @@
       $("#copy-url .copy-label").text("Copy URL");
       setMessage("#copy-status", "");
       $("#copy-url").prop("disabled", false);
+      prepareJSON();
+      acceptedGeneration = generation;
       updateOverlayPreview(url.href);
+      syncJSON();
       return true;
+    }
+
+    /**
+     * Validate the complete JSON draft before changing any controls or accepted settings.
+     * Use resource field IDs and native values; missing keys reset to resource defaults when loaded.
+     * @returns {URLSearchParams|null} Validated field values, or null with an error beside the editor.
+     */
+    function readJSONParameters() {
+      let error = "";
+      let values;
+      try {
+        if (jsonInput.value.length > jsonInput.maxLength) throw new Error("Keep settings JSON under 1 MiB.");
+        const data = JSON.parse(jsonInput.value);
+        if (!data || typeof data !== "object" || Array.isArray(data)) throw new Error("Enter a JSON object with setting IDs as keys.");
+        values = new URLSearchParams();
+        for (const [name, value] of Object.entries(data)) {
+          if (!Object.hasOwn(parameterRules, name)) throw new Error(`Unknown setting: ${name}.`);
+          const rule = parameterRules[name];
+          const text = typeof value === "object" ? JSON.stringify(value) : String(value);
+          if (value === null || (typeof value === "object" && typeof rule.default !== "object") || !byStream.validParameter(parameterRules, name, text)) {
+            throw new Error(`Invalid value for ${rule.label || name} (${name}).`);
+          }
+          values.set(name, text);
+        }
+      } catch (failure) {
+        error = failure.message;
+      }
+      jsonInput.setCustomValidity(error);
+      $(jsonInput).toggleClass("is-invalid", !!error).attr("aria-invalid", String(!!error));
+      setMessage("#json-error", error);
+      return error ? null : values;
+    }
+
+    /**
+     * Prepare both JSON views with each accepted URL; switching views never serializes settings.
+     * URL default comparison excludes required anchors while preserving native values and list order.
+     * @returns {void}
+     */
+    function prepareJSON() {
+      const overrides = settingsURL({ ...resource, urlRequired: [] }, settings).searchParams;
+      const entries = Object.keys(parameterRules).map((name) => [name, settings[name]]);
+      preparedJSON = {
+        overrides: JSON.stringify(Object.fromEntries(entries.filter(([name]) => overrides.has(name))), null, 2),
+        all: JSON.stringify(Object.fromEntries(entries), null, 2)
+      };
+    }
+
+    /**
+     * Display prepared JSON without overwriting an active draft or its caret.
+     * @returns {void}
+     */
+    function syncJSON() {
+      if (jsonEdited) return;
+      jsonInput.value = preparedJSON[$("#json-all-fields").prop("checked") ? "all" : "overrides"];
+      jsonInput.setCustomValidity("");
+      $(jsonInput).removeClass("is-invalid").attr("aria-invalid", "false");
+      setMessage("#json-error", "");
+    }
+
+    function reportEditorValidity() {
+      if (jsonEdited && !jsonInput.checkValidity()) jsonInput.reportValidity();
+      else form.reportValidity();
     }
 
     // Editing is debounced before URL generation; keep the last valid preview on invalid input.
@@ -959,13 +1068,8 @@
       const parameters = await readURLParameters(parameterRules, url.search);
       if (generation !== urlGeneration) return;
       // Omitted parameters reset to defaults instead of inheriting values from the previous form.
-      const loaded = { ...resource.constants, ...Object.fromEntries(Object.entries(parameterRules).map(([name, field]) => [name, structuredClone(field.default)])) };
-      byStream.applyParameters(parameterRules, loaded, parameters.values);
-      // Keep this document and its widget lifetimes; only the preview loads a new overlay.
-      Object.assign(settings, loaded);
-      setFields(settings);
-      // Synchronize widgets without bubbling a separate URL generation for every field.
-      $(fields).each((_, field) => $(field).triggerHandler("change"));
+      jsonEdited = false;
+      loadSettings(parameters.values);
       loadCompressionOptions(url.search, url.search ? parameters.compressedFields : new Set());
       $("#url-load-error").text(parameters.error).prop("hidden", !parameters.error);
       return generateURL(automatic);
@@ -980,8 +1084,8 @@
       if (urlEdited) {
         const draft = readEditorURL();
         if (draft && sameResourceURL(draft) && !(await applyEditedURL())) return null;
-      } else if (!(await generateURL())) {
-        form.reportValidity();
+      } else if (urlGeneration !== acceptedGeneration && !(await generateURL())) {
+        reportEditorValidity();
         return null;
       }
       const url = readEditorURL();
@@ -1904,6 +2008,7 @@
         bootstrap.Tooltip.getInstance($("#advanced-options")[0])?.hide();
         showSection("advanced");
       });
+      jqHost.find('.settings-toolbar [data-bs-toggle="tooltip"]').attr({ "data-bs-placement": "bottom", "data-bs-fallback-placements": '["bottom"]' });
       if (typeof global.Popper?.createPopper === "function") byCommon.initBootstrap({ tooltipsOnly: true, root: jqHost[0] });
       else $("#advanced-options").removeAttr("data-bs-toggle");
       const previewSize = $("#preview-viewport")[0].viewBox.baseVal;
@@ -2022,7 +2127,7 @@
             showSection("advanced");
             return;
           case "KeyO":
-            if ($("#copy-url").prop("disabled")) return urlEdited ? $("#overlay-url")[0].reportValidity() : form.reportValidity();
+            if ($("#copy-url").prop("disabled")) return urlEdited ? $("#overlay-url")[0].reportValidity() : reportEditorValidity();
             $("#preview-url")[0].click();
             return;
           case "KeyC":
@@ -2285,6 +2390,20 @@
     // ==== EDITOR STARTUP AND EVENT HANDLERS ====
     // ==========
 
+    /**
+     * Replace settings from defaults plus an imported URL/JSON object, retaining widget lifetimes and Reset.
+     * @param {URLSearchParams} values Validated/imported raw values; runtime rules resolve their effective values.
+     * @returns {void}
+     */
+    function loadSettings(values) {
+      const loaded = { ...resource.constants, ...Object.fromEntries(Object.entries(parameterRules).map(([name, field]) => [name, structuredClone(field.default)])) };
+      byStream.applyParameters(parameterRules, loaded, values);
+      Object.assign(settings, loaded);
+      setFields(settings);
+      // Widget handlers observe the replacement without bubbling a generation for every field.
+      $(fields).each((_, field) => $(field).triggerHandler("change"));
+    }
+
     // Capture Reset defaults before widgets replace controls, then enhance fields and bind edits once.
     try {
       setFields(settings, true);
@@ -2323,12 +2442,89 @@
       initHelpDialog(initResourceHelp);
       initColorPickers();
       jqForm.find("select").each((_, select) => initSelect2(select));
-      // Both editing paths share a revision so queued form work cannot overwrite a newer URL draft.
+      // View requests also supersede earlier clicks while asynchronous validation is pending.
+      let settingsViewGeneration = 0;
+      // All editing surfaces share a revision so queued work cannot overwrite a newer draft.
       const generateURLDebounced = global.debounce((generation) => {
         if (generation === urlGeneration) generateURL();
       });
       const applyURLDebounced = global.debounce((generation) => {
         if (generation === urlGeneration) applyEditedURL(true);
+      });
+      $("[data-settings-view]").on("click", async function () {
+        const generation = ++settingsViewGeneration;
+        if ($(this).attr("aria-pressed") === "true") return;
+        const valid = await currentOverlayURL();
+        if (generation !== settingsViewGeneration) return;
+        if (!valid) return reportEditorValidity();
+        const json = this.dataset.settingsView === "json";
+        jsonEdited = false;
+        syncJSON();
+        $("[data-settings-view]").removeClass("active btn-outline-primary").addClass("btn-outline-secondary").attr("aria-pressed", "false");
+        $(this).removeClass("btn-outline-secondary").addClass("active btn-outline-primary").attr("aria-pressed", "true");
+        const outgoing = json ? form : $("#settings-json-panel")[0];
+        const incoming = json ? $("#settings-json-panel")[0] : form;
+        setVisible(outgoing, false);
+        jqHost.find(".settings-panel").toggleClass("json-view", json);
+        setVisible($("#form-actions"), !json);
+        $("#copy-json, #json-options").each((_, element) => setVisible(element, json));
+        setVisible(incoming, true);
+        if (!json) revealFields(jqForm);
+        setMessage("#json-status", "");
+      });
+      $("[data-expand-sections]").on("click", function () {
+        const expand = this.dataset.expandSections === "true";
+        jqForm.find(".accordion-collapse").each((_, group) => {
+          const applySubsections = () =>
+            $(group)
+              .find(".subsection-collapse")
+              .each((_, subsection) => setExpanded(subsection, expand));
+          $(group).off(".expandSubsections");
+          // Expand children after the parent reaches auto height so neither transition clips the other.
+          if (expand && (!group.classList.contains("show") || group.classList.contains("collapsing"))) {
+            $(group).on("shown.bs.collapse.expandSubsections", function (event) {
+              if (event.target !== group) return;
+              $(group).off(".expandSubsections");
+              applySubsections();
+            });
+          } else applySubsections();
+          setExpanded(group, expand);
+        });
+      });
+      $("#json-all-fields").on("change", async function () {
+        const checked = this.checked;
+        if (!(await currentOverlayURL())) {
+          this.checked = !checked;
+          return reportEditorValidity();
+        }
+        jsonEdited = false;
+        syncJSON();
+      });
+      $(jsonInput)
+        .on("input", (event) => {
+          jsonEdited = true;
+          urlEdited = false;
+          setMessage("#json-status", "");
+          const generation = ++urlGeneration;
+          if (!event.originalEvent?.isComposing) generateURLDebounced(generation);
+        })
+        .on("compositionstart", () => urlGeneration++)
+        .on("compositionend", () => generateURLDebounced(++urlGeneration))
+        .on("change", async () => {
+          if (!(await generateURL()) || document.activeElement === jsonInput) return;
+          // Reformat only after leaving the editor; typing must preserve its draft and caret.
+          jsonEdited = false;
+          syncJSON();
+        });
+      $("#copy-json").on("click", async () => {
+        if (!(await currentOverlayURL())) return;
+        try {
+          await navigator.clipboard.writeText(jsonInput.value);
+          setMessage("#json-status", "Copied!");
+        } catch {
+          $(jsonInput).trigger("focus").trigger("select");
+          setMessage("#json-status", "Press Ctrl+C (or Command+C) to copy the selected JSON.");
+        }
       });
       jqForm
         .on("focusout", "[name]", function () {
@@ -2346,6 +2542,7 @@
         .on("shown.bs.collapse hidden.bs.collapse", ".accordion-collapse", () => savePreferences())
         .on("input change", (event) => {
           urlEdited = false;
+          jsonEdited = false;
           const generation = ++urlGeneration;
           if (!event.originalEvent?.isComposing) generateURLDebounced(generation);
         })
@@ -2356,7 +2553,10 @@
           generateURL();
           form.reportValidity();
         })
-        .on("reset", () =>
+        .on("reset", () => {
+          jsonEdited = false;
+          urlEdited = false;
+          urlGeneration++;
           setTimeout(() => {
             jqForm.find("select").trigger("change.select2");
             $('#short-url, input[name="compression-scope"], [data-compress-field]').each(function () {
@@ -2365,14 +2565,15 @@
             if ($("#short-url").prop("disabled")) $("#short-url").prop("checked", false);
             $("#compression-search").val("").trigger("input");
             $("#short-url").trigger("change");
-          }, 0)
-        );
+          }, 0);
+        });
       $("#copy-url")
         .on("click", copyURL)
         .on("mouseleave focusout", () => $("#copy-url .copy-label").text("Copy URL"));
       $("#overlay-url")
         .on("input", function (event) {
           urlEdited = true;
+          jsonEdited = false;
           urlGeneration++;
           const url = readEditorURL();
           if (url) url.hash = "";

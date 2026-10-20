@@ -151,6 +151,7 @@ body {
   transform: rotate(-135deg);
 }
 /* Settings, ordered entries, and live preview. */
+.bywr-configurator .settings-editor,
 .bywr-configurator .motion-layer {
   grid-area: 1 / 1;
   align-self: start;
@@ -160,6 +161,30 @@ body {
   min-width: 20rem;
   scrollbar-color: var(--bs-border-color) var(--bs-tertiary-bg);
   scrollbar-width: thin;
+}
+.bywr-configurator .settings-panel.json-view {
+  height: 100% !important;
+  overflow-y: hidden !important;
+}
+.bywr-configurator .json-view :is(.settings-content, .settings-editors) {
+  min-height: 0;
+}
+.bywr-configurator .json-view #overlay-form,
+.bywr-configurator .settings-panel:not(.json-view) #settings-json-panel {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+.bywr-configurator #settings-json-panel {
+  display: flex;
+  flex-direction: column;
+  align-self: stretch;
+  min-height: 0;
+}
+.bywr-configurator #settings-json {
+  flex: 1 1 0;
+  min-height: 0;
+  resize: none;
 }
 .bywr-configurator .entry-row .stream-select2 {
   flex: 1 1 0;
