@@ -510,13 +510,13 @@
           </header>
           <div class="setup-layout row g-0 flex-grow-1 flex-column flex-md-row flex-nowrap overflow-auto">
             <!-- Editable settings. -->
-            <aside class="settings-panel h-100 flex-shrink-0 col-12 col-md-4 bg-body-tertiary p-3 overflow-y-auto border-end" aria-label="Overlay parameters">
+            <aside class="settings-panel position-relative h-100 flex-shrink-0 col-12 col-md-4 bg-body-tertiary p-3 overflow-y-auto border-end" aria-label="Overlay parameters">
               <h1 class="h4 mb-1"><i class="fa-solid fa-sliders me-2" aria-hidden="true"></i>This is the form.</h1>
               <p class="setup-intro text-body-secondary">Your next overlay starts here. Edit a field and watch the demo preview change.</p>
               <form id="overlay-form" data-configurator="" class="accordion"></form>
             </aside>
             <!-- Scaled view of the actual overlay. -->
-            <section class="preview-panel h-100 order-first order-md-last flex-shrink-0 col-12 col-md-8 bg-body p-3 d-flex flex-column gap-2" aria-label="Overlay preview">
+            <section class="preview-panel h-100 order-first order-md-last col-12 col-md bg-body p-3 d-flex flex-column gap-2" aria-label="Overlay preview">
               <header class="preview-toolbar d-flex justify-content-between align-items-center small">
                 <strong><i class="fa-solid fa-eye me-2" aria-hidden="true"></i>Live preview</strong>
                 <a id="preview-url" target="_blank" rel="noopener" class="link-body-emphasis" aria-keyshortcuts="Alt+Shift+O">
@@ -527,7 +527,7 @@
               <div id="preview-stage" class="ratio ratio-16x9 flex-grow-1 overflow-hidden border rounded-0 bg-body-secondary">
                 <svg id="preview-viewport" viewBox="0 0 1280 720" role="group" aria-label="Scaled overlay preview">
                   <foreignObject width="100%" height="100%">
-                    <iframe id="overlay-preview" class="border-0" title="Demo preview"></iframe>
+                    <iframe id="overlay-preview" class="border-0 w-100 h-100 bg-transparent" title="Demo preview"></iframe>
                   </foreignObject>
                 </svg>
               </div>
@@ -539,7 +539,7 @@
               </footer>
             </section>
           </div>
-          <div id="bywr-accessibility" class="uncolor-links">
+          <div id="bywr-accessibility" class="uncolor-links bottom-0 flex-column-reverse">
             <a href="javascript:byCommon.accessibilityToggle();" role="button" data-bs-toggle="tooltip" title="Accessibility tools" aria-label="Accessibility tools" aria-controls="bywr-accessibility-buttons">
               <i class="fa-solid fa-universal-access" aria-hidden="true"></i>
             </a>
@@ -586,12 +586,12 @@
             </div>
           </div>
           <!-- Help navigation. -->
-          <footer class="config-footer position-relative border-top p-2 text-body-secondary flex-shrink-0">
-            <small class="config-info">
+          <footer class="config-footer d-flex flex-column flex-lg-row align-items-center gap-2 border-top p-2 text-body-secondary flex-shrink-0">
+            <small class="config-info text-nowrap opacity-75">
               <!-- <a href="https://github.com/byuwur/stream.html" target="_blank" rel="noopener noreferrer">stream.html</a> · -->configurator v${byConfigurator.VERSION} · resource v${resource.version}
               <!-- · <a href="https://byuwur.co" target="_blank" rel="noopener noreferrer">@byUwUr</a> -->
             </small>
-            <nav class="footer-links px-5 text-center" aria-label="Page navigation"></nav>
+            <nav class="footer-links flex-grow-1 px-5 text-center" aria-label="Page navigation"></nav>
           </footer>
         </main>
       `);
@@ -619,8 +619,8 @@
         if (!groups.has(section)) {
           const id = `section-${groups.size}`;
           const collapsed = savedPreferences.collapsed.includes(section);
-          const group = $(/* HTML */ `<fieldset class="accordion-item mb-3 border border-secondary-subtle bg-body p-2"></fieldset>`).appendTo(jqForm);
-          const heading = $(/* HTML */ `<button class="accordion-button" type="button" data-bs-toggle="collapse" aria-expanded="true"></button>`)
+          const group = $(/* HTML */ `<section class="accordion-item mb-3 border border-secondary-subtle bg-body"></section>`).attr("aria-labelledby", `${id}-toggle`).appendTo(jqForm);
+          const heading = $(/* HTML */ `<button class="accordion-button p-3 fs-6 fw-semibold text-primary bg-transparent" type="button" data-bs-toggle="collapse" aria-expanded="true"></button>`)
             .attr({ id: `${id}-toggle`, "data-bs-target": `#${id}`, "aria-controls": id, "aria-expanded": String(!collapsed) })
             .toggleClass("collapsed", collapsed)
             .text(section);
@@ -629,34 +629,38 @@
               .addClass(`${resource.sectionIcons?.[section] || `fa-solid ${fieldIcon(section)}`} me-2`)
               .attr("aria-hidden", "true")
           );
-          $(/* HTML */ `<legend class="float-start w-100 fs-6 fw-semibold border-bottom pb-2 mb-2 text-primary"></legend>`).append(heading).appendTo(group);
-          groups.set(
-            section,
-            $(/* HTML */ `<div class="accordion-collapse collapse show"></div>`)
-              .attr({ id, "aria-labelledby": `${id}-toggle`, "data-config-section": section })
-              .toggleClass("show", !collapsed)
-              .appendTo(group)
-          );
+          $(/* HTML */ `<h2 class="accordion-header fs-6 m-0"></h2>`).append(heading).appendTo(group);
+          const content = $(/* HTML */ `<div class="accordion-collapse collapse show"></div>`)
+            .attr({ id, "aria-labelledby": `${id}-toggle`, "data-config-section": section })
+            .toggleClass("show", !collapsed)
+            .appendTo(group);
+          // Padding belongs inside the collapsing element so its closed height can reach zero.
+          groups.set(section, $(/* HTML */ `<div class="accordion-body p-3"></div>`).appendTo(content));
         }
         let container = groups.get(section);
         if (field.subsection) {
           const key = `${section}:${field.subsection}`;
           if (!subsections.has(key)) {
-            const details = $(/* HTML */ `<details class="field-subsection border-top pt-2 mb-3"></details>`).appendTo(container);
-            $(/* HTML */ `<summary class="fw-semibold text-primary mb-2"></summary>`)
+            const id = `subsection-${subsections.size}`;
+            const subsection = $(/* HTML */ `<section class="field-subsection border-top mt-3"></section>`).attr("aria-labelledby", `${id}-toggle`).appendTo(container);
+            const heading = $(/* HTML */ `<button class="accordion-button collapsed px-0 py-2 fs-6 fw-medium text-primary bg-transparent" type="button" data-bs-toggle="collapse" aria-expanded="false"></button>`)
+              .attr({ id: `${id}-toggle`, "data-bs-target": `#${id}`, "aria-controls": id })
               .text(field.subsection)
               .prepend(
                 $(/* HTML */ `<i></i>`)
                   .addClass(`fa-solid ${fieldIcon(field.subsection)} fa-fw me-2`)
                   .attr("aria-hidden", "true")
-              )
-              .appendTo(details);
-            subsections.set(key, $(/* HTML */ `<div class="pt-2"></div>`).appendTo(details));
+              );
+            $(/* HTML */ `<h3 class="accordion-header fs-6 m-0"></h3>`).append(heading).appendTo(subsection);
+            const content = $(/* HTML */ `<div class="subsection-collapse collapse"></div>`)
+              .attr({ id, "aria-labelledby": `${id}-toggle`, "data-config-subsection": field.subsection })
+              .appendTo(subsection);
+            subsections.set(key, $(/* HTML */ `<div class="pt-2 pb-1"></div>`).appendTo(content));
           }
           container = subsections.get(key);
         }
-        const label = $(/* HTML */ `<label class="form-label d-flex flex-column gap-1 w-100 mb-3"></label>`).appendTo(container);
-        const caption = $(/* HTML */ `<span class="field-caption"></span>`)
+        const label = $(/* HTML */ `<label class="config-field form-label d-flex flex-column gap-1 w-100 mb-3"></label>`).appendTo(container);
+        const caption = $(/* HTML */ `<span class="field-caption small"></span>`)
           .text(field.label || name)
           .appendTo(label);
         caption.prepend(
@@ -677,7 +681,7 @@
             label.addClass("form-switch ps-0");
             control
               .removeClass("form-control")
-              .addClass("form-check-input")
+              .addClass("form-check-input fs-4 m-0 flex-shrink-0")
               .attr({ role: "switch", value: field.checkedValue ?? 1, "data-unchecked-value": field.uncheckedValue ?? 0 });
           }
         }
@@ -690,8 +694,8 @@
         if (field.type === "switch") caption.add(control).wrapAll(/* HTML */ `<span class="d-flex align-items-center justify-content-between gap-3"></span>`);
         if (field.description) $(/* HTML */ `<small class="text-body-secondary"></small>`).text(field.description).appendTo(label);
         if (field.type === "entries") {
-          const editor = $(/* HTML */ `<div class="entry-editor mb-3"></div>`).appendTo(container);
-          label.appendTo(editor);
+          const editor = $(/* HTML */ `<div class="config-field entry-editor mb-3"></div>`).appendTo(container);
+          label.removeClass("config-field").appendTo(editor);
           $(/* HTML */ `<div class="entry-list"></div>`).appendTo(editor);
           $(/* HTML */ `<button type="button" class="add-entry btn btn-sm btn-outline-primary w-100"></button>`)
             .text(field.addLabel || "Add entry")
@@ -920,7 +924,8 @@
       jqSelect.select2({
         width: "100%",
         dropdownParent: jqParent.length ? jqParent : $("body"),
-        dropdownCssClass: "stream-select2-dropdown",
+        selectionCssClass: "bg-body-secondary border border-secondary-subtle rounded-0 h-auto",
+        dropdownCssClass: "stream-select2-dropdown bg-body-secondary text-body border border-secondary-subtle rounded-0",
         ...options
       });
       jqSelect.next(".select2-container").addClass("stream-select2");
@@ -1561,7 +1566,7 @@
                 <button class="btn btn-sm btn-outline-light border-0" type="button" data-section="advanced" aria-keyshortcuts="Alt+Shift+A"><i class="fa-solid fa-gear me-1" aria-hidden="true"></i>Advanced</button>
                 <button type="button" class="help-close btn btn-sm btn-outline-light border-0 ms-auto fs-4" aria-label="Close dialog">&times;</button>
               </nav>
-              <header class="help-heading px-3 px-md-4 py-3 text-white flex-shrink-0"><h2 class="h2 m-0" id="help-title"></h2></header>
+              <header class="help-heading bg-primary px-3 px-md-4 py-3 text-white flex-shrink-0"><h2 class="h2 m-0" id="help-title"></h2></header>
               <article class="modal-body p-3 p-md-4 overflow-y-auto">
                 <section data-panel="info">
                   <p>
@@ -1637,9 +1642,9 @@
                 </section>
                 <section data-panel="obs" hidden>
                   <ol class="ps-4">
-                    <li>Adjust the parameters and check the live preview.</li>
-                    <li>Click <strong>Copy URL</strong>.</li>
-                    <li>In OBS, add a <strong>Browser</strong> source and paste the link into its <strong>URL</strong> field.</li>
+                    <li class="mb-3">Adjust the parameters and check the live preview.</li>
+                    <li class="mb-3">Click <strong>Copy URL</strong>.</li>
+                    <li class="mb-3">In OBS, add a <strong>Browser</strong> source and paste the link into its <strong>URL</strong> field.</li>
                   </ol>
                   <p class="help-dimensions"></p>
                   <p>For a downloaded overlay, paste the complete <code>file:///</code> URL with <strong>Local file</strong> unchecked. Keep the folder at that location.</p>
@@ -1653,7 +1658,7 @@
                 <section data-panel="advanced" hidden>
                   <h3 class="h5 mb-3">URL options</h3>
                   <div class="form-check form-switch d-flex align-items-center gap-3 p-0 mb-2">
-                    <input id="short-url" class="form-check-input float-none m-0 flex-shrink-0" type="checkbox" role="switch" aria-describedby="short-url-help url-summary" />
+                    <input id="short-url" class="form-check-input fs-4 float-none m-0 flex-shrink-0" type="checkbox" role="switch" aria-describedby="short-url-help url-summary" />
                     <label class="form-check-label fw-semibold" for="short-url"><i class="fa-solid fa-compress fa-fw me-2" aria-hidden="true"></i>Shorter URL</label>
                   </div>
                   <fieldset id="compression-options" class="border-0 p-0 m-0 mb-4" hidden>
@@ -1682,7 +1687,7 @@
                         ><i class="fa-solid fa-magnifying-glass fa-fw me-2" aria-hidden="true"></i>Find a field
                         <input id="compression-search" type="search" class="form-control mt-1" placeholder="Search by label or parameter" />
                       </label>
-                      <div id="compression-field-list" class="compression-fields border p-3"></div>
+                      <div id="compression-field-list" class="compression-fields overflow-auto border p-3"></div>
                       <p id="compression-empty" class="small mt-2 mb-0" hidden>No matching fields.</p>
                     </div>
                   </fieldset>
@@ -1989,6 +1994,7 @@
       }
       initSelect2(jqSelect, {
         placeholder: "Choose a tool",
+        selectionCssClass: "bg-transparent border border-light rounded-0 h-auto",
         templateResult: toolResult,
         templateSelection: toolOption
       });
@@ -2003,6 +2009,23 @@
     // ==========
     // ==== FIELD VISIBILITY AND VALIDATION ====
     // ==========
+
+    /**
+     * Expand or collapse either group type, applying the latest request after an active transition.
+     * @param {HTMLElement} element Section or subsection collapse container.
+     * @param {boolean} expanded Requested final state.
+     * @returns {void}
+     */
+    function setExpanded(element, expanded) {
+      const collapse = bootstrap.Collapse.getOrCreateInstance(element, { toggle: false });
+      const apply = () => {
+        $(element).off(".settingsExpand");
+        collapse[expanded ? "show" : "hide"]();
+      };
+      $(element).off(".settingsExpand");
+      if (element.classList.contains("collapsing")) $(element).one("shown.bs.collapse.settingsExpand hidden.bs.collapse.settingsExpand", apply);
+      else apply();
+    }
 
     /**
      * Use the shared when rules to disable and hide inactive fields and their descendants.
@@ -2024,7 +2047,7 @@
           .find("[name]")
           .toArray()
           .some((input) => !input.disabled);
-        const target = $(container).is("[data-config-section]") ? $(container).closest("fieldset") : $(container);
+        const target = $(container).is("[data-config-section]") ? $(container).closest(".accordion-item") : $(container);
         target.prop("hidden", empty);
       });
     }
@@ -2065,9 +2088,7 @@
       // Hidden controls are excluded from native validation, including the account JSON.
       const accepted = field.checkValidity() && valid;
       if (!accepted) {
-        jqField.parents("details").prop("open", true);
-        const section = jqField.closest(".accordion-collapse")[0];
-        if (section) bootstrap.Collapse.getOrCreateInstance(section, { toggle: false }).show();
+        jqField.parents(".accordion-collapse, .subsection-collapse").each((_, group) => setExpanded(group, true));
       }
       return accepted;
     }
