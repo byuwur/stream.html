@@ -1,0 +1,111 @@
+html,
+body {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  overflow: hidden;
+}
+* {
+  box-sizing: border-box;
+}
+[hidden] {
+  display: none !important;
+}
+#overlay {
+  --font-size: 48px;
+  --base-size: min(var(--font-size), 12vw);
+  --heading-size: max(14px, calc(var(--base-size) * 0.3));
+  --secondary-size: calc(var(--base-size) * 0.42);
+  --text: #fff;
+  --accent: #d9d9d9;
+  --background: #202020e6;
+  --radius: 8px;
+  --padding: 28px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  padding: 16px;
+  font-family: "Courier New", Courier, monospace;
+  color: var(--text);
+  font-weight: 400;
+  font-size: var(--base-size);
+  text-align: center;
+}
+.panel {
+  width: 100%;
+  max-width: 800px;
+  min-width: 0;
+  padding: var(--padding);
+  border-radius: var(--radius);
+  background: var(--background);
+  overflow-wrap: anywhere;
+}
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+  font: inherit;
+}
+.eyebrow {
+  font-weight: 600;
+  color: var(--accent);
+  font-size: var(--heading-size);
+  letter-spacing: calc(var(--heading-size) * 0.05);
+  text-transform: uppercase;
+  margin-bottom: var(--heading-size);
+}
+.secondary {
+  opacity: 0.65;
+  font-size: var(--secondary-size);
+  margin-top: calc(var(--secondary-size) * 0.65);
+  white-space: pre-wrap;
+}
+.primary {
+  white-space: pre-wrap;
+  line-height: 1.2;
+}
+progress {
+  display: block;
+  width: 100%;
+  height: 6px;
+  border: 0;
+  margin-top: 20px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #ffffff20;
+  accent-color: var(--accent);
+}
+progress::-webkit-progress-bar {
+  background: #ffffff20;
+}
+progress::-webkit-progress-value {
+  background: var(--accent);
+}
+img {
+  max-width: 100%;
+  object-fit: contain;
+}
+@keyframes reveal {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes pulse {
+  50% {
+    opacity: 0.45;
+  }
+}
+.sponsor-image {
+  display: block;
+  width: 100%;
+  margin: 0 auto 20px;
+}
