@@ -1,0 +1,228 @@
+html,
+body {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  overflow: hidden;
+}
+* {
+  box-sizing: border-box;
+}
+[hidden] {
+  display: none !important;
+}
+#overlay {
+  --font-size: 48px;
+  --base-size: min(var(--font-size), 12vw);
+  --heading-size: max(14px, calc(var(--base-size) * 0.3));
+  --secondary-size: calc(var(--base-size) * 0.42);
+  --text: #fff;
+  --accent: #d9d9d9;
+  --background: #202020e6;
+  --radius: 8px;
+  --padding: 28px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  padding: 16px;
+  font-family: "Courier New", Courier, monospace;
+  color: var(--text);
+  font-weight: 400;
+  font-size: var(--base-size);
+  text-align: center;
+}
+.panel {
+  width: 100%;
+  max-width: 800px;
+  min-width: 0;
+  padding: var(--padding);
+  border-radius: var(--radius);
+  background: var(--background);
+  overflow-wrap: anywhere;
+}
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+  font: inherit;
+}
+.eyebrow {
+  font-weight: 600;
+  color: var(--accent);
+  font-size: var(--heading-size);
+  letter-spacing: calc(var(--heading-size) * 0.05);
+  text-transform: uppercase;
+  margin-bottom: var(--heading-size);
+}
+.secondary {
+  opacity: 0.65;
+  font-size: var(--secondary-size);
+  margin-top: calc(var(--secondary-size) * 0.65);
+  white-space: pre-wrap;
+}
+.primary {
+  white-space: pre-wrap;
+  line-height: 1.2;
+}
+progress {
+  display: block;
+  width: 100%;
+  height: 6px;
+  border: 0;
+  margin-top: 20px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #ffffff20;
+  accent-color: var(--accent);
+}
+progress::-webkit-progress-bar {
+  background: #ffffff20;
+}
+progress::-webkit-progress-value {
+  background: var(--accent);
+}
+img {
+  max-width: 100%;
+  object-fit: contain;
+}
+@keyframes reveal {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes pulse {
+  50% {
+    opacity: 0.45;
+  }
+}
+.clocks {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing);
+}
+.clocks[data-composition="inline"] {
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-evenly;
+}
+.clock {
+  min-width: 0;
+}
+#overlay[data-composition="single-line"] .panel,
+.clock-line,
+.clock-line .clocks,
+.clock-line .clock {
+  display: flex;
+  align-items: center;
+}
+.clock-line,
+.clock-line .clocks,
+.clock-line .clock {
+  gap: var(--spacing);
+  flex-direction: row;
+  flex-wrap: nowrap;
+}
+.clock-line {
+  width: max-content;
+  flex-shrink: 0;
+}
+.clock-line > *,
+.clock-line .clocks > *,
+.clock-line .clock > * {
+  flex-shrink: 0;
+}
+.clock-line :is(.eyebrow, .secondary, .zone, .dial) {
+  margin: 0;
+  white-space: nowrap;
+}
+.time {
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+.zone {
+  font-size: calc(var(--base-size) * 0.22);
+  color: var(--accent);
+  margin-top: calc(var(--base-size) * 0.132);
+}
+[data-layout="minimal"] .time {
+  font-weight: 300;
+}
+[data-layout="flip"] .time {
+  display: flex;
+  gap: calc(var(--base-size) * 0.08);
+  justify-content: center;
+}
+.flap {
+  position: relative;
+  background: linear-gradient(#ffffff10 49%, #0006 50%, #ffffff08 51%);
+  padding: calc(var(--base-size) * 0.15) calc(var(--base-size) * 0.12);
+  border-radius: calc(var(--base-size) * 0.08);
+  box-shadow: 0 4px 8px #0004;
+}
+@keyframes flip {
+  from {
+    transform: perspective(500px) rotateX(-25deg);
+  }
+  to {
+    transform: perspective(500px) rotateX(0);
+  }
+}
+.dial {
+  width: min(calc(var(--base-size) * 3), 65vw);
+  aspect-ratio: 1;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+  position: relative;
+  margin: 0 auto calc(var(--base-size) * 0.3);
+}
+.tick {
+  position: absolute;
+  left: calc(50% - 1px);
+  top: 5%;
+  width: 2px;
+  height: 6%;
+  transform-origin: 50% 750%;
+  background: currentColor;
+  opacity: 0.4;
+}
+.hand {
+  position: absolute;
+  left: calc(50% - 2px);
+  bottom: 50%;
+  width: 4px;
+  height: 33%;
+  transform-origin: 50% 100%;
+  background: currentColor;
+  border-radius: 4px;
+}
+.hand.hour {
+  height: 23%;
+  width: 6px;
+  left: calc(50% - 3px);
+}
+.hand.second {
+  width: 2px;
+  left: calc(50% - 1px);
+  height: 39%;
+  background: var(--accent);
+}
+.dial::after {
+  content: "";
+  position: absolute;
+  inset: calc(50% - 5px);
+  background: var(--accent);
+  border-radius: 50%;
+}
+[data-layout="analog"] .time {
+  font-size: calc(var(--base-size) * 0.38);
+}
