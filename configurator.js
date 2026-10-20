@@ -13,7 +13,7 @@
   global.byConfigurator = global.byConfigurator || {};
   const byConfigurator = global.byConfigurator;
   if (byConfigurator.initialized) return;
-  byConfigurator.VERSION = "8"; // 2026-10-19
+  byConfigurator.VERSION = "8.1"; // 2026-10-19
   const root = new URL(".", document.currentScript.src);
 
   // F2 belongs to the optional editor; native overlays do not need this script or its dependencies.
