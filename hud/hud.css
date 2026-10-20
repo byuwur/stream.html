@@ -1,0 +1,210 @@
+html,
+body {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  overflow: hidden;
+}
+* {
+  box-sizing: border-box;
+}
+[hidden] {
+  display: none !important;
+}
+#overlay {
+  --font-size: 48px;
+  --base-size: min(var(--font-size), 12vw);
+  --heading-size: max(14px, calc(var(--base-size) * 0.3));
+  --secondary-size: calc(var(--base-size) * 0.42);
+  --text: #fff;
+  --accent: #d9d9d9;
+  --background: #202020e6;
+  --radius: 8px;
+  --padding: 28px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  padding: 16px;
+  font-family: "Courier New", Courier, monospace;
+  color: var(--text);
+  font-weight: 400;
+  font-size: var(--base-size);
+  text-align: center;
+}
+.panel {
+  width: 100%;
+  max-width: 800px;
+  min-width: 0;
+  padding: var(--padding);
+  border-radius: var(--radius);
+  background: var(--background);
+  overflow-wrap: anywhere;
+}
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+  font: inherit;
+}
+.eyebrow {
+  font-weight: 600;
+  color: var(--accent);
+  font-size: var(--heading-size);
+  letter-spacing: calc(var(--heading-size) * 0.05);
+  text-transform: uppercase;
+  margin-bottom: var(--heading-size);
+}
+.secondary {
+  opacity: 0.65;
+  font-size: var(--secondary-size);
+  margin-top: calc(var(--secondary-size) * 0.65);
+  white-space: pre-wrap;
+}
+.primary {
+  white-space: pre-wrap;
+  line-height: 1.2;
+}
+progress {
+  display: block;
+  width: 100%;
+  height: 6px;
+  border: 0;
+  margin-top: 20px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #ffffff20;
+  accent-color: var(--accent);
+}
+progress::-webkit-progress-bar {
+  background: #ffffff20;
+}
+progress::-webkit-progress-value {
+  background: var(--accent);
+}
+img {
+  max-width: 100%;
+  object-fit: contain;
+}
+@keyframes reveal {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes pulse {
+  50% {
+    opacity: 0.45;
+  }
+}
+.hud {
+  position: absolute;
+  inset: var(--inset);
+  width: auto;
+  background: var(--background);
+  padding: 0;
+}
+.hud::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: var(--frame-thickness, 2px) solid var(--text);
+  clip-path: polygon(
+    0 0,
+    var(--corner-length, 20%) 0,
+    var(--corner-length, 20%) var(--frame-thickness, 2px),
+    calc(100% - var(--corner-length, 20%)) var(--frame-thickness, 2px),
+    calc(100% - var(--corner-length, 20%)) 0,
+    100% 0,
+    100% var(--corner-length, 20%),
+    calc(100% - var(--frame-thickness, 2px)) var(--corner-length, 20%),
+    calc(100% - var(--frame-thickness, 2px)) calc(100% - var(--corner-length, 20%)),
+    100% calc(100% - var(--corner-length, 20%)),
+    100% 100%,
+    calc(100% - var(--corner-length, 20%)) 100%,
+    calc(100% - var(--corner-length, 20%)) calc(100% - var(--frame-thickness, 2px)),
+    var(--corner-length, 20%) calc(100% - var(--frame-thickness, 2px)),
+    var(--corner-length, 20%) 100%,
+    0 100%,
+    0 calc(100% - var(--corner-length, 20%)),
+    var(--frame-thickness, 2px) calc(100% - var(--corner-length, 20%)),
+    var(--frame-thickness, 2px) var(--corner-length, 20%),
+    0 var(--corner-length, 20%)
+  );
+}
+.hud::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(0deg, #000 0 1px, transparent 1px 4px);
+  opacity: var(--scanlines);
+  pointer-events: none;
+}
+.hud-rec,
+.hud-label,
+.hud-time,
+.battery {
+  position: absolute;
+  font-size: var(--base-size);
+}
+.hud-rec {
+  left: 20px;
+  top: 15px;
+  color: var(--accent);
+}
+.hud-label {
+  left: 20px;
+  bottom: 20px;
+}
+.hud-time {
+  right: 20px;
+  bottom: 20px;
+  font-size: calc(var(--base-size) * 0.75);
+}
+.battery {
+  right: 20px;
+  top: 15px;
+}
+.crosshair {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0.5;
+}
+.blink {
+  animation: pulse 1.5s steps(1) infinite;
+}
+.hud-noise {
+  position: absolute;
+  inset: 0;
+  background: repeating-conic-gradient(#fff 0% 25%, transparent 0% 50%);
+  background-size: 3px 3px;
+  opacity: var(--grain);
+  pointer-events: none;
+}
+[data-style="vhs"] .hud {
+  font-family: var(--hud-font, monospace);
+  text-shadow: 2px 0 var(--accent);
+  border-radius: 0;
+}
+[data-style="viewfinder"] .hud-rec {
+  color: var(--text);
+}
+[data-style="viewfinder"] .crosshair {
+  font-size: calc(var(--base-size) * 3);
+  font-weight: 300;
+}
+@media (max-width: 500px) {
+  .hud-time {
+    bottom: 55px;
+    font-size: calc(var(--base-size) * 0.6);
+  }
+}

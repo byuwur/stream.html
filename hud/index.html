@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en" data-tool="hud">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Camera HUD | stream.HTML</title>
+    <meta name="description" content="REC, timecode, and a little nostalgia for your camera view." />
+    <meta property="og:description" content="REC, timecode, and a little nostalgia for your camera view." />
+    <meta property="og:image" content="https://byuwur.github.io/stream.html/hud/prev.jpg" />
+    <link rel="icon" href="https://byuwur.github.io/stream.html/stream.html.png" />
+  </head>
+
+  <body>
+    <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.6/_fonts.js" defer></script>
+    <!-- ===== RESOURCE ===== -->
+    <link rel="stylesheet" href="./hud.css" data-renderer-style />
+    <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.6/_functions.js" defer></script>
+    <script src="../resource.js" defer></script>
+    <script src="./hud.js" defer></script>
+    <template id="overlay-markup">
+      <main id="overlay">
+        <div class="panel"></div>
+      </main>
+    </template>
+    <!-- ===== CONFIGURATOR ===== -->
+    <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.6/js/jquery.min.js" defer></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.6/css/fontawesome.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.6/css/bootstrap.min.css" data-editor-style media="not all" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.6/css/pickr.min.css" data-editor-style media="not all" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.6/_common.css" data-editor-style media="not all" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.6/css/select2.min.css" data-editor-style media="not all" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.6/css/animate.min.css" data-editor-style media="not all" />
+    <link rel="stylesheet" href="../configurator.css" data-editor-style media="not all" />
+    <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.6/js/select2.full.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.6/js/popper.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.6/js/bootstrap.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.6/js/pickr.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.6/_common.js" defer></script>
+    <!-- Configurator: URL toolbar, settings, preview, and help. -->
+    <div id="configurator"></div>
+    <script src="../configurator.js" defer></script>
+  </body>
+</html>
