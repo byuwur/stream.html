@@ -196,6 +196,39 @@
     });
   }
 
+  /**
+   * Animate Select2's reused dropdown before opening or detaching it.
+   * Native selection and positioning remain owned by Select2; one pending exit is allowed per control.
+   * @param {HTMLSelectElement|jQuery} select An initialized Select2 control.
+   * @returns {void} Binds once; destroyed/replaced widgets cannot complete an old exit.
+   */
+  byConfigurator.initSelect2Motion = function (select) {
+    const jqSelect = $(select);
+    if (!jqSelect.data("select2") || jqSelect.data("select2Motion")) return;
+    jqSelect.data("select2Motion", true);
+    let finishClosing = false;
+    jqSelect
+      .on("select2:open.streamMotion", () => {
+        const dropdown = jqSelect.data("select2").dropdown.$dropdown;
+        // Select2 reuses a detached node; replay entry after it has positioned the dropdown.
+        dropdown.prop("hidden", true);
+        setVisible(dropdown, true);
+      })
+      .on("select2:closing.streamMotion", (event) => {
+        if (finishClosing) return;
+        event.preventDefault();
+        const widget = jqSelect.data("select2");
+        const dropdown = widget.dropdown.$dropdown;
+        if (dropdown.prop("inert")) return;
+        setVisible(dropdown, false).then((finished) => {
+          if (!finished || jqSelect.data("select2") !== widget) return;
+          finishClosing = true;
+          jqSelect.select2("close");
+          finishClosing = false;
+          dropdown.prop({ hidden: false, inert: false });
+        });
+      });
+  };
 
   /**
    * Explicit resource icons take priority; shared controls use their property or purpose.
@@ -1137,6 +1170,7 @@
         dropdownCssClass: "stream-select2-dropdown bg-body-secondary text-body border border-secondary-subtle rounded-0",
         ...options
       });
+      byConfigurator.initSelect2Motion(jqSelect);
       jqSelect.next(".select2-container").addClass("stream-select2");
       jqSelect.off("select2:open.streamSelect2").on("select2:open.streamSelect2", () => {
         const widget = jqSelect.data("select2");
@@ -1157,7 +1191,7 @@
           widget.dropdown._positionDropdown();
         };
         $(window).on("resize", fitDropdown);
-        jqSelect.one("select2:close.streamSelect2", () => $(window).off("resize", fitDropdown));
+        jqSelect.one("select2:closing.streamSelect2", () => $(window).off("resize", fitDropdown));
         fitDropdown();
       });
     }
@@ -1344,9 +1378,9 @@
       }
       function reset(entries = initial) {
         const height = jqEditor[0].getBoundingClientRect().height;
-        // Destroy Select2 before removing rows so detached dropdowns and widget handlers are cleaned up.
+        // Bypass the deferred exit during destruction so Select2 releases its positioning listeners.
         jqEditor.find("select").each(function () {
-          if ($(this).data("select2")) $(this).select2("close").select2("destroy");
+          if ($(this).data("select2")) $(this).off(".streamMotion").select2("close").select2("destroy");
         });
         jqEditor.empty();
         (map ? Object.entries(entries) : entries).forEach(addRow);
@@ -1361,7 +1395,7 @@
           setVisible(jqRow, false).then((finished) => {
             if (!finished) return;
             const jqSelect = jqRow.find("select");
-            if (jqSelect.data("select2")) jqSelect.select2("close").select2("destroy");
+            if (jqSelect.data("select2")) jqSelect.off(".streamMotion").select2("close").select2("destroy");
             jqRow.remove();
             sync();
           });

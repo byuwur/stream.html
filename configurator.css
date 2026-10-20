@@ -234,12 +234,25 @@ body {
   background: var(--bs-body-bg);
   color: var(--bs-body-color);
 }
+/* Changing the anchor makes the highlight enter from the left and leave to the right. */
+.bywr-configurator .stream-select2-dropdown .select2-results__option--selectable {
+  background-color: transparent;
+  background-image: linear-gradient(var(--primary-color), var(--primary-color));
+  background-repeat: no-repeat;
+  background-position: right center;
+  background-size: 0% 100%;
+  transition:
+    background-size var(--settings-motion-duration) ease-out,
+    color var(--settings-motion-duration) ease-out !important;
+}
 .bywr-configurator .stream-select2-dropdown .select2-results__option--selected {
-  background: var(--bs-tertiary-bg);
+  background-color: var(--bs-tertiary-bg);
 }
 .bywr-configurator .stream-select2-dropdown .select2-results__option--highlighted[aria-selected] {
   color: var(--light-color);
-  background: var(--primary-color);
+  background-color: transparent;
+  background-size: 100% 100%;
+  background-position: left center;
 }
 .bywr-configurator .stream-select2-dropdown .select2-results > .select2-results__options {
   max-height: min(26rem, calc(50vh - 4.5rem));

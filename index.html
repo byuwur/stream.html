@@ -206,6 +206,7 @@
               templateResult: categoryOption,
               templateSelection: categoryOption
             });
+            byConfigurator.initSelect2Motion(jqCategory);
             const widget = jqCategory.data("select2");
             /**
              * Show every category when it fits; keep scrolling within the available viewport space.
@@ -322,11 +323,24 @@
       .stream-home .home-category-dropdown .select2-results__option {
         padding-right: 1.25rem;
       }
+      /* Change the anchor so highlights enter from the left and leave to the right. */
+      .stream-home .home-category-dropdown .select2-results__option--selectable {
+        background-color: transparent;
+        background-image: linear-gradient(var(--primary-color), var(--primary-color));
+        background-repeat: no-repeat;
+        background-position: right center;
+        background-size: 0% 100%;
+        transition:
+          background-size 0.3s ease-out,
+          color 0.3s ease-out !important;
+      }
       .stream-home .home-category-dropdown .select2-results__option--selected {
-        background: var(--bs-secondary-bg);
+        background-color: var(--bs-secondary-bg);
       }
       .stream-home .home-category-dropdown .select2-results__option--highlighted[aria-selected] {
-        background: var(--primary-color);
+        background-color: transparent;
+        background-size: 100% 100%;
+        background-position: left center;
         color: var(--light-color);
       }
       /* ========== LANDING MOTION AND CARD INTERACTIONS ========== */
