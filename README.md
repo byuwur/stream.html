@@ -37,6 +37,8 @@ All 22 overlays are available as prereleases. **Alpha** means early testing; **B
 
 Open a tool, adjust its fields, check the preview, then **Copy URL** into an OBS **Browser** source with **Local file** unchecked. Use **1920 × 1080** for Main; size Controller/Popup to your layout.
 
+Help improve stream.html on GitHub: [contribute a pull request](https://github.com/byuwur/stream.html/pulls) or [report an issue](https://github.com/byuwur/stream.html/issues). Bug reports, ideas, and fixes are welcome; see [Contributing](CONTRIBUTING.md).
+
 ## Settings stay in the URL
 
 - Bare folder/`index.html` URLs open the editor; query settings without a hash render the overlay.

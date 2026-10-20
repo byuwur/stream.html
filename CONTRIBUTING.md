@@ -9,6 +9,8 @@
 
 [CODING_STANDARDS.md](CODING_STANDARDS.md) is the canonical engineering policy. This document describes how to prepare and submit a contribution.
 
+All overlays are currently Alpha or Beta. Help test them, [report issues](https://github.com/byuwur/stream.html/issues), or [contribute pull requests](https://github.com/byuwur/stream.html/pulls) on GitHub. For a bug report, include the tool, reproduction steps, expected and actual behavior, browser/OBS version, and a public overlay URL or settings with private information removed.
+
 ## Before changing code
 
 Read [README.md](./README.md), the coding standards, and relevant project documentation. Inspect the nearby implementation and tests, including existing helpers and the paths that call the behavior. Understand the requested outcome and current contract before proposing architectural changes.

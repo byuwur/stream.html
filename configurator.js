@@ -2115,6 +2115,20 @@
 
       const titles = { info: "About", obs: "Use with OBS", params: "Parameters", advanced: "Advanced options" };
       initResourceHelp?.(jqDialog[0], titles, closeHelp);
+      jqDialog.find('[data-panel="info"]').append(/* HTML */ `
+        <section class="small mt-4 pt-3 border-top border-secondary-subtle" aria-labelledby="release-contributions-title">
+          <h3 id="release-contributions-title" class="h6 mb-3"><i class="fa-brands fa-github me-2" aria-hidden="true"></i>Early access &amp; contributions</h3>
+          <p>
+            <i class="fa-solid fa-triangle-exclamation me-1" aria-hidden="true"></i>
+            All overlays are prerelease. Alpha means early testing; Beta means broader testing. Features may change, and bugs are expected. Try your setup before going live.
+          </p>
+          <p class="mb-0">
+            Help improve stream.html on GitHub:
+            <a href="https://github.com/byuwur/stream.html/pulls" target="_blank" rel="noopener"><i class="fa-solid fa-code-pull-request me-1" aria-hidden="true"></i>contribute a pull request</a> or
+            <a href="https://github.com/byuwur/stream.html/issues" target="_blank" rel="noopener"><i class="fa-solid fa-bug me-1" aria-hidden="true"></i>report an issue</a>. Bug reports, ideas, and fixes are welcome.
+          </p>
+        </section>
+      `);
       jqDialog.find("[data-panel]").addClass("motion-layer");
       let helpSectionGeneration = 0;
       /**
