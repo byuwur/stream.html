@@ -13,7 +13,7 @@
   global.byConfigurator = global.byConfigurator || {};
   const byConfigurator = global.byConfigurator;
   if (byConfigurator.initialized) return;
-  byConfigurator.VERSION = "8.1"; // 2026-10-19
+  byConfigurator.VERSION = "8.2"; // 2026-10-20
   const root = new URL(".", document.currentScript.src);
 
   // F2 belongs to the optional editor; native overlays do not need this script or its dependencies.
@@ -314,7 +314,7 @@
   // ==== SHARED TOOL CATALOG ====
   // ==========
 
-  /** Shared card and navigation metadata; only ready: true tools are published. */
+  /** Shared card, navigation, and release status metadata; only ready: true tools are published. */
   byConfigurator.catalog = {
     // Resolve from this script so links also work in downloaded folders and nested deployments.
     root,
@@ -352,6 +352,7 @@
         description: "Gamepad or keyboard. Four skins. Every input on screen.",
         icon: "fa-gamepad",
         category: "interaction",
+        status: "Beta",
         ready: true
       },
       {
@@ -360,6 +361,7 @@
         description: "Your accounts, one animated popup at a time. Pick from 90+ platforms.",
         icon: "fa-comment",
         category: "branding",
+        status: "Beta",
         ready: true
       },
       {
@@ -368,6 +370,7 @@
         description: "Starting, BRB, ending, and intermission. Make each moment yours.",
         icon: "fa-clapperboard",
         category: "scenes",
+        status: "Beta",
         ready: true
       },
       {
@@ -376,7 +379,8 @@
         description: "Your time, anywhere. Digital, analog, split flap, or beautifully minimal.",
         icon: "fa-clock",
         category: "time",
-        ready: false
+        status: "Alpha",
+        ready: true
       },
       {
         id: "timer",
@@ -384,7 +388,8 @@
         description: "A reload-safe countdown or elapsed timer for your next run.",
         icon: "fa-hourglass-half",
         category: "time",
-        ready: false
+        status: "Alpha",
+        ready: true
       },
       {
         id: "webcam",
@@ -392,7 +397,8 @@
         description: "A clean, transparent frame to place above your camera in OBS.",
         icon: "fa-video",
         category: "scenes",
-        ready: false
+        status: "Alpha",
+        ready: true
       },
       {
         id: "ticker",
@@ -400,7 +406,8 @@
         description: "News, commands, and reminders in a seamless scrolling strip.",
         icon: "fa-align-left",
         category: "information",
-        ready: false
+        status: "Alpha",
+        ready: true
       },
       {
         id: "watermark",
@@ -408,7 +415,8 @@
         description: "A signature for your stream. Text, monogram, or your own logo.",
         icon: "fa-stamp",
         category: "branding",
-        ready: false
+        status: "Alpha",
+        ready: true
       },
       {
         id: "lower-thirds",
@@ -416,7 +424,8 @@
         description: "Introduce a guest, a game, or a moment with a broadcast card.",
         icon: "fa-id-card",
         category: "branding",
-        ready: false
+        status: "Alpha",
+        ready: true
       },
       {
         id: "qr",
@@ -424,7 +433,8 @@
         description: "A locally generated, scannable link card. Point viewers to something good.",
         icon: "fa-qrcode",
         category: "information",
-        ready: false
+        status: "Alpha",
+        ready: true
       },
       {
         id: "reminder",
@@ -432,7 +442,8 @@
         description: "Gentle automatic reminders, on your schedule.",
         icon: "fa-bell",
         category: "information",
-        ready: false
+        status: "Alpha",
+        ready: true
       },
       {
         id: "badge",
@@ -440,7 +451,8 @@
         description: "LIVE. AFK. RECORDING. Give the moment a name.",
         icon: "fa-tag",
         category: "branding",
-        ready: false
+        status: "Alpha",
+        ready: true
       },
       {
         id: "credits",
@@ -448,7 +460,8 @@
         description: "Give your people a proper send-off. Closing credits, made yours.",
         icon: "fa-scroll",
         category: "information",
-        ready: false
+        status: "Alpha",
+        ready: true
       },
       {
         id: "schedule",
@@ -456,7 +469,8 @@
         description: "What’s on next? A dated run of show with automatic current-segment highlighting.",
         icon: "fa-calendar-days",
         category: "time",
-        ready: false
+        status: "Alpha",
+        ready: true
       },
       {
         id: "sponsors",
@@ -464,7 +478,8 @@
         description: "Spotlight public logos and messages, one partner at a time.",
         icon: "fa-handshake",
         category: "branding",
-        ready: false
+        status: "Alpha",
+        ready: true
       },
       {
         id: "info",
@@ -472,7 +487,8 @@
         description: "Stream rules, game settings, commands, and the details worth keeping on screen.",
         icon: "fa-circle-info",
         category: "information",
-        ready: false
+        status: "Alpha",
+        ready: true
       },
       {
         id: "effects",
@@ -480,7 +496,8 @@
         description: "A little atmosphere. Rain, snow, confetti, and floating symbols.",
         icon: "fa-wand-magic-sparkles",
         category: "scenes",
-        ready: false
+        status: "Alpha",
+        ready: true
       },
       {
         id: "hud",
@@ -488,7 +505,8 @@
         description: "REC, timecode, and a little nostalgia for your camera view.",
         icon: "fa-camera",
         category: "scenes",
-        ready: false
+        status: "Alpha",
+        ready: true
       },
       {
         id: "timeline",
@@ -496,7 +514,8 @@
         description: "From a beginning to an ending. Show where you are, and what remains.",
         icon: "fa-bars-progress",
         category: "time",
-        ready: false
+        status: "Alpha",
+        ready: true
       },
       {
         id: "randomizer",
@@ -504,7 +523,8 @@
         description: "Pick a challenge, a game, or your next move. A seed makes every draw reproducible.",
         icon: "fa-shuffle",
         category: "interaction",
-        ready: false
+        status: "Alpha",
+        ready: true
       },
       {
         id: "quotes",
@@ -512,7 +532,8 @@
         description: "A thought, a tip, a little trivia. Keep the good words coming.",
         icon: "fa-quote-left",
         category: "information",
-        ready: false
+        status: "Alpha",
+        ready: true
       },
       {
         id: "shortcuts",
@@ -520,7 +541,8 @@
         description: "Keep the controls in sight. An editable guide, without keyboard monitoring.",
         icon: "fa-keyboard",
         category: "interaction",
-        ready: false
+        status: "Alpha",
+        ready: true
       }
     ],
     get availableTools() {
@@ -781,6 +803,7 @@
             .attr("aria-hidden", "true"),
           $(/* HTML */ `<span></span>`).text(resource.title)
         );
+      if (tool?.status) jqHost.find("h1").append($(/* HTML */ `<span class="resource-status badge rounded-pill border fw-normal align-middle ms-2"></span>`).text(tool.status));
       jqHost.find(".setup-intro").text(resource.description);
       jqHost.find("#preview-viewport").attr("viewBox", `0 0 ${resource.preview.join(" ")}`);
       jqHost.find("#overlay-preview").attr({ title: `${resource.title} preview`, allow: resource.previewAllow || "" });
@@ -2238,8 +2261,8 @@
       byConfigurator.catalog.availableTools.forEach((tool) => {
         $(/* HTML */ `<option></option>`)
           .val(tool.id)
-          .text(tool.name)
-          .attr({ "data-icon": tool.icon, "data-category": byConfigurator.catalog.categories.find((category) => category.id === tool.category).name })
+          .text(`${tool.name} (${tool.status})`)
+          .attr({ "data-name": tool.name, "data-status": tool.status, "data-icon": tool.icon, "data-category": byConfigurator.catalog.categories.find((category) => category.id === tool.category).name })
           .appendTo(jqSelect);
       });
       const current = jqSelect.closest(".tool-switcher").data("tool");
@@ -2248,8 +2271,13 @@
       function toolOption(option) {
         if (!option.id) return option.text;
         const label = $(/* HTML */ `<span></span>`);
-        $(/* HTML */ `<i></i>`, { class: `fa-solid ${$(option.element).attr("data-icon")} fa-fw me-2`, "aria-hidden": "true" }).appendTo(label);
-        return label.append($(/* HTML */ `<span></span>`, { class: "tool-name", text: option.text }));
+        const title = $(/* HTML */ `<span class="d-inline-flex align-items-center mw-100"></span>`).appendTo(label);
+        $(/* HTML */ `<i></i>`, { class: `fa-solid ${$(option.element).attr("data-icon")} fa-fw flex-shrink-0 me-2`, "aria-hidden": "true" }).appendTo(title);
+        title.append(
+          $(/* HTML */ `<span></span>`, { class: "tool-name text-truncate", text: $(option.element).attr("data-name") }),
+          $(/* HTML */ `<span class="resource-status badge rounded-pill border fw-normal align-middle flex-shrink-0 ms-2"></span>`).text($(option.element).attr("data-status"))
+        );
+        return label;
       }
       /**
        * Keep categories visible without grouping away the homepage's priority order.

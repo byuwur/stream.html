@@ -310,6 +310,12 @@ body {
     min-height: 15rem;
   }
 }
+.bywr-configurator .resource-status {
+  font-size: 0.65rem;
+  color: inherit;
+  background: color-mix(in srgb, currentColor 8%, transparent);
+  border-color: color-mix(in srgb, currentColor 40%, transparent) !important;
+}
 /* Toolbar tool navigation. */
 .bywr-configurator .tool-switcher {
   width: 18rem;

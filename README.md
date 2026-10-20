@@ -6,13 +6,34 @@ Browser overlays for your stream. Configure a tool and copy its URL into OBS. Fr
 
 [Open stream.html](https://byuwur.github.io/stream.html/) · [Configurator demo](https://byuwur.github.io/stream.html/configurator.html)
 
-## Ready to use
+## Available overlays
 
-| Tool                                                           | Purpose                                                                         | Local entry point       |
-| -------------------------------------------------------------- | ------------------------------------------------------------------------------- | ----------------------- |
-| [Controller](https://byuwur.github.io/stream.html/controller/) | Gamepad/keyboard input with Xbox, PlayStation, fight-stick, and GameCube skins. | `controller/index.html` |
-| [Social popup](https://byuwur.github.io/stream.html/popup/)    | Animated accounts with 90+ platforms, fonts, colors, and timing.                | `popup/index.html`      |
-| [Main scene](https://byuwur.github.io/stream.html/main/)       | Starting/BRB/ending scenes with branding, countdown, accounts, and schedule.    | `main/index.html`       |
+All 22 overlays are available as prereleases. **Alpha** means early testing; **Beta** means broader testing. Features may change, and bugs are expected. Try your setup before going live. Status pills appear beside tool titles on the landing page, in the tool picker, and in the configurator heading.
+
+| Tool                                                                       | Status | Purpose                                                                         | Local entry point         |
+| -------------------------------------------------------------------------- | ------ | ------------------------------------------------------------------------------- | ------------------------- |
+| [Controller](https://byuwur.github.io/stream.html/controller/)             | Beta   | Gamepad/keyboard input with Xbox, PlayStation, fight-stick, and GameCube skins. | `controller/index.html`   |
+| [Social popup](https://byuwur.github.io/stream.html/popup/)                | Beta   | Animated accounts with 90+ platforms, fonts, colors, and timing.                | `popup/index.html`        |
+| [Main scene](https://byuwur.github.io/stream.html/main/)                   | Beta   | Starting/BRB/ending scenes with branding, countdown, accounts, and schedule.    | `main/index.html`         |
+| [Clock](https://byuwur.github.io/stream.html/clock/)                       | Alpha  | Digital, analog, split-flap, and minimal clocks.                                | `clock/index.html`        |
+| [Timer / Countdown](https://byuwur.github.io/stream.html/timer/)           | Alpha  | Reload-safe countdown or elapsed timer.                                         | `timer/index.html`        |
+| [Webcam Frame](https://byuwur.github.io/stream.html/webcam/)               | Alpha  | Transparent frame for your camera.                                              | `webcam/index.html`       |
+| [Ticker](https://byuwur.github.io/stream.html/ticker/)                     | Alpha  | Scrolling news, commands, and reminders.                                        | `ticker/index.html`       |
+| [Watermark](https://byuwur.github.io/stream.html/watermark/)               | Alpha  | Text, monogram, or logo branding.                                               | `watermark/index.html`    |
+| [Lower Thirds](https://byuwur.github.io/stream.html/lower-thirds/)         | Alpha  | Broadcast cards for guests, games, and moments.                                 | `lower-thirds/index.html` |
+| [QR / Link Card](https://byuwur.github.io/stream.html/qr/)                 | Alpha  | Locally generated QR code and link card.                                        | `qr/index.html`           |
+| [Periodic Reminder](https://byuwur.github.io/stream.html/reminder/)        | Alpha  | Automatic reminders on your schedule.                                           | `reminder/index.html`     |
+| [Stream Badge](https://byuwur.github.io/stream.html/badge/)                | Alpha  | LIVE, AFK, recording, and custom labels.                                        | `badge/index.html`        |
+| [Credits Roll](https://byuwur.github.io/stream.html/credits/)              | Alpha  | Closing credits for your community.                                             | `credits/index.html`      |
+| [Schedule](https://byuwur.github.io/stream.html/schedule/)                 | Alpha  | Dated run of show with current-segment highlighting.                            | `schedule/index.html`     |
+| [Sponsor Carousel](https://byuwur.github.io/stream.html/sponsors/)         | Alpha  | Rotating public logos and messages.                                             | `sponsors/index.html`     |
+| [Info Board](https://byuwur.github.io/stream.html/info/)                   | Alpha  | Rules, game settings, commands, and other stream details.                       | `info/index.html`         |
+| [Screen Effects](https://byuwur.github.io/stream.html/effects/)            | Alpha  | Rain, snow, confetti, and floating symbols.                                     | `effects/index.html`      |
+| [Camera HUD](https://byuwur.github.io/stream.html/hud/)                    | Alpha  | Recording indicator, timecode, and camera styling.                              | `hud/index.html`          |
+| [Progress Timeline](https://byuwur.github.io/stream.html/timeline/)        | Alpha  | Progress from a starting time to an ending time.                                | `timeline/index.html`     |
+| [Randomizer](https://byuwur.github.io/stream.html/randomizer/)             | Alpha  | Seeded draws for challenges, games, and choices.                                | `randomizer/index.html`   |
+| [Quote Display](https://byuwur.github.io/stream.html/quotes/)              | Alpha  | Rotating quotes, tips, and trivia.                                              | `quotes/index.html`       |
+| [Keyboard Shortcut Sheet](https://byuwur.github.io/stream.html/shortcuts/) | Alpha  | Editable shortcut guide without keyboard monitoring.                            | `shortcuts/index.html`    |
 
 Open a tool, adjust its fields, check the preview, then **Copy URL** into an OBS **Browser** source with **Local file** unchecked. Use **1920 × 1080** for Main; size Controller/Popup to your layout.
 
@@ -196,9 +217,9 @@ Each list uses its declared format directly: simple messages are string arrays, 
 
 1. Copy `configurator.html` into the tool folder; replace demo markup/styles/rendering and change shared imports to `../`.
 2. Define fields and initialize the resource before overlay rendering.
-3. Register folder ID, name, description, icon, category, and `ready` in `byConfigurator.catalog.tools`. Set `ready: true` after review/testing.
+3. Register folder ID, name, description, icon, category, `status`, and `ready` in `byConfigurator.catalog.tools`. Use `status: "Alpha"` for early testing or `status: "Beta"` for broader testing. Set `ready: true` to publish it in the catalog after review/testing; availability and release status are separate.
 
-The catalog owns order, cards/count, and navigation; static hosting does not discover folders. IDs determine folder URLs and `prev.jpg`. Update preview images and Open Graph/Twitter metadata together.
+The catalog owns order, cards/count, navigation, and displayed release status; static hosting does not discover folders. Keep the status table above in sync with the catalog. IDs determine folder URLs and `prev.jpg`. Update preview images and Open Graph/Twitter metadata together.
 
 ### Landing and checks
 

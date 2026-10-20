@@ -89,7 +89,7 @@
             <i class="flex-shrink-0 lh-1 m-0" aria-hidden="true"></i>
           </div>
           <div class="home-tool-info d-grid gap-2 my-auto text-start py-1">
-            <h2 class="home-tool-title fw-medium text-wrap text-break m-0"></h2>
+            <h2 class="home-tool-title fw-medium text-wrap text-break m-0"><span data-home-title></span><span class="resource-status badge rounded-pill border fw-normal align-middle ms-2"></span></h2>
             <p class="text-wrap m-0"></p>
           </div>
           <span class="home-tool-action btn btn-outline-light btn-sm mw-100 rounded-0 d-inline-flex align-self-end align-items-center gap-2 px-3 py-2 fw-semibold">
@@ -133,14 +133,15 @@
               .attr({
                 "data-tool": tool.id,
                 "data-category": tool.category,
-                "aria-label": `Configure ${tool.name}`,
+                "aria-label": `Configure ${tool.name} (${tool.status})`,
                 href: new URL(`${tool.id}/${location.protocol === "file:" ? "index.html" : ""}`, byConfigurator.catalog.root).href
               })
               .css({
                 backgroundImage: `url("${new URL(`${tool.id}/prev.jpg`, byConfigurator.catalog.root).href}")`,
                 viewTransitionName: `tool-${tool.id}`
               });
-            jqCard.find("h2").text(tool.name);
+            jqCard.find("[data-home-title]").text(tool.name);
+            jqCard.find(".resource-status").text(tool.status);
             jqCard.find("p").text(tool.description);
             jqCard.find(".home-tool-top span").text(`${String(index + 1).padStart(2, "0")} | ${group.name}`);
             jqCard.find(".home-tool-top i").attr("class", `fa-solid ${tool.icon} flex-shrink-0 lh-1 m-0`);
@@ -270,6 +271,12 @@
       .home-tool-title {
         font-size: clamp(1.75rem, 2.5vw, 2.5rem);
         line-height: 1.2;
+      }
+      .resource-status {
+        font-size: 0.65rem;
+        color: inherit;
+        background: color-mix(in srgb, currentColor 8%, transparent);
+        border-color: color-mix(in srgb, currentColor 40%, transparent) !important;
       }
       .home-tool-top > i {
         font-size: 2.25rem !important;
