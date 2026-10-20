@@ -2043,6 +2043,7 @@
         showSection("advanced");
       });
       jqHost.find('.settings-toolbar [data-bs-toggle="tooltip"]').attr({ "data-bs-placement": "bottom", "data-bs-fallback-placements": '["bottom"]' });
+      jqHost.find('#bywr-accessibility [data-bs-toggle="tooltip"]').attr({ "data-bs-placement": "left", "data-bs-fallback-placements": '["left"]' });
       if (typeof global.Popper?.createPopper === "function") byCommon.initBootstrap({ tooltipsOnly: true, root: jqHost[0] });
       else $("#advanced-options").removeAttr("data-bs-toggle");
       const previewSize = $("#preview-viewport")[0].viewBox.baseVal;
