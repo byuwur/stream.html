@@ -225,6 +225,8 @@ The catalog owns order, cards/count, navigation, and displayed release status; s
 
 ### Landing and checks
 
+Install Playwright outside the repository and set `NODE_PATH` to its `node_modules` directory. Run `node --test tests/resources.cjs` for standalone resources or `node --test tests/configurators.cjs` for editor forms, previews, URL updates, copy, and reset. The resource suite removes optional configurator imports. Both suites fetch pinned runtime dependencies from the CDN; neither needs sibling checkouts. `CHROMIUM_EXECUTABLE_PATH` selects a Chromium executable; `BROWSER_CHANNEL=chrome` uses installed Chrome. [GitHub Actions](.github/workflows/tests.yml) reports Resources and Configurators independently, without canceling the other suite on failure.
+
 Search/categories filter ready tools; the responsive gallery supports keyboard focus. Run `node --check` on changed scripts. Check HTTP/`file://`, URL round trips, F2/`#configure`, copy/reset, invalid values, lists, fonts, and keyboard mapping. Confirm overlay mode skips editor initialization. Check that hidden fields are disabled, their values do not affect overlays or URLs, and re-enabling them restores valid editor drafts. External Playwright/Chrome checks require no repository dependency. Test OBS and endurance separately.
 
 ## Other configurations and assets

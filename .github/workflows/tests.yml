@@ -1,0 +1,39 @@
+name: Stream checks
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  browser:
+    name: ${{ matrix.name }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - suite: resources
+            name: Resources
+          - suite: configurators
+            name: Configurators
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install browser test tools
+        run: |
+          npm install --prefix "$RUNNER_TEMP/stream-tests" --no-package-lock playwright@1.63.0
+          node "$RUNNER_TEMP/stream-tests/node_modules/playwright/cli.js" install --with-deps chromium
+      - name: Check ${{ matrix.name }}
+        env:
+          NODE_PATH: ${{ runner.temp }}/stream-tests/node_modules
+        run: |
+          node --check resource.js
+          if [ "${{ matrix.suite }}" = "configurators" ]; then node --check configurator.js; fi
+          node --test tests/${{ matrix.suite }}.cjs
