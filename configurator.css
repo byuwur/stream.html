@@ -1,5 +1,5 @@
 html {
-  font-size: 16px;
+  font-size: 1rem;
 }
 body {
   font-size: 1rem;
@@ -47,7 +47,7 @@ body {
 .bywr-configurator .pcr-app {
   color: var(--bs-body-color);
   background: var(--bs-body-bg);
-  border: 1px solid var(--bs-border-color);
+  border: 0.0625rem solid var(--bs-border-color);
   border-radius: 0;
 }
 .bywr-configurator .pcr-app .pcr-interaction :is(.pcr-save, .pcr-type.active) {
@@ -83,7 +83,7 @@ body {
 .bywr-configurator :is(.animate__animated, .fade):not(.modal-backdrop) {
   translate: 0;
   transition:
-    opacity var(--settings-motion-duration) ease-out,
+    opacity var(--settings-motion-duration) ease,
     translate var(--settings-motion-duration) ease-out !important;
   @starting-style {
     translate: -0.5rem;
@@ -120,10 +120,10 @@ body {
 }
 .bywr-configurator :is(.btn, .accordion-button, .form-control, .form-select, .form-check-input, .select2-selection, .pcr-button, a) {
   transition:
-    color var(--settings-motion-duration) ease-out,
-    background-color var(--settings-motion-duration) ease-out,
-    border-color var(--settings-motion-duration) ease-out,
-    box-shadow var(--settings-motion-duration) ease-out,
+    color var(--settings-motion-duration) ease,
+    background-color var(--settings-motion-duration) ease,
+    border-color var(--settings-motion-duration) ease,
+    box-shadow var(--settings-motion-duration) ease,
     background-position var(--settings-motion-duration) ease-out !important;
 }
 .bywr-configurator .modal-backdrop.fade {
@@ -141,8 +141,8 @@ body {
   width: 0.5rem;
   height: 0.5rem;
   margin-right: 0.25rem;
-  border-right: 1px solid currentColor;
-  border-bottom: 1px solid currentColor;
+  border-right: 0.0625rem solid currentColor;
+  border-bottom: 0.0625rem solid currentColor;
   background-image: none;
   transform: rotate(45deg);
   transition: transform var(--settings-motion-duration) ease-out !important;
@@ -230,7 +230,7 @@ body {
   box-shadow: 0 0 0 0.2rem color-mix(in srgb, var(--primary-foreground) 25%, transparent);
 }
 .bywr-configurator .stream-select2-dropdown .select2-search__field {
-  border: 1px solid var(--bs-border-color);
+  border: 0.0625rem solid var(--bs-border-color);
   background: var(--bs-body-bg);
   color: var(--bs-body-color);
 }
@@ -242,7 +242,7 @@ body {
   background-position: right center;
   background-size: 0% 100%;
   transition:
-    background-size var(--settings-motion-duration) ease-out,
+    background-size var(--settings-motion-duration) ease,
     color var(--settings-motion-duration) ease-out !important;
 }
 .bywr-configurator .stream-select2-dropdown .select2-results__option--selected {
@@ -255,7 +255,7 @@ body {
   background-position: left center;
 }
 .bywr-configurator .stream-select2-dropdown .select2-results > .select2-results__options {
-  max-height: min(26rem, calc(50vh - 4.5rem));
+  max-height: min(26rem, 50vh - 4.5rem);
 }
 /* The checkerboard shows transparency; the iframe keeps the overlay's own colors. */
 .bywr-configurator #preview-stage {
@@ -275,7 +275,7 @@ body {
   min-width: 3rem;
   margin: 0 0.25rem 0.25rem 0;
   padding: 1.5rem 0.5rem 0.5rem;
-  border: 1px solid transparent;
+  border: 0.0625rem solid transparent;
   color: var(--light-color);
   background: var(--primary-color);
 }
