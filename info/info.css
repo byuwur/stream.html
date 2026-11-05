@@ -15,7 +15,7 @@ body {
 #overlay {
   --font-size: 48px;
   --base-size: min(var(--font-size), 12vw);
-  --heading-size: max(14px, calc(var(--base-size) * 0.3));
+  --heading-size: max(14px, var(--base-size) * 0.3);
   --secondary-size: calc(var(--base-size) * 0.42);
   --text: #fff;
   --accent: #d9d9d9;
@@ -119,9 +119,9 @@ img {
 .info-heading {
   font-weight: 600;
   color: var(--accent);
-  font-size: max(14px, calc(var(--base-size) * 0.4));
-  letter-spacing: calc(max(14px, calc(var(--base-size) * 0.4)) * 0.05);
-  margin-bottom: max(14px, calc(var(--base-size) * 0.4));
+  font-size: max(14px, var(--base-size) * 0.4);
+  letter-spacing: calc(max(14px, var(--base-size) * 0.4) * 0.05);
+  margin-bottom: max(14px, var(--base-size) * 0.4);
 }
 @media (max-width: 500px) {
   .info-board {

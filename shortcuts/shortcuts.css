@@ -15,7 +15,7 @@ body {
 #overlay {
   --font-size: 48px;
   --base-size: min(var(--font-size), 12vw);
-  --heading-size: max(14px, calc(var(--base-size) * 0.3));
+  --heading-size: max(14px, var(--base-size) * 0.3);
   --secondary-size: calc(var(--base-size) * 0.42);
   --text: #fff;
   --accent: #d9d9d9;
@@ -147,8 +147,8 @@ img {
 .keyboard-key {
   flex: 1;
   text-align: center;
-  font-size: max(12px, calc(var(--base-size) * 0.35));
-  max-width: calc(max(12px, calc(var(--base-size) * 0.35)) * 4);
+  font-size: max(12px, var(--base-size) * 0.35);
+  max-width: calc(max(12px, var(--base-size) * 0.35) * 4);
 }
 .keyboard-key.bound {
   color: var(--accent);
