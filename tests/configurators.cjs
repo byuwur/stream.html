@@ -3,13 +3,13 @@
  * Desc: Configurator forms, previews, URL editing, copy, and reset; resource-only checks live in resources.cjs.
  */
 
-/* --- DEPENDENCIES --- */
+// --- DEPENDENCIES ---
 const assert = require("node:assert/strict");
 const test = require("node:test");
 const { chromium } = require("playwright");
 const { runtimeAssets, launchOptions, loadAssets, resourceNames, serve } = require("./browser.cjs");
 
-/* --- CONFIGURATOR INTEGRATION --- */
+// --- CONFIGURATOR INTEGRATION ---
 test("configurator forms and previews initialize for every resource", async (t) => {
   const assets = await loadAssets([
     ...runtimeAssets,
@@ -27,7 +27,7 @@ test("configurator forms and previews initialize for every resource", async (t) 
   ]);
   const browser = await chromium.launch(launchOptions);
   try {
-    /* --- ALL RESOURCE EDITORS --- */
+    // --- ALL RESOURCE EDITORS ---
     for (const name of await resourceNames()) {
       await t.test(name, async () => {
         const page = await browser.newPage();
@@ -54,7 +54,7 @@ test("configurator forms and previews initialize for every resource", async (t) 
       });
     }
 
-    /* --- EDIT, PREVIEW, COPY, AND RESET --- */
+    // --- EDIT, PREVIEW, COPY, AND RESET ---
     await t.test("edits update the URL and preview; copy and reset use the opening settings", async () => {
       const page = await browser.newPage();
       try {

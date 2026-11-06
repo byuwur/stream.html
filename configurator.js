@@ -314,7 +314,7 @@
   // ==== SHARED TOOL CATALOG ====
   // ==========
 
-  /** Shared card, navigation, and release status metadata; only ready: true tools are published. */
+  // Shared card, navigation, and release status metadata; only ready: true tools are published.
   byConfigurator.catalog = {
     // Resolve from this script so links also work in downloaded folders and nested deployments.
     root,
@@ -600,7 +600,8 @@
      * @returns {void}
      */
     function buildConfigurator(resource, jqHost) {
-      jqHost.html(/* HTML */ `
+      jqHost.html(// HTML
+       `
         <main id="setup" class="animate__animated animate__fadeIn d-flex flex-column vh-100 overflow-hidden">
           <!-- URL toolbar and tool navigation. -->
           <header class="url-toolbar has-overlay light-links d-flex flex-column gap-2 p-2 bg-primary border-bottom sticky-top flex-shrink-0">
@@ -798,12 +799,15 @@
         .find("h1")
         .empty()
         .append(
-          $(/* HTML */ `<i></i>`)
+          $(// HTML
+           `<i></i>`)
             .addClass(`fa-solid ${tool?.icon || "fa-sliders"} me-2`)
             .attr("aria-hidden", "true"),
-          $(/* HTML */ `<span></span>`).text(resource.title)
+          $(// HTML
+           `<span></span>`).text(resource.title)
         );
-      if (tool?.status) jqHost.find("h1").append($(/* HTML */ `<span class="resource-status badge rounded-pill border fw-normal align-middle ms-2"></span>`).text(tool.status));
+      if (tool?.status) jqHost.find("h1").append($(// HTML
+       `<span class="resource-status badge rounded-pill border fw-normal align-middle ms-2"></span>`).text(tool.status));
       jqHost.find(".setup-intro").text(resource.description);
       jqHost.find("#preview-viewport").attr("viewBox", `0 0 ${resource.preview.join(" ")}`);
       jqHost.find("#overlay-preview").attr({ title: `${resource.title} preview`, allow: resource.previewAllow || "" });
@@ -816,63 +820,82 @@
         if (!groups.has(section)) {
           const id = `section-${groups.size}`;
           const collapsed = savedPreferences.collapsed.includes(section);
-          const group = $(/* HTML */ `<section class="accordion-item mb-3 border border-secondary-subtle bg-body"></section>`).attr("aria-labelledby", `${id}-toggle`).appendTo(jqForm);
-          const heading = $(/* HTML */ `<button class="accordion-button p-3 fs-6 fw-semibold text-primary bg-transparent" type="button" data-bs-toggle="collapse" aria-expanded="true"></button>`)
+          const group = $(// HTML
+           `<section class="accordion-item mb-3 border border-secondary-subtle bg-body"></section>`).attr("aria-labelledby", `${id}-toggle`).appendTo(jqForm);
+          const heading = $(// HTML
+           `<button class="accordion-button p-3 fs-6 fw-semibold text-primary bg-transparent" type="button" data-bs-toggle="collapse" aria-expanded="true"></button>`)
             .attr({ id: `${id}-toggle`, "data-bs-target": `#${id}`, "aria-controls": id, "aria-expanded": String(!collapsed) })
             .toggleClass("collapsed", collapsed)
             .text(section);
           heading.prepend(
-            $(/* HTML */ `<i></i>`)
+            $(// HTML
+             `<i></i>`)
               .addClass(`${resource.sectionIcons?.[section] || `fa-solid ${fieldIcon(section)}`} me-2`)
               .attr("aria-hidden", "true")
           );
-          $(/* HTML */ `<h2 class="accordion-header fs-6 m-0"></h2>`).append(heading).appendTo(group);
-          const content = $(/* HTML */ `<div class="accordion-collapse collapse show"></div>`)
+          $(// HTML
+           `<h2 class="accordion-header fs-6 m-0"></h2>`).append(heading).appendTo(group);
+          const content = $(// HTML
+           `<div class="accordion-collapse collapse show"></div>`)
             .attr({ id, "aria-labelledby": `${id}-toggle`, "data-config-section": section })
             .toggleClass("show", !collapsed)
             .appendTo(group);
           // Padding belongs inside the collapsing element so its closed height can reach zero.
-          groups.set(section, $(/* HTML */ `<div class="accordion-body p-3"></div>`).appendTo(content));
+          groups.set(section, $(// HTML
+           `<div class="accordion-body p-3"></div>`).appendTo(content));
         }
         let container = groups.get(section);
         if (field.subsection) {
           const key = `${section}:${field.subsection}`;
           if (!subsections.has(key)) {
             const id = `subsection-${subsections.size}`;
-            const subsection = $(/* HTML */ `<section class="field-subsection border-top mt-3"></section>`).attr("aria-labelledby", `${id}-toggle`).appendTo(container);
-            const heading = $(/* HTML */ `<button class="accordion-button collapsed px-0 py-2 fs-6 fw-medium text-primary bg-transparent" type="button" data-bs-toggle="collapse" aria-expanded="false"></button>`)
+            const subsection = $(// HTML
+             `<section class="field-subsection border-top mt-3"></section>`).attr("aria-labelledby", `${id}-toggle`).appendTo(container);
+            const heading = $(// HTML
+             `<button class="accordion-button collapsed px-0 py-2 fs-6 fw-medium text-primary bg-transparent" type="button" data-bs-toggle="collapse" aria-expanded="false"></button>`)
               .attr({ id: `${id}-toggle`, "data-bs-target": `#${id}`, "aria-controls": id })
               .text(field.subsection)
               .prepend(
-                $(/* HTML */ `<i></i>`)
+                $(// HTML
+                 `<i></i>`)
                   .addClass(`fa-solid ${fieldIcon(field.subsection)} fa-fw me-2`)
                   .attr("aria-hidden", "true")
               );
-            $(/* HTML */ `<h3 class="accordion-header fs-6 m-0"></h3>`).append(heading).appendTo(subsection);
-            const content = $(/* HTML */ `<div class="subsection-collapse collapse"></div>`)
+            $(// HTML
+             `<h3 class="accordion-header fs-6 m-0"></h3>`).append(heading).appendTo(subsection);
+            const content = $(// HTML
+             `<div class="subsection-collapse collapse"></div>`)
               .attr({ id, "aria-labelledby": `${id}-toggle`, "data-config-subsection": field.subsection })
               .appendTo(subsection);
-            subsections.set(key, $(/* HTML */ `<div class="pt-2 pb-1"></div>`).appendTo(content));
+            subsections.set(key, $(// HTML
+             `<div class="pt-2 pb-1"></div>`).appendTo(content));
           }
           container = subsections.get(key);
         }
-        const label = $(/* HTML */ `<label class="config-field form-label d-flex flex-column gap-1 w-100 mb-3"></label>`).appendTo(container);
-        const caption = $(/* HTML */ `<span class="field-caption small"></span>`)
+        const label = $(// HTML
+         `<label class="config-field form-label d-flex flex-column gap-1 w-100 mb-3"></label>`).appendTo(container);
+        const caption = $(// HTML
+         `<span class="field-caption small"></span>`)
           .text(field.label || name)
           .appendTo(label);
         caption.prepend(
-          $(/* HTML */ `<i></i>`)
+          $(// HTML
+           `<i></i>`)
             .addClass(`fa-solid ${fieldIcon(name, field)} fa-fw text-primary me-2`)
             .attr("aria-hidden", "true")
         );
         let control;
         if (field.type === "select") {
-          control = $(/* HTML */ `<select class="form-select"></select>`);
-          for (const [value, title] of Object.entries(field.options)) $(/* HTML */ `<option></option>`).val(value).text(title).appendTo(control);
+          control = $(// HTML
+           `<select class="form-select"></select>`);
+          for (const [value, title] of Object.entries(field.options)) $(// HTML
+           `<option></option>`).val(value).text(title).appendTo(control);
         } else if (["textarea", "timezones"].includes(field.type)) {
-          control = $(/* HTML */ `<textarea class="form-control"></textarea>`).attr("rows", field.rows || 3);
+          control = $(// HTML
+           `<textarea class="form-control"></textarea>`).attr("rows", field.rows || 3);
         } else {
-          control = $(/* HTML */ `<input class="form-control" />`).attr("type", field.type === "number" ? "number" : field.type === "switch" ? "checkbox" : ["entries", "mapping"].includes(field.type) ? "hidden" : "text");
+          control = $(// HTML
+           `<input class="form-control" />`).attr("type", field.type === "number" ? "number" : field.type === "switch" ? "checkbox" : ["entries", "mapping"].includes(field.type) ? "hidden" : "text");
           if (field.type === "number") control.attr("step", field.step || "any");
           if (field.type === "switch") {
             label.addClass("form-switch ps-0");
@@ -888,19 +911,27 @@
         for (const key of ["min", "max", "maxlength", "placeholder"]) if (field[key] !== undefined && field[key] !== Infinity) control.attr(key, field[key]);
         if (field.optional && !field.placeholder) control.attr("placeholder", field.default === "" ? "Off" : String(field.default));
         control.appendTo(label);
-        if (field.type === "switch") caption.add(control).wrapAll(/* HTML */ `<span class="d-flex align-items-center justify-content-between gap-3"></span>`);
-        if (field.description) $(/* HTML */ `<small class="text-body-secondary"></small>`).text(field.description).appendTo(label);
+        if (field.type === "switch") caption.add(control).wrapAll(// HTML
+         `<span class="d-flex align-items-center justify-content-between gap-3"></span>`);
+        if (field.description) $(// HTML
+         `<small class="text-body-secondary"></small>`).text(field.description).appendTo(label);
         if (field.type === "entries") {
-          const editor = $(/* HTML */ `<div class="config-field entry-editor mb-3"></div>`).appendTo(container);
+          const editor = $(// HTML
+           `<div class="config-field entry-editor mb-3"></div>`).appendTo(container);
           label.removeClass("config-field").appendTo(editor);
-          $(/* HTML */ `<div class="entry-list"></div>`).appendTo(editor);
-          $(/* HTML */ `<button type="button" class="add-entry btn btn-sm btn-outline-primary w-100"></button>`)
+          $(// HTML
+           `<div class="entry-list"></div>`).appendTo(editor);
+          $(// HTML
+           `<button type="button" class="add-entry btn btn-sm btn-outline-primary w-100"></button>`)
             .text(field.addLabel || "Add entry")
-            .prepend(/* HTML */ `<i class="fa-solid fa-plus me-2" aria-hidden="true"></i>`)
+            .prepend(// HTML
+             `<i class="fa-solid fa-plus me-2" aria-hidden="true"></i>`)
             .appendTo(editor);
         }
-        if (field.type === "mapping") $(/* HTML */ `<a href="#remap"></a>`).text("Configure input mapping").appendTo(label);
-        if (field.when) (field.type === "entries" ? label.closest(".entry-editor") : label).wrap(/* HTML */ `<div class="conditional-field"></div>`);
+        if (field.type === "mapping") $(// HTML
+         `<a href="#remap"></a>`).text("Configure input mapping").appendTo(label);
+        if (field.when) (field.type === "entries" ? label.closest(".entry-editor") : label).wrap(// HTML
+         `<div class="conditional-field"></div>`);
       }
     }
 
@@ -1256,7 +1287,8 @@
      */
     function platformIcon(platform) {
       if (platformIcons.has(platform)) return platformIcons.get(platform);
-      const jqIcon = $(/* HTML */ `<i></i>`)
+      const jqIcon = $(// HTML
+       `<i></i>`)
         .addClass(Object.hasOwn(byStream.platforms, platform) ? `fa-brands fa-${platform}` : "fa-solid fa-globe")
         .prop("hidden", true)
         .appendTo(form);
@@ -1271,9 +1303,12 @@
 
     function platformOption(option) {
       if (!option.id) return option.text;
-      const jqLabel = $(/* HTML */ `<span class="platform-option"></span>`);
-      $(/* HTML */ `<i></i>`, { class: `${platformIcon(option.id)} fa-fw me-2`, "aria-hidden": "true" }).appendTo(jqLabel);
-      jqLabel.append($(/* HTML */ `<span></span>`).text(option.text));
+      const jqLabel = $(// HTML
+       `<span class="platform-option"></span>`);
+      $(// HTML
+       `<i></i>`, { class: `${platformIcon(option.id)} fa-fw me-2`, "aria-hidden": "true" }).appendTo(jqLabel);
+      jqLabel.append($(// HTML
+       `<span></span>`).text(option.text));
       return jqLabel;
     }
 
@@ -1309,7 +1344,9 @@
        * @returns {jQuery} The appended editor row.
        */
       function addRow(entry) {
-        const jqRow = $(/* HTML */ `<div class="entry-row p-2 mb-2 border border-secondary-subtle bg-body-tertiary"></div>`).html(/* HTML */ `
+        const jqRow = $(// HTML
+         `<div class="entry-row p-2 mb-2 border border-secondary-subtle bg-body-tertiary"></div>`).html(// HTML
+         `
           <div class="d-flex align-items-center gap-1 mb-1">
             <i class="entry-icon text-primary fa-fw fa-solid fa-calendar-days" aria-hidden="true"></i>
             <select class="form-select rounded-0 bg-body-secondary border-secondary-subtle flex-grow-1" aria-label="${choiceKey === "platform" ? "Platform" : "Day"}"></select>
@@ -1329,11 +1366,13 @@
         const jqSelect = jqRow.find("select");
         if (!choices) jqRow.find("select, .entry-icon").remove();
         if (choiceKey === "platform") jqRow.find(".entry-icon").remove();
-        Object.entries(choices || {}).forEach(([value, title]) => $(/* HTML */ `<option></option>`).val(value).text(title).appendTo(jqSelect));
+        Object.entries(choices || {}).forEach(([value, title]) => $(// HTML
+         `<option></option>`).val(value).text(title).appendTo(jqSelect));
         jqSelect.val(map ? entry[0] : entry[choiceKey]);
         textFields.forEach(([key, title, type = "text"], index) => {
           const value = map ? entry[choices ? 1 : index] : strings ? entry : entry[key];
-          const input = $(/* HTML */ `<input />`, {
+          const input = $(// HTML
+           `<input />`, {
             type,
             step: type === "datetime-local" ? "1" : undefined,
             maxlength: 160,
@@ -1344,10 +1383,13 @@
           })
             .val(type === "datetime-local" ? localTimestamp(value) : value)
             .appendTo(jqRow);
-          input.wrap(/* HTML */ `<span class="input-group mb-1"></span>`);
-          $(/* HTML */ `<span class="input-group-text"></span>`)
+          input.wrap(// HTML
+           `<span class="input-group mb-1"></span>`);
+          $(// HTML
+           `<span class="input-group-text"></span>`)
             .append(
-              $(/* HTML */ `<i></i>`)
+              $(// HTML
+               `<i></i>`)
                 .addClass(`fa-solid ${fieldIcon(key, { type })} fa-fw`)
                 .attr("aria-hidden", "true")
             )
@@ -1470,16 +1512,21 @@
      * @returns {void}
      */
     function initAppearancePresets() {
-      const jqLabel = $(/* HTML */ `<label class="config-field form-label d-flex flex-column gap-1 w-100 mb-3"></label>`).prependTo(jqForm.find('[data-config-section="Appearance"]').children(".accordion-body"));
-      $(/* HTML */ `<span class="field-caption small"></span>`).text("Appearance preset").prepend($(/* HTML */ `<i class="fa-solid fa-palette fa-fw text-primary me-2" aria-hidden="true"></i>`)).appendTo(jqLabel);
-      const jqSelect = $(/* HTML */ `<select class="form-select rounded-0 bg-body-secondary border-secondary-subtle"></select>`).appendTo(jqLabel);
+      const jqLabel = $(// HTML
+       `<label class="config-field form-label d-flex flex-column gap-1 w-100 mb-3"></label>`).prependTo(jqForm.find('[data-config-section="Appearance"]').children(".accordion-body"));
+      $(// HTML
+       `<span class="field-caption small"></span>`).text("Appearance preset").prepend($(// HTML
+       `<i class="fa-solid fa-palette fa-fw text-primary me-2" aria-hidden="true"></i>`)).appendTo(jqLabel);
+      const jqSelect = $(// HTML
+       `<select class="form-select rounded-0 bg-body-secondary border-secondary-subtle"></select>`).appendTo(jqLabel);
       for (const [value, title] of [
         ["", "Custom"],
         ["studio", "Studio"],
         ["minimal", "Minimal"],
         ["light", "Light ink"]
       ])
-        $(/* HTML */ `<option></option>`).val(value).text(title).appendTo(jqSelect);
+        $(// HTML
+         `<option></option>`).val(value).text(title).appendTo(jqSelect);
       const presets = {
         studio: { backgroundColor: "#202020E6", textColor: "#FFFFFF", accentColor: "#D9D9D9" },
         minimal: { backgroundColor: "#00000000", textColor: "#FFFFFF", accentColor: "#D9D9D9" },
@@ -1510,13 +1557,17 @@
         const title = jqField.closest("label").find(".field-caption").text() || name;
         // The visible picker uses local wall time; the named hidden input keeps absolute UTC for URLs.
         jqField.attr({ type: "hidden", "data-title": title });
-        const jqPicker = $(/* HTML */ `<input type="datetime-local" step="1" required />`)
+        const jqPicker = $(// HTML
+         `<input type="datetime-local" step="1" required />`)
           .attr({ class: `${jqField.attr("class")} timestamp-picker`, "aria-label": title })
           .insertBefore(jqField);
-        const jqNote = $(/* HTML */ `<small class="text-body-secondary"></small>`).text("Choose in this computer’s time zone. The URL stores an absolute time.").insertAfter(jqPicker);
-        const jqNow = $(/* HTML */ `<button type="button" class="btn btn-sm btn-outline-primary align-self-start"></button>`)
+        const jqNote = $(// HTML
+         `<small class="text-body-secondary"></small>`).text("Choose in this computer’s time zone. The URL stores an absolute time.").insertAfter(jqPicker);
+        const jqNow = $(// HTML
+         `<button type="button" class="btn btn-sm btn-outline-primary align-self-start"></button>`)
           .text("Use current time")
-          .prepend($(/* HTML */ `<i class="fa-solid fa-clock me-2" aria-hidden="true"></i>`))
+          .prepend($(// HTML
+           `<i class="fa-solid fa-clock me-2" aria-hidden="true"></i>`))
           .attr("aria-label", `Use current time for ${title}`)
           .insertAfter(jqNote);
         const sync = () => jqPicker.val(localTimestamp(jqField.val()));
@@ -1586,7 +1637,8 @@
           [...new Set(codes)].sort().map((value) => [value, regionalLabel(value, locale)])
         );
       }
-      const jqSelect = $(/* HTML */ `<select class="form-select rounded-0 bg-body-secondary border-secondary-subtle"></select>`)
+      const jqSelect = $(// HTML
+       `<select class="form-select rounded-0 bg-body-secondary border-secondary-subtle"></select>`)
         .attr({ id: `${jqField.attr("id")}-picker`, "data-regional-picker": name, "aria-label": parameterRules[name].label })
         .prop("multiple", multiple)
         .insertAfter(jqField);
@@ -1684,8 +1736,10 @@
         if (parameterRules[input.name]?.type !== "color") continue;
         const jqInput = $(input);
         const title = `${jqInput.closest("label").text().trim() || input.name} picker`;
-        const jqSwatch = $(/* HTML */ `<span class="input-group-text p-1"><span></span></span>`);
-        jqInput.wrap(/* HTML */ `<span class="input-group"></span>`).before(jqSwatch);
+        const jqSwatch = $(// HTML
+         `<span class="input-group-text p-1"><span></span></span>`);
+        jqInput.wrap(// HTML
+         `<span class="input-group"></span>`).before(jqSwatch);
         const optional = parameterRules[input.name].optional;
         jqInput.addClass("font-monospace").attr("placeholder", optional && !parameterRules[input.name].default ? "Off" : parameterRules[input.name].default);
         const picker = Pickr.create({
@@ -1827,8 +1881,10 @@
      * @returns {void}
      */
     function initHelpDialog(initResourceHelp) {
-      const jqDialog = $(/* HTML */ `<div id="config-help" class="config-help modal fade" tabindex="-1" aria-labelledby="help-title"></div>`)
-        .html(/* HTML */ `
+      const jqDialog = $(// HTML
+       `<div id="config-help" class="config-help modal fade" tabindex="-1" aria-labelledby="help-title"></div>`)
+        .html(// HTML
+         `
           <div class="modal-dialog modal-lg modal-dialog-scrollable">
             <div class="modal-content rounded-0">
               <nav class="d-flex flex-wrap align-items-center gap-2 p-3 bg-dark text-white modal-header flex-shrink-0" aria-label="Configurator sections">
@@ -1997,23 +2053,30 @@
       Object.entries(parameterRules).forEach(([name, rule], index) => {
         const section = rule.section || "Settings";
         if (!groups.has(section)) {
-          const group = $(/* HTML */ `<fieldset class="border-0 p-0 m-0 mb-3"></fieldset>`).appendTo("#compression-field-list");
-          $(/* HTML */ `<legend class="fs-6 fw-semibold mb-2"></legend>`).text(section).appendTo(group);
+          const group = $(// HTML
+           `<fieldset class="border-0 p-0 m-0 mb-3"></fieldset>`).appendTo("#compression-field-list");
+          $(// HTML
+           `<legend class="fs-6 fw-semibold mb-2"></legend>`).text(section).appendTo(group);
           groups.set(section, group);
         }
-        const label = $(/* HTML */ `<label class="compression-field d-flex align-items-start gap-2 mb-2"></label>`).appendTo(groups.get(section));
-        $(/* HTML */ `<input class="form-check-input float-none m-0 mt-1 flex-shrink-0" type="checkbox" data-compress-field />`)
+        const label = $(// HTML
+         `<label class="compression-field d-flex align-items-start gap-2 mb-2"></label>`).appendTo(groups.get(section));
+        $(// HTML
+         `<input class="form-check-input float-none m-0 mt-1 flex-shrink-0" type="checkbox" data-compress-field />`)
           .attr({ id: `compress-field-${index}`, value: name })
           .appendTo(label);
-        const caption = $(/* HTML */ `<span class="text-break"></span>`)
+        const caption = $(// HTML
+         `<span class="text-break"></span>`)
           .text(rule.label || name)
           .prepend(
-            $(/* HTML */ `<i></i>`)
+            $(// HTML
+             `<i></i>`)
               .addClass(`fa-solid ${fieldIcon(name, rule)} fa-fw me-2`)
               .attr("aria-hidden", "true")
           )
           .appendTo(label);
-        $(/* HTML */ `<code class="d-block small"></code>`).text(name).appendTo(caption);
+        $(// HTML
+         `<code class="d-block small"></code>`).text(name).appendTo(caption);
       });
       jqDialog.on("change", '#short-url, input[name="compression-scope"], [data-compress-field]', () => {
         syncCompressionOptions();
@@ -2090,32 +2153,42 @@
           (rule.options && Object.keys(rule.options).join(", ")) || (rule.min !== undefined ? `${rule.min} to ${rule.max}` : acceptedTypes[rule.type] || "Text"),
           rule.type === "color" ? String($(form.elements.namedItem(name)).val()).replace(/^#/, "") : ($(form.elements.namedItem(name)).val() ?? "")
         ];
-        const jqDefinition = $(/* HTML */ `<section class="definition border mb-3 p-3 bg-body-tertiary"></section>`).appendTo(jqParameters);
-        $(/* HTML */ `<h3 class="h5 mb-2 d-flex flex-wrap align-items-center gap-2"></h3>`)
+        const jqDefinition = $(// HTML
+         `<section class="definition border mb-3 p-3 bg-body-tertiary"></section>`).appendTo(jqParameters);
+        $(// HTML
+         `<h3 class="h5 mb-2 d-flex flex-wrap align-items-center gap-2"></h3>`)
           .text(title)
           .prepend(
-            $(/* HTML */ `<i></i>`)
+            $(// HTML
+             `<i></i>`)
               .addClass(`fa-solid ${fieldIcon(name, rule)} fa-fw`)
               .attr("aria-hidden", "true")
           )
-          .append($(/* HTML */ `<code class="d-inline-block bg-secondary-subtle text-primary border p-1"></code>`).text(`${name}=`))
+          .append($(// HTML
+           `<code class="d-inline-block bg-secondary-subtle text-primary border p-1"></code>`).text(`${name}=`))
           .appendTo(jqDefinition);
-        $(/* HTML */ `<div class="codeblock bg-black text-white border p-2 mb-3 font-monospace text-break lh-lg"></div>`)
+        $(// HTML
+         `<div class="codeblock bg-black text-white border p-2 mb-3 font-monospace text-break lh-lg"></div>`)
           .text(`${location.pathname.split("/").pop() || "index.html"}?${new URLSearchParams({ [name]: example })}`)
           .appendTo(jqDefinition);
-        const jqList = $(/* HTML */ `<ul class="list-unstyled mb-0"></ul>`).appendTo(jqDefinition);
+        const jqList = $(// HTML
+         `<ul class="list-unstyled mb-0"></ul>`).appendTo(jqDefinition);
         for (const [label, value] of [
           ["Default: ", defaultValue],
           ["Accepted: ", values],
           ["", rule.description]
         ]) {
-          $(/* HTML */ `<li class="mb-2 text-break"></li>`).append($(/* HTML */ `<strong></strong>`).text(label), $(/* HTML */ `<span></span>`).text(value)).appendTo(jqList);
+          $(// HTML
+           `<li class="mb-2 text-break"></li>`).append($(// HTML
+           `<strong></strong>`).text(label), $(// HTML
+           `<span></span>`).text(value)).appendTo(jqList);
         }
       }
 
       const titles = { info: "About", obs: "Use with OBS", params: "Parameters", advanced: "Advanced options" };
       initResourceHelp?.(jqDialog[0], titles, closeHelp);
-      jqDialog.find('[data-panel="info"]').append(/* HTML */ `
+      jqDialog.find('[data-panel="info"]').append(// HTML
+       `
         <section class="small mt-4 pt-3 border-top border-secondary-subtle" aria-labelledby="release-contributions-title">
           <h3 id="release-contributions-title" class="h6 mb-3"><i class="fa-brands fa-github me-2" aria-hidden="true"></i>Early access &amp; contributions</h3>
           <p>
@@ -2243,12 +2316,15 @@
       $(window).on("hashchange", syncHelpHash);
       syncHelpHash();
 
-      const jqLinks = $(/* HTML */ `<p class="small m-0"></p>`).appendTo(".footer-links");
-      $(/* HTML */ `<a></a>`, { href: homeURL, text: "Home", class: "link-body-emphasis" }).appendTo(jqLinks);
+      const jqLinks = $(// HTML
+       `<p class="small m-0"></p>`).appendTo(".footer-links");
+      $(// HTML
+       `<a></a>`, { href: homeURL, text: "Home", class: "link-body-emphasis" }).appendTo(jqLinks);
       jqDialog.find(".modal-header [data-section]").each((_, tab) => {
         const section = tab.dataset.section;
         jqLinks.append(" \u00b7 ");
-        $(/* HTML */ `<a></a>`, { href: `#${section}`, text: section === "params" ? "Parameter reference" : tab.textContent.trim(), class: "link-body-emphasis" }).appendTo(jqLinks);
+        $(// HTML
+         `<a></a>`, { href: `#${section}`, text: section === "params" ? "Parameter reference" : tab.textContent.trim(), class: "link-body-emphasis" }).appendTo(jqLinks);
       });
       $(document).on("click", 'a[href^="#"]', function (event) {
         const section = $(this).attr("href").slice(1);
@@ -2271,9 +2347,11 @@
       $(".home-link").attr("href", homeURL);
       const jqSelect = $("#tool-picker").empty();
       if (!jqSelect.length) return;
-      $(/* HTML */ `<option></option>`).val("").text("Choose a tool").appendTo(jqSelect);
+      $(// HTML
+       `<option></option>`).val("").text("Choose a tool").appendTo(jqSelect);
       byConfigurator.catalog.availableTools.forEach((tool) => {
-        $(/* HTML */ `<option></option>`)
+        $(// HTML
+         `<option></option>`)
           .val(tool.id)
           .text(`${tool.name} (${tool.status})`)
           .attr({ "data-name": tool.name, "data-status": tool.status, "data-icon": tool.icon, "data-category": byConfigurator.catalog.categories.find((category) => category.id === tool.category).name })
@@ -2284,12 +2362,17 @@
 
       function toolOption(option) {
         if (!option.id) return option.text;
-        const label = $(/* HTML */ `<span></span>`);
-        const title = $(/* HTML */ `<span class="d-inline-flex align-items-center mw-100"></span>`).appendTo(label);
-        $(/* HTML */ `<i></i>`, { class: `fa-solid ${$(option.element).attr("data-icon")} fa-fw flex-shrink-0 me-2`, "aria-hidden": "true" }).appendTo(title);
+        const label = $(// HTML
+         `<span></span>`);
+        const title = $(// HTML
+         `<span class="d-inline-flex align-items-center mw-100"></span>`).appendTo(label);
+        $(// HTML
+         `<i></i>`, { class: `fa-solid ${$(option.element).attr("data-icon")} fa-fw flex-shrink-0 me-2`, "aria-hidden": "true" }).appendTo(title);
         title.append(
-          $(/* HTML */ `<span></span>`, { class: "tool-name text-truncate", text: $(option.element).attr("data-name") }),
-          $(/* HTML */ `<span class="resource-status badge rounded-pill border fw-normal align-middle flex-shrink-0 ms-2"></span>`).text($(option.element).attr("data-status"))
+          $(// HTML
+           `<span></span>`, { class: "tool-name text-truncate", text: $(option.element).attr("data-name") }),
+          $(// HTML
+           `<span class="resource-status badge rounded-pill border fw-normal align-middle flex-shrink-0 ms-2"></span>`).text($(option.element).attr("data-status"))
         );
         return label;
       }
@@ -2300,7 +2383,8 @@
        */
       function toolResult(option) {
         const label = toolOption(option);
-        if (option.id) $(/* HTML */ `<small></small>`, { class: "tool-category", text: $(option.element).attr("data-category") }).appendTo(label);
+        if (option.id) $(// HTML
+         `<small></small>`, { class: "tool-category", text: $(option.element).attr("data-category") }).appendTo(label);
         return label;
       }
       initSelect2(jqSelect, {

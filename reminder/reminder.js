@@ -1,10 +1,10 @@
-/** Periodic Reminder: validated URL settings and an native renderer with shared URL setup. */
+// Periodic Reminder: validated URL settings and an native renderer with shared URL setup.
 document.addEventListener("DOMContentLoaded", async () => {
   // ==========
   // ==== RESOURCE DEFINITION ====
   // ==========
 
-  /** Defaults, URL constraints, and the field metadata consumed by the optional editor. */
+  // Defaults, URL constraints, and the field metadata consumed by the optional editor.
   const resource = {
     version: "1.0",
     title: "Periodic Reminder",

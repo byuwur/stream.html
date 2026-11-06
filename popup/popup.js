@@ -9,7 +9,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   // ==== RESOURCE DEFINITION ====
   // ==========
 
-  /** Defaults, URL constraints, and the field metadata consumed by the optional editor. */
+  // Defaults, URL constraints, and the field metadata consumed by the optional editor.
   const resource = {
     version: "1.1", // 2026-10-19
     title: "Social popup",

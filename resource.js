@@ -43,8 +43,8 @@
  * @property {string} [styleParent] Container that needs flex layout when an order/layout override is applied.
  */
 
-/** @typedef {Object<string, ResourceField>} ResourceFields */
-/** @typedef {Object<string, ResourceValue>} ResourceSettings */
+// @typedef {Object<string, ResourceField>} ResourceFields
+// @typedef {Object<string, ResourceValue>} ResourceSettings
 
 /**
  * One resource owns its field defaults, accepted values, and renderer.

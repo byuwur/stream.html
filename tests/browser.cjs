@@ -3,19 +3,19 @@
  * Desc: Browser fixtures shared by independent resource and configurator suites; no tests run on import.
  */
 
-/* --- DEPENDENCIES --- */
+// --- DEPENDENCIES ---
 const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
 const path = require("node:path");
 
-/* --- PINNED DEPENDENCIES AND BROWSER OPTIONS --- */
+// --- PINNED DEPENDENCIES AND BROWSER OPTIONS ---
 const root = path.join(__dirname, "..");
 const spaBase = "https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.7/";
 const runtimeAssets = ["_functions.js", "_fonts.js", "js/gsap.min.js", "js/morphSVGplugin.min.js"];
 const launchOptions = { channel: process.env.BROWSER_CHANNEL || undefined, executablePath: process.env.CHROMIUM_EXECUTABLE_PATH || undefined };
 
-/* --- CDN FIXTURES --- */
-/** Load only the caller's dependencies before browser routing, keeping fetch failures inside its suite. */
+// --- CDN FIXTURES ---
+// Load only the caller's dependencies before browser routing, keeping fetch failures inside its suite.
 async function loadAssets(files) {
   return new Map(
     await Promise.all(
@@ -29,8 +29,8 @@ async function loadAssets(files) {
   );
 }
 
-/* --- RESOURCE DISCOVERY --- */
-/** Discover resource pages by their template so missing renderer scripts still fail their checks. */
+// --- RESOURCE DISCOVERY ---
+// Discover resource pages by their template so missing renderer scripts still fail their checks.
 async function resourceNames() {
   const folders = await fs.readdir(root, { withFileTypes: true });
   const names = [];
@@ -46,15 +46,15 @@ async function resourceNames() {
   return names;
 }
 
-/* --- STANDALONE PAGE FIXTURE --- */
-/** Remove the optional editor imports to exercise the supported renderer-only entry point. */
+// --- STANDALONE PAGE FIXTURE ---
+// Remove the optional editor imports to exercise the supported renderer-only entry point.
 function standaloneHTML(html) {
   const boundary = html.indexOf("<!-- ===== CONFIGURATOR ===== -->");
   assert.ok(boundary >= 0, "Resource must mark its optional configurator imports");
   return `${html.slice(0, boundary)}</body></html>`;
 }
 
-/* --- REQUEST ROUTING --- */
+// --- REQUEST ROUTING ---
 /**
  * Serve local sources and preloaded CDN assets; unrelated external requests are aborted.
  * @param {import("playwright").Page} page Page whose requests belong to this fixture.
@@ -82,5 +82,5 @@ async function serve(page, assets, standalone = false) {
   });
 }
 
-/* --- SUITE FIXTURES --- */
+// --- SUITE FIXTURES ---
 module.exports = { root, runtimeAssets, launchOptions, loadAssets, resourceNames, standaloneHTML, serve };

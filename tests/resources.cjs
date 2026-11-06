@@ -3,7 +3,7 @@
  * Desc: Standalone resource rendering, URL validation, and local-file use without configurator imports.
  */
 
-/* --- DEPENDENCIES --- */
+// --- DEPENDENCIES ---
 const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
 const os = require("node:os");
@@ -13,12 +13,12 @@ const test = require("node:test");
 const { chromium } = require("playwright");
 const { root, runtimeAssets, launchOptions, loadAssets, resourceNames, standaloneHTML, serve } = require("./browser.cjs");
 
-/* --- STANDALONE RESOURCE CONTRACTS --- */
+// --- STANDALONE RESOURCE CONTRACTS ---
 test("resources render and round-trip URLs without configurator assets", async (t) => {
   const assets = await loadAssets(runtimeAssets);
   const browser = await chromium.launch(launchOptions);
   try {
-    /* --- PER-RESOURCE RENDERING AND URL ROUND TRIPS --- */
+    // --- PER-RESOURCE RENDERING AND URL ROUND TRIPS ---
     for (const name of await resourceNames()) {
       await t.test(name, async () => {
         const page = await browser.newPage();
@@ -57,7 +57,7 @@ test("resources render and round-trip URLs without configurator assets", async (
       });
     }
 
-    /* --- URL VALIDATION AND SAFE TEXT --- */
+    // --- URL VALIDATION AND SAFE TEXT ---
     await t.test("invalid values retain defaults while zero and untrusted text survive", async () => {
       const page = await browser.newPage();
       try {
@@ -78,7 +78,7 @@ test("resources render and round-trip URLs without configurator assets", async (
       }
     });
 
-    /* --- LOCAL FILE SUPPORT --- */
+    // --- LOCAL FILE SUPPORT ---
     await t.test("downloaded file URLs render without editor files", async () => {
       const directory = await fs.mkdtemp(path.join(os.tmpdir(), "stream-resource-"));
       const page = await browser.newPage();

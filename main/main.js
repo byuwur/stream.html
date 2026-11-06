@@ -9,7 +9,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   // ==== RESOURCE DEFINITION ====
   // ==========
 
-  /** Defaults, URL constraints, and the field metadata consumed by the optional editor. */
+  // Defaults, URL constraints, and the field metadata consumed by the optional editor.
   const resource = {
     version: "1.1", // 2026-10-19
     title: "Main scene",
@@ -616,7 +616,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (!handle) continue;
       const item = document.createElement("div");
       item.className = "item";
-      item.innerHTML = /* HTML */ `
+      item.innerHTML = // HTML
+       `
         <div class="network">
           <div class="borderTop"></div>
           <div class="icon"><i aria-hidden="true"></i></div>
@@ -634,7 +635,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     for (const [day, text] of Object.entries(scheduleEntries)) {
       const entry = document.createElement("div");
       entry.className = "day";
-      entry.innerHTML = /* HTML */ `
+      entry.innerHTML = // HTML
+       `
         <div class="borderTop"></div>
         <div class="scheduleHead"></div>
         <div class="scheduleTime"></div>
