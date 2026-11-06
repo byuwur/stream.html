@@ -616,8 +616,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (!handle) continue;
       const item = document.createElement("div");
       item.className = "item";
-      item.innerHTML = // HTML
-       `
+      item.innerHTML = /* HTML */ `
         <div class="network">
           <div class="borderTop"></div>
           <div class="icon"><i aria-hidden="true"></i></div>
@@ -635,8 +634,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     for (const [day, text] of Object.entries(scheduleEntries)) {
       const entry = document.createElement("div");
       entry.className = "day";
-      entry.innerHTML = // HTML
-       `
+      entry.innerHTML = /* HTML */ `
         <div class="borderTop"></div>
         <div class="scheduleHead"></div>
         <div class="scheduleTime"></div>

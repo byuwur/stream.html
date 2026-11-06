@@ -124,8 +124,7 @@
           const tools = byConfigurator.catalog.availableTools;
           $("#tool-count").text(`${tools.length} browser overlay${tools.length === 1 ? "" : "s"}`);
           byConfigurator.catalog.categories.forEach((group) => {
-            $(// HTML
-             `<option></option>`, { value: group.id, text: group.name }).attr("data-icon", group.icon).appendTo(jqCategory);
+            $(/* HTML */ `<option></option>`, { value: group.id, text: group.name }).attr("data-icon", group.icon).appendTo(jqCategory);
           });
           tools.forEach((tool, index) => {
             const jqCard = $($("#home-tool-template").prop("content").firstElementChild).clone();
@@ -192,12 +191,9 @@
           function categoryOption(option) {
             if (!option.id) return option.text;
             const icon = $(option.element).attr("data-icon") || "fa-layer-group";
-            const label = $(// HTML
-             `<span></span>`);
-            $(// HTML
-             `<i></i>`, { class: `fa-solid ${icon} fa-fw me-2`, "aria-hidden": "true" }).appendTo(label);
-            label.append($(// HTML
-             `<span></span>`).text(option.text));
+            const label = $(/* HTML */ `<span></span>`);
+            $(/* HTML */ `<i></i>`, { class: `fa-solid ${icon} fa-fw me-2`, "aria-hidden": "true" }).appendTo(label);
+            label.append($(/* HTML */ `<span></span>`).text(option.text));
             return label;
           }
 

@@ -15,8 +15,7 @@ if (window.byConfigurator) window.byConfigurator.configureResource = function ({
   if (typeof jQuery === "undefined" && !window.jQuery) return console.error("Init controller/configurator.js FAILED. No jQuery found.");
   const $ = window.jQuery;
   // Mapping markup belongs to this editor extension, never to the overlay renderer.
-  $(// HTML
-   `
+  $(/* HTML */ `
     <section id="remap" hidden="">
       <article>
         <p id="mapping-status">Press a gamepad button or F for keyboard input.</p>
@@ -161,19 +160,16 @@ if (window.byConfigurator) window.byConfigurator.configureResource = function ({
       const jqOption = jqBase.find(`option[value="${player}"]`);
       if (!jqOption.length) continue;
       jqOption.prop("disabled", false);
-      const jqPanel = $(// HTML
-       `<div class="raw-outputs"></div>`)
+      const jqPanel = $(/* HTML */ `<div class="raw-outputs"></div>`)
         .attr("id", `gamepad-map-${player}`)
         .toggleClass("active", selected === String(player))
         .html($(".raw-outputs.template").html())
         .appendTo("#output-display");
-      $(// HTML
-       `<h2></h2>`).text(pad.id).prependTo(jqPanel);
+      $(/* HTML */ `<h2></h2>`).text(pad.id).prependTo(jqPanel);
       for (const type of ["buttons", "axes"]) {
         pad[type].forEach((value, id) => {
           const shortname = type === "buttons" ? `B${id}` : `Axis ${id}`;
-          $(// HTML
-           `<li></li>`)
+          $(/* HTML */ `<li></li>`)
             .attr({ "data-shortname": shortname, "data-name": `${type === "buttons" ? "button-" : "axis-"}${id}`, "data-info": JSON.stringify({ id: player, type, number: id }), title: shortname })
             .appendTo(jqPanel.find(`.${type}`));
         });
@@ -384,8 +380,7 @@ if (window.byConfigurator) window.byConfigurator.configureResource = function ({
      * @returns {string}
      */
     function mapMsg(message, jqThis, type) {
-      jqThis.prepend(// HTML
-       `<div class="map-message ${type}"><span>${message}</span></div>`);
+      jqThis.prepend(/* HTML */ `<div class="map-message ${type}"><span>${message}</span></div>`);
     }
 
     const localMapping = [];
@@ -503,14 +498,12 @@ if (window.byConfigurator) window.byConfigurator.configureResource = function ({
     if (jqMapping.length) {
       titles.remap = "Custom Mapping";
       $(
-        // HTML
-         `<p>
+        /* HTML */ `<p>
           Controller input is based on <a href="https://github.com/html5rocks/www.html5rocks.com/tree/master/content/tutorials/doodles/gamepad/static/gamepad-tester" target="_blank" rel="noopener">Gamepad.js and Tester.js</a> by Marcin
           Wichary.
         </p>`
       ).appendTo($(dialog).find('[data-panel="info"]'));
-      const jqPanel = $(// HTML
-       `<section data-panel="remap" hidden></section>`).append(jqMapping.contents()).appendTo($(dialog).find("article"));
+      const jqPanel = $(/* HTML */ `<section data-panel="remap" hidden></section>`).append(jqMapping.contents()).appendTo($(dialog).find("article"));
       jqPanel.find("select").addClass("form-select w-auto");
       jqPanel.find("button").addClass("btn btn-outline-secondary btn-sm");
       jqPanel.find("input").addClass("form-check-input");
@@ -520,8 +513,7 @@ if (window.byConfigurator) window.byConfigurator.configureResource = function ({
       jqPanel.find(".del-config").text("Remove").addClass("btn btn-outline-danger btn-sm");
       jqPanel.find(".add-config").text("Add").addClass("btn btn-outline-secondary btn-sm");
       jqPanel.find(".form-group > input").each(function () {
-        const jqLabel = $(// HTML
-         `<label class="small me-2 d-inline-flex align-items-center gap-2"></label>`);
+        const jqLabel = $(/* HTML */ `<label class="small me-2 d-inline-flex align-items-center gap-2"></label>`);
         if (this.type === "checkbox") {
           jqLabel.addClass("form-switch ps-0");
           $(this).attr("role", "switch");
@@ -531,16 +523,13 @@ if (window.byConfigurator) window.byConfigurator.configureResource = function ({
         $(this)
           .wrap(jqLabel)
           .after(
-            $(// HTML
-             `<span></span>`)
+            $(/* HTML */ `<span></span>`)
               .text(title)
-              .prepend($(// HTML
-               `<i></i>`).addClass(`fa-solid ${icon} me-1`).attr("aria-hidden", "true"))
+              .prepend($(/* HTML */ `<i></i>`).addClass(`fa-solid ${icon} me-1`).attr("aria-hidden", "true"))
           );
       });
       initMappingControls(jqPanel);
-      $(// HTML
-       `<button type="button" data-section="remap" class="btn btn-sm btn-outline-light border-0"><i class="fa-solid fa-gamepad me-1" aria-hidden="true"></i>Custom Mapping</button>`).insertBefore($(dialog).find(".help-close"));
+      $(/* HTML */ `<button type="button" data-section="remap" class="btn btn-sm btn-outline-light border-0"><i class="fa-solid fa-gamepad me-1" aria-hidden="true"></i>Custom Mapping</button>`).insertBefore($(dialog).find(".help-close"));
       $("#remap").remove();
       $(document).on("mapping-applied", closeHelp);
     }
@@ -556,9 +545,7 @@ if (window.byConfigurator) window.byConfigurator.configureResource = function ({
       if (!option.element) return option.text;
       const name = option.element.parentElement.name;
       const icon = { axes: "fa-up-down-left-right", "fix-type": "fa-sliders" }[name] || "fa-gamepad";
-      return $(// HTML
-       `<span></span>`).append($(// HTML
-       `<i></i>`).addClass(`fa-solid ${icon} fa-fw me-2`).attr("aria-hidden", "true"), document.createTextNode(option.text));
+      return $(/* HTML */ `<span></span>`).append($(/* HTML */ `<i></i>`).addClass(`fa-solid ${icon} fa-fw me-2`).attr("aria-hidden", "true"), document.createTextNode(option.text));
     }
     const options = { templateResult: mappingOption, templateSelection: mappingOption };
     initSelect2(jqPanel.find("#player-base"), options);
