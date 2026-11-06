@@ -11,7 +11,7 @@ const path = require("node:path");
 // --- PINNED DEPENDENCIES AND BROWSER OPTIONS ---
 const root = path.join(__dirname, "..");
 const spaBase = "https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.7/";
-const runtimeAssets = ["_functions.js", "_fonts.js", "js/gsap.min.js", "js/morphSVGplugin.min.js"];
+const runtimeAssets = ["_functions.min.js", "_fonts.min.js", "js/gsap.min.js", "js/morphSVGplugin.min.js"];
 const launchOptions = { channel: process.env.BROWSER_CHANNEL || undefined, executablePath: process.env.CHROMIUM_EXECUTABLE_PATH || undefined };
 
 // --- CDN FIXTURES ---

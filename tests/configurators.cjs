@@ -18,12 +18,12 @@ test("configurator forms and previews initialize for every resource", async (t) 
     "js/popper.min.js",
     "js/bootstrap.min.js",
     "js/pickr.min.js",
-    "_common.js",
+    "_common.min.js",
     "css/bootstrap.min.css",
     "css/select2.min.css",
     "css/pickr.min.css",
     "css/animate.min.css",
-    "_common.css"
+    "_common.min.css"
   ]);
   const browser = await chromium.launch(launchOptions);
   try {
