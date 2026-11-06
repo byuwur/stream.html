@@ -244,3 +244,5 @@ Back up before importing. Replace devices, paths, and account settings; keep str
 ## License
 
 Project code: [MIT](LICENSE.md), copyright Andrés Trujillo [Mateus] byUwUr. Bundled libraries, applications, and media retain their licenses.
+
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/byuwur/stream.html)
