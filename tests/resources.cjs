@@ -96,6 +96,36 @@ test("resources render and round-trip URLs without configurator assets", async (
       }
     });
 
+    await t.test("scrolling ticker rebuilds copies when only the viewport grows", async () => {
+      const page = await browser.newPage({ viewport: { width: 400, height: 400 } });
+      try {
+        await serve(page, assets, true);
+        const entries = JSON.stringify([{ text: "Ticker", prefix: "", icon: "" }]);
+        await page.goto(`https://stream.test/ticker/?${new URLSearchParams({ mode: "scroll", entries, width: "3840" })}`);
+        await page.waitForFunction(() => document.querySelectorAll(".ticker-group").length > 1);
+        // Hold content width and motion constant so only the viewport changes.
+        await page.addStyleTag({ content: ".ticker-group { width: 256px; } .ticker-track { animation: none; }" });
+        await page.evaluate(() => document.fonts.ready);
+        await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+        const originalWidth = await page
+          .locator(".ticker-group")
+          .first()
+          .evaluate((group) => group.offsetWidth);
+        await page.setViewportSize({ width: 1600, height: 400 });
+        await page.waitForFunction(() => document.querySelector(".ticker-viewport").clientWidth > 1200);
+        await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+        const layout = await page.evaluate(() => ({
+          viewport: document.querySelector(".ticker-viewport").clientWidth,
+          width: document.querySelector(".ticker-group").offsetWidth,
+          groups: document.querySelectorAll(".ticker-group").length
+        }));
+        assert.equal(layout.width, originalWidth, "the content itself did not change");
+        assert.ok((layout.groups - 1) * layout.width >= layout.viewport, "copies cover the viewport through a full scroll cycle");
+      } finally {
+        await page.close();
+      }
+    });
+
     // --- LOCAL FILE SUPPORT ---
     await t.test("downloaded file URLs render without editor files", async () => {
       const directory = await fs.mkdtemp(path.join(os.tmpdir(), "stream-resource-"));

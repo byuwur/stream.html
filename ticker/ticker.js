@@ -292,6 +292,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     return;
   }
   const viewport = element("div", "ticker-viewport");
+  /**
+   * Append optional icon/prefix and required message as text, keeping URL content out of HTML.
+   * @param {Object} entry Validated ticker entry.
+   * @param {HTMLElement} parent Message container.
+   * @returns {void}
+   */
   function content(entry, parent) {
     for (const [name, value] of Object.entries({ icon: entry.icon, prefix: entry.prefix ? `${entry.prefix} ·` : "", text: entry.text })) {
       if (!value) continue;
@@ -307,15 +313,14 @@ document.addEventListener("DOMContentLoaded", async () => {
       element("span", "ticker-separator", settings.separator, group);
     }
     group.style.gap = `${settings.gap}px`;
-    let previous = 0;
     /**
      * Recalculate the resource layout from its current viewport and measured content.
      * @returns {void}
      */
     const resize = () => {
       const width = group.getBoundingClientRect().width;
-      if (!width || width === previous) return;
-      previous = width;
+      if (!width) return;
+      // A wider viewport needs more copies even when the message width stays the same.
       track.querySelectorAll(".ticker-group:not(:first-child)").forEach((x) => x.remove());
       const copies = Math.max(2, Math.ceil(viewport.clientWidth / width) + 1);
       for (let i = 0; i < copies; i++) {
@@ -339,7 +344,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const display = element("div", "ticker-message", undefined, viewport);
     let previous = -1;
     /**
-     * Update.
+     * Render a changed message slot and restart its configured entry transition.
      * @returns {void}
      */
     function update() {
