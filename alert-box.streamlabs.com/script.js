@@ -1,5 +1,6 @@
 (function () {
   $.getScript("https://cdnjs.cloudflare.com/ajax/libs/gsap/1.20.3/TweenMax.min.js", function () {
+    // Streamlabs substitutes field placeholders before this animation is created.
     const sameWidth = "{matchWidth}",
       mainWidth = $("#main").width(),
       altWidth = $(".alt:visible").width();
@@ -9,14 +10,15 @@
       else $("#main").width(altWidth);
     } else if (mainWidth < altWidth) $("#main").width(altWidth);
 
-    let tOrigin = "{mainTransform}",
-      scaleSizeX = 0,
+    const transformOrigin = "{mainTransform}";
+    let scaleSizeX = 0,
       scaleSizeY = 0,
       textOX = 0,
       textOY = 0;
 
-    switch (tOrigin) {
+    switch (transformOrigin) {
       case "left top":
+      case "left bottom":
         textOX = -100;
         break;
       case "center top":
@@ -24,21 +26,16 @@
         textOY = -100;
         break;
       case "right top":
+      case "right bottom":
         textOX = 100;
         break;
       case "right center":
         textOX = 100;
         scaleSizeY = 1;
         break;
-      case "right bottom":
-        textOX = 100;
-        break;
       case "center bottom":
         textOY = 100;
         scaleSizeX = 1;
-        break;
-      case "left bottom":
-        textOX = -100;
         break;
       case "left center":
         textOX = -100;
@@ -53,10 +50,11 @@
       easingType = "Power1.easeIn",
       pauseTime = {pauseTime};
 
-    let tl = new TimelineMax();
-    tl.timeScale(timing);
+    const timeline = new TimelineMax();
+    timeline.timeScale(timing);
 
-    tl.to("#alertHolder", 0, { opacity: 1, delay: 0.4 })
+    timeline
+      .to("#alertHolder", 0, { opacity: 1, delay: 0.4 })
       .from("#main", 0.6, { ease: easingType, scaleX: scaleSizeX, scaleY: scaleSizeY })
       .from("#mainText", 0.3, { x: textOX, y: textOY, opacity: 0 }, "-=.1")
       .from(".alt", 0.6, { ease: easingType, scaleX: scaleSizeX, scaleY: scaleSizeY }, "-=.6")
