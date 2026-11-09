@@ -303,9 +303,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (settings.keyboard === "yes") {
     const keyboard = element("div", "visual-keyboard");
     const configured = new Set(Object.keys(settings.entries).flatMap((keys) => keys.split("+").map((key) => key.trim().toUpperCase())));
-    for (const keys of ["Q W E R T Y U I O P", "A S D F G H J K L", "SHIFT Z X C V B N M", "SPACE"]) {
+    for (const keys of [["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"], ["A", "S", "D", "F", "G", "H", "J", "K", "L"], ["SHIFT", "Z", "X", "C", "V", "B", "N", "M"], ["SPACE"]]) {
       const row = element("div", "keyboard-row", undefined, keyboard);
-      for (const key of keys.split(" ")) {
+      for (const key of keys) {
         const node = element("kbd", "keyboard-key", key, row);
         node.classList.toggle("bound", configured.has(key));
       }

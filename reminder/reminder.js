@@ -305,7 +305,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
   const start = Date.parse(settings.startTime) + settings.delay * 1000;
   /**
-   * Update.
+   * Apply the configured time zone and quiet hours before showing the current reminder.
    * @returns {void}
    */
   function update() {
@@ -314,6 +314,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const local = quietFormat.format(new Date()),
       from = settings.quietStart,
       to = settings.quietEnd;
+    // Fixed-width HH:mm values sort by time; reversed bounds describe quiet hours across midnight.
     const quiet = from && to && from !== to && (from < to ? local >= from && local < to : local >= from || local < to);
     const visible = elapsed >= 0 && !quiet && elapsed % interval < Math.min(settings.duration, settings.interval) * 1000;
     panel.hidden = !visible;

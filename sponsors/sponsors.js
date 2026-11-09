@@ -315,7 +315,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       );
   }
   /**
-   * Update.
+   * Select the wall-clock sponsor slot and render it only when the index changes.
    * @returns {void}
    */
   function update() {

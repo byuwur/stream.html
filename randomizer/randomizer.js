@@ -277,13 +277,14 @@ document.addEventListener("DOMContentLoaded", async () => {
   let round = settings.round,
     last = -1;
   /**
-   * Update.
+   * Derive the current seeded draw and update its label only when the draw number changes.
    * @returns {void}
    */
   function update() {
     const draw = settings.mode === "automatic" ? settings.round + Math.max(0, Math.floor((Date.now() - Date.parse(settings.startTime)) / (settings.duration * 1000))) : round;
     if (draw === last) return;
     last = draw;
+    // Mix the seed with the draw number so reloads reproduce the same result without replaying earlier draws.
     let state = (settings.seed ^ Math.imul(draw + 1, 0x9e3779b1)) >>> 0;
     state = Math.imul(state ^ (state >>> 16), 0x85ebca6b);
     state = Math.imul(state ^ (state >>> 13), 0xc2b2ae35);

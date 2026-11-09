@@ -268,14 +268,25 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   };
 
+  /**
+   * Bound both visible text length and UTF-8 payload bytes before QR encoding.
+   * @param {string} value Content supplied by the URL or form.
+   * @returns {string|null} Accepted content, or null when either limit is exceeded.
+   */
   function parseContent(value) {
     return value.length <= 600 && new TextEncoder().encode(value).length <= 1200 ? value : null;
   }
+  /**
+   * Convert opaque six-digit sRGB into relative luminance for QR contrast validation.
+   * @param {string} value Color with a leading #.
+   * @returns {number|null} Luminance from 0 to 1, or null for unsupported colors.
+   */
   function luminance(value) {
     if (!/^#[0-9a-f]{6}$/i.test(value)) return null;
     const c = [1, 3, 5].map((i) => parseInt(value.slice(i, i + 2), 16) / 255).map((x) => (x <= 0.04045 ? x / 12.92 : ((x + 0.055) / 1.055) ** 2.4));
     return c[0] * 0.2126 + c[1] * 0.7152 + c[2] * 0.0722;
   }
+  // The dark/light bounds keep accepted module colors separate and sufficiently contrasted.
   function parseDark(value) {
     const l = luminance(value);
     return l !== null && l <= 0.15 ? value : null;

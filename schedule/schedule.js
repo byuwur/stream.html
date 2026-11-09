@@ -325,6 +325,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   const zone = settings.timeZone ? { timeZone: settings.timeZone } : {};
   const date = byStream.dateTimeFormatter(settings.dateFormat, settings.locale, { ...zone, month: "short", day: "numeric" });
   const time = byStream.dateTimeFormatter(settings.timeFormat, settings.locale, { ...zone, hour: "2-digit", minute: "2-digit" });
+  /**
+   * Preserve the locale formatter when both patterns are default; otherwise compose the chosen date/time.
+   * @param {Date} value Scheduled instant.
+   * @returns {string} Localized schedule label.
+   */
   function format(value) {
     if (settings.dateFormat === "locale" && settings.timeFormat === "locale") return formatter.format(value);
     return [settings.showDate === "yes" ? date.format(value) : "", time.format(value)].filter(Boolean).join(" ");
@@ -340,7 +345,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
   if (!rows.length) element("p", "secondary schedule-empty", settings.emptyLabel);
   /**
-   * Update.
+   * Mark current and completed entries from their absolute start/end times.
    * @returns {void}
    */
   function update() {

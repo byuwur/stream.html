@@ -318,6 +318,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     name.style.marginBottom = `${settings.spacing}px`;
   }
   element("p", "secondary credits-closing", settings.closing, roll);
+  // Keep speed in pixels per second when font loading or the viewport changes the roll distance.
   const resize = () => {
     const distance = panel.clientHeight + roll.scrollHeight;
     roll.style.setProperty("--end", `${-roll.scrollHeight}px`);

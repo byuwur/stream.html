@@ -388,6 +388,11 @@ document.addEventListener("DOMContentLoaded", async () => {
       return null;
     }
   }
+  /**
+   * Normalize modern GamepadButton objects and numeric legacy/keyboard buttons.
+   * @param {GamepadButton|number|undefined} button Raw button state.
+   * @returns {number} Analog strength, defaulting to zero.
+   */
   function buttonValue(button) {
     return Number(button?.value ?? button ?? 0);
   }
@@ -404,6 +409,12 @@ document.addEventListener("DOMContentLoaded", async () => {
       axes: Array.from(pad.axes)
     };
   }
+  /**
+   * Read one original input, optionally selecting only its positive or negative axis half.
+   * @param {Object} binding Captured button or axis source.
+   * @param {Gamepad} pad Unmodified controller state.
+   * @returns {number} Input strength; missing sources return zero.
+   */
   function sourceValue(binding, pad) {
     if (!binding) return 0;
     if (binding.choiceType === "buttons") return buttonValue(pad.buttons[binding.choice]);

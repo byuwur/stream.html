@@ -406,8 +406,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   const startDate = byStream.dateTimeFormatter(settings.dateFormat, settings.locale, { ...zone, year: "numeric", month: "numeric", day: "numeric" });
   const startTime = byStream.dateTimeFormatter(settings.timeFormat, settings.locale, { ...zone, hour: "numeric", minute: "2-digit", second: "2-digit" });
   /**
-   * Update.
-   * @returns {boolean}
+   * Render elapsed progress from absolute timestamps and stop once the range is invalid or complete.
+   * @returns {boolean} False stops scheduled ticks; visibility or page restoration can refresh again.
    */
   function update() {
     if (end <= start) {

@@ -1361,9 +1361,8 @@
         setVisible(jqRow, true);
         return jqRow;
       }
-      // Serialize the current row order for validation and URL generation.
       /**
-       * Synchronize the enhanced control with its canonical input value.
+       * Serialize editable rows in order, preserving the original map or array shape.
        * @returns {void}
        */
       function sync() {
@@ -1399,6 +1398,7 @@
         jqRows.find("input")[0]?.setCustomValidity(duplicate ? "Use a different key for each row." : byStream.validParameter(parameterRules, name, jqOutput.val()) ? "" : "Invalid list. Check the entries or remove rows.");
         jqAdd.prop("disabled", jqRows.length >= limit);
       }
+      // Release row widgets before rebuilding, retaining the opening values for native Reset.
       function reset(entries = initial) {
         const height = jqEditor[0].getBoundingClientRect().height;
         // Bypass the deferred exit during destruction so Select2 releases its positioning listeners.

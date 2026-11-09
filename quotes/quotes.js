@@ -281,6 +281,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       );
   }
   root.dataset.marks = settings.marks;
+  /**
+   * Select the wall-clock quote slot; unchanged entries keep their existing DOM and animation.
+   * @returns {void}
+   */
   function update() {
     change(Math.floor(Date.now() / (settings.duration * 1000)) % entries.length, ([quote, author]) => {
       element("p", "eyebrow", settings.heading);

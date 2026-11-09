@@ -295,10 +295,11 @@
         continue;
       }
       let parsed;
+      // Custom validators also parse; calling validParameter() first would run them twice.
       if (rule.validate) parsed = rule.validate(value);
       else {
         if (!validParameter(fields, name, value)) continue;
-        parsed = rule.type === "number" && value !== "" ? Number(value) : value;
+        parsed = rule.type === "number" ? Number(value) : value;
       }
       if (parsed === null) continue;
       if (rule.type === "color" && !(rule.optional && parsed === "")) parsed = `#${String(parsed).replace(/^#/, "")}`;
@@ -918,7 +919,7 @@
    * @param {number} total Total seconds to format.
    * @param {string} [format="clock"] Selected display format.
    * @param {boolean} [showDays=true] Include whole days in formats that support them.
-   * @param {null} [milliseconds=null] Optional fractional milliseconds.
+   * @param {number|null} [milliseconds=null] Optional fractional milliseconds.
    * @returns {string} Formatted duration; total-minute and total-second modes do not wrap at midnight.
    */
   function formatDuration(total, format = "clock", showDays = true, milliseconds = null) {
@@ -978,6 +979,7 @@
         return [name, text];
       });
     const url = new URL(location.href);
+    // Downloaded overlays need their filename; directory URLs depend on an HTTP index document.
     if (url.protocol !== "file:") url.pathname = url.pathname.replace(/\/index\.html$/, "/");
     url.hash = "";
     url.search = new URLSearchParams(values).toString().replace(/=raw%3A/g, "=raw:");

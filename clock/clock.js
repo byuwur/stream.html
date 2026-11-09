@@ -415,6 +415,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (settings.showZones === "yes" && zones.length > 1) element("p", "zone", zone || Intl.DateTimeFormat().resolvedOptions().timeZone, view);
     return { timeFormat, faceFormat, dateFormat, weekdayFormat, dial, display, date };
   });
+  /**
+   * Shrink the single-line layout to its available width while retaining unzoomed measurements.
+   * @returns {void}
+   */
   function fitLine() {
     if (content === panel) return;
     const style = getComputedStyle(panel);
@@ -428,7 +432,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     document.fonts.addEventListener("loadingdone", fitLine);
   }
   /**
-   * Update.
+   * Refresh every configured clock from one timestamp, updating only changed text.
    * @returns {void}
    */
   function update() {

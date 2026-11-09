@@ -261,6 +261,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   panel.style.maxWidth = "none";
   root.style.padding = 0;
   root.dataset.effect = settings.effect;
+  // A seeded generator keeps particle placement reproducible when the same overlay URL reloads.
   let state = settings.seed;
   const random = () => {
     state = (Math.imul(state, 1664525) + 1013904223) >>> 0;

@@ -298,7 +298,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
   root.style.justifyContent = { left: "flex-start", center: "center", right: "flex-end" }[settings.placement];
   /**
-   * Update.
+   * Show the current wall-clock card and its visible/gap phase without accumulating timer drift.
    * @returns {void}
    */
   function update() {
