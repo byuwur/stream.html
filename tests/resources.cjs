@@ -78,6 +78,24 @@ test("resources render and round-trip URLs without configurator assets", async (
       }
     });
 
+    // --- CONTINUING ANIMATION AND VIEWPORT CHANGES ---
+    await t.test("watermark fading continues across visible and hidden intervals", async () => {
+      const page = await browser.newPage();
+      try {
+        await page.clock.install({ time: new Date("2026-11-08T00:00:00Z") });
+        await serve(page, assets, true);
+        await page.goto("https://stream.test/watermark/?text=Fading&fadeInterval=2&visibleDuration=1");
+        await page.waitForFunction(() => window.byStreamResource && document.querySelector("#overlay .primary"));
+        assert.equal(await page.locator("#overlay .panel").evaluate((panel) => panel.hidden), false);
+        await page.clock.fastForward(1100);
+        assert.equal(await page.locator("#overlay .panel").evaluate((panel) => panel.hidden), true);
+        await page.clock.fastForward(1000);
+        assert.equal(await page.locator("#overlay .panel").evaluate((panel) => panel.hidden), false);
+      } finally {
+        await page.close();
+      }
+    });
+
     // --- LOCAL FILE SUPPORT ---
     await t.test("downloaded file URLs render without editor files", async () => {
       const directory = await fs.mkdtemp(path.join(os.tmpdir(), "stream-resource-"));

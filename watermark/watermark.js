@@ -311,5 +311,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         : settings.text;
     element("p", "primary brand-text", content);
   }
-  if (settings.fadeInterval > 0) byStream.watch(() => (panel.hidden = Date.now() % (settings.fadeInterval * 1000) >= Math.min(settings.visibleDuration, settings.fadeInterval) * 1000));
+  if (settings.fadeInterval > 0)
+    byStream.watch(() => {
+      // Returning hidden=false would pause the scheduler while the watermark is visible.
+      panel.hidden = Date.now() % (settings.fadeInterval * 1000) >= Math.min(settings.visibleDuration, settings.fadeInterval) * 1000;
+    });
 });
