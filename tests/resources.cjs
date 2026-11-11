@@ -32,12 +32,28 @@ test("resources render and round-trip URLs without configurator assets", async (
           await serve(page, assets, true);
           await page.goto(`https://stream.test/${name}/?test=1`);
           await page.waitForFunction(() => window.byStreamResource && window.byStreamOverlay);
+          await page.evaluate(() => {
+            const resource = byStreamResource;
+            if (resource.fields.edgePadding && resource.fields.edgePadding.default !== 16) throw new Error("Viewport edge padding must default to 16px");
+            const checkText = (value) => {
+              if (typeof value === "string" && value && !value.trim()) throw new Error("Whitespace-only default");
+              if (value && typeof value === "object") Object.values(value).forEach(checkText);
+            };
+            Object.values(resource.fields).forEach((field) => checkText(field.default));
+            const zeros = Object.entries(resource.fields).filter(([, field]) => field.zeroIsDefault);
+            const settings = structuredClone(resource.settings);
+            for (const [name, field] of zeros) {
+              if (!(field.default > 0) || !byStream.validParameter(resource.fields, name, "0")) throw new Error(`Invalid zero fallback: ${name}`);
+            }
+            byStream.applyParameters(resource.fields, settings, new URLSearchParams(zeros.map(([name]) => [name, "0"])));
+            for (const [name, field] of zeros) if (settings[name] !== field.default) throw new Error(`Zero did not restore ${name}`);
+          });
           const { url, values } = await page.evaluate(() => {
             if (typeof byConfigurator !== "undefined" || typeof jQuery !== "undefined") throw new Error("Editor dependency loaded");
             if (!document.querySelector("body > :not(script, link, template, style)")) throw new Error("Overlay markup was not mounted");
             const resource = byStreamResource;
             const url = byStream.settingsURL(resource, resource.settings);
-            if (!resource.urlRequired.length || resource.urlRequired.some((name) => !url.searchParams.has(name))) throw new Error("Required URL settings missing");
+            if (!resource.urlRequired.length || resource.urlRequired.some((name) => byStream.fieldEnabled(resource.fields, resource.settings, name) && !url.searchParams.has(name))) throw new Error("Required URL settings missing");
             for (const name of url.searchParams.keys()) if (!Object.hasOwn(resource.fields, name)) throw new Error(`Unknown URL setting: ${name}`);
             return { url: url.href, values: Object.fromEntries([...url.searchParams].filter(([name]) => byStream.fieldEnabled(resource.fields, resource.settings, name))) };
           });
@@ -57,7 +73,86 @@ test("resources render and round-trip URLs without configurator assets", async (
       });
     }
 
-    // --- URL VALIDATION AND SAFE TEXT ---
+    await t.test("empty text, automatic widths, multiline credits, and overlay layout fixes", async () => {
+      const page = await browser.newPage();
+      try {
+        await serve(page, assets, true);
+        await page.goto("https://stream.test/watermark/?text=&width=0&kind=text");
+        await page.waitForFunction(() => window.byStreamResource && document.querySelector(".brand-text"));
+        assert.equal(await page.evaluate(() => byStreamResource.settings.text), "");
+        assert.equal(await page.locator(".panel").evaluate((node) => getComputedStyle(node).display), "none");
+        assert.equal(new URL(await page.evaluate(() => byStream.settingsURL(byStreamResource, byStreamResource.settings).href)).searchParams.get("text"), "");
+        await page.goto(`https://stream.test/watermark/?${new URLSearchParams({ text: " \t\n", kind: "text" })}`);
+        await page.waitForFunction(() => window.byStreamResource && document.querySelector(".brand-text"));
+        assert.equal(await page.evaluate(() => byStreamResource.settings.text), "");
+        assert.equal(await page.locator(".panel").evaluate((node) => getComputedStyle(node).display), "none");
+        await page.goto("https://stream.test/watermark/?text=Short&width=0&widthMode=content");
+        await page.waitForSelector(".brand-text");
+        const compact = await page.locator(".panel").evaluate((node) => node.getBoundingClientRect().width);
+        await page.goto("https://stream.test/watermark/?text=Short&width=0&widthMode=fill");
+        await page.waitForSelector(".brand-text");
+        assert.ok((await page.locator(".panel").evaluate((node) => node.getBoundingClientRect().width)) > compact * 2);
+        const credits = new URLSearchParams({ title: "Opening\nTitle", closing: "", entries: JSON.stringify([{ category: "Team\nFriends", name: "One\nTwo" }]) });
+        await page.goto("https://stream.test/credits/?" + credits);
+        await page.waitForFunction(() => document.querySelector(".credit-name"));
+        assert.equal(await page.locator(".credits-group:not([aria-hidden]) .credit-name").textContent(), "One\nTwo");
+        assert.equal(await page.locator(".credits-group:not([aria-hidden]) .credit-name").evaluate((node) => getComputedStyle(node).whiteSpace), "pre-wrap");
+        assert.equal(await page.locator(".credits-group:not([aria-hidden]) .credits-closing").evaluate((node) => getComputedStyle(node).display), "none");
+        await page.goto("https://stream.test/schedule/?columns=0&width=0&widthMode=fill");
+        await page.waitForSelector(".schedule-list");
+        assert.equal(await page.evaluate(() => byStreamResource.settings.columns), 0);
+        assert.notEqual(await page.locator(".schedule-list").evaluate((node) => getComputedStyle(node).gridTemplateColumns), "none");
+        await page.goto("https://stream.test/effects/?speed=1&fontSize=8&motion=on");
+        await page.waitForFunction(() => window.byStreamResource);
+        assert.deepEqual(await page.evaluate(() => [byStreamResource.settings.speed, byStreamResource.settings.fontSize]), [1, 8]);
+        await page.goto("https://stream.test/badge/?dot=yes&animation=none");
+        await page.waitForSelector(".status-dot");
+        const badge = await page.locator(".panel").screenshot({ omitBackground: true });
+        const centers = await page.evaluate(async (png) => {
+          const image = await createImageBitmap(new Blob([Uint8Array.from(atob(png), (character) => character.charCodeAt(0))], { type: "image/png" }));
+          const canvas = document.createElement("canvas");
+          canvas.width = image.width;
+          canvas.height = image.height;
+          const context = canvas.getContext("2d");
+          context.drawImage(image, 0, 0);
+          const pixels = context.getImageData(0, 0, image.width, image.height).data;
+          const dot = [],
+            text = [];
+          for (let y = 0; y < image.height; y++)
+            for (let x = 0; x < image.width; x++) {
+              const i = (y * image.width + x) * 4;
+              if (pixels[i + 3] < 200) continue;
+              if (pixels[i] > 40 && pixels[i + 1] < 10 && pixels[i + 2] < 10) dot.push(y);
+              if (pixels[i] > 200 && pixels[i + 1] > 200 && pixels[i + 2] > 200) text.push(y);
+            }
+          return [dot, text].map((rows) => (Math.min(...rows) + Math.max(...rows)) / 2);
+        }, badge.toString("base64"));
+        assert.ok(Math.abs(centers[0] - centers[1]) <= 1, "Dot aligns with the visible label, excluding the font's descender space");
+        assert.deepEqual(
+          await page.locator(".status-dot").evaluate((node) => {
+            const style = getComputedStyle(node);
+            return [style.backgroundColor, style.borderRadius, node.getBoundingClientRect().width];
+          }),
+          ["rgb(102, 0, 0)", "6px", 12]
+        );
+        await page.goto("https://stream.test/badge/?dot=no");
+        await page.waitForFunction(() => window.byStreamResource);
+        assert.equal(await page.locator(".status-dot").count(), 0);
+        const lower = new URLSearchParams({ gap: "0", entries: JSON.stringify([{ name: "Title", subtitle: "Subtitle", icon: "", imageUrl: "" }]) });
+        await page.goto("https://stream.test/lower-thirds/?" + lower);
+        await page.waitForSelector(".secondary");
+        assert.equal(
+          await page.locator(".secondary").evaluate((node) => {
+            const style = getComputedStyle(node);
+            return parseFloat(style.marginTop) < parseFloat(style.fontSize) * 0.25;
+          }),
+          true
+        );
+      } finally {
+        await page.close();
+      }
+    });
+
     await t.test("invalid values retain defaults while zero and untrusted text survive", async () => {
       const page = await browser.newPage();
       try {
@@ -160,6 +255,88 @@ test("resources render and round-trip URLs without configurator assets", async (
       }
     });
 
+    await t.test("credits enter at the selected edge and loop without gaps", async () => {
+      const page = await browser.newPage({ viewport: { width: 960, height: 540 } });
+      try {
+        await serve(page, assets, true);
+        for (const rollDirection of ["normal", "reverse"]) {
+          for (const loop of ["no", "yes"]) {
+            const query = new URLSearchParams({ rollDirection, loop, viewportHeight: "320", rollDelay: "2", padding: "12", edgeFadeMode: "none" });
+            if (loop === "yes") {
+              query.set("entries", "[]");
+              query.set("closing", "");
+              query.set("titleGap", "0");
+            }
+            await page.goto(`https://stream.test/credits/?${query}`);
+            const roll = page.locator(".credits-roll");
+            await page.waitForFunction(() => document.querySelector(".credits-roll")?.getAnimations().length);
+            const result = await roll.evaluate((node) => {
+              const animations = node.getAnimations();
+              const [entry, repeat] = animations;
+              const timing = entry.effect.getTiming();
+              const bounds = node.parentElement.getBoundingClientRect();
+              const original = node.querySelector(".credits-group:not([aria-hidden])");
+              const rectAt = (time) => {
+                animations.forEach((animation) => {
+                  animation.pause();
+                  animation.currentTime = time;
+                });
+                return original.getBoundingClientRect();
+              };
+              const waiting = rectAt(timing.delay / 2);
+              const entering = rectAt(timing.delay + 1000);
+              const finished = rectAt(timing.delay + timing.duration);
+              const coverage = () => {
+                const groups = [...node.children].map((group) => group.getBoundingClientRect());
+                return groups[0].top <= bounds.top + 1 && groups.at(-1).bottom >= bounds.bottom - 1;
+              };
+              const fillsAtHandoff = repeat ? coverage() : null;
+              if (repeat) rectAt(timing.delay + timing.duration + repeat.effect.getTiming().duration + 16);
+              return {
+                bounds,
+                waiting,
+                entering,
+                finished,
+                delay: timing.delay,
+                fillsAtHandoff,
+                fillsNextLoop: repeat ? coverage() : null,
+                iteration: repeat?.effect.getComputedTiming().currentIteration
+              };
+            });
+            assert.equal(result.bounds.height, 320);
+            assert.equal(result.delay, 2000);
+            if (rollDirection === "normal") {
+              assert.ok(result.waiting.top >= result.bounds.bottom - 1);
+              assert.ok(result.entering.top < result.bounds.bottom - 1);
+              if (loop === "no") assert.ok(result.finished.bottom <= result.bounds.top + 1);
+            } else {
+              assert.ok(result.waiting.bottom <= result.bounds.top + 1);
+              assert.ok(result.entering.bottom > result.bounds.top + 1);
+              if (loop === "no") assert.ok(result.finished.top >= result.bounds.bottom - 1);
+            }
+            if (loop === "yes") {
+              assert.equal(result.fillsAtHandoff, true);
+              assert.equal(result.fillsNextLoop, true);
+              assert.equal(result.iteration, 1);
+            }
+          }
+        }
+        await page.goto("https://stream.test/credits/?animate=no");
+        const group = page.locator(".credits-group");
+        await group.locator(".credit-name").first().waitFor();
+        assert.deepEqual(await group.locator(".credit-name").allTextContents(), ["You, on the other side\nEverybody who made this possible", "Our moderators", "BONYUR / byUwUr"]);
+        for (const selector of [".credits-title", ".credits-category", ".credit-name", ".credits-closing"]) {
+          const shadow = await group
+            .locator(selector)
+            .first()
+            .evaluate((node) => getComputedStyle(node).textShadow);
+          assert.equal(shadow, "rgba(0, 0, 0, 0.8) 0px 2px 2px");
+        }
+      } finally {
+        await page.close();
+      }
+    });
+
     await t.test("sponsor and lower-third images use intrinsic proportions at zero size", async () => {
       const page = await browser.newPage();
       try {
@@ -211,6 +388,52 @@ test("resources render and round-trip URLs without configurator assets", async (
         await page.goto("https://stream.test/quotes/?marks=no&transition=none");
         await page.waitForSelector(".quote-text");
         assert.equal(await page.locator(".quote-text").evaluate((node) => getComputedStyle(node).paddingLeft), "0px");
+      } finally {
+        await page.close();
+      }
+    });
+
+    await t.test("zero maximum dimensions remove caps while positive limits still apply", async () => {
+      const page = await browser.newPage();
+      try {
+        await serve(page, assets, true);
+        for (const name of await resourceNames()) {
+          await page.goto(`https://stream.test/${name}/?width=0${name === "lower-thirds" ? "&gap=0" : ""}`);
+          await page.waitForFunction(() => window.byStreamResource && window.byStreamOverlay);
+          const width = await page.evaluate(() => {
+            const resource = byStreamResource;
+            if (!resource.fields.width) return null;
+            const panel = document.querySelector("#overlay .panel");
+            return { value: resource.settings.width, maximum: getComputedStyle(panel).maxWidth, rendered: panel.getBoundingClientRect().width, shared: byStream.settingsURL(resource, resource.settings).searchParams.get("width") };
+          });
+          if (!width) continue;
+          assert.equal(width.value, 0, `${name} accepts zero width`);
+          assert.equal(width.maximum, "none", `${name} removes the width cap`);
+          assert.ok(width.rendered > 0, `${name} stays visible`);
+          assert.equal(width.shared ?? "0", "0", `${name} preserves zero or its declared default in copied URLs`);
+          await page.goto(`https://stream.test/${name}/?width=320${name === "lower-thirds" ? "&gap=0" : ""}`);
+          await page.waitForFunction(() => window.byStreamResource && window.byStreamOverlay);
+          assert.equal(await page.locator("#overlay .panel").evaluate((panel) => getComputedStyle(panel).maxWidth), "320px", `${name} retains positive limits`);
+        }
+        const logo = "../stream.html.png";
+        const limits = [
+          ["info", "boardHeight", ".info-board", "maxHeight", {}],
+          ["schedule", "listHeight", ".schedule-list", "maxHeight", {}],
+          ["shortcuts", "listHeight", ".shortcut-list", "maxHeight", {}],
+          ["qr", "logoWidth", ".qr-logo", "maxWidth", { showLogo: "yes", logoUrl: logo }],
+          ["qr", "logoHeight", ".qr-logo", "maxHeight", { showLogo: "yes", logoUrl: logo }],
+          ["sponsors", "imageHeight", ".sponsor-image", "maxHeight", { entries: JSON.stringify([{ name: "Partner", text: "Message", imageUrl: logo }]) }],
+          ["watermark", "imageHeight", ".brand-logo", "maxHeight", { kind: "logo", logoUrl: logo }]
+        ];
+        for (const [name, field, selector, property, settings] of limits) {
+          for (const value of [0, 80]) {
+            const query = new URLSearchParams({ ...settings, [field]: value });
+            await page.goto(`https://stream.test/${name}/?${query}`);
+            await page.waitForFunction(() => window.byStreamResource && window.byStreamOverlay);
+            const actual = await page.locator(selector).evaluate((element, property) => getComputedStyle(element)[property], property);
+            assert.equal(actual, value === 0 ? "none" : "80px", `${name} ${field}=${value}`);
+          }
+        }
       } finally {
         await page.close();
       }
@@ -326,6 +549,29 @@ test("resources render and round-trip URLs without configurator assets", async (
         await page.waitForFunction(() => document.querySelector(".secondary").textContent === "DRAW 5");
         assert.equal(await page.locator(".primary").textContent(), entries[1], "Only the latest rapid draw renders");
         assert.deepEqual(errors, []);
+      } finally {
+        await page.close();
+      }
+    });
+
+    await t.test("Animate overrides reduced motion and Off removes resource motion", async () => {
+      const page = await browser.newPage({ reducedMotion: "reduce" });
+      try {
+        await serve(page, assets, true);
+        await page.goto("https://stream.test/badge/?label=LIVE");
+        await page.waitForSelector(".status-dot");
+        assert.equal(await page.evaluate(() => byStreamResource.settings.animate), "yes");
+        assert.ok((await page.locator(".status-dot").evaluate((node) => node.getAnimations().length)) > 0);
+        for (const name of await resourceNames()) {
+          await page.goto(`https://stream.test/${name}/?animate=no`);
+          await page.waitForFunction(() => window.byStreamResource && window.byStreamOverlay);
+          assert.equal(await page.evaluate(() => document.documentElement.dataset.animate), "no", name);
+          assert.equal(await page.evaluate(() => document.getAnimations().length), 0, name);
+          if (["main", "popup"].includes(name)) assert.equal(await page.evaluate(() => gsap.globalTimeline.getChildren(true, true, false).filter((tween) => tween.duration() > 0).length), 0, name);
+        }
+        await page.goto("https://stream.test/ticker/?animate=no&mode=scroll");
+        await page.waitForSelector(".ticker-message");
+        assert.equal(await page.locator(".ticker-track").count(), 0, "Disabled scrolling uses readable cycling messages");
       } finally {
         await page.close();
       }

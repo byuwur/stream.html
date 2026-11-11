@@ -16,9 +16,18 @@ document.addEventListener("DOMContentLoaded", async () => {
       entries: {
         type: "entries",
         default: [
-          { category: "Made possible by", name: "Our community" },
-          { category: "Made possible by", name: "You, watching right now" },
-          { category: "Special thanks", name: "The moderators" }
+          {
+            category: "Good company",
+            name: "You, on the other side\nEverybody who made this possible"
+          },
+          {
+            category: "Keeping it kind",
+            name: "Our moderators"
+          },
+          {
+            category: "Made with love",
+            name: "BONYUR / byUwUr"
+          }
         ],
         label: "Credits",
         section: "Content & behavior",
@@ -26,8 +35,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         maxlength: 8000,
         entries: {
           textFields: [
-            ["category", "Category"],
-            ["name", "Name"]
+            ["category", "Category", "textarea"],
+            ["name", "Name", "textarea"]
           ],
           newEntry: { category: "", name: "" },
           limit: 40
@@ -35,22 +44,22 @@ document.addEventListener("DOMContentLoaded", async () => {
         addLabel: "Add entry"
       },
       title: {
-        type: "text",
-        default: "THANK YOU",
+        type: "textarea",
+        default: "GRACIAS POR ESTAR",
         label: "Opening title",
         section: "Content & behavior",
         maxlength: 160
       },
       closing: {
-        type: "text",
-        default: "See you next time.",
+        type: "textarea",
+        default: "Simple is complicated enough.",
         label: "Closing line",
         section: "Content & behavior",
         maxlength: 160
       },
       speed: {
         type: "number",
-        default: 35,
+        default: 16,
         label: "Scroll speed (px / second)",
         section: "Content & behavior",
         min: 5,
@@ -66,19 +75,16 @@ document.addEventListener("DOMContentLoaded", async () => {
         uncheckedValue: "no",
         options: { yes: "yes", no: "no" }
       },
-      rollDirection: { type: "select", default: "normal", label: "Roll direction", section: "Content & behavior", options: { normal: "Up", reverse: "Down" }, styleSelector: "#overlay .credits-roll", styleProperty: "animation-direction" },
+      rollDirection: { type: "select", default: "normal", label: "Roll direction", section: "Content & behavior", options: { normal: "Up", reverse: "Down" } },
       rollDelay: {
         type: "number",
-        default: "",
+        default: 0,
         optional: true,
         label: "Roll delay (s)",
         section: "Content & behavior",
         min: 0,
         max: 3600,
-        step: "any",
-        styleSelector: "#overlay .credits-roll",
-        styleProperty: "animation-delay",
-        styleUnit: "s"
+        step: "any"
       },
       fontFamily: {
         type: "font",
@@ -90,7 +96,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       fontSize: {
         type: "number",
-        default: 42,
+        default: 32,
         label: "Base text size (px)",
         section: "Appearance",
         min: 10,
@@ -106,14 +112,14 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       textColor: {
         type: "color",
-        default: "#FFFFFF",
+        default: "#EEEEEE",
         label: "Base text color",
         section: "Appearance",
         maxlength: 80
       },
       accentColor: {
         type: "color",
-        default: "#D9D9D9",
+        default: "#660000",
         label: "Accent color",
         section: "Appearance",
         maxlength: 80
@@ -145,10 +151,11 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       width: {
         type: "number",
-        default: 800,
+        default: 0,
         label: "Maximum width (px)",
+        description: "0 = Auto (no fixed maximum).",
         section: "Size & placement",
-        min: 100,
+        min: 0,
         max: 3840,
         step: "any"
       },
@@ -170,31 +177,32 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       padding: {
         type: "number",
-        default: 28,
+        default: 0,
         label: "Padding (px)",
         section: "Size & placement",
         min: 0,
         max: 100,
         step: "any"
       },
-      edgePadding: { type: "number", default: "", optional: true, label: "Viewport edge padding (px)", section: "Size & placement", min: 0, max: 1000, step: "any", styleSelector: "#overlay", styleProperty: "padding", styleUnit: "px" },
+      edgePadding: { type: "number", default: 16, optional: true, label: "Viewport edge padding (px)", section: "Size & placement", min: 0, max: 1000, step: "any", styleSelector: "#overlay", styleProperty: "padding", styleUnit: "px" },
       viewportHeight: {
         type: "number",
-        default: "",
+        default: 0,
         optional: true,
         label: "Roll viewport height (px)",
+        description: "0 fills the available height.",
         section: "Size & placement",
         min: 0,
         max: 10000,
         step: "any",
         styleSelector: "#overlay .credits-window",
         styleProperty: "height",
-        styleUnit: "px"
+        styleValue: (settings) => (settings.viewportHeight === 0 ? "100%" : `${settings.viewportHeight}px`)
       },
       ...byStream.placementFields("#overlay .panel"),
       spacing: {
         type: "number",
-        default: 12,
+        default: 16,
         label: "Name spacing (px)",
         section: "Composition",
         min: 0,
@@ -203,7 +211,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       categoryGap: {
         type: "number",
-        default: 52,
+        default: 64,
         label: "Category spacing (px)",
         section: "Composition",
         min: 0,
@@ -212,7 +220,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       titleGap: {
         type: "number",
-        default: "",
+        default: 128,
         optional: true,
         label: "Space below title (px)",
         section: "Composition",
@@ -225,7 +233,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       closingGap: {
         type: "number",
-        default: "",
+        default: 128,
         optional: true,
         label: "Space above closing (px)",
         section: "Composition",
@@ -251,6 +259,45 @@ document.addEventListener("DOMContentLoaded", async () => {
       position: "center"
     }
   };
+
+  const fieldDefaults = {
+    titleFontSize: 32,
+    categoryFontSize: 16,
+    nameFontSize: 24,
+    closingFontSize: 24,
+    edgeFadeMode: "custom",
+    edgeFadeStart: 25,
+    edgeFadeEnd: 25,
+    titleTracking: 2.72,
+    titleLineHeight: 37,
+    categoryTracking: 0.72,
+    categoryLineHeight: 18,
+    nameLineHeight: 27,
+    closingLineHeight: 27,
+    titleTextShadow: "yes",
+    titleTextShadowColor: "#000000cc",
+    titleTextShadowBlur: 2,
+    titleTextShadowY: 2,
+    categoryTextShadow: "yes",
+    categoryTextShadowColor: "#000000cc",
+    categoryTextShadowBlur: 2,
+    categoryTextShadowY: 2,
+    nameTextShadow: "yes",
+    nameTextShadowColor: "#000000cc",
+    nameTextShadowBlur: 2,
+    nameTextShadowY: 2,
+    closingTextShadow: "yes",
+    closingTextShadowColor: "#000000cc",
+    closingTextShadowBlur: 2,
+    closingTextShadowY: 2
+  };
+  for (const [name, value] of Object.entries(fieldDefaults)) {
+    const field = resource.fields[name];
+    field.default = value;
+    delete field.styleDefault;
+  }
+  resource.fields.titleTracking.zeroIsDefault = true;
+  resource.fields.categoryTracking.zeroIsDefault = true;
 
   /**
    * Accept only this resource's declared content shape and limits; invalid input returns null.
@@ -287,7 +334,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     "font-size": `${settings.fontSize}px`
   }))
     root.style.setProperty(`--${name}`, value);
-  panel.style.maxWidth = `${settings.width}px`;
+  panel.style.maxWidth = settings.width === 0 ? "none" : `${settings.width}px`;
   /**
    * Create an element, assign its classes and text, and append it to the resource-owned parent.
    * @param {string} tag HTML tag to create.
@@ -306,33 +353,66 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   panel.classList.add("credits-window");
   const roll = element("div", "credits-roll");
-  element("h1", "credits-title", settings.title, roll);
+  const group = element("div", "credits-group", undefined, roll);
+  element("h1", "credits-title", settings.title, group);
   let category = null;
   for (const entry of settings.entries) {
     if (entry.category !== category) {
       category = entry.category;
-      const heading = element("h2", "eyebrow credits-category", category, roll);
+      const heading = element("h2", "eyebrow credits-category", category, group);
       heading.style.marginTop = `${settings.categoryGap}px`;
     }
-    const name = element("p", "credit-name", entry.name, roll);
+    const name = element("p", "credit-name", entry.name, group);
     name.style.marginBottom = `${settings.spacing}px`;
   }
-  element("p", "secondary credits-closing", settings.closing, roll);
+  element("p", "secondary credits-closing", settings.closing, group);
+  if (settings.animate !== "yes") return;
+  const loop = settings.loop === "yes";
+  const down = settings.rollDirection === "reverse";
+  roll.classList.toggle("credits-loop", loop);
+  roll.style.setProperty("--roll-delay", `${settings.rollDelay}s`);
+
   // Keep speed in pixels per second when font loading or the viewport changes the roll distance.
   const resize = () => {
-    const distance = panel.clientHeight + roll.scrollHeight;
-    roll.style.setProperty("--end", `${-roll.scrollHeight}px`);
-    roll.style.setProperty("--start", `${panel.clientHeight}px`);
-    roll.style.animationDuration = `${distance / settings.speed}s`;
-    roll.style.animationIterationCount = settings.loop === "yes" ? "infinite" : "1";
+    roll.querySelectorAll(".credits-group[aria-hidden]").forEach((copy) => copy.remove());
+    const height = parseFloat(getComputedStyle(group).height);
+    if (!height) return;
+    const viewportHeight = panel.clientHeight;
+    if (loop) {
+      const copies = Math.ceil(viewportHeight / height);
+      for (let i = 0; i < copies; i++) {
+        const copy = group.cloneNode(true);
+        copy.setAttribute("aria-hidden", "true");
+        if (down) roll.prepend(copy);
+        else roll.append(copy);
+      }
+      // Keep the original group anchored when copies precede it on a downward roll.
+      if (down) roll.style.top = `${-copies * height}px`;
+    }
+    const top = roll.offsetTop + group.offsetTop;
+    const above = -height - top;
+    const below = viewportHeight - top;
+    const entry = down ? above : below;
+    const exit = down ? below : above;
+    // The first pass fills the viewport before the repeating segment starts.
+    const start = loop ? exit + (down ? -height : height) : entry;
+    roll.style.setProperty("--start", `${start}px`);
+    roll.style.setProperty("--end", `${exit}px`);
+    roll.style.setProperty("--roll-duration", `${(loop ? height : viewportHeight + height) / settings.speed}s`);
+    if (loop) {
+      const entryDuration = viewportHeight / settings.speed;
+      roll.style.setProperty("--entry", `${entry}px`);
+      roll.style.setProperty("--entry-duration", `${entryDuration}s`);
+      roll.style.setProperty("--loop-delay", `${settings.rollDelay + entryDuration}s`);
+    }
   };
   const observer = new ResizeObserver(resize);
   observer.observe(panel);
-  observer.observe(roll);
+  observer.observe(group);
   document.fonts.ready.then(resize);
   window.addEventListener("pagehide", () => observer.disconnect());
   window.addEventListener("pageshow", () => {
     observer.observe(panel);
-    observer.observe(roll);
+    observer.observe(group);
   });
 });

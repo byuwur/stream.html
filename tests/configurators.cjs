@@ -41,12 +41,30 @@ test("configurator forms and previews initialize for every resource", async (t) 
           assert.equal(await page.locator("form[data-configurator]").count(), 1);
           await page.evaluate(() => byConfigurator.init());
           assert.equal(await page.locator("form[data-configurator]").count(), 1, "Repeated initialization preserves the editor");
+          assert.equal(await page.locator('[name="animate"]').isChecked(), true, name + " enables resource animation by default");
+          if (["schedule", "info"].includes(name)) assert.equal(await page.locator('[name="widthMode"]').isChecked(), true, name + " fills width by default");
           const url = new URL(await page.locator("#overlay-url").inputValue());
           assert.equal(url.hash, "");
           assert.equal(url.pathname, `/${name}/`);
           assert.ok(url.search.length > 1);
           // Absolutely positioned overlays can leave the HTML root at zero height.
           await page.frameLocator("#overlay-preview").locator("html[data-overlay]").waitFor({ state: "attached" });
+          const required = await page.evaluate(() => byStreamResource.urlRequired.filter((key) => byStream.fieldEnabled(byStreamResource.fields, byStreamResource.settings, key)));
+          await page.locator('[data-settings-view="json"]').click();
+          const compact = JSON.parse(await page.locator("#settings-json").inputValue());
+          for (const key of required) {
+            assert.ok(Object.hasOwn(compact, key), name + " compact JSON retains " + key);
+            assert.ok(url.searchParams.has(key), name + " URL retains " + key);
+          }
+          await page.locator("#json-all-fields").check();
+          const complete = JSON.parse(await page.locator("#settings-json").inputValue());
+          const fieldNames = await page.evaluate(() => Object.keys(byStreamResource.fields));
+          assert.deepEqual(Object.keys(complete), fieldNames, name + " complete JSON includes every field");
+          if (fieldNames.includes("width")) assert.equal(fieldNames[fieldNames.indexOf("width") + 1], "widthMode", name + " places Fill width immediately after Width");
+          for (const key of required) assert.deepEqual(complete[key], compact[key]);
+          await page.locator("#json-all-fields").uncheck();
+          assert.deepEqual(JSON.parse(await page.locator("#settings-json").inputValue()), compact);
+
           assert.deepEqual(errors, []);
         } finally {
           await page.close();
@@ -95,6 +113,55 @@ test("configurator forms and previews initialize for every resource", async (t) 
         } finally {
           await page.close();
         }
+      }
+    });
+
+    await t.test("cleared text stays empty, numeric defaults restore, and multiline rows serialize", async () => {
+      const page = await browser.newPage();
+      try {
+        await serve(page, assets);
+        await page.goto("https://stream.test/watermark/?text=Opening#configure");
+        await page.waitForFunction(() => document.getElementById("overlay-url")?.value);
+        const text = page.locator('#overlay-form [name="text"]');
+        await text.fill("");
+        await text.blur();
+        await page.waitForFunction(() => {
+          const query = new URL(document.getElementById("overlay-url").value).searchParams;
+          return query.has("text") && query.get("text") === "";
+        });
+        assert.equal(await text.inputValue(), "");
+        const number = page.locator('#overlay-form [name="fontSize"]');
+        const fallback = await page.evaluate(() => String(byStreamResource.fields.fontSize.default));
+        for (const value of ["", "0"]) {
+          await number.fill(value);
+          await number.blur();
+          await page.waitForFunction((fallback) => document.querySelector('[name="fontSize"]').value === fallback, fallback);
+        }
+        await number.fill("99999");
+        await number.blur();
+        await page.waitForFunction(() => document.querySelector('[name="fontSize"]').classList.contains("is-invalid"));
+        assert.equal(await number.getAttribute("aria-invalid"), "true");
+        await number.fill(fallback);
+        await number.blur();
+        await page.waitForFunction(() => !document.querySelector('[name="fontSize"]').classList.contains("is-invalid"));
+        const opacity = page.locator('#overlay-form [name="opacity"]');
+        await opacity.fill("0");
+        await opacity.blur();
+        assert.equal(await opacity.inputValue(), "0");
+        await page.goto("https://stream.test/clock/#configure");
+        await page.waitForFunction(() => document.getElementById("overlay-url")?.value);
+        assert.equal(await page.locator(".select2-selection__clear").count(), 0);
+        assert.equal(await page.locator('[name="label"]').inputValue(), "");
+        await page.locator('[name="label"]').fill("   ");
+        await page.locator('[name="label"]').blur();
+        assert.equal(await page.locator('[name="label"]').inputValue(), "");
+        await page.goto("https://stream.test/credits/#configure");
+        await page.waitForFunction(() => document.querySelector('.entry-row textarea[data-field="name"]'));
+        await page.locator('.entry-row textarea[data-field="name"]').first().fill("First\nSecond");
+        await page.waitForFunction(() => JSON.parse(document.querySelector('[name="entries"]').value)[0].name === "First\nSecond");
+        assert.equal(await page.locator('[name="title"]').evaluate((node) => node.tagName), "TEXTAREA");
+      } finally {
+        await page.close();
       }
     });
 

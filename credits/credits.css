@@ -15,13 +15,13 @@ body {
 #overlay {
   --font-size: 48px;
   --base-size: min(var(--font-size), 12vw);
-  --heading-size: max(14px, var(--base-size) * 0.3);
-  --secondary-size: calc(var(--base-size) * 0.42);
-  --text: #fff;
-  --accent: #d9d9d9;
-  --background: #202020e6;
-  --radius: 8px;
-  --padding: 28px;
+  --heading-size: max(12px, var(--base-size) * 0.67);
+  --secondary-size: calc(var(--base-size) * 0.75);
+  --text: #eee;
+  --accent: #600;
+  --background: #00000000;
+  --radius: 6px;
+  --padding: 12px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -54,12 +54,12 @@ p {
   font-weight: 600;
   color: var(--accent);
   font-size: var(--heading-size);
-  letter-spacing: calc(var(--heading-size) * 0.05);
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  margin-bottom: var(--heading-size);
+  margin-bottom: calc(var(--heading-size) * 0.8);
 }
 .secondary {
-  opacity: 0.65;
+  opacity: 0.72;
   font-size: var(--secondary-size);
   margin-top: calc(var(--secondary-size) * 0.65);
   white-space: pre-wrap;
@@ -112,11 +112,16 @@ img {
 }
 .credits-roll {
   width: 100%;
-  position: absolute;
+  position: relative;
   left: 0;
   top: 0;
   padding: var(--padding);
-  animation: credits linear forwards;
+  animation: credits var(--roll-duration) linear var(--roll-delay) both;
+}
+.credits-roll.credits-loop {
+  animation:
+    credits-enter var(--entry-duration) linear var(--roll-delay) backwards,
+    credits var(--roll-duration) linear var(--loop-delay) infinite;
 }
 .credits-title {
   font-weight: 600;
@@ -132,11 +137,29 @@ img {
 .credits-closing {
   margin: calc(var(--secondary-size) * 3) 0;
 }
-@keyframes credits {
+@keyframes credits-enter {
   from {
-    transform: translateY(var(--start, 100vh));
+    transform: translateY(var(--entry));
   }
   to {
-    transform: translateY(var(--end, -100%));
+    transform: translateY(var(--start));
   }
+}
+@keyframes credits {
+  from {
+    transform: translateY(var(--start));
+  }
+  to {
+    transform: translateY(var(--end));
+  }
+}
+
+.credits-title,
+.credits-category,
+.credit-name,
+.credits-closing {
+  white-space: pre-wrap;
+}
+.credits-group {
+  display: flow-root;
 }
