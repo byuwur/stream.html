@@ -6,7 +6,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Defaults, URL constraints, and the field metadata consumed by the optional editor.
   const resource = {
-    version: "1.0",
+    version: "1.1",
     title: "Watermark",
     description: "A signature for your stream. Text, monogram, or your own logo.",
     preview: [960, 540],

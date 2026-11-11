@@ -6,7 +6,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Defaults, URL constraints, and the field metadata consumed by the optional editor.
   const resource = {
-    version: "1.0",
+    version: "1.1",
     title: "Timer / Countdown",
     description: "A countdown or elapsed timer, with an optional fixed start for reloads.",
     preview: [960, 540],

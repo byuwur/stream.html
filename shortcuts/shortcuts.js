@@ -6,7 +6,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Defaults, URL constraints, and the field metadata consumed by the optional editor.
   const resource = {
-    version: "1.0",
+    version: "1.1",
     title: "Keyboard Shortcut Sheet",
     description: "Keep the controls in sight. An editable guide, without keyboard monitoring.",
     preview: [960, 540],

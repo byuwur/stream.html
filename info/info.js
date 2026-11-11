@@ -6,7 +6,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Defaults, URL constraints, and the field metadata consumed by the optional editor.
   const resource = {
-    version: "1.0",
+    version: "1.1",
     title: "Info Board",
     description: "Stream rules, game settings, commands, and the details worth keeping on screen.",
     preview: [960, 540],
