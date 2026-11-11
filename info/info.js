@@ -15,7 +15,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     fields: {
       entries: {
         type: "entries",
-        default: { "THE PLAN": "Good games. No rush.", "CHAT RULES": "Be kind. Respect the people here.", COMMANDS: "!socials · !schedule · !help", "GAME SETTINGS": "Difficulty: one more try." },
+        default: {
+          "THE PLAN": "Good games. No rush.",
+          "THE VIBE": "Be kind. Stay curious.",
+          "FIND ME": "!socials · !schedule"
+        },
         label: "Information",
         section: "Content & behavior",
         validate: parseEntries,
@@ -32,7 +36,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       title: {
         type: "text",
-        default: "GOOD TO KNOW",
+        default: "MAKE YOURSELF AT HOME",
         label: "Board title",
         section: "Content & behavior",
         maxlength: 160
@@ -47,7 +51,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       fontSize: {
         type: "number",
-        default: 32,
+        default: 16,
         label: "Base text size (px)",
         section: "Appearance",
         min: 10,
@@ -63,21 +67,21 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       textColor: {
         type: "color",
-        default: "#FFFFFF",
+        default: "#EEEEEE",
         label: "Base text color",
         section: "Appearance",
         maxlength: 80
       },
       accentColor: {
         type: "color",
-        default: "#D9D9D9",
+        default: "#990000",
         label: "Accent color",
         section: "Appearance",
         maxlength: 80
       },
       backgroundColor: {
         type: "color",
-        default: "#202020E6",
+        default: "#11111199",
         label: "Panel background",
         section: "Appearance",
         maxlength: 80
@@ -102,10 +106,12 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       width: {
         type: "number",
-        default: 900,
+        default: 0,
+        contentSized: false,
         label: "Maximum width (px)",
+        description: "0 = Auto (no fixed maximum).",
         section: "Size & placement",
-        min: 100,
+        min: 0,
         max: 3840,
         step: "any"
       },
@@ -120,7 +126,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       position: {
         type: "select",
-        default: "center",
+        default: "top",
         label: "Vertical placement",
         section: "Size & placement",
         options: { top: "top", center: "center", bottom: "bottom" }
@@ -134,19 +140,20 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       padding: {
         type: "number",
-        default: 28,
+        default: 8,
         label: "Padding (px)",
         section: "Size & placement",
         min: 0,
         max: 100,
         step: "any"
       },
-      edgePadding: { type: "number", default: "", optional: true, label: "Viewport edge padding (px)", section: "Size & placement", min: 0, max: 1000, step: "any", styleSelector: "#overlay", styleProperty: "padding", styleUnit: "px" },
+      edgePadding: { type: "number", default: 16, optional: true, label: "Viewport edge padding (px)", section: "Size & placement", min: 0, max: 1000, step: "any", styleSelector: "#overlay", styleProperty: "padding", styleUnit: "px" },
       boardHeight: {
         type: "number",
-        default: "",
+        default: 0,
         optional: true,
         label: "Maximum board height (px)",
+        description: "0 = Auto (no fixed maximum).",
         section: "Size & placement",
         min: 0,
         max: 10000,
@@ -165,17 +172,18 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       columns: {
         type: "number",
-        default: 2,
+        default: 0,
         label: "Grid columns",
+        description: "0 automatically fits columns to the cards and available width.",
         section: "Composition",
         when: ["layout", "grid"],
-        min: 1,
+        min: 0,
         max: 4,
         step: 1
       },
       spacing: {
         type: "number",
-        default: 18,
+        default: 16,
         label: "Card spacing (px)",
         section: "Composition",
         min: 0,
@@ -195,6 +203,34 @@ document.addEventListener("DOMContentLoaded", async () => {
       ...byStream.filterFields("backdropFilter", "Panel backdrop", "#overlay .panel", true)
     }
   };
+
+  const fieldDefaults = {
+    cardHeadingFontSize: 16,
+    titleFontSize: 16,
+    panelBorderWidth: 1,
+    panelBorderStyle: "solid",
+    panelBorderColor: "#EEEEEE11",
+    panelShadow: "yes",
+    panelShadowColor: "#00000066",
+    panelShadowBlur: 16,
+    panelShadowY: 4,
+    backdropFilterMode: "none",
+    backdropFilterBlur: 12,
+    titleTracking: 1.92,
+    titleLineHeight: 18,
+    cardHeadingTracking: 0.7,
+    cardHeadingLineHeight: 18,
+    cardTextFontSize: 16,
+    cardTextLineHeight: 19.2,
+    cardPadding: 18,
+    cardRadius: 6
+  };
+  for (const [name, value] of Object.entries(fieldDefaults)) {
+    const field = resource.fields[name];
+    field.default = value;
+    delete field.styleDefault;
+  }
+  for (const name of ["titleTracking", "cardHeadingTracking", "cardPadding", "cardRadius"]) resource.fields[name].zeroIsDefault = true;
 
   /**
    * Accept only this resource's declared content shape and limits; invalid input returns null.
@@ -231,7 +267,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     "font-size": `${settings.fontSize}px`
   }))
     root.style.setProperty(`--${name}`, value);
-  panel.style.maxWidth = `${settings.width}px`;
+  panel.style.maxWidth = settings.width === 0 ? "none" : `${settings.width}px`;
   /**
    * Create an element, assign its classes and text, and append it to the resource-owned parent.
    * @param {string} tag HTML tag to create.
@@ -250,7 +286,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   element("h1", "eyebrow", settings.title);
   const board = element("div", "info-board");
-  board.style.setProperty("--columns", settings.layout === "list" ? 1 : settings.columns);
+  if (settings.layout === "grid" && settings.columns === 0) board.style.gridTemplateColumns = "repeat(auto-fit, minmax(min(100%, 240px), 1fr))";
+  else board.style.setProperty("--columns", settings.layout === "list" ? 1 : settings.columns);
   board.style.gap = `${settings.spacing}px`;
   for (const [heading, text] of Object.entries(settings.entries)) {
     const card = element("section", "info-card", undefined, board);

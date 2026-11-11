@@ -55,7 +55,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       fontSize: {
         type: "number",
-        default: 26,
+        default: 20,
         label: "Base text size (px)",
         section: "Appearance",
         min: 10,
@@ -64,28 +64,28 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       fontWeight: {
         type: "select",
-        default: "600",
+        default: "700",
         label: "Font weight",
         section: "Appearance",
         options: { 300: "300", 400: "400", 500: "500", 600: "600", 700: "700", 800: "800", 900: "900" }
       },
       textColor: {
         type: "color",
-        default: "#FFFFFF",
+        default: "#EEEEEE",
         label: "Base text color",
         section: "Appearance",
         maxlength: 80
       },
       accentColor: {
         type: "color",
-        default: "#D9D9D9",
+        default: "#660000",
         label: "Accent color",
         section: "Appearance",
         maxlength: 80
       },
       backgroundColor: {
         type: "color",
-        default: "#202020E6",
+        default: "#11111166",
         label: "Panel background",
         section: "Appearance",
         maxlength: 80
@@ -101,16 +101,17 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       width: {
         type: "number",
-        default: 220,
+        default: 128,
         label: "Maximum width (px)",
+        description: "0 = Auto (no fixed maximum).",
         section: "Size & placement",
-        min: 100,
+        min: 0,
         max: 3840,
         step: "any"
       },
       horizontalPlacement: {
         type: "select",
-        default: "center",
+        default: "flex-end",
         label: "Horizontal placement",
         section: "Size & placement",
         options: { "flex-start": "Left", center: "Center", "flex-end": "Right" },
@@ -119,7 +120,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       position: {
         type: "select",
-        default: "center",
+        default: "top",
         label: "Vertical placement",
         section: "Size & placement",
         options: { top: "top", center: "center", bottom: "bottom" }
@@ -133,14 +134,14 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       padding: {
         type: "number",
-        default: 16,
+        default: 8,
         label: "Padding (px)",
         section: "Size & placement",
         min: 0,
         max: 100,
         step: "any"
       },
-      edgePadding: { type: "number", default: "", optional: true, label: "Viewport edge padding (px)", section: "Size & placement", min: 0, max: 1000, step: "any", styleSelector: "#overlay", styleProperty: "padding", styleUnit: "px" },
+      edgePadding: { type: "number", default: 16, optional: true, label: "Viewport edge padding (px)", section: "Size & placement", min: 0, max: 1000, step: "any", styleSelector: "#overlay", styleProperty: "padding", styleUnit: "px" },
       ...byStream.placementFields("#overlay .panel"),
       ...byStream.layoutFields("#overlay .badge-content", { dot: ["Status dot", "#overlay .status-dot"], icon: ["Icon", "#overlay .badge-icon"], text: ["Text", "#overlay .primary"] }, "content", {
         dot: ["dot", "yes"],
@@ -148,7 +149,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       }),
       dotColor: {
         type: "color",
-        default: "",
+        default: "#660000",
         optional: true,
         label: "Status dot color",
         section: "Details",
@@ -160,7 +161,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       dotSize: {
         type: "number",
-        default: "",
+        default: 12,
         optional: true,
         label: "Status dot size (px)",
         section: "Details",
@@ -175,7 +176,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       dotRadius: {
         type: "number",
-        default: "",
+        default: 6,
         optional: true,
         label: "Status dot corner radius (px)",
         section: "Details",
@@ -190,14 +191,14 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       animation: {
         type: "select",
-        default: "none",
+        default: "pulse",
         label: "Accent motion",
         section: "Animation",
         options: { none: "none", pulse: "pulse", glow: "glow" }
       },
       animationDuration: {
         type: "number",
-        default: "",
+        default: 1,
         optional: true,
         label: "Accent animation duration (s)",
         section: "Animation",
@@ -225,6 +226,31 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   };
 
+  const fieldDefaults = {
+    panelBorderWidth: 0,
+    panelBorderStyle: "solid",
+    panelBorderColor: "#EEEEEE66",
+    panelShadow: "yes",
+    panelShadowColor: "#00000066",
+    panelShadowBlur: 16,
+    panelShadowY: 4,
+    backdropFilterMode: "none",
+    backdropFilterBlur: 12,
+    badgeTextTracking: 2,
+    panelRadius: 6,
+    badgeTextFontSize: 16,
+    contentGap: 10,
+    badgeTextLineHeight: 19.2,
+    badgeIconFontSize: 20,
+    badgeIconLineHeight: 23
+  };
+  for (const [name, value] of Object.entries(fieldDefaults)) {
+    const field = resource.fields[name];
+    field.default = value;
+    delete field.styleDefault;
+  }
+  resource.fields.contentGap.zeroIsDefault = true;
+
   const settings = await byStream.initResource(resource);
   if (!byStreamOverlay) return;
   const root = document.getElementById("overlay");
@@ -243,7 +269,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     "font-size": `${settings.fontSize}px`
   }))
     root.style.setProperty(`--${name}`, value);
-  panel.style.maxWidth = `${settings.width}px`;
+  panel.style.maxWidth = settings.width === 0 ? "none" : `${settings.width}px`;
   /**
    * Create an element, assign its classes and text, and append it to the resource-owned parent.
    * @param {string} tag HTML tag to create.
@@ -265,7 +291,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   root.dataset.animation = settings.animation;
   const content = element("div", "badge-content");
   content.style.justifyContent = { left: "flex-start", center: "center", right: "flex-end" }[settings.align];
-  if (settings.dot === "yes") element("i", "status-dot", "", content);
+  const dot = settings.dot === "yes" ? element("i", "status-dot", "", content) : null;
   if (settings.showIcon === "yes") element("span", "badge-icon", settings.icon, content);
-  element("span", "primary", settings.label, content);
+  const label = element("span", "primary", settings.label, content);
+  if (dot) dot.style.font = getComputedStyle(label).font;
 });

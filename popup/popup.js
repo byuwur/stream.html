@@ -22,8 +22,14 @@ document.addEventListener("DOMContentLoaded", async () => {
       accounts: {
         type: "entries",
         default: [
-          { platform: "twitch", handle: "/byUwUr" },
-          { platform: "youtube", handle: "@byUwUr" }
+          {
+            platform: "twitch",
+            handle: "/byUwUr"
+          },
+          {
+            platform: "youtube",
+            handle: "@byUwUr"
+          }
         ],
         label: "Social accounts",
         section: "Social accounts",
@@ -35,7 +41,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       pauseTime: {
         type: "number",
-        default: 5,
+        default: 3,
         label: "Seconds per account",
         section: "Playback",
         description: "Seconds to display each account.",
@@ -46,7 +52,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       inbetweenPauseTime: {
         type: "number",
-        default: 5,
+        default: 3,
         label: "Seconds between cycles",
         section: "Playback",
         description: "Seconds to wait between animation cycles.",
@@ -76,7 +82,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       fontSize: {
         type: "number",
-        default: 72,
+        default: 64,
         label: "Font size (px)",
         section: "Appearance",
         description: "Account name size in pixels.",
@@ -98,7 +104,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       fontColor: {
         type: "color",
-        default: "#300",
+        default: "#111111",
         label: "Text color",
         section: "Appearance",
         description: "CSS color of the account names.",
@@ -107,7 +113,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       iconColor: {
         type: "color",
-        default: "#FFFFFF",
+        default: "#EEEEEE",
         label: "Icon color",
         section: "Appearance",
         description: "CSS color of the social icons.",
@@ -116,7 +122,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       textBoxColor: {
         type: "color",
-        default: "#FFFFFF",
+        default: "#eeeeee",
         label: "Text box color",
         section: "Appearance",
         description: "CSS background color behind the account name.",
@@ -125,14 +131,14 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       iconBoxColor: {
         type: "color",
-        default: "#300",
+        default: "#330000",
         label: "Icon box color",
         section: "Appearance",
         description: "CSS background color of the animated icon box.",
         maxlength: 160,
         icon: "fa-palette"
       },
-      opacity: { type: "number", default: "", optional: true, label: "Popup opacity (%)", section: "Appearance", min: 0, max: 100, step: "any" },
+      opacity: { type: "number", default: 100, optional: true, label: "Popup opacity (%)", section: "Appearance", min: 0, max: 100, step: "any" },
       scale: {
         type: "number",
         default: 100,
@@ -146,7 +152,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       cornerInset: {
         type: "number",
-        default: "",
+        default: 16,
         optional: true,
         label: "Corner inset (px)",
         section: "Size & placement",
@@ -154,12 +160,12 @@ document.addEventListener("DOMContentLoaded", async () => {
         max: 1000,
         step: "any",
         styleSelector: "#socialHolder",
-        styleProperty: "margin-inline",
+        styleProperty: "margin",
         styleUnit: "px"
       },
       textPadding: {
         type: "number",
-        default: "",
+        default: 12,
         optional: true,
         label: "Text horizontal padding (px)",
         section: "Size & placement",
@@ -187,9 +193,34 @@ document.addEventListener("DOMContentLoaded", async () => {
         icon: ["Social icon", "#icons > i", ["size"]]
       }),
       ...byStream.surfaceFields({ textSurface: ["Text box", "#textBox", ["border", "radius", "shadow"]] }),
+      ...byStream.filterFields("textBackdrop", "Text box backdrop", "#textBox", true),
       ...byStream.filterFields("popupFilter", "Popup", "#socialHolder")
     }
   };
+
+  const fieldDefaults = {
+    textSurfaceRadius: 0,
+    textSurfaceBorderWidth: 0,
+    textSurfaceBorderStyle: "solid",
+    textSurfaceBorderColor: "#00000010",
+    textSurfaceShadow: "yes",
+    textSurfaceShadowColor: "#00000040",
+    textSurfaceShadowBlur: 8,
+    textSurfaceShadowY: 8,
+    textBackdropMode: "none",
+    textBackdropBlur: 12,
+    textSurfaceShadowGlow: "yes",
+    textSurfaceShadowGlowColor: "#33000080",
+    textSurfaceShadowGlowBlur: 24,
+    accountNameLineHeight: 100,
+    iconFontSize: 100,
+    iconLineHeight: 100
+  };
+  for (const [name, value] of Object.entries(fieldDefaults)) {
+    const field = resource.fields[name];
+    field.default = value;
+    delete field.styleDefault;
+  }
 
   /**
    * Render safe text and play the elastic square, handle, and icon sequence.
@@ -280,6 +311,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       .set(popup, { autoAlpha: 0 });
 
     timeline.timeScale(settings.animationSpeed / 100);
+    if (settings.animate === "no") timeline.getChildren(true, true, false).forEach((tween) => tween.duration(0));
     window.addEventListener("pagehide", () => timeline.pause());
     window.addEventListener("pageshow", (event) => {
       if (event.persisted) timeline.restart();

@@ -22,21 +22,21 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       label: {
         type: "text",
-        default: "PLAYER ONE",
+        default: "BONYUR @byUwUr",
         label: "Camera label",
         section: "Content & behavior",
         maxlength: 160
       },
       accentColor: {
         type: "color",
-        default: "#D9D9D9",
+        default: "#330000",
         label: "Accent color",
         section: "Appearance",
         maxlength: 80
       },
       border: {
         type: "number",
-        default: 2,
+        default: 8,
         label: "Border thickness (px)",
         section: "Appearance",
         min: 1,
@@ -45,7 +45,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       corner: {
         type: "number",
-        default: 8,
+        default: 24,
         label: "Rounded corner radius (px)",
         section: "Appearance",
         when: ["shape", "rounded"],
@@ -64,7 +64,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       secondColor: {
         type: "color",
-        default: "#FFFFFF",
+        default: "#112233",
         label: "Second border color",
         section: "Appearance",
         when: ["gradient", "yes"],
@@ -80,7 +80,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       fontSize: {
         type: "number",
-        default: 28,
+        default: 24,
         label: "Base text size (px)",
         section: "Appearance",
         min: 10,
@@ -89,21 +89,21 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       fontWeight: {
         type: "select",
-        default: "400",
+        default: "600",
         label: "Font weight",
         section: "Appearance",
         options: { 300: "300", 400: "400", 500: "500", 600: "600", 700: "700", 800: "800", 900: "900" }
       },
       textColor: {
         type: "color",
-        default: "#FFFFFF",
+        default: "#EEEEEE",
         label: "Base text color",
         section: "Appearance",
         maxlength: 80
       },
       backgroundColor: {
         type: "color",
-        default: "#202020",
+        default: "#11111133",
         label: "Label background",
         section: "Appearance",
         maxlength: 80
@@ -118,17 +118,19 @@ document.addEventListener("DOMContentLoaded", async () => {
         step: "any"
       },
       width: {
+        contentSized: false,
         type: "number",
-        default: 680,
+        default: 720,
         label: "Maximum width (px)",
+        description: "0 = Auto (no fixed maximum).",
         section: "Size & placement",
-        min: 100,
+        min: 0,
         max: 3840,
         step: "any"
       },
       height: {
         type: "number",
-        default: 390,
+        default: 405,
         label: "Frame height (px)",
         section: "Size & placement",
         min: 100,
@@ -137,7 +139,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       horizontalPlacement: {
         type: "select",
-        default: "center",
+        default: "flex-end",
         label: "Horizontal placement",
         section: "Size & placement",
         options: { "flex-start": "Left", center: "Center", "flex-end": "Right" },
@@ -158,7 +160,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         section: "Size & placement",
         options: { left: "left", center: "center", right: "right" }
       },
-      edgePadding: { type: "number", default: "", optional: true, label: "Viewport edge padding (px)", section: "Size & placement", min: 0, max: 1000, step: "any", styleSelector: "#overlay", styleProperty: "padding", styleUnit: "px" },
+      edgePadding: { type: "number", default: 16, optional: true, label: "Viewport edge padding (px)", section: "Size & placement", min: 0, max: 1000, step: "any", styleSelector: "#overlay", styleProperty: "padding", styleUnit: "px" },
       labelPosition: {
         type: "select",
         default: "bottom",
@@ -171,7 +173,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       ...byStream.whenFields(["label"], byStream.offsetFields("labelOffset", "Label offset", "#overlay .camera-label")),
       gradientAngle: {
         type: "number",
-        default: "",
+        default: 0,
         optional: true,
         label: "Gradient angle (degrees)",
         section: "Details",
@@ -186,7 +188,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       decorationWidth: {
         type: "number",
-        default: "",
+        default: 0,
         optional: true,
         label: "Decorative corner width (%)",
         section: "Details",
@@ -201,7 +203,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       decorationHeight: {
         type: "number",
-        default: "",
+        default: 0,
         optional: true,
         label: "Decorative corner height (%)",
         section: "Details",
@@ -216,7 +218,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       decorationThickness: {
         type: "number",
-        default: "",
+        default: 0,
         optional: true,
         label: "Decorative corner thickness (px)",
         section: "Details",
@@ -231,7 +233,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       decorationColor: {
         type: "color",
-        default: "",
+        default: "#FFFFFF",
         optional: true,
         label: "Decorative corner color",
         section: "Details",
@@ -250,7 +252,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       animationDuration: {
         type: "number",
-        default: "",
+        default: 0.1,
         optional: true,
         label: "Frame pulse duration (s)",
         section: "Animation",
@@ -270,6 +272,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       ),
       ...byStream.surfaceFields({ panel: ["Panel", "#overlay .panel", ["border", "shadow"]] }),
       ...byStream.surfaceFields({ labelSurface: ["Label", "#overlay .camera-label"] }, { labelSurface: ["label"] }),
+      ...byStream.whenFields(["label"], byStream.filterFields("labelBackdrop", "Label backdrop", "#overlay .camera-label", true)),
       ...byStream.filterFields("panelFilter", "Panel", "#overlay .panel"),
       ...byStream.filterFields("backdropFilter", "Panel backdrop", "#overlay .panel", true)
     },
@@ -278,6 +281,34 @@ document.addEventListener("DOMContentLoaded", async () => {
       radius: 8
     }
   };
+
+  const fieldDefaults = {
+    panelShadow: "yes",
+    panelShadowColor: "#00000066",
+    panelShadowBlur: 16,
+    panelShadowY: 8,
+    labelSurfaceRadius: 16,
+    labelSurfaceBorderWidth: 2,
+    labelSurfaceBorderColor: "#ffffff66",
+    labelSurfaceBorderStyle: "solid",
+    labelSurfacePadding: 8,
+    labelBackdropMode: "custom",
+    labelBackdropBlur: 8,
+    labelTextShadow: "yes",
+    labelTextShadowColor: "#00000066",
+    labelTextShadowBlur: 8,
+    labelTextShadowY: 2,
+    panelBorderWidth: 2,
+    panelBorderColor: "#FFFFFF66",
+    panelBorderStyle: "solid",
+    labelFontSize: 24,
+    labelLineHeight: 27
+  };
+  for (const [name, value] of Object.entries(fieldDefaults)) {
+    const field = resource.fields[name];
+    field.default = value;
+    delete field.styleDefault;
+  }
 
   const settings = await byStream.initResource(resource);
   if (!byStreamOverlay) return;
@@ -297,7 +328,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     "font-size": `${settings.fontSize}px`
   }))
     root.style.setProperty(`--${name}`, value);
-  panel.style.maxWidth = `${settings.width}px`;
+  panel.style.maxWidth = settings.width === 0 ? "none" : `${settings.width}px`;
   /**
    * Create an element, assign its classes and text, and append it to the resource-owned parent.
    * @param {string} tag HTML tag to create.
@@ -315,11 +346,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   panel.className = "panel camera-frame";
-  panel.style.width = `${settings.width}px`;
+  panel.style.width = settings.width === 0 ? "100%" : `${settings.width}px`;
   panel.style.height = `min(${settings.height}px, calc(100vh - 32px))`;
   root.dataset.shape = settings.shape;
   if (settings.shape === "circle") {
-    panel.style.width = `min(${settings.width}px, ${settings.height}px, calc(100vh - 80px))`;
+    panel.style.width = `min(${settings.width === 0 ? "100%" : `${settings.width}px`}, ${settings.height}px, calc(100vh - 80px))`;
     panel.style.height = "auto";
   }
 

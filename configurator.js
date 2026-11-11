@@ -1476,12 +1476,14 @@
       const jqSelect = $(/* HTML */ `<select class="form-select rounded-0 bg-body-secondary border-secondary-subtle"></select>`).appendTo(jqLabel);
       for (const [value, title] of [
         ["", "Custom"],
+        ["bonyur", "BONYUR"],
         ["studio", "Studio"],
         ["minimal", "Minimal"],
         ["light", "Light ink"]
       ])
         $(/* HTML */ `<option></option>`).val(value).text(title).appendTo(jqSelect);
       const presets = {
+        bonyur: { backgroundColor: "#11111166", textColor: "#EEEEEE", accentColor: "#660000" },
         studio: { backgroundColor: "#202020E6", textColor: "#FFFFFF", accentColor: "#D9D9D9" },
         minimal: { backgroundColor: "#00000000", textColor: "#FFFFFF", accentColor: "#D9D9D9" },
         light: { backgroundColor: "#FFFFFFE6", textColor: "#202020", accentColor: "#404040" }

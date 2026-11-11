@@ -22,7 +22,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       text: {
         type: "text",
-        default: "YOUR CHANNEL",
+        default: "BONYUR",
         label: "Brand text",
         section: "Content & behavior",
         maxlength: 160
@@ -46,7 +46,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       fontSize: {
         type: "number",
-        default: 24,
+        default: 16,
         label: "Base text size (px)",
         section: "Appearance",
         min: 10,
@@ -55,35 +55,35 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       fontWeight: {
         type: "select",
-        default: "400",
+        default: "700",
         label: "Font weight",
         section: "Appearance",
         options: { 300: "300", 400: "400", 500: "500", 600: "600", 700: "700", 800: "800", 900: "900" }
       },
       textColor: {
         type: "color",
-        default: "#FFFFFF",
+        default: "#EEEEEE",
         label: "Base text color",
         section: "Appearance",
         maxlength: 80
       },
       accentColor: {
         type: "color",
-        default: "#D9D9D9",
+        default: "#660000",
         label: "Accent color",
         section: "Appearance",
         maxlength: 80
       },
       backgroundColor: {
         type: "color",
-        default: "#00000000",
+        default: "#11111166",
         label: "Panel background",
         section: "Appearance",
         maxlength: 80
       },
       opacity: {
         type: "number",
-        default: 45,
+        default: 100,
         label: "Opacity (%)",
         section: "Appearance",
         min: 0,
@@ -101,10 +101,11 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       width: {
         type: "number",
-        default: 320,
+        default: 120,
         label: "Maximum width (px)",
+        description: "0 = Auto (no fixed maximum).",
         section: "Size & placement",
-        min: 100,
+        min: 0,
         max: 3840,
         step: "any"
       },
@@ -131,28 +132,29 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       padding: {
         type: "number",
-        default: 12,
+        default: 8,
         label: "Padding (px)",
         section: "Size & placement",
         min: 0,
         max: 100,
         step: "any"
       },
-      edgePadding: { type: "number", default: "", optional: true, label: "Viewport edge padding (px)", section: "Size & placement", min: 0, max: 1000, step: "any", styleSelector: "#overlay", styleProperty: "padding", styleUnit: "px" },
+      edgePadding: { type: "number", default: 16, optional: true, label: "Viewport edge padding (px)", section: "Size & placement", min: 0, max: 1000, step: "any", styleSelector: "#overlay", styleProperty: "padding", styleUnit: "px" },
       imageHeight: {
         type: "number",
         default: 100,
         label: "Maximum logo height (px)",
+        description: "0 = Auto (no fixed maximum).",
         section: "Size & placement",
         when: ["kind", "logo"],
-        min: 20,
+        min: 0,
         max: 500,
         step: "any"
       },
       ...byStream.placementFields("#overlay .panel"),
       underlineWidth: {
         type: "number",
-        default: "",
+        default: 1,
         optional: true,
         label: "Underline width (px)",
         section: "Details",
@@ -164,10 +166,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         styleProperty: "border-bottom-width",
         styleUnit: "px"
       },
-      underlineColor: { type: "color", default: "", optional: true, label: "Underline color", section: "Details", subsection: "Underline", maxlength: 80, styleSelector: "#overlay .brand-text", styleProperty: "border-bottom-color" },
+      underlineColor: { type: "color", default: "#660000", optional: true, label: "Underline color", section: "Details", subsection: "Underline", maxlength: 80, styleSelector: "#overlay .brand-text", styleProperty: "border-bottom-color" },
       underlineGap: {
         type: "number",
-        default: "",
+        default: 0,
         optional: true,
         label: "Underline gap (px)",
         section: "Details",
@@ -192,7 +194,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       motion: {
         type: "select",
-        default: "none",
+        default: "float",
         label: "Motion",
         section: "Animation",
         options: { none: "none", float: "float" }
@@ -208,7 +210,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       visibleDuration: {
         type: "number",
-        default: 20,
+        default: 1,
         label: "Visible time per cycle (seconds)",
         section: "Animation",
         min: 1,
@@ -217,7 +219,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       floatDuration: {
         type: "number",
-        default: "",
+        default: 10,
         optional: true,
         label: "Float duration (s)",
         section: "Animation",
@@ -231,7 +233,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       floatDistance: {
         type: "number",
-        default: "",
+        default: 8,
         optional: true,
         label: "Float vertical distance (px)",
         section: "Animation",
@@ -253,6 +255,25 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   };
 
+  const fieldDefaults = {
+    panelBorderWidth: 1,
+    panelBorderStyle: "solid",
+    panelBorderColor: "#EEEEEE1A",
+    panelShadow: "yes",
+    panelShadowColor: "#00000066",
+    panelShadowBlur: 16,
+    panelShadowY: 4,
+    backdropFilterMode: "none",
+    backdropFilterBlur: 12,
+    watermarkTextFontSize: 16,
+    watermarkTextLineHeight: 19.2
+  };
+  for (const [name, value] of Object.entries(fieldDefaults)) {
+    const field = resource.fields[name];
+    field.default = value;
+    delete field.styleDefault;
+  }
+
   const settings = await byStream.initResource(resource);
   if (!byStreamOverlay) return;
   const root = document.getElementById("overlay");
@@ -271,7 +292,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     "font-size": `${settings.fontSize}px`
   }))
     root.style.setProperty(`--${name}`, value);
-  panel.style.maxWidth = `${settings.width}px`;
+  panel.style.maxWidth = settings.width === 0 ? "none" : `${settings.width}px`;
   /**
    * Create an element, assign its classes and text, and append it to the resource-owned parent.
    * @param {string} tag HTML tag to create.
@@ -294,7 +315,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const img = element("img", "brand-logo");
     img.src = settings.logoUrl;
     img.alt = settings.text;
-    img.style.maxHeight = `${settings.imageHeight}px`;
+    img.style.maxHeight = settings.imageHeight === 0 ? "none" : `${settings.imageHeight}px`;
     img.addEventListener("error", () => {
       img.remove();
       element("p", "primary", settings.text);
@@ -311,9 +332,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         : settings.text;
     element("p", "primary brand-text", content);
   }
+  const changeVisibility = byStream.contentTransition(panel, { ...settings, transition: "fade", transitionDuration: 450, transitionEasing: "ease" });
   if (settings.fadeInterval > 0)
     byStream.watch(() => {
       // Returning hidden=false would pause the scheduler while the watermark is visible.
-      panel.hidden = Date.now() % (settings.fadeInterval * 1000) >= Math.min(settings.visibleDuration, settings.fadeInterval) * 1000;
+      changeVisibility(null, Date.now() % (settings.fadeInterval * 1000) < Math.min(settings.visibleDuration, settings.fadeInterval) * 1000);
     });
 });

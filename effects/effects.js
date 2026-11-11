@@ -15,7 +15,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     fields: {
       effect: {
         type: "select",
-        default: "snow",
+        default: "symbols",
         label: "Effect",
         section: "Content & behavior",
         options: { rain: "rain", snow: "snow", particles: "particles", confetti: "confetti", symbols: "symbols" }
@@ -30,7 +30,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       density: {
         type: "number",
-        default: 45,
+        default: 128,
         label: "Particle count",
         section: "Content & behavior",
         min: 5,
@@ -39,11 +39,11 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       speed: {
         type: "number",
-        default: 12,
+        default: 16,
         label: "Fall duration (seconds)",
         section: "Content & behavior",
         when: ["motion", "on"],
-        min: 2,
+        min: 1,
         max: 60,
         step: "any"
       },
@@ -59,7 +59,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       wind: {
         type: "number",
-        default: 60,
+        default: 256,
         label: "Horizontal drift (px)",
         section: "Content & behavior",
         when: ["motion", "on"],
@@ -78,9 +78,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         styleProperty: "animation-direction"
       },
       sizeVariation: { type: "number", default: 100, label: "Size variation (%)", section: "Content & behavior", subsection: "Pattern variation", min: 0, max: 100, step: "any" },
-      speedVariation: { type: "number", default: 30, label: "Speed variation (%)", section: "Content & behavior", when: ["motion", "on"], subsection: "Pattern variation", min: 0, max: 100, step: "any" },
-      minimumOpacity: { type: "number", default: 20, label: "Minimum particle opacity (%)", section: "Content & behavior", subsection: "Pattern variation", min: 0, max: 100, step: "any" },
-      maximumOpacity: { type: "number", default: 100, label: "Maximum particle opacity (%)", section: "Content & behavior", subsection: "Pattern variation", min: 0, max: 100, step: "any" },
+      speedVariation: { type: "number", default: 50, label: "Speed variation (%)", section: "Content & behavior", when: ["motion", "on"], subsection: "Pattern variation", min: 0, max: 100, step: "any" },
+      minimumOpacity: { type: "number", default: 25, label: "Minimum particle opacity (%)", section: "Content & behavior", subsection: "Pattern variation", min: 0, max: 100, step: "any" },
+      maximumOpacity: { type: "number", default: 75, label: "Maximum particle opacity (%)", section: "Content & behavior", subsection: "Pattern variation", min: 0, max: 100, step: "any" },
       performance: {
         type: "select",
         default: "standard",
@@ -92,7 +92,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       seed: {
         type: "number",
-        default: 17,
+        default: 1,
         label: "Pattern seed",
         section: "Content & behavior",
         subsection: "Pattern variation",
@@ -106,27 +106,27 @@ document.addEventListener("DOMContentLoaded", async () => {
         default: 10,
         label: "Base text size (px)",
         section: "Appearance",
-        min: 10,
+        min: 8,
         max: 200,
         step: "any"
       },
       textColor: {
         type: "color",
-        default: "#FFFFFF",
+        default: "#EEEEEE",
         label: "Base text color",
         section: "Appearance",
         maxlength: 80
       },
       accentColor: {
         type: "color",
-        default: "#D9D9D9",
+        default: "#660000",
         label: "Accent color",
         section: "Appearance",
         maxlength: 80
       },
       opacity: {
         type: "number",
-        default: 65,
+        default: 50,
         label: "Opacity (%)",
         section: "Appearance",
         min: 0,
@@ -145,7 +145,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       ...byStream.placementFields("#overlay .panel"),
       particleRadius: {
         type: "number",
-        default: "",
+        default: 0,
         optional: true,
         label: "Particle corner radius (px)",
         section: "Details",
@@ -159,7 +159,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       spin: {
         type: "number",
-        default: "",
+        default: 0,
         optional: true,
         label: "Confetti rotation (degrees)",
         section: "Details",
@@ -174,7 +174,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       rainWidth: {
         type: "number",
-        default: "",
+        default: 0.1,
         optional: true,
         label: "Rain width (px)",
         section: "Details",
@@ -189,7 +189,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       rainLength: {
         type: "number",
-        default: "",
+        default: 1,
         optional: true,
         label: "Rain length (px)",
         section: "Details",
@@ -212,7 +212,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     },
     constants: {
       fontWeight: "400",
-      backgroundColor: "#202020E6",
+      backgroundColor: "#00000000",
       width: 800,
       padding: 28,
       align: "center",
@@ -221,6 +221,16 @@ document.addEventListener("DOMContentLoaded", async () => {
       shadow: 0
     }
   };
+
+  const fieldDefaults = {
+    symbolFontSize: 10,
+    symbolLineHeight: 11
+  };
+  for (const [name, value] of Object.entries(fieldDefaults)) resource.fields[name].default = value;
+
+  // Particle variation scales from the displayed symbol size and line height.
+  resource.fields.symbolFontSize.styleValue = () => "";
+  resource.fields.symbolLineHeight.styleValue = () => "";
 
   const settings = await byStream.initResource(resource);
   if (!byStreamOverlay) return;
@@ -277,7 +287,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     particle.style.setProperty("--drift", `${settings.wind}px`);
     particle.style.animationDuration = `${settings.speed * (1 - speedVariation + random() * speedVariation * 2)}s`;
     particle.style.animationDelay = `${-random() * settings.speed}s`;
-    particle.style.fontSize = `${settings.fontSize * (1 + (random() - 0.5) * sizeVariation)}px`;
+    const baseSize = settings.effect === "symbols" ? settings.symbolFontSize : settings.fontSize;
+    particle.style.fontSize = `${baseSize * (1 + (random() - 0.5) * sizeVariation)}px`;
+    if (settings.effect === "symbols") particle.style.lineHeight = settings.symbolLineHeight / settings.symbolFontSize;
     particle.style.width = `${settings.fontSize * (0.55 + (random() - 0.5) * 0.5 * sizeVariation)}px`;
     particle.style.height = particle.style.width;
     particle.style.color = i % 2 ? settings.accentColor : settings.textColor;

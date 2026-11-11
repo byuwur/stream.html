@@ -25,19 +25,19 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       title: {
         type: "text",
-        default: "LET’S CONNECT",
+        default: "SAY BONYUR.",
         label: "Title",
         section: "Content & behavior",
         maxlength: 160
       },
       subtitle: {
         type: "text",
-        default: "Scan to explore",
+        default: "Tools, streams & good company. Scan this code if you want to know more about stream.HTML!",
         label: "Subtitle",
         section: "Content & behavior",
         maxlength: 160
       },
-      showLogo: { type: "switch", default: "no", label: "Logo", section: "Content & behavior", checkedValue: "yes", uncheckedValue: "no", options: { yes: "On", no: "Off" } },
+      showLogo: { type: "switch", default: "yes", label: "Logo", section: "Content & behavior", checkedValue: "yes", uncheckedValue: "no", options: { yes: "On", no: "Off" } },
       logoUrl: {
         type: "url",
         default: "https://byuwur.github.io/img/logo.png",
@@ -49,7 +49,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       foreground: {
         type: "color",
-        default: "#000000",
+        default: "#330000",
         label: "QR foreground",
         section: "Appearance",
         description: "Opaque dark #RRGGBB colors keep the code readable.",
@@ -84,35 +84,35 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       fontWeight: {
         type: "select",
-        default: "400",
+        default: "700",
         label: "Font weight",
         section: "Appearance",
         options: { 300: "300", 400: "400", 500: "500", 600: "600", 700: "700", 800: "800", 900: "900" }
       },
       textColor: {
         type: "color",
-        default: "#FFFFFF",
+        default: "#EEEEEE",
         label: "Base text color",
         section: "Appearance",
         maxlength: 80
       },
       accentColor: {
         type: "color",
-        default: "#D9D9D9",
+        default: "#660000",
         label: "Accent color",
         section: "Appearance",
         maxlength: 80
       },
       backgroundColor: {
         type: "color",
-        default: "#202020E6",
+        default: "#11111166",
         label: "Panel background",
         section: "Appearance",
         maxlength: 80
       },
       framing: {
         type: "select",
-        default: "line",
+        default: "none",
         label: "Card frame",
         section: "Appearance",
         options: { none: "none", line: "line", corners: "corners" }
@@ -120,7 +120,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       opacity: { type: "number", default: 100, label: "Opacity (%)", section: "Appearance", min: 0, max: 100, step: "any" },
       radius: {
         type: "number",
-        default: 8,
+        default: 16,
         label: "Corner radius (px)",
         section: "Appearance",
         min: 0,
@@ -129,7 +129,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       size: {
         type: "number",
-        default: 260,
+        default: 180,
         label: "QR size (px)",
         section: "Size & placement",
         description: "Rounded to whole modules; expands if needed to keep modules at least 3 px.",
@@ -139,16 +139,17 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       width: {
         type: "number",
-        default: 440,
+        default: 480,
         label: "Maximum width (px)",
+        description: "0 = Auto (no fixed maximum).",
         section: "Size & placement",
-        min: 100,
+        min: 0,
         max: 3840,
         step: "any"
       },
       horizontalPlacement: {
         type: "select",
-        default: "center",
+        default: "flex-start",
         label: "Horizontal placement",
         section: "Size & placement",
         options: { "flex-start": "Left", center: "Center", "flex-end": "Right" },
@@ -157,30 +158,30 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       position: {
         type: "select",
-        default: "center",
+        default: "top",
         label: "Vertical placement",
         section: "Size & placement",
         options: { top: "top", center: "center", bottom: "bottom" }
       },
       align: {
         type: "select",
-        default: "center",
+        default: "left",
         label: "Text alignment",
         section: "Size & placement",
         options: { left: "left", center: "center", right: "right" }
       },
       padding: {
         type: "number",
-        default: 24,
+        default: 8,
         label: "Padding (px)",
         section: "Size & placement",
         min: 0,
         max: 100,
         step: "any"
       },
-      edgePadding: { type: "number", default: "", optional: true, label: "Viewport edge padding (px)", section: "Size & placement", min: 0, max: 1000, step: "any", styleSelector: "#overlay", styleProperty: "padding", styleUnit: "px" },
+      edgePadding: { type: "number", default: 16, optional: true, label: "Viewport edge padding (px)", section: "Size & placement", min: 0, max: 1000, step: "any", styleSelector: "#overlay", styleProperty: "padding", styleUnit: "px" },
       ...byStream.placementFields("#overlay .panel"),
-      codeGap: { type: "number", default: "", optional: true, label: "Space above QR code (px)", section: "Composition", min: -1000, max: 1000, step: "any", styleSelector: "#overlay .qr-code", styleProperty: "margin-top", styleUnit: "px" },
+      codeGap: { type: "number", default: 0, optional: true, label: "Space above QR code (px)", section: "Composition", min: -1000, max: 1000, step: "any", styleSelector: "#overlay .qr-code", styleProperty: "margin-top", styleUnit: "px" },
       ...byStream.layoutFields("#overlay .panel", { logo: ["Logo", "#overlay .qr-logo"], title: ["Title", "#overlay .primary"], code: ["QR code", "#overlay .qr-code"], subtitle: ["Subtitle", "#overlay .qr-subtitle"] }, "content", {
         logo: ["logoUrl"]
       }),
@@ -204,9 +205,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       logoWidth: {
         type: "number",
-        default: "",
+        default: 96,
         optional: true,
         label: "Maximum logo width (px)",
+        description: "0 = Auto (no fixed maximum).",
         section: "Details",
         when: ["logoUrl"],
         subsection: "Logo",
@@ -219,9 +221,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       logoHeight: {
         type: "number",
-        default: "",
+        default: 48,
         optional: true,
         label: "Maximum logo height (px)",
+        description: "0 = Auto (no fixed maximum).",
         section: "Details",
         when: ["logoUrl"],
         subsection: "Logo",
@@ -241,7 +244,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       animationDuration: {
         type: "number",
-        default: "",
+        default: 0.1,
         optional: true,
         label: "Title animation duration (s)",
         section: "Animation",
@@ -267,6 +270,29 @@ document.addEventListener("DOMContentLoaded", async () => {
       opacity: 1
     }
   };
+
+  const fieldDefaults = {
+    panelBorderWidth: 1,
+    panelBorderStyle: "solid",
+    panelBorderColor: "#EEEEEE1A",
+    panelShadow: "yes",
+    panelShadowColor: "#00000066",
+    panelShadowBlur: 16,
+    panelShadowY: 4,
+    backdropFilterMode: "custom",
+    backdropFilterBlur: 4,
+    subtitleFontSize: 12,
+    titleFontSize: 32,
+    titleLineHeight: 38.4,
+    subtitleLineHeight: 19.2,
+    noticeFontSize: 13.44,
+    noticeLineHeight: 15
+  };
+  for (const [name, value] of Object.entries(fieldDefaults)) {
+    const field = resource.fields[name];
+    field.default = value;
+    delete field.styleDefault;
+  }
 
   /**
    * Bound both visible text length and UTF-8 payload bytes before QR encoding.
@@ -314,7 +340,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     "font-size": `${settings.fontSize}px`
   }))
     root.style.setProperty(`--${name}`, value);
-  panel.style.maxWidth = `${settings.width}px`;
+  panel.style.maxWidth = settings.width === 0 ? "none" : `${settings.width}px`;
   /**
    * Create an element, assign its classes and text, and append it to the resource-owned parent.
    * @param {string} tag HTML tag to create.

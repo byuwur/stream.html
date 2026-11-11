@@ -21,7 +21,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     fields: {
       sceneTitle: {
         type: "textarea",
-        default: "Ya estamos\nempezando",
+        default: "Ya casito\nempezamos",
         label: "Title (line breaks supported)",
         section: "Scene",
         description: "Main heading displayed on the scene. Line breaks are supported.",
@@ -31,7 +31,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       tagline: {
         type: "text",
-        default: "[Mateus] byUwUr",
+        default: "@byUwUr",
         label: "Subtitle",
         section: "Scene",
         description: "Subtitle displayed beneath the main heading.",
@@ -51,7 +51,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       countdownTime: {
         type: "number",
-        default: 4,
+        default: 1,
         label: "Countdown (minutes)",
         section: "Countdown",
         when: ["displayCountdown", "yes"],
@@ -115,7 +115,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       backgroundScale: { type: "number", default: 100, label: "Background scale (%)", section: "Background", min: -500, max: 500, step: "any" },
       backgroundBlur: {
         type: "number",
-        default: 0,
+        default: 64,
         label: "Background blur (px)",
         section: "Background",
         description: "Background blur radius in pixels.",
@@ -126,7 +126,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       backgroundOverlay: {
         type: "color",
-        default: "#36353A",
+        default: "#300",
         label: "Background tint color",
         section: "Background",
         description: "Color of the background tint.",
@@ -135,7 +135,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       backgroundOverlayOpacity: {
         type: "number",
-        default: 0,
+        default: 1,
         label: "Background tint opacity (%)",
         section: "Background",
         description: "Opacity from 0% (transparent) to 100% (opaque).",
@@ -167,7 +167,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       logoScale: {
         type: "number",
-        default: 100,
+        default: 50,
         label: "Logo scale (%)",
         section: "Branding",
         when: ["displayBranding", "yes"],
@@ -203,9 +203,21 @@ document.addEventListener("DOMContentLoaded", async () => {
       accounts: {
         type: "entries",
         default: [
-          { platform: "twitch", handle: "/byUwUr", heading: "Stream casi todos los días" },
-          { platform: "youtube", handle: "[Mateus] @byUwUr", heading: "VODs todas las semanas" },
-          { platform: "instagram", handle: "@byUwUr", heading: "Fotos de vez en cuando" }
+          {
+            platform: "twitch",
+            handle: "/byUwUr",
+            heading: "Stream casi todos los días"
+          },
+          {
+            platform: "youtube",
+            handle: "[Mateus] @byUwUr",
+            heading: "VODs casi todas las semanas"
+          },
+          {
+            platform: "instagram",
+            handle: "@byUwUr",
+            heading: "Fotos de vez en cuando"
+          }
         ],
         label: "Social accounts",
         section: "Social accounts",
@@ -237,7 +249,15 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       scheduleEntries: {
         type: "entries",
-        default: { monday: "", tuesday: "", wednesday: "", thursday: "", friday: "", saturday: "", sunday: "" },
+        default: {
+          monday: "",
+          tuesday: "",
+          wednesday: "",
+          thursday: "",
+          friday: "",
+          saturday: "",
+          sunday: ""
+        },
         label: "Schedule",
         section: "Schedule",
         when: ["displaySchedule", "yes"],
@@ -299,7 +319,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       primaryTextColor: {
         type: "color",
-        default: "#FFFFFF",
+        default: "#EEEEEE",
         label: "Text color",
         section: "Appearance",
         description: "Color used for primary text.",
@@ -308,7 +328,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       subTextColor: {
         type: "color",
-        default: "#C9C9C9",
+        default: "#EEEEEE99",
         label: "Secondary text color",
         section: "Appearance",
         description: "Color used for secondary text.",
@@ -317,17 +337,17 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       accentColor: {
         type: "color",
-        default: "#300",
+        default: "#440000",
         label: "Accent color",
         section: "Appearance",
         description: "Color used for accents.",
         maxlength: 160,
         icon: "fa-palette"
       },
-      contentBackgrounds: { type: "color", default: "#FFFFFF1A", label: "Card backgrounds", section: "Appearance", maxlength: 80 },
+      contentBackgrounds: { type: "color", default: "#11111133", label: "Card backgrounds", section: "Appearance", maxlength: 80 },
       frameColor: {
         type: "color",
-        default: "#300",
+        default: "#440000",
         label: "Frame color",
         section: "Appearance",
         description: "Color of the scene border.",
@@ -336,7 +356,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       frameWidth: {
         type: "number",
-        default: 2,
+        default: 8,
         label: "Frame width (px)",
         section: "Appearance",
         description: "Scene border thickness in pixels.",
@@ -345,15 +365,16 @@ document.addEventListener("DOMContentLoaded", async () => {
         step: "any",
         icon: "fa-hashtag"
       },
-      opacity: { type: "number", default: "", optional: true, label: "Scene opacity (%)", section: "Appearance", min: 0, max: 100, step: "any", styleSelector: "#scene", styleProperty: "opacity", styleUnit: "%" },
-      frameInset: { type: "number", default: "", optional: true, label: "Frame inset (px)", section: "Size & placement", min: -1000, max: 1000, step: "any", styleSelector: "#frame", styleProperty: "inset", styleUnit: "px" },
+      opacity: { type: "number", default: 100, optional: true, label: "Scene opacity (%)", section: "Appearance", min: 0, max: 100, step: "any", styleSelector: "#scene", styleProperty: "opacity", styleUnit: "%" },
+      frameInset: { type: "number", default: 16, optional: true, label: "Frame inset (px)", section: "Size & placement", min: -1000, max: 1000, step: "any", styleSelector: "#frame", styleProperty: "inset", styleUnit: "px" },
       ...byStream.placementFields("#scene"),
-      titleVerticalOffset: { type: "number", default: -8, label: "Title vertical offset (px)", section: "Size & placement", subsection: "Title and subtitle position", min: -1080, max: 1080, step: "any" },
-      subtitleVerticalOffset: { type: "number", default: 128, label: "Subtitle vertical offset (px)", section: "Size & placement", subsection: "Title and subtitle position", min: -1080, max: 1080, step: "any" },
-      countdownScale: { type: "number", default: 125, label: "Countdown scale (%)", section: "Size & placement", when: ["displayCountdown", "yes"], subsection: "Countdown position", min: -500, max: 500, step: "any" },
+      titleVerticalOffset: { type: "number", default: 0, label: "Title vertical offset (px)", section: "Size & placement", subsection: "Title and subtitle position", min: -1080, max: 1080, step: "any" },
+      subtitleVerticalOffset: { type: "number", default: 64, label: "Subtitle vertical offset (px)", section: "Size & placement", subsection: "Title and subtitle position", min: -1080, max: 1080, step: "any" },
+      countdownScale: { type: "number", default: 100, label: "Countdown scale (%)", section: "Size & placement", when: ["displayCountdown", "yes"], subsection: "Countdown position", min: -500, max: 500, step: "any" },
       countdownRight: {
         type: "number",
-        default: "",
+        default: 80,
+        zeroIsDefault: true,
         optional: true,
         label: "Countdown right (px)",
         section: "Size & placement",
@@ -368,7 +389,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       countdownBottom: {
         type: "number",
-        default: "",
+        default: 80,
+        zeroIsDefault: true,
         optional: true,
         label: "Countdown bottom (px)",
         section: "Size & placement",
@@ -414,10 +436,11 @@ document.addEventListener("DOMContentLoaded", async () => {
         max: 1080,
         step: "any"
       },
-      socialMediaScale: { type: "number", default: 125, label: "Social scale (%)", section: "Size & placement", when: ["displaySocial", "yes"], subsection: "Social accounts position", min: -500, max: 500, step: "any" },
+      socialMediaScale: { type: "number", default: 100, label: "Social scale (%)", section: "Size & placement", when: ["displaySocial", "yes"], subsection: "Social accounts position", min: -500, max: 500, step: "any" },
       updatesLeft: {
         type: "number",
-        default: "",
+        default: 80,
+        zeroIsDefault: true,
         optional: true,
         label: "Updates left (px)",
         section: "Size & placement",
@@ -432,7 +455,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       updatesTop: {
         type: "number",
-        default: "",
+        default: 80,
+        zeroIsDefault: true,
         optional: true,
         label: "Updates top (px)",
         section: "Size & placement",
@@ -449,7 +473,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       labelsScale: { type: "number", default: 125, label: "Event labels scale (%)", section: "Size & placement", when: ["displayLabels", "yes"], subsection: "Event labels position", min: -500, max: 500, step: "any" },
       eventsLeft: {
         type: "number",
-        default: "",
+        default: 80,
+        zeroIsDefault: true,
         optional: true,
         label: "Event labels left (px)",
         section: "Size & placement",
@@ -464,7 +489,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       eventsBottom: {
         type: "number",
-        default: "",
+        default: 80,
+        zeroIsDefault: true,
         optional: true,
         label: "Event labels bottom (px)",
         section: "Size & placement",
@@ -529,16 +555,102 @@ document.addEventListener("DOMContentLoaded", async () => {
         },
         { socialCard: ["displaySocial", "yes"], scheduleCard: ["displaySchedule", "yes"], eventCard: ["displayLabels", "yes"] }
       ),
+      ...byStream.whenFields(["displaySocial", "yes"], byStream.filterFields("socialCardBackdrop", "Social card backdrop", "#social .network", true)),
+      ...byStream.whenFields(["displaySchedule", "yes"], byStream.filterFields("scheduleCardBackdrop", "Schedule card backdrop", "#schedule .day", true)),
+      ...byStream.whenFields(["displayLabels", "yes"], byStream.filterFields("eventCardBackdrop", "Event card backdrop", "#list .event", true)),
       ...byStream.filterFields("sceneFilter", "Scene", "#scene")
     },
     constants: {
       labelNameSize: 24,
-      labelHeaderSize: 12,
-      countdownTimeSize: 64,
-      countdownMessageSize: 24,
-      countdownEndMessageSize: 64
+      labelHeaderSize: 18,
+      countdownTimeSize: 48,
+      countdownMessageSize: 28,
+      countdownEndMessageSize: 48
     }
   };
+
+  const fieldDefaults = {
+    socialCardRadius: 4,
+    socialCardBorderWidth: 0,
+    socialCardBorderStyle: "solid",
+    socialCardBorderColor: "#EEEEEE1A",
+    socialCardShadow: "no",
+    socialCardShadowColor: "#00000014",
+    socialCardShadowBlur: 12,
+    socialCardShadowY: 3,
+    scheduleCardRadius: 6,
+    scheduleCardBorderWidth: 1,
+    scheduleCardBorderStyle: "solid",
+    scheduleCardBorderColor: "#EEEEEE1A",
+    scheduleCardShadow: "no",
+    scheduleCardShadowColor: "#00000014",
+    scheduleCardShadowBlur: 12,
+    scheduleCardShadowY: 3,
+    eventCardRadius: 6,
+    eventCardBorderWidth: 1,
+    eventCardBorderStyle: "solid",
+    eventCardBorderColor: "#EEEEEE1A",
+    eventCardShadow: "no",
+    eventCardShadowColor: "#00000014",
+    eventCardShadowBlur: 12,
+    eventCardShadowY: 3,
+    sceneFrameRadius: 32,
+    socialCardPadding: 12,
+    socialCardBackdropMode: "none",
+    socialCardBackdropBlur: 12,
+    scheduleCardPadding: 8,
+    scheduleCardBackdropMode: "custom",
+    scheduleCardBackdropBlur: 12,
+    eventCardPadding: 8,
+    eventCardBackdropMode: "custom",
+    eventCardBackdropBlur: 12,
+    socialGap: 12,
+    titleTextShadow: "yes",
+    titleTextShadowColor: "#00000066",
+    titleTextShadowBlur: 16,
+    subtitleTextShadow: "yes",
+    subtitleTextShadowColor: "#00000066",
+    subtitleTextShadowBlur: 16,
+    socialHeadingFontSize: 16,
+    socialNameFontSize: 24,
+    socialIconFontSize: 40,
+    countdownFontSize: 48,
+    countdownTextShadow: "yes",
+    countdownTextShadowColor: "#00000066",
+    countdownTextShadowBlur: 16,
+    countdownMessageFontSize: 24,
+    countdownMessageTextShadow: "yes",
+    countdownMessageTextShadowColor: "#00000066",
+    countdownMessageTextShadowBlur: 16,
+    countdownEndFontSize: 48,
+    countdownEndTextShadow: "yes",
+    countdownEndTextShadowColor: "#00000066",
+    countdownEndTextShadowBlur: 16,
+    sceneFilterMode: "custom",
+    countdownLineHeight: 54,
+    countdownMessageLineHeight: 27,
+    countdownEndLineHeight: 54,
+    socialHeadingLineHeight: 18,
+    socialNameLineHeight: 27,
+    socialIconLineHeight: 40,
+    eventNameFontSize: 24,
+    eventNameLineHeight: 24,
+    eventHeadingFontSize: 18,
+    eventHeadingLineHeight: 18,
+    weekGap: 24,
+    scheduleDayFontSize: 16,
+    scheduleDayLineHeight: 18,
+    scheduleTimeFontSize: 16,
+    scheduleTimeLineHeight: 18,
+    titleLineHeight: 82,
+    subtitleLineHeight: 54
+  };
+  for (const [name, value] of Object.entries(fieldDefaults)) {
+    const field = resource.fields[name];
+    field.default = value;
+    delete field.styleDefault;
+  }
+  resource.fields.weekGap.zeroIsDefault = true;
 
   const dayLabels = { monday: "Lunes", tuesday: "Martes", wednesday: "Miércoles", thursday: "Jueves", friday: "Viernes", saturday: "Sábado", sunday: "Domingo" };
 
@@ -692,6 +804,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       animation.add(card, "+=1");
     });
     animation?.timeScale(settings.animationSpeed / 100);
+    if (settings.animate === "no") animation?.getChildren(true, true, false).forEach((tween) => tween.duration(0));
     function start() {
       if (time) {
         if (Date.now() < deadline) countdownTimer = setInterval(updateCountdown, 1000);

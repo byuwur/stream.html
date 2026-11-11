@@ -1,11 +1,11 @@
 /* Match popup.js defaults; inline settings override these values. */
 :root {
-  --iconBoxColor: #300;
-  --textBoxColor: #ffffff;
-  --iconColor: #ffffff;
-  --fontColor: #300;
+  --iconBoxColor: #66000066;
+  --textBoxColor: #11111166;
+  --iconColor: #eee;
+  --fontColor: #eee;
   --font-family: "Courier New", Courier, monospace;
-  --font-size: 72px;
+  --font-size: 48px;
   --font-weight: 600;
   --text-offset: 0px;
 }
@@ -15,6 +15,7 @@ html {
 body {
   margin: 0;
   overflow: hidden;
+  background: transparent;
 }
 #socialHolder {
   position: absolute;
@@ -50,7 +51,7 @@ body {
   color: var(--fontColor);
 }
 #nameHolder {
-  padding: 0 20px;
+  padding: 0 10px;
 }
 .name {
   display: block;

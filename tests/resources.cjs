@@ -66,13 +66,95 @@ test("resources render and round-trip URLs without configurator assets", async (
         await page.goto(`https://stream.test/watermark/?${new URLSearchParams({ text, fontSize: "invalid", kind: "invalid", opacity: "0", unknown: "ignored" })}`);
         await page.waitForFunction(() => window.byStreamResource && document.querySelector("#overlay .primary"));
         assert.deepEqual(await page.evaluate(() => ({ fontSize: byStreamResource.settings.fontSize, kind: byStreamResource.settings.kind, opacity: byStreamResource.settings.opacity, injected: window.injected })), {
-          fontSize: 24,
+          fontSize: 16,
           kind: "text",
           opacity: 0,
           injected: undefined
         });
         assert.equal(await page.locator("#overlay .primary").textContent(), text);
         assert.equal(await page.locator("#overlay img, #overlay script").count(), 0);
+      } finally {
+        await page.close();
+      }
+    });
+
+    await t.test("resource appearance defaults allow neutral overrides without hiding base text", async () => {
+      const page = await browser.newPage();
+      try {
+        await serve(page, assets, true);
+        await page.goto("https://stream.test/clock/?test=1");
+        await page.waitForFunction(() => document.querySelector(".time"));
+        assert.equal(await page.locator(".panel").evaluate((panel) => getComputedStyle(panel).borderTopWidth), "0px");
+        assert.equal(await page.evaluate(() => byStreamResource.fields.label.default), "");
+        assert.equal(await page.locator(".eyebrow").count(), 0);
+        await page.goto("https://stream.test/clock/?label=Heading&panelBorderWidth=0&headingTracking=0&headingFontSize=0&panelShadow=no&backdropFilterMode=none&radius=0");
+        await page.waitForFunction(() => document.querySelector(".time"));
+        const styles = await page.evaluate(() => {
+          const panel = getComputedStyle(document.querySelector(".panel"));
+          const heading = getComputedStyle(document.querySelector(".eyebrow"));
+          return { border: panel.borderTopWidth, shadow: panel.boxShadow, blur: panel.backdropFilter, radius: panel.borderTopLeftRadius, tracking: heading.letterSpacing, headingSize: parseFloat(heading.fontSize) };
+        });
+        assert.equal(styles.headingSize, await page.evaluate(() => byStreamResource.fields.headingFontSize.default), "Size 0 restores the displayed default");
+        delete styles.headingSize;
+        assert.deepEqual(styles, { border: "0px", shadow: "none", blur: "none", radius: "0px", tracking: "normal" });
+      } finally {
+        await page.close();
+      }
+    });
+
+    await t.test("Main insets and text sizes restore concrete defaults from legacy zeros", async () => {
+      const page = await browser.newPage({ viewport: { width: 1920, height: 1080 } });
+      try {
+        await serve(page, assets, true);
+        await page.goto("https://stream.test/main/?displayLabels=yes&updatesLeft=0&updatesTop=0&eventsLeft=0&eventsBottom=0&countdownRight=0&countdownBottom=0&countdownFontSize=0&countdownLineHeight=0");
+        await page.waitForSelector("#countdown");
+        assert.deepEqual(
+          await page.evaluate(() => {
+            const updates = getComputedStyle(document.querySelector("#updates"));
+            const events = getComputedStyle(document.querySelector("#list"));
+            const countdown = getComputedStyle(document.querySelector("#countdown"));
+            return [updates.left, updates.top, events.left, events.bottom, countdown.right, countdown.bottom];
+          }),
+          Array(6).fill("80px")
+        );
+        assert.deepEqual(await page.evaluate(() => [byStreamResource.settings.countdownFontSize, byStreamResource.settings.countdownLineHeight]), [48, 54]);
+        const url = new URL(await page.evaluate(() => byStream.settingsURL(byStreamResource, byStreamResource.settings).href));
+        assert.ok(url.searchParams.has("sceneTitle"));
+        assert.equal(url.searchParams.has("countdownRight"), false);
+        await page.goto("https://stream.test/effects/?effect=symbols&motion=off&symbolFontSize=20&symbolLineHeight=22&sizeVariation=50");
+        await page.waitForSelector(".particle");
+        const sizes = await page.locator(".particle").evaluateAll((nodes) => nodes.map((node) => parseFloat(getComputedStyle(node).fontSize)));
+        assert.ok(Math.max(...sizes) > Math.min(...sizes), "Symbol size variation remains active");
+        assert.ok(sizes.every((size) => size >= 15 && size <= 25));
+      } finally {
+        await page.close();
+      }
+    });
+
+    await t.test("zero columns fit existing items and retain explicit column counts", async () => {
+      const page = await browser.newPage({ viewport: { width: 960, height: 540 } });
+      try {
+        await serve(page, assets, true);
+        for (const [name, selector] of [
+          ["schedule", ".schedule-list"],
+          ["info", ".info-board"],
+          ["shortcuts", ".shortcut-list"]
+        ]) {
+          await page.goto(`https://stream.test/${name}/?width=0&widthMode=fill`);
+          await page.waitForSelector(selector);
+          assert.equal(await page.evaluate(() => byStreamResource.fields.columns.default), 0, name);
+          assert.equal(await page.evaluate(() => byStreamResource.settings.columns), 0, name);
+          const tracks = await page.locator(selector).evaluate((node) =>
+            getComputedStyle(node)
+              .gridTemplateColumns.split(" ")
+              .map(parseFloat)
+              .filter((size) => size > 0)
+          );
+          assert.ok(tracks.length > 1 && tracks.length <= (await page.locator(selector).locator(":scope > *").count()), name);
+          await page.goto(`https://stream.test/${name}/?columns=2&width=0&widthMode=fill`);
+          await page.waitForSelector(selector);
+          assert.equal(await page.locator(selector).evaluate((node) => getComputedStyle(node).gridTemplateColumns.split(" ").length), 2, name);
+        }
       } finally {
         await page.close();
       }
@@ -129,6 +211,26 @@ test("resources render and round-trip URLs without configurator assets", async (
         await page.goto("https://stream.test/quotes/?marks=no&transition=none");
         await page.waitForSelector(".quote-text");
         assert.equal(await page.locator(".quote-text").evaluate((node) => getComputedStyle(node).paddingLeft), "0px");
+      } finally {
+        await page.close();
+      }
+    });
+
+    await t.test("webcam backdrop blur stays on the label and can be disabled", async () => {
+      const page = await browser.newPage();
+      try {
+        await serve(page, assets, true);
+        await page.goto("https://stream.test/webcam/?test=1");
+        await page.waitForFunction(() => document.querySelector(".camera-label"));
+        const styles = await page.evaluate(() => ({
+          camera: getComputedStyle(document.querySelector(".camera-frame")).backdropFilter,
+          label: getComputedStyle(document.querySelector(".camera-label")).backdropFilter
+        }));
+        assert.equal(styles.camera, "none", "Camera content stays clear");
+        assert.ok(styles.label.startsWith("blur(8px)"));
+        await page.goto("https://stream.test/webcam/?labelBackdropMode=none&labelSurfacePadding=0");
+        await page.waitForFunction(() => document.querySelector(".camera-label"));
+        assert.deepEqual(await page.locator(".camera-label").evaluate((label) => ({ blur: getComputedStyle(label).backdropFilter, padding: getComputedStyle(label).padding })), { blur: "none", padding: "0px" });
       } finally {
         await page.close();
       }
@@ -323,6 +425,14 @@ test("resources render and round-trip URLs without configurator assets", async (
         await page.waitForFunction(() => window.byStreamResource && document.querySelector("#overlay .primary"));
         assert.equal(await page.locator("#overlay .panel").evaluate((panel) => panel.hidden), false);
         await page.clock.fastForward(1100);
+        assert.equal(await page.locator("#overlay .panel").evaluate((panel) => panel.hidden), false, "The watermark leaves before it is hidden");
+        await page.locator("#overlay .panel").evaluate((panel) =>
+          panel
+            .getAnimations()
+            .filter((animation) => animation.effect.getTiming().iterations !== Infinity)
+            .forEach((animation) => animation.finish())
+        );
+        await page.waitForFunction(() => document.querySelector("#overlay .panel").hidden);
         assert.equal(await page.locator("#overlay .panel").evaluate((panel) => panel.hidden), true);
         await page.clock.fastForward(1000);
         assert.equal(await page.locator("#overlay .panel").evaluate((panel) => panel.hidden), false);

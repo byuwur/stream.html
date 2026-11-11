@@ -16,8 +16,21 @@ document.addEventListener("DOMContentLoaded", async () => {
       entries: {
         type: "entries",
         default: [
-          { title: "Warm-up", startTime: new Date().toISOString(), endTime: new Date(Date.now() + 1800000).toISOString() },
-          { title: "The main event", startTime: new Date(Date.now() + 1800000).toISOString(), endTime: new Date(Date.now() + 5400000).toISOString() }
+          {
+            title: "Warm-up",
+            startTime: "2026-11-09T15:30:00.000Z",
+            endTime: "2026-11-09T15:45:00.000Z"
+          },
+          {
+            title: "Announcement",
+            startTime: "2026-11-10T15:45:00.000Z",
+            endTime: "2099-11-10T16:30:00.000Z"
+          },
+          {
+            title: "The main event",
+            startTime: "2099-11-09T15:45:00.000Z",
+            endTime: "2099-11-09T16:30:00.000Z"
+          }
         ],
         label: "Activities",
         section: "Content & behavior",
@@ -36,7 +49,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       title: {
         type: "text",
-        default: "TONIGHT’S PLAN",
+        default: "TONIGHT, AT OUR PACE",
         label: "Heading",
         section: "Content & behavior",
         maxlength: 160
@@ -56,7 +69,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       emptyLabel: { type: "text", default: "No activities scheduled.", label: "Empty schedule text", section: "Content & behavior", subsection: "Status labels", maxlength: 160 },
       timeZone: {
         type: "timezone",
-        default: "",
+        default: "America/Bogota",
         label: "Display time zone",
         section: "Date & time",
         description: "Search by IANA name or current UTC offset. Entries keep their explicit UTC offsets.",
@@ -65,7 +78,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       locale: {
         type: "locale",
-        default: "",
+        default: "en-US",
         label: "Locale",
         section: "Date & time",
         description: "Search by locale code, language, or region. Empty uses browser locale.",
@@ -92,7 +105,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       fontSize: {
         type: "number",
-        default: 32,
+        default: 24,
         label: "Base text size (px)",
         section: "Appearance",
         min: 10,
@@ -108,21 +121,21 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       textColor: {
         type: "color",
-        default: "#FFFFFF",
+        default: "#EEEEEE",
         label: "Base text color",
         section: "Appearance",
         maxlength: 80
       },
       accentColor: {
         type: "color",
-        default: "#D9D9D9",
+        default: "#660000",
         label: "Accent color",
         section: "Appearance",
         maxlength: 80
       },
       backgroundColor: {
         type: "color",
-        default: "#202020E6",
+        default: "#11111199",
         label: "Panel background",
         section: "Appearance",
         maxlength: 80
@@ -138,7 +151,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       radius: {
         type: "number",
-        default: 8,
+        default: 16,
         label: "Corner radius (px)",
         section: "Appearance",
         min: 0,
@@ -147,16 +160,18 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       width: {
         type: "number",
-        default: 760,
+        default: 0,
+        contentSized: false,
         label: "Maximum width (px)",
+        description: "0 = Auto (no fixed maximum).",
         section: "Size & placement",
-        min: 100,
+        min: 0,
         max: 3840,
         step: "any"
       },
       horizontalPlacement: {
         type: "select",
-        default: "center",
+        default: "flex-end",
         label: "Horizontal placement",
         section: "Size & placement",
         options: { "flex-start": "Left", center: "Center", "flex-end": "Right" },
@@ -165,33 +180,34 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       position: {
         type: "select",
-        default: "center",
+        default: "top",
         label: "Vertical placement",
         section: "Size & placement",
         options: { top: "top", center: "center", bottom: "bottom" }
       },
       align: {
         type: "select",
-        default: "left",
+        default: "center",
         label: "Text alignment",
         section: "Size & placement",
         options: { left: "left", center: "center", right: "right" }
       },
       padding: {
         type: "number",
-        default: 28,
+        default: 8,
         label: "Padding (px)",
         section: "Size & placement",
         min: 0,
         max: 100,
         step: "any"
       },
-      edgePadding: { type: "number", default: "", optional: true, label: "Viewport edge padding (px)", section: "Size & placement", min: 0, max: 1000, step: "any", styleSelector: "#overlay", styleProperty: "padding", styleUnit: "px" },
+      edgePadding: { type: "number", default: 16, optional: true, label: "Viewport edge padding (px)", section: "Size & placement", min: 0, max: 1000, step: "any", styleSelector: "#overlay", styleProperty: "padding", styleUnit: "px" },
       listHeight: {
         type: "number",
-        default: "",
+        default: 0,
         optional: true,
         label: "Maximum list height (px)",
+        description: "0 = Auto (no fixed maximum).",
         section: "Size & placement",
         min: 0,
         max: 10000,
@@ -202,13 +218,13 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       ...byStream.placementFields("#overlay .panel"),
       ...byStream.insetFields("statusInset", "Status position", "#overlay .schedule-state"),
-      columns: { type: "number", default: 1, label: "Activity columns", section: "Composition", min: 1, max: 6, step: 1 },
-      spacing: { type: "number", default: "", optional: true, label: "Activity gap (px)", section: "Composition", min: 0, max: 1000, step: "any", styleSelector: "#overlay .schedule-list", styleProperty: "gap", styleUnit: "px" },
+      columns: { type: "number", default: 0, label: "Activity columns", description: "0 automatically fits columns to the activities and available width.", section: "Composition", min: 0, max: 6, step: 1 },
+      spacing: { type: "number", default: 16, optional: true, label: "Activity gap (px)", section: "Composition", min: 0, max: 1000, step: "any", styleSelector: "#overlay .schedule-list", styleProperty: "gap", styleUnit: "px" },
       ...byStream.layoutFields("#overlay .panel", { heading: ["Heading", "#overlay .eyebrow"], list: ["Activities", "#overlay .schedule-list"] }),
       ...byStream.layoutFields("#overlay .schedule-entry", { activity: ["Activity", "#overlay .schedule-entry .primary"], time: ["Time", "#overlay .schedule-entry .secondary"] }, "activity"),
       currentBackground: {
         type: "color",
-        default: "",
+        default: "#440000",
         optional: true,
         label: "Current activity background",
         section: "Details",
@@ -219,7 +235,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       currentBorderColor: {
         type: "color",
-        default: "",
+        default: "#660000",
         optional: true,
         label: "Current activity border",
         section: "Details",
@@ -230,7 +246,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       endedOpacity: {
         type: "number",
-        default: "",
+        default: 50,
         optional: true,
         label: "Ended activity opacity (%)",
         section: "Details",
@@ -255,6 +271,39 @@ document.addEventListener("DOMContentLoaded", async () => {
       ...byStream.filterFields("backdropFilter", "Panel backdrop", "#overlay .panel", true)
     }
   };
+
+  const fieldDefaults = {
+    statusFontSize: 16,
+    timeFontSize: 18,
+    panelBorderWidth: 1,
+    panelBorderStyle: "solid",
+    panelBorderColor: "#EEEEEE11",
+    panelShadow: "yes",
+    panelShadowColor: "#00000066",
+    panelShadowBlur: 16,
+    panelShadowY: 4,
+    backdropFilterMode: "none",
+    backdropFilterBlur: 12,
+    headingFontSize: 24,
+    headingTracking: 1.8,
+    entryBackground: "#00000066",
+    headingLineHeight: 27,
+    activityFontSize: 24,
+    activityLineHeight: 28.8,
+    timeLineHeight: 20,
+    statusTracking: 0.6,
+    statusLineHeight: 18,
+    entryRadius: 8,
+    emptyMessageFontSize: 18,
+    emptyMessageLineHeight: 20
+  };
+  for (const [name, value] of Object.entries(fieldDefaults)) {
+    const field = resource.fields[name];
+    field.default = value;
+    delete field.styleDefault;
+  }
+  resource.fields.statusTracking.zeroIsDefault = true;
+  resource.fields.entryRadius.zeroIsDefault = true;
 
   /**
    * Accept only this resource's declared content shape and limits; invalid input returns null.
@@ -298,7 +347,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     "font-size": `${settings.fontSize}px`
   }))
     root.style.setProperty(`--${name}`, value);
-  panel.style.maxWidth = `${settings.width}px`;
+  panel.style.maxWidth = settings.width === 0 ? "none" : `${settings.width}px`;
   /**
    * Create an element, assign its classes and text, and append it to the resource-owned parent.
    * @param {string} tag HTML tag to create.
@@ -335,7 +384,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     return [settings.showDate === "yes" ? date.format(value) : "", time.format(value)].filter(Boolean).join(" ");
   }
   const list = element("div", "schedule-list");
-  list.style.gridTemplateColumns = `repeat(${settings.columns}, minmax(0, 1fr))`;
+  list.style.gridTemplateColumns = settings.columns === 0 ? "repeat(auto-fit, minmax(min(100%, 240px), 1fr))" : `repeat(${settings.columns}, minmax(0, 1fr))`;
   const rows = settings.entries.map((entry) => {
     const row = element("section", "schedule-entry", undefined, list);
     element("p", "primary", entry.title, row);

@@ -1,36 +1,36 @@
 /* Match main.js defaults; inline settings override these values. */
 :root {
   --font-family: "Courier New", Courier, monospace;
-  --primary-color: #ffffff;
-  --secondary-color: #c9c9c9;
-  --accent-color: #300;
+  --primary-color: #eee;
+  --secondary-color: #eeeeeeb3;
+  --accent-color: #600;
   --frame-color: #300;
-  --content-background: #ffffff1a;
+  --content-background: #11111166;
   --background-color: #00000000;
   --background-tint: #36353a;
-  --frame-width: 2px;
-  --logo-opacity: 0.05;
+  --frame-width: 6px;
+  --logo-opacity: 0.04;
   --logo-scale: 1;
   --background-opacity: 0;
   --background-blur: 0px;
   --background-scale: 1;
-  --socialMediaScale: 1.25;
+  --socialMediaScale: 0.85;
   --labelsScale: 1.25;
   --scheduleScale: 1.25;
-  --countdownScale: 1.25;
+  --countdownScale: 1;
   --titleSize: 72px;
-  --titleVerticalOffset: -8px;
-  --subtitleSize: 48px;
-  --subtitleVerticalOffset: 128px;
+  --titleVerticalOffset: -32px;
+  --subtitleSize: 40px;
+  --subtitleVerticalOffset: 56px;
   --labelNameSize: 24px;
   --labelNameVerticalOffset: 0px;
-  --labelHeaderSize: 12px;
+  --labelHeaderSize: 18px;
   --labelHeaderVerticalOffset: 4px;
-  --countdownTimeSize: 64px;
+  --countdownTimeSize: 48px;
   --countdownTimeVerticalOffset: 0px;
-  --countdownMessageSize: 24px;
+  --countdownMessageSize: 28px;
   --countdownMessageVerticalOffset: 0px;
-  --countdownEndMessageSize: 64px;
+  --countdownEndMessageSize: 48px;
   --countdownEndMessageVerticalOffset: 0px;
 }
 html {
@@ -251,4 +251,8 @@ body {
   color: var(--secondary-color);
   font-size: var(--countdownEndMessageSize);
   transform: translateY(var(--countdownEndMessageVerticalOffset));
+}
+
+:is(#title, #subtitle, #message, #endMessage, .socialHead, .socialName, .scheduleTime, .event .type):empty {
+  display: none !important;
 }

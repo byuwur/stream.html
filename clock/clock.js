@@ -22,14 +22,14 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       label: {
         type: "text",
-        default: "LOCAL TIME",
+        default: "",
         label: "Heading",
         section: "Content & behavior",
         maxlength: 160
       },
       timeZone: {
         type: "timezone",
-        default: "",
+        default: "America/Bogota",
         label: "Time zone",
         section: "Date & time",
         description: "Search by IANA name or current UTC offset. Empty uses the OBS computer zone.",
@@ -97,10 +97,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         uncheckedValue: "no",
         options: { yes: "yes", no: "no" }
       },
-      showZones: { type: "switch", default: "yes", label: "Show zone names", section: "Date & time", checkedValue: "yes", uncheckedValue: "no", options: { yes: "Yes", no: "No" } },
+      showZones: { type: "switch", default: "no", label: "Show zone names", section: "Date & time", checkedValue: "yes", uncheckedValue: "no", options: { yes: "Yes", no: "No" } },
       locale: {
         type: "locale",
-        default: "",
+        default: "en-US",
         label: "Locale",
         section: "Date & time",
         description: "Search by locale code, language, or region. Empty uses browser locale.",
@@ -118,7 +118,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       fontSize: {
         type: "number",
-        default: 88,
+        default: 32,
         label: "Base text size (px)",
         section: "Appearance",
         min: 10,
@@ -127,28 +127,28 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       fontWeight: {
         type: "select",
-        default: "400",
+        default: "600",
         label: "Font weight",
         section: "Appearance",
         options: { 300: "300", 400: "400", 500: "500", 600: "600", 700: "700", 800: "800", 900: "900" }
       },
       textColor: {
         type: "color",
-        default: "#FFFFFF",
+        default: "#EEEEEE",
         label: "Base text color",
         section: "Appearance",
         maxlength: 80
       },
       accentColor: {
         type: "color",
-        default: "#D9D9D9",
+        default: "#660000",
         label: "Accent color",
         section: "Appearance",
         maxlength: 80
       },
       backgroundColor: {
         type: "color",
-        default: "#00000000",
+        default: "#22111111",
         label: "Panel background",
         section: "Appearance",
         maxlength: 80
@@ -183,16 +183,17 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       width: {
         type: "number",
-        default: 860,
+        default: 360,
         label: "Maximum width (px)",
+        description: "0 = Auto (no fixed maximum).",
         section: "Size & placement",
-        min: 100,
+        min: 0,
         max: 3840,
         step: "any"
       },
       horizontalPlacement: {
         type: "select",
-        default: "center",
+        default: "flex-end",
         label: "Horizontal placement",
         section: "Size & placement",
         options: { "flex-start": "Left", center: "Center", "flex-end": "Right" },
@@ -201,32 +202,32 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       position: {
         type: "select",
-        default: "center",
+        default: "top",
         label: "Vertical placement",
         section: "Size & placement",
         options: { top: "top", center: "center", bottom: "bottom" }
       },
       align: {
         type: "select",
-        default: "center",
+        default: "right",
         label: "Text alignment",
         section: "Size & placement",
         options: { left: "left", center: "center", right: "right" }
       },
       padding: {
         type: "number",
-        default: 28,
+        default: 4,
         label: "Padding (px)",
         section: "Size & placement",
         min: 0,
         max: 100,
         step: "any"
       },
-      edgePadding: { type: "number", default: "", optional: true, label: "Viewport edge padding (px)", section: "Size & placement", min: 0, max: 1000, step: "any", styleSelector: "#overlay", styleProperty: "padding", styleUnit: "px" },
+      edgePadding: { type: "number", default: 16, optional: true, label: "Viewport edge padding (px)", section: "Size & placement", min: 0, max: 1000, step: "any", styleSelector: "#overlay", styleProperty: "padding", styleUnit: "px" },
       ...byStream.placementFields("#overlay .panel"),
       composition: {
         type: "select",
-        default: "stacked",
+        default: "single-line",
         label: "Composition",
         section: "Composition",
         description: "Single line puts the heading, time, and date in one row and scales them to fit.",
@@ -234,7 +235,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       spacing: {
         type: "number",
-        default: 18,
+        default: 24,
         label: "Clock spacing (px)",
         section: "Composition",
         min: 0,
@@ -248,7 +249,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       }),
       dialSize: {
         type: "number",
-        default: "",
+        default: 0,
         optional: true,
         label: "Analog dial diameter (px)",
         section: "Details",
@@ -261,10 +262,21 @@ document.addEventListener("DOMContentLoaded", async () => {
         styleProperty: "width",
         styleUnit: "px"
       },
-      dialColor: { type: "color", default: "", optional: true, label: "Analog tick color", section: "Details", when: ["layout", "analog"], subsection: "Analog dial", maxlength: 80, styleSelector: "#overlay .dial", styleProperty: "color" },
+      dialColor: {
+        type: "color",
+        default: "#FFFFFF",
+        optional: true,
+        label: "Analog tick color",
+        section: "Details",
+        when: ["layout", "analog"],
+        subsection: "Analog dial",
+        maxlength: 80,
+        styleSelector: "#overlay .dial",
+        styleProperty: "color"
+      },
       hourHandColor: {
         type: "color",
-        default: "",
+        default: "#00000000",
         optional: true,
         label: "Hour hand color",
         section: "Details",
@@ -276,7 +288,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       minuteHandColor: {
         type: "color",
-        default: "",
+        default: "#00000000",
         optional: true,
         label: "Minute hand color",
         section: "Details",
@@ -288,7 +300,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       secondHandColor: {
         type: "color",
-        default: "",
+        default: "#00000000",
         optional: true,
         label: "Second hand color",
         section: "Details",
@@ -300,7 +312,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       tickOpacity: {
         type: "number",
-        default: "",
+        default: 100,
         optional: true,
         label: "Tick opacity (%)",
         section: "Details",
@@ -330,6 +342,46 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   };
 
+  const fieldDefaults = {
+    panelBorderWidth: 0,
+    panelBorderStyle: "solid",
+    panelBorderColor: "#EEEEEE66",
+    panelShadow: "no",
+    panelShadowColor: "#00000014",
+    panelShadowBlur: 12,
+    panelShadowY: 3,
+    backdropFilterMode: "none",
+    backdropFilterBlur: 12,
+    headingFontSize: 24,
+    headingTracking: 1.8,
+    dateFontSize: 24,
+    zoneFontSize: 18,
+    timeTextShadow: "yes",
+    timeTextShadowColor: "#00000066",
+    timeTextShadowBlur: 2,
+    timeTextShadowX: 2,
+    timeTextShadowY: 2,
+    dateTextShadow: "yes",
+    dateTextShadowColor: "#00000066",
+    dateTextShadowBlur: 2,
+    dateTextShadowX: 2,
+    dateTextShadowY: 2,
+    contentGap: 24,
+    headingLineHeight: 27,
+    timeFontSize: 32,
+    timeLineHeight: 35.2,
+    dateLineHeight: 27,
+    dialBorderWidth: 2,
+    flapRadius: 2.56,
+    zoneLineHeight: 20
+  };
+  for (const [name, value] of Object.entries(fieldDefaults)) {
+    const field = resource.fields[name];
+    field.default = value;
+    delete field.styleDefault;
+  }
+  for (const name of ["contentGap", "dialBorderWidth", "flapRadius"]) resource.fields[name].zeroIsDefault = true;
+
   const settings = await byStream.initResource(resource);
   if (!byStreamOverlay) return;
   const root = document.getElementById("overlay");
@@ -348,7 +400,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     "font-size": `${settings.fontSize}px`
   }))
     root.style.setProperty(`--${name}`, value);
-  panel.style.maxWidth = `${settings.width}px`;
+  panel.style.maxWidth = settings.width === 0 ? "none" : `${settings.width}px`;
   /**
    * Create an element, assign its classes and text, and append it to the resource-owned parent.
    * @param {string} tag HTML tag to create.
@@ -456,7 +508,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             }
             if (node.textContent === part.value) return;
             node.textContent = part.value;
-            node.animate([{ transform: "perspective(500px) rotateX(-25deg)" }, { transform: "perspective(500px) rotateX(0)" }], { duration: settings.flipDuration });
+            if (settings.animate !== "no") node.animate([{ transform: "perspective(500px) rotateX(-25deg)" }, { transform: "perspective(500px) rotateX(0)" }], { duration: settings.flipDuration });
           });
         } else view.display.textContent = text;
       }

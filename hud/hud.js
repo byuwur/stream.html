@@ -22,7 +22,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       label: {
         type: "text",
-        default: "CAM 01",
+        default: "BONYUR / CAM 01",
         label: "Camera label",
         section: "Content & behavior",
         maxlength: 160
@@ -53,7 +53,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       crosshairText: { type: "text", default: "+", label: "Crosshair symbol", section: "Content & behavior", when: ["showCrosshair", "yes"], subsection: "Indicator text", maxlength: 160 },
       timeZone: {
         type: "timezone",
-        default: "",
+        default: "America/Bogota",
         label: "Timestamp time zone",
         section: "Date & time",
         when: ["timestamp", "yes"],
@@ -72,7 +72,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       fontSize: {
         type: "number",
-        default: 28,
+        default: 24,
         label: "Base text size (px)",
         section: "Appearance",
         min: 10,
@@ -88,14 +88,14 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       textColor: {
         type: "color",
-        default: "#FFFFFF",
+        default: "#EEEEEE",
         label: "Base text color",
         section: "Appearance",
         maxlength: 80
       },
       accentColor: {
         type: "color",
-        default: "#D9D9D9",
+        default: "#660000",
         label: "Accent color",
         section: "Appearance",
         maxlength: 80
@@ -117,17 +117,19 @@ document.addEventListener("DOMContentLoaded", async () => {
         step: "any"
       },
       width: {
+        contentSized: false,
         type: "number",
         default: 1920,
         label: "Maximum width (px)",
+        description: "0 = Auto (no fixed maximum).",
         section: "Size & placement",
-        min: 100,
+        min: 0,
         max: 3840,
         step: "any"
       },
       inset: {
         type: "number",
-        default: 32,
+        default: 16,
         label: "Viewfinder inset (px)",
         section: "Size & placement",
         min: -100,
@@ -142,7 +144,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       ...byStream.whenFields(["showCrosshair", "yes"], byStream.insetFields("crosshairInset", "Crosshair position", "#overlay .crosshair")),
       scanlines: {
         type: "number",
-        default: 0,
+        default: 5,
         label: "Scanline opacity (%)",
         section: "Details",
         subsection: "Texture",
@@ -152,7 +154,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       grain: {
         type: "number",
-        default: 0,
+        default: 5,
         label: "Noise opacity (%)",
         section: "Details",
         subsection: "Texture",
@@ -160,10 +162,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         max: 100,
         step: "any"
       },
-      frameColor: { type: "color", default: "", optional: true, label: "Corner color", section: "Details", subsection: "Viewfinder corners", maxlength: 80, styleSelector: "#overlay .hud::before", styleProperty: "border-color" },
+      frameColor: { type: "color", default: "#EEEEEE66", optional: true, label: "Corner color", section: "Details", subsection: "Viewfinder corners", maxlength: 80, styleSelector: "#overlay .hud::before", styleProperty: "border-color" },
       frameThickness: {
         type: "number",
-        default: "",
+        default: 4,
         optional: true,
         label: "Corner thickness (px)",
         section: "Details",
@@ -177,7 +179,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       cornerLength: {
         type: "number",
-        default: "",
+        default: 10,
         optional: true,
         label: "Corner length (%)",
         section: "Details",
@@ -191,7 +193,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       blink: {
         type: "switch",
-        default: "no",
+        default: "yes",
         label: "Blink REC",
         section: "Animation",
         when: ["rec", "yes"],
@@ -201,7 +203,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       blinkDuration: {
         type: "number",
-        default: "",
+        default: 1,
         optional: true,
         label: "Recording blink duration (s)",
         section: "Animation",
@@ -235,6 +237,20 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   };
 
+  const fieldDefaults = {
+    statusFontSize: 24,
+    statusLineHeight: 27,
+    labelFontSize: 24,
+    labelLineHeight: 27,
+    timeFontSize: 18,
+    timeLineHeight: 20,
+    batteryFontSize: 24,
+    batteryLineHeight: 27,
+    crosshairFontSize: 24,
+    crosshairLineHeight: 27
+  };
+  for (const [name, value] of Object.entries(fieldDefaults)) resource.fields[name].default = value;
+
   const settings = await byStream.initResource(resource);
   if (!byStreamOverlay) return;
   const root = document.getElementById("overlay");
@@ -253,7 +269,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     "font-size": `${settings.fontSize}px`
   }))
     root.style.setProperty(`--${name}`, value);
-  panel.style.maxWidth = `${settings.width}px`;
+  panel.style.maxWidth = settings.width === 0 ? "none" : `${settings.width}px`;
   /**
    * Create an element, assign its classes and text, and append it to the resource-owned parent.
    * @param {string} tag HTML tag to create.

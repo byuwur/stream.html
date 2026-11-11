@@ -15,7 +15,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     fields: {
       entries: {
         type: "entries",
-        default: { "W + A + S + D": "Move", Space: "Jump", Shift: "Sprint", E: "Interact" },
+        default: {
+          "W + A + S + D": "Move",
+          Space: "Jump",
+          Shift: "Sprint",
+          E: "Interact"
+        },
         label: "Shortcuts",
         section: "Content & behavior",
         validate: parseEntries,
@@ -32,7 +37,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       title: {
         type: "text",
-        default: "THE CONTROLS",
+        default: "A FEW GOOD BUTTONS",
         label: "Heading",
         section: "Content & behavior",
         maxlength: 160
@@ -56,7 +61,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       fontSize: {
         type: "number",
-        default: 30,
+        default: 24,
         label: "Base text size (px)",
         section: "Appearance",
         min: 10,
@@ -65,28 +70,28 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       fontWeight: {
         type: "select",
-        default: "400",
+        default: "700",
         label: "Font weight",
         section: "Appearance",
         options: { 300: "300", 400: "400", 500: "500", 600: "600", 700: "700", 800: "800", 900: "900" }
       },
       textColor: {
         type: "color",
-        default: "#FFFFFF",
+        default: "#EEEEEE",
         label: "Base text color",
         section: "Appearance",
         maxlength: 80
       },
       accentColor: {
         type: "color",
-        default: "#D9D9D9",
+        default: "#660000",
         label: "Accent color",
         section: "Appearance",
         maxlength: 80
       },
       backgroundColor: {
         type: "color",
-        default: "#202020E6",
+        default: "#11111199",
         label: "Panel background",
         section: "Appearance",
         maxlength: 80
@@ -102,7 +107,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       radius: {
         type: "number",
-        default: 8,
+        default: 16,
         label: "Corner radius (px)",
         section: "Appearance",
         min: 0,
@@ -111,16 +116,17 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       width: {
         type: "number",
-        default: 850,
+        default: 0,
         label: "Maximum width (px)",
+        description: "0 = Auto (no fixed maximum).",
         section: "Size & placement",
-        min: 100,
+        min: 0,
         max: 3840,
         step: "any"
       },
       horizontalPlacement: {
         type: "select",
-        default: "center",
+        default: "flex-start",
         label: "Horizontal placement",
         section: "Size & placement",
         options: { "flex-start": "Left", center: "Center", "flex-end": "Right" },
@@ -143,19 +149,20 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       padding: {
         type: "number",
-        default: 28,
+        default: 16,
         label: "Padding (px)",
         section: "Size & placement",
         min: 0,
         max: 100,
         step: "any"
       },
-      edgePadding: { type: "number", default: "", optional: true, label: "Viewport edge padding (px)", section: "Size & placement", min: 0, max: 1000, step: "any", styleSelector: "#overlay", styleProperty: "padding", styleUnit: "px" },
+      edgePadding: { type: "number", default: 16, optional: true, label: "Viewport edge padding (px)", section: "Size & placement", min: 0, max: 1000, step: "any", styleSelector: "#overlay", styleProperty: "padding", styleUnit: "px" },
       listHeight: {
         type: "number",
-        default: "",
+        default: 0,
         optional: true,
         label: "Maximum shortcut list height (px)",
+        description: "0 = Auto (no fixed maximum).",
         section: "Size & placement",
         min: 0,
         max: 10000,
@@ -165,10 +172,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         styleUnit: "px"
       },
       ...byStream.placementFields("#overlay .panel"),
-      columns: { type: "number", default: 1, label: "Shortcut columns", section: "Composition", min: 1, max: 4, step: 1 },
+      columns: { type: "number", default: 0, label: "Shortcut columns", description: "0 automatically fits columns to the shortcuts and available width.", section: "Composition", min: 0, max: 4, step: 1 },
       spacing: {
         type: "number",
-        default: 12,
+        default: 16,
         label: "Row spacing (px)",
         section: "Composition",
         min: 0,
@@ -177,7 +184,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       keyGap: {
         type: "number",
-        default: "",
+        default: 4,
         optional: true,
         label: "Key gap (px)",
         section: "Composition",
@@ -190,7 +197,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       keyboardGap: {
         type: "number",
-        default: "",
+        default: 0,
         optional: true,
         label: "Keyboard row gap (px)",
         section: "Composition",
@@ -204,7 +211,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       keyboardMargin: {
         type: "number",
-        default: "",
+        default: 0,
         optional: true,
         label: "Space above keyboard (px)",
         section: "Composition",
@@ -237,6 +244,38 @@ document.addEventListener("DOMContentLoaded", async () => {
       ...byStream.filterFields("backdropFilter", "Panel backdrop", "#overlay .panel", true)
     }
   };
+
+  const fieldDefaults = {
+    descriptionFontSize: 16,
+    keyFontSize: 16,
+    titleFontSize: 16,
+    panelBorderWidth: 1,
+    panelBorderStyle: "solid",
+    panelBorderColor: "#EEEEEE11",
+    panelShadow: "yes",
+    panelShadowColor: "#00000066",
+    panelShadowBlur: 16,
+    panelShadowY: 4,
+    backdropFilterMode: "none",
+    backdropFilterBlur: 12,
+    contentGap: 20,
+    titleTracking: 1.92,
+    titleLineHeight: 18,
+    keyLineHeight: 18,
+    descriptionLineHeight: 19.2,
+    keyRadius: 5,
+    keyboardFontSize: 12,
+    keyboardLineHeight: 14,
+    boundKeyFontSize: 12,
+    boundKeyLineHeight: 14,
+    keyboardKeyRadius: 5
+  };
+  for (const [name, value] of Object.entries(fieldDefaults)) {
+    const field = resource.fields[name];
+    field.default = value;
+    delete field.styleDefault;
+  }
+  for (const name of ["contentGap", "titleTracking", "keyRadius", "keyboardKeyRadius"]) resource.fields[name].zeroIsDefault = true;
 
   /**
    * Accept only this resource's declared content shape and limits; invalid input returns null.
@@ -273,7 +312,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     "font-size": `${settings.fontSize}px`
   }))
     root.style.setProperty(`--${name}`, value);
-  panel.style.maxWidth = `${settings.width}px`;
+  panel.style.maxWidth = settings.width === 0 ? "none" : `${settings.width}px`;
   /**
    * Create an element, assign its classes and text, and append it to the resource-owned parent.
    * @param {string} tag HTML tag to create.
@@ -292,7 +331,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   element("h1", "eyebrow", settings.title);
   const list = element("div", "shortcut-list");
-  list.style.gridTemplateColumns = `repeat(${settings.columns}, minmax(0, 1fr))`;
+  list.style.gridTemplateColumns = settings.columns === 0 ? "repeat(auto-fit, minmax(min(100%, 240px), 1fr))" : `repeat(${settings.columns}, minmax(0, 1fr))`;
   list.style.gap = `${settings.spacing}px`;
   for (const [shortcut, text] of Object.entries(settings.entries)) {
     const row = element("div", "shortcut-row", undefined, list);

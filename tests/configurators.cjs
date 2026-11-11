@@ -98,6 +98,89 @@ test("configurator forms and previews initialize for every resource", async (t) 
       }
     });
 
+    await t.test("numeric zero imports show concrete defaults and Fill width follows Width", async () => {
+      const page = await browser.newPage();
+      try {
+        await serve(page, assets);
+        await page.goto("https://stream.test/main/?countdownRight=0&countdownFontSize=0#configure");
+        await page.waitForFunction(() => document.getElementById("overlay-url")?.value);
+        assert.equal(await page.locator('[name="countdownRight"]').inputValue(), "80");
+        assert.equal(await page.locator('[name="countdownFontSize"]').inputValue(), "48");
+        await page.getByRole("button", { name: "Expand All", exact: true }).click();
+        await page.locator('[name="countdownRight"]').fill("0");
+        await page.locator('[name="countdownRight"]').blur();
+        assert.equal(await page.locator('[name="countdownRight"]').inputValue(), "80");
+        await page.locator('[data-settings-view="json"]').click();
+        await page.locator("#settings-json").fill(JSON.stringify({ sceneTitle: "Test", countdownRight: 0, countdownFontSize: 0 }));
+        await page.locator("#settings-json").blur();
+        await page.waitForFunction(() => byStreamResource.settings.sceneTitle === "Test");
+        assert.deepEqual(await page.evaluate(() => [byStreamResource.settings.countdownRight, byStreamResource.settings.countdownFontSize]), [80, 48]);
+        await page.goto("https://stream.test/lower-thirds/?imageSize=0#configure");
+        await page.waitForFunction(() => document.getElementById("overlay-url")?.value);
+        assert.equal(await page.locator('[name="imageSize"]').inputValue(), "0");
+        await page.goto("https://stream.test/watermark/?width=0#configure");
+        await page.waitForFunction(() => document.getElementById("overlay-url")?.value);
+        const fill = page.locator('[name="widthMode"]');
+        assert.equal(await fill.isDisabled(), false);
+        assert.equal(await fill.evaluate((node) => node.closest(".conditional-field").hidden), false);
+        const width = page.locator('[name="width"]');
+        await width.fill("320");
+        await width.blur();
+        await page.waitForFunction(() => document.querySelector('[name="widthMode"]').disabled && document.querySelector('[name="widthMode"]').closest(".conditional-field").hidden);
+        await width.fill("0");
+        await width.blur();
+        await page.waitForFunction(() => !document.querySelector('[name="widthMode"]').disabled && !document.querySelector('[name="widthMode"]').closest(".conditional-field").hidden);
+        await page.goto("https://stream.test/badge/#configure");
+        await page.waitForFunction(() => document.getElementById("overlay-url")?.value);
+        await page.getByRole("button", { name: "Expand All", exact: true }).click();
+        await page.locator('[name="animate"]').uncheck();
+        await page.waitForFunction(() => new URL(document.getElementById("overlay-url").value).searchParams.get("animate") === "no");
+        await page.frameLocator("#overlay-preview").locator('html[data-animate="no"]').waitFor({ state: "attached" });
+        assert.equal(await page.evaluate(() => document.documentElement.hasAttribute("data-animate")), false, "Resource Animate does not disable configurator motion");
+        await page.locator('[name="animate"]').check();
+        await page.waitForFunction(() => !new URL(document.getElementById("overlay-url").value).searchParams.has("animate"));
+      } finally {
+        await page.close();
+      }
+    });
+
+    await t.test("restoring resource defaults replaces saved Schedule entries and Sponsor image URLs", async () => {
+      const page = await browser.newPage();
+      try {
+        await serve(page, assets);
+        await page.addInitScript(() => {
+          const name = location.pathname.split("/")[1];
+          if (sessionStorage.getItem(`seeded.${name}`)) return;
+          const entries =
+            name === "schedule"
+              ? [
+                  { title: "Warm-up", startTime: "2026-11-10T18:00:00Z", endTime: "2026-11-10T18:30:00Z" },
+                  { title: "The main event", startTime: "2026-11-10T18:30:00Z", endTime: "2026-11-10T19:30:00Z" }
+                ]
+              : [{ name: "Old partner", text: "Saved card", imageUrl: "" }];
+          localStorage.setItem(`stream.html.settings.${encodeURIComponent(location.pathname)}`, JSON.stringify({ query: new URLSearchParams({ entries: JSON.stringify(entries) }).toString() }));
+          sessionStorage.setItem(`seeded.${name}`, "yes");
+        });
+        for (const [name, count] of [
+          ["schedule", 3],
+          ["sponsors", 2]
+        ]) {
+          await page.goto(`https://stream.test/${name}/#configure`);
+          await page.waitForFunction(() => document.getElementById("overlay-url")?.value);
+          assert.equal(await page.locator(".entry-row").count(), count - 1);
+          await page.locator("#advanced-options").click();
+          await Promise.all([page.waitForEvent("load"), page.locator("#restore-defaults").click()]);
+          await page.waitForFunction((count) => window.byStreamResource?.settings.entries.length === count && document.getElementById("overlay-url")?.value, count);
+          assert.equal(await page.locator(".entry-row").count(), count);
+          assert.deepEqual(await page.evaluate(() => byStreamResource.settings.entries), await page.evaluate(() => byStreamResource.fields.entries.default));
+          if (name === "schedule") assert.deepEqual(await page.evaluate(() => byStreamResource.settings.entries.map((entry) => entry.title)), ["Warm-up", "Announcement", "The main event"]);
+          else assert.deepEqual(await page.locator('.entry-row [data-field="imageUrl"]').evaluateAll((nodes) => nodes.map((node) => node.value)), ["https://byuwur.github.io/img/logo.png", ""]);
+        }
+      } finally {
+        await page.close();
+      }
+    });
+
     // --- EDIT, PREVIEW, COPY, AND RESET ---
     await t.test("edits update the URL and preview; copy and reset use the opening settings", async () => {
       const page = await browser.newPage();
