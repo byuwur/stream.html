@@ -1032,14 +1032,14 @@
 
     /**
      * Prepare both JSON views with each accepted URL; switching views never serializes settings.
-     * URL default comparison excludes required anchors while preserving native values and list order.
+     * Required overlay fields stay in both views, preserving native values and list order.
      * @returns {void}
      */
     function prepareJSON() {
-      const overrides = settingsURL({ ...resource, urlRequired: [] }, settings).searchParams;
+      const included = settingsURL(resource, settings).searchParams;
       const entries = Object.keys(parameterRules).map((name) => [name, settings[name]]);
       preparedJSON = {
-        overrides: JSON.stringify(Object.fromEntries(entries.filter(([name]) => overrides.has(name))), null, 2),
+        overrides: JSON.stringify(Object.fromEntries(entries.filter(([name]) => included.has(name))), null, 2),
         all: JSON.stringify(Object.fromEntries(entries), null, 2)
       };
     }
@@ -1333,8 +1333,9 @@
         jqSelect.val(map ? entry[0] : entry[choiceKey]);
         textFields.forEach(([key, title, type = "text"], index) => {
           const value = map ? entry[choices ? 1 : index] : strings ? entry : entry[key];
-          const input = $(/* HTML */ `<input />`, {
-            type,
+          const input = $(type === "textarea" ? "<textarea></textarea>" : "<input />", {
+            type: type === "textarea" ? undefined : type,
+            rows: type === "textarea" ? 3 : undefined,
             step: type === "datetime-local" ? "1" : undefined,
             maxlength: 160,
             "data-field": key,
@@ -1376,13 +1377,13 @@
             return [
               ...(choices ? [jqRow.find("select").val()] : []),
               ...jqRow
-                .find("input")
+                .find("input, textarea")
                 .get()
                 .map((input) => input.value)
             ];
-          if (strings) return jqRow.find("input").val();
+          if (strings) return jqRow.find("input, textarea").val();
           const entry = choices ? { [choiceKey]: jqRow.find("select").val() } : {};
-          jqRow.find("input").each(function () {
+          jqRow.find("input, textarea").each(function () {
             const jqInput = $(this);
             const value = jqInput.val();
             entry[jqInput.data("field")] = jqInput.is('[type="datetime-local"]') && value ? utcTimestamp(value) : value;
@@ -1392,10 +1393,10 @@
         // Repeated platform rows are valid arrays; duplicate map keys would silently erase earlier rows.
         const duplicate = map && new Set(values.map(([key]) => key)).size !== values.length;
         jqOutput.val(duplicate ? "" : JSON.stringify(map ? Object.fromEntries(values) : values));
-        jqRows.find("input").each(function () {
+        jqRows.find("input, textarea").each(function () {
           this.setCustomValidity("");
         });
-        jqRows.find("input")[0]?.setCustomValidity(duplicate ? "Use a different key for each row." : byStream.validParameter(parameterRules, name, jqOutput.val()) ? "" : "Invalid list. Check the entries or remove rows.");
+        jqRows.find("input, textarea")[0]?.setCustomValidity(duplicate ? "Use a different key for each row." : byStream.validParameter(parameterRules, name, jqOutput.val()) ? "" : "Invalid list. Check the entries or remove rows.");
         jqAdd.prop("disabled", jqRows.length >= limit);
       }
       // Release row widgets before rebuilding, retaining the opening values for native Reset.
@@ -1410,11 +1411,11 @@
         sync();
         resizeContainers(new Map([[jqEditor[0], height]]));
       }
-      jqEditor.on("input change", "input, select", sync).on("click", "[data-action]", function () {
+      jqEditor.on("input change", "input, textarea, select", sync).on("click", "[data-action]", function () {
         const jqRow = $(this).closest(".entry-row");
         const action = $(this).data("action");
         if (action === "remove") {
-          jqRow.find("input, select, button").prop("disabled", true);
+          jqRow.find("input, textarea, select, button").prop("disabled", true);
           setVisible(jqRow, false).then((finished) => {
             if (!finished) return;
             const jqSelect = jqRow.find("select");
@@ -1628,7 +1629,7 @@
       });
       initSelect2(jqSelect, {
         placeholder,
-        allowClear: true,
+        allowClear: false,
         maximumSelectionLength: multiple ? 3 : 0,
         tags: true,
         createTag: ({ term }) => {
@@ -2399,9 +2400,14 @@
      * @returns {void}
      */
     function restoreEmptyField(field) {
-      if (field.value !== "" || field.type === "checkbox" || field.validity.badInput) return;
+      if (field.type === "checkbox" || field.validity.badInput) return;
       const rule = parameterRules[field.name];
       if (["entries", "mapping"].includes(rule.type)) return;
+      if (["text", "textarea"].includes(rule.type) && !rule.styleProperty && !rule.validate) {
+        if (!field.value.trim()) field.value = "";
+        return;
+      }
+      if (field.value !== "" && !(rule.type === "number" && Number(field.value) === 0 && (rule.zeroIsDefault || !byStream.validParameter(parameterRules, field.name, field.value)))) return;
       const value = rule.default;
       const text = typeof value === "object" ? JSON.stringify(value) : String(value);
       if (text === "") return;
@@ -2419,6 +2425,7 @@
       if (field.disabled) {
         // A hidden dependent field must not keep an earlier error active or block URL generation.
         field.setCustomValidity("");
+        $(field).removeClass("is-invalid").attr("aria-invalid", "false");
         return true;
       }
       const jqField = $(field);
@@ -2426,6 +2433,7 @@
       field.setCustomValidity(valid ? "" : "Enter a valid value for this setting.");
       // Hidden controls are excluded from native validation, including the account JSON.
       const accepted = field.checkValidity() && valid;
+      jqField.toggleClass("is-invalid", !accepted).attr("aria-invalid", String(!accepted));
       if (!accepted) {
         jqField.parents(".accordion-collapse, .subsection-collapse").each((_, group) => setExpanded(group, true));
       }

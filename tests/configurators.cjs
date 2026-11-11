@@ -54,7 +54,6 @@ test("configurator forms and previews initialize for every resource", async (t) 
       });
     }
 
-    // --- EDIT, PREVIEW, COPY, AND RESET ---
     await t.test("edits update the URL and preview; copy and reset use the opening settings", async () => {
       const page = await browser.newPage();
       try {
@@ -80,7 +79,7 @@ test("configurator forms and previews initialize for every resource", async (t) 
         await page.locator("#copy-url").click();
         assert.equal(await page.evaluate(() => window.copiedURL), await page.locator("#overlay-url").inputValue());
         await page.locator('button[type="reset"][form="overlay-form"]').click();
-        await page.waitForFunction(() => document.querySelector('#overlay-form [name="text"]').value === "Opening");
+        await page.waitForFunction(() => document.querySelector('#overlay-form [name="text"]').value === "Opening" && new URL(document.getElementById("overlay-url").value).searchParams.get("text") === "Opening");
         assert.equal(new URL(await page.locator("#overlay-url").inputValue()).searchParams.get("text"), "Opening");
       } finally {
         await page.close();

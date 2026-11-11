@@ -39,6 +39,7 @@
  * @property {string} [styleProperty] CSS property written by the override.
  * @property {string} [styleUnit] Unit appended to scalar settings, such as px, deg, or %.
  * @property {ResourceValue} [styleDefault] Neutral generated value that leaves authored CSS unchanged.
+ * @property {boolean} [zeroIsDefault] Normalize numeric zero to the declared default instead of a literal zero.
  * @property {function(ResourceSettings): string} [styleValue] Compound CSS writer; empty output keeps authored CSS.
  * @property {string} [styleParent] Container that needs flex layout when an order/layout override is applied.
  */
@@ -55,7 +56,7 @@
  * @property {string} description Resource purpose shown above its settings.
  * @property {Array<number>} preview Preview width and height in pixels.
  * @property {ResourceFields} fields Parameter definitions in display order.
- * @property {Array<string>} urlRequired Parameters retained even at defaults to enable overlay mode and preserve anchors/content.
+ * @property {Array<string>} urlRequired Active parameters retained even at defaults to enable overlay mode and preserve anchors/content.
  * @property {Object<string, ResourceValue>} [constants] Renderer-only defaults excluded from URL fields.
  * @property {Object<string, string>} [sectionIcons] Explicit icons for top-level sections.
  * @property {boolean|Object} [presets] Whether the editor exposes shared or resource-specific appearance presets.
@@ -221,6 +222,7 @@
    * section/subsection and declaration order define form placement; when defines field availability.
    * styleSelector/styleProperty target a native CSS override, with styleUnit appended to scalar values.
    * styleDefault marks a neutral generated value; resource-specific defaults can override it.
+   * Numeric max-width/max-height overrides use 0 to remove their authored CSS cap.
    * styleValue(settings) builds compound CSS from several validated fields instead of appending a unit.
    * styleParent enables a flex container when a layout override is present.
    * Helpers below return ordinary field declarations; resource JS remains the owner of their defaults.
@@ -242,12 +244,14 @@
     if (rule.validate) return rule.validate(value) !== null;
     if (rule.options && !Object.hasOwn(rule.options, value)) return false;
     if (rule.maxlength && value.length > Number(rule.maxlength)) return false;
-    if (rule.optional && value === "") return true;
+    if (value === "" && (rule.optional || (["text", "textarea"].includes(rule.type) && !rule.styleProperty && !rule.validate))) return true;
     if (rule.type === "color" && !CSS.supports("color", `#${value.replace(/^#/, "")}`)) return false;
     if (rule.styleProperty && rule.type === "text" && !CSS.supports(rule.styleProperty, value)) return false;
     if (rule.type === "number") {
       const number = Number(value);
-      if (!value.trim() || !Number.isFinite(number) || number < Number(rule.min) || number > Number(rule.max)) return false;
+      if (!value.trim() || !Number.isFinite(number)) return false;
+      if (number === 0 && rule.zeroIsDefault) return true;
+      if (number < Number(rule.min) || number > Number(rule.max)) return false;
       if (rule.step && rule.step !== "any") {
         const steps = (number - Number(rule.min)) / Number(rule.step);
         // Decimal increments can produce tiny rounding errors even at valid step boundaries.
@@ -277,7 +281,7 @@
 
   /**
    * Apply valid declared values to the supplied settings object in place.
-   * Callers seed defaults first; empty values restore declared defaults, while missing/invalid values leave that state intact.
+   * Callers seed defaults first; blank display text becomes empty, while other empty values restore defaults. Missing/invalid values leave seeded state intact.
    * Numbers and custom data are parsed here, and accepted colors regain their leading #.
    * Inactive switches use their Off value; other inactive settings fall back to declared defaults.
    * @param {ResourceFields} fields Declared resource fields and their validation metadata.
@@ -289,7 +293,7 @@
     for (const [name, value] of values) {
       if (!Object.hasOwn(fields, name)) continue;
       const rule = fields[name];
-      if (value === "") {
+      if ((value === "" && !(["text", "textarea"].includes(rule.type) && !rule.styleProperty && !rule.validate)) || (rule.zeroIsDefault && Number(value) === 0)) {
         // Structured defaults must not become mutable aliases of the field declaration.
         settings[name] = structuredClone(rule.default);
         continue;
@@ -300,6 +304,7 @@
       else {
         if (!validParameter(fields, name, value)) continue;
         parsed = rule.type === "number" ? Number(value) : value;
+        if (["text", "textarea"].includes(rule.type) && !rule.styleProperty && !value.trim()) parsed = "";
       }
       if (parsed === null) continue;
       if (rule.type === "color" && !(rule.optional && parsed === "")) parsed = `#${String(parsed).replace(/^#/, "")}`;
@@ -352,7 +357,7 @@
           styleSelector: selector,
           styleProperty: "font-size",
           styleUnit: "px",
-          styleDefault: 0
+          styleValue: (settings) => (settings[`${name}FontSize`] === 0 ? "" : `${settings[`${name}FontSize`]}px`)
         };
       if (properties.includes("color"))
         fields[`${name}Color`] = {
@@ -957,9 +962,9 @@
     const values = Object.entries(settings)
       .filter(([name, value]) => {
         if (!Object.hasOwn(parameterRules, name)) return false;
-        // Required parameters keep default configurations in overlay mode even when nothing was edited.
-        if (resource.urlRequired.includes(name)) return true;
         if (!fieldEnabled(parameterRules, settings, name)) return false;
+        // Active required parameters preserve content and optional time anchors, even at defaults.
+        if (resource.urlRequired.includes(name)) return true;
         const rule = parameterRules[name];
         if (rule.type === "font" && value === "") return false;
         if (rule.type === "color") {
@@ -994,6 +999,10 @@
    */
   function initializeDefaults(fields) {
     for (const [name, field] of Object.entries(fields)) {
+      if (["text", "textarea"].includes(field.type) && !field.styleProperty && !field.validate && typeof field.default === "string" && !field.default.trim()) {
+        field.default = "";
+        continue;
+      }
       // Explicit zero, false, and structured values belong to the resource and must survive unchanged.
       if (field.default !== "" && field.default !== undefined && field.default !== null) continue;
       if (field.type === "number") {
@@ -1026,7 +1035,42 @@
    * @returns {Promise<ResourceSettings>} Validated settings, also published through window.byStreamResource.
    */
   function initResource(resource, integrations = {}) {
+    resource.fields.animate = {
+      type: "switch",
+      default: "yes",
+      label: "Animate",
+      section: "Animation",
+      description: "Enable resource animations, regardless of the system reduced-motion preference.",
+      checkedValue: "yes",
+      uncheckedValue: "no",
+      options: { yes: "On", no: "Off" }
+    };
+    if (resource.fields.width) {
+      resource.fields.width.description = "0 fits content, or fills the available space when Fill width is enabled.";
+      const widthMode = {
+        type: "switch",
+        default: resource.fields.width.contentSized === false ? "fill" : "content",
+        label: "Fill width",
+        section: resource.fields.width.section,
+        when: ["width", "0"],
+        checkedValue: "fill",
+        uncheckedValue: "content",
+        options: { fill: "Fill available space", content: "Fit content" },
+        styleSelector: "#overlay .panel",
+        styleProperty: "width",
+        styleValue: (settings) => (settings.width === 0 ? (settings.widthMode === "fill" ? "100%" : "fit-content") : "")
+      };
+      const fields = Object.entries(resource.fields);
+      fields.splice(fields.findIndex(([name]) => name === "width") + 1, 0, ["widthMode", widthMode]);
+      resource.fields = Object.fromEntries(fields);
+    }
     initializeDefaults(resource.fields);
+    for (const field of Object.values(resource.fields)) {
+      if (field.type === "number" && ["font-size", "line-height"].includes(field.styleProperty) && field.default > 0) field.zeroIsDefault = true;
+      if (!field.zeroIsDefault) continue;
+      field.label = field.label.replace(" size override", " size");
+      field.description = `0 or clearing restores the default (${field.default}${field.styleUnit || ""}).`;
+    }
     const overlay = location.search.length > 1 && !location.hash;
     // Only an attached editor supplies saved preferences; standalone overlays use their URL alone.
     const search = overlay ? location.search : (byStream.prepareResource?.(resource) ?? location.search);
@@ -1040,12 +1084,19 @@
       });
       if (overlay) {
         document.documentElement.setAttribute("data-overlay", "");
+        document.documentElement.dataset.animate = settings.animate;
         document.body.append(document.getElementById("overlay-markup").content.cloneNode(true));
         // Metadata-driven CSS is emitted once; selectors also cover rows a renderer creates later.
+        const emptyTextStyle = document.createElement("style");
+        emptyTextStyle.textContent = "#overlay :is(h1,h2,h3,p,.primary,.secondary,.eyebrow,.schedule-state,.badge-icon):empty { display: none !important; } #overlay .panel:empty { display: none !important; }";
+        emptyTextStyle.textContent += 'html[data-animate="no"] *, html[data-animate="no"] *::before, html[data-animate="no"] *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }';
+        document.body.append(emptyTextStyle);
         const overrides = [];
         for (const [name, field] of Object.entries(resource.fields)) {
-          if (!field.styleSelector || !fieldEnabled(resource.fields, settings, name) || (!field.styleValue && settings[name] === field.styleDefault)) continue;
-          const value = field.styleValue ? field.styleValue(settings) : field.type === "font" ? byFont.family(settings[name], '"Courier New", Courier, monospace') : `${settings[name]}${field.styleUnit || ""}`;
+          // A zero maximum removes authored CSS caps; other neutral values preserve their base styles.
+          const unlimited = (field.styleProperty === "max-width" || field.styleProperty === "max-height") && settings[name] === 0;
+          if (!field.styleSelector || !fieldEnabled(resource.fields, settings, name) || (!unlimited && !field.styleValue && settings[name] === field.styleDefault && field.default === field.styleDefault)) continue;
+          const value = unlimited ? "none" : field.styleValue ? field.styleValue(settings) : field.type === "font" ? byFont.family(settings[name], '"Courier New", Courier, monospace') : `${settings[name]}${field.styleUnit || ""}`;
           if (value !== "") overrides.push([field, value]);
         }
         if (overrides.length) {

@@ -346,3 +346,13 @@ body {
   font-size: 0.75rem;
   opacity: 0.75;
 }
+.bywr-configurator :is(input, textarea, select).is-invalid {
+  border: 2px solid #ff6b6b !important;
+  background-color: #ff000014 !important;
+  box-shadow: 0 0 0 0.15rem #ff6b6b40;
+}
+.bywr-configurator .input-group:has(.is-invalid) > .input-group-text,
+.bywr-configurator .input-group:has(.is-invalid) .select2-selection {
+  border-color: #ff6b6b !important;
+  color: #ff6b6b;
+}
