@@ -8,9 +8,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   const resource = {
     version: "1.0",
     title: "Timer / Countdown",
-    description: "A reload-safe countdown or elapsed timer for your next run.",
+    description: "A countdown or elapsed timer, with an optional fixed start for reloads.",
     preview: [960, 540],
-    urlRequired: ["startTime", "endTime"],
+    urlRequired: ["mode", "startTime", "endTime"],
     presets: true,
     fields: {
       mode: {
@@ -18,12 +18,12 @@ document.addEventListener("DOMContentLoaded", async () => {
         default: "duration",
         label: "Timer mode",
         section: "Content & behavior",
-        description: "Duration counts down from Start + duration. Restart begins again each time OBS loads it. Elapsed counts up from Start.",
+        description: "Duration counts down and Elapsed counts up from page load, unless a fixed start is enabled. Restart always begins again on load.",
         options: { duration: "duration", deadline: "deadline", elapsed: "elapsed", restart: "restart" }
       },
       duration: {
         type: "number",
-        default: 300,
+        default: 5,
         label: "Duration (seconds)",
         section: "Content & behavior",
         when: ["mode", "duration", "restart", "elapsed"],
@@ -31,19 +31,30 @@ document.addEventListener("DOMContentLoaded", async () => {
         max: 31536000,
         step: "any"
       },
-      startTime: {
-        type: "datetime",
-        default: new Date().toISOString(),
-        label: "Start timestamp",
+      useStartTime: {
+        type: "switch",
+        default: "no",
+        label: "Use fixed start time",
         section: "Content & behavior",
         when: ["mode", "duration", "deadline", "elapsed"],
+        description: "Off starts when the page loads. On uses the timestamp and preserves progress across reloads.",
+        checkedValue: "yes",
+        uncheckedValue: "no",
+        options: { yes: "On", no: "Off" }
+      },
+      startTime: {
+        type: "datetime",
+        default: "2026-11-10T17:05:04.357Z",
+        label: "Start timestamp",
+        section: "Content & behavior",
+        when: ["useStartTime", "yes"],
         description: "ISO time with zone, e.g. 2026-10-10T18:00:00-05:00.",
         validate: byStream.parseTimestamp,
         maxlength: 160
       },
       endTime: {
         type: "datetime",
-        default: new Date(Date.now() + 300000).toISOString(),
+        default: "2026-11-10T17:10:04.357Z",
         label: "Deadline timestamp",
         section: "Content & behavior",
         when: ["mode", "deadline"],
@@ -75,18 +86,18 @@ document.addEventListener("DOMContentLoaded", async () => {
         options: { yes: "yes", no: "no" }
       },
       elapsedLabel: { type: "text", default: "ELAPSED", label: "Elapsed message", section: "Content & behavior", when: ["mode", "elapsed"], subsection: "Status labels", maxlength: 160 },
-      remainingLabel: { type: "text", default: "REMAINING", label: "Remaining message", section: "Content & behavior", when: ["mode", "duration", "deadline"], subsection: "Status labels", maxlength: 160 },
+      remainingLabel: { type: "text", default: "Up next", label: "Remaining message", section: "Content & behavior", when: ["mode", "duration", "deadline"], subsection: "Status labels", maxlength: 160 },
       restartLabel: { type: "text", default: "RESTARTS ON LOAD", label: "Restart message", section: "Content & behavior", when: ["mode", "restart"], subsection: "Status labels", maxlength: 160 },
       format: {
         type: "select",
-        default: "clock",
+        default: "stopwatch",
         label: "Duration format",
         section: "Date & time",
         options: byStream.durationFormats
       },
       days: {
         type: "switch",
-        default: "yes",
+        default: "no",
         label: "Show days",
         section: "Date & time",
         checkedValue: "yes",
@@ -95,7 +106,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       milliseconds: {
         type: "switch",
-        default: "no",
+        default: "yes",
         label: "Show milliseconds",
         section: "Date & time",
         description: "Refreshes at 20 Hz when enabled.",
@@ -114,7 +125,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       fontSize: {
         type: "number",
-        default: 88,
+        default: 48,
         label: "Base text size (px)",
         section: "Appearance",
         min: 10,
@@ -123,28 +134,28 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       fontWeight: {
         type: "select",
-        default: "400",
+        default: "600",
         label: "Font weight",
         section: "Appearance",
         options: { 300: "300", 400: "400", 500: "500", 600: "600", 700: "700", 800: "800", 900: "900" }
       },
       textColor: {
         type: "color",
-        default: "#FFFFFF",
+        default: "#EEEEEE",
         label: "Base text color",
         section: "Appearance",
         maxlength: 80
       },
       accentColor: {
         type: "color",
-        default: "#D9D9D9",
+        default: "#660000",
         label: "Accent color",
         section: "Appearance",
         maxlength: 80
       },
       backgroundColor: {
         type: "color",
-        default: "#202020E6",
+        default: "#11111133",
         label: "Panel background",
         section: "Appearance",
         maxlength: 80
@@ -169,10 +180,11 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       width: {
         type: "number",
-        default: 800,
+        default: 480,
         label: "Maximum width (px)",
+        description: "0 = Auto (no fixed maximum).",
         section: "Size & placement",
-        min: 100,
+        min: 0,
         max: 3840,
         step: "any"
       },
@@ -187,28 +199,28 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       position: {
         type: "select",
-        default: "center",
+        default: "bottom",
         label: "Vertical placement",
         section: "Size & placement",
         options: { top: "top", center: "center", bottom: "bottom" }
       },
       align: {
         type: "select",
-        default: "center",
+        default: "left",
         label: "Text alignment",
         section: "Size & placement",
         options: { left: "left", center: "center", right: "right" }
       },
       padding: {
         type: "number",
-        default: 28,
+        default: 16,
         label: "Padding (px)",
         section: "Size & placement",
         min: 0,
         max: 100,
         step: "any"
       },
-      edgePadding: { type: "number", default: "", optional: true, label: "Viewport edge padding (px)", section: "Size & placement", min: 0, max: 1000, step: "any", styleSelector: "#overlay", styleProperty: "padding", styleUnit: "px" },
+      edgePadding: { type: "number", default: 16, optional: true, label: "Viewport edge padding (px)", section: "Size & placement", min: 0, max: 1000, step: "any", styleSelector: "#overlay", styleProperty: "padding", styleUnit: "px" },
       ...byStream.placementFields("#overlay .panel"),
       ...byStream.layoutFields(
         "#overlay .panel",
@@ -218,7 +230,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       ),
       progressColor: {
         type: "color",
-        default: "",
+        default: "#660000",
         optional: true,
         label: "Progress color",
         section: "Details",
@@ -230,7 +242,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       trackColor: {
         type: "color",
-        default: "",
+        default: "#eee6",
         optional: true,
         label: "Progress track color",
         section: "Details",
@@ -242,7 +254,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       barHeight: {
         type: "number",
-        default: "",
+        default: 8,
         optional: true,
         label: "Progress bar height (px)",
         section: "Details",
@@ -257,7 +269,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       barRadius: {
         type: "number",
-        default: "",
+        default: 8,
         optional: true,
         label: "Progress bar corner radius (px)",
         section: "Details",
@@ -272,7 +284,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       barGap: {
         type: "number",
-        default: "",
+        default: 16,
         optional: true,
         label: "Space above progress (px)",
         section: "Details",
@@ -287,14 +299,14 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       animation: {
         type: "select",
-        default: "none",
+        default: "pulse",
         label: "Completion animation",
         section: "Animation",
         options: { none: "none", pulse: "pulse" }
       },
       completionDuration: {
         type: "number",
-        default: "",
+        default: 1,
         optional: true,
         label: "Completion pulse duration (s)",
         section: "Animation",
@@ -308,7 +320,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       completionPulses: {
         type: "number",
-        default: "",
+        default: 3,
         optional: true,
         label: "Completion pulse count",
         section: "Animation",
@@ -330,6 +342,30 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   };
 
+  const fieldDefaults = {
+    panelBorderWidth: 1,
+    panelBorderStyle: "solid",
+    panelBorderColor: "#EEEEEE1A",
+    panelShadow: "yes",
+    panelShadowColor: "#00000033",
+    panelShadowBlur: 16,
+    panelShadowY: 4,
+    backdropFilterMode: "none",
+    backdropFilterBlur: 12,
+    headingFontSize: 24,
+    headingTracking: 1.8,
+    messageFontSize: 24,
+    headingLineHeight: 27,
+    digitsFontSize: 48,
+    digitsLineHeight: 48,
+    messageLineHeight: 27
+  };
+  for (const [name, value] of Object.entries(fieldDefaults)) {
+    const field = resource.fields[name];
+    field.default = value;
+    delete field.styleDefault;
+  }
+
   const settings = await byStream.initResource(resource);
   if (!byStreamOverlay) return;
   const root = document.getElementById("overlay");
@@ -348,7 +384,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     "font-size": `${settings.fontSize}px`
   }))
     root.style.setProperty(`--${name}`, value);
-  panel.style.maxWidth = `${settings.width}px`;
+  panel.style.maxWidth = settings.width === 0 ? "none" : `${settings.width}px`;
   /**
    * Create an element, assign its classes and text, and append it to the resource-owned parent.
    * @param {string} tag HTML tag to create.
@@ -371,11 +407,15 @@ document.addEventListener("DOMContentLoaded", async () => {
   const bar = element("progress", "");
   bar.max = 1;
   bar.hidden = settings.progress === "no";
-  const start = settings.mode === "restart" ? Date.now() : Date.parse(settings.startTime);
+  const start = settings.useStartTime === "yes" ? Date.parse(settings.startTime) : Date.now();
   const end = settings.mode === "deadline" ? Date.parse(settings.endTime) : start + settings.duration * 1000;
   const zone = settings.timeZone ? { timeZone: settings.timeZone } : {};
   const startDate = byStream.dateTimeFormatter(settings.dateFormat, settings.locale, { ...zone, year: "numeric", month: "numeric", day: "numeric" });
   const startTime = byStream.dateTimeFormatter(settings.timeFormat, settings.locale, { ...zone, hour: "numeric", minute: "2-digit", second: "2-digit" });
+  // Paint continuous wall-clock progress without rebuilding the timer text on every frame.
+  function paintProgress(now = Date.now()) {
+    bar.value = settings.mode === "elapsed" ? Math.min(1, Math.max(0, now - start) / (settings.duration * 1000)) : Math.min(1, Math.max(0, (now - start) / Math.max(1, end - start)));
+  }
   /**
    * Render elapsed or remaining time, rounding countdown seconds upward until completion.
    * @returns {boolean} False stops scheduled ticks; visibility or page restoration can refresh again.
@@ -397,10 +437,10 @@ document.addEventListener("DOMContentLoaded", async () => {
           : settings.mode === "restart"
             ? settings.restartLabel
             : settings.remainingLabel;
-    bar.value = elapsed ? Math.min(1, raw / (settings.duration * 1000)) : Math.min(1, Math.max(0, (now - start) / Math.max(1, end - start)));
+    paintProgress(now);
     display.classList.toggle("complete", complete && settings.animation === "pulse");
     root.dataset.complete = String(complete);
     return !complete;
   }
-  byStream.watch(update, settings.milliseconds === "yes" ? 50 : 1000);
+  byStream.watch(update, settings.milliseconds === "yes" ? 50 : 1000, settings.animate === "yes" && settings.progress === "yes" ? paintProgress : undefined);
 });

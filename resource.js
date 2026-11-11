@@ -1236,19 +1236,31 @@
    * Visibility/pageshow events refresh immediately. Returning false stops scheduling until a later resume.
    * @param {function(): (boolean|void)} update Refresh callback; false pauses scheduling until a later visibility/pageshow event.
    * @param {number} [interval=1000] Update interval in milliseconds.
+   * @param {function(): void} [interpolate] Optional lightweight visual update between clock ticks.
    * @returns {void} Registers one visibility-aware loop; it does not expose a cancellation handle.
    */
-  function watch(update, interval = 1000) {
-    let pending;
+  function watch(update, interval = 1000, interpolate) {
+    let pending, frame;
+    function stop() {
+      clearTimeout(pending);
+      cancelAnimationFrame(frame);
+    }
+    function paint() {
+      interpolate();
+      frame = requestAnimationFrame(paint);
+    }
     function resume() {
       // Visibility and page events replace the pending tick rather than starting another loop.
-      clearTimeout(pending);
+      stop();
       const keepUpdating = update() !== false;
       // Align the next tick to the clock boundary instead of adding a full interval after rendering.
-      if (keepUpdating && !document.hidden) pending = setTimeout(resume, interval - (Date.now() % interval));
+      if (keepUpdating && !document.hidden) {
+        pending = setTimeout(resume, interval - (Date.now() % interval));
+        if (interpolate) frame = requestAnimationFrame(paint);
+      }
     }
     document.addEventListener("visibilitychange", resume);
-    global.addEventListener("pagehide", () => clearTimeout(pending));
+    global.addEventListener("pagehide", stop);
     global.addEventListener("pageshow", resume);
     resume();
   }

@@ -79,6 +79,50 @@ test("resources render and round-trip URLs without configurator assets", async (
     });
 
     // --- CONTINUING ANIMATION AND VIEWPORT CHANGES ---
+    await t.test("timer and timeline interpolate progress between ticks and suspend while hidden", async () => {
+      for (const [name, style] of [
+        ["timer", ""],
+        ["timeline", "bar"],
+        ["timeline", "ring"]
+      ]) {
+        const page = await browser.newPage();
+        try {
+          await page.clock.install({ time: new Date("2026-11-10T00:00:00Z") });
+          await page.clock.pauseAt(new Date("2026-11-10T00:00:00Z"));
+          await serve(page, assets, true);
+          const params = new URLSearchParams({ duration: "10", milliseconds: "no", progress: "yes", animate: "yes", ...(style ? { style } : {}) });
+          await page.goto(`https://stream.test/${name}/?${params}`);
+          await page.waitForFunction(() => window.byStreamResource && document.querySelector("progress"));
+          await page.clock.runFor(500);
+          const value = await page.locator("progress").evaluate((node) => node.value);
+          assert.ok(value > 0.04 && value < 0.06, `${name}/${style} advances before the next one-second tick`);
+          if (style === "ring") assert.ok(Math.abs((await page.locator(".ring-value").evaluate((node) => parseFloat(node.style.strokeDashoffset))) - 2 * Math.PI * 52 * (1 - value)) < 0.01);
+          await page.evaluate(() => {
+            window.testHidden = true;
+            Object.defineProperty(document, "hidden", { configurable: true, get: () => testHidden });
+            document.dispatchEvent(new Event("visibilitychange"));
+          });
+          const paused = await page.locator("progress").evaluate((node) => node.value);
+          await page.clock.runFor(500);
+          assert.equal(await page.locator("progress").evaluate((node) => node.value), paused);
+          await page.evaluate(() => {
+            testHidden = false;
+            document.dispatchEvent(new Event("visibilitychange"));
+          });
+          assert.equal(await page.locator("progress").evaluate((node) => node.value), 0.1);
+          params.set("animate", "no");
+          await page.goto(`https://stream.test/${name}/?${params}`);
+          await page.waitForFunction(() => window.byStreamResource && document.querySelector("progress"));
+          await page.clock.runFor(500);
+          assert.equal(await page.locator("progress").evaluate((node) => node.value), 0, "Animate Off retains instantaneous clock ticks");
+          await page.clock.fastForward(11000);
+          assert.equal(await page.locator("progress").evaluate((node) => node.value), 1, "Progress reaches the exact final value");
+        } finally {
+          await page.close();
+        }
+      }
+    });
+
     await t.test("watermark fading continues across visible and hidden intervals", async () => {
       const page = await browser.newPage();
       try {

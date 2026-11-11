@@ -13,15 +13,15 @@ body {
   display: none !important;
 }
 #overlay {
-  --font-size: 48px;
+  --font-size: 32px;
   --base-size: min(var(--font-size), 12vw);
-  --heading-size: max(14px, var(--base-size) * 0.3);
-  --secondary-size: calc(var(--base-size) * 0.42);
-  --text: #fff;
-  --accent: #d9d9d9;
-  --background: #202020e6;
-  --radius: 8px;
-  --padding: 28px;
+  --heading-size: max(12px, var(--base-size) * 0.67);
+  --secondary-size: calc(var(--base-size) * 0.75);
+  --text: #eee;
+  --accent: #600;
+  --background: #11111166;
+  --radius: 6px;
+  --padding: 12px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -35,6 +35,11 @@ body {
   text-align: center;
 }
 .panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: 24px;
+  row-gap: 6px;
   width: 100%;
   max-width: 800px;
   min-width: 0;
@@ -54,12 +59,12 @@ p {
   font-weight: 600;
   color: var(--accent);
   font-size: var(--heading-size);
-  letter-spacing: calc(var(--heading-size) * 0.05);
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  margin-bottom: var(--heading-size);
+  margin-bottom: calc(var(--heading-size) * 0.8);
 }
 .secondary {
-  opacity: 0.65;
+  opacity: 0.72;
   font-size: var(--secondary-size);
   margin-top: calc(var(--secondary-size) * 0.65);
   white-space: pre-wrap;
@@ -130,4 +135,31 @@ img {
 }
 .step.reached {
   background: var(--progress-color, var(--accent));
+}
+
+/* Keep the status and supporting text beside the value, with the track beneath both. */
+.panel > .eyebrow {
+  grid-column: 1;
+  margin: 0;
+}
+.panel > .primary {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  text-align: right;
+  line-height: 1;
+}
+.panel > .secondary {
+  grid-column: 1;
+  margin-top: 0;
+}
+.panel > :is(progress, .timeline-ring, .timeline-steps) {
+  grid-column: 1 / -1;
+}
+@media (max-width: 28rem) {
+  .panel {
+    column-gap: 16px;
+  }
+  .panel > .primary {
+    font-size: min(var(--base-size), 12vw);
+  }
 }
