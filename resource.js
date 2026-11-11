@@ -948,6 +948,83 @@
   // ==========
 
   /**
+   * Create one transition owner for a changing resource surface.
+   * The old content leaves, the container resizes, then the new content enters without being clipped.
+   * A newer request cancels pending animation/rendering, so rapid draws cannot restore stale content.
+   * @param {HTMLElement} target Content surface to animate.
+   * @param {ResourceSettings} settings Animation mode, timing, slide distance, and Animate switch.
+   * @param {HTMLElement} [container=target] Surface whose content-sized dimensions should interpolate.
+   * @returns {function(function(): void|null, boolean=): Promise<void>} Replace content or change visibility.
+   */
+  function contentTransition(target, settings, container = target) {
+    let revision = 0;
+    let visible = !target.hidden;
+    let animations = [];
+    let restoreSize;
+    return async (render, show = true) => {
+      if (!render && show === visible) return;
+      visible = show;
+      const current = ++revision;
+      const before = { width: container.offsetWidth, height: container.offsetHeight };
+      animations.forEach((animation) => animation.cancel());
+      restoreSize?.();
+      restoreSize = null;
+      animations = [];
+      const duration = settings.animate === "no" || settings.transition === "none" ? 0 : settings.transitionDuration / 2;
+      const timing = { duration, easing: settings.transitionEasing };
+      const distance = settings.slideDistance || 0;
+      const axis = settings.transitionAxis === "Y" ? "Y" : "X";
+      const rest = { opacity: 1, transform: `translate${axis}(0)` };
+      const away = { opacity: 0, transform: `translate${axis}(${distance}px)` };
+      const enter = settings.transition === "slide" ? [{ ...away, transform: `translate${axis}(${-distance}px)` }, rest] : [{ opacity: 0 }, { opacity: 1 }];
+      const leave = settings.transition === "slide" ? [rest, away] : [{ opacity: 1 }, { opacity: 0 }];
+      if (duration && !target.hidden && target.hasChildNodes()) {
+        animations = [target.animate(leave, { ...timing, fill: "forwards" })];
+        await Promise.allSettled(animations.map((animation) => animation.finished));
+        if (current !== revision) return;
+      }
+      target.hidden = !show;
+      if (!show) {
+        animations.forEach((animation) => animation.cancel());
+        animations = [];
+        return;
+      }
+      // Keep incoming text invisible until its container has room for it.
+      const hold = duration ? target.animate([{ opacity: 0 }], { duration: 0, fill: "forwards" }) : null;
+      animations.forEach((animation) => animation.cancel());
+      animations = hold ? [hold] : [];
+      if (render) render();
+      if (!duration) return;
+      // Logo/card images must reach their real dimensions before measuring the incoming layout.
+      await Promise.allSettled([...target.querySelectorAll("img")].filter((image) => !image.complete).map((image) => image.decode()));
+      if (current !== revision) return;
+      const after = { width: container.offsetWidth, height: container.offsetHeight };
+      if (before.width && before.height && (before.width !== after.width || before.height !== after.height)) {
+        const original = ["width", "height", "transition", "overflow"].map((name) => [name, container.style.getPropertyValue(name), container.style.getPropertyPriority(name)]);
+        restoreSize = () => original.forEach(([name, value, priority]) => container.style.setProperty(name, value, priority));
+        // CSS transitions can interpolate dimensions even when configured sizing uses !important.
+        container.style.setProperty("transition", "none", "important");
+        container.style.setProperty("overflow", "clip", "important");
+        container.style.setProperty("width", `${before.width}px`, "important");
+        container.style.setProperty("height", `${before.height}px`, "important");
+        void container.offsetHeight;
+        container.style.setProperty("transition", `width ${duration}ms ${settings.transitionEasing}, height ${duration}ms ${settings.transitionEasing}`, "important");
+        container.style.setProperty("width", `${after.width}px`, "important");
+        container.style.setProperty("height", `${after.height}px`, "important");
+        animations.push(...container.getAnimations().filter((animation) => ["width", "height"].includes(animation.transitionProperty)));
+      }
+      await Promise.allSettled(animations.map((animation) => animation.finished));
+      if (current !== revision) return;
+      restoreSize?.();
+      restoreSize = null;
+      animations.forEach((animation) => animation.cancel());
+      animations = [target.animate(enter, timing)];
+      await Promise.allSettled(animations.map((animation) => animation.finished));
+      if (current === revision) animations = [];
+    };
+  }
+
+  /**
    * Build the readable overlay URL shared by editor actions and native resource interactions.
    * Only declared fields are emitted. urlRequired keeps overlay mode/timestamp anchors even at defaults.
    * Inactive optional fields and defaults are omitted; CSS normalizes equivalent colors, and JSON comparison preserves data order.
@@ -1288,6 +1365,7 @@
     fadeFields,
     layoutFields,
     transitionFields,
+    contentTransition,
     dateTimeFields,
     dateTimeFormatter,
     durationFormats,

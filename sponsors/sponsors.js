@@ -16,8 +16,16 @@ document.addEventListener("DOMContentLoaded", async () => {
       entries: {
         type: "entries",
         default: [
-          { name: "YOUR PARTNER", text: "Good people. Good projects.", imageUrl: "" },
-          { name: "COMMUNITY SUPPORT", text: "Made possible by viewers like you.", imageUrl: "" }
+          {
+            name: "BONYUR",
+            text: "Good games. Better company.",
+            imageUrl: "https://byuwur.github.io/img/logo.png"
+          },
+          {
+            name: "YOUR PARTNER",
+            text: "A little space for your people.",
+            imageUrl: ""
+          }
         ],
         label: "Partner cards",
         section: "Content & behavior",
@@ -36,14 +44,14 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       heading: {
         type: "text",
-        default: "SUPPORTED BY",
+        default: "Brought to you by:",
         label: "Heading",
         section: "Content & behavior",
         maxlength: 160
       },
       duration: {
         type: "number",
-        default: 8,
+        default: 3,
         label: "Seconds per entry",
         section: "Content & behavior",
         min: 1,
@@ -52,7 +60,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       transition: {
         type: "select",
-        default: "fade",
+        default: "slide",
         label: "Transition",
         section: "Content & behavior",
         options: { fade: "fade", slide: "slide", none: "none" }
@@ -67,7 +75,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       fontSize: {
         type: "number",
-        default: 36,
+        default: 32,
         label: "Base text size (px)",
         section: "Appearance",
         min: 10,
@@ -76,28 +84,28 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       fontWeight: {
         type: "select",
-        default: "400",
+        default: "700",
         label: "Font weight",
         section: "Appearance",
         options: { 300: "300", 400: "400", 500: "500", 600: "600", 700: "700", 800: "800", 900: "900" }
       },
       textColor: {
         type: "color",
-        default: "#FFFFFF",
+        default: "#EEEEEE",
         label: "Base text color",
         section: "Appearance",
         maxlength: 80
       },
       accentColor: {
         type: "color",
-        default: "#D9D9D9",
+        default: "#660000",
         label: "Accent color",
         section: "Appearance",
         maxlength: 80
       },
       backgroundColor: {
         type: "color",
-        default: "#202020E6",
+        default: "#11111199",
         label: "Panel background",
         section: "Appearance",
         maxlength: 80
@@ -113,7 +121,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       radius: {
         type: "number",
-        default: 8,
+        default: 6,
         label: "Corner radius (px)",
         section: "Appearance",
         min: 0,
@@ -122,10 +130,11 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       width: {
         type: "number",
-        default: 580,
+        default: 600,
         label: "Maximum width (px)",
+        description: "0 = Auto (no fixed maximum).",
         section: "Size & placement",
-        min: 100,
+        min: 0,
         max: 3840,
         step: "any"
       },
@@ -154,18 +163,18 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       padding: {
         type: "number",
-        default: 28,
+        default: 12,
         label: "Padding (px)",
         section: "Size & placement",
         min: 0,
         max: 100,
         step: "any"
       },
-      edgePadding: { type: "number", default: "", optional: true, label: "Viewport edge padding (px)", section: "Size & placement", min: 0, max: 1000, step: "any", styleSelector: "#overlay", styleProperty: "padding", styleUnit: "px" },
+      edgePadding: { type: "number", default: 16, optional: true, label: "Viewport edge padding (px)", section: "Size & placement", min: 0, max: 1000, step: "any", styleSelector: "#overlay", styleProperty: "padding", styleUnit: "px" },
       ...byStream.placementFields("#overlay .panel"),
       imageGap: {
         type: "number",
-        default: "",
+        default: 0,
         optional: true,
         label: "Space below image (px)",
         section: "Composition",
@@ -179,19 +188,21 @@ document.addEventListener("DOMContentLoaded", async () => {
       ...byStream.layoutFields("#overlay .panel", { heading: ["Heading", "#overlay .eyebrow"], image: ["Image", "#overlay .sponsor-image"], name: ["Name", "#overlay .primary"], message: ["Message", "#overlay .secondary"] }),
       imageHeight: {
         type: "number",
-        default: 120,
+        default: 96,
         label: "Maximum logo height (px)",
+        description: "0 = Auto (no fixed maximum).",
         section: "Details",
         subsection: "Sponsor image",
-        min: 20,
+        min: 0,
         max: 400,
         step: "any"
       },
       imageWidth: {
         type: "number",
-        default: "",
+        default: 0,
         optional: true,
         label: "Image width (px)",
+        description: "0 = Auto (preserve the image proportions).",
         section: "Details",
         subsection: "Sponsor image",
         min: 0,
@@ -199,7 +210,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         step: "any",
         styleSelector: "#overlay .sponsor-image",
         styleProperty: "width",
-        styleUnit: "px"
+        styleValue: (settings) => (settings.imageWidth === 0 ? "auto" : `${settings.imageWidth}px`)
       },
       fit: {
         type: "select",
@@ -211,7 +222,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       imageOpacity: {
         type: "number",
-        default: "",
+        default: 100,
         optional: true,
         label: "Image opacity (%)",
         section: "Details",
@@ -236,6 +247,33 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   };
 
+  const fieldDefaults = {
+    panelBorderWidth: 1,
+    panelBorderStyle: "solid",
+    panelBorderColor: "#EEEEEE1A",
+    panelShadow: "yes",
+    panelShadowColor: "#00000066",
+    panelShadowBlur: 16,
+    panelShadowY: 4,
+    backdropFilterMode: "none",
+    backdropFilterBlur: 12,
+    headingFontSize: 16,
+    headingTracking: 1.8,
+    messageFontSize: 24,
+    transitionDuration: 500,
+    transitionEasing: "ease",
+    slideDistance: 32,
+    nameFontSize: 32,
+    headingLineHeight: 18,
+    nameLineHeight: 38.4,
+    messageLineHeight: 27
+  };
+  for (const [name, value] of Object.entries(fieldDefaults)) {
+    const field = resource.fields[name];
+    field.default = value;
+    delete field.styleDefault;
+  }
+
   /**
    * Accept only this resource's declared content shape and limits; invalid input returns null.
    * @param {string} value Serialized content in this resource's declared format.
@@ -252,6 +290,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       return null;
     }
   }
+
   const settings = await byStream.initResource(resource);
   if (!byStreamOverlay) return;
   const root = document.getElementById("overlay");
@@ -270,7 +309,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     "font-size": `${settings.fontSize}px`
   }))
     root.style.setProperty(`--${name}`, value);
-  panel.style.maxWidth = `${settings.width}px`;
+  panel.style.maxWidth = settings.width === 0 ? "none" : `${settings.width}px`;
   /**
    * Create an element, assign its classes and text, and append it to the resource-owned parent.
    * @param {string} tag HTML tag to create.
@@ -291,6 +330,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     panel.hidden = true;
     return;
   }
+  const changeContent = byStream.contentTransition(panel, settings);
   let previous = -1;
   /**
    * Display the next entry and apply the configured transition to the resource-owned elements.
@@ -301,18 +341,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   function change(index, render) {
     if (index === previous) return;
     previous = index;
-    panel.replaceChildren();
-    render(settings.entries[index]);
-    if (settings.transition !== "none")
-      panel.animate(
-        settings.transition === "slide"
-          ? [
-              { opacity: 0, transform: `translateX(${-settings.slideDistance}px)` },
-              { opacity: 1, transform: "translateX(0)" }
-            ]
-          : [{ opacity: 0 }, { opacity: 1 }],
-        { duration: settings.transitionDuration, easing: settings.transitionEasing }
-      );
+    changeContent(() => {
+      panel.replaceChildren();
+      render(settings.entries[index]);
+    });
   }
   /**
    * Select the wall-clock sponsor slot and render it only when the index changes.
@@ -325,7 +357,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         const image = element("img", "sponsor-image");
         image.src = e.imageUrl;
         image.alt = e.name;
-        image.style.height = `${settings.imageHeight}px`;
+        image.style.maxHeight = settings.imageHeight === 0 ? "none" : `${settings.imageHeight}px`;
         image.style.objectFit = settings.fit;
         image.addEventListener("error", () => image.remove());
       }

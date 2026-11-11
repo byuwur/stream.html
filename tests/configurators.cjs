@@ -54,6 +54,51 @@ test("configurator forms and previews initialize for every resource", async (t) 
       });
     }
 
+    await t.test("fixed start toggles reveal timestamps and remove inactive anchors from URLs", async () => {
+      for (const name of ["timer", "timeline", "reminder", "randomizer"]) {
+        const page = await browser.newPage();
+        try {
+          await serve(page, assets);
+          await page.goto(`https://stream.test/${name}/#configure`);
+          await page.waitForFunction(() => document.querySelector('#overlay-form [name="useStartTime"]') && document.getElementById("overlay-url")?.value);
+          const toggle = page.locator('#overlay-form [name="useStartTime"]');
+          const start = page.locator('#overlay-form [name="startTime"]');
+          assert.equal(await toggle.isChecked(), false, name);
+          assert.equal(await start.isDisabled(), true, name);
+          await page.waitForFunction(() => document.querySelector('[name="startTime"]').closest(".conditional-field").hidden);
+          assert.equal(new URL(await page.locator("#overlay-url").inputValue()).searchParams.has("startTime"), false);
+
+          // Set the native control directly because its resource subsection can be collapsed.
+          await toggle.evaluate((input) => {
+            input.checked = true;
+            input.dispatchEvent(new Event("change", { bubbles: true }));
+          });
+          await page.waitForFunction(() => new URL(document.getElementById("overlay-url").value).searchParams.get("useStartTime") === "yes");
+          assert.equal(await start.isDisabled(), false, name);
+          assert.equal(await start.evaluate((input) => input.closest(".conditional-field").hidden), false);
+          const fixed = new URL(await page.locator("#overlay-url").inputValue());
+          assert.equal(fixed.searchParams.get("startTime"), await start.inputValue());
+          assert.equal(JSON.parse(await page.locator("#settings-json").inputValue()).startTime, await start.inputValue(), name + " JSON retains the enabled time anchor");
+          if (name === "timeline") {
+            assert.ok(fixed.searchParams.has("endTime"));
+            assert.equal(await page.locator('[name="duration"]').isDisabled(), true);
+          }
+
+          await toggle.evaluate((input) => {
+            input.checked = false;
+            input.dispatchEvent(new Event("change", { bubbles: true }));
+          });
+          await page.waitForFunction(() => !new URL(document.getElementById("overlay-url").value).searchParams.has("startTime"));
+          await page.waitForFunction(() => document.querySelector('[name="startTime"]').closest(".conditional-field").hidden);
+          assert.equal(await start.isDisabled(), true, name);
+          assert.equal(new URL(await page.locator("#overlay-url").inputValue()).searchParams.has("endTime"), false);
+        } finally {
+          await page.close();
+        }
+      }
+    });
+
+    // --- EDIT, PREVIEW, COPY, AND RESET ---
     await t.test("edits update the URL and preview; copy and reset use the opening settings", async () => {
       const page = await browser.newPage();
       try {

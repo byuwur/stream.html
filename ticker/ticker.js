@@ -16,8 +16,16 @@ document.addEventListener("DOMContentLoaded", async () => {
       entries: {
         type: "entries",
         default: [
-          { text: "Welcome to the stream", prefix: "HELLO", icon: "✦" },
-          { text: "Stay hydrated. Take a stretch break.", prefix: "REMINDER", icon: "☕" }
+          {
+            text: "Make yourself at home.",
+            prefix: "BONYUR",
+            icon: "✦"
+          },
+          {
+            text: "Good games. Better company.",
+            prefix: "TONIGHT",
+            icon: "↗"
+          }
         ],
         label: "Messages",
         section: "Content & behavior",
@@ -36,14 +44,14 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       mode: {
         type: "select",
-        default: "scroll",
+        default: "vertical",
         label: "Motion",
         section: "Content & behavior",
         options: { scroll: "scroll", vertical: "vertical", fade: "fade", static: "static" }
       },
       duration: {
         type: "number",
-        default: 6,
+        default: 3,
         label: "Seconds per message",
         section: "Content & behavior",
         when: ["mode", "vertical", "fade"],
@@ -53,7 +61,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       speed: {
         type: "number",
-        default: 70,
+        default: 50,
         label: "Scroll speed (px / second)",
         section: "Content & behavior",
         when: ["mode", "scroll"],
@@ -105,21 +113,21 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       textColor: {
         type: "color",
-        default: "#FFFFFF",
+        default: "#EEEEEE",
         label: "Base text color",
         section: "Appearance",
         maxlength: 80
       },
       accentColor: {
         type: "color",
-        default: "#D9D9D9",
+        default: "#660000",
         label: "Accent color",
         section: "Appearance",
         maxlength: 80
       },
       backgroundColor: {
         type: "color",
-        default: "#202020E6",
+        default: "#11111166",
         label: "Panel background",
         section: "Appearance",
         maxlength: 80
@@ -144,16 +152,17 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       width: {
         type: "number",
-        default: 1200,
+        default: 0,
         label: "Maximum width (px)",
+        description: "0 = Auto (no fixed maximum).",
         section: "Size & placement",
-        min: 100,
+        min: 0,
         max: 3840,
         step: "any"
       },
       horizontalPlacement: {
         type: "select",
-        default: "center",
+        default: "flex-start",
         label: "Horizontal placement",
         section: "Size & placement",
         options: { "flex-start": "Left", center: "Center", "flex-end": "Right" },
@@ -162,32 +171,32 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       position: {
         type: "select",
-        default: "center",
+        default: "bottom",
         label: "Vertical placement",
         section: "Size & placement",
         options: { top: "top", center: "center", bottom: "bottom" }
       },
       align: {
         type: "select",
-        default: "center",
+        default: "left",
         label: "Text alignment",
         section: "Size & placement",
         options: { left: "left", center: "center", right: "right" }
       },
       padding: {
         type: "number",
-        default: 18,
+        default: 8,
         label: "Padding (px)",
         section: "Size & placement",
         min: 0,
         max: 100,
         step: "any"
       },
-      edgePadding: { type: "number", default: "", optional: true, label: "Viewport edge padding (px)", section: "Size & placement", min: 0, max: 1000, step: "any", styleSelector: "#overlay", styleProperty: "padding", styleUnit: "px" },
+      edgePadding: { type: "number", default: 16, optional: true, label: "Viewport edge padding (px)", section: "Size & placement", min: 0, max: 1000, step: "any", styleSelector: "#overlay", styleProperty: "padding", styleUnit: "px" },
       ...byStream.placementFields("#overlay .panel"),
       gap: {
         type: "number",
-        default: 64,
+        default: 48,
         label: "Message gap (px)",
         section: "Composition",
         when: ["mode", "scroll"],
@@ -197,7 +206,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       separatorPadding: {
         type: "number",
-        default: "",
+        default: 0,
         optional: true,
         label: "Space after separator (px)",
         section: "Composition",
@@ -211,10 +220,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       ...byStream.layoutFields("#overlay .ticker-message", { icon: ["Icon", "#overlay .ticker-icon"], prefix: ["Prefix", "#overlay .ticker-prefix"], text: ["Message", "#overlay .ticker-text"] }),
       ...byStream.whenFields(["mode", "scroll"], byStream.fadeFields("edgeFade", "Ticker edge fade", "#overlay .ticker-viewport", "horizontal")),
-      transitionDuration: { type: "number", default: 400, label: "Transition duration (ms)", section: "Animation", when: ["mode", "vertical", "fade"], min: 0, max: 10000, step: "any" },
+      transitionDuration: { type: "number", default: 500, label: "Transition duration (ms)", section: "Animation", when: ["mode", "vertical", "fade"], min: 0, max: 10000, step: "any" },
       transitionEasing: {
         type: "select",
-        default: "linear",
+        default: "ease",
         label: "Transition easing",
         section: "Animation",
         when: ["mode", "vertical", "fade"],
@@ -234,6 +243,31 @@ document.addEventListener("DOMContentLoaded", async () => {
       ...byStream.filterFields("backdropFilter", "Panel backdrop", "#overlay .panel", true)
     }
   };
+
+  const fieldDefaults = {
+    separatorFontSize: 18,
+    panelBorderWidth: 0,
+    panelBorderStyle: "solid",
+    panelBorderColor: "#EEEEEE66",
+    panelShadow: "yes",
+    panelShadowColor: "#00000033",
+    panelShadowBlur: 16,
+    panelShadowY: 4,
+    backdropFilterMode: "none",
+    backdropFilterBlur: 12,
+    messageFontSize: 16,
+    separatorLineHeight: 20,
+    messageLineHeight: 18,
+    prefixFontSize: 16,
+    prefixLineHeight: 18,
+    iconFontSize: 16,
+    iconLineHeight: 18
+  };
+  for (const [name, value] of Object.entries(fieldDefaults)) {
+    const field = resource.fields[name];
+    field.default = value;
+    delete field.styleDefault;
+  }
 
   /**
    * Accept only this resource's declared content shape and limits; invalid input returns null.
@@ -270,7 +304,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     "font-size": `${settings.fontSize}px`
   }))
     root.style.setProperty(`--${name}`, value);
-  panel.style.maxWidth = `${settings.width}px`;
+  panel.style.maxWidth = settings.width === 0 ? "none" : `${settings.width}px`;
   /**
    * Create an element, assign its classes and text, and append it to the resource-owned parent.
    * @param {string} tag HTML tag to create.
@@ -305,7 +339,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       element("span", `ticker-${name}`, value, parent);
     }
   }
-  if (settings.mode === "scroll") {
+  if (settings.mode === "scroll" && settings.animate !== "no") {
     const track = element("div", "ticker-track", undefined, viewport);
     const group = element("div", "ticker-group", undefined, track);
     for (const entry of settings.entries) {
@@ -342,6 +376,16 @@ document.addEventListener("DOMContentLoaded", async () => {
     document.fonts.ready.then(resize);
   } else {
     const display = element("div", "ticker-message", undefined, viewport);
+    const changeContent = byStream.contentTransition(
+      display,
+      {
+        ...settings,
+        transition: settings.mode === "static" ? "none" : settings.mode === "vertical" ? "slide" : "fade",
+        transitionAxis: "Y",
+        slideDistance: settings.fontSize
+      },
+      panel
+    );
     let previous = -1;
     /**
      * Render a changed message slot and restart its configured entry transition.
@@ -351,18 +395,11 @@ document.addEventListener("DOMContentLoaded", async () => {
       const index = Math.floor(Date.now() / (settings.duration * 1000)) % settings.entries.length;
       if (index === previous) return;
       previous = index;
-      display.replaceChildren();
-      content(settings.entries[index], display);
-      display.className = `ticker-message ${settings.mode}`;
-      display.animate(
-        settings.mode === "vertical"
-          ? [
-              { opacity: 0, transform: "translateY(100%)" },
-              { opacity: 1, transform: "translateY(0)" }
-            ]
-          : [{ opacity: settings.mode === "static" ? 1 : 0 }, { opacity: 1 }],
-        { duration: settings.transitionDuration, easing: settings.transitionEasing }
-      );
+      changeContent(() => {
+        display.replaceChildren();
+        content(settings.entries[index], display);
+        display.className = `ticker-message ${settings.mode}`;
+      });
     }
     byStream.watch(update);
   }

@@ -78,6 +78,62 @@ test("resources render and round-trip URLs without configurator assets", async (
       }
     });
 
+    await t.test("sponsor and lower-third images use intrinsic proportions at zero size", async () => {
+      const page = await browser.newPage();
+      try {
+        await serve(page, assets, true);
+        const logo = "https://byuwur.github.io/img/logo.png";
+        await page.route(logo, (route) =>
+          route.fulfill({
+            contentType: "image/svg+xml",
+            body: '<svg xmlns="http://www.w3.org/2000/svg" width="40" height="24"><rect width="40" height="24"/></svg>'
+          })
+        );
+        const dimensions = (selector) =>
+          page.locator(selector).evaluate(async (image) => {
+            await image.decode();
+            const { width, height } = image.getBoundingClientRect();
+            return [width, height];
+          });
+        await page.clock.install({ time: new Date(0) });
+        await page.clock.pauseAt(new Date(1000));
+        for (const imageWidth of [0, 80]) {
+          await page.goto(`https://stream.test/sponsors/?transition=none&imageWidth=${imageWidth}`);
+          assert.deepEqual(await dimensions(".sponsor-image"), imageWidth === 0 ? [40, 24] : [80, 48]);
+        }
+        await page.clock.fastForward(3000);
+        assert.equal(await page.locator(".primary").textContent(), "YOUR PARTNER");
+        assert.equal(await page.locator(".sponsor-image").count(), 0);
+        const entries = JSON.stringify([{ name: "Partner", subtitle: "", icon: "", imageUrl: logo }]);
+        for (const imageSize of [0, 80]) {
+          const query = new URLSearchParams({ entries, transition: "none", gap: "0", imageSize });
+          await page.goto(`https://stream.test/lower-thirds/?${query}`);
+          assert.deepEqual(await dimensions(".lower-image"), imageSize === 0 ? [40, 24] : [80, 80]);
+          assert.equal(await page.evaluate(() => byStream.settingsURL(byStreamResource, byStreamResource.settings).searchParams.get("imageSize")), String(imageSize));
+        }
+      } finally {
+        await page.close();
+      }
+    });
+
+    await t.test("decorative quote marks reserve space beside the quote", async () => {
+      const page = await browser.newPage();
+      try {
+        await serve(page, assets, true);
+        await page.goto("https://stream.test/quotes/?marks=yes&quoteIndent=0&transition=none");
+        await page.waitForSelector(".quote-text");
+        assert.equal(await page.evaluate(() => byStreamResource.settings.quoteIndent), 35.2);
+        const styles = await page.locator(".quote-text").evaluate((node) => ({ indent: parseFloat(getComputedStyle(node).paddingLeft), markSize: parseFloat(getComputedStyle(node, "::before").fontSize) }));
+        assert.equal(styles.indent, 35.2);
+        assert.equal(styles.markSize, 64);
+        await page.goto("https://stream.test/quotes/?marks=no&transition=none");
+        await page.waitForSelector(".quote-text");
+        assert.equal(await page.locator(".quote-text").evaluate((node) => getComputedStyle(node).paddingLeft), "0px");
+      } finally {
+        await page.close();
+      }
+    });
+
     // --- CONTINUING ANIMATION AND VIEWPORT CHANGES ---
     await t.test("timer and timeline interpolate progress between ticks and suspend while hidden", async () => {
       for (const [name, style] of [
@@ -117,6 +173,141 @@ test("resources render and round-trip URLs without configurator assets", async (
           assert.equal(await page.locator("progress").evaluate((node) => node.value), 0, "Animate Off retains instantaneous clock ticks");
           await page.clock.fastForward(11000);
           assert.equal(await page.locator("progress").evaluate((node) => node.value), 1, "Progress reaches the exact final value");
+        } finally {
+          await page.close();
+        }
+      }
+    });
+
+    await t.test("changing cards leave before replacement and resize smoothly to new content", async () => {
+      const page = await browser.newPage();
+      const errors = [];
+      page.on("pageerror", (error) => errors.push(error.message));
+      try {
+        await serve(page, assets, true);
+        const entries = ["Short", "A much longer result\nwith another line"];
+        await page.goto(
+          `https://stream.test/randomizer/?${new URLSearchParams({ mode: "manual", entries: JSON.stringify(entries), seed: "1", round: "0", width: "0", resultMotion: "slide", transitionDuration: "5000", showNumber: "yes" })}`
+        );
+        await page.waitForSelector(".draw-button");
+        await page.evaluate(() => document.getAnimations().forEach((animation) => animation.finish()));
+        await page.waitForFunction(() => !document.querySelector(".panel").style.height);
+        await page.locator(".primary").evaluate((node) => node.getAnimations().forEach((animation) => animation.finish()));
+        const oldSize = await page.locator(".panel").evaluate((node) => [node.offsetWidth, node.offsetHeight]);
+        assert.equal(await page.locator(".primary").textContent(), entries[0]);
+        await page.locator(".draw-button").click();
+        assert.equal(await page.locator(".primary").textContent(), entries[0], "Outgoing content remains during its exit");
+        const exit = await page.locator(".primary").evaluate((node) =>
+          node
+            .getAnimations()[0]
+            .effect.getKeyframes()
+            .map((frame) => frame.opacity)
+        );
+        assert.deepEqual(exit, ["1", "0"]);
+        await page.locator(".primary").evaluate((node) => node.getAnimations().forEach((animation) => animation.finish()));
+        await page.waitForFunction((text) => document.querySelector(".primary").textContent === text, entries[1]);
+        assert.equal(await page.locator(".primary").evaluate((node) => getComputedStyle(node).opacity), "0", "Incoming text stays invisible until resizing finishes");
+        const resized = await page.locator(".panel").evaluate((node) => {
+          const changes = node.getAnimations().filter((animation) => ["width", "height"].includes(animation.transitionProperty));
+          changes.forEach((animation) => {
+            animation.pause();
+            animation.currentTime = animation.effect.getTiming().duration / 2;
+          });
+          return { count: changes.length, size: [node.offsetWidth, node.offsetHeight], targets: changes.map((animation) => [animation.transitionProperty, animation.effect.getKeyframes().at(-1)[animation.transitionProperty]]) };
+        });
+        assert.equal(resized.count, 2);
+        assert.ok(resized.size[0] > oldSize[0] && resized.size[1] > oldSize[1], "Container passes through intermediate dimensions");
+        await page.evaluate(() => document.getAnimations().forEach((animation) => animation.finish()));
+        await page.waitForFunction(() => !document.querySelector(".panel").style.width && !document.querySelector(".panel").style.height);
+        await page.locator(".draw-button").click({ clickCount: 3, delay: 10 });
+        await page.evaluate(() => document.getAnimations().forEach((animation) => animation.finish()));
+        await page.waitForFunction(() => document.querySelector(".secondary").textContent === "DRAW 5");
+        assert.equal(await page.locator(".primary").textContent(), entries[1], "Only the latest rapid draw renders");
+        assert.deepEqual(errors, []);
+      } finally {
+        await page.close();
+      }
+    });
+
+    await t.test("all rotating card renderers keep multiline content inside the settled container", async () => {
+      const long = "A longer incoming message\nwith a second line";
+      const cases = [
+        [
+          "ticker",
+          ".ticker-message",
+          ".ticker-message",
+          {
+            mode: "fade",
+            duration: "2",
+            entries: JSON.stringify([
+              { text: "Short", prefix: "", icon: "" },
+              { text: long, prefix: "", icon: "" }
+            ])
+          }
+        ],
+        ["quotes", ".panel", ".quote-text", { duration: "2", marks: "no", entries: JSON.stringify({ Short: "Author", [long]: "Author" }) }],
+        [
+          "sponsors",
+          ".panel",
+          ".primary",
+          {
+            duration: "2",
+            entries: JSON.stringify([
+              { name: "Short", text: "", imageUrl: "" },
+              { name: long, text: "", imageUrl: "" }
+            ])
+          }
+        ],
+        [
+          "lower-thirds",
+          ".panel",
+          ".primary",
+          {
+            duration: "2",
+            gap: "0",
+            entries: JSON.stringify([
+              { name: "Short", subtitle: "", icon: "", imageUrl: "" },
+              { name: long, subtitle: "", icon: "", imageUrl: "" }
+            ])
+          }
+        ],
+        ["reminder", ".panel", ".primary", { interval: "10", duration: "10", delay: "0", entries: JSON.stringify(["Short", long]) }]
+      ];
+      for (const [name, target, text, values] of cases) {
+        const page = await browser.newPage();
+        try {
+          await page.clock.install({ time: new Date("2026-11-10T00:00:00Z") });
+          await page.clock.pauseAt(new Date("2026-11-10T00:00:00Z"));
+          await serve(page, assets, true);
+          await page.goto(`https://stream.test/${name}/?${new URLSearchParams({ ...values, width: "0", transition: "fade", transitionDuration: "1000" })}`);
+          await page.waitForSelector(text);
+          const finish = async () => {
+            for (let phase = 0; phase < 4; phase++)
+              await page.evaluate(() =>
+                document
+                  .getAnimations()
+                  .filter((animation) => animation.effect.getTiming().iterations !== Infinity)
+                  .forEach((animation) => animation.finish())
+              );
+          };
+          await finish();
+          const outgoing = await page.locator(text).textContent();
+          await page.clock.fastForward(name === "reminder" ? 10100 : 2100);
+          assert.equal(await page.locator(text).textContent(), outgoing, name + " retains outgoing text during exit");
+          await page.locator(target).evaluate((node) => node.getAnimations().forEach((animation) => animation.finish()));
+          await page.waitForFunction(({ text, long }) => document.querySelector(text)?.textContent === long, { text, long });
+          assert.equal(await page.locator(target).evaluate((node) => getComputedStyle(node).opacity), "0", name + " hides incoming content during resizing");
+          await finish();
+          const bounds = await page.evaluate((text) => {
+            const panel = document.querySelector(".panel"),
+              node = document.querySelector(text);
+            const outer = panel.getBoundingClientRect(),
+              inner = node.getBoundingClientRect();
+            return { fits: inner.top >= outer.top - 1 && inner.bottom <= outer.bottom + 1, height: panel.style.height, overflow: panel.style.overflow };
+          }, text);
+          assert.equal(bounds.fits, true, name);
+          assert.equal(bounds.height, "", name + " releases temporary height");
+          assert.equal(bounds.overflow, "", name + " releases temporary clipping");
         } finally {
           await page.close();
         }
@@ -167,6 +358,58 @@ test("resources render and round-trip URLs without configurator assets", async (
         assert.ok((layout.groups - 1) * layout.width >= layout.viewport, "copies cover the viewport through a full scroll cycle");
       } finally {
         await page.close();
+      }
+    });
+
+    // --- PAGE-LOAD AND FIXED SCHEDULE ANCHORS ---
+    await t.test("timed resources restart on load unless fixed start is enabled", async () => {
+      const cases = [
+        { name: "timer", values: { duration: "60", format: "seconds", milliseconds: "no" }, selector: ".timer-digits", initial: "60", advanced: "55", fixed: "55" },
+        { name: "timeline", values: { duration: "60" }, selector: ".primary", initial: "0%", advanced: "8%", fixed: "8%" },
+        { name: "randomizer", values: { duration: "2", showNumber: "yes" }, selector: ".secondary", initial: "DRAW 1", advanced: "DRAW 3", fixed: "DRAW 3" },
+        { name: "reminder", values: { entries: '["First","Second"]', interval: "10", duration: "2", transition: "none" }, selector: ".primary", initial: "First", advanced: "hidden", fixed: "hidden" }
+      ];
+      for (const entry of cases) {
+        const page = await browser.newPage();
+        try {
+          await page.clock.install({ time: new Date("2026-11-09T18:00:00Z") });
+          await page.clock.pauseAt(new Date("2026-11-09T18:00:01Z"));
+          await serve(page, assets, true);
+          const read = () =>
+            page.evaluate((selector) => {
+              const panel = document.querySelector(".panel");
+              return panel.hidden ? "hidden" : panel.querySelector(selector).textContent;
+            }, entry.selector);
+          // Clock assertions are independent of the separately tested visual transition phases.
+          const parameters = new URLSearchParams({ ...entry.values, animate: "no", startTime: "2020-01-01T00:00:00Z", endTime: "2020-01-01T01:00:00Z" });
+          await page.goto(`https://stream.test/${entry.name}/?${parameters}`);
+          await page.waitForFunction(() => window.byStreamResource && document.querySelector(".primary"));
+          assert.equal(await read(), entry.initial, `${entry.name} starts fresh despite inactive timestamps`);
+          const generated = new URL(await page.evaluate(() => byStream.settingsURL(byStreamResource, byStreamResource.settings).href));
+          assert.ok(generated.search.length > 1);
+          assert.equal(generated.searchParams.has("startTime"), false);
+          assert.equal(generated.searchParams.has("endTime"), false);
+          await page.clock.fastForward(5000);
+          assert.equal(await read(), entry.advanced, `${entry.name} advances from the captured load time`);
+          await page.reload();
+          await page.waitForFunction(() => window.byStreamResource && document.querySelector(".primary"));
+          assert.equal(await read(), entry.initial, `${entry.name} resets on reload`);
+
+          const now = await page.evaluate(() => Date.now());
+          parameters.set("useStartTime", "yes");
+          parameters.set("startTime", new Date(now - 5000).toISOString());
+          parameters.set("endTime", new Date(now + 55000).toISOString());
+          await page.goto(`https://stream.test/${entry.name}/?${parameters}`);
+          await page.waitForFunction(() => window.byStreamResource && document.querySelector(".panel"));
+          assert.equal(await read(), entry.fixed, `${entry.name} honors an enabled fixed start`);
+          const anchored = await page.evaluate(() => byStream.settingsURL(byStreamResource, byStreamResource.settings).href);
+          assert.equal(new URL(anchored).searchParams.get("startTime"), parameters.get("startTime"));
+          await page.reload();
+          await page.waitForFunction(() => window.byStreamResource && document.querySelector(".panel"));
+          assert.equal(await read(), entry.fixed, `${entry.name} retains the fixed schedule on reload`);
+        } finally {
+          await page.close();
+        }
       }
     });
 

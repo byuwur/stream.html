@@ -16,8 +16,18 @@ document.addEventListener("DOMContentLoaded", async () => {
       entries: {
         type: "entries",
         default: [
-          { name: "PLAYER ONE", subtitle: "Good games. Better company.", icon: "✦", imageUrl: "" },
-          { name: "Tonight’s adventure", subtitle: "One more round.", icon: "↗", imageUrl: "" }
+          {
+            name: "BONYUR",
+            subtitle: "Good games. Better company.",
+            icon: "✦",
+            imageUrl: "https://byuwur.github.io/img/logo.png"
+          },
+          {
+            name: "Mateus / byUwUr",
+            subtitle: "Un ratito más.",
+            icon: "↗",
+            imageUrl: ""
+          }
         ],
         label: "Ordered cards",
         section: "Content & behavior",
@@ -37,7 +47,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       duration: {
         type: "number",
-        default: 8,
+        default: 3,
         label: "Seconds per entry",
         section: "Content & behavior",
         min: 1,
@@ -46,7 +56,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       gap: {
         type: "number",
-        default: 2,
+        default: 1,
         label: "Hidden gap (seconds)",
         section: "Content & behavior",
         min: 0,
@@ -55,7 +65,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       transition: {
         type: "select",
-        default: "fade",
+        default: "slide",
         label: "Transition",
         section: "Content & behavior",
         options: { fade: "fade", slide: "slide", none: "none" }
@@ -70,7 +80,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       fontSize: {
         type: "number",
-        default: 42,
+        default: 32,
         label: "Base text size (px)",
         section: "Appearance",
         min: 10,
@@ -79,28 +89,28 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       fontWeight: {
         type: "select",
-        default: "400",
+        default: "700",
         label: "Font weight",
         section: "Appearance",
         options: { 300: "300", 400: "400", 500: "500", 600: "600", 700: "700", 800: "800", 900: "900" }
       },
       textColor: {
         type: "color",
-        default: "#FFFFFF",
+        default: "#EEEEEE",
         label: "Base text color",
         section: "Appearance",
         maxlength: 80
       },
       accentColor: {
         type: "color",
-        default: "#D9D9D9",
+        default: "#660000",
         label: "Accent color",
         section: "Appearance",
         maxlength: 80
       },
       backgroundColor: {
         type: "color",
-        default: "#202020E6",
+        default: "#11111166",
         label: "Panel background",
         section: "Appearance",
         maxlength: 80
@@ -116,7 +126,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       radius: {
         type: "number",
-        default: 8,
+        default: 16,
         label: "Corner radius (px)",
         section: "Appearance",
         min: 0,
@@ -125,10 +135,11 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       width: {
         type: "number",
-        default: 720,
+        default: 0,
         label: "Maximum width (px)",
+        description: "0 = Auto (no fixed maximum).",
         section: "Size & placement",
-        min: 100,
+        min: 0,
         max: 3840,
         step: "any"
       },
@@ -155,22 +166,23 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       padding: {
         type: "number",
-        default: 28,
+        default: 8,
         label: "Padding (px)",
         section: "Size & placement",
         min: 0,
         max: 100,
         step: "any"
       },
-      edgePadding: { type: "number", default: "", optional: true, label: "Viewport edge padding (px)", section: "Size & placement", min: 0, max: 1000, step: "any", styleSelector: "#overlay", styleProperty: "padding", styleUnit: "px" },
+      edgePadding: { type: "number", default: 16, optional: true, label: "Viewport edge padding (px)", section: "Size & placement", min: 0, max: 1000, step: "any", styleSelector: "#overlay", styleProperty: "padding", styleUnit: "px" },
       ...byStream.placementFields("#overlay .panel"),
       ...byStream.layoutFields("#overlay .lower-card", { image: ["Image", "#overlay .lower-image"], icon: ["Icon", "#overlay .lower-icon"], copy: ["Text", "#overlay .lower-copy"] }),
       ...byStream.layoutFields("#overlay .lower-copy", { name: ["Name", "#overlay .lower-copy .primary"], subtitle: ["Subtitle", "#overlay .lower-copy .secondary"] }, "copy"),
       imageSize: {
         type: "number",
-        default: "",
+        default: 51.2,
         optional: true,
         label: "Image size (px)",
+        description: "0 = Auto (preserve the image proportions).",
         section: "Details",
         subsection: "Image",
         min: 0,
@@ -178,7 +190,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         step: "any",
         styleSelector: "#overlay .lower-image",
         styleProperty: "--image-size",
-        styleUnit: "px"
+        styleValue: (settings) => (settings.imageSize === 0 ? "auto" : `${settings.imageSize}px`)
       },
       imageFit: {
         type: "select",
@@ -192,7 +204,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       accentWidth: {
         type: "number",
-        default: "",
+        default: 4,
         optional: true,
         label: "Accent line width (px)",
         section: "Details",
@@ -204,7 +216,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         styleProperty: "border-left-width",
         styleUnit: "px"
       },
-      lineColor: { type: "color", default: "", optional: true, label: "Accent line color", section: "Details", subsection: "Accent line", maxlength: 80, styleSelector: "#overlay .lower-card", styleProperty: "border-left-color" },
+      lineColor: { type: "color", default: "#FFFFFF", optional: true, label: "Accent line color", section: "Details", subsection: "Accent line", maxlength: 80, styleSelector: "#overlay .lower-card", styleProperty: "border-left-color" },
       ...byStream.transitionFields("transition"),
       ...byStream.textFields({
         name: ["Name", "#overlay .lower-copy .primary"],
@@ -217,6 +229,34 @@ document.addEventListener("DOMContentLoaded", async () => {
       ...byStream.filterFields("backdropFilter", "Panel backdrop", "#overlay .panel", true)
     }
   };
+
+  const fieldDefaults = {
+    panelBorderWidth: 1,
+    panelBorderStyle: "solid",
+    panelBorderColor: "#EEEEEE66",
+    panelShadow: "yes",
+    panelShadowColor: "#00000066",
+    panelShadowBlur: 16,
+    panelShadowY: 4,
+    backdropFilterMode: "none",
+    backdropFilterBlur: 12,
+    subtitleFontSize: 24,
+    contentGap: 16,
+    transitionDuration: 300,
+    transitionEasing: "ease",
+    slideDistance: 32,
+    iconFontSize: 64,
+    imageRadius: 16,
+    nameFontSize: 32,
+    nameLineHeight: 38.4,
+    subtitleLineHeight: 27,
+    iconLineHeight: 72
+  };
+  for (const [name, value] of Object.entries(fieldDefaults)) {
+    const field = resource.fields[name];
+    field.default = value;
+    delete field.styleDefault;
+  }
 
   /**
    * Accept only this resource's declared content shape and limits; invalid input returns null.
@@ -234,6 +274,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       return null;
     }
   }
+
   const settings = await byStream.initResource(resource);
   if (!byStreamOverlay) return;
   const root = document.getElementById("overlay");
@@ -252,7 +293,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     "font-size": `${settings.fontSize}px`
   }))
     root.style.setProperty(`--${name}`, value);
-  panel.style.maxWidth = `${settings.width}px`;
+  panel.style.maxWidth = settings.width === 0 ? "none" : `${settings.width}px`;
   /**
    * Create an element, assign its classes and text, and append it to the resource-owned parent.
    * @param {string} tag HTML tag to create.
@@ -273,6 +314,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     panel.hidden = true;
     return;
   }
+  const changeContent = byStream.contentTransition(panel, settings);
   let previous = -1;
   /**
    * Display the next entry and apply the configured transition to the resource-owned elements.
@@ -283,18 +325,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   function change(index, render) {
     if (index === previous) return;
     previous = index;
-    panel.replaceChildren();
-    render(settings.entries[index]);
-    if (settings.transition !== "none")
-      panel.animate(
-        settings.transition === "slide"
-          ? [
-              { opacity: 0, transform: `translateX(${-settings.slideDistance}px)` },
-              { opacity: 1, transform: "translateX(0)" }
-            ]
-          : [{ opacity: 0 }, { opacity: 1 }],
-        { duration: settings.transitionDuration, easing: settings.transitionEasing }
-      );
+    changeContent(() => {
+      panel.replaceChildren();
+      render(settings.entries[index]);
+    });
   }
   root.style.justifyContent = { left: "flex-start", center: "center", right: "flex-end" }[settings.placement];
   /**
@@ -304,7 +338,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   function update() {
     const cycle = (settings.duration + settings.gap) * 1000,
       time = Date.now();
-    panel.hidden = time % cycle >= settings.duration * 1000;
+    const visible = time % cycle < settings.duration * 1000;
+    if (!visible) {
+      previous = -1;
+      changeContent(null, false);
+      return;
+    }
     change(Math.floor(time / cycle) % settings.entries.length, (e) => {
       const card = element("div", "lower-card");
       if (e.imageUrl) {

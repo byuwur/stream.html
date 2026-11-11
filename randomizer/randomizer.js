@@ -15,7 +15,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     fields: {
       entries: {
         type: "entries",
-        default: ["One more round", "Try a new strategy", "Take the scenic route", "Community challenge"],
+        default: ["One more round?", "Try a new character!", "Let chat decide", "Take a breather..."],
         label: "Items",
         section: "Content & behavior",
         validate: parseEntries,
@@ -25,7 +25,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       label: {
         type: "text",
-        default: "NEXT CHALLENGE",
+        default: "WHAT’S NEXT?",
         label: "Heading",
         section: "Content & behavior",
         maxlength: 160
@@ -39,7 +39,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       duration: {
         type: "number",
-        default: 10,
+        default: 3,
         label: "Seconds per timed draw",
         section: "Content & behavior",
         when: ["mode", "automatic"],
@@ -49,19 +49,31 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       showNumber: {
         type: "switch",
-        default: "yes",
+        default: "no",
         label: "Show draw number",
         section: "Content & behavior",
         checkedValue: "yes",
         uncheckedValue: "no",
         options: { yes: "yes", no: "no" }
       },
+      useStartTime: {
+        type: "switch",
+        default: "no",
+        label: "Use fixed start time",
+        section: "Content & behavior",
+        subsection: "Draw state",
+        when: ["mode", "automatic"],
+        description: "Off starts when the page loads. On uses the timestamp and preserves progress across reloads.",
+        checkedValue: "yes",
+        uncheckedValue: "no",
+        options: { yes: "On", no: "Off" }
+      },
       startTime: {
         type: "datetime",
-        default: new Date().toISOString(),
+        default: "2026-11-10T17:33:30.927Z",
         label: "Draw schedule start",
         section: "Content & behavior",
-        when: ["mode", "automatic"],
+        when: ["useStartTime", "yes"],
         subsection: "Draw state",
         description: "ISO timestamp with explicit zone. Seed + draw number determines the result.",
         validate: byStream.parseTimestamp,
@@ -69,7 +81,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       seed: {
         type: "number",
-        default: 42,
+        default: 1,
         label: "Random seed",
         section: "Content & behavior",
         subsection: "Draw state",
@@ -99,7 +111,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       fontSize: {
         type: "number",
-        default: 48,
+        default: 32,
         label: "Base text size (px)",
         section: "Appearance",
         min: 10,
@@ -108,28 +120,28 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       fontWeight: {
         type: "select",
-        default: "400",
+        default: "700",
         label: "Font weight",
         section: "Appearance",
         options: { 300: "300", 400: "400", 500: "500", 600: "600", 700: "700", 800: "800", 900: "900" }
       },
       textColor: {
         type: "color",
-        default: "#FFFFFF",
+        default: "#EEEEEE",
         label: "Base text color",
         section: "Appearance",
         maxlength: 80
       },
       accentColor: {
         type: "color",
-        default: "#D9D9D9",
+        default: "#660000",
         label: "Accent color",
         section: "Appearance",
         maxlength: 80
       },
       backgroundColor: {
         type: "color",
-        default: "#202020E6",
+        default: "#11111166",
         label: "Panel background",
         section: "Appearance",
         maxlength: 80
@@ -145,7 +157,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       radius: {
         type: "number",
-        default: 8,
+        default: 16,
         label: "Corner radius (px)",
         section: "Appearance",
         min: 0,
@@ -154,10 +166,11 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       width: {
         type: "number",
-        default: 680,
+        default: 0,
         label: "Maximum width (px)",
+        description: "0 = Auto (no fixed maximum).",
         section: "Size & placement",
-        min: 100,
+        min: 0,
         max: 3840,
         step: "any"
       },
@@ -172,7 +185,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       position: {
         type: "select",
-        default: "center",
+        default: "top",
         label: "Vertical placement",
         section: "Size & placement",
         options: { top: "top", center: "center", bottom: "bottom" }
@@ -186,20 +199,20 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       padding: {
         type: "number",
-        default: 28,
+        default: 16,
         label: "Padding (px)",
         section: "Size & placement",
         min: 0,
         max: 100,
         step: "any"
       },
-      edgePadding: { type: "number", default: "", optional: true, label: "Viewport edge padding (px)", section: "Size & placement", min: 0, max: 1000, step: "any", styleSelector: "#overlay", styleProperty: "padding", styleUnit: "px" },
+      edgePadding: { type: "number", default: 16, optional: true, label: "Viewport edge padding (px)", section: "Size & placement", min: 0, max: 1000, step: "any", styleSelector: "#overlay", styleProperty: "padding", styleUnit: "px" },
       ...byStream.placementFields("#overlay .panel"),
       ...byStream.layoutFields("#overlay .panel", { heading: ["Heading", "#overlay .eyebrow"], result: ["Result", "#overlay .primary"], counter: ["Counter", "#overlay .secondary"], button: ["Button", "#overlay .draw-button"] }, "content", {
         counter: ["showNumber", "yes"],
         button: ["mode", "manual"]
       }),
-      resultMotion: { type: "select", default: "none", label: "Result transition", section: "Animation", options: { none: "None", fade: "Fade", slide: "Slide" } },
+      resultMotion: { type: "select", default: "slide", label: "Result transition", section: "Animation", options: { none: "None", fade: "Fade", slide: "Slide" } },
       ...byStream.transitionFields("resultMotion"),
       ...byStream.textFields(
         {
@@ -217,6 +230,38 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   };
 
+  const fieldDefaults = {
+    panelBorderWidth: 1,
+    panelBorderStyle: "solid",
+    panelBorderColor: "#EEEEEE11",
+    panelShadow: "yes",
+    panelShadowColor: "#00000066",
+    panelShadowBlur: 16,
+    panelShadowY: 4,
+    backdropFilterMode: "none",
+    backdropFilterBlur: 12,
+    headingFontSize: 16,
+    headingTracking: 1.8,
+    transitionDuration: 500,
+    transitionEasing: "ease",
+    headingLineHeight: 18,
+    resultFontSize: 32,
+    resultLineHeight: 38.4,
+    counterFontSize: 24,
+    counterLineHeight: 27,
+    buttonFontSize: 11.2,
+    buttonLineHeight: 12,
+    buttonRadius: 4,
+    buttonBorderWidth: 1
+  };
+  for (const [name, value] of Object.entries(fieldDefaults)) {
+    const field = resource.fields[name];
+    field.default = value;
+    delete field.styleDefault;
+  }
+  resource.fields.buttonRadius.zeroIsDefault = true;
+  resource.fields.buttonBorderWidth.zeroIsDefault = true;
+
   /**
    * Accept only this resource's declared content shape and limits; invalid input returns null.
    * @param {string} value Serialized content in this resource's declared format.
@@ -231,6 +276,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       return null;
     }
   }
+
   const settings = await byStream.initResource(resource);
   if (!byStreamOverlay) return;
   const root = document.getElementById("overlay");
@@ -249,7 +295,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     "font-size": `${settings.fontSize}px`
   }))
     root.style.setProperty(`--${name}`, value);
-  panel.style.maxWidth = `${settings.width}px`;
+  panel.style.maxWidth = settings.width === 0 ? "none" : `${settings.width}px`;
   /**
    * Create an element, assign its classes and text, and append it to the resource-owned parent.
    * @param {string} tag HTML tag to create.
@@ -273,7 +319,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   element("p", "eyebrow", settings.label);
   const display = element("p", "primary");
   const number = element("p", "secondary");
+  const changeContent = byStream.contentTransition(display, { ...settings, transition: settings.resultMotion }, panel);
   number.hidden = settings.showNumber === "no";
+  const start = settings.useStartTime === "yes" ? Date.parse(settings.startTime) : Date.now();
   let round = settings.round,
     last = -1;
   /**
@@ -281,7 +329,7 @@ document.addEventListener("DOMContentLoaded", async () => {
    * @returns {void}
    */
   function update() {
-    const draw = settings.mode === "automatic" ? settings.round + Math.max(0, Math.floor((Date.now() - Date.parse(settings.startTime)) / (settings.duration * 1000))) : round;
+    const draw = settings.mode === "automatic" ? settings.round + Math.max(0, Math.floor((Date.now() - start) / (settings.duration * 1000))) : round;
     if (draw === last) return;
     last = draw;
     // Mix the seed with the draw number so reloads reproduce the same result without replaying earlier draws.
@@ -289,18 +337,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     state = Math.imul(state ^ (state >>> 16), 0x85ebca6b);
     state = Math.imul(state ^ (state >>> 13), 0xc2b2ae35);
     state = (state ^ (state >>> 16)) >>> 0;
-    display.textContent = settings.entries[state % settings.entries.length];
-    number.textContent = `${settings.counterLabel} ${draw + 1}`;
-    if (settings.resultMotion !== "none")
-      display.animate(
-        settings.resultMotion === "slide"
-          ? [
-              { opacity: 0, transform: `translateX(${-settings.slideDistance}px)` },
-              { opacity: 1, transform: "translateX(0)" }
-            ]
-          : [{ opacity: 0 }, { opacity: 1 }],
-        { duration: settings.transitionDuration, easing: settings.transitionEasing }
-      );
+    changeContent(() => {
+      display.textContent = settings.entries[state % settings.entries.length];
+      number.textContent = `${settings.counterLabel} ${draw + 1}`;
+    });
   }
   if (settings.mode === "manual") {
     const button = element("button", "draw-button", settings.buttonLabel);

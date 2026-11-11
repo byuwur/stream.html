@@ -15,7 +15,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     fields: {
       entries: {
         type: "entries",
-        default: ["Stay hydrated. Your next great play can wait.", "Take a moment to stretch your hands."],
+        default: ["Water break. The next round can wait.", "Relax your hands. We’re here for a good time."],
         label: "Reminder messages",
         section: "Content & behavior",
         validate: parseEntries,
@@ -23,10 +23,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         entries: { textFields: [["text", "Reminder"]], newEntry: "", limit: 40 },
         addLabel: "Add entry"
       },
-      label: { type: "text", default: "REMINDER", label: "Heading", section: "Content & behavior", maxlength: 160 },
+      label: { type: "text", default: "A LITTLE RESET", label: "Heading", section: "Content & behavior", maxlength: 160 },
       interval: {
         type: "number",
-        default: 600,
+        default: 10,
         label: "Repeat interval (seconds)",
         section: "Content & behavior",
         min: 10,
@@ -35,7 +35,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       duration: {
         type: "number",
-        default: 12,
+        default: 30,
         label: "Visible duration (seconds)",
         section: "Content & behavior",
         description: "Clamped to the repeat interval.",
@@ -45,7 +45,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       transition: {
         type: "select",
-        default: "fade",
+        default: "slide",
         label: "Animation",
         section: "Content & behavior",
         options: { fade: "fade", slide: "slide", none: "none" }
@@ -60,12 +60,24 @@ document.addEventListener("DOMContentLoaded", async () => {
         max: 86400,
         step: "any"
       },
+      useStartTime: {
+        type: "switch",
+        default: "no",
+        label: "Use fixed start time",
+        section: "Content & behavior",
+        subsection: "Scheduling",
+        description: "Off starts when the page loads. On uses the timestamp and preserves progress across reloads.",
+        checkedValue: "yes",
+        uncheckedValue: "no",
+        options: { yes: "On", no: "Off" }
+      },
       startTime: {
         type: "datetime",
-        default: new Date().toISOString(),
+        default: "2026-11-10T17:05:27.490Z",
         label: "Schedule start",
         section: "Content & behavior",
         subsection: "Scheduling",
+        when: ["useStartTime", "yes"],
         description: "An ISO timestamp with Z or UTC offset. Reloads preserve this schedule.",
         validate: byStream.parseTimestamp,
         maxlength: 160
@@ -92,7 +104,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       timeZone: {
         type: "timezone",
-        default: "",
+        default: "America/Bogota",
         label: "Quiet period time zone",
         section: "Content & behavior",
         subsection: "Scheduling",
@@ -110,7 +122,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       fontSize: {
         type: "number",
-        default: 30,
+        default: 24,
         label: "Base text size (px)",
         section: "Appearance",
         min: 10,
@@ -126,21 +138,21 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       textColor: {
         type: "color",
-        default: "#FFFFFF",
+        default: "#EEEEEE",
         label: "Base text color",
         section: "Appearance",
         maxlength: 80
       },
       accentColor: {
         type: "color",
-        default: "#D9D9D9",
+        default: "#660000",
         label: "Accent color",
         section: "Appearance",
         maxlength: 80
       },
       backgroundColor: {
         type: "color",
-        default: "#202020E6",
+        default: "#11111166",
         label: "Panel background",
         section: "Appearance",
         maxlength: 80
@@ -156,7 +168,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       radius: {
         type: "number",
-        default: 8,
+        default: 16,
         label: "Corner radius (px)",
         section: "Appearance",
         min: 0,
@@ -165,10 +177,11 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       width: {
         type: "number",
-        default: 600,
+        default: 650,
         label: "Maximum width (px)",
+        description: "0 = Auto (no fixed maximum).",
         section: "Size & placement",
-        min: 100,
+        min: 0,
         max: 3840,
         step: "any"
       },
@@ -190,21 +203,21 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       align: {
         type: "select",
-        default: "center",
+        default: "left",
         label: "Text alignment",
         section: "Size & placement",
         options: { left: "left", center: "center", right: "right" }
       },
       padding: {
         type: "number",
-        default: 28,
+        default: 8,
         label: "Padding (px)",
         section: "Size & placement",
         min: 0,
         max: 100,
         step: "any"
       },
-      edgePadding: { type: "number", default: "", optional: true, label: "Viewport edge padding (px)", section: "Size & placement", min: 0, max: 1000, step: "any", styleSelector: "#overlay", styleProperty: "padding", styleUnit: "px" },
+      edgePadding: { type: "number", default: 16, optional: true, label: "Viewport edge padding (px)", section: "Size & placement", min: 0, max: 1000, step: "any", styleSelector: "#overlay", styleProperty: "padding", styleUnit: "px" },
       ...byStream.placementFields("#overlay .panel"),
       ...byStream.layoutFields("#overlay .panel", { heading: ["Heading", "#overlay .eyebrow"], message: ["Message", "#overlay .primary"] }),
       ...byStream.transitionFields("transition"),
@@ -217,6 +230,31 @@ document.addEventListener("DOMContentLoaded", async () => {
       ...byStream.filterFields("backdropFilter", "Panel backdrop", "#overlay .panel", true)
     }
   };
+
+  const fieldDefaults = {
+    panelBorderWidth: 1,
+    panelBorderStyle: "solid",
+    panelBorderColor: "#EEEEEE11",
+    panelShadow: "yes",
+    panelShadowColor: "#00000066",
+    panelShadowBlur: 16,
+    panelShadowY: 4,
+    backdropFilterMode: "none",
+    backdropFilterBlur: 12,
+    headingFontSize: 16,
+    headingTracking: 1.8,
+    messageFontSize: 12,
+    transitionDuration: 500,
+    transitionEasing: "ease",
+    slideDistance: 32,
+    headingLineHeight: 18,
+    messageLineHeight: 14.4
+  };
+  for (const [name, value] of Object.entries(fieldDefaults)) {
+    const field = resource.fields[name];
+    field.default = value;
+    delete field.styleDefault;
+  }
 
   /**
    * Accept only this resource's declared content shape and limits; invalid input returns null.
@@ -235,6 +273,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   function parseQuiet(value) {
     return value === "" || /^([01]\d|2[0-3]):[0-5]\d$/.test(value) ? value : null;
   }
+
   const settings = await byStream.initResource(resource);
   if (!byStreamOverlay) return;
   const root = document.getElementById("overlay");
@@ -253,7 +292,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     "font-size": `${settings.fontSize}px`
   }))
     root.style.setProperty(`--${name}`, value);
-  panel.style.maxWidth = `${settings.width}px`;
+  panel.style.maxWidth = settings.width === 0 ? "none" : `${settings.width}px`;
   /**
    * Create an element, assign its classes and text, and append it to the resource-owned parent.
    * @param {string} tag HTML tag to create.
@@ -274,6 +313,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     panel.hidden = true;
     return;
   }
+  const changeContent = byStream.contentTransition(panel, settings);
   let previous = -1;
   /**
    * Display the next entry and apply the configured transition to the resource-owned elements.
@@ -284,18 +324,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   function change(index, render) {
     if (index === previous) return;
     previous = index;
-    panel.replaceChildren();
-    render(settings.entries[index]);
-    if (settings.transition !== "none")
-      panel.animate(
-        settings.transition === "slide"
-          ? [
-              { opacity: 0, transform: `translateX(${-settings.slideDistance}px)` },
-              { opacity: 1, transform: "translateX(0)" }
-            ]
-          : [{ opacity: 0 }, { opacity: 1 }],
-        { duration: settings.transitionDuration, easing: settings.transitionEasing }
-      );
+    changeContent(() => {
+      panel.replaceChildren();
+      render(settings.entries[index]);
+    });
   }
   const quietFormat = new Intl.DateTimeFormat("en-US", {
     hourCycle: "h23",
@@ -303,7 +335,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     minute: "2-digit",
     ...(settings.timeZone ? { timeZone: settings.timeZone } : {})
   });
-  const start = Date.parse(settings.startTime) + settings.delay * 1000;
+  const start = (settings.useStartTime === "yes" ? Date.parse(settings.startTime) : Date.now()) + settings.delay * 1000;
   /**
    * Apply the configured time zone and quiet hours before showing the current reminder.
    * @returns {void}
@@ -317,7 +349,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Fixed-width HH:mm values sort by time; reversed bounds describe quiet hours across midnight.
     const quiet = from && to && from !== to && (from < to ? local >= from && local < to : local >= from || local < to);
     const visible = elapsed >= 0 && !quiet && elapsed % interval < Math.min(settings.duration, settings.interval) * 1000;
-    panel.hidden = !visible;
+    if (!visible) {
+      previous = -1;
+      changeContent(null, false);
+      return;
+    }
     if (visible)
       change(Math.floor(elapsed / interval) % settings.entries.length, (e) => {
         element("p", "eyebrow", settings.label);
