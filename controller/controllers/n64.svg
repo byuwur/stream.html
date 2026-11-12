@@ -1,5 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" id="n64" data-controller="n64" data-name="Nintendo 64 Controller" data-platform="Nintendo" viewBox="15.0659 -10.35 495.3002 484.24" data-labels="icons" data-layout="full" role="img" aria-label="Nintendo 64 Controller input display" font-family="Arial, sans-serif" data-full-viewbox="15.0659 -10.35 495.3002 484.24" data-compact-viewbox="1.5 1.5 124 106" data-source="N64.svg">
-  <title>Nintendo 64 Controller</title>
+<svg xmlns="http://www.w3.org/2000/svg" id="n64" data-controller="n64" data-name="N64" data-platform="Nintendo" viewBox="15.0659 -10.35 495.3002 484.24" data-labels="icons" data-layout="full" role="img" aria-label="N64 input display" font-family="Arial, sans-serif" data-full-viewbox="15.0659 -10.35 495.3002 484.24" data-compact-viewbox="1.5 1.5 124 106" data-source="N64.svg">
+  <title>N64</title>
   <style>
     .custom-colors .shell-base { fill: var(--controller-color); }
     .custom-colors .shell-panel { fill: var(--controller-panel); }

@@ -1,5 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" id="famicom" data-controller="famicom" data-name="Nintendo Famicom Controller" data-platform="Nintendo" viewBox="7.71 134.59 511.34 217.27" data-labels="icons" data-layout="full" role="img" aria-label="Nintendo Famicom Controller input display" font-family="Arial, sans-serif" data-full-viewbox="7.71 134.59 511.34 217.27" data-compact-viewbox="2.50001 5.5 95.99999 46.76372" data-source="FAMICOM.svg">
-  <title>Nintendo Famicom Controller</title>
+<svg xmlns="http://www.w3.org/2000/svg" id="famicom" data-controller="famicom" data-name="Famicom" data-platform="Nintendo" viewBox="7.71 134.59 511.34 217.27" data-labels="icons" data-layout="full" role="img" aria-label="Famicom input display" font-family="Arial, sans-serif" data-full-viewbox="7.71 134.59 511.34 217.27" data-compact-viewbox="2.50001 5.5 95.99999 46.76372" data-source="FAMICOM.svg">
+  <title>Famicom</title>
   <style>
     .custom-colors .shell-base { fill: var(--controller-color); }
     .custom-colors .shell-panel { fill: var(--controller-panel); }

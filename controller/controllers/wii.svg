@@ -1,5 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" id="wii" data-controller="wii" data-name="Nintendo Wii Remote" data-platform="Nintendo" viewBox="313.04 0.92 180.96 484.59" data-labels="icons" data-layout="full" role="img" aria-label="Nintendo Wii Remote input display" font-family="Arial, sans-serif" data-full-viewbox="313.04 0.92 180.96 484.59" data-compact-viewbox="0 0 109 79" data-source="WII.svg">
-  <title>Nintendo Wii Remote</title>
+<svg xmlns="http://www.w3.org/2000/svg" id="wii" data-controller="wii" data-name="Wiimote" data-platform="Nintendo" viewBox="313.04 0.92 180.96 484.59" data-labels="icons" data-layout="full" role="img" aria-label="Wiimote input display" font-family="Arial, sans-serif" data-full-viewbox="313.04 0.92 180.96 484.59" data-compact-viewbox="0 0 109 79" data-source="WII.svg">
+  <title>Wiimote</title>
   <style>
     .custom-colors .shell-base { fill: var(--controller-color); }
     .custom-colors .shell-panel { fill: var(--controller-panel); }

@@ -1,5 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" id="joycon" data-controller="joycon" data-name="Nintendo Switch Joy-Con Pair" data-platform="Nintendo" viewBox="101.24 -60.08333 336.86 521.87333" data-labels="icons" data-layout="full" role="img" aria-label="Nintendo Switch Joy-Con Pair input display" font-family="Arial, sans-serif" data-full-viewbox="101.24 -60.08333 336.86 521.87333" data-compact-viewbox="-2.00039 0 179.00039 80" data-source="SWITCH.svg">
-  <title>Nintendo Switch Joy-Con Pair</title>
+<svg xmlns="http://www.w3.org/2000/svg" id="joycon" data-controller="joycon" data-name="Joy-cons" data-platform="Nintendo" viewBox="101.24 -60.08333 336.86 521.87333" data-labels="icons" data-layout="full" role="img" aria-label="Joy-cons input display" font-family="Arial, sans-serif" data-full-viewbox="101.24 -60.08333 336.86 521.87333" data-compact-viewbox="-2.00039 0 179.00039 80" data-source="SWITCH.svg">
+  <title>Joy-cons</title>
   <style>
     .custom-colors .shell-base { fill: var(--controller-color); }
     .custom-colors .shell-panel { fill: var(--controller-panel); }

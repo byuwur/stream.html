@@ -1,5 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" id="saturn" data-controller="saturn" data-name="Sega Saturn Controller" data-platform="Sega" viewBox="21.7322 101.22119 479.4956 281.00171" data-labels="icons" data-layout="full" role="img" aria-label="Sega Saturn Controller input display" font-family="Arial, sans-serif" data-full-viewbox="21.7322 101.22119 479.4956 281.00171" data-compact-viewbox="0.00251 1.5 108.49749 67" data-source="SATURN.svg">
-  <title>Sega Saturn Controller</title>
+<svg xmlns="http://www.w3.org/2000/svg" id="saturn" data-controller="saturn" data-name="Saturn" data-platform="Sega" viewBox="21.7322 101.22119 479.4956 281.00171" data-labels="icons" data-layout="full" role="img" aria-label="Saturn input display" font-family="Arial, sans-serif" data-full-viewbox="21.7322 101.22119 479.4956 281.00171" data-compact-viewbox="0.00251 1.5 108.49749 67" data-source="SATURN.svg">
+  <title>Saturn</title>
   <style>
     .custom-colors .shell-base { fill: var(--controller-color); }
     .custom-colors .shell-panel { fill: var(--controller-panel); }

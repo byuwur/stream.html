@@ -1,5 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" id="wiiupro" data-controller="wiiupro" data-name="Nintendo Wii U Pro Controller" data-platform="Nintendo" viewBox="15.8989 13.6032 490.9187 396.1832" data-labels="icons" data-layout="full" role="img" aria-label="Nintendo Wii U Pro Controller input display" font-family="Arial, sans-serif" data-full-viewbox="15.8989 13.6032 490.9187 396.1832" data-compact-viewbox="-2 0 179 80" data-source="WIIUPRO.svg">
-  <title>Nintendo Wii U Pro Controller</title>
+<svg xmlns="http://www.w3.org/2000/svg" id="wiiupro" data-controller="wiiupro" data-name="Wii U Pro" data-platform="Nintendo" viewBox="15.8989 13.6032 490.9187 396.1832" data-labels="icons" data-layout="full" role="img" aria-label="Wii U Pro input display" font-family="Arial, sans-serif" data-full-viewbox="15.8989 13.6032 490.9187 396.1832" data-compact-viewbox="-2 0 179 80" data-source="WIIUPRO.svg">
+  <title>Wii U Pro</title>
   <style>
     .custom-colors .shell-base { fill: var(--controller-color); }
     .custom-colors .shell-panel { fill: var(--controller-panel); }

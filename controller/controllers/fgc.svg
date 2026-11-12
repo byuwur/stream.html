@@ -1,6 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" class="controller-art" viewBox="-8 -8 936 550" role="img" aria-label="Fighting Stick (8 buttons) input display" id="fgc" data-controller="fgc" data-name="Fighting Stick (8 buttons)" data-platform="Other" data-labels="icons" data-layout="full" data-full-viewbox="-8 -8 936 550" data-compact-viewbox="-4.6 0.5 133.6 60.5">
-  <title>Fight Stick (8 buttons)</title>
-  <view id="fgc6" viewBox="-8 -8 758 550" data-name="Fighting Stick (6 buttons)" data-exclude=".eight-button-only" data-compact-viewbox="-4.6 0.5 112.6 60.5"/><view id="fgc4" viewBox="-8 -8 590 550" data-name="Fighting Stick (4 buttons)" data-exclude=".eight-button-only, .six-button-only" data-compact-viewbox="-4.6 0.5 90.6 60.5"/><style>
+<svg xmlns="http://www.w3.org/2000/svg" class="controller-art" viewBox="-8 -8 936 550" role="img" aria-label="FGC (8 buttons) input display" id="fgc" data-controller="fgc" data-name="FGC (8 buttons)" data-platform="Other" data-labels="icons" data-layout="full" data-full-viewbox="-8 -8 936 550" data-compact-viewbox="-4.6 0.5 133.6 60.5">
+  <title>FGC (8 buttons)</title>
+  <view id="fgc6" viewBox="-8 -8 758 550" data-name="FGC (6 buttons)" data-exclude=".eight-button-only" data-compact-viewbox="-4.6 0.5 112.6 60.5"/><view id="fgc4" viewBox="-8 -8 590 550" data-name="FGC (4 buttons)" data-exclude=".eight-button-only, .six-button-only" data-compact-viewbox="-4.6 0.5 90.6 60.5"/><style>
     .custom-colors .shell-base { fill: var(--controller-color); }
     .custom-colors .shell-panel { fill: var(--controller-panel); }
     .hardware-marking { opacity: 0.65; } .custom-colors .hardware-marking { fill: var(--controller-ink); }

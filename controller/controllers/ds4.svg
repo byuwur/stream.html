@@ -1,5 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" id="ds4" data-controller="ds4" data-name="PlayStation 4 — DualShock 4" data-platform="PlayStation" viewBox="16.7991 17.94777 492.977 384.03853" data-labels="icons" data-layout="full" role="img" aria-label="PlayStation 4 — DualShock 4 input display" font-family="Arial, sans-serif" data-full-viewbox="16.7991 17.94777 492.977 384.03853" data-compact-viewbox="-2 0 181 78" data-source="PS4.svg">
-  <title>PlayStation 4 — DualShock 4</title>
+<svg xmlns="http://www.w3.org/2000/svg" id="ds4" data-controller="ds4" data-name="DualShock 4" data-platform="PlayStation" viewBox="16.7991 17.94777 492.977 384.03853" data-labels="icons" data-layout="full" role="img" aria-label="DualShock 4 input display" font-family="Arial, sans-serif" data-full-viewbox="16.7991 17.94777 492.977 384.03853" data-compact-viewbox="-2 0 181 78" data-source="PS4.svg">
+  <title>DualShock 4</title>
   <style>
     .custom-colors .shell-base { fill: var(--controller-color); }
     .custom-colors .shell-panel { fill: var(--controller-panel); }

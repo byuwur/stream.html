@@ -1,5 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" id="ds5" data-controller="ds5" data-name="PlayStation 5 — DualSense" data-platform="PlayStation" viewBox="22.5571 18.49769 478.0901 384.80791" data-labels="icons" data-layout="full" role="img" aria-label="PlayStation 5 — DualSense input display" font-family="Arial, sans-serif" data-full-viewbox="22.5571 18.49769 478.0901 384.80791" data-compact-viewbox="-2 0 181 78" data-source="PS5.svg">
-  <title>PlayStation 5 — DualSense</title>
+<svg xmlns="http://www.w3.org/2000/svg" id="ds5" data-controller="ds5" data-name="DualSense" data-platform="PlayStation" viewBox="22.5571 18.49769 478.0901 384.80791" data-labels="icons" data-layout="full" role="img" aria-label="DualSense input display" font-family="Arial, sans-serif" data-full-viewbox="22.5571 18.49769 478.0901 384.80791" data-compact-viewbox="-2 0 181 78" data-source="PS5.svg">
+  <title>DualSense</title>
   <style>
     .custom-colors .shell-base { fill: var(--controller-color); }
     .custom-colors .shell-panel { fill: var(--controller-panel); }

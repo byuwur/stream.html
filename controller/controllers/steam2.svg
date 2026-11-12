@@ -1,5 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" id="steam2" data-controller="steam2" data-name="Steam Controller (2026)" data-platform="Steam" viewBox="16.4452 22.32785 490.0656 414.94135" data-labels="icons" data-layout="full" role="img" aria-label="Steam Controller (2026) input display" font-family="Arial, sans-serif" data-full-viewbox="16.4452 22.32785 490.0656 414.94135" data-compact-viewbox="-2.00044 0 180.00044 84.6581" data-source="STEAM2.svg">
-  <title>Steam Controller (2026)</title>
+<svg xmlns="http://www.w3.org/2000/svg" id="steam2" data-controller="steam2" data-name="Steam 2026" data-platform="Steam" viewBox="16.4452 22.32785 490.0656 414.94135" data-labels="icons" data-layout="full" role="img" aria-label="Steam 2026 input display" font-family="Arial, sans-serif" data-full-viewbox="16.4452 22.32785 490.0656 414.94135" data-compact-viewbox="-2.00044 0 180.00044 84.6581" data-source="STEAM2.svg">
+  <title>Steam 2026</title>
   <style>
     .custom-colors .shell-base { fill: var(--controller-color); }
     .custom-colors .shell-panel { fill: var(--controller-panel); }

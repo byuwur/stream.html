@@ -1,5 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" id="wiiu" data-controller="wiiu" data-name="Nintendo Wii U GamePad" data-platform="Nintendo" viewBox="37.01 20.7632 701.62 431.4368" data-labels="icons" data-layout="full" role="img" aria-label="Nintendo Wii U GamePad input display" font-family="Arial, sans-serif" data-orientation="portrait" data-full-viewbox="37.01 20.7632 701.62 431.4368" data-compact-viewbox="-2 0 179 80" data-source="WIIU.svg">
-  <title>Nintendo Wii U GamePad</title>
+<svg xmlns="http://www.w3.org/2000/svg" id="wiiu" data-controller="wiiu" data-name="Wii U GamePad" data-platform="Nintendo" viewBox="37.01 20.7632 701.62 431.4368" data-labels="icons" data-layout="full" role="img" aria-label="Wii U GamePad input display" font-family="Arial, sans-serif" data-orientation="portrait" data-full-viewbox="37.01 20.7632 701.62 431.4368" data-compact-viewbox="-2 0 179 80" data-source="WIIU.svg">
+  <title>Wii U GamePad</title>
   <style>
     .custom-colors .shell-base { fill: var(--controller-color); }
     .custom-colors .shell-panel { fill: var(--controller-panel); }
