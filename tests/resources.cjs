@@ -153,6 +153,43 @@ test("resources render and round-trip URLs without configurator assets", async (
       }
     });
 
+    await t.test("inactive drafts remain validated while availability and legacy normalization govern shared URLs", async () => {
+      const page = await browser.newPage();
+      try {
+        await serve(page, assets, true);
+        await page.goto("https://stream.test/clock/?savedColor=aa33cc&savedSwitch=yes&transient=9&combined=8");
+        await page.waitForFunction(() => window.byStreamResource);
+        const result = await page.evaluate(async () => {
+          const toggle = { type: "switch", checkedValue: "yes", uncheckedValue: "no", options: { yes: "On", no: "Off" } };
+          const fields = {
+            enabled: { ...toggle, default: "no" },
+            available: { ...toggle, default: "yes" },
+            savedColor: { type: "color", default: "#111111", when: ["enabled", "yes"], retainInactive: true },
+            savedSwitch: { ...toggle, default: "no", when: ["enabled", "yes"], retainInactive: true },
+            transient: { type: "number", default: 1, min: 0, max: 10, when: ["enabled", "yes"] },
+            combined: { type: "number", default: 1, min: 0, max: 10, when: (settings) => settings.enabled === "yes" && settings.available === "yes", retainInactive: true }
+          };
+          let normalized = 0;
+          const resource = { fields, urlRequired: [], normalizeParameters(values) { normalized++; values.set("savedColor", values.get("savedColor").toUpperCase()); } };
+          const settings = await byStream.initResource(resource);
+          const inactive = { ...settings }, hiddenURL = byStream.settingsURL(resource, settings).search;
+          byStream.applyParameters(fields, settings, new URLSearchParams("savedColor=invalid&combined=99"));
+          const invalid = { ...settings };
+          settings.enabled = "yes";
+          const activeURL = Object.fromEntries(byStream.settingsURL(resource, settings).searchParams);
+          settings.available = "no";
+          return { normalized, inactive, hiddenURL, invalid, activeURL, combinedEnabled: byStream.fieldEnabled(fields, settings, "combined"), unavailableURL: Object.fromEntries(byStream.settingsURL(resource, settings).searchParams) };
+        });
+        assert.equal(result.normalized, 1);
+        assert.deepEqual(result.inactive, { enabled: "no", available: "yes", savedColor: "#AA33CC", savedSwitch: "yes", transient: 1, combined: 8, animate: "yes" });
+        assert.equal(result.hiddenURL, "");
+        assert.deepEqual(result.invalid, result.inactive, "Invalid inactive values cannot overwrite accepted drafts");
+        assert.deepEqual(result.activeURL, { enabled: "yes", savedColor: "AA33CC", savedSwitch: "yes", combined: "8" });
+        assert.equal(result.combinedEnabled, false);
+        assert.equal(Object.hasOwn(result.unavailableURL, "combined"), false);
+      } finally { await page.close(); }
+    });
+
     await t.test("invalid values retain defaults while zero and untrusted text survive", async () => {
       const page = await browser.newPage();
       try {

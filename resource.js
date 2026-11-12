@@ -33,7 +33,8 @@
  * @property {number} [maxlength] Maximum accepted text or serialized-content length.
  * @property {string} [checkedValue] Serialized value when a switch is on.
  * @property {string} [uncheckedValue] Serialized value when a switch is off.
- * @property {Array<string>} [when] Parent field and allowed values; a parent alone requires nonempty text. Inactive ancestors disable descendants and their overrides.
+ * @property {Array<string>|function(ResourceSettings): boolean} [when] Parent and allowed values, or a predicate for combined conditions. Inactive ancestors disable descendants and their overrides.
+ * @property {boolean} [retainInactive] Keep accepted inactive values in settings and editor preferences; inactive values remain omitted from overlay URLs and styles.
  * @property {Object} [entries] Row-editor choices, choiceKey, textFields, newEntry, limit, and addLabel; map selects a key/value representation.
  * @property {string} [styleSelector] Native elements affected by the override, including rows created later.
  * @property {string} [styleProperty] CSS property written by the override.
@@ -57,6 +58,7 @@
  * @property {Array<number>} preview Preview width and height in pixels.
  * @property {ResourceFields} fields Parameter definitions in display order.
  * @property {Array<string>} urlRequired Active parameters retained even at defaults to enable overlay mode and preserve anchors/content.
+ * @property {function(URLSearchParams): void} [normalizeParameters] Migrate decoded legacy parameters before validation, including editor imports.
  * @property {Object<string, ResourceValue>} [constants] Renderer-only defaults excluded from URL fields.
  * @property {Object<string, string>} [sectionIcons] Explicit icons for top-level sections.
  * @property {boolean|Object} [presets] Whether the editor exposes shared or resource-specific appearance presets.
@@ -273,6 +275,7 @@
   function fieldEnabled(fields, settings, name) {
     const when = fields[name].when;
     if (!when) return true;
+    if (typeof when === "function") return Boolean(when(settings));
     const [parent, ...values] = when;
     const value = String(settings[parent]);
     // Matching the immediate parent is insufficient if an earlier ancestor is inactive.
@@ -312,7 +315,7 @@
     }
     // Resolve availability after applying every parameter, regardless of its order in the URL.
     for (const [name, field] of Object.entries(fields)) {
-      if (!fieldEnabled(fields, settings, name)) settings[name] = field.type === "switch" ? field.uncheckedValue : structuredClone(field.default);
+      if (!field.retainInactive && !fieldEnabled(fields, settings, name)) settings[name] = field.type === "switch" ? field.uncheckedValue : structuredClone(field.default);
     }
   }
 
@@ -1152,6 +1155,7 @@
     // Only an attached editor supplies saved preferences; standalone overlays use their URL alone.
     const search = overlay ? location.search : (byStream.prepareResource?.(resource) ?? location.search);
     byStream.ready = readURLParameters(resource.fields, search).then((parameters) => {
+      resource.normalizeParameters?.(parameters.values);
       // Resolve one settings object for both consumers before either the renderer or editor starts.
       const settings = { ...resource.constants, ...Object.fromEntries(Object.entries(resource.fields).map(([name, field]) => [name, structuredClone(field.default)])) };
       applyParameters(resource.fields, settings, parameters.values);

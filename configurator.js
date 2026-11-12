@@ -985,7 +985,16 @@
       }
       // Compression can finish out of order; only the latest edit may publish or save its URL.
       if (generation !== urlGeneration) return false;
-      savePreferences(url.search.slice(1));
+      // Retained drafts belong to the existing editor preference, never to the shared overlay URL.
+      const preferenceValues = new URLSearchParams(url.search);
+      for (const [name, field] of Object.entries(parameterRules)) {
+        if (!field.retainInactive || fieldEnabled(parameterRules, settings, name)) continue;
+        let value = typeof settings[name] === "object" ? JSON.stringify(settings[name]) : String(settings[name]);
+        if (field.type === "color") value = value.replace(/^#/, "");
+        if (value.startsWith("dr:") || value.startsWith("raw:")) value = `raw:${value}`;
+        preferenceValues.set(name, value);
+      }
+      savePreferences(preferenceValues.toString());
       if (!urlEdited) $("#overlay-url").val(url.href);
       $("#url-summary").text(summary);
       $("#preview-url").attr("href", url.href);
@@ -2481,6 +2490,7 @@
      * @returns {void}
      */
     function loadSettings(values) {
+      resource.normalizeParameters?.(values);
       const loaded = { ...resource.constants, ...Object.fromEntries(Object.entries(parameterRules).map(([name, field]) => [name, structuredClone(field.default)])) };
       byStream.applyParameters(parameterRules, loaded, values);
       Object.assign(settings, loaded);
