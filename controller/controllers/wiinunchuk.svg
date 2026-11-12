@@ -66,7 +66,7 @@
       <g id="shell-surfaces">
         <path
           d="M100 203c0-60 19-103 59-103 40 0 59 43 59 103 0 66-13 160-31 226-5 21-15 33-28 33-13 0-23-12-28-33-18-66-31-160-31-226z"
-          fill="#292c31" stroke="#111111" stroke-width="1.7" class="vector-outline shell-base" />
+          fill="#292c31" stroke="#111111" stroke-width="3" class="vector-outline shell-base" />
         <rect x="321.04" y="8.92" width="113.67" height="468.59" rx="12.65" fill="#292c31"
           stroke="rgb(0, 0, 0)" class="vector-outline shell-base" stroke-width="3" />
         <circle cx="369.5" cy="271.44" r="2.19" fill="#d3d5d8" stroke="none"
@@ -402,7 +402,7 @@
     <g class="analog-socket">
       <polygon
         points="190.92927664359007,183.2255394225375 172.2255394225375,201.92927664359007 145.7744605774625,201.92927664359007 127.07072335640993,183.2255394225375 127.07072335640993,156.77446057746252 145.7744605774625,138.07072335640993 172.2255394225375,138.07072335640993 190.92927664359007,156.7744605774625"
-        fill="#151a20" class="vector-outline socket-base" stroke="#111111" stroke-width="1.8" />
+        fill="#151a20" class="vector-outline socket-base" stroke="#111111" stroke-width="3" />
     </g>
   </g>
   <g id="input-10" class="control stick stock-neutral" data-name="stick-1" data-input="button:10"
@@ -425,9 +425,9 @@
     <g class="press-visual">
       <g class="full-geometry shoulder-geometry">
         <rect x="445" y="162" width="42" height="48" rx="5" fill="#34393e"
-          class="button-face vector-outline stock-plastic" stroke="#111111" stroke-width="1.8" />
+          class="button-face vector-outline stock-plastic" stroke="#111111" stroke-width="3" />
         <rect x="450" y="167" width="32" height="38" rx="3" fill="none" class="vector-outline"
-          stroke="#111111" stroke-width="1.8" />
+          stroke="#111111" stroke-width="3" />
         <g class="hardware-icon marking ">
           <path d="M0 10V0H4Q8 0 8 2.5Q8 5 4 5H0M4 5Q8 5 8 7.5Q8 10 4 10H0" fill="none"
             stroke="var(--button-label-color, #85888b)" stroke-width="1.25" stroke-linejoin="round"
@@ -446,7 +446,7 @@
     <g class="press-visual">
       <g class="full-geometry shoulder-geometry">
         <ellipse cx="159" cy="80" rx="26" ry="13" fill="#34393e" class="button-face vector-outline"
-          stroke="#111111" stroke-width="1.8" />
+          stroke="#111111" stroke-width="3" />
         <g class="hardware-icon marking ">
           <path d="M164.2 74.8Q153.8 70.9 153.8 80 153.8 89.1 164.2 85.2" fill="none"
             stroke="var(--button-label-color, #85888b)" stroke-width="1.25" stroke-linejoin="round"
@@ -465,7 +465,7 @@
     <g class="press-visual">
       <g class="full-geometry shoulder-geometry">
         <rect x="131" y="35" width="56" height="28" rx="7" fill="#34393e"
-          class="button-face vector-outline" stroke="#111111" stroke-width="1.8" />
+          class="button-face vector-outline" stroke="#111111" stroke-width="3" />
         <g class="hardware-icon marking ">
           <path d="M153.8 42.5H164.2L153.8 55.5H164.2" fill="none"
             stroke="var(--button-label-color, #85888b)" stroke-width="1.25" stroke-linejoin="round"

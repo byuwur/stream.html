@@ -86,6 +86,14 @@ test("configurator forms and previews initialize for every resource", async (t) 
         assert.deepEqual(await page.locator("#skin-input optgroup").evaluateAll((groups) => groups.map((group) => group.label)), ["Nintendo", "PlayStation", "Xbox", "Sega", "Steam", "Other"]);
         for (const id of ["ds3", "ds4", "ds5", "fgc", "fgc6", "fgc4", "gcn", "n64", "nes", "snes", "x360", "xone", "xseries"]) assert.ok(choices.some(([value]) => value === id));
         await page.frameLocator("#overlay-preview").locator('svg[data-controller="snes"].controller-background').waitFor();
+        assert.equal(await page.locator("#preview-viewport").getAttribute("viewBox"), "0 0 1280 720");
+        assert.deepEqual(
+          await page
+            .frameLocator("#overlay-preview")
+            .locator("html")
+            .evaluate(() => [innerWidth, innerHeight]),
+          [1280, 720]
+        );
         assert.equal(new URL(await page.locator("#overlay-url").inputValue()).searchParams.get("skin"), "snes");
         await page.keyboard.press("F1");
         await page.locator('[data-section="remap"]').click();

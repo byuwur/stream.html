@@ -129,7 +129,7 @@
               fill="none" stroke="var(--button-label-color, #872b2b)" stroke-width="1.25"
               stroke-linejoin="round" stroke-linecap="round" />
           </g>
-          <g class="hardware-icon marking full-hardware">
+          <g class="hardware-icon marking full-hardware" transform="translate(0 4.8)">
             <path
               d="M364.22521 326.2936V315.3064H371.55001Q378.87481 315.3064 378.87481 318.0532 378.87481 320.8 371.55001 320.8H364.22521M371.55001 320.8Q378.87481 320.8 378.87481 323.5468 378.87481 326.2936 371.55001 326.2936H364.22521"
               fill="none" stroke="#c94444" stroke-width="1.25" stroke-linejoin="round"
@@ -165,7 +165,7 @@
               fill="none" stroke="var(--button-label-color, #872b2b)" stroke-width="1.25"
               stroke-linejoin="round" stroke-linecap="round" />
           </g>
-          <g class="hardware-icon marking full-hardware">
+          <g class="hardware-icon marking full-hardware" transform="translate(0 4.8)">
             <path
               d="M432.02521 326.2936L438.43441 315.3064H440.26561L446.67481 326.2936M435.32141 322.44808H443.37871"
               fill="none" stroke="#c94444" stroke-width="1.25" stroke-linejoin="round"

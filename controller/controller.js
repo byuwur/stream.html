@@ -920,12 +920,12 @@ function customizeControllerAppearance(controller, settings) {
       : settings.customOutlineColor === "yes"
         ? settings.outlineColor
         : null;
-  for (const node of controller.querySelectorAll(".vector-outline:not(.control-detail):not(.button-detail)")) {
+  for (const node of controller.querySelectorAll(".vector-outline")) {
     if (node.closest("defs, .marking, .hardware-icon, .guide-logo-original")) continue;
     const style = getComputedStyle(node);
     if (style.stroke === "none") continue;
     node.style.strokeWidth = `${parseFloat(style.strokeWidth) * settings.outlineWidth}px`;
-    if (outline) node.style.stroke = outline;
+    if (outline && !node.matches(".control-detail, .button-detail")) node.style.stroke = outline;
   }
   if (settings.tintControls === "yes") tintControllerControls(controller, settings.controllerColor);
   if (settings.customGuide !== "yes") return;

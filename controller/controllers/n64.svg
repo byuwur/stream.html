@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" id="n64" data-controller="n64" data-name="N64"
-  data-platform="Nintendo" viewBox="15.0659 -10.35 495.3002 484.24" data-labels="icons"
+  data-platform="Nintendo" viewBox="15.0659 -14.35 495.3002 488.24" data-labels="icons"
   data-layout="full" role="img" aria-label="N64 input display" font-family="Arial, sans-serif"
-  data-full-viewbox="15.0659 -10.35 495.3002 484.24" data-compact-viewbox="1.5 1.5 124 106"
+  data-full-viewbox="15.0659 -14.35 495.3002 488.24" data-compact-viewbox="1.5 1.5 124 106"
   data-source="N64.svg">
   <title>N64</title>
   <style>
@@ -83,7 +83,7 @@
       </g>
       <g class="compact-geometry minimal-bar-base">
         <rect x="61.63" y="49.01045" width="100.83" height="36.2991" rx="18.14955"
-          fill="rgb(191, 194, 197)" stroke="#aeb6be" stroke-width="2.6216"
+          fill="rgb(191, 194, 197)" stroke="#aeb6be" stroke-width="3"
           class="vector-outline button-face" />
         <g class="marking minimal-bar-label">
           <path d="M103.62361 56.63326V77.68674H120.4664" fill="none" stroke="#4e565f"
@@ -115,7 +115,7 @@
       </g>
       <g class="compact-geometry minimal-bar-base">
         <rect x="362.90997" y="49.0109" width="100.83002" height="36.2982" rx="18.1491"
-          fill="rgb(191, 194, 197)" stroke="#aeb6be" stroke-width="2.62154"
+          fill="rgb(191, 194, 197)" stroke="#aeb6be" stroke-width="3"
           class="vector-outline button-face" />
         <g class="marking minimal-bar-label">
           <path
@@ -128,6 +128,35 @@
     <text x="413.32498" y="55.75" fill="var(--button-label-color, #76787a)" stroke-width="0.3"
       font-family="Arial, sans-serif" font-size="11" text-anchor="middle"
       dominant-baseline="central" class="word-label marking">R</text>
+  </g>
+  <g id="input-6" class="control stock-neutral minimal-bar"
+    data-name="button-left-shoulder-bottom-digital" data-input="button:6" data-label="Z"
+    data-bounds="236.10001 -8.35 52.79999 39.6"
+    data-compact-transform="matrix(0.5303 0 0 0.5303 -111.20457 1.3069)" data-order="-24"
+    data-reconstructed="yes" data-compact-scale="0.5303">
+    <g class="press-visual">
+      <g class="full-geometry shoulder-geometry" transform="translate(0 -4)">
+        <path d="M236.1 35.25L236.1 3.57Q263.3-12.27 288.9 3.57L288.9 35.25Z" fill="#bfc2c5"
+          class="button-face vector-outline" stroke="#111111" stroke-width="3" />
+        <g class="hardware-icon marking ">
+          <path d="M258.46799 9.21H266.53199L258.46799 19.29H266.53199" fill="none"
+            stroke="var(--button-label-color, #76787a)" stroke-width="1.25" stroke-linejoin="round"
+            stroke-linecap="round" />
+        </g>
+      </g>
+      <g class="compact-geometry minimal-bar-base">
+        <rect x="236.10001" y="6.96424" width="52.79999" height="16.97153" rx="8.48576"
+          fill="rgb(191, 194, 197)" stroke="#aeb6be" stroke-width="3"
+          class="vector-outline button-face" />
+        <g class="marking minimal-bar-label">
+          <path d="M258.56262 10.52826H266.4374L258.56262 20.37174H266.4374" fill="none"
+            stroke="#4e565f" stroke-width="1.35772" stroke-linejoin="round" stroke-linecap="round" />
+        </g>
+      </g>
+    </g>
+    <text x="262.5" y="22.05" fill="var(--button-label-color, #76787a)" stroke-width="0.3"
+      font-family="Arial, sans-serif" font-size="9.12" text-anchor="middle"
+      dominant-baseline="central" class="word-label marking" transform="matrix(1 0 0 1 0 -11.8)">Z</text>
   </g>
   <g>
     <g id="shell">
@@ -187,35 +216,7 @@
       </g>
     </g>
   </g>
-  <g id="input-6" class="control stock-neutral minimal-bar"
-    data-name="button-left-shoulder-bottom-digital" data-input="button:6" data-label="Z"
-    data-bounds="236.10001 -4.35 52.79999 39.6"
-    data-compact-transform="matrix(0.5303 0 0 0.5303 -111.20457 1.3069)" data-order="-24"
-    data-reconstructed="yes" data-compact-scale="0.5303">
-    <g class="press-visual">
-      <g class="full-geometry shoulder-geometry">
-        <path d="M236.1 35.25L236.1 3.57Q263.3-12.27 288.9 3.57L288.9 35.25Z" fill="#bfc2c5"
-          class="button-face vector-outline" stroke="#111111" stroke-width="1.8" />
-        <g class="hardware-icon marking ">
-          <path d="M258.46799 9.21H266.53199L258.46799 19.29H266.53199" fill="none"
-            stroke="var(--button-label-color, #76787a)" stroke-width="1.25" stroke-linejoin="round"
-            stroke-linecap="round" />
-        </g>
-      </g>
-      <g class="compact-geometry minimal-bar-base">
-        <rect x="236.10001" y="6.96424" width="52.79999" height="16.97153" rx="8.48576"
-          fill="rgb(191, 194, 197)" stroke="#aeb6be" stroke-width="1.22572"
-          class="vector-outline button-face" />
-        <g class="marking minimal-bar-label">
-          <path d="M258.56262 10.52826H266.4374L258.56262 20.37174H266.4374" fill="none"
-            stroke="#4e565f" stroke-width="1.35772" stroke-linejoin="round" stroke-linecap="round" />
-        </g>
-      </g>
-    </g>
-    <text x="262.5" y="22.05" fill="var(--button-label-color, #76787a)" stroke-width="0.3"
-      font-family="Arial, sans-serif" font-size="9.12" text-anchor="middle"
-      dominant-baseline="central" class="word-label marking" transform="matrix(1 0 0 1 0 -7.8)">Z</text>
-  </g>
+
   <g id="input-9" class="control stock-neutral" data-name="button-start" data-input="button:9"
     data-label="Start" data-bounds="245.37 165.01001 34.64 34.64"
     data-compact-transform="matrix(0.23095 0 0 0.23095 3.33256 -5.10855)" data-order="7"

@@ -98,7 +98,7 @@
 
       <g class="compact-geometry minimal-bar-base">
         <rect x="81.13762" y="72.4088" width="80.01097" height="20.00274" rx="10.00137"
-          fill="rgb(52, 57, 62)" stroke="#aeb6be" stroke-width="1.44464"
+          fill="rgb(52, 57, 62)" stroke="#aeb6be" stroke-width="3"
           class="vector-outline button-face" />
         <g class="marking minimal-bar-label">
           <path d="M110.70167 76.60938V88.21097H119.98294" fill="none" stroke="#c8ced4"
@@ -139,7 +139,7 @@
 
       <g class="compact-geometry minimal-bar-base">
         <rect x="361.85132" y="72.4088" width="80.01096" height="20.00274" rx="10.00137"
-          fill="rgb(52, 57, 62)" stroke="#aeb6be" stroke-width="1.44465"
+          fill="rgb(52, 57, 62)" stroke="#aeb6be" stroke-width="3"
           class="vector-outline button-face" />
         <g class="marking minimal-bar-label">
           <path
@@ -191,15 +191,15 @@
   </g>
   <g id="input-6" class="control analog-trigger stock-neutral minimal-bar"
     data-name="button-left-shoulder-bottom-digital" data-input="button:6" data-label="LT"
-    data-bounds="104 -3.2697 43.07552 69.39957"
+    data-bounds="104 -3.27 43.08 68.02665"
     data-compact-transform="matrix(0.83574 0 0 0.83574 -86.91712 -19.26743)" data-order="-24"
-    data-reconstructed="yes" data-pressure-full-bounds="104 -3.2697 43.07552 69.39957"
+    data-reconstructed="yes" data-pressure-full-bounds="104 -3.27 43.08 68.02665"
     data-compact-scale="0.83574">
     <g class="press-visual">
       <g class="full-geometry shoulder-geometry">
         <path
-          d="M104 30.4728v-15.5925c0-13.2 8-19.2 20-18 15 1.2 24 8.4 23 21.6l-0.66625 11.9925 0.74176 28.10803c-14.95026-0.91529-29.30233 1.6939-43.07551 7.54904z"
-          fill="#34393e" class="button-face vector-outline" stroke="#111111" stroke-width="1.8" />
+          d="M104 62.49 V14.73 C104 0.73 112 -3.27 124 -3.27 C138 -3.27 147.08 3.73 147.08 16.73 V54.93 C147.08 57.93 145.58 57.83 144.08 57.78 C131.72 57.36 119.36 59.43 107 64.26 C105.5 64.85 104 65.49 104 62.49 Z"
+          fill="#34393e" class="button-face vector-outline" stroke="#000000" stroke-width="3" />
         <g class="hardware-icon marking ">
           <path d="M115.63776 22.9803V33.9803H124.43776" fill="none"
             stroke="var(--button-label-color, #85888b)" stroke-width="1.25" stroke-linejoin="round"
@@ -212,7 +212,7 @@
 
       <g class="compact-geometry minimal-bar-base">
         <rect x="104" y="26.04565" width="43.07552" height="10.76888" rx="5.38444"
-          fill="rgb(52, 57, 62)" stroke="#aeb6be" stroke-width="0.77775"
+          fill="rgb(52, 57, 62)" stroke="#aeb6be" stroke-width="3"
           class="vector-outline button-face" />
         <g class="marking minimal-bar-label">
           <path d="M119.91641 28.30711V34.55306H124.91317" fill="none" stroke="#c8ced4"
@@ -226,8 +226,8 @@
       <g class="press-visual">
         <g class="full-geometry shoulder-geometry">
           <path
-            d="M104 30.4728v-15.5925c0-13.2 8-19.2 20-18 15 1.2 24 8.4 23 21.6l-0.66625 11.9925 0.74176 28.10803c-14.95026-0.91529-29.30233 1.6939-43.07551 7.54904z"
-            fill="#cbd0d5" class="button-face vector-outline" stroke="#111111" stroke-width="1.8" />
+            d="M104 62.49 V14.73 C104 0.73 112 -3.27 124 -3.27 C138 -3.27 147.08 3.73 147.08 16.73 V54.93 C147.08 57.93 145.58 57.83 144.08 57.78 C131.72 57.36 119.36 59.43 107 64.26 C105.5 64.85 104 65.49 104 62.49 Z"
+            fill="#cbd0d5" class="button-face vector-outline" stroke="#000000" stroke-width="3" />
           <g class="hardware-icon marking ">
             <path d="M115.63776 22.9803V33.9803H124.43776" fill="none"
               stroke="var(--button-label-color, #85888b)" stroke-width="1.25"
@@ -240,7 +240,7 @@
 
         <g class="compact-geometry minimal-bar-pressure">
           <rect x="104" y="26.04565" width="43.07552" height="10.76888" rx="5.38444" fill="#c8ced4"
-            stroke="#aeb6be" stroke-width="0.77775" class="vector-outline button-face" />
+            stroke="#aeb6be" stroke-width="3" class="vector-outline button-face" />
           <g class="marking minimal-bar-label">
             <path d="M119.91641 28.30711V34.55306H124.91317" fill="none" stroke="#283039"
               stroke-width="0.86151" stroke-linejoin="round" stroke-linecap="round" />
@@ -256,15 +256,15 @@
   </g>
   <g id="input-7" class="control analog-trigger stock-neutral minimal-bar"
     data-name="button-right-shoulder-bottom-digital" data-input="button:7" data-label="RT"
-    data-bounds="375.92441 -3.2697 43.0755 69.39957"
+    data-bounds="375.92001 -3.27 43.07999 68.02665"
     data-compact-transform="matrix(0.83574 0 0 0.83574 -182.17579 -19.26744)" data-order="-23"
-    data-reconstructed="yes" data-pressure-full-bounds="375.92441 -3.2697 43.0755 69.39957"
+    data-reconstructed="yes" data-pressure-full-bounds="375.92001 -3.27 43.07999 68.02665"
     data-compact-scale="0.83574">
     <g class="press-visual">
       <g class="full-geometry shoulder-geometry">
         <path
-          d="M418.9999 30.4728v-15.5925c0-13.2-8-19.2-20-18-15 1.2-24 8.4-23 21.6l0.66625 11.9925-0.74176 28.10803c14.95026-0.91529 29.30233 1.6939 43.07551 7.54904z"
-          fill="#34393e" class="button-face vector-outline" stroke="#111111" stroke-width="1.8" />
+          d="M419 62.49 V14.73 C419 0.73 411 -3.27 399 -3.27 C385 -3.27 375.92 3.73 375.92 16.73 V54.93 C375.92 57.93 377.42 57.83 378.92 57.78 C391.28 57.36 403.64 59.43 416 64.26 C417.5 64.85 419 65.49 419 62.49 Z"
+          fill="#34393e" class="button-face vector-outline" stroke="#000000" stroke-width="3" />
         <g class="hardware-icon marking ">
           <path
             d="M387.56212 33.9803V22.9803H391.96212Q396.36212 22.9803 396.36212 26.2803 396.36212 28.4803 391.96212 28.4803H387.56212M391.96212 28.4803L396.36212 33.9803"
@@ -278,7 +278,7 @@
 
       <g class="compact-geometry minimal-bar-base">
         <rect x="375.92441" y="26.04565" width="43.0755" height="10.76887" rx="5.38444"
-          fill="rgb(52, 57, 62)" stroke="#aeb6be" stroke-width="0.77775"
+          fill="rgb(52, 57, 62)" stroke="#aeb6be" stroke-width="3"
           class="vector-outline button-face" />
         <g class="marking minimal-bar-label">
           <path
@@ -294,8 +294,8 @@
       <g class="press-visual">
         <g class="full-geometry shoulder-geometry">
           <path
-            d="M418.9999 30.4728v-15.5925c0-13.2-8-19.2-20-18-15 1.2-24 8.4-23 21.6l0.66625 11.9925-0.74176 28.10803c14.95026-0.91529 29.30233 1.6939 43.07551 7.54904z"
-            fill="#cbd0d5" class="button-face vector-outline" stroke="#111111" stroke-width="1.8" />
+            d="M419 62.49 V14.73 C419 0.73 411 -3.27 399 -3.27 C385 -3.27 375.92 3.73 375.92 16.73 V54.93 C375.92 57.93 377.42 57.83 378.92 57.78 C391.28 57.36 403.64 59.43 416 64.26 C417.5 64.85 419 65.49 419 62.49 Z"
+            fill="#cbd0d5" class="button-face vector-outline" stroke="#000000" stroke-width="3" />
           <g class="hardware-icon marking ">
             <path
               d="M387.56212 33.9803V22.9803H391.96212Q396.36212 22.9803 396.36212 26.2803 396.36212 28.4803 391.96212 28.4803H387.56212M391.96212 28.4803L396.36212 33.9803"
@@ -309,7 +309,7 @@
 
         <g class="compact-geometry minimal-bar-pressure">
           <rect x="375.92441" y="26.04565" width="43.0755" height="10.76887" rx="5.38444"
-            fill="#c8ced4" stroke="#aeb6be" stroke-width="0.77775"
+            fill="#c8ced4" stroke="#aeb6be" stroke-width="3"
             class="vector-outline button-face" />
           <g class="marking minimal-bar-label">
             <path
@@ -641,7 +641,7 @@
     </g>
     <g class="analog-socket">
       <circle cx="117.59" cy="166.47001" r="46.66" fill="#151a20" class="vector-outline socket-base"
-        stroke="#111111" stroke-width="1.8" />
+        stroke="#111111" stroke-width="3" />
     </g>
   </g>
   <g id="input-10" class="control stick stock-neutral" data-name="stick-1" data-input="button:10"
@@ -675,7 +675,7 @@
     </g>
     <g class="analog-socket">
       <circle cx="327.29999" cy="249.88999" r="46.66" fill="#151a20"
-        class="vector-outline socket-base" stroke="#111111" stroke-width="1.8" />
+        class="vector-outline socket-base" stroke="#111111" stroke-width="3" />
     </g>
   </g>
   <g id="input-11" class="control stick stock-neutral" data-name="stick-2" data-input="button:11"

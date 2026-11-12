@@ -105,6 +105,21 @@ test("resources render and round-trip URLs without configurator assets", async (
               sockets: svg.dataset.controller === "fgc" || svg.querySelectorAll(".analog-socket").length === sticks,
               wordsHidden: [...svg.querySelectorAll(".word-label")].every((node) => getComputedStyle(node).display === "none"),
               vectorLabels: !svg.querySelector(".hardware-icon text"),
+              uniformOutlines: [...svg.querySelectorAll(".vector-outline")]
+                .filter((node) => !node.closest("defs, .marking, .hardware-icon, .guide-logo-original") && getComputedStyle(node).stroke !== "none")
+                .every((node) => parseFloat(getComputedStyle(node).strokeWidth) === 3),
+              triggerGeometry: [...svg.querySelectorAll(".analog-trigger")].every((control) => {
+                const face = control.querySelector(".full-geometry .button-face"),
+                  active = control.querySelector(".trigger-active .full-geometry .button-face"),
+                  bounds = face.getBBox(),
+                  pressure = control.dataset.pressureFullBounds.split(" ").map(Number);
+                return (
+                  [bounds.x, bounds.y, bounds.width, bounds.height].every((value, i) => Math.abs(value - pressure[i]) < 0.02) &&
+                  face.getAttribute("d") === active.getAttribute("d") &&
+                  getComputedStyle(face).strokeWidth === getComputedStyle(active).strokeWidth &&
+                  getComputedStyle(face).strokeWidth === getComputedStyle(svg.querySelector("#shell .shell-base")).strokeWidth
+                );
+              }),
               rotatedLabelsAligned:
                 svg.dataset.controller !== "steamdeck" ||
                 [2, 3].every((slot) => {
@@ -225,7 +240,7 @@ test("resources render and round-trip URLs without configurator assets", async (
     await t.test("native controller labels, contours, and shoulder spacing follow their hardware references", async () => {
       const page = await browser.newPage();
       try {
-        for (const skin of ["nes", "snes", "superfamicom", "gcn", "wiinunchuk", "ps", "ds2", "ds3", "ds4", "ds5", "steam", "steam2", "steamdeck", "wiiupro", "x360", "xseries"]) {
+        for (const skin of ["nes", "n64", "snes", "superfamicom", "gcn", "wiinunchuk", "ps", "ds2", "ds3", "ds4", "ds5", "steam", "steam2", "steamdeck", "wiiupro", "x360", "xseries"]) {
           await page.goto(pathToFileURL(path.join(root, `controller/controllers/${skin}.svg`)).href);
           const result = await page.evaluate((skin) => {
             const root = document.documentElement,
@@ -238,6 +253,14 @@ test("resources render and round-trip URLs without configurator assets", async (
                 const face = box(control(slot).querySelector(".button-face"));
                 return b.width > b.height && Math.abs(b.x + b.width / 2 - face.x - face.width / 2) < 0.02;
               });
+            if (skin === "n64") {
+              const z = control(6),
+                shell = root.querySelector("#shell"),
+                label = z.querySelector(".full-geometry .hardware-icon").getBoundingClientRect(),
+                face = z.querySelector(".full-geometry .button-face").getBoundingClientRect(),
+                body = shell.getBoundingClientRect();
+              return Boolean(z.compareDocumentPosition(shell) & Node.DOCUMENT_POSITION_FOLLOWING) && face.top < body.top && face.bottom > body.top && label.bottom < body.top;
+            }
             if (["snes", "superfamicom"].includes(skin))
               return [0, 1, 2, 3].every((slot) => {
                 const g = control(slot),
@@ -262,7 +285,9 @@ test("resources render and round-trip URLs without configurator assets", async (
                   face = g.querySelector(".full-geometry .button-face"),
                   label = box(g.querySelector(".full-geometry .hardware-icon")),
                   [cx, cy] = center(label);
-                return [-0.4, 0, 0.4].every((x) => [-0.4, 0, 0.4].every((y) => inside(face, cx + x * label.width, cy + y * label.height) && !solids.some((shape) => inside(shape, cx + x * label.width, cy + y * label.height))));
+                const bounds = box(face),
+                  coveredBase = skin !== "steamdeck" || [0.01, 0.5, 0.99].every((ratio) => solids.some((shape) => inside(shape, bounds.x + bounds.width * ratio, bounds.y + bounds.height - 0.1)));
+                return coveredBase && [-0.4, 0, 0.4].every((x) => [-0.4, 0, 0.4].every((y) => inside(face, cx + x * label.width, cy + y * label.height) && !solids.some((shape) => inside(shape, cx + x * label.width, cy + y * label.height))));
               });
             }
             return [
@@ -290,7 +315,8 @@ test("resources render and round-trip URLs without configurator assets", async (
                 return NaN;
               };
               return (
-                Math.abs(t.width - b.width) < 0.02 &&
+                Math.abs(t.width - b.width * 0.9) < 0.02 &&
+                Math.abs(t.x + t.width / 2 - b.x - b.width / 2) < 0.02 &&
                 [0.25, 0.5, 0.75].every((ratio) => {
                   const x = t.x + t.width * ratio,
                     gap = edge(control(bumper).querySelector(".button-face"), x, true) - edge(control(trigger).querySelector(".button-face"), x, false);
@@ -580,13 +606,13 @@ test("resources render and round-trip URLs without configurator assets", async (
         assert.equal(await page.evaluate(() => byStreamResource.settings.customColors), "no");
         assert.equal(await page.locator(".controller").evaluate((node) => node.style.getPropertyValue("--controller-color")), "");
         const baseline = await page
-          .locator(".vector-outline:not(.control-detail):not(.button-detail)")
+          .locator(".vector-outline")
           .evaluateAll((nodes) => nodes.filter((node) => !node.closest("defs, .marking, .hardware-icon, .guide-logo-original")).map((node) => getComputedStyle(node).strokeWidth));
         await open({ customColors: "yes", outlineWidth: "1.5" });
         const scaled = await page
-          .locator(".vector-outline:not(.control-detail):not(.button-detail)")
+          .locator(".vector-outline")
           .evaluateAll((nodes) => nodes.filter((node) => !node.closest("defs, .marking, .hardware-icon, .guide-logo-original")).map((node) => getComputedStyle(node).strokeWidth));
-        assert.ok(new Set(baseline).size > 1, "The fixture includes different original structural widths");
+        assert.deepEqual([...new Set(baseline)], ["3px"], "All structural outlines share the same authored width");
         assert.equal(scaled.length, baseline.length);
         // Computed SVG widths have limited decimal precision.
         assert.ok(scaled.every((width, i) => Math.abs(parseFloat(width) - parseFloat(baseline[i]) * 1.5) < 0.00001));
@@ -725,6 +751,14 @@ test("resources render and round-trip URLs without configurator assets", async (
               await page.waitForSelector(".controller.active:not(.disconnected) .controller-background", { state: "attached" });
               assert.equal(await page.evaluate((family) => byControllerArtwork.sources[family], family), source);
               const fixed = await page.locator(".control-layer .button-face").evaluateAll((nodes) => nodes.map((node) => getComputedStyle(node).fill));
+              if (!colors) {
+                const fit = await page.locator(".controller.active").evaluate((node) => {
+                  const bounds = node.getBoundingClientRect(),
+                    margin = byStreamResource.settings.fitMargin;
+                  return Math.abs(Math.max(bounds.width / (innerWidth - margin * 2), bounds.height / (innerHeight - margin * 2)) - 1) < 0.005;
+                });
+                assert.equal(fit, true, `${family}/${layout} fills the limiting viewport dimension`);
+              }
               if (colors) assert.deepEqual(fixed, colors, `${family} preserves hardware colors`);
               colors = fixed;
               if (family === "fgc") assert.equal(await page.locator(".controller-background .shell-base").count(), 0, "Fight stick has no background panel");

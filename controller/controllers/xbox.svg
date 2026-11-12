@@ -178,7 +178,7 @@
     <g class="press-visual">
       <g class="full-geometry shoulder-geometry">
         <path d="M91 51.87843c-2-14 0-35 12-47 9-7 26-5 34 5l9 32z" fill="#34393e"
-          class="button-face vector-outline" stroke="#111111" stroke-width="1.8" />
+          class="button-face vector-outline" stroke="#000000" stroke-width="3" />
         <g class="hardware-icon marking ">
           <path d="M108.26216 18.35929V29.35929H117.06216" fill="none"
             stroke="var(--button-label-color, #85888b)" stroke-width="1.25" stroke-linejoin="round"
@@ -191,7 +191,7 @@
 
       <g class="compact-geometry minimal-bar-base">
         <rect x="90.32433" y="18.93752" width="55.67567" height="14.73768" rx="7.36884"
-          fill="rgb(52, 57, 62)" stroke="#aeb6be" stroke-width="1.06439"
+          fill="rgb(52, 57, 62)" stroke="#aeb6be" stroke-width="3"
           class="vector-outline button-face" />
         <g class="marking minimal-bar-label">
           <path d="M110.46909 22.03243V30.58029H117.30738" fill="none" stroke="#c8ced4"
@@ -205,7 +205,7 @@
       <g class="press-visual">
         <g class="full-geometry shoulder-geometry">
           <path d="M91 51.87843c-2-14 0-35 12-47 9-7 26-5 34 5l9 32z" fill="#cbd0d5"
-            class="button-face vector-outline" stroke="#111111" stroke-width="1.8" />
+            class="button-face vector-outline" stroke="#000000" stroke-width="3" />
           <g class="hardware-icon marking ">
             <path d="M108.26216 18.35929V29.35929H117.06216" fill="none"
               stroke="var(--button-label-color, #85888b)" stroke-width="1.25"
@@ -218,7 +218,7 @@
 
         <g class="compact-geometry minimal-bar-pressure">
           <rect x="90.32433" y="18.93752" width="55.67567" height="14.73768" rx="7.36884"
-            fill="#c8ced4" stroke="#aeb6be" stroke-width="1.06439"
+            fill="#c8ced4" stroke="#aeb6be" stroke-width="3"
             class="vector-outline button-face" />
           <g class="marking minimal-bar-label">
             <path d="M110.46909 22.03243V30.58029H117.30738" fill="none" stroke="#283039"
@@ -242,7 +242,7 @@
     <g class="press-visual">
       <g class="full-geometry shoulder-geometry">
         <path d="M431.97742 51.87843c2-14 0-35-12-47-9-7-26-5-34 5l-9 32z" fill="#34393e"
-          class="button-face vector-outline" stroke="#111111" stroke-width="1.8" />
+          class="button-face vector-outline" stroke="#000000" stroke-width="3" />
         <g class="hardware-icon marking ">
           <path
             d="M394.91525 29.35929V18.35929H399.31525Q403.71525 18.35929 403.71525 21.65929 403.71525 23.85929 399.31525 23.85929H394.91525M399.31525 23.85929L403.71525 29.35929"
@@ -256,7 +256,7 @@
 
       <g class="compact-geometry minimal-bar-base">
         <rect x="376.97742" y="18.93752" width="55.67566" height="14.73767" rx="7.36884"
-          fill="rgb(52, 57, 62)" stroke="#aeb6be" stroke-width="1.06439"
+          fill="rgb(52, 57, 62)" stroke="#aeb6be" stroke-width="3"
           class="vector-outline button-face" />
         <g class="marking minimal-bar-label">
           <path
@@ -272,7 +272,7 @@
       <g class="press-visual">
         <g class="full-geometry shoulder-geometry">
           <path d="M431.97742 51.87843c2-14 0-35-12-47-9-7-26-5-34 5l-9 32z" fill="#cbd0d5"
-            class="button-face vector-outline" stroke="#111111" stroke-width="1.8" />
+            class="button-face vector-outline" stroke="#000000" stroke-width="3" />
           <g class="hardware-icon marking ">
             <path
               d="M394.91525 29.35929V18.35929H399.31525Q403.71525 18.35929 403.71525 21.65929 403.71525 23.85929 399.31525 23.85929H394.91525M399.31525 23.85929L403.71525 29.35929"
@@ -286,7 +286,7 @@
 
         <g class="compact-geometry minimal-bar-pressure">
           <rect x="376.97742" y="18.93752" width="55.67566" height="14.73767" rx="7.36884"
-            fill="#c8ced4" stroke="#aeb6be" stroke-width="1.06439"
+            fill="#c8ced4" stroke="#aeb6be" stroke-width="3"
             class="vector-outline button-face" />
           <g class="marking minimal-bar-label">
             <path
@@ -609,7 +609,7 @@
     </g>
     <g class="analog-socket">
       <circle cx="100.75" cy="184.12" r="52.67" fill="#151a20" class="vector-outline socket-base"
-        stroke="#111111" stroke-width="1.8" />
+        stroke="#111111" stroke-width="3" />
     </g>
   </g>
   <g id="input-10" class="control stick stock-neutral" data-name="stick-1" data-input="button:10"
@@ -636,7 +636,7 @@
     </g>
     <g class="analog-socket">
       <circle cx="384.84998" cy="299.09998" r="52.67" fill="#151a20"
-        class="vector-outline socket-base" stroke="#111111" stroke-width="1.8" />
+        class="vector-outline socket-base" stroke="#111111" stroke-width="3" />
     </g>
   </g>
   <g id="input-11" class="control stick stock-neutral" data-name="stick-2" data-input="button:11"

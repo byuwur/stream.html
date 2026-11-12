@@ -43,7 +43,7 @@
         <g class="full-geometry">
           <g>
             <circle cx="355.9" cy="192.5" r="61.7" fill="#1a1a1a" class="button-face vector-outline"
-              stroke="#111111" stroke-width="1.2" />
+              stroke="#111111" stroke-width="3" />
           </g>
           <g class="button-label marking full-only-decoration">
             <g class="hardware-icon">
@@ -101,7 +101,7 @@
         <g class="full-geometry">
           <g>
             <circle cx="510.9" cy="126.5" r="61.7" fill="#1a1a1a" class="button-face vector-outline"
-              stroke="#111111" stroke-width="1.2" />
+              stroke="#111111" stroke-width="3" />
           </g>
           <g class="button-label marking full-only-decoration">
             <g class="hardware-icon">
@@ -163,7 +163,7 @@
         <g class="full-geometry">
           <g>
             <circle cx="678.9" cy="154.5" r="61.7" fill="#1a1a1a" class="button-face vector-outline"
-              stroke="#111111" stroke-width="1.2" />
+              stroke="#111111" stroke-width="3" />
           </g>
           <g class="button-label marking full-only-decoration">
             <g class="hardware-icon">
@@ -228,7 +228,7 @@
         <g class="full-geometry">
           <g>
             <circle cx="840.1634043664516" cy="225.67771012185395" r="61.7" fill="#1a1a1a"
-              class="button-face vector-outline" stroke="#111111" stroke-width="1.2" />
+              class="button-face vector-outline" stroke="#111111" stroke-width="3" />
           </g>
           <g class="button-label marking full-only-decoration">
             <g class="hardware-icon">
@@ -290,7 +290,7 @@
         <g class="full-geometry">
           <g>
             <circle cx="808.9" cy="407.5" r="61.7" fill="#1a1a1a" class="button-face vector-outline"
-              stroke="#111111" stroke-width="1.2" />
+              stroke="#111111" stroke-width="3" />
           </g>
           <g class="button-label marking full-only-decoration">
             <g class="hardware-icon">
@@ -353,7 +353,7 @@
         <g class="full-geometry">
           <g>
             <circle cx="647.9" cy="336.5" r="61.7" fill="#1a1a1a" class="button-face vector-outline"
-              stroke="#111111" stroke-width="1.2" />
+              stroke="#111111" stroke-width="3" />
           </g>
           <g class="button-label marking full-only-decoration">
             <g class="hardware-icon">
@@ -416,7 +416,7 @@
         <g class="full-geometry">
           <g>
             <circle cx="478.9" cy="308.5" r="61.7" fill="#1a1a1a" class="button-face vector-outline"
-              stroke="#111111" stroke-width="1.2" />
+              stroke="#111111" stroke-width="3" />
           </g>
           <g class="button-label marking full-only-decoration">
             <g class="hardware-icon">
@@ -476,7 +476,7 @@
         <g class="full-geometry">
           <g>
             <circle cx="322.9" cy="373.5" r="61.7" fill="#1a1a1a" class="button-face vector-outline"
-              stroke="#111111" stroke-width="1.2" />
+              stroke="#111111" stroke-width="3" />
           </g>
           <g class="button-label marking full-only-decoration">
             <g class="hardware-icon">
@@ -532,7 +532,7 @@
         <g class="full-geometry">
           <g>
             <circle cx="41.5" cy="68" r="35.1" fill="#1a1a1a" class="button-face vector-outline"
-  stroke="#111111" stroke-width="1.2"></circle>
+  stroke="#111111" stroke-width="3"></circle>
           </g>
           <g class="full-only-decoration">
             <path
@@ -583,7 +583,7 @@
         <g class="full-geometry">
           <g>
             <circle cx="146.9" cy="71.1" r="35.1" fill="#1a1a1a" class="button-face vector-outline"
-  stroke="#111111" stroke-width="1.2"></circle>
+  stroke="#111111" stroke-width="3"></circle>
           </g>
           <g class="full-only-decoration">
             <path
@@ -617,7 +617,7 @@
   <g id="socket-10" data-for="button:10" data-order="-1" class="fixed-control"
     data-compact-transform="matrix(0.21053 0 0 0.21053 -0.76842 -29.94737)">
     <circle cx="93.9" cy="308.5" r="57" id="arcade-stick-socket" class="vector-outline"
-      fill="#000000" stroke="#111111" stroke-width="1.2" />
+      fill="#000000" stroke="#111111" stroke-width="3" />
     <line class="stick-shaft" x1="93.9" y1="308.5" x2="93.9" y2="308.5" stroke="#333333"
       stroke-width="12" stroke-linecap="round" />
   </g>
@@ -630,7 +630,7 @@
       <g class="full-geometry">
         <g transform="translate(93.9 308.5) scale(1.000000) translate(-110.3 -110.3)">
           <circle cx="110.3" cy="110.3" r="53" fill="#c1272d" class="button-face vector-outline"
-            stroke="#111111" stroke-width="1.2" />
+            stroke="#111111" stroke-width="3" />
           <path d="M153.03 78.93 A53 53 0 0 1 78.93 153.03 A60 60 0 0 0 153.03 78.93 Z"
             fill="#000000" opacity="0.15" />
         </g>

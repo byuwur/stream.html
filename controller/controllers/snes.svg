@@ -83,7 +83,7 @@
       </g>
       <g class="compact-geometry minimal-bar-base">
         <rect x="61.19" y="134.24236" width="109.59" height="25.9553" rx="12.97765"
-          fill="rgb(191, 194, 197)" stroke="#aeb6be" stroke-width="1.87455"
+          fill="rgb(191, 194, 197)" stroke="#aeb6be" stroke-width="3"
           class="vector-outline button-face" />
         <g class="marking minimal-bar-label">
           <path d="M109.96337 139.69297V154.74704H122.00663" fill="none" stroke="#4e565f"
@@ -115,7 +115,7 @@
       </g>
       <g class="compact-geometry minimal-bar-base">
         <rect x="352.17761" y="134.24237" width="109.58997" height="25.95528" rx="12.97764"
-          fill="rgb(191, 194, 197)" stroke="#aeb6be" stroke-width="1.87455"
+          fill="rgb(191, 194, 197)" stroke="#aeb6be" stroke-width="3"
           class="vector-outline button-face" />
         <g class="marking minimal-bar-label">
           <path

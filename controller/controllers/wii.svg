@@ -401,9 +401,9 @@
     <g class="press-visual">
       <g class="full-geometry shoulder-geometry">
         <rect x="445" y="162" width="42" height="48" rx="5" fill="#34393e"
-          class="button-face vector-outline stock-plastic" stroke="#111111" stroke-width="1.8" />
+          class="button-face vector-outline stock-plastic" stroke="#111111" stroke-width="3" />
         <rect x="450" y="167" width="32" height="38" rx="3" fill="none" class="vector-outline"
-          stroke="#111111" stroke-width="1.8" />
+          stroke="#111111" stroke-width="3" />
         <g class="hardware-icon marking ">
           <path d="M0 10V0H4Q8 0 8 2.5Q8 5 4 5H0M4 5Q8 5 8 7.5Q8 10 4 10H0" fill="none"
             stroke="var(--button-label-color, #85888b)" stroke-width="1.25" stroke-linejoin="round"

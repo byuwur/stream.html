@@ -88,7 +88,7 @@
 
       <g class="compact-geometry minimal-bar-base">
         <rect x="381.50784" y="86.42704" width="61.23001" height="19.68108" rx="9.84054"
-          fill="rgb(100, 104, 107)" stroke="#aeb6be" stroke-width="1.42141"
+          fill="rgb(100, 104, 107)" stroke="#aeb6be" stroke-width="3"
           class="vector-outline button-face" />
         <g class="marking minimal-bar-label">
           <path
@@ -128,7 +128,7 @@
 
       <g class="compact-geometry minimal-bar-base">
         <rect x="80.7" y="86.42704" width="61.23" height="19.68107" rx="9.84054"
-          fill="rgb(100, 104, 107)" stroke="#aeb6be" stroke-width="1.42142"
+          fill="rgb(100, 104, 107)" stroke="#aeb6be" stroke-width="3"
           class="vector-outline button-face" />
         <g class="marking minimal-bar-label">
           <path d="M101.61221 90.56007V101.97509H110.74423" fill="none" stroke="#c8ced4"
@@ -190,15 +190,16 @@
   </g>
   <g id="input-6" class="control stock-neutral minimal-bar"
     data-name="button-left-shoulder-bottom-digital" data-input="button:6" data-label="L2"
-    data-bounds="80.7 28.70606 61.23001 58.92666"
+    data-bounds="83.76 39.58 55.10999 42.51537"
     data-compact-transform="matrix(0.45729 0 0 0.45729 -32.90348 -19.6004)" data-order="-24"
     data-reconstructed="yes" data-compact-scale="0.45729">
     <g class="press-visual">
       <g class="full-geometry shoulder-geometry">
         <path
-          d="M81.08429 59.64254l0.06629-7.36992 0.19843-8.49166c0.42019-6.46846 4.14566-10.4724 11.17642-12.01183l29.24213-3.06272c8.03337-0.03833 13.16914 3.03752 15.40733 9.22755l2.39976 14.33866 0.44034 7.36992c0 3.97403 1.91501 8.6104 1.91501 13.24677 0 4.63637-0.97968 9.27274-2.4492 13.24677-2.24719-3.16002-2.54747-4.28162-5.63316-6.332-2.43098-1.61534-5.66268-2.45584-8.44974-3.1933-8.27591-2.18982-17.02027-2.30813-25.34922-0.32557-3.71317 0.88385-8.14582 1.99244-11.26632 4.29791-3.15935 2.33417-3.41015 3.5528-5.63316 7.04958-1.46952-4.19852-2.4492-9.0968-2.4492-13.99508 0-4.89828 0.38429-9.99508 0.38429-13.99508z"
-          fill="#64686b" class="button-face vector-outline" stroke="#111111" stroke-width="1.8" />
-        <g class="hardware-icon marking ">
+          d="M83.76 79.99 V53.28 Q83.76 42.28 94.76 42.28 L127.87 39.58 Q138.87 39.58 138.87 50.58 V78.96 C138.87 81.96 137.37 81.19 135.87 80.51 C119.5 73.03 103.13 72.98 86.76 81.36 C85.26 82.13 83.76 82.99 83.76 79.99 Z"
+          fill="#64686b" class="button-face vector-outline" stroke="#000000" stroke-width="3" />
+        <g class="hardware-icon marking "
+          transform="translate(111.32 57.28) scale(0.9) translate(-111.32 -53.71)">
           <path d="M100.97332 47.63296L101.93204 58.5911 110.69855 57.82413" fill="none"
             stroke="var(--button-label-color, #a2a4a6)" stroke-width="1.25" stroke-linejoin="round"
             stroke-linecap="round" />
@@ -211,7 +212,7 @@
 
       <g class="compact-geometry minimal-bar-base">
         <rect x="80.7" y="48.32885" width="61.23001" height="19.68107" rx="9.84054"
-          fill="rgb(100, 104, 107)" stroke="#aeb6be" stroke-width="1.42142"
+          fill="rgb(100, 104, 107)" stroke="#aeb6be" stroke-width="3"
           class="vector-outline button-face" />
         <g class="marking minimal-bar-label">
           <path d="M101.29206 52.74028L101.29206 63.87688 110.20135 63.87689" fill="none"
@@ -223,21 +224,22 @@
         </g>
       </g>
     </g>
-    <text x="111.315" y="52.33106" fill="var(--button-label-color, #a2a4a6)" stroke-width="0.3"
-      font-family="Arial, sans-serif" font-size="12.5201" text-anchor="middle"
+    <text x="111.315" y="57.28" fill="var(--button-label-color, #a2a4a6)" stroke-width="0.3"
+      font-family="Arial, sans-serif" font-size="11.27" text-anchor="middle"
       dominant-baseline="central" class="word-label marking">L2</text>
   </g>
   <g id="input-7" class="control stock-neutral minimal-bar"
     data-name="button-right-shoulder-bottom-digital" data-input="button:7" data-label="R2"
-    data-bounds="381.50787 28.70606 61.22995 58.92666"
+    data-bounds="384.57001 39.58 55.10999 42.51537"
     data-compact-transform="matrix(0.45729 0 0 0.45729 -66.46071 -19.60043)" data-order="-23"
     data-reconstructed="yes" data-compact-scale="0.45729">
     <g class="press-visual">
       <g class="full-geometry shoulder-geometry">
         <path
-          d="M442.35355 59.64254l-0.06629-7.36992-0.19843-8.49166c-0.42019-6.46846-4.14566-10.4724-11.17642-12.01183l-29.24213-3.06272c-8.03337-0.03833-13.16914 3.03752-15.40733 9.22755l-2.39976 14.33866-0.44034 7.36992c0 3.97403-1.91501 8.6104-1.91501 13.24677 0 4.63637 0.97968 9.27274 2.4492 13.24677 2.24719-3.16002 2.54747-4.28162 5.63316-6.332 2.43098-1.61534 5.66268-2.45584 8.44974-3.1933 8.27591-2.18982 17.02027-2.30813 25.34922-0.32557 3.71317 0.88385 8.14582 1.99244 11.26632 4.29791 3.15935 2.33417 3.41015 3.5528 5.63316 7.04958 1.46952-4.19852 2.4492-9.0968 2.4492-13.99508 0-4.89828-0.38429-9.99508-0.38429-13.99508z"
-          fill="#64686b" class="button-face vector-outline" stroke="#111111" stroke-width="1.8" />
-        <g class="hardware-icon marking ">
+          d="M439.68 79.99 V53.28 Q439.68 42.28 428.68 42.28 L395.57 39.58 Q384.57 39.58 384.57 50.58 V78.96 C384.57 81.96 386.07 81.19 387.57 80.51 C403.94 73.03 420.31 72.98 436.68 81.36 C438.18 82.13 439.68 82.99 439.68 79.99 Z"
+          fill="#64686b" class="button-face vector-outline" stroke="#000000" stroke-width="3" />
+        <g class="hardware-icon marking "
+          transform="translate(412.12 57.28) scale(0.9) translate(-412.12 -53.71)">
           <path
             d="M402.19642 56.8877L403.14276 46.071 407.46944 46.44954Q411.79611 46.82807 411.51221 50.07309 411.32295 52.23642 406.99627 51.85789L402.66959 51.47935M406.99627 51.85789L410.84977 57.64477"
             fill="none" stroke="var(--button-label-color, #a2a4a6)" stroke-width="1.25"
@@ -251,7 +253,7 @@
 
       <g class="compact-geometry minimal-bar-base">
         <rect x="381.50787" y="48.32886" width="61.22995" height="19.68106" rx="9.84053"
-          fill="rgb(100, 104, 107)" stroke="#aeb6be" stroke-width="1.4214"
+          fill="rgb(100, 104, 107)" stroke="#aeb6be" stroke-width="3"
           class="vector-outline button-face" />
         <g class="marking minimal-bar-label">
           <path
@@ -265,8 +267,8 @@
         </g>
       </g>
     </g>
-    <text x="412.12284" y="52.33106" fill="var(--button-label-color, #a2a4a6)" stroke-width="0.3"
-      font-family="Arial, sans-serif" font-size="12.5201" text-anchor="middle"
+    <text x="412.12284" y="57.28" fill="var(--button-label-color, #a2a4a6)" stroke-width="0.3"
+      font-family="Arial, sans-serif" font-size="11.27" text-anchor="middle"
       dominant-baseline="central" class="word-label marking">R2</text>
   </g>
   <g id="input-8" class="control stock-neutral" data-name="button-select" data-input="button:8"
