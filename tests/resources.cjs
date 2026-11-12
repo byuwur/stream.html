@@ -2366,7 +2366,9 @@ test("All player modes retain disconnected slots and keep keyboard input separat
     assert.equal(await page.locator(".controller.active").count(), 8);
     assert.equal(await page.locator(".controller.disconnected").count(), 7);
     assert.deepEqual(await palettes(), expected, "Fixed slots retain their palette sequence on connection changes");
-    await page.evaluate(() => { testPads[5] = null; });
+    await page.evaluate(() => {
+      testPads[5] = null;
+    });
     await page.waitForSelector('#gamepads[data-gamepad-count="0"] #gamepad-6.disconnected');
     await page.waitForFunction(() => !document.querySelector('#gamepad-6 .control[data-name="button-1"]').classList.contains("pressed"));
     assert.equal(await page.evaluate(() => originalSlot === document.getElementById("gamepad-6")), true, "Connection changes update existing fixed slots");
@@ -2382,7 +2384,9 @@ test("All player modes retain disconnected slots and keep keyboard input separat
     assert.equal(await page.evaluate(() => byStreamResource.gamepadSupport.gamepadsRaw[9] === bySettingsKB), true);
     await page.keyboard.down("j");
     await page.waitForSelector('#gamepad-9 .control[data-name="button-1"].pressed');
-    await page.evaluate(() => { testPads[0] = { id: "P1 fixture", index: 0, buttons: [{ value: 1 }], axes: [] }; });
+    await page.evaluate(() => {
+      testPads[0] = { id: "P1 fixture", index: 0, buttons: [{ value: 1 }], axes: [] };
+    });
     await page.waitForSelector('#gamepads[data-gamepad-count="1"] #gamepad-1:not(.disconnected) .control[data-name="button-1"].pressed');
     assert.equal(await page.locator(".controller.active").count(), 9);
     assert.equal(await page.locator('.control[data-name="button-1"].pressed').count(), 2);
@@ -2417,11 +2421,15 @@ test("sequential controller variants cycle visible palettes through layout and c
       await page.evaluate((layout) => document.querySelectorAll(".controller").forEach((node) => byControllerArtwork.setLayout(node, layout)), layout);
       assert.deepEqual(await variants(), expected, layout);
     }
-    await page.evaluate(() => { testPads[0] = null; });
+    await page.evaluate(() => {
+      testPads[0] = null;
+    });
     await page.waitForSelector('#gamepads[data-gamepad-count="7"]', { state: "attached" });
     assert.equal(await page.locator("#gamepad-1").count(), 0);
     assert.deepEqual(await variants(), expected.slice(0, 8), "The sequence follows visible order despite gaps in player numbers");
-    await page.evaluate(() => { testPads[0] = { index: 0, id: "Reconnected", buttons: [], axes: [] }; });
+    await page.evaluate(() => {
+      testPads[0] = { index: 0, id: "Reconnected", buttons: [], axes: [] };
+    });
     await page.waitForSelector('#gamepads[data-gamepad-count="8"] #gamepad-1');
     assert.deepEqual(await variants(), expected, "Reconnecting restores the visible sequence");
 
@@ -2586,18 +2594,20 @@ test("controller layouts preserve native lamps, use plain square LEDs, and keep 
       for (const layout of ["full", "minimal", "full"]) {
         await page.evaluate((layout) => byControllerArtwork.setLayout(document.querySelector(".controller"), layout), layout);
         const geometry = await page.locator(".player-leds-layer .player-indicator").evaluateAll((nodes) => nodes.map((node) => [Number(node.getAttribute("x")), Number(node.getAttribute("width")), Number(node.getAttribute("height"))]));
-        assert.deepEqual(geometry, [0, 1, 2, 3].map((index) => layout === "minimal" ? [index * 15, 5, 5] : [index * 8, 3, 3]), `${skin} preserves minimal sizes and uses smaller full-layout lamps`);
+        assert.deepEqual(
+          geometry,
+          [0, 1, 2, 3].map((index) => (layout === "minimal" ? [index * 15, 5, 5] : [index * 8, 3, 3])),
+          `${skin} preserves minimal sizes and uses smaller full-layout lamps`
+        );
         if (skin === "x360") {
-          const rings = await page
-            .locator(".player-ring[data-player]")
-            .evaluateAll((nodes) =>
-              nodes.map((node) => ({
-                player: Number(node.dataset.player),
-                lit: node.classList.contains("lit"),
-                stroke: getComputedStyle(node).stroke,
-                visible: node.getBoundingClientRect().width > 0 && getComputedStyle(node).visibility === "visible"
-              }))
-            );
+          const rings = await page.locator(".player-ring[data-player]").evaluateAll((nodes) =>
+            nodes.map((node) => ({
+              player: Number(node.dataset.player),
+              lit: node.classList.contains("lit"),
+              stroke: getComputedStyle(node).stroke,
+              visible: node.getBoundingClientRect().width > 0 && getComputedStyle(node).visibility === "visible"
+            }))
+          );
           assert.deepEqual(
             rings.map((ring) => ring.player),
             [1, 2, 3, 4]
@@ -2636,10 +2646,13 @@ test("controller layouts preserve native lamps, use plain square LEDs, and keep 
             };
             const lamps = [...document.querySelectorAll(".player-indicator")].filter(visible);
             const markings = [...document.querySelectorAll(".hardware-marking, .guide-logo-slot, .screen-surface")].filter(visible);
-            return lamps.some((lamp) => markings.some((marking) => {
-              const a = lamp.getBoundingClientRect(), b = marking.getBoundingClientRect();
-              return a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
-            }));
+            return lamps.some((lamp) =>
+              markings.some((marking) => {
+                const a = lamp.getBoundingClientRect(),
+                  b = marking.getBoundingClientRect();
+                return a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
+              })
+            );
           });
           assert.equal(overlap, false, `${skin} indicators clear logos and screens`);
         }
@@ -2696,10 +2709,17 @@ test("player indicators default to hidden without hiding the guide or blocking i
     await page.waitForSelector("#gamepad-8");
     for (const layout of ["full", "minimal", "full"]) {
       await page.evaluate((layout) => byControllerArtwork.setLayout(document.querySelector(".controller"), layout), layout);
-      const state = await page.locator(".player-leds-layer .player-indicator").evaluateAll((nodes, layout) => nodes.sort((a, b) => {
-        const key = layout === "full" ? "top" : "left";
-        return a.getBoundingClientRect()[key] - b.getBoundingClientRect()[key];
-      }).map((node) => node.classList.contains("lit") ? "X" : "-").join(""), layout);
+      const state = await page.locator(".player-leds-layer .player-indicator").evaluateAll(
+        (nodes, layout) =>
+          nodes
+            .sort((a, b) => {
+              const key = layout === "full" ? "top" : "left";
+              return a.getBoundingClientRect()[key] - b.getBoundingClientRect()[key];
+            })
+            .map((node) => (node.classList.contains("lit") ? "X" : "-"))
+            .join(""),
+        layout
+      );
       assert.equal(state, "X-XX", `Joy-Con ${layout} keeps the player order after mirroring and layout changes`);
       const box = await page.locator(".player-leds").boundingBox();
       assert.equal(box.height > box.width, layout === "full", "Joy-Con uses a vertical row only in full mode");

@@ -184,7 +184,7 @@ test("configurator forms and previews initialize for every resource", async (t) 
       }
     });
 
-    await t.test("controller variants list supported palettes, reset on Skin edits, and preserve imports and Reset", async () => {
+    await t.test("controller variants reset named palettes, preserve Default and Sequential on Skin edits, and retain imports and Reset", async () => {
       const page = await browser.newPage();
       try {
         await serve(page, assets);
@@ -238,8 +238,18 @@ test("configurator forms and previews initialize for every resource", async (t) 
         assert.equal(new URL(await page.locator("#overlay-url").inputValue()).searchParams.get("variant"), "sequential");
         await page.frameLocator("#overlay-preview").locator('.controller-background[data-variant="original"]').waitFor();
         await page.locator("#skin-input").selectOption("ds2");
-        await waitSettings("ds2", "original");
-        assert.equal(await variant.inputValue(), "original", "Skin edits also reset Sequential (all)");
+        await waitSettings("ds2", "sequential");
+        assert.equal(await variant.inputValue(), "sequential", "Skin edits preserve Sequential (all)");
+        assert.equal(new URL(await page.locator("#overlay-url").inputValue()).searchParams.get("variant"), "sequential");
+        await page.locator("#skin-input").selectOption("fgc6");
+        await waitSettings("fgc6", "sequential");
+        assert.equal(await variant.inputValue(), "sequential", "Fight Stick views also preserve Sequential (all)");
+        await variant.selectOption("original");
+        await waitSettings("fgc6", "original");
+        await page.locator("#skin-input").selectOption("nes");
+        await waitSettings("nes", "original");
+        assert.equal(await variant.inputValue(), "original", "Skin edits preserve Default");
+        assert.equal(new URL(await page.locator("#overlay-url").inputValue()).searchParams.has("variant"), false);
 
         await page.locator("#overlay-url").fill("https://stream.test/controller/?skin=gcn&variant=indigo&player=9");
         await page.locator("#overlay-url").press("Enter");
@@ -359,7 +369,12 @@ test("configurator forms and previews initialize for every resource", async (t) 
         });
         await page.goto("https://stream.test/controller/?player=all-inputs&skin=xseries#configure");
         await page.waitForFunction(() => document.getElementById("overlay-url")?.value);
-        for (const [mode, count, disconnected] of [["all-inputs", 9, 8], ["all-gamepads", 8, 8], ["gamepads", 0, 0], ["all", 1, 0]]) {
+        for (const [mode, count, disconnected] of [
+          ["all-inputs", 9, 8],
+          ["all-gamepads", 8, 8],
+          ["gamepads", 0, 0],
+          ["all", 1, 0]
+        ]) {
           await page.locator("#player-input").selectOption(mode);
           await page.waitForFunction((mode) => document.querySelector("#overlay-preview").contentWindow.byStreamResource?.settings.player === mode, mode);
           await page.frameLocator("#overlay-preview").locator('#gamepads[data-gamepad-count="0"]').waitFor({ state: "attached" });
