@@ -2356,7 +2356,7 @@ test("All player modes retain disconnected slots and keep keyboard input separat
     assert.equal(await page.locator(".controller.disconnected").count(), 8);
     assert.equal(await page.locator("#gamepad-9").count(), 0);
     const palettes = () => page.locator(".controller-background").evaluateAll((nodes) => nodes.map((node) => node.dataset.variant));
-    const expected = ["original", "indigo", "silver", "white", "original", "indigo", "silver", "white"];
+    const expected = ["original", "indigo", "silver", "white", "bonyur", "arctic", "sakura", "lagoon"];
     assert.deepEqual(await palettes(), expected);
     await page.evaluate(() => {
       window.originalSlot = document.getElementById("gamepad-6");
@@ -2410,9 +2410,9 @@ test("sequential controller variants cycle visible palettes through layout and c
     const variants = () => page.locator(".controller-background").evaluateAll((nodes) => nodes.map((node) => node.dataset.variant));
     await page.goto("https://stream.test/controller/?player=all&skin=gcn&variant=sequential");
     await page.waitForSelector("#gamepad-9:not(.disconnected)");
-    const expected = ["original", "indigo", "silver", "white", "original", "indigo", "silver", "white", "original"];
+    const expected = ["original", "indigo", "silver", "white", "bonyur", "arctic", "sakura", "lagoon", "forest"];
     assert.deepEqual(await variants(), expected);
-    assert.equal(await page.locator(".controller-background .shell-base").evaluateAll((nodes) => new Set(nodes.map((node) => getComputedStyle(node).fill)).size), 4, "Stock palettes change the actual shell colors");
+    assert.equal(await page.locator(".controller-background .shell-base").evaluateAll((nodes) => new Set(nodes.map((node) => getComputedStyle(node).fill)).size), 9, "Nine visible players have distinct shell colors");
     for (const layout of ["minimal", "full"]) {
       await page.evaluate((layout) => document.querySelectorAll(".controller").forEach((node) => byControllerArtwork.setLayout(node, layout)), layout);
       assert.deepEqual(await variants(), expected, layout);
@@ -2430,7 +2430,7 @@ test("sequential controller variants cycle visible palettes through layout and c
     assert.deepEqual(await variants(), ["original"], "A single controller uses Default");
     await page.goto("https://stream.test/controller/?player=gamepads&skin=nes&variant=sequential");
     await page.waitForSelector("#gamepad-8:not(.disconnected)");
-    assert.deepEqual(await variants(), Array(8).fill("original"), "Skins without alternate palettes use Default");
+    assert.deepEqual(await variants(), ["original", "bonyur", "arctic", "sakura", "lagoon", "forest", "sunset", "royal"], "Previously stock-only skins also sequence their palettes");
     await page.goto("https://stream.test/controller/?player=gamepads&skin=xseries&variant=red");
     await page.waitForSelector("#gamepad-8:not(.disconnected)");
     assert.deepEqual(await variants(), Array(8).fill("red"), "Explicit palettes still apply to every controller");
@@ -2438,6 +2438,119 @@ test("sequential controller variants cycle visible palettes through layout and c
     await page.waitForSelector("#gamepad-9:not(.disconnected)");
     assert.deepEqual(await variants(), Array(9).fill("original"), "Custom colors take precedence over stock sequencing");
     assert.equal(await page.locator(".controller-background .shell-base").evaluateAll((nodes) => nodes.every((node) => getComputedStyle(node).fill === "rgb(34, 85, 204)")), true);
+    assert.deepEqual(errors, []);
+  } finally {
+    await browser.close();
+  }
+});
+
+test("every controller skin paints at least nine distinct palettes in full and minimal layouts", async () => {
+  const assets = await loadAssets(["_functions.min.js"]);
+  const browser = await chromium.launch(launchOptions);
+  try {
+    const page = await browser.newPage();
+    const errors = [];
+    page.on("pageerror", (error) => errors.push(error.message));
+    await serve(page, assets, true);
+    await page.goto("https://stream.test/controller/?player=9&skin=nes&variant=cyberpunk");
+    await page.waitForSelector('#gamepad-9 .controller-background[data-variant="cyberpunk"]');
+    assert.equal(await page.evaluate(() => byStream.settingsURL(byStreamResource, byStreamResource.settings).searchParams.get("variant")), "cyberpunk");
+    await page.keyboard.down("j");
+    await page.waitForSelector('.control[data-name="button-1"].pressed');
+    await page.keyboard.up("j");
+    const results = await page.evaluate(() => {
+      const mount = document.createElement("div");
+      mount.className = "controller active";
+      document.body.append(mount);
+      const results = [];
+      for (const [id, skin] of Object.entries(byControllerArtwork.skins)) {
+        const full = new Set(),
+          minimal = new Set();
+        let layered = true,
+          contrast = true,
+          transparent = true,
+          uniformFaces = true,
+          readableLabels = true;
+        for (const variant of ["original", ...Object.keys(skin.variants)]) {
+          mount.innerHTML = byControllerArtwork.render(id, "full", "icons", variant, "palette-test").markup;
+          layered &&= [...mount.querySelectorAll("svg[data-controller]")].every((svg) => svg.dataset.variant === variant);
+          const fill = (selector) => {
+            const node = mount.querySelector(selector);
+            return node ? getComputedStyle(node).fill : "";
+          };
+          const themed = ["bonyur", "arctic", "sakura", "lagoon", "forest", "sunset", "royal", "sandstone", "cyberpunk"].includes(variant);
+          const matchingFaces = () => {
+            if (["genesis", "saturn"].includes(id)) return new Set(["A", "B", "C"].map((label) => fill(`.control[data-label="${label}"] .button-face`))).size === 1;
+            if (!themed) return true;
+            if (!["PlayStation", "Xbox", "Steam"].includes(skin.platform) && id !== "dreamcast" && !id.startsWith("fgc")) return true;
+            const faces = id.startsWith("fgc") ? [...mount.querySelectorAll(".control:not(.stick) .button-face")] : [1, 2, 3, 4].map((slot) => mount.querySelector(`.control[data-name="button-${slot}"] .button-face`));
+            return faces.length >= 4 && faces.every(Boolean) && new Set(faces.map((node) => getComputedStyle(node).fill)).size === 1;
+          };
+          if (themed && skin.platform === "Xbox") {
+            const luminance = (color) =>
+              color
+                .match(/[\d.]+/g)
+                .slice(0, 3)
+                .map(Number)
+                .reduce((sum, channel, index) => {
+                  channel /= 255;
+                  return sum + (channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4) * [0.2126, 0.7152, 0.0722][index];
+                }, 0);
+            for (const slot of [1, 2, 3, 4]) {
+              const control = mount.querySelector(`.control[data-name="button-${slot}"]`);
+              const background = luminance(getComputedStyle(control.querySelector(".button-face")).fill);
+              const glyphs = [...control.querySelectorAll(".hardware-icon path, path.hardware-icon, polygon.hardware-icon, .word-label text")];
+              readableLabels &&=
+                glyphs.length > 0 &&
+                glyphs.every((node) => {
+                  const style = getComputedStyle(node);
+                  const ink = luminance(style.fill === "none" ? style.stroke : style.fill);
+                  return (Math.max(background, ink) + 0.05) / (Math.min(background, ink) + 0.05) >= 4.5;
+                });
+            }
+          }
+          full.add(`${fill(".shell-base")}/${fill('.control[data-name="button-1"] .button-face')}`);
+          uniformFaces &&= matchingFaces();
+          for (const trigger of mount.querySelectorAll(".analog-trigger")) {
+            const inactive = trigger.querySelector(".full-geometry .button-face");
+            const active = trigger.querySelector(".trigger-active .button-face");
+            if (inactive && active) contrast &&= getComputedStyle(inactive).fill !== getComputedStyle(active).fill;
+          }
+          transparent &&= [...mount.querySelectorAll(".screen-surface")].every((node) => getComputedStyle(node).opacity === "0");
+          byControllerArtwork.setLayout(mount, "minimal");
+          minimal.add(fill('.control[data-name="button-1"] .button-face'));
+          uniformFaces &&= matchingFaces();
+        }
+        mount.innerHTML = byControllerArtwork.render(id, "full", "icons", "unknown-palette").markup;
+        results.push({
+          id,
+          palettes: Object.keys(skin.variants).length + 1,
+          full: full.size,
+          minimal: minimal.size,
+          layered,
+          contrast,
+          transparent,
+          uniformFaces,
+          readableLabels,
+          fallback: mount.querySelector(".controller-background").dataset.variant
+        });
+      }
+      mount.remove();
+      return results;
+    });
+    assert.equal(results.length, 34, "Includes the three Fight Stick views");
+    for (const result of results) {
+      assert.ok(result.palettes >= 9 && result.full >= 9 && result.minimal >= 9, `${result.id} paints nine distinct palettes including Default in both layouts`);
+      assert.equal(result.layered, true, `${result.id} retains its palette across independent SVG layers`);
+      assert.equal(result.contrast, true, `${result.id} retains contrasting trigger pressure fills`);
+      assert.equal(result.transparent, true, `${result.id} retains transparent screen interiors`);
+      assert.equal(result.uniformFaces, true, `${result.id} keeps matching face-button fills in each palette and layout`);
+      assert.equal(result.readableLabels, true, `${result.id} keeps Xbox theme labels at a contrast ratio of at least 4.5`);
+      assert.equal(result.fallback, "original", `${result.id} falls back for unknown palettes`);
+    }
+    await page.goto("https://stream.test/controller/?player=9&skin=nes&variant=cyberpunk&customColors=yes&controllerColor=2255cc");
+    await page.waitForSelector('#gamepad-9 .controller-background[data-variant="original"]');
+    assert.equal(await page.locator(".controller-background .shell-base").evaluate((node) => getComputedStyle(node).fill), "rgb(34, 85, 204)");
     assert.deepEqual(errors, []);
   } finally {
     await browser.close();

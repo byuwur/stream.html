@@ -345,7 +345,8 @@
           <g class="hardware-icon marking ">
             <path
               d="M379.54884 218.65395L384.38861 204.82605H385.7714L390.61116 218.65395M382.03787 213.81419H388.12214"
-              fill="none" stroke="#7eb94c" stroke-width="1.25" stroke-linejoin="round"
+              fill="none" stroke="var(--face-label-color, #7eb94c)" stroke-width="1.25"
+              stroke-linejoin="round"
               stroke-linecap="round" />
           </g>
         </g>
@@ -374,7 +375,7 @@
             class="vector-outline button-face stock-plastic" stroke-width="3" />
           <path
             d="M386.12999 148.992v5.032h-2.2584v-4.9527l-4.4773-8.8753h2.6151l2.8131 5.7452c0.0792 0.1585 0.1585 0.3566 0.1981 0.515 0.0396 0.1585 0.0792 0.2774 0.1189 0.3963h0c0.0792-0.317 0.1585-0.5943 0.3169-0.8717l2.8924-5.7848h2.4169l-4.5961 8.796Z"
-            fill="#dfc64b" class="marking hardware-icon" />
+            fill="var(--face-label-color, #dfc64b)" class="marking hardware-icon" />
         </g>
       </g>
       <g class="word-label marking full-only-decoration">
@@ -402,7 +403,8 @@
           <g class="hardware-icon marking ">
             <path
               d="M412.56885 186.33893V172.51103H418.10001Q423.63117 172.51103 423.63117 175.96801 423.63117 179.42498 418.10001 179.42498H412.56885M418.10001 179.42498Q423.63117 179.42498 423.63117 182.88196 423.63117 186.33893 418.10001 186.33893H412.56885"
-              fill="none" stroke="#df534d" stroke-width="1.25" stroke-linejoin="round"
+              fill="none" stroke="var(--face-label-color, #df534d)" stroke-width="1.25"
+              stroke-linejoin="round"
               stroke-linecap="round" />
           </g>
         </g>
@@ -431,7 +433,7 @@
             class="vector-outline button-face stock-plastic" stroke-width="3" />
           <path
             d="M355.3486 186.33899l-2.932-5.032c-0.0792-0.1189-0.1189-0.2377-0.1585-0.3566l-0.1189-0.3566h-0.0396l-0.1189 0.3566c0 0.1189-0.0792 0.2377-0.1584 0.3566l-3.0113 5.032h-2.8131l4.6357-6.9338-4.2395-6.8942h2.8528l2.4961 4.5565c0.1981 0.317 0.3566 0.6736 0.4755 1.0302h0.0396c0.1189-0.2377 0.1981-0.4755 0.2773-0.7132 0.0396-0.1189 0.9905-1.7037 2.8924-4.8735h2.615l-4.3187 6.8546 4.398 6.9734h-2.7735Z"
-            fill="#4ca4cf" class="marking hardware-icon" />
+            fill="var(--face-label-color, #4ca4cf)" class="marking hardware-icon" />
         </g>
       </g>
       <g class="word-label marking full-only-decoration">
@@ -653,5 +655,86 @@
     [data-controller="xone"][data-variant="red"] .stock-plastic { fill: #393b40; }
     [data-controller="xone"][data-variant="red"] .stock-neutral, [data-controller="xone"][data-variant="red"].stock-neutral { --button-label-color: #88898c; }
     [data-controller="xone"][data-variant="red"] .hardware-marking { fill: #cbd0d5; }
+  </style>
+  <style data-variant-id="bonyur" data-variant-name="BONYUR">
+    [data-controller="xone"][data-variant="bonyur"] { --button-label-color: #eeeeee; --face-label-color: var(--button-label-color); }
+    [data-controller="xone"][data-variant="bonyur"] .shell-base { fill: #660000; }
+    [data-controller="xone"][data-variant="bonyur"] .shell-panel { fill: #330000; }
+    [data-controller="xone"][data-variant="bonyur"] .button-face, [data-controller="xone"][data-variant="bonyur"] .stock-plastic { fill: #222222; }
+    [data-controller="xone"][data-variant="bonyur"] .socket-base, [data-controller="xone"][data-variant="bonyur"] .faceplate { fill: #222222; }
+    [data-controller="xone"][data-variant="bonyur"] .hardware-marking { fill: #eeeeee; }
+    [data-controller="xone"][data-variant="bonyur"] .trigger-active .button-face { fill: #eeeeee; }
+  </style>
+  <style data-variant-id="arctic" data-variant-name="Arctic">
+    [data-controller="xone"][data-variant="arctic"] { --button-label-color: #f5f9ff; --face-label-color: var(--button-label-color); }
+    [data-controller="xone"][data-variant="arctic"] .shell-base { fill: #dbeaf5; }
+    [data-controller="xone"][data-variant="arctic"] .shell-panel { fill: #90adc6; }
+    [data-controller="xone"][data-variant="arctic"] .button-face, [data-controller="xone"][data-variant="arctic"] .stock-plastic { fill: #334e68; }
+    [data-controller="xone"][data-variant="arctic"] .socket-base, [data-controller="xone"][data-variant="arctic"] .faceplate { fill: #334e68; }
+    [data-controller="xone"][data-variant="arctic"] .hardware-marking { fill: #20384e; }
+    [data-controller="xone"][data-variant="arctic"] .trigger-active .button-face { fill: #f5f9ff; }
+  </style>
+  <style data-variant-id="sakura" data-variant-name="Sakura">
+    [data-controller="xone"][data-variant="sakura"] { --button-label-color: #fff5fa; --face-label-color: var(--button-label-color); }
+    [data-controller="xone"][data-variant="sakura"] .shell-base { fill: #f2c6d8; }
+    [data-controller="xone"][data-variant="sakura"] .shell-panel { fill: #d796b5; }
+    [data-controller="xone"][data-variant="sakura"] .button-face, [data-controller="xone"][data-variant="sakura"] .stock-plastic { fill: #75415d; }
+    [data-controller="xone"][data-variant="sakura"] .socket-base, [data-controller="xone"][data-variant="sakura"] .faceplate { fill: #75415d; }
+    [data-controller="xone"][data-variant="sakura"] .hardware-marking { fill: #5a2942; }
+    [data-controller="xone"][data-variant="sakura"] .trigger-active .button-face { fill: #fff5fa; }
+  </style>
+  <style data-variant-id="lagoon" data-variant-name="Lagoon">
+    [data-controller="xone"][data-variant="lagoon"] { --button-label-color: #e5fcf4; --face-label-color: var(--button-label-color); }
+    [data-controller="xone"][data-variant="lagoon"] .shell-base { fill: #167d91; }
+    [data-controller="xone"][data-variant="lagoon"] .shell-panel { fill: #105567; }
+    [data-controller="xone"][data-variant="lagoon"] .button-face, [data-controller="xone"][data-variant="lagoon"] .stock-plastic { fill: #183d4a; }
+    [data-controller="xone"][data-variant="lagoon"] .socket-base, [data-controller="xone"][data-variant="lagoon"] .faceplate { fill: #183d4a; }
+    [data-controller="xone"][data-variant="lagoon"] .hardware-marking { fill: #d6f7ed; }
+    [data-controller="xone"][data-variant="lagoon"] .trigger-active .button-face { fill: #e5fcf4; }
+  </style>
+  <style data-variant-id="forest" data-variant-name="Forest">
+    [data-controller="xone"][data-variant="forest"] { --button-label-color: #f6f2dc; --face-label-color: var(--button-label-color); }
+    [data-controller="xone"][data-variant="forest"] .shell-base { fill: #344b3c; }
+    [data-controller="xone"][data-variant="forest"] .shell-panel { fill: #26382d; }
+    [data-controller="xone"][data-variant="forest"] .button-face, [data-controller="xone"][data-variant="forest"] .stock-plastic { fill: #202b24; }
+    [data-controller="xone"][data-variant="forest"] .socket-base, [data-controller="xone"][data-variant="forest"] .faceplate { fill: #202b24; }
+    [data-controller="xone"][data-variant="forest"] .hardware-marking { fill: #e6e9cd; }
+    [data-controller="xone"][data-variant="forest"] .trigger-active .button-face { fill: #f6f2dc; }
+  </style>
+  <style data-variant-id="sunset" data-variant-name="Sunset">
+    [data-controller="xone"][data-variant="sunset"] { --button-label-color: #fff0df; --face-label-color: var(--button-label-color); }
+    [data-controller="xone"][data-variant="sunset"] .shell-base { fill: #d57a4b; }
+    [data-controller="xone"][data-variant="sunset"] .shell-panel { fill: #a64e46; }
+    [data-controller="xone"][data-variant="sunset"] .button-face, [data-controller="xone"][data-variant="sunset"] .stock-plastic { fill: #462c42; }
+    [data-controller="xone"][data-variant="sunset"] .socket-base, [data-controller="xone"][data-variant="sunset"] .faceplate { fill: #462c42; }
+    [data-controller="xone"][data-variant="sunset"] .hardware-marking { fill: #392c3d; }
+    [data-controller="xone"][data-variant="sunset"] .trigger-active .button-face { fill: #fff0df; }
+  </style>
+  <style data-variant-id="royal" data-variant-name="Royal">
+    [data-controller="xone"][data-variant="royal"] { --button-label-color: #fff2db; --face-label-color: var(--button-label-color); }
+    [data-controller="xone"][data-variant="royal"] .shell-base { fill: #5c3f85; }
+    [data-controller="xone"][data-variant="royal"] .shell-panel { fill: #3b285d; }
+    [data-controller="xone"][data-variant="royal"] .button-face, [data-controller="xone"][data-variant="royal"] .stock-plastic { fill: #282039; }
+    [data-controller="xone"][data-variant="royal"] .socket-base, [data-controller="xone"][data-variant="royal"] .faceplate { fill: #282039; }
+    [data-controller="xone"][data-variant="royal"] .hardware-marking { fill: #f1dfaa; }
+    [data-controller="xone"][data-variant="royal"] .trigger-active .button-face { fill: #fff2db; }
+  </style>
+  <style data-variant-id="sandstone" data-variant-name="Sandstone">
+    [data-controller="xone"][data-variant="sandstone"] { --button-label-color: #fff8e7; --face-label-color: var(--button-label-color); }
+    [data-controller="xone"][data-variant="sandstone"] .shell-base { fill: #d8c29b; }
+    [data-controller="xone"][data-variant="sandstone"] .shell-panel { fill: #b89c74; }
+    [data-controller="xone"][data-variant="sandstone"] .button-face, [data-controller="xone"][data-variant="sandstone"] .stock-plastic { fill: #514635; }
+    [data-controller="xone"][data-variant="sandstone"] .socket-base, [data-controller="xone"][data-variant="sandstone"] .faceplate { fill: #514635; }
+    [data-controller="xone"][data-variant="sandstone"] .hardware-marking { fill: #493823; }
+    [data-controller="xone"][data-variant="sandstone"] .trigger-active .button-face { fill: #fff8e7; }
+  </style>
+  <style data-variant-id="cyberpunk" data-variant-name="Cyberpunk">
+    [data-controller="xone"][data-variant="cyberpunk"] { --button-label-color: #fff4fc; --face-label-color: var(--button-label-color); }
+    [data-controller="xone"][data-variant="cyberpunk"] .shell-base { fill: #e8d64d; }
+    [data-controller="xone"][data-variant="cyberpunk"] .shell-panel { fill: #8e8130; }
+    [data-controller="xone"][data-variant="cyberpunk"] .button-face, [data-controller="xone"][data-variant="cyberpunk"] .stock-plastic { fill: #292039; }
+    [data-controller="xone"][data-variant="cyberpunk"] .socket-base, [data-controller="xone"][data-variant="cyberpunk"] .faceplate { fill: #292039; }
+    [data-controller="xone"][data-variant="cyberpunk"] .hardware-marking { fill: #292039; }
+    [data-controller="xone"][data-variant="cyberpunk"] .trigger-active .button-face { fill: #fff4fc; }
   </style>
 </svg>

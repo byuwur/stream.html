@@ -492,4 +492,103 @@
     [data-controller="wiinunchuk"][data-variant="red"] .stock-neutral, [data-controller="wiinunchuk"][data-variant="red"].stock-neutral { --button-label-color: #6c1923; }
     [data-controller="wiinunchuk"][data-variant="red"] .hardware-marking { fill: #cbd0d5; }
   </style>
+  <style data-variant-id="bonyur" data-variant-name="BONYUR">
+    [data-controller="wiinunchuk"][data-variant="bonyur"] { --button-label-color: #eeeeee; }
+    [data-controller="wiinunchuk"][data-variant="bonyur"] .shell-base { fill: #660000; }
+    [data-controller="wiinunchuk"][data-variant="bonyur"] .shell-panel { fill: #330000; }
+    [data-controller="wiinunchuk"][data-variant="bonyur"] .button-face, [data-controller="wiinunchuk"][data-variant="bonyur"] .stock-plastic { fill: #222222; }
+    [data-controller="wiinunchuk"][data-variant="bonyur"] [data-name="button-1"] .button-face, [data-controller="wiinunchuk"][data-variant="bonyur"][data-name="button-1"] .button-face { fill: #aa2233; }
+    [data-controller="wiinunchuk"][data-variant="bonyur"] [data-name="button-2"] .button-face, [data-controller="wiinunchuk"][data-variant="bonyur"][data-name="button-2"] .button-face { fill: #aa2233; }
+    [data-controller="wiinunchuk"][data-variant="bonyur"] .socket-base, [data-controller="wiinunchuk"][data-variant="bonyur"] .faceplate { fill: #222222; }
+    [data-controller="wiinunchuk"][data-variant="bonyur"] .hardware-marking { fill: #eeeeee; }
+    [data-controller="wiinunchuk"][data-variant="bonyur"] .trigger-active .button-face { fill: #eeeeee; }
+  </style>
+  <style data-variant-id="arctic" data-variant-name="Arctic">
+    [data-controller="wiinunchuk"][data-variant="arctic"] { --button-label-color: #f5f9ff; }
+    [data-controller="wiinunchuk"][data-variant="arctic"] .shell-base { fill: #dbeaf5; }
+    [data-controller="wiinunchuk"][data-variant="arctic"] .shell-panel { fill: #90adc6; }
+    [data-controller="wiinunchuk"][data-variant="arctic"] .button-face, [data-controller="wiinunchuk"][data-variant="arctic"] .stock-plastic { fill: #334e68; }
+    [data-controller="wiinunchuk"][data-variant="arctic"] [data-name="button-1"] .button-face, [data-controller="wiinunchuk"][data-variant="arctic"][data-name="button-1"] .button-face { fill: #26718e; }
+    [data-controller="wiinunchuk"][data-variant="arctic"] [data-name="button-2"] .button-face, [data-controller="wiinunchuk"][data-variant="arctic"][data-name="button-2"] .button-face { fill: #26718e; }
+    [data-controller="wiinunchuk"][data-variant="arctic"] .socket-base, [data-controller="wiinunchuk"][data-variant="arctic"] .faceplate { fill: #334e68; }
+    [data-controller="wiinunchuk"][data-variant="arctic"] .hardware-marking { fill: #20384e; }
+    [data-controller="wiinunchuk"][data-variant="arctic"] .trigger-active .button-face { fill: #f5f9ff; }
+  </style>
+  <style data-variant-id="sakura" data-variant-name="Sakura">
+    [data-controller="wiinunchuk"][data-variant="sakura"] { --button-label-color: #fff5fa; }
+    [data-controller="wiinunchuk"][data-variant="sakura"] .shell-base { fill: #f2c6d8; }
+    [data-controller="wiinunchuk"][data-variant="sakura"] .shell-panel { fill: #d796b5; }
+    [data-controller="wiinunchuk"][data-variant="sakura"] .button-face, [data-controller="wiinunchuk"][data-variant="sakura"] .stock-plastic { fill: #75415d; }
+    [data-controller="wiinunchuk"][data-variant="sakura"] [data-name="button-1"] .button-face, [data-controller="wiinunchuk"][data-variant="sakura"][data-name="button-1"] .button-face { fill: #964469; }
+    [data-controller="wiinunchuk"][data-variant="sakura"] [data-name="button-2"] .button-face, [data-controller="wiinunchuk"][data-variant="sakura"][data-name="button-2"] .button-face { fill: #964469; }
+    [data-controller="wiinunchuk"][data-variant="sakura"] .socket-base, [data-controller="wiinunchuk"][data-variant="sakura"] .faceplate { fill: #75415d; }
+    [data-controller="wiinunchuk"][data-variant="sakura"] .hardware-marking { fill: #5a2942; }
+    [data-controller="wiinunchuk"][data-variant="sakura"] .trigger-active .button-face { fill: #fff5fa; }
+  </style>
+  <style data-variant-id="lagoon" data-variant-name="Lagoon">
+    [data-controller="wiinunchuk"][data-variant="lagoon"] { --button-label-color: #e5fcf4; }
+    [data-controller="wiinunchuk"][data-variant="lagoon"] .shell-base { fill: #167d91; }
+    [data-controller="wiinunchuk"][data-variant="lagoon"] .shell-panel { fill: #105567; }
+    [data-controller="wiinunchuk"][data-variant="lagoon"] .button-face, [data-controller="wiinunchuk"][data-variant="lagoon"] .stock-plastic { fill: #183d4a; }
+    [data-controller="wiinunchuk"][data-variant="lagoon"] [data-name="button-1"] .button-face, [data-controller="wiinunchuk"][data-variant="lagoon"][data-name="button-1"] .button-face { fill: #196a5d; }
+    [data-controller="wiinunchuk"][data-variant="lagoon"] [data-name="button-2"] .button-face, [data-controller="wiinunchuk"][data-variant="lagoon"][data-name="button-2"] .button-face { fill: #196a5d; }
+    [data-controller="wiinunchuk"][data-variant="lagoon"] .socket-base, [data-controller="wiinunchuk"][data-variant="lagoon"] .faceplate { fill: #183d4a; }
+    [data-controller="wiinunchuk"][data-variant="lagoon"] .hardware-marking { fill: #d6f7ed; }
+    [data-controller="wiinunchuk"][data-variant="lagoon"] .trigger-active .button-face { fill: #e5fcf4; }
+  </style>
+  <style data-variant-id="forest" data-variant-name="Forest">
+    [data-controller="wiinunchuk"][data-variant="forest"] { --button-label-color: #f6f2dc; }
+    [data-controller="wiinunchuk"][data-variant="forest"] .shell-base { fill: #344b3c; }
+    [data-controller="wiinunchuk"][data-variant="forest"] .shell-panel { fill: #26382d; }
+    [data-controller="wiinunchuk"][data-variant="forest"] .button-face, [data-controller="wiinunchuk"][data-variant="forest"] .stock-plastic { fill: #202b24; }
+    [data-controller="wiinunchuk"][data-variant="forest"] [data-name="button-1"] .button-face, [data-controller="wiinunchuk"][data-variant="forest"][data-name="button-1"] .button-face { fill: #536341; }
+    [data-controller="wiinunchuk"][data-variant="forest"] [data-name="button-2"] .button-face, [data-controller="wiinunchuk"][data-variant="forest"][data-name="button-2"] .button-face { fill: #536341; }
+    [data-controller="wiinunchuk"][data-variant="forest"] .socket-base, [data-controller="wiinunchuk"][data-variant="forest"] .faceplate { fill: #202b24; }
+    [data-controller="wiinunchuk"][data-variant="forest"] .hardware-marking { fill: #e6e9cd; }
+    [data-controller="wiinunchuk"][data-variant="forest"] .trigger-active .button-face { fill: #f6f2dc; }
+  </style>
+  <style data-variant-id="sunset" data-variant-name="Sunset">
+    [data-controller="wiinunchuk"][data-variant="sunset"] { --button-label-color: #fff0df; }
+    [data-controller="wiinunchuk"][data-variant="sunset"] .shell-base { fill: #d57a4b; }
+    [data-controller="wiinunchuk"][data-variant="sunset"] .shell-panel { fill: #a64e46; }
+    [data-controller="wiinunchuk"][data-variant="sunset"] .button-face, [data-controller="wiinunchuk"][data-variant="sunset"] .stock-plastic { fill: #462c42; }
+    [data-controller="wiinunchuk"][data-variant="sunset"] [data-name="button-1"] .button-face, [data-controller="wiinunchuk"][data-variant="sunset"][data-name="button-1"] .button-face { fill: #943d5b; }
+    [data-controller="wiinunchuk"][data-variant="sunset"] [data-name="button-2"] .button-face, [data-controller="wiinunchuk"][data-variant="sunset"][data-name="button-2"] .button-face { fill: #943d5b; }
+    [data-controller="wiinunchuk"][data-variant="sunset"] .socket-base, [data-controller="wiinunchuk"][data-variant="sunset"] .faceplate { fill: #462c42; }
+    [data-controller="wiinunchuk"][data-variant="sunset"] .hardware-marking { fill: #392c3d; }
+    [data-controller="wiinunchuk"][data-variant="sunset"] .trigger-active .button-face { fill: #fff0df; }
+  </style>
+  <style data-variant-id="royal" data-variant-name="Royal">
+    [data-controller="wiinunchuk"][data-variant="royal"] { --button-label-color: #fff2db; }
+    [data-controller="wiinunchuk"][data-variant="royal"] .shell-base { fill: #5c3f85; }
+    [data-controller="wiinunchuk"][data-variant="royal"] .shell-panel { fill: #3b285d; }
+    [data-controller="wiinunchuk"][data-variant="royal"] .button-face, [data-controller="wiinunchuk"][data-variant="royal"] .stock-plastic { fill: #282039; }
+    [data-controller="wiinunchuk"][data-variant="royal"] [data-name="button-1"] .button-face, [data-controller="wiinunchuk"][data-variant="royal"][data-name="button-1"] .button-face { fill: #85652e; }
+    [data-controller="wiinunchuk"][data-variant="royal"] [data-name="button-2"] .button-face, [data-controller="wiinunchuk"][data-variant="royal"][data-name="button-2"] .button-face { fill: #85652e; }
+    [data-controller="wiinunchuk"][data-variant="royal"] .socket-base, [data-controller="wiinunchuk"][data-variant="royal"] .faceplate { fill: #282039; }
+    [data-controller="wiinunchuk"][data-variant="royal"] .hardware-marking { fill: #f1dfaa; }
+    [data-controller="wiinunchuk"][data-variant="royal"] .trigger-active .button-face { fill: #fff2db; }
+  </style>
+  <style data-variant-id="sandstone" data-variant-name="Sandstone">
+    [data-controller="wiinunchuk"][data-variant="sandstone"] { --button-label-color: #fff8e7; }
+    [data-controller="wiinunchuk"][data-variant="sandstone"] .shell-base { fill: #d8c29b; }
+    [data-controller="wiinunchuk"][data-variant="sandstone"] .shell-panel { fill: #b89c74; }
+    [data-controller="wiinunchuk"][data-variant="sandstone"] .button-face, [data-controller="wiinunchuk"][data-variant="sandstone"] .stock-plastic { fill: #514635; }
+    [data-controller="wiinunchuk"][data-variant="sandstone"] [data-name="button-1"] .button-face, [data-controller="wiinunchuk"][data-variant="sandstone"][data-name="button-1"] .button-face { fill: #7d5c40; }
+    [data-controller="wiinunchuk"][data-variant="sandstone"] [data-name="button-2"] .button-face, [data-controller="wiinunchuk"][data-variant="sandstone"][data-name="button-2"] .button-face { fill: #7d5c40; }
+    [data-controller="wiinunchuk"][data-variant="sandstone"] .socket-base, [data-controller="wiinunchuk"][data-variant="sandstone"] .faceplate { fill: #514635; }
+    [data-controller="wiinunchuk"][data-variant="sandstone"] .hardware-marking { fill: #493823; }
+    [data-controller="wiinunchuk"][data-variant="sandstone"] .trigger-active .button-face { fill: #fff8e7; }
+  </style>
+  <style data-variant-id="cyberpunk" data-variant-name="Cyberpunk">
+    [data-controller="wiinunchuk"][data-variant="cyberpunk"] { --button-label-color: #fff4fc; }
+    [data-controller="wiinunchuk"][data-variant="cyberpunk"] .shell-base { fill: #e8d64d; }
+    [data-controller="wiinunchuk"][data-variant="cyberpunk"] .shell-panel { fill: #8e8130; }
+    [data-controller="wiinunchuk"][data-variant="cyberpunk"] .button-face, [data-controller="wiinunchuk"][data-variant="cyberpunk"] .stock-plastic { fill: #292039; }
+    [data-controller="wiinunchuk"][data-variant="cyberpunk"] [data-name="button-1"] .button-face, [data-controller="wiinunchuk"][data-variant="cyberpunk"][data-name="button-1"] .button-face { fill: #8c245e; }
+    [data-controller="wiinunchuk"][data-variant="cyberpunk"] [data-name="button-2"] .button-face, [data-controller="wiinunchuk"][data-variant="cyberpunk"][data-name="button-2"] .button-face { fill: #8c245e; }
+    [data-controller="wiinunchuk"][data-variant="cyberpunk"] .socket-base, [data-controller="wiinunchuk"][data-variant="cyberpunk"] .faceplate { fill: #292039; }
+    [data-controller="wiinunchuk"][data-variant="cyberpunk"] .hardware-marking { fill: #292039; }
+    [data-controller="wiinunchuk"][data-variant="cyberpunk"] .trigger-active .button-face { fill: #fff4fc; }
+  </style>
 </svg>

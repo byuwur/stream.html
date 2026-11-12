@@ -362,7 +362,8 @@
             transform="matrix(0.9244 -0.3814 0.3814 0.9244 -48.25 164.83)" fill="#48b862"
             stroke="rgb(0, 0, 0)" class="vector-outline button-face" stroke-width="3" />
           <g class="hardware-icon marking ">
-            <path d="M0 10 3.5 0H4.5L8 10M1.8 6.5H6.2" fill="none" stroke="#111111"
+            <path d="M0 10 3.5 0H4.5L8 10M1.8 6.5H6.2" fill="none"
+              stroke="var(--face-label-color, #111111)"
               stroke-width="1.25" stroke-linejoin="round" stroke-linecap="round"
               transform="matrix(1.93116 0 0 1.93116 383.92722 194.48359)" />
           </g>
@@ -393,7 +394,8 @@
             stroke="rgb(0, 0, 0)" class="vector-outline button-face" stroke-width="3" />
           <g class="hardware-icon marking ">
             <path d="M0 10V0H4Q8 0 8 2.5Q8 5 4 5H0M4 5Q8 5 8 7.5Q8 10 4 10H0" fill="none"
-              stroke="#111111" stroke-width="1.25" stroke-linejoin="round" stroke-linecap="round"
+              stroke="var(--face-label-color, #111111)" stroke-width="1.25" stroke-linejoin="round"
+              stroke-linecap="round"
               transform="matrix(1.93116 0 0 1.93116 426.0644 216.04146)" />
           </g>
         </g>
@@ -423,7 +425,7 @@
             stroke="rgb(0, 0, 0)" class="vector-outline button-face" stroke-width="3" />
           <path
             d="M437.0559 179.4206v7.0274h-3.1541v-6.9168l-6.2527-12.3948h3.652l3.9287 8.0234c0.1107 0.2213 0.2213 0.498 0.2767 0.7194 0.0553 0.2213 0.1107 0.3873 0.166 0.5533h0c0.1107-0.4427 0.2213-0.83 0.4427-1.2173l4.0394-8.0788h3.3754l-6.4188 12.2842Z"
-            fill="#111111" class="marking hardware-icon" />
+            fill="var(--face-label-color, #111111)" class="marking hardware-icon" />
         </g>
       </g>
       <g class="word-label marking full-only-decoration">
@@ -451,7 +453,7 @@
             stroke="rgb(0, 0, 0)" class="vector-outline button-face" stroke-width="3" />
           <path
             d="M396.253 163.3392l-4.0948-7.0274c-0.1107-0.166-0.166-0.332-0.2213-0.498l-0.166-0.498h-0.0553l-0.166 0.498c0 0.166-0.1107 0.332-0.2214 0.498l-4.2054 7.0274h-3.9287l6.4741-9.6834-5.9208-9.6282h3.9841l3.486 6.3634c0.2767 0.4427 0.498 0.9407 0.6641 1.4387h0.0553c0.166-0.332 0.2767-0.664 0.3873-0.996 0.0553-0.166 1.3834-2.3794 4.0394-6.8061h3.6521l-6.0314 9.5728 6.1421 9.7388h-3.8734Z"
-            fill="#111111" class="marking hardware-icon" />
+            fill="var(--face-label-color, #111111)" class="marking hardware-icon" />
         </g>
       </g>
       <g class="word-label marking full-only-decoration">
@@ -655,4 +657,85 @@
       </g>
     </g>
   </g>
+  <style data-variant-id="bonyur" data-variant-name="BONYUR">
+    [data-controller="xbox"][data-variant="bonyur"] { --button-label-color: #eeeeee; --face-label-color: var(--button-label-color); }
+    [data-controller="xbox"][data-variant="bonyur"] .shell-base { fill: #660000; }
+    [data-controller="xbox"][data-variant="bonyur"] .shell-panel { fill: #330000; }
+    [data-controller="xbox"][data-variant="bonyur"] .button-face, [data-controller="xbox"][data-variant="bonyur"] .stock-plastic { fill: #222222; }
+    [data-controller="xbox"][data-variant="bonyur"] .socket-base, [data-controller="xbox"][data-variant="bonyur"] .faceplate { fill: #222222; }
+    [data-controller="xbox"][data-variant="bonyur"] .hardware-marking { fill: #eeeeee; }
+    [data-controller="xbox"][data-variant="bonyur"] .trigger-active .button-face { fill: #eeeeee; }
+  </style>
+  <style data-variant-id="arctic" data-variant-name="Arctic">
+    [data-controller="xbox"][data-variant="arctic"] { --button-label-color: #f5f9ff; --face-label-color: var(--button-label-color); }
+    [data-controller="xbox"][data-variant="arctic"] .shell-base { fill: #dbeaf5; }
+    [data-controller="xbox"][data-variant="arctic"] .shell-panel { fill: #90adc6; }
+    [data-controller="xbox"][data-variant="arctic"] .button-face, [data-controller="xbox"][data-variant="arctic"] .stock-plastic { fill: #334e68; }
+    [data-controller="xbox"][data-variant="arctic"] .socket-base, [data-controller="xbox"][data-variant="arctic"] .faceplate { fill: #334e68; }
+    [data-controller="xbox"][data-variant="arctic"] .hardware-marking { fill: #20384e; }
+    [data-controller="xbox"][data-variant="arctic"] .trigger-active .button-face { fill: #f5f9ff; }
+  </style>
+  <style data-variant-id="sakura" data-variant-name="Sakura">
+    [data-controller="xbox"][data-variant="sakura"] { --button-label-color: #fff5fa; --face-label-color: var(--button-label-color); }
+    [data-controller="xbox"][data-variant="sakura"] .shell-base { fill: #f2c6d8; }
+    [data-controller="xbox"][data-variant="sakura"] .shell-panel { fill: #d796b5; }
+    [data-controller="xbox"][data-variant="sakura"] .button-face, [data-controller="xbox"][data-variant="sakura"] .stock-plastic { fill: #75415d; }
+    [data-controller="xbox"][data-variant="sakura"] .socket-base, [data-controller="xbox"][data-variant="sakura"] .faceplate { fill: #75415d; }
+    [data-controller="xbox"][data-variant="sakura"] .hardware-marking { fill: #5a2942; }
+    [data-controller="xbox"][data-variant="sakura"] .trigger-active .button-face { fill: #fff5fa; }
+  </style>
+  <style data-variant-id="lagoon" data-variant-name="Lagoon">
+    [data-controller="xbox"][data-variant="lagoon"] { --button-label-color: #e5fcf4; --face-label-color: var(--button-label-color); }
+    [data-controller="xbox"][data-variant="lagoon"] .shell-base { fill: #167d91; }
+    [data-controller="xbox"][data-variant="lagoon"] .shell-panel { fill: #105567; }
+    [data-controller="xbox"][data-variant="lagoon"] .button-face, [data-controller="xbox"][data-variant="lagoon"] .stock-plastic { fill: #183d4a; }
+    [data-controller="xbox"][data-variant="lagoon"] .socket-base, [data-controller="xbox"][data-variant="lagoon"] .faceplate { fill: #183d4a; }
+    [data-controller="xbox"][data-variant="lagoon"] .hardware-marking { fill: #d6f7ed; }
+    [data-controller="xbox"][data-variant="lagoon"] .trigger-active .button-face { fill: #e5fcf4; }
+  </style>
+  <style data-variant-id="forest" data-variant-name="Forest">
+    [data-controller="xbox"][data-variant="forest"] { --button-label-color: #f6f2dc; --face-label-color: var(--button-label-color); }
+    [data-controller="xbox"][data-variant="forest"] .shell-base { fill: #344b3c; }
+    [data-controller="xbox"][data-variant="forest"] .shell-panel { fill: #26382d; }
+    [data-controller="xbox"][data-variant="forest"] .button-face, [data-controller="xbox"][data-variant="forest"] .stock-plastic { fill: #202b24; }
+    [data-controller="xbox"][data-variant="forest"] .socket-base, [data-controller="xbox"][data-variant="forest"] .faceplate { fill: #202b24; }
+    [data-controller="xbox"][data-variant="forest"] .hardware-marking { fill: #e6e9cd; }
+    [data-controller="xbox"][data-variant="forest"] .trigger-active .button-face { fill: #f6f2dc; }
+  </style>
+  <style data-variant-id="sunset" data-variant-name="Sunset">
+    [data-controller="xbox"][data-variant="sunset"] { --button-label-color: #fff0df; --face-label-color: var(--button-label-color); }
+    [data-controller="xbox"][data-variant="sunset"] .shell-base { fill: #d57a4b; }
+    [data-controller="xbox"][data-variant="sunset"] .shell-panel { fill: #a64e46; }
+    [data-controller="xbox"][data-variant="sunset"] .button-face, [data-controller="xbox"][data-variant="sunset"] .stock-plastic { fill: #462c42; }
+    [data-controller="xbox"][data-variant="sunset"] .socket-base, [data-controller="xbox"][data-variant="sunset"] .faceplate { fill: #462c42; }
+    [data-controller="xbox"][data-variant="sunset"] .hardware-marking { fill: #392c3d; }
+    [data-controller="xbox"][data-variant="sunset"] .trigger-active .button-face { fill: #fff0df; }
+  </style>
+  <style data-variant-id="royal" data-variant-name="Royal">
+    [data-controller="xbox"][data-variant="royal"] { --button-label-color: #fff2db; --face-label-color: var(--button-label-color); }
+    [data-controller="xbox"][data-variant="royal"] .shell-base { fill: #5c3f85; }
+    [data-controller="xbox"][data-variant="royal"] .shell-panel { fill: #3b285d; }
+    [data-controller="xbox"][data-variant="royal"] .button-face, [data-controller="xbox"][data-variant="royal"] .stock-plastic { fill: #282039; }
+    [data-controller="xbox"][data-variant="royal"] .socket-base, [data-controller="xbox"][data-variant="royal"] .faceplate { fill: #282039; }
+    [data-controller="xbox"][data-variant="royal"] .hardware-marking { fill: #f1dfaa; }
+    [data-controller="xbox"][data-variant="royal"] .trigger-active .button-face { fill: #fff2db; }
+  </style>
+  <style data-variant-id="sandstone" data-variant-name="Sandstone">
+    [data-controller="xbox"][data-variant="sandstone"] { --button-label-color: #fff8e7; --face-label-color: var(--button-label-color); }
+    [data-controller="xbox"][data-variant="sandstone"] .shell-base { fill: #d8c29b; }
+    [data-controller="xbox"][data-variant="sandstone"] .shell-panel { fill: #b89c74; }
+    [data-controller="xbox"][data-variant="sandstone"] .button-face, [data-controller="xbox"][data-variant="sandstone"] .stock-plastic { fill: #514635; }
+    [data-controller="xbox"][data-variant="sandstone"] .socket-base, [data-controller="xbox"][data-variant="sandstone"] .faceplate { fill: #514635; }
+    [data-controller="xbox"][data-variant="sandstone"] .hardware-marking { fill: #493823; }
+    [data-controller="xbox"][data-variant="sandstone"] .trigger-active .button-face { fill: #fff8e7; }
+  </style>
+  <style data-variant-id="cyberpunk" data-variant-name="Cyberpunk">
+    [data-controller="xbox"][data-variant="cyberpunk"] { --button-label-color: #fff4fc; --face-label-color: var(--button-label-color); }
+    [data-controller="xbox"][data-variant="cyberpunk"] .shell-base { fill: #e8d64d; }
+    [data-controller="xbox"][data-variant="cyberpunk"] .shell-panel { fill: #8e8130; }
+    [data-controller="xbox"][data-variant="cyberpunk"] .button-face, [data-controller="xbox"][data-variant="cyberpunk"] .stock-plastic { fill: #292039; }
+    [data-controller="xbox"][data-variant="cyberpunk"] .socket-base, [data-controller="xbox"][data-variant="cyberpunk"] .faceplate { fill: #292039; }
+    [data-controller="xbox"][data-variant="cyberpunk"] .hardware-marking { fill: #292039; }
+    [data-controller="xbox"][data-variant="cyberpunk"] .trigger-active .button-face { fill: #fff4fc; }
+  </style>
 </svg>

@@ -2,7 +2,8 @@
   data-platform="Steam" viewBox="26.653 10.90531 474.8894 405.79479" data-labels="icons"
   data-layout="full" role="img" aria-label="Steam 2015 input display"
   font-family="Arial, sans-serif" data-full-viewbox="26.653 10.90531 474.8894 405.79479"
-  data-compact-viewbox="-2 0 180 78" data-source="STEAM.svg" data-player-leds="240.374 106.486 1.676">
+  data-compact-viewbox="-2 0 180 78" data-source="STEAM.svg"
+  data-player-leds="240.374 106.486 1.676">
   <title>Steam 2015</title>
   <style>
     .custom-colors .shell-base { fill: var(--controller-color); }
@@ -338,7 +339,7 @@
             class="vector-outline button-face stock-plastic" stroke-width="3" />
           <path
             d="M320.54121 213.6651v3.8637h-1.7341v-3.8029l-3.4378-6.8147h2.0079l2.16 4.4113c0.0608 0.1217 0.1217 0.2738 0.1522 0.3955 0.0304 0.1217 0.0608 0.213 0.0912 0.3043h0c0.0608-0.2434 0.1217-0.4563 0.2434-0.6694l2.2209-4.4417h1.8558l-3.5291 6.7539Z"
-            fill="#dfc64b" class="marking hardware-icon" />
+            fill="var(--face-label-color, #dfc64b)" class="marking hardware-icon" />
         </g>
       </g>
       <g class="word-label marking full-only-decoration">
@@ -366,7 +367,8 @@
           <g class="hardware-icon marking ">
             <path
               d="M315.48796 270.91878L319.20412 260.30118H320.26588L323.98204 270.91878M317.39913 267.20262H322.07087"
-              fill="none" stroke="#7eb94c" stroke-width="1.25" stroke-linejoin="round"
+              fill="none" stroke="var(--face-label-color, #7eb94c)" stroke-width="1.25"
+              stroke-linejoin="round"
               stroke-linecap="round" />
           </g>
         </g>
@@ -396,7 +398,8 @@
           <g class="hardware-icon marking ">
             <path
               d="M342.18295 244.2238V233.6062H346.42999Q350.67703 233.6062 350.67703 236.2606 350.67703 238.915 346.42999 238.915H342.18295M346.42999 238.915Q350.67703 238.915 350.67703 241.5694 350.67703 244.2238 346.42999 244.2238H342.18295"
-              fill="none" stroke="#df534d" stroke-width="1.25" stroke-linejoin="round"
+              fill="none" stroke="var(--face-label-color, #df534d)" stroke-width="1.25"
+              stroke-linejoin="round"
               stroke-linecap="round" />
           </g>
         </g>
@@ -425,7 +428,7 @@
             class="vector-outline button-face stock-plastic" stroke-width="3" />
           <path
             d="M295.5651 244.2238l-2.2513-3.8637c-0.0608-0.0913-0.0913-0.1825-0.1217-0.2738l-0.0913-0.2738h-0.0304l-0.0913 0.2738c0 0.0913-0.0608 0.1825-0.1217 0.2738l-2.3121 3.8637h-2.16l3.5595-5.324-3.2553-5.2936h2.1904l1.9167 3.4986c0.1521 0.2434 0.2738 0.5172 0.3651 0.791h0.0304c0.0913-0.1825 0.1521-0.3651 0.213-0.5476 0.0304-0.0913 0.7606-1.3082 2.2208-3.742h2.0079l-3.3161 5.2632 3.377 5.3544h-2.1296Z"
-            fill="#4ca4cf" class="marking hardware-icon" />
+            fill="var(--face-label-color, #4ca4cf)" class="marking hardware-icon" />
         </g>
       </g>
       <g class="word-label marking full-only-decoration">
@@ -659,4 +662,85 @@
       </g>
     </g>
   </g>
+  <style data-variant-id="bonyur" data-variant-name="BONYUR">
+    [data-controller="steam"][data-variant="bonyur"] { --button-label-color: #eeeeee; --face-label-color: var(--button-label-color); }
+    [data-controller="steam"][data-variant="bonyur"] .shell-base { fill: #660000; }
+    [data-controller="steam"][data-variant="bonyur"] .shell-panel { fill: #330000; }
+    [data-controller="steam"][data-variant="bonyur"] .button-face, [data-controller="steam"][data-variant="bonyur"] .stock-plastic { fill: #222222; }
+    [data-controller="steam"][data-variant="bonyur"] .socket-base, [data-controller="steam"][data-variant="bonyur"] .faceplate { fill: #222222; }
+    [data-controller="steam"][data-variant="bonyur"] .hardware-marking { fill: #eeeeee; }
+    [data-controller="steam"][data-variant="bonyur"] .trigger-active .button-face { fill: #eeeeee; }
+  </style>
+  <style data-variant-id="arctic" data-variant-name="Arctic">
+    [data-controller="steam"][data-variant="arctic"] { --button-label-color: #f5f9ff; --face-label-color: var(--button-label-color); }
+    [data-controller="steam"][data-variant="arctic"] .shell-base { fill: #dbeaf5; }
+    [data-controller="steam"][data-variant="arctic"] .shell-panel { fill: #90adc6; }
+    [data-controller="steam"][data-variant="arctic"] .button-face, [data-controller="steam"][data-variant="arctic"] .stock-plastic { fill: #334e68; }
+    [data-controller="steam"][data-variant="arctic"] .socket-base, [data-controller="steam"][data-variant="arctic"] .faceplate { fill: #334e68; }
+    [data-controller="steam"][data-variant="arctic"] .hardware-marking { fill: #20384e; }
+    [data-controller="steam"][data-variant="arctic"] .trigger-active .button-face { fill: #f5f9ff; }
+  </style>
+  <style data-variant-id="sakura" data-variant-name="Sakura">
+    [data-controller="steam"][data-variant="sakura"] { --button-label-color: #fff5fa; --face-label-color: var(--button-label-color); }
+    [data-controller="steam"][data-variant="sakura"] .shell-base { fill: #f2c6d8; }
+    [data-controller="steam"][data-variant="sakura"] .shell-panel { fill: #d796b5; }
+    [data-controller="steam"][data-variant="sakura"] .button-face, [data-controller="steam"][data-variant="sakura"] .stock-plastic { fill: #75415d; }
+    [data-controller="steam"][data-variant="sakura"] .socket-base, [data-controller="steam"][data-variant="sakura"] .faceplate { fill: #75415d; }
+    [data-controller="steam"][data-variant="sakura"] .hardware-marking { fill: #5a2942; }
+    [data-controller="steam"][data-variant="sakura"] .trigger-active .button-face { fill: #fff5fa; }
+  </style>
+  <style data-variant-id="lagoon" data-variant-name="Lagoon">
+    [data-controller="steam"][data-variant="lagoon"] { --button-label-color: #e5fcf4; --face-label-color: var(--button-label-color); }
+    [data-controller="steam"][data-variant="lagoon"] .shell-base { fill: #167d91; }
+    [data-controller="steam"][data-variant="lagoon"] .shell-panel { fill: #105567; }
+    [data-controller="steam"][data-variant="lagoon"] .button-face, [data-controller="steam"][data-variant="lagoon"] .stock-plastic { fill: #183d4a; }
+    [data-controller="steam"][data-variant="lagoon"] .socket-base, [data-controller="steam"][data-variant="lagoon"] .faceplate { fill: #183d4a; }
+    [data-controller="steam"][data-variant="lagoon"] .hardware-marking { fill: #d6f7ed; }
+    [data-controller="steam"][data-variant="lagoon"] .trigger-active .button-face { fill: #e5fcf4; }
+  </style>
+  <style data-variant-id="forest" data-variant-name="Forest">
+    [data-controller="steam"][data-variant="forest"] { --button-label-color: #f6f2dc; --face-label-color: var(--button-label-color); }
+    [data-controller="steam"][data-variant="forest"] .shell-base { fill: #344b3c; }
+    [data-controller="steam"][data-variant="forest"] .shell-panel { fill: #26382d; }
+    [data-controller="steam"][data-variant="forest"] .button-face, [data-controller="steam"][data-variant="forest"] .stock-plastic { fill: #202b24; }
+    [data-controller="steam"][data-variant="forest"] .socket-base, [data-controller="steam"][data-variant="forest"] .faceplate { fill: #202b24; }
+    [data-controller="steam"][data-variant="forest"] .hardware-marking { fill: #e6e9cd; }
+    [data-controller="steam"][data-variant="forest"] .trigger-active .button-face { fill: #f6f2dc; }
+  </style>
+  <style data-variant-id="sunset" data-variant-name="Sunset">
+    [data-controller="steam"][data-variant="sunset"] { --button-label-color: #fff0df; --face-label-color: var(--button-label-color); }
+    [data-controller="steam"][data-variant="sunset"] .shell-base { fill: #d57a4b; }
+    [data-controller="steam"][data-variant="sunset"] .shell-panel { fill: #a64e46; }
+    [data-controller="steam"][data-variant="sunset"] .button-face, [data-controller="steam"][data-variant="sunset"] .stock-plastic { fill: #462c42; }
+    [data-controller="steam"][data-variant="sunset"] .socket-base, [data-controller="steam"][data-variant="sunset"] .faceplate { fill: #462c42; }
+    [data-controller="steam"][data-variant="sunset"] .hardware-marking { fill: #392c3d; }
+    [data-controller="steam"][data-variant="sunset"] .trigger-active .button-face { fill: #fff0df; }
+  </style>
+  <style data-variant-id="royal" data-variant-name="Royal">
+    [data-controller="steam"][data-variant="royal"] { --button-label-color: #fff2db; --face-label-color: var(--button-label-color); }
+    [data-controller="steam"][data-variant="royal"] .shell-base { fill: #5c3f85; }
+    [data-controller="steam"][data-variant="royal"] .shell-panel { fill: #3b285d; }
+    [data-controller="steam"][data-variant="royal"] .button-face, [data-controller="steam"][data-variant="royal"] .stock-plastic { fill: #282039; }
+    [data-controller="steam"][data-variant="royal"] .socket-base, [data-controller="steam"][data-variant="royal"] .faceplate { fill: #282039; }
+    [data-controller="steam"][data-variant="royal"] .hardware-marking { fill: #f1dfaa; }
+    [data-controller="steam"][data-variant="royal"] .trigger-active .button-face { fill: #fff2db; }
+  </style>
+  <style data-variant-id="sandstone" data-variant-name="Sandstone">
+    [data-controller="steam"][data-variant="sandstone"] { --button-label-color: #fff8e7; --face-label-color: var(--button-label-color); }
+    [data-controller="steam"][data-variant="sandstone"] .shell-base { fill: #d8c29b; }
+    [data-controller="steam"][data-variant="sandstone"] .shell-panel { fill: #b89c74; }
+    [data-controller="steam"][data-variant="sandstone"] .button-face, [data-controller="steam"][data-variant="sandstone"] .stock-plastic { fill: #514635; }
+    [data-controller="steam"][data-variant="sandstone"] .socket-base, [data-controller="steam"][data-variant="sandstone"] .faceplate { fill: #514635; }
+    [data-controller="steam"][data-variant="sandstone"] .hardware-marking { fill: #493823; }
+    [data-controller="steam"][data-variant="sandstone"] .trigger-active .button-face { fill: #fff8e7; }
+  </style>
+  <style data-variant-id="cyberpunk" data-variant-name="Cyberpunk">
+    [data-controller="steam"][data-variant="cyberpunk"] { --button-label-color: #fff4fc; --face-label-color: var(--button-label-color); }
+    [data-controller="steam"][data-variant="cyberpunk"] .shell-base { fill: #e8d64d; }
+    [data-controller="steam"][data-variant="cyberpunk"] .shell-panel { fill: #8e8130; }
+    [data-controller="steam"][data-variant="cyberpunk"] .button-face, [data-controller="steam"][data-variant="cyberpunk"] .stock-plastic { fill: #292039; }
+    [data-controller="steam"][data-variant="cyberpunk"] .socket-base, [data-controller="steam"][data-variant="cyberpunk"] .faceplate { fill: #292039; }
+    [data-controller="steam"][data-variant="cyberpunk"] .hardware-marking { fill: #292039; }
+    [data-controller="steam"][data-variant="cyberpunk"] .trigger-active .button-face { fill: #fff4fc; }
+  </style>
 </svg>

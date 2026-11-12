@@ -191,25 +191,26 @@ test("configurator forms and previews initialize for every resource", async (t) 
         await page.goto("https://stream.test/controller/?skin=ds2&variant=silver&player=9#configure");
         await page.waitForFunction(() => document.getElementById("overlay-url")?.value);
         const variant = page.locator('[name="variant"]');
+        const palettes = [
+          ["bonyur", "BONYUR"],
+          ["arctic", "Arctic"],
+          ["sakura", "Sakura"],
+          ["lagoon", "Lagoon"],
+          ["forest", "Forest"],
+          ["sunset", "Sunset"],
+          ["royal", "Royal"],
+          ["sandstone", "Sandstone"],
+          ["cyberpunk", "Cyberpunk"]
+        ];
         const options = () => variant.locator("option").evaluateAll((nodes) => nodes.map((node) => [node.value, node.textContent]));
         const waitSettings = (skin, variant) => page.waitForFunction(([skin, variant]) => byStreamResource.settings.skin === skin && byStreamResource.settings.variant === variant, [skin, variant]);
-        assert.deepEqual(await options(), [
-          ["original", "Default"],
-          ["silver", "Silver"],
-          ["white", "White"],
-          ["sequential", "Sequential (all)"]
-        ]);
+        assert.deepEqual(await options(), [["original", "Default"], ["silver", "Silver"], ["white", "White"], ...palettes, ["sequential", "Sequential (all)"]]);
         assert.equal(await variant.inputValue(), "silver", "Opening links retain their explicit palette");
         await variant.selectOption("white");
         await waitSettings("ds2", "white");
         await page.locator("#skin-input").selectOption("xone");
         await waitSettings("xone", "original");
-        assert.deepEqual(await options(), [
-          ["original", "Default"],
-          ["white", "White"],
-          ["red", "Red"],
-          ["sequential", "Sequential (all)"]
-        ]);
+        assert.deepEqual(await options(), [["original", "Default"], ["white", "White"], ["red", "Red"], ...palettes, ["sequential", "Sequential (all)"]]);
         assert.equal(new URL(await page.locator("#overlay-url").inputValue()).searchParams.has("variant"), false, "Changing Skin resets even a palette supported by both models");
 
         const choices = await page.evaluate(() =>
@@ -220,10 +221,17 @@ test("configurator forms and previews initialize for every resource", async (t) 
           })
         );
         for (const choice of choices) {
+          assert.ok(Object.keys(choice.variants).length + 1 >= 9, `${choice.id} has at least nine palettes including Default`);
+          if (choice.id.startsWith("fgc")) assert.equal(Object.hasOwn(choice.variants, "bonyur"), false, `${choice.id} uses Default for BONYUR`);
           assert.deepEqual(choice.options, [["original", "Default"], ...Object.entries(choice.variants), ...(Object.keys(choice.variants).length ? [["sequential", "Sequential (all)"]] : [])], choice.id);
           assert.equal(choice.disabled, false, `${choice.id} has no unavailable options`);
           assert.equal(choice.value, "original", `${choice.id} resets to Default`);
         }
+        await page.locator("#skin-input").selectOption("nes");
+        await variant.selectOption("sakura");
+        await waitSettings("nes", "sakura");
+        assert.equal(new URL(await page.locator("#overlay-url").inputValue()).searchParams.get("variant"), "sakura");
+        await page.frameLocator("#overlay-preview").locator('.controller-background[data-controller="nes"][data-variant="sakura"]').waitFor();
         await page.locator("#skin-input").selectOption("gcn");
         await variant.selectOption("sequential");
         await waitSettings("gcn", "sequential");
@@ -239,7 +247,7 @@ test("configurator forms and previews initialize for every resource", async (t) 
         assert.equal(await variant.inputValue(), "indigo", "URL imports can select palettes absent from the previous skin");
         await page.frameLocator("#overlay-preview").locator('.controller-background[data-controller="gcn"][data-variant="indigo"]').waitFor();
         await page.locator('label:has([name="variant"]) .select2-selection').click();
-        assert.deepEqual(await page.locator('.select2-results__option[role="option"]').allTextContents(), ["Default", "Indigo", "Silver", "White", "Sequential (all)"]);
+        assert.deepEqual(await page.locator('.select2-results__option[role="option"]').allTextContents(), ["Default", "Indigo", "Silver", "White", ...palettes.map(([, name]) => name), "Sequential (all)"]);
         assert.equal(await page.locator(".select2-results__option--disabled").count(), 0);
         await page.keyboard.press("Escape");
 
@@ -247,21 +255,12 @@ test("configurator forms and previews initialize for every resource", async (t) 
         await page.locator("#settings-json").fill(JSON.stringify({ skin: "joycon", variant: "neon", player: "9" }));
         await page.locator("#settings-json").press("Tab");
         await waitSettings("joycon", "neon");
-        assert.deepEqual(await options(), [
-          ["original", "Default"],
-          ["neon", "Neon"],
-          ["sequential", "Sequential (all)"]
-        ]);
+        assert.deepEqual(await options(), [["original", "Default"], ["neon", "Neon"], ...palettes, ["sequential", "Sequential (all)"]]);
         assert.equal(await variant.inputValue(), "neon", "JSON imports retain explicit palettes");
         await page.locator('[data-settings-view="form"]').click();
         await page.locator('button[type="reset"][form="overlay-form"]').click();
         await waitSettings("ds2", "silver");
-        assert.deepEqual(await options(), [
-          ["original", "Default"],
-          ["silver", "Silver"],
-          ["white", "White"],
-          ["sequential", "Sequential (all)"]
-        ]);
+        assert.deepEqual(await options(), [["original", "Default"], ["silver", "Silver"], ["white", "White"], ...palettes, ["sequential", "Sequential (all)"]]);
         assert.equal(await variant.inputValue(), "silver", "Reset restores the opening palette after its option was removed");
         await page.goto("https://stream.test/controller/#configure");
         await page.waitForFunction(() => document.getElementById("overlay-url")?.value);
@@ -297,8 +296,14 @@ test("configurator forms and previews initialize for every resource", async (t) 
         await page.waitForFunction(() => document.querySelector("#overlay-preview").contentWindow.byStreamResource?.settings.showPlayerIndicators === "yes");
         await page.frameLocator("#overlay-preview").locator("#gamepad-9 .player-leds-layer").waitFor();
         await page.locator('[name="variant"]').selectOption("sequential");
-        await page.waitForFunction(() => document.querySelector("#overlay-preview").contentWindow.document.querySelector('#gamepad-9 .controller-background')?.dataset.variant === "red");
-        assert.deepEqual(await page.frameLocator("#overlay-preview").locator(".controller-background").evaluateAll((nodes) => nodes.map((node) => node.dataset.variant)), ["original", "white", "red", "original", "white", "red", "original", "white", "red"]);
+        await page.waitForFunction(() => document.querySelector("#overlay-preview").contentWindow.document.querySelector("#gamepad-9 .controller-background")?.dataset.variant === "sunset");
+        assert.deepEqual(
+          await page
+            .frameLocator("#overlay-preview")
+            .locator(".controller-background")
+            .evaluateAll((nodes) => nodes.map((node) => node.dataset.variant)),
+          ["original", "white", "red", "bonyur", "arctic", "sakura", "lagoon", "forest", "sunset"]
+        );
         assert.equal(new URL(await page.locator("#overlay-url").inputValue()).searchParams.get("variant"), "sequential");
         assert.equal(new URL(await page.locator("#overlay-url").inputValue()).searchParams.get("showPlayerIndicators"), "yes");
         await indicators.evaluate((node) => {
