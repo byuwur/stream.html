@@ -42,7 +42,7 @@ async function initControllerResource() {
     title: "Controller",
     description: "Show gamepad or keyboard input with stock colors or optional custom appearance. Choose a model and full or speedrun layout. Gamepads connect after a button press.",
     preview: [1280, 720],
-    urlRequired: ["player", "skin", "customColors"],
+    urlRequired: ["player", "skin"],
     sectionIcons: { Input: "fa-solid fa-gamepad" },
     previewAllow: "autoplay; gamepad *",
     normalizeParameters(values) {

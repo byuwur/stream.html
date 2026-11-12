@@ -985,10 +985,10 @@
       }
       // Compression can finish out of order; only the latest edit may publish or save its URL.
       if (generation !== urlGeneration) return false;
-      // Retained drafts belong to the existing editor preference, never to the shared overlay URL.
+      // Save switch states beside retained drafts so legacy URL inference cannot enable them on reopening.
       const preferenceValues = new URLSearchParams(url.search);
       for (const [name, field] of Object.entries(parameterRules)) {
-        if (!field.retainInactive || fieldEnabled(parameterRules, settings, name)) continue;
+        if (field.type !== "switch" && (!field.retainInactive || fieldEnabled(parameterRules, settings, name))) continue;
         let value = typeof settings[name] === "object" ? JSON.stringify(settings[name]) : String(settings[name]);
         if (field.type === "color") value = value.replace(/^#/, "");
         if (value.startsWith("dr:") || value.startsWith("raw:")) value = `raw:${value}`;

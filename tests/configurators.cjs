@@ -122,10 +122,18 @@ test("configurator forms and previews initialize for every resource", async (t) 
         await page.waitForFunction(() => document.getElementById("overlay-url")?.value);
         assert.equal(await page.locator('[name="customColors"]').isChecked(), false);
         assert.equal(await page.locator('[name="controllerColor"]').isDisabled(), true);
+        assert.equal(new URL(await page.locator("#overlay-url").inputValue()).searchParams.has("customColors"), false);
+        await page.locator('[data-settings-view="json"]').click();
+        assert.equal(Object.hasOwn(JSON.parse(await page.locator("#settings-json").inputValue()), "customColors"), false, "Compact JSON omits the default Off switch");
+        await page.locator("#json-all-fields").check();
+        assert.equal(JSON.parse(await page.locator("#settings-json").inputValue()).customColors, "no", "Show all fields still exposes the default");
+        await page.locator("#json-all-fields").uncheck();
+        await page.locator('[data-settings-view="form"]').click();
         await change("variant", "silver");
         await page.frameLocator("#overlay-preview").locator('.controller-background[data-variant="silver"]').waitFor();
         await change("customColors", "yes");
         assert.equal(await page.locator('[name="controllerColor"]').isEnabled(), true);
+        assert.equal(new URL(await page.locator("#overlay-url").inputValue()).searchParams.get("customColors"), "yes");
         assert.equal(await page.locator('[name="customGuide"]').isDisabled(), true, "DualShock 2 has no invented guide button");
         await change("controllerColor", "#2255cc");
         await change("tintControls", "yes");
@@ -146,7 +154,7 @@ test("configurator forms and previews initialize for every resource", async (t) 
         await change("guideOffsetX", "5");
         await change("guideOffsetY", "-5");
         await change("customColors", "no");
-        await page.waitForFunction(() => new URL(document.getElementById("overlay-url").value).searchParams.get("customColors") === "no");
+        await page.waitForFunction(() => !new URL(document.getElementById("overlay-url").value).searchParams.has("customColors"));
         const shared = new URL(await page.locator("#overlay-url").inputValue());
         assert.equal(shared.searchParams.has("controllerColor"), false);
         assert.equal(shared.searchParams.has("guideImage"), false);
@@ -161,7 +169,7 @@ test("configurator forms and previews initialize for every resource", async (t) 
         await page.frameLocator("#overlay-preview").locator(".guide-logo-custom image").waitFor();
         await change("controllerColor", "#334455");
         await page.locator('button[type="reset"][form="overlay-form"]').click();
-        await page.waitForFunction(() => !document.querySelector('[name="customColors"]').checked && new URL(document.getElementById("overlay-url").value).searchParams.get("customColors") === "no");
+        await page.waitForFunction(() => !document.querySelector('[name="customColors"]').checked && !new URL(document.getElementById("overlay-url").value).searchParams.has("customColors"));
         assert.equal(await page.locator('[name="controllerColor"]').inputValue(), "#2255cc", "Reset restores the opening draft, including disabled values");
       } finally { await page.close(); }
     });
