@@ -1844,13 +1844,15 @@ test("controller inversion paints and releases consistently across browser engin
                   released = true;
                 const neighbors = [-width - 1, -width, -width + 1, -1, 1, width - 1, width, width + 1];
                 for (let i = 0; i < pixels[0].length; i += 4) {
-                  // Chromium can round antialiasing by one channel unit after a filter repaint.
-                  if ([0, 1, 2, 3].some((channel) => Math.abs(pixels[0][i + channel] - pixels[2][i + channel]) > 1)) released = false;
-                  if ([0, 1, 2].some((channel) => Math.abs(pixels[0][i + channel] - pixels[1][i + channel]) > 5)) {
+                  const releaseChanged = [0, 1, 2, 3].some((channel) => Math.abs(pixels[0][i + channel] - pixels[2][i + channel]) > 1);
+                  const pressChanged = [0, 1, 2].some((channel) => Math.abs(pixels[0][i + channel] - pixels[1][i + channel]) > 5);
+                  if (!releaseChanged && !pressChanged) continue;
+                  // Filter compositing can rasterize SVG edges differently; protect flat interiors in both states.
+                  const flat = neighbors.every((offset) => [0, 1, 2].every((channel) => Math.abs(pixels[0][i + offset * 4 + channel] - pixels[0][i + channel]) <= 1));
+                  if (releaseChanged && flat) released = false;
+                  if (pressChanged) {
                     const x = (i / 4) % width, y = Math.floor(i / 4 / width);
-                    // Compositing can rasterize other SVG edges differently; protect their flat interiors.
                     if (x < bounds.x - 4 || x > bounds.x + bounds.width + 4 || y < bounds.y - 4 || y > bounds.y + bounds.height + 4) {
-                      const flat = neighbors.every((offset) => [0, 1, 2].every((channel) => Math.abs(pixels[0][i + offset * 4 + channel] - pixels[0][i + channel]) <= 1));
                       if (flat) unrelated++;
                     } else {
                       changed++;
@@ -1903,9 +1905,14 @@ test("controller inversion paints and releases consistently across browser engin
                     const context = canvas.getContext("2d"); context.drawImage(bitmap, 0, 0);
                     const pixels = context.getImageData(0, 0, canvas.width, canvas.height).data;
                     initial ||= pixels;
+                    const neighbors = [-canvas.width - 1, -canvas.width, -canvas.width + 1, -1, 1, canvas.width - 1, canvas.width, canvas.width + 1];
                     let count = 0;
-                    for (let i = 0; i < pixels.length; i += 4)
-                      if ([0, 1, 2].some((channel) => Math.abs(initial[i + channel] - pixels[i + channel]) > 5)) count++;
+                    for (let i = 0; i < pixels.length; i += 4) {
+                      if (![0, 1, 2].some((channel) => Math.abs(initial[i + channel] - pixels[i + channel]) > 5)) continue;
+                      // Count pressure changes in flat interiors, excluding SVG edge rasterization.
+                      const flat = neighbors.every((offset) => [0, 1, 2].every((channel) => Math.abs(initial[i + offset * 4 + channel] - initial[i + channel]) <= 1));
+                      if (flat) count++;
+                    }
                     changes.push(count);
                   }
                   return changes;
