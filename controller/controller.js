@@ -62,7 +62,7 @@ async function initControllerResource() {
         default: "1",
         label: "Player Number:",
         section: "Input",
-        description: "Choose a gamepad or Keyboard. Keyboard uses J/K/U/I for face buttons and arrows for the left stick; Custom Mapping can use any identified key.",
+        description: "Choose a gamepad or Keyboard. Keyboard uses J/K/U/I for face buttons, WASD for the left stick, and arrows for the D-pad; Custom Mapping can use any identified key.",
         options: { 1: "Player 1", 2: "Player 2", 3: "Player 3", 4: "Player 4", 9: "Keyboard" },
         id: "player-input",
         icon: "fa-user"

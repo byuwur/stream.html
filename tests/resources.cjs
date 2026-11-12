@@ -1124,9 +1124,9 @@ test("resources render and round-trip URLs without configurator assets", async (
             const base = await page.locator('.fixed-layer[data-for="button:10"] .vector-outline').boundingBox();
             const ball = await page.locator('.control[data-name="stick-1"] .button-face').boundingBox();
             assert.ok(Math.abs(ball.x + ball.width / 2 - base.x - base.width / 2) < 0.01 && Math.abs(ball.y + ball.height / 2 - base.y - base.height / 2) < 0.01, "The arcade ball rests at the center of its base");
-            await page.keyboard.down("Space");
+            await page.keyboard.down("ArrowUp");
             await page.waitForFunction(() => parseFloat(document.querySelector('.control[data-name="stick-1"]').style.translate.split(" ")[1]) < 0);
-            await page.keyboard.up("Space");
+            await page.keyboard.up("ArrowUp");
             await page.waitForFunction(() =>
               document
                 .querySelector('.control[data-name="stick-1"]')
@@ -2127,6 +2127,78 @@ test("resources render and round-trip URLs without configurator assets", async (
     await browser.close();
   }
 });
+test("default keyboard separates WASD, arrow D-pad, and Q/E shoulders", async () => {
+  const assets = await loadAssets(["_functions.min.js"]);
+  const browser = await chromium.launch(launchOptions);
+  try {
+    const page = await browser.newPage();
+    await serve(page, assets, true);
+    await page.goto("https://stream.test/controller/?player=9&skin=xseries");
+    await page.waitForSelector(".controller.active:not(.disconnected)");
+    const directions = [
+      ["a", [-1, 0, 0, 0], []],
+      ["d", [1, 0, 0, 0], []],
+      ["w", [0, -1, 0, 0], []],
+      ["s", [0, 1, 0, 0], []],
+      ["ArrowUp", [0, 0, 0, 0], [12]],
+      ["ArrowDown", [0, 0, 0, 0], [13]],
+      ["ArrowLeft", [0, 0, 0, 0], [14]],
+      ["ArrowRight", [0, 0, 0, 0], [15]],
+      ["f", [0, 0, -1, 0], []],
+      ["h", [0, 0, 1, 0], []],
+      ["t", [0, 0, 0, -1], []],
+      ["g", [0, 0, 0, 1], []]
+    ];
+    for (const [key, axes, buttons] of directions) {
+      await page.keyboard.down(key);
+      await page.waitForFunction(
+        (axes) =>
+          ["stick-1", "stick-2"].every((name, i) => {
+            const translate = document.querySelector(`.control[data-name="${name}"]`).style.translate.split(" ").map(parseFloat);
+            return translate.every((value, axis) => Math.sign(value) === axes[i * 2 + axis]);
+          }),
+        axes
+      );
+      assert.deepEqual(await page.evaluate(() => bySettingsKB.axes), axes, key);
+      assert.deepEqual(await page.evaluate(() => bySettingsKB.buttons.flatMap((value, i) => (value ? [i] : []))), buttons, key);
+      await page.keyboard.up(key);
+    }
+    for (const [slot, key] of [
+      [0, "j"],
+      [1, "k"],
+      [2, "u"],
+      [3, "i"],
+      [4, "q"],
+      [5, "o"],
+      [6, "e"],
+      [7, "l"],
+      [8, "Tab"],
+      [9, "Escape"],
+      [10, "r"],
+      [11, "y"],
+      [16, "3"]
+    ]) {
+      await page.keyboard.down(key);
+      assert.deepEqual(await page.evaluate(() => bySettingsKB.buttons.flatMap((value, i) => (value ? [i] : []))), [slot], key);
+      assert.deepEqual(await page.evaluate(() => bySettingsKB.axes), [0, 0, 0, 0], key);
+      await page.keyboard.up(key);
+    }
+    await page.goto("https://stream.test/controller/?player=9&skin=fgc&layout=minimal");
+    await page.waitForSelector(".controller.active:not(.disconnected)");
+    await page.keyboard.down("ArrowUp");
+    await page.waitForFunction(() => parseFloat(document.querySelector('.control[data-name="stick-1"]').style.translate.split(" ")[1]) < 0);
+    await page.keyboard.up("ArrowUp");
+    await page.waitForFunction(() =>
+      document
+        .querySelector('.control[data-name="stick-1"]')
+        .style.translate.split(" ")
+        .every((value) => parseFloat(value) === 0)
+    );
+  } finally {
+    await browser.close();
+  }
+});
+
 test("handheld D-pads paint the requested directions after artwork rotation", async () => {
   const assets = await loadAssets(runtimeAssets);
   const browser = await chromium.launch(launchOptions);
