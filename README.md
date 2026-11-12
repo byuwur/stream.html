@@ -129,7 +129,7 @@ Current URLs use percentages for opacity, deadzone, and scale: `100` means 100%,
 | `skin` | `xseries` Xbox Series (default), `ds5` DualSense, `fgc` Fight Stick (8 buttons), `fgc6` (6 buttons), `fgc4` (4 buttons), `xone` Xbox One, `ds4` DualShock 4, `x360` Xbox 360, `ds3` DualShock 3, `gcn` GameCube, `n64` Nintendo 64, `snes` SNES, `nes` NES. |
 | `showPlayerIndicators` | `no` (default) hides player lamps, including Xbox 360 guide segments; `yes` shows them. |
 | `layout`, `buttonLabels` | `full` (default) or `minimal`; `icons` (default), `letters`, or `none`. |
-| `variant` | A stock palette supported by that model, such as PS2 `silver` or `white`; default `original` uses its SVG base palette. Available while Custom colors is Off. |
+| `variant` | A stock palette supported by that model, such as PS2 `silver` or `white`; Default (`original`) uses its SVG base palette. The picker lists only that skin's variants and returns to Default when Skin changes. Available while Custom colors is Off. |
 | `customColors` | Default `no` preserves the SVG palette, structural strokes, and guide symbol. `yes` enables the optional appearance controls. |
 | `tintControls` | Optional button-plastic tint derived from `controllerColor`; default `no` preserves hardware colors. Rubber sticks and shoulders stay unchanged. |
 | `disconnectedTint`, `disconnectedOpacity` | Disconnected tint (alpha controls strength; transparent disables it) and opacity `0` to `100`% (default `5`). Connected appearance is unchanged. |

@@ -96,7 +96,7 @@ async function initControllerResource() {
         default: "original",
         label: "Color variant",
         section: "Appearance",
-        options: { original: "Original / base", ...Object.assign({}, ...Object.values(byControllerArtwork.skins).map((skin) => skin.variants)) },
+        options: { original: "Default", ...Object.assign({}, ...Object.values(byControllerArtwork.skins).map((skin) => skin.variants)) },
         when: (values) => values.customColors !== "yes" && Object.keys(byControllerArtwork.skins[values.skin]?.variants || {}).length > 0,
         retainInactive: true
       },
@@ -1343,15 +1343,18 @@ function initControllerMapping() {
         const output = $("<output class='ms-2 text-body-secondary'></output>").attr("for", input.attr("id")).appendTo(label.find(".field-caption"));
         input.on("input.controllerSlider change.controllerSlider", () => output.text(`${input.val()}${name === "outlineWidth" ? "×" : "%"}`)).triggerHandler("change.controllerSlider");
       }
-      function updateVariants() {
-        const choices = byControllerArtwork.skins[$("#skin-input").val()]?.variants || {};
+      const initialVariant = settings.variant;
+      function updateVariants(value = settings.variant) {
+        const variants = byControllerArtwork.skins[$("#skin-input").val()]?.variants || {};
+        const choices = { original: "Default", ...variants };
         const select = $('[name="variant"]');
-        select.find("option").each((_, option) => {
-          option.disabled = option.value !== "original" && !Object.hasOwn(choices, option.value);
-        });
-        if (select.find(":selected").prop("disabled")) select.val("original");
+        select.empty();
+        for (const [id, label] of Object.entries(choices)) select.append(new Option(label, id, id === initialVariant, id === value));
+        select.val(Object.hasOwn(choices, value) ? value : "original").trigger("change.select2");
       }
-      $("#skin-input").on("change.controllerVariants", updateVariants);
+      $("#skin-input").on("change.controllerVariants", () => updateVariants());
+      // Imports update fields without bubbling; only editing Skin resets the selected palette.
+      $("form[data-configurator]").on("change.controllerVariants", "#skin-input", () => updateVariants("original"));
       updateVariants();
       const platforms = new Map();
       for (const option of [...document.querySelectorAll("#skin-input option")]) {
@@ -1785,6 +1788,7 @@ function initControllerMapping() {
       // The shared Reset handler generates the URL after this callback restores the field.
       $("form[data-configurator]").on("reset", () =>
         setTimeout(() => {
+          updateVariants(initialVariant);
           $("#mapping-input").val(initialMapping);
           loadRows();
         }, 0)

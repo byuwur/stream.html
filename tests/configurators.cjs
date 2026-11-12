@@ -184,6 +184,81 @@ test("configurator forms and previews initialize for every resource", async (t) 
       }
     });
 
+    await t.test("controller variants list supported palettes, reset on Skin edits, and preserve imports and Reset", async () => {
+      const page = await browser.newPage();
+      try {
+        await serve(page, assets);
+        await page.goto("https://stream.test/controller/?skin=ds2&variant=silver&player=9#configure");
+        await page.waitForFunction(() => document.getElementById("overlay-url")?.value);
+        const variant = page.locator('[name="variant"]');
+        const options = () => variant.locator("option").evaluateAll((nodes) => nodes.map((node) => [node.value, node.textContent]));
+        const waitSettings = (skin, variant) => page.waitForFunction(([skin, variant]) => byStreamResource.settings.skin === skin && byStreamResource.settings.variant === variant, [skin, variant]);
+        assert.deepEqual(await options(), [
+          ["original", "Default"],
+          ["silver", "Silver"],
+          ["white", "White"]
+        ]);
+        assert.equal(await variant.inputValue(), "silver", "Opening links retain their explicit palette");
+        await variant.selectOption("white");
+        await waitSettings("ds2", "white");
+        await page.locator("#skin-input").selectOption("xone");
+        await waitSettings("xone", "original");
+        assert.deepEqual(await options(), [
+          ["original", "Default"],
+          ["white", "White"],
+          ["red", "Red"]
+        ]);
+        assert.equal(new URL(await page.locator("#overlay-url").inputValue()).searchParams.has("variant"), false, "Changing Skin resets even a palette supported by both models");
+
+        const choices = await page.evaluate(() =>
+          Object.entries(byControllerArtwork.skins).map(([id, skin]) => {
+            jQuery("#skin-input").val(id).trigger("change");
+            const select = document.querySelector('[name="variant"]');
+            return { id, variants: skin.variants, options: [...select.options].map((node) => [node.value, node.textContent]), disabled: [...select.options].some((node) => node.disabled), value: select.value };
+          })
+        );
+        for (const choice of choices) {
+          assert.deepEqual(choice.options, [["original", "Default"], ...Object.entries(choice.variants)], choice.id);
+          assert.equal(choice.disabled, false, `${choice.id} has no unavailable options`);
+          assert.equal(choice.value, "original", `${choice.id} resets to Default`);
+        }
+
+        await page.locator("#overlay-url").fill("https://stream.test/controller/?skin=gcn&variant=indigo&player=9");
+        await page.locator("#overlay-url").press("Enter");
+        await waitSettings("gcn", "indigo");
+        assert.equal(await variant.inputValue(), "indigo", "URL imports can select palettes absent from the previous skin");
+        await page.frameLocator("#overlay-preview").locator('.controller-background[data-controller="gcn"][data-variant="indigo"]').waitFor();
+        await page.locator('label:has([name="variant"]) .select2-selection').click();
+        assert.deepEqual(await page.locator('.select2-results__option[role="option"]').allTextContents(), ["Default", "Indigo", "Silver", "White"]);
+        assert.equal(await page.locator(".select2-results__option--disabled").count(), 0);
+        await page.keyboard.press("Escape");
+
+        await page.locator('[data-settings-view="json"]').click();
+        await page.locator("#settings-json").fill(JSON.stringify({ skin: "joycon", variant: "neon", player: "9" }));
+        await page.locator("#settings-json").press("Tab");
+        await waitSettings("joycon", "neon");
+        assert.deepEqual(await options(), [
+          ["original", "Default"],
+          ["neon", "Neon"]
+        ]);
+        assert.equal(await variant.inputValue(), "neon", "JSON imports retain explicit palettes");
+        await page.locator('[data-settings-view="form"]').click();
+        await page.locator('button[type="reset"][form="overlay-form"]').click();
+        await waitSettings("ds2", "silver");
+        assert.deepEqual(await options(), [
+          ["original", "Default"],
+          ["silver", "Silver"],
+          ["white", "White"]
+        ]);
+        assert.equal(await variant.inputValue(), "silver", "Reset restores the opening palette after its option was removed");
+        await page.goto("https://stream.test/controller/#configure");
+        await page.waitForFunction(() => document.getElementById("overlay-url")?.value);
+        assert.equal(await variant.inputValue(), "silver", "Saved settings retain their palette on reopening");
+      } finally {
+        await page.close();
+      }
+    });
+
     await t.test("controller editor selects all eight gamepads and previews their player LEDs", async () => {
       const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
       try {
