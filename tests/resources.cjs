@@ -2338,6 +2338,55 @@ test("eight gamepads keep independent players, LEDs, and keyboard through reconn
   }
 });
 
+test("sequential controller variants cycle visible palettes through layout and connection changes", async () => {
+  const assets = await loadAssets(["_functions.min.js"]);
+  const browser = await chromium.launch(launchOptions);
+  try {
+    const page = await browser.newPage();
+    const errors = [];
+    page.on("pageerror", (error) => errors.push(error.message));
+    await serve(page, assets, true);
+    await page.addInitScript(() => {
+      window.testPads = Array.from({ length: 8 }, (_, index) => ({ index, id: `Pad ${index}`, buttons: [], axes: [] }));
+      Object.defineProperty(navigator, "getGamepads", { value: () => testPads });
+    });
+    const variants = () => page.locator(".controller-background").evaluateAll((nodes) => nodes.map((node) => node.dataset.variant));
+    await page.goto("https://stream.test/controller/?player=all&skin=gcn&variant=sequential");
+    await page.waitForSelector("#gamepad-9:not(.disconnected)");
+    const expected = ["original", "indigo", "silver", "white", "original", "indigo", "silver", "white", "original"];
+    assert.deepEqual(await variants(), expected);
+    assert.equal(await page.locator(".controller-background .shell-base").evaluateAll((nodes) => new Set(nodes.map((node) => getComputedStyle(node).fill)).size), 4, "Stock palettes change the actual shell colors");
+    for (const layout of ["minimal", "full"]) {
+      await page.evaluate((layout) => document.querySelectorAll(".controller").forEach((node) => byControllerArtwork.setLayout(node, layout)), layout);
+      assert.deepEqual(await variants(), expected, layout);
+    }
+    await page.evaluate(() => { testPads[0] = null; });
+    await page.waitForSelector('#gamepads[data-gamepad-count="7"]', { state: "attached" });
+    assert.equal(await page.locator("#gamepad-1").count(), 0);
+    assert.deepEqual(await variants(), expected.slice(0, 8), "The sequence follows visible order despite gaps in player numbers");
+    await page.evaluate(() => { testPads[0] = { index: 0, id: "Reconnected", buttons: [], axes: [] }; });
+    await page.waitForSelector('#gamepads[data-gamepad-count="8"] #gamepad-1');
+    assert.deepEqual(await variants(), expected, "Reconnecting restores the visible sequence");
+
+    await page.goto("https://stream.test/controller/?player=8&skin=gcn&variant=sequential");
+    await page.waitForSelector("#gamepad-8:not(.disconnected)");
+    assert.deepEqual(await variants(), ["original"], "A single controller uses Default");
+    await page.goto("https://stream.test/controller/?player=gamepads&skin=nes&variant=sequential");
+    await page.waitForSelector("#gamepad-8:not(.disconnected)");
+    assert.deepEqual(await variants(), Array(8).fill("original"), "Skins without alternate palettes use Default");
+    await page.goto("https://stream.test/controller/?player=gamepads&skin=xseries&variant=red");
+    await page.waitForSelector("#gamepad-8:not(.disconnected)");
+    assert.deepEqual(await variants(), Array(8).fill("red"), "Explicit palettes still apply to every controller");
+    await page.goto("https://stream.test/controller/?player=all&skin=gcn&variant=sequential&customColors=yes&controllerColor=2255cc");
+    await page.waitForSelector("#gamepad-9:not(.disconnected)");
+    assert.deepEqual(await variants(), Array(9).fill("original"), "Custom colors take precedence over stock sequencing");
+    assert.equal(await page.locator(".controller-background .shell-base").evaluateAll((nodes) => nodes.every((node) => getComputedStyle(node).fill === "rgb(34, 85, 204)")), true);
+    assert.deepEqual(errors, []);
+  } finally {
+    await browser.close();
+  }
+});
+
 test("controller layouts preserve native lamps, use plain square LEDs, and keep Xbox 360 guide indicators", async () => {
   const assets = await loadAssets(["_functions.min.js"]);
   const browser = await chromium.launch(launchOptions);

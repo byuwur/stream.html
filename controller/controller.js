@@ -96,7 +96,7 @@ async function initControllerResource() {
         default: "original",
         label: "Color variant",
         section: "Appearance",
-        options: { original: "Default", ...Object.assign({}, ...Object.values(byControllerArtwork.skins).map((skin) => skin.variants)) },
+        options: { original: "Default", ...Object.assign({}, ...Object.values(byControllerArtwork.skins).map((skin) => skin.variants)), sequential: "Sequential (all)" },
         when: (values) => values.customColors !== "yes" && Object.keys(byControllerArtwork.skins[values.skin]?.variants || {}).length > 0,
         retainInactive: true
       },
@@ -794,15 +794,17 @@ async function initControllerResource() {
     container.replaceChildren();
     container.dataset.gamepadCount = gamepadSupport.connectedCount;
     tester.controls.clear();
-    for (const player of players) mountController(player);
+    const variants = ["original", ...Object.keys(byControllerArtwork.skins[settings.skin].variants)];
+    players.forEach((player, index) => mountController(player, index));
     const controllers = [...container.querySelectorAll(".controller")];
-    function mountController(player) {
+    function mountController(player, index) {
       const active = document.createElement("div");
       active.className = "controller active";
       active.id = `gamepad-${player}`;
       active.setAttribute("aria-label", player === 9 ? "Keyboard" : `Player ${player}`);
       container.append(active);
-      const artwork = byControllerArtwork.render(settings.skin, settings.layout, settings.buttonLabels, settings.customColors === "yes" ? "original" : settings.variant, `p${player}`);
+      const variant = settings.variant === "sequential" ? variants[index % variants.length] : settings.variant;
+      const artwork = byControllerArtwork.render(settings.skin, settings.layout, settings.buttonLabels, settings.customColors === "yes" ? "original" : variant, `p${player}`);
       active.innerHTML = `<div class="controller-layers">${artwork.markup}</div>`;
       active.style.width = `${artwork.width}px`;
       active.style.height = `${artwork.height}px`;
@@ -1347,6 +1349,7 @@ function initControllerMapping() {
       function updateVariants(value = settings.variant) {
         const variants = byControllerArtwork.skins[$("#skin-input").val()]?.variants || {};
         const choices = { original: "Default", ...variants };
+        if (Object.keys(variants).length) choices.sequential = "Sequential (all)";
         const select = $('[name="variant"]');
         select.empty();
         for (const [id, label] of Object.entries(choices)) select.append(new Option(label, id, id === initialVariant, id === value));
