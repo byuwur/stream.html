@@ -1,6 +1,13 @@
-<svg xmlns="http://www.w3.org/2000/svg" class="controller-art" viewBox="-8 -8 936 550" role="img" aria-label="FGC (8 buttons) input display" id="fgc" data-controller="fgc" data-name="FGC (8 buttons)" data-platform="Other" data-labels="icons" data-layout="full" data-full-viewbox="-8 -8 936 550" data-compact-viewbox="-4.6 0.5 133.6 60.5">
+<svg xmlns="http://www.w3.org/2000/svg" class="controller-art" viewBox="-8 -8 936 550" role="img"
+  aria-label="FGC (8 buttons) input display" id="fgc" data-controller="fgc"
+  data-name="FGC (8 buttons)" data-platform="Other" data-labels="icons" data-layout="full"
+  data-full-viewbox="-8 -8 936 550" data-compact-viewbox="-4.6 0.5 133.6 60.5">
   <title>FGC (8 buttons)</title>
-  <view id="fgc6" viewBox="-8 -8 758 550" data-name="FGC (6 buttons)" data-exclude=".eight-button-only" data-compact-viewbox="-4.6 0.5 112.6 60.5"/><view id="fgc4" viewBox="-8 -8 590 550" data-name="FGC (4 buttons)" data-exclude=".eight-button-only, .six-button-only" data-compact-viewbox="-4.6 0.5 90.6 60.5"/><style>
+  <view id="fgc6" viewBox="-8 -8 758 550" data-name="FGC (6 buttons)"
+    data-exclude=".eight-button-only" data-compact-viewbox="-4.6 0.5 112.6 60.5" />
+  <view id="fgc4" viewBox="-8 -8 590 550" data-name="FGC (4 buttons)"
+    data-exclude=".eight-button-only, .six-button-only" data-compact-viewbox="-4.6 0.5 90.6 60.5" />
+  <style>
     .custom-colors .shell-base { fill: var(--controller-color); }
     .custom-colors .shell-panel { fill: var(--controller-panel); }
     .hardware-marking { opacity: 0.65; } .custom-colors .hardware-marking { fill: var(--controller-ink); }
@@ -27,435 +34,605 @@
 
     #fgc6:target ~ .eight-button-only, #fgc4:target ~ .eight-button-only, #fgc4:target ~ .six-button-only { display: none; }
 </style>
-  <g id="button-3" class="control" data-name="button-3" data-input="button:2" data-label="Square / X" data-bounds="294.19998 130.8 123.4 123.4" data-compact-transform="matrix(0.14587 0 0 0.14587 -1.9141 -7.07942)" data-compact-scale="0.14587">
+  <g id="button-3" class="control" data-name="button-3" data-input="button:2"
+    data-label="Square / X" data-bounds="294.19998 130.8 123.4 123.4"
+    data-compact-transform="matrix(0.14587 0 0 0.14587 -1.9141 -7.07942)"
+    data-compact-scale="0.14587">
     <g class="press-visual">
       <g transform="matrix(1 0 0 1 0 0)">
         <g class="full-geometry">
           <g>
-            <circle cx="355.9" cy="192.5" r="61.7" fill="#1a1a1a" class="button-face vector-outline" stroke="#111111" stroke-width="1.2"/>
+            <circle cx="355.9" cy="192.5" r="61.7" fill="#1a1a1a" class="button-face vector-outline"
+              stroke="#111111" stroke-width="1.2" />
           </g>
           <g class="button-label marking full-only-decoration">
             <g class="hardware-icon">
               <g>
                 <g>
-                  <ellipse cx="391.3" cy="98.9" rx="27.4" ry="27.3" fill="#141414"/>
+                  <ellipse cx="391.3" cy="98.9" rx="27.4" ry="27.3" fill="#141414" />
                 </g>
                 <g isolation="isolate">
-                  <path d="M399.6,116.3l-7.4-12.7c-.2-.3-.3-.6-.4-.9l-.3-.9h-.1l-.3.9c0,.3-.2.6-.4.9l-7.6,12.7h-7.1l11.7-17.5-10.7-17.4h7.2l6.3,11.5c.5.8.9,1.7,1.2,2.6h.1c.3-.6.5-1.2.7-1.8.1-.3,2.5-4.3,7.3-12.3h6.6l-10.9,17.3,11.1,17.6h-7Z" fill="#0071bc"/>
+                  <path
+                    d="M399.6,116.3l-7.4-12.7c-.2-.3-.3-.6-.4-.9l-.3-.9h-.1l-.3.9c0,.3-.2.6-.4.9l-7.6,12.7h-7.1l11.7-17.5-10.7-17.4h7.2l6.3,11.5c.5.8.9,1.7,1.2,2.6h.1c.3-.6.5-1.2.7-1.8.1-.3,2.5-4.3,7.3-12.3h6.6l-10.9,17.3,11.1,17.6h-7Z"
+                    fill="#0071bc" />
                 </g>
               </g>
               <g>
                 <g>
-                  <path d="M321.2,125.4c-14.7,0-26.6-11.9-26.6-26.5s11.9-26.5,26.6-26.5,26.6,11.9,26.6,26.5h0c0,14.6-11.8,26.5-26.5,26.5,0,0,0,0-.1,0Z" fill="#1a1a1a"/>
-                  <path d="M321.2,73.5c14.1,0,25.6,11.3,25.6,25.4,0,14.1-11.3,25.5-25.4,25.6-14.1,0-25.6-11.3-25.6-25.4,0,0,0-.1,0-.2,0-14,11.4-25.3,25.4-25.4M321.2,71.5c-15.2,0-27.6,12.3-27.6,27.5s12.3,27.5,27.6,27.5c15.2,0,27.6-12.3,27.6-27.5h0c0-15.2-12.4-27.5-27.6-27.5Z" fill="#0f0f0f"/>
+                  <path
+                    d="M321.2,125.4c-14.7,0-26.6-11.9-26.6-26.5s11.9-26.5,26.6-26.5,26.6,11.9,26.6,26.5h0c0,14.6-11.8,26.5-26.5,26.5,0,0,0,0-.1,0Z"
+                    fill="#1a1a1a" />
+                  <path
+                    d="M321.2,73.5c14.1,0,25.6,11.3,25.6,25.4,0,14.1-11.3,25.5-25.4,25.6-14.1,0-25.6-11.3-25.6-25.4,0,0,0-.1,0-.2,0-14,11.4-25.3,25.4-25.4M321.2,71.5c-15.2,0-27.6,12.3-27.6,27.5s12.3,27.5,27.6,27.5c15.2,0,27.6-12.3,27.6-27.5h0c0-15.2-12.4-27.5-27.6-27.5Z"
+                    fill="#0f0f0f" />
                 </g>
-                <path d="M332.8,84.4h-26.1v28.8h28.9v-28.8h-2.8ZM332.8,110.5h-23.2v-23.2h23.2v23.2Z" fill="#ff69f8"/>
+                <path d="M332.8,84.4h-26.1v28.8h28.9v-28.8h-2.8ZM332.8,110.5h-23.2v-23.2h23.2v23.2Z"
+                  fill="#ff69f8" />
               </g>
             </g>
             <g class="word-label" transform="translate(355.9 192.5) scale(1.4)">
-              <g transform="translate(-20.52 -3.54) scale(0.708)" fill="none" stroke="#D797CD" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round">
-                <path transform="translate(0 0)" d="M8 1 Q0 -2 0 3 Q0 5 4 5 Q8 5 8 8 Q8 12 0 9"/>
-                <path transform="translate(10 0)" d="M4 0 Q0 0 0 5 Q0 10 4 10 Q8 10 8 5 Q8 0 4 0 Z M5 7 9 11"/>
-                <path transform="translate(20 0)" d="M0 0 V7 Q0 10 4 10 Q8 10 8 7 V0"/>
-                <path transform="translate(30 0)" d="M0 10 3 0 H5 L8 10 M2 6 H6"/>
-                <path transform="translate(40 0)" d="M0 10 V0 H4 Q8 0 8 3 Q8 5 4 5 H0 M4 5 8 10"/>
-                <path transform="translate(50 0)" d="M8 0 H0 V10 H8 M0 5 H6"/>
+              <g transform="translate(-20.52 -3.54) scale(0.708)" fill="none" stroke="#D797CD"
+                stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round">
+                <path transform="translate(0 0)" d="M8 1 Q0 -2 0 3 Q0 5 4 5 Q8 5 8 8 Q8 12 0 9" />
+                <path transform="translate(10 0)"
+                  d="M4 0 Q0 0 0 5 Q0 10 4 10 Q8 10 8 5 Q8 0 4 0 Z M5 7 9 11" />
+                <path transform="translate(20 0)" d="M0 0 V7 Q0 10 4 10 Q8 10 8 7 V0" />
+                <path transform="translate(30 0)" d="M0 10 3 0 H5 L8 10 M2 6 H6" />
+                <path transform="translate(40 0)" d="M0 10 V0 H4 Q8 0 8 3 Q8 5 4 5 H0 M4 5 8 10" />
+                <path transform="translate(50 0)" d="M8 0 H0 V10 H8 M0 5 H6" />
               </g>
             </g>
           </g>
         </g>
       </g>
-      <g class="compact-geometry word-label marking" transform="matrix(6.85556 0 0 6.85556 13.1222 48.53334)">
-        <text x="50.0" y="21.0" fill="#eeeeee" font-family="Arial, sans-serif" font-size="2.4" text-anchor="middle" dominant-baseline="central">Square / X</text>
+      <g class="compact-geometry word-label marking"
+        transform="matrix(6.85556 0 0 6.85556 13.1222 48.53334)">
+        <text x="50.0" y="21.0" fill="#eeeeee" font-family="Arial, sans-serif" font-size="2.4"
+          text-anchor="middle" dominant-baseline="central">Square / X</text>
       </g>
     </g>
   </g>
-  <g id="button-4" class="control" data-name="button-4" data-input="button:3" data-label="Triangle / Y" data-bounds="449.19998 64.8 123.4 123.4" data-compact-transform="matrix(0.14587 0 0 0.14587 -2.5235 0.54781)" data-compact-scale="0.14587">
+  <g id="button-4" class="control" data-name="button-4" data-input="button:3"
+    data-label="Triangle / Y" data-bounds="449.19998 64.8 123.4 123.4"
+    data-compact-transform="matrix(0.14587 0 0 0.14587 -2.5235 0.54781)"
+    data-compact-scale="0.14587">
     <g class="press-visual">
       <g transform="matrix(1 0 0 1 0 0)">
         <g class="full-geometry">
           <g>
-            <circle cx="510.9" cy="126.5" r="61.7" fill="#1a1a1a" class="button-face vector-outline" stroke="#111111" stroke-width="1.2"/>
+            <circle cx="510.9" cy="126.5" r="61.7" fill="#1a1a1a" class="button-face vector-outline"
+              stroke="#111111" stroke-width="1.2" />
           </g>
           <g class="button-label marking full-only-decoration">
             <g class="hardware-icon">
               <g>
                 <g>
-                  <ellipse cx="546.3" cy="32.8" rx="27.3" ry="27.3" fill="#141414"/>
+                  <ellipse cx="546.3" cy="32.8" rx="27.3" ry="27.3" fill="#141414" />
                 </g>
                 <g isolation="isolate">
-                  <path d="M549,37.5v12.7h-5.7v-12.5l-11.3-22.4h6.6l7.1,14.5c.2.4.4.9.5,1.3.1.4.2.7.3,1h0c.2-.8.4-1.5.8-2.2l7.3-14.6h6.1l-11.6,22.2Z" fill="#fcee21"/>
+                  <path
+                    d="M549,37.5v12.7h-5.7v-12.5l-11.3-22.4h6.6l7.1,14.5c.2.4.4.9.5,1.3.1.4.2.7.3,1h0c.2-.8.4-1.5.8-2.2l7.3-14.6h6.1l-11.6,22.2Z"
+                    fill="#fcee21" />
                 </g>
               </g>
               <g>
                 <g>
-                  <path d="M476.2,59.4c-14.6,0-26.4-11.9-26.4-26.5,0-14.6,11.9-26.4,26.5-26.4,14.6,0,26.4,11.9,26.4,26.5,0,14.6-11.9,26.4-26.5,26.4Z" fill="#1a1a1a"/>
-                  <path d="M476.2,7.5c14.1,0,25.5,11.4,25.5,25.5s-11.4,25.5-25.5,25.5c-14.1,0-25.5-11.4-25.5-25.5h0c0-14.1,11.4-25.5,25.5-25.5M476.2,5.5c-15.2,0-27.5,12.3-27.5,27.5s12.3,27.5,27.5,27.5c15.2,0,27.5-12.3,27.5-27.5h0c0-15.2-12.3-27.5-27.5-27.5Z" fill="#0f0f0f"/>
+                  <path
+                    d="M476.2,59.4c-14.6,0-26.4-11.9-26.4-26.5,0-14.6,11.9-26.4,26.5-26.4,14.6,0,26.4,11.9,26.4,26.5,0,14.6-11.9,26.4-26.5,26.4Z"
+                    fill="#1a1a1a" />
+                  <path
+                    d="M476.2,7.5c14.1,0,25.5,11.4,25.5,25.5s-11.4,25.5-25.5,25.5c-14.1,0-25.5-11.4-25.5-25.5h0c0-14.1,11.4-25.5,25.5-25.5M476.2,5.5c-15.2,0-27.5,12.3-27.5,27.5s12.3,27.5,27.5,27.5c15.2,0,27.5-12.3,27.5-27.5h0c0-15.2-12.3-27.5-27.5-27.5Z"
+                    fill="#0f0f0f" />
                 </g>
-                <path d="M492.3,41l-16.1-27.8-16.1,27.8-1.6,2.8h35.5l-1.6-2.8ZM476.2,41h-12.8l12.8-22.1,12.8,22.1h-12.8Z" fill="#40e2a0"/>
+                <path
+                  d="M492.3,41l-16.1-27.8-16.1,27.8-1.6,2.8h35.5l-1.6-2.8ZM476.2,41h-12.8l12.8-22.1,12.8,22.1h-12.8Z"
+                  fill="#40e2a0" />
               </g>
             </g>
             <g class="word-label" transform="translate(510.9 126.5) scale(1.4)">
-              <g transform="translate(-20.52 -2.63) scale(0.526)" fill="none" stroke="#73C6AD" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round">
-                <path transform="translate(0 0)" d="M0 0 H8 M4 0 V10"/>
-                <path transform="translate(10 0)" d="M0 10 V0 H4 Q8 0 8 3 Q8 5 4 5 H0 M4 5 8 10"/>
-                <path transform="translate(20 0)" d="M1 0 H7 M4 0 V10 M1 10 H7"/>
-                <path transform="translate(30 0)" d="M0 10 3 0 H5 L8 10 M2 6 H6"/>
-                <path transform="translate(40 0)" d="M0 10 V0 L8 10 V0"/>
-                <path transform="translate(50 0)" d="M8 1 Q0 -2 0 5 Q0 12 8 9 V6 H5"/>
-                <path transform="translate(60 0)" d="M0 0 V10 H8"/>
-                <path transform="translate(70 0)" d="M8 0 H0 V10 H8 M0 5 H6"/>
+              <g transform="translate(-20.52 -2.63) scale(0.526)" fill="none" stroke="#73C6AD"
+                stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round">
+                <path transform="translate(0 0)" d="M0 0 H8 M4 0 V10" />
+                <path transform="translate(10 0)" d="M0 10 V0 H4 Q8 0 8 3 Q8 5 4 5 H0 M4 5 8 10" />
+                <path transform="translate(20 0)" d="M1 0 H7 M4 0 V10 M1 10 H7" />
+                <path transform="translate(30 0)" d="M0 10 3 0 H5 L8 10 M2 6 H6" />
+                <path transform="translate(40 0)" d="M0 10 V0 L8 10 V0" />
+                <path transform="translate(50 0)" d="M8 1 Q0 -2 0 5 Q0 12 8 9 V6 H5" />
+                <path transform="translate(60 0)" d="M0 0 V10 H8" />
+                <path transform="translate(70 0)" d="M8 0 H0 V10 H8 M0 5 H6" />
               </g>
             </g>
           </g>
         </g>
       </g>
-      <g class="compact-geometry word-label marking" transform="matrix(6.85556 0 0 6.85556 17.29998 -3.75555)">
-        <text x="72.0" y="19.0" fill="#eeeeee" font-family="Arial, sans-serif" font-size="2.0000000000000004" text-anchor="middle" dominant-baseline="central">Triangle / Y</text>
+      <g class="compact-geometry word-label marking"
+        transform="matrix(6.85556 0 0 6.85556 17.29998 -3.75555)">
+        <text x="72.0" y="19.0" fill="#eeeeee" font-family="Arial, sans-serif"
+          font-size="2.0000000000000004" text-anchor="middle" dominant-baseline="central">Triangle /
+          Y</text>
       </g>
     </g>
   </g>
-  <g id="button-right-shoulder-top" class="control six-button-only" data-name="button-right-shoulder-top" data-input="button:5" data-label="R1 / RB" data-bounds="617.20001 92.8 123.4 123.4" data-compact-transform="matrix(0.14587 0 0 0.14587 -5.02917 -1.53647)" data-compact-scale="0.14587">
+  <g id="button-right-shoulder-top" class="control six-button-only"
+    data-name="button-right-shoulder-top" data-input="button:5" data-label="R1 / RB"
+    data-bounds="617.20001 92.8 123.4 123.4"
+    data-compact-transform="matrix(0.14587 0 0 0.14587 -5.02917 -1.53647)"
+    data-compact-scale="0.14587">
     <g class="press-visual">
       <g transform="matrix(1 0 0 1 0 0)">
         <g class="full-geometry">
           <g>
-            <circle cx="678.9" cy="154.5" r="61.7" fill="#1a1a1a" class="button-face vector-outline" stroke="#111111" stroke-width="1.2"/>
+            <circle cx="678.9" cy="154.5" r="61.7" fill="#1a1a1a" class="button-face vector-outline"
+              stroke="#111111" stroke-width="1.2" />
           </g>
           <g class="button-label marking full-only-decoration">
             <g class="hardware-icon">
               <g>
                 <g>
-                  <ellipse cx="714.3" cy="60.9" rx="27.3" ry="27.3" fill="#141414"/>
+                  <ellipse cx="714.3" cy="60.9" rx="27.3" ry="27.3" fill="#141414" />
                 </g>
               </g>
               <g>
-                <path d="M714,71.6h-5.4l-2.1-5.4c-.7-1.8-1.6-2.6-2.8-2.6h-1v8.1h-4.7v-21.2h7.6c5.1,0,7.7,1.9,7.7,5.8,0,1.3-.4,2.7-1.2,3.7-.9,1.1-2.2,1.8-3.5,2.1h0c1.4.7,2.5,1.9,3,3.3l2.6,6.3ZM708,56.7c0-1.8-1.1-2.8-3.3-2.8h-2.1v5.9h2.1c.9,0,1.8-.3,2.4-.9.6-.5,1-1.3.9-2.1Z" fill="#fff"/>
-                <path d="M732.9,65.3c0,1.8-.7,3.5-2.1,4.6-1.6,1.2-3.6,1.8-5.6,1.7h-8.2v-21.2h7.7c1.9-.1,3.8.3,5.4,1.3,1.2.8,2,2.2,1.9,3.6,0,1.1-.4,2.1-1.1,2.9-.8.9-1.8,1.6-3,1.8h0c1.4.2,2.6.8,3.6,1.7.9.9,1.5,2.1,1.4,3.4ZM727,56.2c0-1.5-1.2-2.3-3.5-2.3h-1.8v5h2.1c.8,0,1.7-.2,2.3-.7.6-.5,1-1.2.9-2ZM727.9,65.2c0-.8-.3-1.5-.9-2-.8-.5-1.7-.8-2.6-.7h-2.6v5.6h2.6c.9,0,1.9-.3,2.6-.8.6-.5.9-1.2.9-2h0Z" fill="#fff"/>
+                <path
+                  d="M714,71.6h-5.4l-2.1-5.4c-.7-1.8-1.6-2.6-2.8-2.6h-1v8.1h-4.7v-21.2h7.6c5.1,0,7.7,1.9,7.7,5.8,0,1.3-.4,2.7-1.2,3.7-.9,1.1-2.2,1.8-3.5,2.1h0c1.4.7,2.5,1.9,3,3.3l2.6,6.3ZM708,56.7c0-1.8-1.1-2.8-3.3-2.8h-2.1v5.9h2.1c.9,0,1.8-.3,2.4-.9.6-.5,1-1.3.9-2.1Z"
+                  fill="#fff" />
+                <path
+                  d="M732.9,65.3c0,1.8-.7,3.5-2.1,4.6-1.6,1.2-3.6,1.8-5.6,1.7h-8.2v-21.2h7.7c1.9-.1,3.8.3,5.4,1.3,1.2.8,2,2.2,1.9,3.6,0,1.1-.4,2.1-1.1,2.9-.8.9-1.8,1.6-3,1.8h0c1.4.2,2.6.8,3.6,1.7.9.9,1.5,2.1,1.4,3.4ZM727,56.2c0-1.5-1.2-2.3-3.5-2.3h-1.8v5h2.1c.8,0,1.7-.2,2.3-.7.6-.5,1-1.2.9-2ZM727.9,65.2c0-.8-.3-1.5-.9-2-.8-.5-1.7-.8-2.6-.7h-2.6v5.6h2.6c.9,0,1.9-.3,2.6-.8.6-.5.9-1.2.9-2h0Z"
+                  fill="#fff" />
               </g>
               <g>
                 <g>
-                  <path d="M644,87.5c-14.6,0-26.4-11.9-26.4-26.5,0-14.6,11.9-26.5,26.5-26.4,14.6,0,26.4,11.8,26.4,26.4,0,14.7-11.9,26.5-26.5,26.5Z" fill="#1a1a1a"/>
-                  <path d="M644,35.5c14,0,25.4,11.5,25.4,25.5,0,14.1-11.4,25.5-25.5,25.4-14,0-25.4-11.5-25.4-25.5,0-14.1,11.5-25.4,25.5-25.4M644,33.5c-15.2,0-27.4,12.4-27.4,27.6,0,15.2,12.3,27.5,27.5,27.4,15.2,0,27.4-12.4,27.4-27.6,0-15.2-12.4-27.4-27.5-27.4Z" fill="#0f0f0f"/>
+                  <path
+                    d="M644,87.5c-14.6,0-26.4-11.9-26.4-26.5,0-14.6,11.9-26.5,26.5-26.4,14.6,0,26.4,11.8,26.4,26.4,0,14.7-11.9,26.5-26.5,26.5Z"
+                    fill="#1a1a1a" />
+                  <path
+                    d="M644,35.5c14,0,25.4,11.5,25.4,25.5,0,14.1-11.4,25.5-25.5,25.4-14,0-25.4-11.5-25.4-25.5,0-14.1,11.5-25.4,25.5-25.4M644,33.5c-15.2,0-27.4,12.4-27.4,27.6,0,15.2,12.3,27.5,27.5,27.4,15.2,0,27.4-12.4,27.4-27.6,0-15.2-12.4-27.4-27.5-27.4Z"
+                    fill="#0f0f0f" />
                 </g>
                 <g>
-                  <path d="M628.3,50.2h11.6c3.3-.2,6.2,2.4,6.3,5.7,0,0,0,.1,0,.2.2,2.4-1.2,4.6-3.4,5.4h0c2.3.7,3,2.9,3.1,5.1.1,1.4,0,3.9.9,5.1h-4.7c-.4-1.7-.7-3.4-.8-5.1-.3-2.3-1.2-3.2-3.6-3.2h-4.7v8.4h-4.7v-21.7h.1ZM633.1,59.9h5.2c2.1,0,3.2-.9,3.2-3.1s-1.1-3-3.2-3h-5.2v6.2Z" fill="#fff"/>
-                  <path d="M659.9,71.8h-4.3v-13.8h-5.3v-3.2c3,.1,5.7-1,6.2-4.2h3.4v21.3h0Z" fill="#fff"/>
+                  <path
+                    d="M628.3,50.2h11.6c3.3-.2,6.2,2.4,6.3,5.7,0,0,0,.1,0,.2.2,2.4-1.2,4.6-3.4,5.4h0c2.3.7,3,2.9,3.1,5.1.1,1.4,0,3.9.9,5.1h-4.7c-.4-1.7-.7-3.4-.8-5.1-.3-2.3-1.2-3.2-3.6-3.2h-4.7v8.4h-4.7v-21.7h.1ZM633.1,59.9h5.2c2.1,0,3.2-.9,3.2-3.1s-1.1-3-3.2-3h-5.2v6.2Z"
+                    fill="#fff" />
+                  <path d="M659.9,71.8h-4.3v-13.8h-5.3v-3.2c3,.1,5.7-1,6.2-4.2h3.4v21.3h0Z"
+                    fill="#fff" />
                 </g>
               </g>
             </g>
             <g class="word-label" transform="translate(678.9 154.5) scale(1.4)">
               <g class="button-label marking full-only-decoration" data-label="RB">
-                <g transform="translate(-20.40 -11.33) scale(2.267)" fill="none" stroke="#BFC5CB" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round">
-                  <path transform="translate(0 0)" d="M0 10 V0 H4 Q8 0 8 3 Q8 5 4 5 H0 M4 5 8 10"/>
-                  <path transform="translate(10 0)" d="M0 10 V0 H4 Q8 0 8 2.5 Q8 5 4 5 H0 M4 5 Q8 5 8 7.5 Q8 10 4 10 H0"/>
+                <g transform="translate(-20.40 -11.33) scale(2.267)" fill="none" stroke="#BFC5CB"
+                  stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round">
+                  <path transform="translate(0 0)" d="M0 10 V0 H4 Q8 0 8 3 Q8 5 4 5 H0 M4 5 8 10" />
+                  <path transform="translate(10 0)"
+                    d="M0 10 V0 H4 Q8 0 8 2.5 Q8 5 4 5 H0 M4 5 Q8 5 8 7.5 Q8 10 4 10 H0" />
                 </g>
               </g>
             </g>
           </g>
         </g>
       </g>
-      <g class="compact-geometry word-label marking" transform="matrix(6.85556 0 0 6.85556 34.47778 10.53334)">
-        <text x="94.0" y="21.0" fill="#eeeeee" font-family="Arial, sans-serif" font-size="3.4285714285714284" text-anchor="middle" dominant-baseline="central">R1 / RB</text>
+      <g class="compact-geometry word-label marking"
+        transform="matrix(6.85556 0 0 6.85556 34.47778 10.53334)">
+        <text x="94.0" y="21.0" fill="#eeeeee" font-family="Arial, sans-serif"
+          font-size="3.4285714285714284" text-anchor="middle" dominant-baseline="central">R1 / RB</text>
       </g>
     </g>
   </g>
-  <g id="button-left-shoulder-top" class="control eight-button-only" data-name="button-left-shoulder-top" data-input="button:4" data-label="L1 / LB" data-bounds="778.46338 163.97771 123.4 123.4" data-compact-transform="matrix(0.14587 0 0 0.14587 -6.55219 -7.91895)" data-compact-scale="0.14587">
+  <g id="button-left-shoulder-top" class="control eight-button-only"
+    data-name="button-left-shoulder-top" data-input="button:4" data-label="L1 / LB"
+    data-bounds="778.46338 163.97771 123.4 123.4"
+    data-compact-transform="matrix(0.14587 0 0 0.14587 -6.55219 -7.91895)"
+    data-compact-scale="0.14587">
     <g class="press-visual">
       <g transform="matrix(1 0 0 1 0 0)">
         <g class="full-geometry">
           <g>
-            <circle cx="840.1634043664516" cy="225.67771012185395" r="61.7" fill="#1a1a1a" class="button-face vector-outline" stroke="#111111" stroke-width="1.2"/>
+            <circle cx="840.1634043664516" cy="225.67771012185395" r="61.7" fill="#1a1a1a"
+              class="button-face vector-outline" stroke="#111111" stroke-width="1.2" />
           </g>
           <g class="button-label marking full-only-decoration">
             <g class="hardware-icon">
               <g>
                 <g>
                   <g>
-                    <ellipse cx="876.4" cy="131.9" rx="27.3" ry="27.3" fill="#141414"/>
+                    <ellipse cx="876.4" cy="131.9" rx="27.3" ry="27.3" fill="#141414" />
                   </g>
                 </g>
                 <g>
-                  <path d="M874.4,142.5h-12.6v-21.2h4.7v17.3h7.9v3.8Z" fill="#fff"/>
-                  <path d="M893.1,136.1c0,1.8-.7,3.5-2.1,4.6-1.6,1.2-3.6,1.8-5.6,1.7h-8.2v-21.2h7.6c1.9-.1,3.8.3,5.4,1.3,1.2.8,2,2.2,1.9,3.6,0,1.1-.4,2.1-1.1,2.9-.8.9-1.8,1.6-3,1.8h0c1.3.2,2.6.8,3.6,1.7.9.9,1.4,2.1,1.4,3.4ZM887.1,127.2c0-1.5-1.2-2.3-3.5-2.3h-1.8v5h2.1c.8,0,1.7-.2,2.3-.7.6-.5,1-1.2.9-2ZM888,136.1c0-.8-.3-1.5-.9-2-.8-.5-1.7-.8-2.6-.7h-2.6v5.5h2.6c.9,0,1.9-.3,2.6-.8.6-.5,1-1.2.9-2Z" fill="#fff"/>
+                  <path d="M874.4,142.5h-12.6v-21.2h4.7v17.3h7.9v3.8Z" fill="#fff" />
+                  <path
+                    d="M893.1,136.1c0,1.8-.7,3.5-2.1,4.6-1.6,1.2-3.6,1.8-5.6,1.7h-8.2v-21.2h7.6c1.9-.1,3.8.3,5.4,1.3,1.2.8,2,2.2,1.9,3.6,0,1.1-.4,2.1-1.1,2.9-.8.9-1.8,1.6-3,1.8h0c1.3.2,2.6.8,3.6,1.7.9.9,1.4,2.1,1.4,3.4ZM887.1,127.2c0-1.5-1.2-2.3-3.5-2.3h-1.8v5h2.1c.8,0,1.7-.2,2.3-.7.6-.5,1-1.2.9-2ZM888,136.1c0-.8-.3-1.5-.9-2-.8-.5-1.7-.8-2.6-.7h-2.6v5.5h2.6c.9,0,1.9-.3,2.6-.8.6-.5,1-1.2.9-2Z"
+                    fill="#fff" />
                 </g>
               </g>
               <g>
                 <g>
-                  <path d="M806.1,158.3c-14.6,0-26.5-11.9-26.5-26.5,0-14.6,11.9-26.5,26.5-26.5,14.6,0,26.5,11.9,26.5,26.5,0,14.6-11.9,26.5-26.5,26.5Z" fill="#1a1a1a"/>
-                  <path d="M806.1,106.5c14.1,0,25.5,11.4,25.5,25.5s-11.4,25.5-25.5,25.5c-14.1,0-25.5-11.4-25.5-25.5h0c0-14.1,11.4-25.5,25.5-25.5M806.1,104.5c-15.2,0-27.5,12.3-27.5,27.5,0,15.2,12.3,27.5,27.5,27.5,15.2,0,27.5-12.3,27.5-27.5,0-15.2-12.3-27.5-27.5-27.5Z" fill="#0f0f0f"/>
+                  <path
+                    d="M806.1,158.3c-14.6,0-26.5-11.9-26.5-26.5,0-14.6,11.9-26.5,26.5-26.5,14.6,0,26.5,11.9,26.5,26.5,0,14.6-11.9,26.5-26.5,26.5Z"
+                    fill="#1a1a1a" />
+                  <path
+                    d="M806.1,106.5c14.1,0,25.5,11.4,25.5,25.5s-11.4,25.5-25.5,25.5c-14.1,0-25.5-11.4-25.5-25.5h0c0-14.1,11.4-25.5,25.5-25.5M806.1,104.5c-15.2,0-27.5,12.3-27.5,27.5,0,15.2,12.3,27.5,27.5,27.5,15.2,0,27.5-12.3,27.5-27.5,0-15.2-12.3-27.5-27.5-27.5Z"
+                    fill="#0f0f0f" />
                 </g>
                 <g>
-                  <path d="M792.3,121.1h4.7v17.6h10.5v4h-15.2v-21.7h0Z" fill="#fff"/>
-                  <path d="M820,142.7h-4.3v-13.7h-5.3v-3.2c3,.1,5.7-1,6.2-4.2h3.4v21.2Z" fill="#fff"/>
+                  <path d="M792.3,121.1h4.7v17.6h10.5v4h-15.2v-21.7h0Z" fill="#fff" />
+                  <path d="M820,142.7h-4.3v-13.7h-5.3v-3.2c3,.1,5.7-1,6.2-4.2h3.4v21.2Z" fill="#fff" />
                 </g>
               </g>
             </g>
             <g class="word-label" transform="translate(839.9 225.5) scale(1.4)">
               <g class="button-label marking full-only-decoration" data-label="LB">
-                <g transform="translate(-20.40 -11.33) scale(2.267)" fill="none" stroke="#BFC5CB" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round">
-                  <path transform="translate(0 0)" d="M0 0 V10 H8"/>
-                  <path transform="translate(10 0)" d="M0 10 V0 H4 Q8 0 8 2.5 Q8 5 4 5 H0 M4 5 Q8 5 8 7.5 Q8 10 4 10 H0"/>
+                <g transform="translate(-20.40 -11.33) scale(2.267)" fill="none" stroke="#BFC5CB"
+                  stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round">
+                  <path transform="translate(0 0)" d="M0 0 V10 H8" />
+                  <path transform="translate(10 0)"
+                    d="M0 10 V0 H4 Q8 0 8 2.5 Q8 5 4 5 H0 M4 5 Q8 5 8 7.5 Q8 10 4 10 H0" />
                 </g>
               </g>
             </g>
           </g>
         </g>
       </g>
-      <g class="compact-geometry word-label marking" transform="matrix(6.85556 0 0 6.85556 44.91893 54.28882)">
-        <text x="116.0" y="25.0" fill="#eeeeee" font-family="Arial, sans-serif" font-size="3.4285714285714284" text-anchor="middle" dominant-baseline="central">L1 / LB</text>
+      <g class="compact-geometry word-label marking"
+        transform="matrix(6.85556 0 0 6.85556 44.91893 54.28882)">
+        <text x="116.0" y="25.0" fill="#eeeeee" font-family="Arial, sans-serif"
+          font-size="3.4285714285714284" text-anchor="middle" dominant-baseline="central">L1 / LB</text>
       </g>
     </g>
   </g>
-  <g id="button-left-shoulder-bottom-digital" class="control eight-button-only" data-name="button-left-shoulder-bottom-digital" data-input="button:6" data-label="L2 / LT" data-bounds="747.20001 345.79999 123.4 123.4" data-compact-transform="matrix(0.14587 0 0 0.14587 -1.9919 -11.44084)" data-compact-scale="0.14587">
+  <g id="button-left-shoulder-bottom-digital" class="control eight-button-only"
+    data-name="button-left-shoulder-bottom-digital" data-input="button:6" data-label="L2 / LT"
+    data-bounds="747.20001 345.79999 123.4 123.4"
+    data-compact-transform="matrix(0.14587 0 0 0.14587 -1.9919 -11.44084)"
+    data-compact-scale="0.14587">
     <g class="press-visual">
       <g transform="matrix(1 0 0 1 0 0)">
         <g class="full-geometry">
           <g>
-            <circle cx="808.9" cy="407.5" r="61.7" fill="#1a1a1a" class="button-face vector-outline" stroke="#111111" stroke-width="1.2"/>
+            <circle cx="808.9" cy="407.5" r="61.7" fill="#1a1a1a" class="button-face vector-outline"
+              stroke="#111111" stroke-width="1.2" />
           </g>
           <g class="button-label marking full-only-decoration">
             <g class="hardware-icon">
               <g>
                 <g>
                   <g>
-                    <circle cx="845.3" cy="500.9" r="27.3" fill="#141414"/>
+                    <circle cx="845.3" cy="500.9" r="27.3" fill="#141414" />
                   </g>
                 </g>
                 <g>
-                  <path d="M844.8,511.5h-12.6v-21.2h4.7v17.3h7.9v3.8Z" fill="#fff"/>
-                  <path d="M860.6,494.2h-6v17.3h-4.7v-17.3h-6v-3.8h16.8v3.8Z" fill="#fff"/>
+                  <path d="M844.8,511.5h-12.6v-21.2h4.7v17.3h7.9v3.8Z" fill="#fff" />
+                  <path d="M860.6,494.2h-6v17.3h-4.7v-17.3h-6v-3.8h16.8v3.8Z" fill="#fff" />
                 </g>
               </g>
               <g>
                 <g>
-                  <path d="M775.1,527.3c-14.6,0-26.4-11.9-26.4-26.5,0-14.6,11.9-26.4,26.5-26.4,14.6,0,26.4,11.9,26.4,26.5,0,14.6-11.9,26.4-26.5,26.4Z" fill="#1a1a1a"/>
-                  <path d="M775.1,475.5c14.1,0,25.5,11.4,25.5,25.5s-11.4,25.5-25.5,25.5-25.5-11.4-25.5-25.5h0c0-14.1,11.4-25.5,25.5-25.5M775.1,473.5c-15.2,0-27.5,12.3-27.5,27.5s12.3,27.5,27.5,27.5,27.5-12.3,27.5-27.5h0c0-15.2-12.3-27.5-27.5-27.5Z" fill="#0f0f0f"/>
+                  <path
+                    d="M775.1,527.3c-14.6,0-26.4-11.9-26.4-26.5,0-14.6,11.9-26.4,26.5-26.4,14.6,0,26.4,11.9,26.4,26.5,0,14.6-11.9,26.4-26.5,26.4Z"
+                    fill="#1a1a1a" />
+                  <path
+                    d="M775.1,475.5c14.1,0,25.5,11.4,25.5,25.5s-11.4,25.5-25.5,25.5-25.5-11.4-25.5-25.5h0c0-14.1,11.4-25.5,25.5-25.5M775.1,473.5c-15.2,0-27.5,12.3-27.5,27.5s12.3,27.5,27.5,27.5,27.5-12.3,27.5-27.5h0c0-15.2-12.3-27.5-27.5-27.5Z"
+                    fill="#0f0f0f" />
                 </g>
                 <g>
-                  <path d="M785.8,501c-3.2,2.6-4.8,3.9-4.9,4-1.8,1.8-2.9,4.3-3,6.8h14.9v-3.9h-9.5c.8-1.2,1.9-2.2,3.2-2.8,1.5-.9,2.9-1.9,4.1-3.1,1.3-1.4,2-3.2,2-5,0-1.9-.7-3.8-2.1-5-1.5-1.2-3.4-1.9-5.3-1.8-4.7,0-7.2,2.5-7.2,7.7h4.1c.1-2.7,1.1-4.1,3.1-4.1s3,1,3,3.1c.2,1.4-.7,2.8-2.5,4.2Z" fill="#fff"/>
-                  <polygon points="772.8 507.7 762 507.7 762 490 757.5 490 757.5 511.8 772.8 511.8 772.8 507.7" fill="#fff"/>
+                  <path
+                    d="M785.8,501c-3.2,2.6-4.8,3.9-4.9,4-1.8,1.8-2.9,4.3-3,6.8h14.9v-3.9h-9.5c.8-1.2,1.9-2.2,3.2-2.8,1.5-.9,2.9-1.9,4.1-3.1,1.3-1.4,2-3.2,2-5,0-1.9-.7-3.8-2.1-5-1.5-1.2-3.4-1.9-5.3-1.8-4.7,0-7.2,2.5-7.2,7.7h4.1c.1-2.7,1.1-4.1,3.1-4.1s3,1,3,3.1c.2,1.4-.7,2.8-2.5,4.2Z"
+                    fill="#fff" />
+                  <polygon
+                    points="772.8 507.7 762 507.7 762 490 757.5 490 757.5 511.8 772.8 511.8 772.8 507.7"
+                    fill="#fff" />
                 </g>
               </g>
             </g>
             <g class="word-label" transform="translate(808.9 407.5) scale(1.4)">
               <g class="button-label marking full-only-decoration" data-label="LT">
-                <g transform="translate(-20.40 -11.33) scale(2.267)" fill="none" stroke="#BFC5CB" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round">
-                  <path transform="translate(0 0)" d="M0 0 V10 H8"/>
-                  <path transform="translate(10 0)" d="M0 0 H8 M4 0 V10"/>
+                <g transform="translate(-20.40 -11.33) scale(2.267)" fill="none" stroke="#BFC5CB"
+                  stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round">
+                  <path transform="translate(0 0)" d="M0 0 V10 H8" />
+                  <path transform="translate(10 0)" d="M0 0 H8 M4 0 V10" />
                 </g>
               </g>
             </g>
           </g>
         </g>
       </g>
-      <g class="compact-geometry word-label marking" transform="matrix(6.85556 0 0 6.85556 13.65556 78.43332)">
-        <text x="116.0" y="48.0" fill="#eeeeee" font-family="Arial, sans-serif" font-size="3.4285714285714284" text-anchor="middle" dominant-baseline="central">L2 / LT</text>
+      <g class="compact-geometry word-label marking"
+        transform="matrix(6.85556 0 0 6.85556 13.65556 78.43332)">
+        <text x="116.0" y="48.0" fill="#eeeeee" font-family="Arial, sans-serif"
+          font-size="3.4285714285714284" text-anchor="middle" dominant-baseline="central">L2 / LT</text>
       </g>
     </g>
   </g>
-  <g id="button-right-shoulder-bottom-digital" class="control six-button-only" data-name="button-right-shoulder-bottom-digital" data-input="button:7" data-label="R2 / RT" data-bounds="586.20001 274.79999 123.4 123.4" data-compact-transform="matrix(0.14587 0 0 0.14587 -0.50729 -5.08428)" data-compact-scale="0.14587">
+  <g id="button-right-shoulder-bottom-digital" class="control six-button-only"
+    data-name="button-right-shoulder-bottom-digital" data-input="button:7" data-label="R2 / RT"
+    data-bounds="586.20001 274.79999 123.4 123.4"
+    data-compact-transform="matrix(0.14587 0 0 0.14587 -0.50729 -5.08428)"
+    data-compact-scale="0.14587">
     <g class="press-visual">
       <g transform="matrix(1 0 0 1 0 0)">
         <g class="full-geometry">
           <g>
-            <circle cx="647.9" cy="336.5" r="61.7" fill="#1a1a1a" class="button-face vector-outline" stroke="#111111" stroke-width="1.2"/>
+            <circle cx="647.9" cy="336.5" r="61.7" fill="#1a1a1a" class="button-face vector-outline"
+              stroke="#111111" stroke-width="1.2" />
           </g>
           <g class="button-label marking full-only-decoration">
             <g class="hardware-icon">
               <g>
                 <g>
                   <g>
-                    <ellipse cx="684.3" cy="429.9" rx="27.3" ry="27.3" fill="#141414"/>
+                    <ellipse cx="684.3" cy="429.9" rx="27.3" ry="27.3" fill="#141414" />
                   </g>
                 </g>
                 <g>
-                  <path d="M684.5,440.6h-5.4l-2.1-5.4c-.7-1.8-1.6-2.6-2.8-2.6h-1v8.1h-4.7v-21.2h7.6c5.1,0,7.7,1.9,7.7,5.8,0,1.3-.4,2.7-1.2,3.7-.9,1.1-2.2,1.8-3.5,2.1h0c1.4.7,2.5,1.9,3,3.3l2.6,6.3ZM678.5,425.7c0-1.8-1.1-2.8-3.3-2.8h-2.1v5.9h2.1c.9,0,1.8-.3,2.4-.9.6-.5,1-1.3.9-2.1Z" fill="#fff"/>
-                  <path d="M702.4,423.3h-6v17.4h-4.7v-17.4h-6v-3.9h16.8v3.9Z" fill="#fff"/>
+                  <path
+                    d="M684.5,440.6h-5.4l-2.1-5.4c-.7-1.8-1.6-2.6-2.8-2.6h-1v8.1h-4.7v-21.2h7.6c5.1,0,7.7,1.9,7.7,5.8,0,1.3-.4,2.7-1.2,3.7-.9,1.1-2.2,1.8-3.5,2.1h0c1.4.7,2.5,1.9,3,3.3l2.6,6.3ZM678.5,425.7c0-1.8-1.1-2.8-3.3-2.8h-2.1v5.9h2.1c.9,0,1.8-.3,2.4-.9.6-.5,1-1.3.9-2.1Z"
+                    fill="#fff" />
+                  <path d="M702.4,423.3h-6v17.4h-4.7v-17.4h-6v-3.9h16.8v3.9Z" fill="#fff" />
                 </g>
               </g>
               <g>
                 <g>
-                  <path d="M614,456.5c-14.6,0-26.5-11.9-26.5-26.5s11.9-26.5,26.5-26.5,26.5,11.9,26.5,26.5h0c0,14.7-11.9,26.5-26.5,26.5Z" fill="#1a1a1a"/>
-                  <path d="M614,404.5c14,0,25.4,11.5,25.4,25.5,0,14.1-11.4,25.5-25.5,25.4-14,0-25.4-11.5-25.4-25.5,0-14.1,11.5-25.4,25.5-25.4M614,402.5c-15.2,0-27.4,12.4-27.4,27.6,0,15.2,12.3,27.5,27.5,27.4,15.2,0,27.4-12.4,27.4-27.6,0-15.2-12.4-27.4-27.5-27.4Z" fill="#0f0f0f"/>
+                  <path
+                    d="M614,456.5c-14.6,0-26.5-11.9-26.5-26.5s11.9-26.5,26.5-26.5,26.5,11.9,26.5,26.5h0c0,14.7-11.9,26.5-26.5,26.5Z"
+                    fill="#1a1a1a" />
+                  <path
+                    d="M614,404.5c14,0,25.4,11.5,25.4,25.5,0,14.1-11.4,25.5-25.5,25.4-14,0-25.4-11.5-25.4-25.5,0-14.1,11.5-25.4,25.5-25.4M614,402.5c-15.2,0-27.4,12.4-27.4,27.6,0,15.2,12.3,27.5,27.5,27.4,15.2,0,27.4-12.4,27.4-27.6,0-15.2-12.4-27.4-27.5-27.4Z"
+                    fill="#0f0f0f" />
                 </g>
                 <g>
-                  <path d="M625.8,430.1c-3.2,2.6-4.8,3.9-4.9,4-1.8,1.8-2.9,4.3-3,6.9h14.9v-3.9h-9.5c.8-1.2,1.9-2.2,3.2-2.8,1.5-.9,2.9-1.9,4.1-3.1,1.3-1.4,2-3.2,2-5,0-1.9-.7-3.8-2.1-5-1.5-1.3-3.4-1.9-5.3-1.8-4.7,0-7.2,2.5-7.2,7.7h4.1c.1-2.7,1.1-4.1,3.1-4.1s3,1,3,3.1c.1,1.4-.7,2.9-2.5,4.2Z" fill="#fff"/>
-                  <path d="M600,432.4h4.6c2.2,0,3.5.9,3.6,2.8s.3,3.8.5,5.8h4.9v-.6c-.7-.2-1-1-1-2.3,0-.4,0-.8.1-1.2v-1.1c0-2.6-.9-4.4-2.7-5.2,2.2-.7,3.3-2.5,3.3-5.1,0-1.7-.6-3.4-1.9-4.5-1.4-1.1-3.1-1.7-4.9-1.6h-11.1v21.9h4.6v-8.7h-.1ZM600,422.9h5.6c2.1,0,3.2.9,3.2,2.8s-1.2,2.9-3.5,2.9h-5.2v-5.8h-.1Z" fill="#fff"/>
+                  <path
+                    d="M625.8,430.1c-3.2,2.6-4.8,3.9-4.9,4-1.8,1.8-2.9,4.3-3,6.9h14.9v-3.9h-9.5c.8-1.2,1.9-2.2,3.2-2.8,1.5-.9,2.9-1.9,4.1-3.1,1.3-1.4,2-3.2,2-5,0-1.9-.7-3.8-2.1-5-1.5-1.3-3.4-1.9-5.3-1.8-4.7,0-7.2,2.5-7.2,7.7h4.1c.1-2.7,1.1-4.1,3.1-4.1s3,1,3,3.1c.1,1.4-.7,2.9-2.5,4.2Z"
+                    fill="#fff" />
+                  <path
+                    d="M600,432.4h4.6c2.2,0,3.5.9,3.6,2.8s.3,3.8.5,5.8h4.9v-.6c-.7-.2-1-1-1-2.3,0-.4,0-.8.1-1.2v-1.1c0-2.6-.9-4.4-2.7-5.2,2.2-.7,3.3-2.5,3.3-5.1,0-1.7-.6-3.4-1.9-4.5-1.4-1.1-3.1-1.7-4.9-1.6h-11.1v21.9h4.6v-8.7h-.1ZM600,422.9h5.6c2.1,0,3.2.9,3.2,2.8s-1.2,2.9-3.5,2.9h-5.2v-5.8h-.1Z"
+                    fill="#fff" />
                 </g>
               </g>
             </g>
             <g class="word-label" transform="translate(647.9 336.5) scale(1.4)">
               <g class="button-label marking full-only-decoration" data-label="RT">
-                <g transform="translate(-20.40 -11.33) scale(2.267)" fill="none" stroke="#BFC5CB" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round">
-                  <path transform="translate(0 0)" d="M0 10 V0 H4 Q8 0 8 3 Q8 5 4 5 H0 M4 5 8 10"/>
-                  <path transform="translate(10 0)" d="M0 0 H8 M4 0 V10"/>
+                <g transform="translate(-20.40 -11.33) scale(2.267)" fill="none" stroke="#BFC5CB"
+                  stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round">
+                  <path transform="translate(0 0)" d="M0 10 V0 H4 Q8 0 8 3 Q8 5 4 5 H0 M4 5 8 10" />
+                  <path transform="translate(10 0)" d="M0 0 H8 M4 0 V10" />
                 </g>
               </g>
             </g>
           </g>
         </g>
       </g>
-      <g class="compact-geometry word-label marking" transform="matrix(6.85556 0 0 6.85556 3.47778 34.85554)">
-        <text x="94.0" y="44.0" fill="#eeeeee" font-family="Arial, sans-serif" font-size="3.4285714285714284" text-anchor="middle" dominant-baseline="central">R2 / RT</text>
+      <g class="compact-geometry word-label marking"
+        transform="matrix(6.85556 0 0 6.85556 3.47778 34.85554)">
+        <text x="94.0" y="44.0" fill="#eeeeee" font-family="Arial, sans-serif"
+          font-size="3.4285714285714284" text-anchor="middle" dominant-baseline="central">R2 / RT</text>
       </g>
     </g>
   </g>
-  <g id="button-2" class="control" data-name="button-2" data-input="button:1" data-label="Circle / B" data-bounds="417.19998 246.8 123.4 123.4" data-compact-transform="matrix(0.14587 0 0 0.14587 2.14425 -3)" data-compact-scale="0.14587">
+  <g id="button-2" class="control" data-name="button-2" data-input="button:1"
+    data-label="Circle / B" data-bounds="417.19998 246.8 123.4 123.4"
+    data-compact-transform="matrix(0.14587 0 0 0.14587 2.14425 -3)" data-compact-scale="0.14587">
     <g class="press-visual">
       <g transform="matrix(1 0 0 1 0 0)">
         <g class="full-geometry">
           <g>
-            <circle cx="478.9" cy="308.5" r="61.7" fill="#1a1a1a" class="button-face vector-outline" stroke="#111111" stroke-width="1.2"/>
+            <circle cx="478.9" cy="308.5" r="61.7" fill="#1a1a1a" class="button-face vector-outline"
+              stroke="#111111" stroke-width="1.2" />
           </g>
           <g class="button-label marking full-only-decoration">
             <g class="hardware-icon">
               <g>
                 <g>
                   <g>
-                    <ellipse cx="515.4" cy="401.9" rx="27.3" ry="27.3" fill="#141414"/>
+                    <ellipse cx="515.4" cy="401.9" rx="27.3" ry="27.3" fill="#141414" />
                   </g>
                   <g isolation="isolate">
-                    <path d="M527.1,409.2c.1,2.8-1.1,5.6-3.3,7.4-2.4,2-5.5,3-8.7,2.8h-11.4v-34.9h11c2.8-.2,5.5.6,7.9,2.1,1.9,1.3,3,3.5,2.9,5.8,0,1.8-.6,3.6-1.7,5-1.1,1.5-2.7,2.5-4.5,3h0c2.2.3,4.3,1.2,5.8,2.8,1.3,1.6,2.1,3.7,2,5.8ZM519.3,393.5c0-1.3-.5-2.5-1.5-3.2-1.4-.8-3-1.2-4.6-1.1h-3.7v9.7h3.7c1.6,0,3.2-.4,4.5-1.4,1.1-1,1.7-2.4,1.6-3.9ZM521,409.1c0-1.5-.6-3-1.8-3.9-1.6-1-3.5-1.5-5.3-1.4h-4.3v10.9h4.9c1.8.1,3.5-.4,4.9-1.5,1.1-1.1,1.6-2.5,1.6-4Z" fill="#c1272d"/>
+                    <path
+                      d="M527.1,409.2c.1,2.8-1.1,5.6-3.3,7.4-2.4,2-5.5,3-8.7,2.8h-11.4v-34.9h11c2.8-.2,5.5.6,7.9,2.1,1.9,1.3,3,3.5,2.9,5.8,0,1.8-.6,3.6-1.7,5-1.1,1.5-2.7,2.5-4.5,3h0c2.2.3,4.3,1.2,5.8,2.8,1.3,1.6,2.1,3.7,2,5.8ZM519.3,393.5c0-1.3-.5-2.5-1.5-3.2-1.4-.8-3-1.2-4.6-1.1h-3.7v9.7h3.7c1.6,0,3.2-.4,4.5-1.4,1.1-1,1.7-2.4,1.6-3.9ZM521,409.1c0-1.5-.6-3-1.8-3.9-1.6-1-3.5-1.5-5.3-1.4h-4.3v10.9h4.9c1.8.1,3.5-.4,4.9-1.5,1.1-1.1,1.6-2.5,1.6-4Z"
+                      fill="#c1272d" />
                   </g>
                 </g>
               </g>
               <g>
                 <g>
-                  <path d="M445.1,428.3c-14.6,0-26.5-11.9-26.5-26.5s11.9-26.5,26.5-26.5,26.5,11.9,26.5,26.5h0c0,14.6-11.9,26.5-26.5,26.5Z" fill="#1a1a1a"/>
-                  <path d="M445.1,376.5c14,0,25.4,11.4,25.4,25.5,0,14-11.4,25.4-25.5,25.4-14,0-25.4-11.4-25.4-25.5,0-14,11.4-25.4,25.5-25.4M445.1,374.5c-15.2,0-27.5,12.3-27.5,27.5s12.3,27.5,27.5,27.5,27.5-12.3,27.5-27.5h0c0-15.2-12.3-27.5-27.5-27.5Z" fill="#0f0f0f"/>
+                  <path
+                    d="M445.1,428.3c-14.6,0-26.5-11.9-26.5-26.5s11.9-26.5,26.5-26.5,26.5,11.9,26.5,26.5h0c0,14.6-11.9,26.5-26.5,26.5Z"
+                    fill="#1a1a1a" />
+                  <path
+                    d="M445.1,376.5c14,0,25.4,11.4,25.4,25.5,0,14-11.4,25.4-25.5,25.4-14,0-25.4-11.4-25.4-25.5,0-14,11.4-25.4,25.5-25.4M445.1,374.5c-15.2,0-27.5,12.3-27.5,27.5s12.3,27.5,27.5,27.5,27.5-12.3,27.5-27.5h0c0-15.2-12.3-27.5-27.5-27.5Z"
+                    fill="#0f0f0f" />
                 </g>
-                <path d="M445.1,382.9c-10.5,0-19,8.5-19,19s8.5,19,19,19c10.5,0,19-8.5,19-19,0-10.5-8.5-19-19-19ZM445.1,418c-8.9,0-16.1-7.2-16.1-16.1s7.2-16.1,16.1-16.1,16.1,7.2,16.1,16.1-7.2,16.1-16.1,16.1Z" fill="#f66"/>
+                <path
+                  d="M445.1,382.9c-10.5,0-19,8.5-19,19s8.5,19,19,19c10.5,0,19-8.5,19-19,0-10.5-8.5-19-19-19ZM445.1,418c-8.9,0-16.1-7.2-16.1-16.1s7.2-16.1,16.1-16.1,16.1,7.2,16.1,16.1-7.2,16.1-16.1,16.1Z"
+                  fill="#f66" />
               </g>
             </g>
             <g class="word-label" transform="translate(478.9 308.5) scale(1.4)">
-              <g transform="translate(-20.52 -3.54) scale(0.708)" fill="none" stroke="#DD8193" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round">
-                <path transform="translate(0 0)" d="M8 1 Q0 -2 0 5 Q0 12 8 9"/>
-                <path transform="translate(10 0)" d="M1 0 H7 M4 0 V10 M1 10 H7"/>
-                <path transform="translate(20 0)" d="M0 10 V0 H4 Q8 0 8 3 Q8 5 4 5 H0 M4 5 8 10"/>
-                <path transform="translate(30 0)" d="M8 1 Q0 -2 0 5 Q0 12 8 9"/>
-                <path transform="translate(40 0)" d="M0 0 V10 H8"/>
-                <path transform="translate(50 0)" d="M8 0 H0 V10 H8 M0 5 H6"/>
+              <g transform="translate(-20.52 -3.54) scale(0.708)" fill="none" stroke="#DD8193"
+                stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round">
+                <path transform="translate(0 0)" d="M8 1 Q0 -2 0 5 Q0 12 8 9" />
+                <path transform="translate(10 0)" d="M1 0 H7 M4 0 V10 M1 10 H7" />
+                <path transform="translate(20 0)" d="M0 10 V0 H4 Q8 0 8 3 Q8 5 4 5 H0 M4 5 8 10" />
+                <path transform="translate(30 0)" d="M8 1 Q0 -2 0 5 Q0 12 8 9" />
+                <path transform="translate(40 0)" d="M0 0 V10 H8" />
+                <path transform="translate(50 0)" d="M8 0 H0 V10 H8 M0 5 H6" />
               </g>
             </g>
           </g>
         </g>
       </g>
-      <g class="compact-geometry word-label marking" transform="matrix(6.85556 0 0 6.85556 -14.70002 20.56667)">
-        <text x="72.0" y="42.0" fill="#eeeeee" font-family="Arial, sans-serif" font-size="2.4" text-anchor="middle" dominant-baseline="central">Circle / B</text>
+      <g class="compact-geometry word-label marking"
+        transform="matrix(6.85556 0 0 6.85556 -14.70002 20.56667)">
+        <text x="72.0" y="42.0" fill="#eeeeee" font-family="Arial, sans-serif" font-size="2.4"
+          text-anchor="middle" dominant-baseline="central">Circle / B</text>
       </g>
     </g>
   </g>
-  <g id="button-1" class="control" data-name="button-1" data-input="button:0" data-label="Cross / A" data-bounds="261.19998 311.79999 123.4 123.4" data-compact-transform="matrix(0.14587 0 0 0.14587 2.89952 -10.48136)" data-compact-scale="0.14587">
+  <g id="button-1" class="control" data-name="button-1" data-input="button:0" data-label="Cross / A"
+    data-bounds="261.19998 311.79999 123.4 123.4"
+    data-compact-transform="matrix(0.14587 0 0 0.14587 2.89952 -10.48136)"
+    data-compact-scale="0.14587">
     <g class="press-visual">
       <g transform="matrix(1 0 0 1 0 0)">
         <g class="full-geometry">
           <g>
-            <circle cx="322.9" cy="373.5" r="61.7" fill="#1a1a1a" class="button-face vector-outline" stroke="#111111" stroke-width="1.2"/>
+            <circle cx="322.9" cy="373.5" r="61.7" fill="#1a1a1a" class="button-face vector-outline"
+              stroke="#111111" stroke-width="1.2" />
           </g>
           <g class="button-label marking full-only-decoration">
             <g class="hardware-icon">
               <g>
                 <g>
-                  <ellipse cx="358.3" cy="467.1" rx="27.3" ry="27.3" fill="#141414"/>
+                  <ellipse cx="358.3" cy="467.1" rx="27.3" ry="27.3" fill="#141414" />
                 </g>
                 <g isolation="isolate">
-                  <path d="M368.4,484.5l-3.2-8.8h-14l-3,8.8h-6.4l13.2-34.9h6.5l13.3,34.9h-6.4ZM358.3,454.9h-.1c0,.9-.3,1.7-.5,2.5l-4.7,13.5h10.7l-4.8-13.5c-.3-.8-.5-1.7-.5-2.5h0Z" fill="#39b54a"/>
+                  <path
+                    d="M368.4,484.5l-3.2-8.8h-14l-3,8.8h-6.4l13.2-34.9h6.5l13.3,34.9h-6.4ZM358.3,454.9h-.1c0,.9-.3,1.7-.5,2.5l-4.7,13.5h10.7l-4.8-13.5c-.3-.8-.5-1.7-.5-2.5h0Z"
+                    fill="#39b54a" />
                 </g>
               </g>
               <g>
                 <g>
-                  <path d="M288.2,493.4c-14.6,0-26.6-11.8-26.6-26.4,0-14.6,11.8-26.5,26.4-26.6s26.6,11.8,26.6,26.4c0,0,0,0,0,.1,0,14.6-11.8,26.4-26.4,26.5Z" fill="#1a1a1a"/>
-                  <path d="M288.2,441.5c14.1,0,25.4,11.4,25.4,25.5s-11.4,25.4-25.5,25.4c-14.1,0-25.4-11.4-25.4-25.5,0-14,11.5-25.4,25.5-25.4M288.2,439.5c-15.2,0-27.5,12.3-27.5,27.5,0,15.2,12.3,27.5,27.5,27.5,15.2,0,27.5-12.3,27.5-27.5,0-15.2-12.3-27.5-27.5-27.5h0Z" fill="#0f0f0f"/>
+                  <path
+                    d="M288.2,493.4c-14.6,0-26.6-11.8-26.6-26.4,0-14.6,11.8-26.5,26.4-26.6s26.6,11.8,26.6,26.4c0,0,0,0,0,.1,0,14.6-11.8,26.4-26.4,26.5Z"
+                    fill="#1a1a1a" />
+                  <path
+                    d="M288.2,441.5c14.1,0,25.4,11.4,25.4,25.5s-11.4,25.4-25.5,25.4c-14.1,0-25.4-11.4-25.4-25.5,0-14,11.5-25.4,25.5-25.4M288.2,439.5c-15.2,0-27.5,12.3-27.5,27.5,0,15.2,12.3,27.5,27.5,27.5,15.2,0,27.5-12.3,27.5-27.5,0-15.2-12.3-27.5-27.5-27.5h0Z"
+                    fill="#0f0f0f" />
                 </g>
-                <polygon points="302.7 454.5 300.7 452.5 288.2 464.9 275.8 452.5 273.7 454.5 286.1 466.9 273.7 479.4 275.8 481.4 288.2 469 300.7 481.4 302.7 479.4 290.2 466.9 302.7 454.5" fill="#7cb2e8"/>
+                <polygon
+                  points="302.7 454.5 300.7 452.5 288.2 464.9 275.8 452.5 273.7 454.5 286.1 466.9 273.7 479.4 275.8 481.4 288.2 469 300.7 481.4 302.7 479.4 290.2 466.9 302.7 454.5"
+                  fill="#7cb2e8" />
               </g>
             </g>
             <g class="word-label" transform="translate(322.9 373.5) scale(1.4)">
-              <g transform="translate(-20.52 -4.28) scale(0.855)" fill="none" stroke="#81B7D2" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round">
-                <path transform="translate(0 0)" d="M8 1 Q0 -2 0 5 Q0 12 8 9"/>
-                <path transform="translate(10 0)" d="M0 10 V0 H4 Q8 0 8 3 Q8 5 4 5 H0 M4 5 8 10"/>
-                <path transform="translate(20 0)" d="M4 0 Q0 0 0 5 Q0 10 4 10 Q8 10 8 5 Q8 0 4 0 Z"/>
-                <path transform="translate(30 0)" d="M8 1 Q0 -2 0 3 Q0 5 4 5 Q8 5 8 8 Q8 12 0 9"/>
-                <path transform="translate(40 0)" d="M8 1 Q0 -2 0 3 Q0 5 4 5 Q8 5 8 8 Q8 12 0 9"/>
+              <g transform="translate(-20.52 -4.28) scale(0.855)" fill="none" stroke="#81B7D2"
+                stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round">
+                <path transform="translate(0 0)" d="M8 1 Q0 -2 0 5 Q0 12 8 9" />
+                <path transform="translate(10 0)" d="M0 10 V0 H4 Q8 0 8 3 Q8 5 4 5 H0 M4 5 8 10" />
+                <path transform="translate(20 0)" d="M4 0 Q0 0 0 5 Q0 10 4 10 Q8 10 8 5 Q8 0 4 0 Z" />
+                <path transform="translate(30 0)" d="M8 1 Q0 -2 0 3 Q0 5 4 5 Q8 5 8 8 Q8 12 0 9" />
+                <path transform="translate(40 0)" d="M8 1 Q0 -2 0 3 Q0 5 4 5 Q8 5 8 8 Q8 12 0 9" />
               </g>
             </g>
           </g>
         </g>
       </g>
-      <g class="compact-geometry word-label marking" transform="matrix(6.85556 0 0 6.85556 -19.8778 71.85554)">
-        <text x="50.0" y="44.0" fill="#eeeeee" font-family="Arial, sans-serif" font-size="2.666666666666667" text-anchor="middle" dominant-baseline="central">Cross / A</text>
+      <g class="compact-geometry word-label marking"
+        transform="matrix(6.85556 0 0 6.85556 -19.8778 71.85554)">
+        <text x="50.0" y="44.0" fill="#eeeeee" font-family="Arial, sans-serif"
+          font-size="2.666666666666667" text-anchor="middle" dominant-baseline="central">Cross / A</text>
       </g>
     </g>
   </g>
-  <!-- Recoverable auxiliary button: <g id="button-select" class="control" data-name="button-select" data-input="button:8" data-label="Back" data-bounds="6.4 32.9 70.2 70.2" data-compact-transform="matrix(0.09972 0 0 0.09972 9.36182 1.21937)" data-compact-scale="0.09972">
+  <!-- Recoverable auxiliary button: <g id="button-select" class="control" data-name="button-select"
+  data-input="button:8" data-label="Back" data-bounds="6.4 32.9 70.2 70.2"
+  data-compact-transform="matrix(0.09972 0 0 0.09972 9.36182 1.21937)" data-compact-scale="0.09972">
     <g class="press-visual">
       <g transform="matrix(1 0 0 1 0 0)">
         <g class="full-geometry">
           <g>
-            <circle cx="41.5" cy="68" r="35.1" fill="#1a1a1a" class="button-face vector-outline" stroke="#111111" stroke-width="1.2"></circle>
+            <circle cx="41.5" cy="68" r="35.1" fill="#1a1a1a" class="button-face vector-outline"
+  stroke="#111111" stroke-width="1.2"></circle>
           </g>
           <g class="full-only-decoration">
-            <path d="M75.9,26.5H8.1c-4.5,0-8.1-3.6-8.1-8h0c0-4.4,3.6-8,8.1-8h67.8c4.5,0,8.1,3.6,8.1,8h0c0,4.4-3.6,8-8.1,8Z" fill="#1a1a1a"></path>
+            <path
+  d="M75.9,26.5H8.1c-4.5,0-8.1-3.6-8.1-8h0c0-4.4,3.6-8,8.1-8h67.8c4.5,0,8.1,3.6,8.1,8h0c0,4.4-3.6,8-8.1,8Z"
+  fill="#1a1a1a"></path>
           </g>
           <g class="full-only-decoration">
             <g class="marking">
-              <path d="M3.5,14.9h3.4c1.4,0,2.3.4,2.3,1.8,0,.6-.4,1.2-1,1.5.8.2,1.4,1,1.3,1.8,0,1.5-1.3,2-2.5,2h-3.5v-7.1ZM5.2,17.8h1.6c.6,0,1-.2,1-.9s-.5-.8-1.1-.8h-1.5v1.7ZM5.2,20.8h1.7c.6,0,1.2-.2,1.2-1s-.5-1-1.2-1h-1.7v2Z" fill="#fff"></path>
-              <path d="M12.7,14.9h1.6l2.7,7.2h-1.7l-.5-1.6h-2.7l-.6,1.6h-1.6l2.7-7.2ZM12.5,19.3h1.9l-.9-2.6h0l-1,2.6Z" fill="#fff"></path>
-              <path d="M22.4,17.3c-.2-.7-.8-1.3-1.6-1.2-1.4,0-2,1.2-2,2.4s.6,2.4,2,2.4,1.5-.6,1.6-1.6h1.5c0,1.7-1.5,3-3.1,2.9,0,0,0,0,0,0-2.2,0-3.5-1.6-3.5-3.7s1.3-3.8,3.5-3.8,2.9.9,3.1,2.6h-1.5Z" fill="#fff"></path>
-              <path d="M25.1,14.9h1.6v2.9l2.8-2.9h2l-2.8,2.8,3.1,4.3h-2l-2.2-3.2-.9.9v2.3h-1.6v-7.1Z" fill="#fff"></path>
+              <path
+  d="M3.5,14.9h3.4c1.4,0,2.3.4,2.3,1.8,0,.6-.4,1.2-1,1.5.8.2,1.4,1,1.3,1.8,0,1.5-1.3,2-2.5,2h-3.5v-7.1ZM5.2,17.8h1.6c.6,0,1-.2,1-.9s-.5-.8-1.1-.8h-1.5v1.7ZM5.2,20.8h1.7c.6,0,1.2-.2,1.2-1s-.5-1-1.2-1h-1.7v2Z"
+  fill="#fff"></path>
+              <path
+  d="M12.7,14.9h1.6l2.7,7.2h-1.7l-.5-1.6h-2.7l-.6,1.6h-1.6l2.7-7.2ZM12.5,19.3h1.9l-.9-2.6h0l-1,2.6Z"
+  fill="#fff"></path>
+              <path
+  d="M22.4,17.3c-.2-.7-.8-1.3-1.6-1.2-1.4,0-2,1.2-2,2.4s.6,2.4,2,2.4,1.5-.6,1.6-1.6h1.5c0,1.7-1.5,3-3.1,2.9,0,0,0,0,0,0-2.2,0-3.5-1.6-3.5-3.7s1.3-3.8,3.5-3.8,2.9.9,3.1,2.6h-1.5Z"
+  fill="#fff"></path>
+              <path d="M25.1,14.9h1.6v2.9l2.8-2.9h2l-2.8,2.8,3.1,4.3h-2l-2.2-3.2-.9.9v2.3h-1.6v-7.1Z"
+  fill="#fff"></path>
               <path d="M37.3,14.7h1.2l-2.8,7.5h-1.2l2.8-7.5Z" fill="#fff"></path>
-              <path d="M42.9,19.7c0,1,.8,1.3,1.6,1.3s1.4-.1,1.4-.9-1.1-.9-2.1-1.2-2.2-.7-2.2-2.1,1.4-2.1,2.7-2.1,2.9.6,2.9,2.3h-1.5c0-.9-.7-1.1-1.4-1.1s-1.1.2-1.1.8.4.6,2.2,1.1c.6.1,2.1.4,2.1,2.1s-1,2.3-3,2.3-3.1-.8-3.1-2.5h1.5Z" fill="#fff"></path>
+              <path
+  d="M42.9,19.7c0,1,.8,1.3,1.6,1.3s1.4-.1,1.4-.9-1.1-.9-2.1-1.2-2.2-.7-2.2-2.1,1.4-2.1,2.7-2.1,2.9.6,2.9,2.3h-1.5c0-.9-.7-1.1-1.4-1.1s-1.1.2-1.1.8.4.6,2.2,1.1c.6.1,2.1.4,2.1,2.1s-1,2.3-3,2.3-3.1-.8-3.1-2.5h1.5Z"
+  fill="#fff"></path>
               <path d="M48.4,14.9h5.4v1.3h-3.8v1.6h3.5v1.2h-3.5v1.8h3.9v1.3h-5.5v-7.1Z" fill="#fff"></path>
               <path d="M55,14.9h1.6v5.8h3.5v1.3h-5.1v-7.1Z" fill="#fff"></path>
               <path d="M61,14.9h5.4v1.3h-3.8v1.6h3.5v1.2h-3.5v1.8h3.9v1.3h-5.5v-7.1h0Z" fill="#fff"></path>
-              <path d="M72.4,17.3c-.2-.7-.8-1.3-1.6-1.2-1.4,0-2,1.2-2,2.4s.6,2.4,2,2.4,1.5-.6,1.6-1.6h1.5c0,1.7-1.5,3-3.1,2.9,0,0,0,0,0,0-2.2,0-3.5-1.6-3.5-3.7s1.3-3.8,3.5-3.8,2.9.9,3.1,2.6h-1.5Z" fill="#fff"></path>
+              <path
+  d="M72.4,17.3c-.2-.7-.8-1.3-1.6-1.2-1.4,0-2,1.2-2,2.4s.6,2.4,2,2.4,1.5-.6,1.6-1.6h1.5c0,1.7-1.5,3-3.1,2.9,0,0,0,0,0,0-2.2,0-3.5-1.6-3.5-3.7s1.3-3.8,3.5-3.8,2.9.9,3.1,2.6h-1.5Z"
+  fill="#fff"></path>
               <path d="M76.7,16.2h-2.2v-1.3h5.9v1.3h-2.2v5.8h-1.6v-5.8h0Z" fill="#fff"></path>
             </g>
           </g>
         </g>
       </g>
-      <g class="compact-geometry word-label marking" transform="matrix(10.02857 0 0 10.02857 -93.88571 -12.22857)">
-        <text x="13.5" y="8.0" fill="#eeeeee" font-family="Arial, sans-serif" font-size="2.3333333333333335" text-anchor="middle" dominant-baseline="central">Back</text>
+      <g class="compact-geometry word-label marking" transform="matrix(10.02857 0 0 10.02857 -93.88571
+  -12.22857)">
+        <text x="13.5" y="8.0" fill="#eeeeee" font-family="Arial, sans-serif"
+  font-size="2.3333333333333335" text-anchor="middle" dominant-baseline="central">Back</text>
       </g>
     </g>
   </g> -->
-  <!-- Recoverable auxiliary button: <g id="button-start" class="control" data-name="button-start" data-input="button:9" data-label="Start" data-bounds="111.8 36 70.2 70.2" data-compact-transform="matrix(0.09972 0 0 0.09972 11.85185 0.91026)" data-compact-scale="0.09972">
+  <!-- Recoverable auxiliary button: <g id="button-start" class="control" data-name="button-start"
+  data-input="button:9" data-label="Start" data-bounds="111.8 36 70.2 70.2"
+  data-compact-transform="matrix(0.09972 0 0 0.09972 11.85185 0.91026)"
+  data-compact-scale="0.09972">
     <g class="press-visual">
       <g transform="matrix(1 0 0 1 0 0)">
         <g class="full-geometry">
           <g>
-            <circle cx="146.9" cy="71.1" r="35.1" fill="#1a1a1a" class="button-face vector-outline" stroke="#111111" stroke-width="1.2"></circle>
+            <circle cx="146.9" cy="71.1" r="35.1" fill="#1a1a1a" class="button-face vector-outline"
+  stroke="#111111" stroke-width="1.2"></circle>
           </g>
           <g class="full-only-decoration">
-            <path d="M168.3,29.6h-42.5c-8.1,0-14.8-6.3-14.8-14h0c0-7.7,6.6-14,14.8-14h42.5c8.1,0,14.8,6.3,14.8,14h0c0,7.7-6.6,13.9-14.8,14Z" fill="#1a1a1a"></path>
+            <path
+  d="M168.3,29.6h-42.5c-8.1,0-14.8-6.3-14.8-14h0c0-7.7,6.6-14,14.8-14h42.5c8.1,0,14.8,6.3,14.8,14h0c0,7.7-6.6,13.9-14.8,14Z"
+  fill="#1a1a1a"></path>
           </g>
           <g class="full-only-decoration">
             <g class="marking">
-              <path d="M120,17.7c0,1.7,1.4,2.3,3,2.3s2.6-.3,2.6-1.6-2-1.6-3.9-2.1-4-1.2-4-3.6,2.6-3.8,4.9-3.8,5.3,1.1,5.3,4h-2.8c0-1.5-1.2-1.9-2.6-1.9s-2,.3-2,1.4.6,1.1,4,1.9c1,.2,3.9.8,3.9,3.7s-1.8,4-5.4,4-5.6-1.4-5.6-4.5h2.8Z" fill="#fff"></path>
+              <path
+  d="M120,17.7c0,1.7,1.4,2.3,3,2.3s2.6-.3,2.6-1.6-2-1.6-3.9-2.1-4-1.2-4-3.6,2.6-3.8,4.9-3.8,5.3,1.1,5.3,4h-2.8c0-1.5-1.2-1.9-2.6-1.9s-2,.3-2,1.4.6,1.1,4,1.9c1,.2,3.9.8,3.9,3.7s-1.8,4-5.4,4-5.6-1.4-5.6-4.5h2.8Z"
+  fill="#fff"></path>
               <path d="M132.9,11.7h-4v-2.3h10.8v2.3h-4v10.2h-2.9v-10.2Z" fill="#fff"></path>
-              <path d="M144.8,9.4h3l4.9,12.5h-3l-1-2.8h-4.9l-1,2.8h-3l5.1-12.5ZM144.5,17h3.4l-1.7-4.5h0l-1.8,4.5Z" fill="#fff"></path>
-              <path d="M153.8,9.4h7.1c2-.1,3.7,1.3,3.9,3.2,0,0,0,.2,0,.2.1,1.4-.8,2.7-2.1,3.2h0c1.4.3,1.8,1.7,1.9,2.9,0,.8,0,2.3.6,3h-2.9c-.3-1-.4-2-.5-3-.2-1.3-.7-1.9-2.2-1.9h-2.9v4.9h-2.9v-12.4h0ZM156.8,15h3.1c1.3,0,2-.5,2-1.8s-.6-1.8-2-1.8h-3.1v3.5Z" fill="#fff"></path>
+              <path
+  d="M144.8,9.4h3l4.9,12.5h-3l-1-2.8h-4.9l-1,2.8h-3l5.1-12.5ZM144.5,17h3.4l-1.7-4.5h0l-1.8,4.5Z"
+  fill="#fff"></path>
+              <path
+  d="M153.8,9.4h7.1c2-.1,3.7,1.3,3.9,3.2,0,0,0,.2,0,.2.1,1.4-.8,2.7-2.1,3.2h0c1.4.3,1.8,1.7,1.9,2.9,0,.8,0,2.3.6,3h-2.9c-.3-1-.4-2-.5-3-.2-1.3-.7-1.9-2.2-1.9h-2.9v4.9h-2.9v-12.4h0ZM156.8,15h3.1c1.3,0,2-.5,2-1.8s-.6-1.8-2-1.8h-3.1v3.5Z"
+  fill="#fff"></path>
               <path d="M170,11.7h-4v-2.3h10.8v2.3h-4v10.2h-2.9v-10.2Z" fill="#fff"></path>
             </g>
           </g>
         </g>
       </g>
-      <g class="compact-geometry word-label marking" transform="matrix(10.02857 0 0 10.02857 -118.85714 -9.12857)">
-        <text x="26.5" y="8.0" fill="#eeeeee" font-family="Arial, sans-serif" font-size="1.866666666666667" text-anchor="middle" dominant-baseline="central">Start</text>
+      <g class="compact-geometry word-label marking" transform="matrix(10.02857 0 0 10.02857 -118.85714
+  -9.12857)">
+        <text x="26.5" y="8.0" fill="#eeeeee" font-family="Arial, sans-serif" font-size="1.866666666666667"
+  text-anchor="middle" dominant-baseline="central">Start</text>
       </g>
     </g>
   </g> -->
-  <g id="socket-10" data-for="button:10" data-order="-1" class="fixed-control" data-compact-transform="matrix(0.21053 0 0 0.21053 -0.76842 -29.94737)">
-    <circle cx="93.9" cy="308.5" r="57" id="arcade-stick-socket" class="vector-outline" fill="#000000" stroke="#111111" stroke-width="1.2"/>
-    <line class="stick-shaft" x1="93.9" y1="308.5" x2="93.9" y2="308.5" stroke="#333333" stroke-width="12" stroke-linecap="round"/>
+  <g id="socket-10" data-for="button:10" data-order="-1" class="fixed-control"
+    data-compact-transform="matrix(0.21053 0 0 0.21053 -0.76842 -29.94737)">
+    <circle cx="93.9" cy="308.5" r="57" id="arcade-stick-socket" class="vector-outline"
+      fill="#000000" stroke="#111111" stroke-width="1.2" />
+    <line class="stick-shaft" x1="93.9" y1="308.5" x2="93.9" y2="308.5" stroke="#333333"
+      stroke-width="12" stroke-linecap="round" />
   </g>
-  <g id="stick-1" class="control stick" data-name="stick-1" data-input="button:10" data-label="Stick" data-axes="0 1" data-stick-click="no" data-bounds="40.88659 255.5 106.0134 106.03015" data-compact-transform="matrix(0.21053 0 0 0.21053 -0.76842 -29.94737)" data-compact-scale="0.21053" data-dpad="12 13 14 15" data-travel-scale="1.6">
+  <g id="stick-1" class="control stick" data-name="stick-1" data-input="button:10"
+    data-label="Stick" data-axes="0 1" data-stick-click="no"
+    data-bounds="40.88659 255.5 106.0134 106.03015"
+    data-compact-transform="matrix(0.21053 0 0 0.21053 -0.76842 -29.94737)"
+    data-compact-scale="0.21053" data-dpad="12 13 14 15" data-travel-scale="1.6">
     <g class="press-visual">
       <g class="full-geometry">
         <g transform="translate(93.9 308.5) scale(1.000000) translate(-110.3 -110.3)">
-          <circle cx="110.3" cy="110.3" r="53" fill="#c1272d" class="button-face vector-outline" stroke="#111111" stroke-width="1.2"/>
-          <path d="M153.03 78.93 A53 53 0 0 1 78.93 153.03 A60 60 0 0 0 153.03 78.93 Z" fill="#000000" opacity="0.15"/>
+          <circle cx="110.3" cy="110.3" r="53" fill="#c1272d" class="button-face vector-outline"
+            stroke="#111111" stroke-width="1.2" />
+          <path d="M153.03 78.93 A53 53 0 0 1 78.93 153.03 A60 60 0 0 0 153.03 78.93 Z"
+            fill="#000000" opacity="0.15" />
         </g>
       </g>
     </g>

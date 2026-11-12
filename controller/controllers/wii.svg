@@ -1,4 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" id="wii" data-controller="wii" data-name="Wiimote" data-platform="Nintendo" viewBox="313.04 0.92 180.96 484.59" data-labels="icons" data-layout="full" role="img" aria-label="Wiimote input display" font-family="Arial, sans-serif" data-full-viewbox="313.04 0.92 180.96 484.59" data-compact-viewbox="0 0 109 79" data-source="WII.svg">
+<svg xmlns="http://www.w3.org/2000/svg" id="wii" data-controller="wii" data-name="Wiimote"
+  data-platform="Nintendo" viewBox="313.04 0.92 180.96 484.59" data-labels="icons"
+  data-layout="full" role="img" aria-label="Wiimote input display" font-family="Arial, sans-serif"
+  data-full-viewbox="313.04 0.92 180.96 484.59" data-compact-viewbox="0 0 109 79"
+  data-source="WII.svg">
   <title>Wiimote</title>
   <style>
     .custom-colors .shell-base { fill: var(--controller-color); }
@@ -27,15 +31,19 @@
   </style>
   <defs>
     <g id="housing-shape">
-      <rect x="321.04" y="8.92" width="113.67" height="468.59" rx="12.65" fill="#ffffff" stroke="none" class="" />
+      <rect x="321.04" y="8.92" width="113.67" height="468.59" rx="12.65" fill="#ffffff"
+        stroke="none" class="" />
     </g>
-    <mask id="highlight-rim" maskUnits="userSpaceOnUse" x="-1000" y="-1000" width="4000" height="4000">
+    <mask id="highlight-rim" maskUnits="userSpaceOnUse" x="-1000" y="-1000" width="4000"
+      height="4000">
       <use href="#housing-shape" />
-      <rect x="321.04" y="8.92" width="113.67" height="468.59" rx="12.65" fill="#000000" stroke="none" class="" transform="translate(4 5)" />
+      <rect x="321.04" y="8.92" width="113.67" height="468.59" rx="12.65" fill="#000000"
+        stroke="none" class="" transform="translate(4 5)" />
     </mask>
     <mask id="shadow-rim" maskUnits="userSpaceOnUse" x="-1000" y="-1000" width="4000" height="4000">
       <use href="#housing-shape" />
-      <rect x="321.04" y="8.92" width="113.67" height="468.59" rx="12.65" fill="#000000" stroke="none" class="" transform="translate(-4 -5)" />
+      <rect x="321.04" y="8.92" width="113.67" height="468.59" rx="12.65" fill="#000000"
+        stroke="none" class="" transform="translate(-4 -5)" />
     </mask>
     <clipPath id="dpad-12">
       <polygon points="349.87,54.93 404.78,54.93 377.325,82.38" />
@@ -56,31 +64,57 @@
   <g>
     <g id="shell">
       <g id="shell-surfaces">
-        <rect x="321.04" y="8.92" width="113.67" height="468.59" rx="12.65" fill="#292c31" stroke="rgb(0, 0, 0)" class="vector-outline shell-base" stroke-width="3" />
-        <circle cx="369.5" cy="271.44" r="2.19" fill="#d3d5d8" stroke="none" class="hardware-marking" />
-        <circle cx="377.49" cy="271.44" r="2.19" fill="#d3d5d8" stroke="none" class="hardware-marking" />
-        <circle cx="385.86" cy="271.44" r="2.19" fill="#d3d5d8" stroke="none" class="hardware-marking" />
-        <circle cx="369.5" cy="280.59" r="2.19" fill="#d3d5d8" stroke="none" class="hardware-marking" />
-        <circle cx="377.49" cy="280.59" r="2.19" fill="#d3d5d8" stroke="none" class="hardware-marking" />
-        <circle cx="385.86" cy="280.59" r="2.19" fill="#d3d5d8" stroke="none" class="hardware-marking" />
-        <circle cx="369.5" cy="289.74" r="2.19" fill="#d3d5d8" stroke="none" class="hardware-marking" />
-        <circle cx="377.49" cy="289.74" r="2.19" fill="#d3d5d8" stroke="none" class="hardware-marking" />
-        <circle cx="385.86" cy="289.74" r="2.19" fill="#d3d5d8" stroke="none" class="hardware-marking" />
-        <circle cx="369.5" cy="298.03" r="2.19" fill="#d3d5d8" stroke="none" class="hardware-marking" />
-        <circle cx="377.49" cy="298.03" r="2.19" fill="#d3d5d8" stroke="none" class="hardware-marking" />
-        <circle cx="385.86" cy="298.03" r="2.19" fill="#d3d5d8" stroke="none" class="hardware-marking" />
-        <circle cx="369.5" cy="307.18" r="2.19" fill="#d3d5d8" stroke="none" class="hardware-marking" />
-        <circle cx="377.49" cy="307.18" r="2.19" fill="#d3d5d8" stroke="none" class="hardware-marking" />
-        <circle cx="385.86" cy="307.18" r="2.19" fill="#d3d5d8" stroke="none" class="hardware-marking" />
-        <circle cx="369.5" cy="316.33" r="2.19" fill="#d3d5d8" stroke="none" class="hardware-marking" />
-        <circle cx="377.49" cy="316.33" r="2.19" fill="#d3d5d8" stroke="none" class="hardware-marking" />
-        <circle cx="385.86" cy="316.33" r="2.19" fill="#d3d5d8" stroke="none" class="hardware-marking" />
-        <rect x="341.34" y="424.74" width="10.05" height="10.05" fill="rgb(0, 0, 0)" stroke="none" class="player-indicator lit" data-player="1" />
-        <rect x="361.83" y="424.74" width="10.05" height="10.05" fill="rgb(0, 0, 0)" stroke="none" class="player-indicator" data-player="2" />
-        <path d="M373.74,453.35h-4.8a5,5,0,0,1-4.83-3.35l-2.66-8.81a1.51,1.51,0,0,1,1.44-1.95h17a1.51,1.51,0,0,1,1.44,2L378.57,450A5,5,0,0,1,373.74,453.35Z" fill="#d3d5d8" stroke="none" class="hardware-marking" />
-        <rect x="382.9" y="439.24" width="10.05" height="14.11" fill="#d3d5d8" stroke="none" class="hardware-marking" />
-        <rect x="382.9" y="424.74" width="10.05" height="10.05" fill="rgb(0, 0, 0)" stroke="none" class="player-indicator" data-player="3" />
-        <rect x="403.78" y="424.74" width="10.05" height="10.05" fill="rgb(0, 0, 0)" stroke="none" class="player-indicator" data-player="4" />
+        <rect x="321.04" y="8.92" width="113.67" height="468.59" rx="12.65" fill="#292c31"
+          stroke="rgb(0, 0, 0)" class="vector-outline shell-base" stroke-width="3" />
+        <circle cx="369.5" cy="271.44" r="2.19" fill="#d3d5d8" stroke="none"
+          class="hardware-marking" />
+        <circle cx="377.49" cy="271.44" r="2.19" fill="#d3d5d8" stroke="none"
+          class="hardware-marking" />
+        <circle cx="385.86" cy="271.44" r="2.19" fill="#d3d5d8" stroke="none"
+          class="hardware-marking" />
+        <circle cx="369.5" cy="280.59" r="2.19" fill="#d3d5d8" stroke="none"
+          class="hardware-marking" />
+        <circle cx="377.49" cy="280.59" r="2.19" fill="#d3d5d8" stroke="none"
+          class="hardware-marking" />
+        <circle cx="385.86" cy="280.59" r="2.19" fill="#d3d5d8" stroke="none"
+          class="hardware-marking" />
+        <circle cx="369.5" cy="289.74" r="2.19" fill="#d3d5d8" stroke="none"
+          class="hardware-marking" />
+        <circle cx="377.49" cy="289.74" r="2.19" fill="#d3d5d8" stroke="none"
+          class="hardware-marking" />
+        <circle cx="385.86" cy="289.74" r="2.19" fill="#d3d5d8" stroke="none"
+          class="hardware-marking" />
+        <circle cx="369.5" cy="298.03" r="2.19" fill="#d3d5d8" stroke="none"
+          class="hardware-marking" />
+        <circle cx="377.49" cy="298.03" r="2.19" fill="#d3d5d8" stroke="none"
+          class="hardware-marking" />
+        <circle cx="385.86" cy="298.03" r="2.19" fill="#d3d5d8" stroke="none"
+          class="hardware-marking" />
+        <circle cx="369.5" cy="307.18" r="2.19" fill="#d3d5d8" stroke="none"
+          class="hardware-marking" />
+        <circle cx="377.49" cy="307.18" r="2.19" fill="#d3d5d8" stroke="none"
+          class="hardware-marking" />
+        <circle cx="385.86" cy="307.18" r="2.19" fill="#d3d5d8" stroke="none"
+          class="hardware-marking" />
+        <circle cx="369.5" cy="316.33" r="2.19" fill="#d3d5d8" stroke="none"
+          class="hardware-marking" />
+        <circle cx="377.49" cy="316.33" r="2.19" fill="#d3d5d8" stroke="none"
+          class="hardware-marking" />
+        <circle cx="385.86" cy="316.33" r="2.19" fill="#d3d5d8" stroke="none"
+          class="hardware-marking" />
+        <rect x="341.34" y="424.74" width="10.05" height="10.05" fill="rgb(0, 0, 0)" stroke="none"
+          class="player-indicator lit" data-player="1" />
+        <rect x="361.83" y="424.74" width="10.05" height="10.05" fill="rgb(0, 0, 0)" stroke="none"
+          class="player-indicator" data-player="2" />
+        <path
+          d="M373.74,453.35h-4.8a5,5,0,0,1-4.83-3.35l-2.66-8.81a1.51,1.51,0,0,1,1.44-1.95h17a1.51,1.51,0,0,1,1.44,2L378.57,450A5,5,0,0,1,373.74,453.35Z"
+          fill="#d3d5d8" stroke="none" class="hardware-marking" />
+        <rect x="382.9" y="439.24" width="10.05" height="14.11" fill="#d3d5d8" stroke="none"
+          class="hardware-marking" />
+        <rect x="382.9" y="424.74" width="10.05" height="10.05" fill="rgb(0, 0, 0)" stroke="none"
+          class="player-indicator" data-player="3" />
+        <rect x="403.78" y="424.74" width="10.05" height="10.05" fill="rgb(0, 0, 0)" stroke="none"
+          class="player-indicator" data-player="4" />
       </g>
       <g mask="url(#highlight-rim)" class="shell-highlight">
         <rect x="321.04" y="8.92" width="113.67" height="468.59" rx="12.65" stroke="none" class="" />
@@ -92,174 +126,294 @@
   </g>
   <g transform="matrix(1 0 0 1 0 0)" class="shell-decoration">
     <g class="full-geometry">
-      <circle cx="345.52" cy="26.96" r="9.52" fill="#eeeeee" stroke="rgb(0, 0, 0)" class="button-face vector-outline" stroke-width="3" />
+      <circle cx="345.52" cy="26.96" r="9.52" fill="#eeeeee" stroke="rgb(0, 0, 0)"
+        class="button-face vector-outline" stroke-width="3" />
     </g>
   </g>
-  <g id="input-16" class="control stock-neutral" data-name="button-meta" data-input="button:16" data-label="Home" data-bounds="366.39999 222.85001 21.13998 21.14" data-compact-transform="matrix(0.47304 0 0 0.47304 -129.32088 -39.41638)" data-order="1" data-compact-scale="0.47304">
+  <g id="input-16" class="control stock-neutral" data-name="button-meta" data-input="button:16"
+    data-label="Home" data-bounds="366.39999 222.85001 21.13998 21.14"
+    data-compact-transform="matrix(0.47304 0 0 0.47304 -129.32088 -39.41638)" data-order="1"
+    data-compact-scale="0.47304">
     <g class="press-visual">
       <g transform="matrix(1 0 0 1 0 0)">
         <g class="full-geometry">
-          <circle cx="376.97" cy="233.42" r="10.57" fill="#3b4147" stroke="rgb(0, 0, 0)" class="vector-outline button-face stock-plastic" stroke-width="3" />
+          <circle cx="376.97" cy="233.42" r="10.57" fill="#3b4147" stroke="rgb(0, 0, 0)"
+            class="vector-outline button-face stock-plastic" stroke-width="3" />
         </g>
       </g>
-      <g id="guide-logo-slot" class="guide-logo-slot" data-default-symbol="home" data-logo-bounds="369.4653 225.9153 15.0094 15.0094" data-guide-clip="#guide-logo-clip">
-        <g class="guide-logo-original" data-guide-symbol="home" data-symbol-bounds="370.27 226.71 13.4 11.16">
-          <path d="M383.67,232.27l-6.49-5.56-6.91,5.56h2.32v5.6h8.76v-5.6Zm-5,2.89H375.3v-2.89h3.35Z" fill="#c8cdd2" stroke="none" class="" />
+      <g id="guide-logo-slot" class="guide-logo-slot" data-default-symbol="home"
+        data-logo-bounds="369.4653 225.9153 15.0094 15.0094" data-guide-clip="#guide-logo-clip">
+        <g class="guide-logo-original" data-guide-symbol="home"
+          data-symbol-bounds="370.27 226.71 13.4 11.16">
+          <path
+            d="M383.67,232.27l-6.49-5.56-6.91,5.56h2.32v5.6h8.76v-5.6Zm-5,2.89H375.3v-2.89h3.35Z"
+            fill="#c8cdd2" stroke="none" class="" />
         </g>
       </g>
     </g>
   </g>
-  <g id="input-0" class="control stock-neutral" data-name="button-1" data-input="button:0" data-label="A" data-bounds="359.44 135.56 35.06 35.06" data-compact-transform="matrix(0.6275 0 0 0.6275 -171.54706 -79.06332)" data-order="2" data-compact-scale="0.6275">
+  <g id="input-0" class="control stock-neutral" data-name="button-1" data-input="button:0"
+    data-label="A" data-bounds="359.44 135.56 35.06 35.06"
+    data-compact-transform="matrix(0.6275 0 0 0.6275 -171.54706 -79.06332)" data-order="2"
+    data-compact-scale="0.6275">
     <g class="press-visual">
       <g transform="matrix(1 0 0 1 0 0)">
         <g class="full-geometry">
-          <circle cx="376.97" cy="153.09" r="17.53" fill="#34393e" stroke="rgb(0, 0, 0)" class="vector-outline button-face stock-plastic" stroke-width="3" />
-          <path d="M381.3,156.06h-8.71l-1.76,3.88a1.41,1.41,0,0,1-.63.72,1.72,1.72,0,0,1-.86.22,1.87,1.87,0,0,1-1.14-.39,1.24,1.24,0,0,1-.52-1.05,1.4,1.4,0,0,1,.16-.66l6.81-14.84a2.19,2.19,0,0,1,1-1.09,2.75,2.75,0,0,1,2.72,0,2.19,2.19,0,0,1,1,1.09l6.82,14.84a1.53,1.53,0,0,1,.16.66,1.25,1.25,0,0,1-.53,1.05,1.87,1.87,0,0,1-1.14.39,1.72,1.72,0,0,1-.86-.22,1.41,1.41,0,0,1-.63-.72ZM377,146.43,374,153h6Z" fill="var(--button-label-color, #85888b)" stroke="none" class="marking hardware-icon" />
+          <circle cx="376.97" cy="153.09" r="17.53" fill="#34393e" stroke="rgb(0, 0, 0)"
+            class="vector-outline button-face stock-plastic" stroke-width="3" />
+          <path
+            d="M381.3,156.06h-8.71l-1.76,3.88a1.41,1.41,0,0,1-.63.72,1.72,1.72,0,0,1-.86.22,1.87,1.87,0,0,1-1.14-.39,1.24,1.24,0,0,1-.52-1.05,1.4,1.4,0,0,1,.16-.66l6.81-14.84a2.19,2.19,0,0,1,1-1.09,2.75,2.75,0,0,1,2.72,0,2.19,2.19,0,0,1,1,1.09l6.82,14.84a1.53,1.53,0,0,1,.16.66,1.25,1.25,0,0,1-.53,1.05,1.87,1.87,0,0,1-1.14.39,1.72,1.72,0,0,1-.86-.22,1.41,1.41,0,0,1-.63-.72ZM377,146.43,374,153h6Z"
+            fill="var(--button-label-color, #85888b)" stroke="none" class="marking hardware-icon" />
         </g>
       </g>
       <g class="word-label marking full-only-decoration">
-        <text x="376.9700012207031" y="153.08999633789062" fill="var(--button-label-color, #85888b)" font-family="Arial, sans-serif" font-size="13.322799072265624" text-anchor="middle" dominant-baseline="central">A</text>
+        <text x="376.9700012207031" y="153.08999633789062" fill="var(--button-label-color, #85888b)"
+          font-family="Arial, sans-serif" font-size="13.322799072265624" text-anchor="middle"
+          dominant-baseline="central">A</text>
       </g>
-      <g class="compact-geometry word-label marking" transform="matrix(2.50429 0 0 2.50429 224.20858 95.49143)">
-        <text x="61.0" y="23.0" fill="var(--button-label-color, #85888b)" font-family="Arial, sans-serif" font-size="7.0" text-anchor="middle" dominant-baseline="central">A</text>
+      <g class="compact-geometry word-label marking"
+        transform="matrix(2.50429 0 0 2.50429 224.20858 95.49143)">
+        <text x="61.0" y="23.0" fill="var(--button-label-color, #85888b)"
+          font-family="Arial, sans-serif" font-size="7.0" text-anchor="middle"
+          dominant-baseline="central">A</text>
       </g>
     </g>
   </g>
-  <g id="input-9" class="control stock-neutral" data-name="button-start" data-input="button:9" data-label="+" data-bounds="400.23001 223.89999 19.04001 19.04001" data-compact-transform="matrix(0.52521 0 0 0.52521 -148.20473 -51.59447)" data-order="3" data-compact-scale="0.52521">
+  <g id="input-9" class="control stock-neutral" data-name="button-start" data-input="button:9"
+    data-label="+" data-bounds="400.23001 223.89999 19.04001 19.04001"
+    data-compact-transform="matrix(0.52521 0 0 0.52521 -148.20473 -51.59447)" data-order="3"
+    data-compact-scale="0.52521">
     <g class="press-visual">
       <g transform="matrix(1 0 0 1 0 0)">
         <g class="full-geometry">
-          <circle cx="409.75" cy="233.42" r="9.52" fill="#34393e" stroke="rgb(0, 0, 0)" class="vector-outline button-face stock-plastic" stroke-width="3" />
-          <polygon points="414.65 231.63 411.55 231.63 411.55 228.53 407.95 228.53 407.95 231.63 404.85 231.63 404.85 235.22 407.95 235.22 407.95 238.32 411.55 238.32 411.55 235.22 414.65 235.22 414.65 231.63" fill="var(--button-label-color, #85888b)" stroke="none" class="marking hardware-icon" />
+          <circle cx="409.75" cy="233.42" r="9.52" fill="#34393e" stroke="rgb(0, 0, 0)"
+            class="vector-outline button-face stock-plastic" stroke-width="3" />
+          <polygon
+            points="414.65 231.63 411.55 231.63 411.55 228.53 407.95 228.53 407.95 231.63 404.85 231.63 404.85 235.22 407.95 235.22 407.95 238.32 411.55 238.32 411.55 235.22 414.65 235.22 414.65 231.63"
+            fill="var(--button-label-color, #85888b)" stroke="none" class="marking hardware-icon" />
         </g>
       </g>
       <g class="word-label marking full-only-decoration">
-        <text x="409.75001525878906" y="233.4199981689453" fill="var(--button-label-color, #85888b)" font-family="Arial, sans-serif" font-size="7.235203247070313" text-anchor="middle" dominant-baseline="central">+</text>
+        <text x="409.75001525878906" y="233.4199981689453" fill="var(--button-label-color, #85888b)"
+          font-family="Arial, sans-serif" font-size="7.235203247070313" text-anchor="middle"
+          dominant-baseline="central">+</text>
       </g>
-      <g class="compact-geometry word-label marking" transform="matrix(2.72 0 0 2.72 262.86995 56.61992)">
-        <text x="54.0" y="65.0" fill="var(--button-label-color, #85888b)" font-family="Arial, sans-serif" font-size="3.5" text-anchor="middle" dominant-baseline="central">+</text>
+      <g class="compact-geometry word-label marking"
+        transform="matrix(2.72 0 0 2.72 262.86995 56.61992)">
+        <text x="54.0" y="65.0" fill="var(--button-label-color, #85888b)"
+          font-family="Arial, sans-serif" font-size="3.5" text-anchor="middle"
+          dominant-baseline="central">+</text>
       </g>
     </g>
   </g>
-  <g id="input-8" class="control stock-neutral" data-name="button-select" data-input="button:8" data-label="−" data-bounds="336 223.89999 19.04001 19.04001" data-compact-transform="matrix(0.52521 0 0 0.52521 -150.4705 -51.59447)" data-order="4" data-compact-scale="0.52521">
+  <g id="input-8" class="control stock-neutral" data-name="button-select" data-input="button:8"
+    data-label="−" data-bounds="336 223.89999 19.04001 19.04001"
+    data-compact-transform="matrix(0.52521 0 0 0.52521 -150.4705 -51.59447)" data-order="4"
+    data-compact-scale="0.52521">
     <g class="press-visual">
       <g transform="matrix(1 0 0 1 0 0)">
         <g class="full-geometry">
-          <circle cx="345.52" cy="233.42" r="9.52" fill="#34393e" stroke="rgb(0, 0, 0)" class="vector-outline button-face stock-plastic" stroke-width="3" />
-          <rect x="340.62" y="231.62" width="9.79" height="3.6" fill="var(--button-label-color, #85888b)" stroke="none" class="marking hardware-icon" />
+          <circle cx="345.52" cy="233.42" r="9.52" fill="#34393e" stroke="rgb(0, 0, 0)"
+            class="vector-outline button-face stock-plastic" stroke-width="3" />
+          <rect x="340.62" y="231.62" width="9.79" height="3.6"
+            fill="var(--button-label-color, #85888b)" stroke="none" class="marking hardware-icon" />
         </g>
       </g>
       <g class="word-label marking full-only-decoration">
-        <text x="345.52000427246094" y="233.4199981689453" fill="var(--button-label-color, #85888b)" font-family="Arial, sans-serif" font-size="7.235203247070313" text-anchor="middle" dominant-baseline="central">−</text>
+        <text x="345.52000427246094" y="233.4199981689453" fill="var(--button-label-color, #85888b)"
+          font-family="Arial, sans-serif" font-size="7.235203247070313" text-anchor="middle"
+          dominant-baseline="central">−</text>
       </g>
-      <g class="compact-geometry word-label marking" transform="matrix(2.72 0 0 2.72 263.91997 56.61992)">
-        <text x="30.0" y="65.0" fill="var(--button-label-color, #85888b)" font-family="Arial, sans-serif" font-size="3.5" text-anchor="middle" dominant-baseline="central">−</text>
+      <g class="compact-geometry word-label marking"
+        transform="matrix(2.72 0 0 2.72 263.91997 56.61992)">
+        <text x="30.0" y="65.0" fill="var(--button-label-color, #85888b)"
+          font-family="Arial, sans-serif" font-size="3.5" text-anchor="middle"
+          dominant-baseline="central">−</text>
       </g>
     </g>
   </g>
-  <g id="input-2" class="control stock-neutral" data-name="button-3" data-input="button:2" data-label="1" data-bounds="363.78 342.10001 26.38 26.38" data-compact-transform="matrix(0.83397 0 0 0.83397 -249.37983 -248.29948)" data-order="6" data-compact-scale="0.83397">
+  <g id="input-2" class="control stock-neutral" data-name="button-3" data-input="button:2"
+    data-label="1" data-bounds="363.78 342.10001 26.38 26.38"
+    data-compact-transform="matrix(0.83397 0 0 0.83397 -249.37983 -248.29948)" data-order="6"
+    data-compact-scale="0.83397">
     <g class="press-visual">
       <g transform="matrix(1 0 0 1 0 0)">
         <g class="full-geometry">
-          <circle cx="376.97" cy="355.29" r="13.19" fill="#34393e" stroke="rgb(0, 0, 0)" class="vector-outline button-face stock-plastic" stroke-width="3" />
-          <path d="M376.38,351.66a3.73,3.73,0,0,1-.49.29l-.54.28a1.17,1.17,0,0,1-.43.1.89.89,0,0,1-.43-.11,1.15,1.15,0,0,1-.33-.29,1.26,1.26,0,0,1-.22-.39,1.09,1.09,0,0,1-.08-.43,1.06,1.06,0,0,1,.12-.5.88.88,0,0,1,.42-.36l.47-.25.56-.33c.19-.12.37-.24.54-.37a3.71,3.71,0,0,0,.45-.37,1.14,1.14,0,0,1,.41-.24,1.49,1.49,0,0,1,.47-.07,1.41,1.41,0,0,1,.88.31,1.06,1.06,0,0,1,.4.91v10.65a.74.74,0,0,1-.34.67,1.41,1.41,0,0,1-1.51,0,.73.73,0,0,1-.35-.67Z" fill="var(--button-label-color, #85888b)" stroke="none" class="marking hardware-icon" />
+          <circle cx="376.97" cy="355.29" r="13.19" fill="#34393e" stroke="rgb(0, 0, 0)"
+            class="vector-outline button-face stock-plastic" stroke-width="3" />
+          <path
+            d="M376.38,351.66a3.73,3.73,0,0,1-.49.29l-.54.28a1.17,1.17,0,0,1-.43.1.89.89,0,0,1-.43-.11,1.15,1.15,0,0,1-.33-.29,1.26,1.26,0,0,1-.22-.39,1.09,1.09,0,0,1-.08-.43,1.06,1.06,0,0,1,.12-.5.88.88,0,0,1,.42-.36l.47-.25.56-.33c.19-.12.37-.24.54-.37a3.71,3.71,0,0,0,.45-.37,1.14,1.14,0,0,1,.41-.24,1.49,1.49,0,0,1,.47-.07,1.41,1.41,0,0,1,.88.31,1.06,1.06,0,0,1,.4.91v10.65a.74.74,0,0,1-.34.67,1.41,1.41,0,0,1-1.51,0,.73.73,0,0,1-.35-.67Z"
+            fill="var(--button-label-color, #85888b)" stroke="none" class="marking hardware-icon" />
         </g>
       </g>
       <g class="word-label marking full-only-decoration">
-        <text x="376.9700012207031" y="355.2900085449219" fill="var(--button-label-color, #85888b)" font-family="Arial, sans-serif" font-size="10.02440185546875" text-anchor="middle" dominant-baseline="central">1</text>
+        <text x="376.9700012207031" y="355.2900085449219" fill="var(--button-label-color, #85888b)"
+          font-family="Arial, sans-serif" font-size="10.02440185546875" text-anchor="middle"
+          dominant-baseline="central">1</text>
       </g>
-      <g class="compact-geometry word-label marking" transform="matrix(1.88429 0 0 1.88429 262.02855 274.26571)">
-        <text x="61.0" y="43.0" fill="var(--button-label-color, #85888b)" font-family="Arial, sans-serif" font-size="7.000000000000001" text-anchor="middle" dominant-baseline="central">1</text>
+      <g class="compact-geometry word-label marking"
+        transform="matrix(1.88429 0 0 1.88429 262.02855 274.26571)">
+        <text x="61.0" y="43.0" fill="var(--button-label-color, #85888b)"
+          font-family="Arial, sans-serif" font-size="7.000000000000001" text-anchor="middle"
+          dominant-baseline="central">1</text>
       </g>
     </g>
   </g>
-  <g id="input-3" class="control stock-neutral" data-name="button-4" data-input="button:3" data-label="2" data-bounds="363.78 384.04999 26.38 26.38" data-compact-transform="matrix(0.83397 0 0 0.83397 -221.37983 -283.2843)" data-order="7" data-compact-scale="0.83397">
+  <g id="input-3" class="control stock-neutral" data-name="button-4" data-input="button:3"
+    data-label="2" data-bounds="363.78 384.04999 26.38 26.38"
+    data-compact-transform="matrix(0.83397 0 0 0.83397 -221.37983 -283.2843)" data-order="7"
+    data-compact-scale="0.83397">
     <g class="press-visual">
       <g transform="matrix(1 0 0 1 0 0)">
         <g class="full-geometry">
-          <circle cx="376.97" cy="397.24" r="13.19" fill="#34393e" stroke="rgb(0, 0, 0)" class="vector-outline button-face stock-plastic" stroke-width="3" />
-          <path d="M374.42,403.32a1.49,1.49,0,0,1-1.15-.42,1.53,1.53,0,0,1-.39-1.09,3.56,3.56,0,0,1,.48-1.66,4.54,4.54,0,0,1,.78-1.06,8.49,8.49,0,0,1,1-.88,12.32,12.32,0,0,1,1.09-.74l1.06-.62a6.27,6.27,0,0,0,1.3-1,2.08,2.08,0,0,0,.58-1.25,1.35,1.35,0,0,0,0-.22,1.73,1.73,0,0,0-.12-.64,1.67,1.67,0,0,0-.35-.55,1.71,1.71,0,0,0-.59-.38,2.38,2.38,0,0,0-2.21.32,2,2,0,0,0-.63,1.33.79.79,0,0,1-.34.61,1.13,1.13,0,0,1-.64.2,1.2,1.2,0,0,1-.76-.27.87.87,0,0,1-.35-.73v-.1a4.28,4.28,0,0,1,.42-1.45,3.69,3.69,0,0,1,.86-1.13,4,4,0,0,1,1.28-.74,5,5,0,0,1,1.66-.26,4.47,4.47,0,0,1,1.74.31,3.32,3.32,0,0,1,1.24.84,3.37,3.37,0,0,1,.75,1.23,4.44,4.44,0,0,1,.24,1.47v.18a3.45,3.45,0,0,1-.29,1.32,4.46,4.46,0,0,1-.67,1.05,5.49,5.49,0,0,1-.95.84c-.36.24-.74.48-1.13.7s-.69.4-1,.61-.64.42-.92.64a4.64,4.64,0,0,0-.71.68,2.05,2.05,0,0,0-.38.73h5.44a.71.71,0,0,1,.66.34,1.32,1.32,0,0,1,.21.73,1.3,1.3,0,0,1-.21.73.73.73,0,0,1-.66.33Z" fill="var(--button-label-color, #85888b)" stroke="none" class="marking hardware-icon" />
+          <circle cx="376.97" cy="397.24" r="13.19" fill="#34393e" stroke="rgb(0, 0, 0)"
+            class="vector-outline button-face stock-plastic" stroke-width="3" />
+          <path
+            d="M374.42,403.32a1.49,1.49,0,0,1-1.15-.42,1.53,1.53,0,0,1-.39-1.09,3.56,3.56,0,0,1,.48-1.66,4.54,4.54,0,0,1,.78-1.06,8.49,8.49,0,0,1,1-.88,12.32,12.32,0,0,1,1.09-.74l1.06-.62a6.27,6.27,0,0,0,1.3-1,2.08,2.08,0,0,0,.58-1.25,1.35,1.35,0,0,0,0-.22,1.73,1.73,0,0,0-.12-.64,1.67,1.67,0,0,0-.35-.55,1.71,1.71,0,0,0-.59-.38,2.38,2.38,0,0,0-2.21.32,2,2,0,0,0-.63,1.33.79.79,0,0,1-.34.61,1.13,1.13,0,0,1-.64.2,1.2,1.2,0,0,1-.76-.27.87.87,0,0,1-.35-.73v-.1a4.28,4.28,0,0,1,.42-1.45,3.69,3.69,0,0,1,.86-1.13,4,4,0,0,1,1.28-.74,5,5,0,0,1,1.66-.26,4.47,4.47,0,0,1,1.74.31,3.32,3.32,0,0,1,1.24.84,3.37,3.37,0,0,1,.75,1.23,4.44,4.44,0,0,1,.24,1.47v.18a3.45,3.45,0,0,1-.29,1.32,4.46,4.46,0,0,1-.67,1.05,5.49,5.49,0,0,1-.95.84c-.36.24-.74.48-1.13.7s-.69.4-1,.61-.64.42-.92.64a4.64,4.64,0,0,0-.71.68,2.05,2.05,0,0,0-.38.73h5.44a.71.71,0,0,1,.66.34,1.32,1.32,0,0,1,.21.73,1.3,1.3,0,0,1-.21.73.73.73,0,0,1-.66.33Z"
+            fill="var(--button-label-color, #85888b)" stroke="none" class="marking hardware-icon" />
         </g>
       </g>
       <g class="word-label marking full-only-decoration">
-        <text x="376.9700012207031" y="397.239990234375" fill="var(--button-label-color, #85888b)" font-family="Arial, sans-serif" font-size="10.02440185546875" text-anchor="middle" dominant-baseline="central">2</text>
+        <text x="376.9700012207031" y="397.239990234375" fill="var(--button-label-color, #85888b)"
+          font-family="Arial, sans-serif" font-size="10.02440185546875" text-anchor="middle"
+          dominant-baseline="central">2</text>
       </g>
-      <g class="compact-geometry word-label marking" transform="matrix(1.88429 0 0 1.88429 226.22712 316.21569)">
-        <text x="80.0" y="43.0" fill="var(--button-label-color, #85888b)" font-family="Arial, sans-serif" font-size="7.000000000000001" text-anchor="middle" dominant-baseline="central">2</text>
+      <g class="compact-geometry word-label marking"
+        transform="matrix(1.88429 0 0 1.88429 226.22712 316.21569)">
+        <text x="80.0" y="43.0" fill="var(--button-label-color, #85888b)"
+          font-family="Arial, sans-serif" font-size="7.000000000000001" text-anchor="middle"
+          dominant-baseline="central">2</text>
       </g>
     </g>
   </g>
-  <g id="input-12" class="control stock-neutral" data-name="button-dpad-top" data-input="button:12" data-label="↑" data-bounds="349.87 54.925 54.91 54.90997" data-compact-transform="matrix(0.80116 0 0 0.80116 -277.29981 -35.00001)" data-order="912" data-compact-scale="0.80116">
+  <g id="input-12" class="control stock-neutral" data-name="button-dpad-top" data-input="button:12"
+    data-label="↑" data-bounds="349.87 54.925 54.91 54.90997"
+    data-compact-transform="matrix(0.80116 0 0 0.80116 -277.29981 -35.00001)" data-order="912"
+    data-compact-scale="0.80116">
     <g class="press-visual">
       <g transform="matrix(1 0 0 1 0 0)">
         <g class="full-geometry">
           <g clip-path="url(#dpad-12)">
-            <path d="M372,54.93h5.325v-0.005h5.32999c1.43366,0.00548 2.59452,1.16634 2.6,2.6v14.35c0,1.43042 1.15958,2.59 2.59,2.59h14.34c1.43042,0 2.59,1.15958 2.59,2.59v5.325l0.005,0v5.32999c-0.00548,1.43366 -1.16634,2.59452 -2.6,2.6h-14.35c-1.43042,0 -2.59,1.15958 -2.59,2.59v14.34c0,1.43042 -1.15958,2.59 -2.59,2.59l-5.325,0v0.005h-5.32999c-1.43366,-0.00548 -2.59452,-1.16634 -2.6,-2.6v-14.35c0,-1.43042 -1.15958,-2.59 -2.59,-2.59h-14.34c-1.43042,0 -2.59,-1.15958 -2.59,-2.59v-5.325h-0.005v-5.32999c0.00548,-1.43366 1.16634,-2.59452 2.6,-2.6h14.35c1.43042,0 2.59,-1.15958 2.59,-2.59v-14.34c0,-1.43042 1.15958,-2.59 2.59,-2.59z" fill="#34393e" stroke="rgb(0, 0, 0)" class="vector-outline button-face stock-plastic" stroke-width="3" />
-            <path d="M377.33,72.32a1,1,0,0,1-1-1V60.92a1,1,0,0,1,1.91,0V71.36A1,1,0,0,1,377.33,72.32Z" fill="#8c9398" stroke="none" class="direction-marking" />
-            <path d="M377.33,104.79a1,1,0,0,1-1-1V93.4a1,1,0,1,1,1.91,0v10.44A1,1,0,0,1,377.33,104.79Z" fill="#8c9398" stroke="none" class="direction-marking" />
-            <path d="M398.78,83.43H388.34a1,1,0,0,1,0-1.91h10.44a1,1,0,1,1,0,1.91Z" fill="#8c9398" stroke="none" class="direction-marking" />
-            <path d="M366.31,83.43H355.87a1,1,0,1,1,0-1.91h10.44a1,1,0,0,1,0,1.91Z" fill="#8c9398" stroke="none" class="direction-marking" />
+            <path
+              d="M372,54.93h5.325v-0.005h5.32999c1.43366,0.00548 2.59452,1.16634 2.6,2.6v14.35c0,1.43042 1.15958,2.59 2.59,2.59h14.34c1.43042,0 2.59,1.15958 2.59,2.59v5.325l0.005,0v5.32999c-0.00548,1.43366 -1.16634,2.59452 -2.6,2.6h-14.35c-1.43042,0 -2.59,1.15958 -2.59,2.59v14.34c0,1.43042 -1.15958,2.59 -2.59,2.59l-5.325,0v0.005h-5.32999c-1.43366,-0.00548 -2.59452,-1.16634 -2.6,-2.6v-14.35c0,-1.43042 -1.15958,-2.59 -2.59,-2.59h-14.34c-1.43042,0 -2.59,-1.15958 -2.59,-2.59v-5.325h-0.005v-5.32999c0.00548,-1.43366 1.16634,-2.59452 2.6,-2.6h14.35c1.43042,0 2.59,-1.15958 2.59,-2.59v-14.34c0,-1.43042 1.15958,-2.59 2.59,-2.59z"
+              fill="#34393e" stroke="rgb(0, 0, 0)" class="vector-outline button-face stock-plastic"
+              stroke-width="3" />
+            <path
+              d="M377.33,72.32a1,1,0,0,1-1-1V60.92a1,1,0,0,1,1.91,0V71.36A1,1,0,0,1,377.33,72.32Z"
+              fill="#8c9398" stroke="none" class="direction-marking" />
+            <path
+              d="M377.33,104.79a1,1,0,0,1-1-1V93.4a1,1,0,1,1,1.91,0v10.44A1,1,0,0,1,377.33,104.79Z"
+              fill="#8c9398" stroke="none" class="direction-marking" />
+            <path d="M398.78,83.43H388.34a1,1,0,0,1,0-1.91h10.44a1,1,0,1,1,0,1.91Z" fill="#8c9398"
+              stroke="none" class="direction-marking" />
+            <path d="M366.31,83.43H355.87a1,1,0,1,1,0-1.91h10.44a1,1,0,0,1,0,1.91Z" fill="#8c9398"
+              stroke="none" class="direction-marking" />
           </g>
         </g>
       </g>
     </g>
   </g>
-  <g id="input-13" class="control stock-neutral" data-name="button-dpad-bottom" data-input="button:13" data-label="↓" data-bounds="349.87 54.925 54.91 54.90997" data-compact-transform="matrix(0.80116 0 0 0.80116 -277.29981 -35.00001)" data-order="913" data-compact-scale="0.80116">
+  <g id="input-13" class="control stock-neutral" data-name="button-dpad-bottom"
+    data-input="button:13" data-label="↓" data-bounds="349.87 54.925 54.91 54.90997"
+    data-compact-transform="matrix(0.80116 0 0 0.80116 -277.29981 -35.00001)" data-order="913"
+    data-compact-scale="0.80116">
     <g class="press-visual">
       <g transform="matrix(1 0 0 1 0 0)">
         <g class="full-geometry">
           <g clip-path="url(#dpad-13)">
-            <path d="M372,54.93h5.325v-0.005h5.32999c1.43366,0.00548 2.59452,1.16634 2.6,2.6v14.35c0,1.43042 1.15958,2.59 2.59,2.59h14.34c1.43042,0 2.59,1.15958 2.59,2.59v5.325l0.005,0v5.32999c-0.00548,1.43366 -1.16634,2.59452 -2.6,2.6h-14.35c-1.43042,0 -2.59,1.15958 -2.59,2.59v14.34c0,1.43042 -1.15958,2.59 -2.59,2.59l-5.325,0v0.005h-5.32999c-1.43366,-0.00548 -2.59452,-1.16634 -2.6,-2.6v-14.35c0,-1.43042 -1.15958,-2.59 -2.59,-2.59h-14.34c-1.43042,0 -2.59,-1.15958 -2.59,-2.59v-5.325h-0.005v-5.32999c0.00548,-1.43366 1.16634,-2.59452 2.6,-2.6h14.35c1.43042,0 2.59,-1.15958 2.59,-2.59v-14.34c0,-1.43042 1.15958,-2.59 2.59,-2.59z" fill="#34393e" stroke="rgb(0, 0, 0)" class="vector-outline button-face stock-plastic" stroke-width="3" />
-            <path d="M377.33,72.32a1,1,0,0,1-1-1V60.92a1,1,0,0,1,1.91,0V71.36A1,1,0,0,1,377.33,72.32Z" fill="#8c9398" stroke="none" class="direction-marking" />
-            <path d="M377.33,104.79a1,1,0,0,1-1-1V93.4a1,1,0,1,1,1.91,0v10.44A1,1,0,0,1,377.33,104.79Z" fill="#8c9398" stroke="none" class="direction-marking" />
-            <path d="M398.78,83.43H388.34a1,1,0,0,1,0-1.91h10.44a1,1,0,1,1,0,1.91Z" fill="#8c9398" stroke="none" class="direction-marking" />
-            <path d="M366.31,83.43H355.87a1,1,0,1,1,0-1.91h10.44a1,1,0,0,1,0,1.91Z" fill="#8c9398" stroke="none" class="direction-marking" />
+            <path
+              d="M372,54.93h5.325v-0.005h5.32999c1.43366,0.00548 2.59452,1.16634 2.6,2.6v14.35c0,1.43042 1.15958,2.59 2.59,2.59h14.34c1.43042,0 2.59,1.15958 2.59,2.59v5.325l0.005,0v5.32999c-0.00548,1.43366 -1.16634,2.59452 -2.6,2.6h-14.35c-1.43042,0 -2.59,1.15958 -2.59,2.59v14.34c0,1.43042 -1.15958,2.59 -2.59,2.59l-5.325,0v0.005h-5.32999c-1.43366,-0.00548 -2.59452,-1.16634 -2.6,-2.6v-14.35c0,-1.43042 -1.15958,-2.59 -2.59,-2.59h-14.34c-1.43042,0 -2.59,-1.15958 -2.59,-2.59v-5.325h-0.005v-5.32999c0.00548,-1.43366 1.16634,-2.59452 2.6,-2.6h14.35c1.43042,0 2.59,-1.15958 2.59,-2.59v-14.34c0,-1.43042 1.15958,-2.59 2.59,-2.59z"
+              fill="#34393e" stroke="rgb(0, 0, 0)" class="vector-outline button-face stock-plastic"
+              stroke-width="3" />
+            <path
+              d="M377.33,72.32a1,1,0,0,1-1-1V60.92a1,1,0,0,1,1.91,0V71.36A1,1,0,0,1,377.33,72.32Z"
+              fill="#8c9398" stroke="none" class="direction-marking" />
+            <path
+              d="M377.33,104.79a1,1,0,0,1-1-1V93.4a1,1,0,1,1,1.91,0v10.44A1,1,0,0,1,377.33,104.79Z"
+              fill="#8c9398" stroke="none" class="direction-marking" />
+            <path d="M398.78,83.43H388.34a1,1,0,0,1,0-1.91h10.44a1,1,0,1,1,0,1.91Z" fill="#8c9398"
+              stroke="none" class="direction-marking" />
+            <path d="M366.31,83.43H355.87a1,1,0,1,1,0-1.91h10.44a1,1,0,0,1,0,1.91Z" fill="#8c9398"
+              stroke="none" class="direction-marking" />
           </g>
         </g>
       </g>
     </g>
   </g>
-  <g id="input-14" class="control stock-neutral" data-name="button-dpad-left" data-input="button:14" data-label="←" data-bounds="349.87 54.925 54.91 54.90997" data-compact-transform="matrix(0.80116 0 0 0.80116 -277.29981 -35.00001)" data-order="914" data-compact-scale="0.80116">
+  <g id="input-14" class="control stock-neutral" data-name="button-dpad-left" data-input="button:14"
+    data-label="←" data-bounds="349.87 54.925 54.91 54.90997"
+    data-compact-transform="matrix(0.80116 0 0 0.80116 -277.29981 -35.00001)" data-order="914"
+    data-compact-scale="0.80116">
     <g class="press-visual">
       <g transform="matrix(1 0 0 1 0 0)">
         <g class="full-geometry">
           <g clip-path="url(#dpad-14)">
-            <path d="M372,54.93h5.325v-0.005h5.32999c1.43366,0.00548 2.59452,1.16634 2.6,2.6v14.35c0,1.43042 1.15958,2.59 2.59,2.59h14.34c1.43042,0 2.59,1.15958 2.59,2.59v5.325l0.005,0v5.32999c-0.00548,1.43366 -1.16634,2.59452 -2.6,2.6h-14.35c-1.43042,0 -2.59,1.15958 -2.59,2.59v14.34c0,1.43042 -1.15958,2.59 -2.59,2.59l-5.325,0v0.005h-5.32999c-1.43366,-0.00548 -2.59452,-1.16634 -2.6,-2.6v-14.35c0,-1.43042 -1.15958,-2.59 -2.59,-2.59h-14.34c-1.43042,0 -2.59,-1.15958 -2.59,-2.59v-5.325h-0.005v-5.32999c0.00548,-1.43366 1.16634,-2.59452 2.6,-2.6h14.35c1.43042,0 2.59,-1.15958 2.59,-2.59v-14.34c0,-1.43042 1.15958,-2.59 2.59,-2.59z" fill="#34393e" stroke="rgb(0, 0, 0)" class="vector-outline button-face stock-plastic" stroke-width="3" />
-            <path d="M377.33,72.32a1,1,0,0,1-1-1V60.92a1,1,0,0,1,1.91,0V71.36A1,1,0,0,1,377.33,72.32Z" fill="#8c9398" stroke="none" class="direction-marking" />
-            <path d="M377.33,104.79a1,1,0,0,1-1-1V93.4a1,1,0,1,1,1.91,0v10.44A1,1,0,0,1,377.33,104.79Z" fill="#8c9398" stroke="none" class="direction-marking" />
-            <path d="M398.78,83.43H388.34a1,1,0,0,1,0-1.91h10.44a1,1,0,1,1,0,1.91Z" fill="#8c9398" stroke="none" class="direction-marking" />
-            <path d="M366.31,83.43H355.87a1,1,0,1,1,0-1.91h10.44a1,1,0,0,1,0,1.91Z" fill="#8c9398" stroke="none" class="direction-marking" />
+            <path
+              d="M372,54.93h5.325v-0.005h5.32999c1.43366,0.00548 2.59452,1.16634 2.6,2.6v14.35c0,1.43042 1.15958,2.59 2.59,2.59h14.34c1.43042,0 2.59,1.15958 2.59,2.59v5.325l0.005,0v5.32999c-0.00548,1.43366 -1.16634,2.59452 -2.6,2.6h-14.35c-1.43042,0 -2.59,1.15958 -2.59,2.59v14.34c0,1.43042 -1.15958,2.59 -2.59,2.59l-5.325,0v0.005h-5.32999c-1.43366,-0.00548 -2.59452,-1.16634 -2.6,-2.6v-14.35c0,-1.43042 -1.15958,-2.59 -2.59,-2.59h-14.34c-1.43042,0 -2.59,-1.15958 -2.59,-2.59v-5.325h-0.005v-5.32999c0.00548,-1.43366 1.16634,-2.59452 2.6,-2.6h14.35c1.43042,0 2.59,-1.15958 2.59,-2.59v-14.34c0,-1.43042 1.15958,-2.59 2.59,-2.59z"
+              fill="#34393e" stroke="rgb(0, 0, 0)" class="vector-outline button-face stock-plastic"
+              stroke-width="3" />
+            <path
+              d="M377.33,72.32a1,1,0,0,1-1-1V60.92a1,1,0,0,1,1.91,0V71.36A1,1,0,0,1,377.33,72.32Z"
+              fill="#8c9398" stroke="none" class="direction-marking" />
+            <path
+              d="M377.33,104.79a1,1,0,0,1-1-1V93.4a1,1,0,1,1,1.91,0v10.44A1,1,0,0,1,377.33,104.79Z"
+              fill="#8c9398" stroke="none" class="direction-marking" />
+            <path d="M398.78,83.43H388.34a1,1,0,0,1,0-1.91h10.44a1,1,0,1,1,0,1.91Z" fill="#8c9398"
+              stroke="none" class="direction-marking" />
+            <path d="M366.31,83.43H355.87a1,1,0,1,1,0-1.91h10.44a1,1,0,0,1,0,1.91Z" fill="#8c9398"
+              stroke="none" class="direction-marking" />
           </g>
         </g>
       </g>
     </g>
   </g>
-  <g id="input-15" class="control stock-neutral" data-name="button-dpad-right" data-input="button:15" data-label="→" data-bounds="349.87 54.925 54.91 54.90997" data-compact-transform="matrix(0.80116 0 0 0.80116 -277.29981 -35.00001)" data-order="915" data-compact-scale="0.80116">
+  <g id="input-15" class="control stock-neutral" data-name="button-dpad-right"
+    data-input="button:15" data-label="→" data-bounds="349.87 54.925 54.91 54.90997"
+    data-compact-transform="matrix(0.80116 0 0 0.80116 -277.29981 -35.00001)" data-order="915"
+    data-compact-scale="0.80116">
     <g class="press-visual">
       <g transform="matrix(1 0 0 1 0 0)">
         <g class="full-geometry">
           <g clip-path="url(#dpad-15)">
-            <path d="M372,54.93h5.325v-0.005h5.32999c1.43366,0.00548 2.59452,1.16634 2.6,2.6v14.35c0,1.43042 1.15958,2.59 2.59,2.59h14.34c1.43042,0 2.59,1.15958 2.59,2.59v5.325l0.005,0v5.32999c-0.00548,1.43366 -1.16634,2.59452 -2.6,2.6h-14.35c-1.43042,0 -2.59,1.15958 -2.59,2.59v14.34c0,1.43042 -1.15958,2.59 -2.59,2.59l-5.325,0v0.005h-5.32999c-1.43366,-0.00548 -2.59452,-1.16634 -2.6,-2.6v-14.35c0,-1.43042 -1.15958,-2.59 -2.59,-2.59h-14.34c-1.43042,0 -2.59,-1.15958 -2.59,-2.59v-5.325h-0.005v-5.32999c0.00548,-1.43366 1.16634,-2.59452 2.6,-2.6h14.35c1.43042,0 2.59,-1.15958 2.59,-2.59v-14.34c0,-1.43042 1.15958,-2.59 2.59,-2.59z" fill="#34393e" stroke="rgb(0, 0, 0)" class="vector-outline button-face stock-plastic" stroke-width="3" />
-            <path d="M377.33,72.32a1,1,0,0,1-1-1V60.92a1,1,0,0,1,1.91,0V71.36A1,1,0,0,1,377.33,72.32Z" fill="#8c9398" stroke="none" class="direction-marking" />
-            <path d="M377.33,104.79a1,1,0,0,1-1-1V93.4a1,1,0,1,1,1.91,0v10.44A1,1,0,0,1,377.33,104.79Z" fill="#8c9398" stroke="none" class="direction-marking" />
-            <path d="M398.78,83.43H388.34a1,1,0,0,1,0-1.91h10.44a1,1,0,1,1,0,1.91Z" fill="#8c9398" stroke="none" class="direction-marking" />
-            <path d="M366.31,83.43H355.87a1,1,0,1,1,0-1.91h10.44a1,1,0,0,1,0,1.91Z" fill="#8c9398" stroke="none" class="direction-marking" />
+            <path
+              d="M372,54.93h5.325v-0.005h5.32999c1.43366,0.00548 2.59452,1.16634 2.6,2.6v14.35c0,1.43042 1.15958,2.59 2.59,2.59h14.34c1.43042,0 2.59,1.15958 2.59,2.59v5.325l0.005,0v5.32999c-0.00548,1.43366 -1.16634,2.59452 -2.6,2.6h-14.35c-1.43042,0 -2.59,1.15958 -2.59,2.59v14.34c0,1.43042 -1.15958,2.59 -2.59,2.59l-5.325,0v0.005h-5.32999c-1.43366,-0.00548 -2.59452,-1.16634 -2.6,-2.6v-14.35c0,-1.43042 -1.15958,-2.59 -2.59,-2.59h-14.34c-1.43042,0 -2.59,-1.15958 -2.59,-2.59v-5.325h-0.005v-5.32999c0.00548,-1.43366 1.16634,-2.59452 2.6,-2.6h14.35c1.43042,0 2.59,-1.15958 2.59,-2.59v-14.34c0,-1.43042 1.15958,-2.59 2.59,-2.59z"
+              fill="#34393e" stroke="rgb(0, 0, 0)" class="vector-outline button-face stock-plastic"
+              stroke-width="3" />
+            <path
+              d="M377.33,72.32a1,1,0,0,1-1-1V60.92a1,1,0,0,1,1.91,0V71.36A1,1,0,0,1,377.33,72.32Z"
+              fill="#8c9398" stroke="none" class="direction-marking" />
+            <path
+              d="M377.33,104.79a1,1,0,0,1-1-1V93.4a1,1,0,1,1,1.91,0v10.44A1,1,0,0,1,377.33,104.79Z"
+              fill="#8c9398" stroke="none" class="direction-marking" />
+            <path d="M398.78,83.43H388.34a1,1,0,0,1,0-1.91h10.44a1,1,0,1,1,0,1.91Z" fill="#8c9398"
+              stroke="none" class="direction-marking" />
+            <path d="M366.31,83.43H355.87a1,1,0,1,1,0-1.91h10.44a1,1,0,0,1,0,1.91Z" fill="#8c9398"
+              stroke="none" class="direction-marking" />
           </g>
         </g>
       </g>
     </g>
   </g>
-  <g id="input-1" class="control stock-neutral" data-name="button-2" data-input="button:1" data-label="B" data-bounds="445 162 42 48" data-compact-transform="matrix(0.47619 0 0 0.47619 -128.90476 -71.57143)" data-order="-19" data-reconstructed="yes" data-compact-scale="0.47619">
+  <g id="input-1" class="control stock-neutral" data-name="button-2" data-input="button:1"
+    data-label="B" data-bounds="445 162 42 48"
+    data-compact-transform="matrix(0.47619 0 0 0.47619 -128.90476 -71.57143)" data-order="-19"
+    data-reconstructed="yes" data-compact-scale="0.47619">
     <g class="press-visual">
       <g class="full-geometry shoulder-geometry">
-        <rect x="445" y="162" width="42" height="48" rx="5" fill="#34393e" class="button-face vector-outline stock-plastic" stroke="#111111" stroke-width="1.8" />
-        <rect x="450" y="167" width="32" height="38" rx="3" fill="none" class="vector-outline" stroke="#111111" stroke-width="1.8" />
+        <rect x="445" y="162" width="42" height="48" rx="5" fill="#34393e"
+          class="button-face vector-outline stock-plastic" stroke="#111111" stroke-width="1.8" />
+        <rect x="450" y="167" width="32" height="38" rx="3" fill="none" class="vector-outline"
+          stroke="#111111" stroke-width="1.8" />
         <g class="hardware-icon marking ">
-          <path d="M0 10V0H4Q8 0 8 2.5Q8 5 4 5H0M4 5Q8 5 8 7.5Q8 10 4 10H0" fill="none" stroke="var(--button-label-color, #85888b)" stroke-width="1.25" stroke-linejoin="round" stroke-linecap="round" transform="matrix(1.8 0 0 1.8 458.8 177)" />
+          <path d="M0 10V0H4Q8 0 8 2.5Q8 5 4 5H0M4 5Q8 5 8 7.5Q8 10 4 10H0" fill="none"
+            stroke="var(--button-label-color, #85888b)" stroke-width="1.25" stroke-linejoin="round"
+            stroke-linecap="round" transform="matrix(1.8 0 0 1.8 458.8 177)" />
         </g>
       </g>
     </g>
-    <text x="466.0" y="183.6" fill="var(--button-label-color, #85888b)" stroke-width="0.3" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" dominant-baseline="central" class="word-label marking">B</text>
+    <text x="466.0" y="183.6" fill="var(--button-label-color, #85888b)" stroke-width="0.3"
+      font-family="Arial, sans-serif" font-size="12" text-anchor="middle"
+      dominant-baseline="central" class="word-label marking">B</text>
   </g>
   <style data-variant-id="white" data-variant-name="White">
     [data-controller="wii"][data-variant="white"] .shell-base { fill: #e2e4e2; }

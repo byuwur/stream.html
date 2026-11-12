@@ -26,9 +26,7 @@ async function initControllerResource() {
     const message = document.createElement("p");
     message.setAttribute("role", "alert");
     message.textContent =
-      location.protocol === "file:"
-        ? "Controller SVG resources require HTTP/HTTPS. Open this overlay through a local web server or its hosted URL."
-        : "Unable to load controller resources. Check the controller SVG files, then reload.";
+      location.protocol === "file:" ? "Controller SVG resources require HTTP/HTTPS. Open this overlay through a local web server or its hosted URL." : "Unable to load controller resources. Check the controller SVG files, then reload.";
     document.body.appendChild(message);
     return;
   }
@@ -81,26 +79,172 @@ async function initControllerResource() {
       },
       layout: { type: "select", default: "full", label: "Layout", section: "Appearance", options: { full: "Full controller", minimal: "Minimal / speedrun" } },
       buttonLabels: { type: "select", default: "icons", label: "Button labels", section: "Appearance", options: { icons: "Hardware symbols", letters: "Button letters", none: "Hidden" } },
-      variant: { type: "select", default: "original", label: "Color variant", section: "Appearance", options: { original: "Original / base", ...Object.assign({}, ...Object.values(byControllerArtwork.skins).map((skin) => skin.variants)) }, when: (values) => values.customColors !== "yes" && Object.keys(byControllerArtwork.skins[values.skin]?.variants || {}).length > 0, retainInactive: true },
-      customColors: { type: "switch", default: "no", label: "Custom colors", section: "Appearance", description: "Off uses the SVG's stock palette, outlines, and guide symbol.", checkedValue: "yes", uncheckedValue: "no", options: { yes: "On", no: "Off" } },
-      controllerColor: { type: "color", default: "#000000", label: "Controller color", section: "Appearance", description: "One body color with flat highlights and shadows; also supplies optional control and outline tints.", maxlength: 9, when: (values) => values.customColors === "yes" && (byControllerArtwork.skins[values.skin]?.shell || values.tintControls === "yes" || values.tintOutlines === "yes"), retainInactive: true },
-      tintControls: { type: "switch", default: "no", label: "Tint controls", section: "Appearance", description: "Blend button plastics with the controller color. Rubber sticks, shoulders, and mechanical parts retain their hardware colors.", checkedValue: "yes", uncheckedValue: "no", options: { yes: "Yes", no: "No" }, when: ["customColors", "yes"], retainInactive: true },
-      tintOutlines: { type: "switch", default: "no", label: "Tint outlines", section: "Appearance", subsection: "Vector details", checkedValue: "yes", uncheckedValue: "no", options: { yes: "On", no: "Off" }, when: ["customColors", "yes"], retainInactive: true },
-      customOutlineColor: { type: "switch", default: "no", label: "Custom outline color", section: "Appearance", subsection: "Vector details", checkedValue: "yes", uncheckedValue: "no", options: { yes: "On", no: "Off" }, when: ["tintOutlines", "no"], retainInactive: true },
+      variant: {
+        type: "select",
+        default: "original",
+        label: "Color variant",
+        section: "Appearance",
+        options: { original: "Original / base", ...Object.assign({}, ...Object.values(byControllerArtwork.skins).map((skin) => skin.variants)) },
+        when: (values) => values.customColors !== "yes" && Object.keys(byControllerArtwork.skins[values.skin]?.variants || {}).length > 0,
+        retainInactive: true
+      },
+      customColors: {
+        type: "switch",
+        default: "no",
+        label: "Custom colors",
+        section: "Appearance",
+        description: "Off uses the SVG's stock palette, outlines, and guide symbol.",
+        checkedValue: "yes",
+        uncheckedValue: "no",
+        options: { yes: "On", no: "Off" }
+      },
+      controllerColor: {
+        type: "color",
+        default: "#000000",
+        label: "Controller color",
+        section: "Appearance",
+        description: "One body color with flat highlights and shadows; also supplies optional control and outline tints.",
+        maxlength: 9,
+        when: (values) => values.customColors === "yes" && (byControllerArtwork.skins[values.skin]?.shell || values.tintControls === "yes" || values.tintOutlines === "yes"),
+        retainInactive: true
+      },
+      tintControls: {
+        type: "switch",
+        default: "no",
+        label: "Tint controls",
+        section: "Appearance",
+        description: "Blend button plastics with the controller color. Rubber sticks, shoulders, and mechanical parts retain their hardware colors.",
+        checkedValue: "yes",
+        uncheckedValue: "no",
+        options: { yes: "Yes", no: "No" },
+        when: ["customColors", "yes"],
+        retainInactive: true
+      },
+      tintOutlines: {
+        type: "switch",
+        default: "no",
+        label: "Tint outlines",
+        section: "Appearance",
+        subsection: "Vector details",
+        checkedValue: "yes",
+        uncheckedValue: "no",
+        options: { yes: "On", no: "Off" },
+        when: ["customColors", "yes"],
+        retainInactive: true
+      },
+      customOutlineColor: {
+        type: "switch",
+        default: "no",
+        label: "Custom outline color",
+        section: "Appearance",
+        subsection: "Vector details",
+        checkedValue: "yes",
+        uncheckedValue: "no",
+        options: { yes: "On", no: "Off" },
+        when: ["tintOutlines", "no"],
+        retainInactive: true
+      },
       outlineColor: { type: "color", default: "#111111", label: "Outline color", section: "Appearance", subsection: "Vector details", maxlength: 9, when: ["customOutlineColor", "yes"], retainInactive: true },
-      outlineWidth: { type: "number", default: 1, label: "Outline thickness (×)", section: "Appearance", subsection: "Vector details", min: 0.5, max: 2, step: 0.05, description: "Multiplies each structural stroke's own SVG width. Filled-path borders and hardware symbols retain their proportions.", when: ["customColors", "yes"], retainInactive: true },
-      highlightIntensity: { type: "number", default: 12, label: "Highlights (%)", section: "Appearance", subsection: "Vector details", min: 0, max: 100, when: (values) => values.customColors === "yes" && byControllerArtwork.skins[values.skin]?.highlights, retainInactive: true },
-      shadowIntensity: { type: "number", default: 16, label: "Shadows (%)", section: "Appearance", subsection: "Vector details", min: 0, max: 100, when: (values) => values.customColors === "yes" && byControllerArtwork.skins[values.skin]?.shadows, retainInactive: true },
-      customGuide: { type: "switch", default: "no", label: "Custom guide button", section: "Appearance", subsection: "Guide button", checkedValue: "yes", uncheckedValue: "no", options: { yes: "On", no: "Off" }, when: (values) => values.customColors === "yes" && byControllerArtwork.skins[values.skin]?.guide, retainInactive: true },
+      outlineWidth: {
+        type: "number",
+        default: 1,
+        label: "Outline thickness (×)",
+        section: "Appearance",
+        subsection: "Vector details",
+        min: 0.5,
+        max: 2,
+        step: 0.05,
+        description: "Multiplies each structural stroke's own SVG width. Filled-path borders and hardware symbols retain their proportions.",
+        when: ["customColors", "yes"],
+        retainInactive: true
+      },
+      highlightIntensity: {
+        type: "number",
+        default: 12,
+        label: "Highlights (%)",
+        section: "Appearance",
+        subsection: "Vector details",
+        min: 0,
+        max: 100,
+        when: (values) => values.customColors === "yes" && byControllerArtwork.skins[values.skin]?.highlights,
+        retainInactive: true
+      },
+      shadowIntensity: {
+        type: "number",
+        default: 16,
+        label: "Shadows (%)",
+        section: "Appearance",
+        subsection: "Vector details",
+        min: 0,
+        max: 100,
+        when: (values) => values.customColors === "yes" && byControllerArtwork.skins[values.skin]?.shadows,
+        retainInactive: true
+      },
+      customGuide: {
+        type: "switch",
+        default: "no",
+        label: "Custom guide button",
+        section: "Appearance",
+        subsection: "Guide button",
+        checkedValue: "yes",
+        uncheckedValue: "no",
+        options: { yes: "On", no: "Off" },
+        when: (values) => values.customColors === "yes" && byControllerArtwork.skins[values.skin]?.guide,
+        retainInactive: true
+      },
       guideSource: { type: "select", default: "symbol", label: "Logo source", section: "Appearance", subsection: "Guide button", options: { symbol: "Symbol", image: "Image URL" }, when: ["customGuide", "yes"], retainInactive: true },
-      guideSymbol: { type: "select", default: "original", label: "Symbol", section: "Appearance", subsection: "Guide button", options: { original: "Original hardware", xbox: "Xbox", playstation: "PlayStation", steam: "Steam", circle: "Circle", diamond: "Diamond", star: "Star" }, when: ["guideSource", "symbol"], retainInactive: true },
-      guideImage: { type: "text", default: "", label: "Image URL", section: "Appearance", subsection: "Guide button", description: "HTTPS images, including animated GIFs. Failed images retain the original symbol.", maxlength: 2048, validate: (value) => byStream.safeImage(value) ? value : null, when: ["guideSource", "image"], retainInactive: true },
-      guideColorMode: { type: "select", default: "original", label: "Logo color", section: "Appearance", subsection: "Guide button", options: { original: "Original colors", custom: "Custom / monochrome" }, when: ["customGuide", "yes"], retainInactive: true },
+      guideSymbol: {
+        type: "select",
+        default: "original",
+        label: "Symbol",
+        section: "Appearance",
+        subsection: "Guide button",
+        options: { original: "Original hardware", xbox: "Xbox", playstation: "PlayStation", steam: "Steam", circle: "Circle", diamond: "Diamond", star: "Star" },
+        when: ["guideSource", "symbol"],
+        retainInactive: true
+      },
+      guideImage: {
+        type: "text",
+        default: "",
+        label: "Image URL",
+        section: "Appearance",
+        subsection: "Guide button",
+        description: "HTTPS images, including animated GIFs. Failed images retain the original symbol.",
+        maxlength: 2048,
+        validate: (value) => (byStream.safeImage(value) ? value : null),
+        when: ["guideSource", "image"],
+        retainInactive: true
+      },
+      guideColorMode: {
+        type: "select",
+        default: "original",
+        label: "Logo color",
+        section: "Appearance",
+        subsection: "Guide button",
+        options: { original: "Original colors", custom: "Custom / monochrome" },
+        when: ["customGuide", "yes"],
+        retainInactive: true
+      },
       guideColor: { type: "color", default: "#ffffff", label: "Custom logo color", section: "Appearance", subsection: "Guide button", maxlength: 9, when: ["guideColorMode", "custom"], retainInactive: true },
       guideScale: { type: "number", default: 100, label: "Logo scale (%)", section: "Appearance", subsection: "Guide button", min: 50, max: 150, step: 5, when: ["customGuide", "yes"], retainInactive: true },
       guideOffsetX: { type: "number", default: 0, label: "Logo position X (%)", section: "Appearance", subsection: "Guide button", min: -25, max: 25, step: 1, when: ["customGuide", "yes"], retainInactive: true },
       guideOffsetY: { type: "number", default: 0, label: "Logo position Y (%)", section: "Appearance", subsection: "Guide button", min: -25, max: 25, step: 1, when: ["customGuide", "yes"], retainInactive: true },
-      screenOpacity: { type: "number", default: 0, label: "Screen opacity (%)", section: "Appearance", subsection: "Screen opening", description: "Set to 0 for a clear opening over your OBS capture. The bezel stays visible.", min: 0, max: 100, when: ["skin", ...Object.values(byControllerArtwork.skins).filter((skin) => skin.screen).map((skin) => skin.id)] },
+      screenOpacity: {
+        type: "number",
+        default: 0,
+        label: "Screen opacity (%)",
+        section: "Appearance",
+        subsection: "Screen opening",
+        description: "Set to 0 for a clear opening over your OBS capture. The bezel stays visible.",
+        min: 0,
+        max: 100,
+        when: [
+          "skin",
+          ...Object.values(byControllerArtwork.skins)
+            .filter((skin) => skin.screen)
+            .map((skin) => skin.id)
+        ]
+      },
       deadzone: {
         type: "number",
         default: 5,
@@ -455,8 +599,8 @@ async function initControllerResource() {
       const active = Math.hypot(horizontal, vertical) >= this.ANALOGUE_STICK_THRESHOLD;
       const travel = this.STICK_OFFSET * Number(stick.dataset.travelScale || 1) * (stick.dataset.layout === "minimal" ? Number(stick.dataset.compactScale || 1) : 1);
       const magnitude = Math.max(1, Math.hypot(horizontal, vertical));
-      const x = active ? horizontal / magnitude * travel : 0;
-      const y = active ? vertical / magnitude * travel : 0;
+      const x = active ? (horizontal / magnitude) * travel : 0;
+      const y = active ? (vertical / magnitude) * travel : 0;
       const wheel = this.controls.get(`${name}-wheel`)?.node;
       const rotation = horizontal * this.ROTATE_BOUNDARY;
       if (wheel && control.rotation !== rotation) {
@@ -636,14 +780,18 @@ async function initControllerResource() {
       const shaft = active.querySelector(`.fixed-layer[data-for="${node.dataset.input}"] .stick-shaft`);
       tester.controls.set(node.dataset.name, { node, shaft, fillArtwork, fillBounds: triggerBounds(node, fillArtwork), fill: clip ? node.querySelector(`[id="${clip}"] .trigger-fill-rect`) : null });
     }
-    active.addEventListener("controller-layout", () => {
-      for (const control of tester.controls.values()) {
-        control.pressure = undefined;
-        control.x = control.y = undefined;
-        if (control.fillArtwork) control.fillBounds = triggerBounds(control.node, control.fillArtwork);
-      }
-      fitController();
-    }, { signal: controllerEvents.signal });
+    active.addEventListener(
+      "controller-layout",
+      () => {
+        for (const control of tester.controls.values()) {
+          control.pressure = undefined;
+          control.x = control.y = undefined;
+          if (control.fillArtwork) control.fillBounds = triggerBounds(control.node, control.fillArtwork);
+        }
+        fitController();
+      },
+      { signal: controllerEvents.signal }
+    );
     for (const [name, property] of [
       ["offset", "STICK_OFFSET"],
       ["deadzone", "ANALOGUE_STICK_THRESHOLD"],
@@ -681,7 +829,6 @@ async function initControllerResource() {
     return artwork?.getBBox();
   }
 
-
   const settings = await byStream.initResource(resource, { gamepadSupport, buttonValue, copyGamepad });
   gamepadSupport.init();
   if (byStreamOverlay) initController();
@@ -707,7 +854,10 @@ function tintControllerControls(controller, color) {
     const faces = control.matches(".control-tint-face") ? [control] : control.querySelectorAll(".button-face, .gcn-face");
     for (const face of faces) {
       if (face.closest(".guide-logo-original")) continue;
-      const original = getComputedStyle(face).fill.match(/[\d.]+/g)?.slice(0, 3).map(Number);
+      const original = getComputedStyle(face)
+        .fill.match(/[\d.]+/g)
+        ?.slice(0, 3)
+        .map(Number);
       if (!original || original.length !== 3) continue;
       const tinted = original.map((channel, index) => Math.round((channel + shell[index]) / 2));
       face.style.fill = `rgb(${tinted.join(", ")})`;
@@ -715,7 +865,13 @@ function tintControllerControls(controller, color) {
     }
     if (!surface) continue;
     const darken = Math.max(...surface) > 150;
-    const ink = `#${surface.map((channel) => Math.round(darken ? channel * 0.62 : channel + (255 - channel) * 0.40).toString(16).padStart(2, "0")).join("")}`;
+    const ink = `#${surface
+      .map((channel) =>
+        Math.round(darken ? channel * 0.62 : channel + (255 - channel) * 0.4)
+          .toString(16)
+          .padStart(2, "0")
+      )
+      .join("")}`;
     for (const marking of control.querySelectorAll(".marking")) {
       for (const node of [marking, ...marking.querySelectorAll("[fill], [stroke]")]) {
         const style = getComputedStyle(node);
@@ -736,14 +892,34 @@ function customizeControllerAppearance(controller, settings) {
   if (hex.length <= 4) hex = [...hex].map((digit) => digit + digit).join("");
   const channels = [0, 2, 4].map((i) => parseInt(hex.slice(i, i + 2), 16));
   const light = channels.reduce((sum, channel) => sum + channel, 0) > 384;
-  const panel = channels.map((channel) => Math.round(light ? channel * 0.86 : channel + (255 - channel) * 0.10));
+  const panel = channels.map((channel) => Math.round(light ? channel * 0.86 : channel + (255 - channel) * 0.1));
   controller.style.setProperty("--controller-color", settings.controllerColor);
   controller.style.setProperty("--controller-panel", `#${panel.map((channel) => channel.toString(16).padStart(2, "0")).join("")}`);
-  controller.style.setProperty("--controller-socket", `#${channels.map((channel) => Math.round(channel * 0.40).toString(16).padStart(2, "0")).join("")}`);
+  controller.style.setProperty(
+    "--controller-socket",
+    `#${channels
+      .map((channel) =>
+        Math.round(channel * 0.4)
+          .toString(16)
+          .padStart(2, "0")
+      )
+      .join("")}`
+  );
   controller.style.setProperty("--controller-ink", controllerInk(channels));
   controller.style.setProperty("--highlight-intensity", settings.highlightIntensity / 100);
   controller.style.setProperty("--shadow-intensity", settings.shadowIntensity / 100);
-  const outline = settings.tintOutlines === "yes" ? `#${channels.map((channel) => Math.round(channel * 0.28).toString(16).padStart(2, "0")).join("")}` : settings.customOutlineColor === "yes" ? settings.outlineColor : null;
+  const outline =
+    settings.tintOutlines === "yes"
+      ? `#${channels
+          .map((channel) =>
+            Math.round(channel * 0.28)
+              .toString(16)
+              .padStart(2, "0")
+          )
+          .join("")}`
+      : settings.customOutlineColor === "yes"
+        ? settings.outlineColor
+        : null;
   for (const node of controller.querySelectorAll(".vector-outline:not(.control-detail):not(.button-detail)")) {
     if (node.closest("defs, .marking, .hardware-icon, .guide-logo-original")) continue;
     const style = getComputedStyle(node);
@@ -759,8 +935,8 @@ function customizeControllerAppearance(controller, settings) {
   const original = slot.querySelector(".guide-logo-original");
   const housing = slot.parentElement.querySelector(".guide-custom-housing");
   const [x, y, width, height] = slot.dataset.logoBounds.split(" ").map(Number);
-  const cx = x + width / 2 + width * settings.guideOffsetX / 100;
-  const cy = y + height / 2 + height * settings.guideOffsetY / 100;
+  const cx = x + width / 2 + (width * settings.guideOffsetX) / 100;
+  const cy = y + height / 2 + (height * settings.guideOffsetY) / 100;
   const ns = "http://www.w3.org/2000/svg";
   const content = document.createElementNS(ns, "g");
   content.classList.add("guide-logo-custom");
@@ -774,8 +950,8 @@ function customizeControllerAppearance(controller, settings) {
     if (!settings.guideImage || !byStream.safeImage(settings.guideImage)) return;
     const image = document.createElementNS(ns, "image");
     const scale = settings.guideScale / 100;
-    image.setAttribute("x", String(cx - width * scale / 2));
-    image.setAttribute("y", String(cy - height * scale / 2));
+    image.setAttribute("x", String(cx - (width * scale) / 2));
+    image.setAttribute("y", String(cy - (height * scale) / 2));
     image.setAttribute("width", String(width * scale));
     image.setAttribute("height", String(height * scale));
     image.setAttribute("preserveAspectRatio", "xMidYMid meet");
@@ -810,7 +986,7 @@ function customizeControllerAppearance(controller, settings) {
     if (node.hasAttribute("stroke") && node.getAttribute("stroke") !== "none") node.setAttribute("stroke", settings.guideColor);
   }
   const [sx, sy, sw, sh] = symbol.bounds;
-  const scale = Math.min(width / sw, height / sh) * settings.guideScale / 100;
+  const scale = (Math.min(width / sw, height / sh) * settings.guideScale) / 100;
   artwork.setAttribute("transform", `translate(${cx} ${cy}) scale(${scale}) translate(${-sx - sw / 2} ${-sy - sh / 2})`);
   content.append(artwork);
   slot.append(content);
@@ -819,25 +995,92 @@ function customizeControllerAppearance(controller, settings) {
 
 async function loadControllerArtwork() {
   // Discovery/order only. Names, bindings, geometry, and layouts belong to the SVGs.
-  const families = ["nes", "famicom", "snes", "superfamicom", "n64", "gcn", "wii", "wiinunchuk", "wiiclassic", "wiiupro", "wiiu", "joycon", "switchpro", "ps", "ds2", "ds3", "ds4", "ds5", "xbox", "x360", "xone", "xseries", "mastersystem", "genesis", "saturn", "dreamcast", "steam", "steam2", "steamdeck", "turbografx", "playdate", "fgc"];
-  const names = [
-    "button-1", "button-2", "button-3", "button-4",
-    "button-left-shoulder-top", "button-right-shoulder-top",
-    "button-left-shoulder-bottom-digital", "button-right-shoulder-bottom-digital",
-    "button-select", "button-start", "stick-1", "stick-2",
-    "button-dpad-top", "button-dpad-bottom", "button-dpad-left", "button-dpad-right",
-    "button-meta", "touch-pad", "button-c-up", "button-c-down", "button-c-left", "button-c-right", "button-mute",
-    "trackpad-left", "trackpad-right", "button-grip-left", "button-grip-right",
-    "button-grip-left-bottom", "button-grip-right-bottom", "button-aux-1", "button-aux-2",
-    "button-left-trigger-click", "button-right-trigger-click", "crank",
-    "button-sl-left", "button-sr-left", "button-sl-right", "button-sr-right", "button-volume-down", "button-volume-up"
+  const families = [
+    "nes",
+    "famicom",
+    "snes",
+    "superfamicom",
+    "n64",
+    "gcn",
+    "wii",
+    "wiinunchuk",
+    "wiiclassic",
+    "wiiupro",
+    "wiiu",
+    "joycon",
+    "switchpro",
+    "ps",
+    "ds2",
+    "ds3",
+    "ds4",
+    "ds5",
+    "xbox",
+    "x360",
+    "xone",
+    "xseries",
+    "mastersystem",
+    "genesis",
+    "saturn",
+    "dreamcast",
+    "steam",
+    "steam2",
+    "steamdeck",
+    "turbografx",
+    "playdate",
+    "fgc"
   ];
-  const sources = {}, skins = {}, guideSymbols = {};
-  await Promise.all(families.map(async (id) => {
-    const response = await fetch(new URL(`./controllers/${id}.svg`, controllerResourceURL), { cache: "no-cache" });
-    if (!response.ok) throw new Error(`Unable to load ${id}.svg: ${response.status}`);
-    sources[id] = await response.text();
-  }));
+  const names = [
+    "button-1",
+    "button-2",
+    "button-3",
+    "button-4",
+    "button-left-shoulder-top",
+    "button-right-shoulder-top",
+    "button-left-shoulder-bottom-digital",
+    "button-right-shoulder-bottom-digital",
+    "button-select",
+    "button-start",
+    "stick-1",
+    "stick-2",
+    "button-dpad-top",
+    "button-dpad-bottom",
+    "button-dpad-left",
+    "button-dpad-right",
+    "button-meta",
+    "touch-pad",
+    "button-c-up",
+    "button-c-down",
+    "button-c-left",
+    "button-c-right",
+    "button-mute",
+    "trackpad-left",
+    "trackpad-right",
+    "button-grip-left",
+    "button-grip-right",
+    "button-grip-left-bottom",
+    "button-grip-right-bottom",
+    "button-aux-1",
+    "button-aux-2",
+    "button-left-trigger-click",
+    "button-right-trigger-click",
+    "crank",
+    "button-sl-left",
+    "button-sr-left",
+    "button-sl-right",
+    "button-sr-right",
+    "button-volume-down",
+    "button-volume-up"
+  ];
+  const sources = {},
+    skins = {},
+    guideSymbols = {};
+  await Promise.all(
+    families.map(async (id) => {
+      const response = await fetch(new URL(`./controllers/${id}.svg`, controllerResourceURL), { cache: "no-cache" });
+      if (!response.ok) throw new Error(`Unable to load ${id}.svg: ${response.status}`);
+      sources[id] = await response.text();
+    })
+  );
   for (const id of families) {
     const svg = new DOMParser().parseFromString(sources[id], "image/svg+xml").documentElement;
     if (svg.localName !== "svg" || svg.dataset.controller !== id) throw new Error(`Invalid controller SVG: ${id}`);
@@ -866,11 +1109,19 @@ async function loadControllerArtwork() {
       guideSymbols[symbol.dataset.guideSymbol] = { markup: new XMLSerializer().serializeToString(symbol), bounds: symbol.dataset.symbolBounds.split(" ").map(Number) };
     }
     skins[id] = {
-      id, name: svg.dataset.name, platform: svg.dataset.platform, screen: !!svg.querySelector(".screen-surface"), guide: !!svg.querySelector(".guide-logo-slot"),
-      shell: !!svg.querySelector(".shell-base"), highlights: !!svg.querySelector(".shell-highlight"), shadows: !!svg.querySelector(".shell-shadow"),
+      id,
+      name: svg.dataset.name,
+      platform: svg.dataset.platform,
+      screen: !!svg.querySelector(".screen-surface"),
+      guide: !!svg.querySelector(".guide-logo-slot"),
+      shell: !!svg.querySelector(".shell-base"),
+      highlights: !!svg.querySelector(".shell-highlight"),
+      shadows: !!svg.querySelector(".shell-shadow"),
       variants: Object.fromEntries([...svg.querySelectorAll("style[data-variant-id]")].map((node) => [node.dataset.variantId, node.dataset.variantName])),
-      buttons: controls.filter((node) => !node.dataset.axes && !node.dataset.name.startsWith("button-dpad-")).map((node) => ({ id: Number(node.dataset.input.split(":")[1]), letter: node.dataset.label, analog: node.classList.contains("analog-trigger") })),
-      sticks: controls.filter((node) => node.dataset.axes).map((node) => node.dataset.stickClick === "no" ? [] : [Number(node.dataset.input.split(":")[1])]),
+      buttons: controls
+        .filter((node) => !node.dataset.axes && !node.dataset.name.startsWith("button-dpad-"))
+        .map((node) => ({ id: Number(node.dataset.input.split(":")[1]), letter: node.dataset.label, analog: node.classList.contains("analog-trigger") })),
+      sticks: controls.filter((node) => node.dataset.axes).map((node) => (node.dataset.stickClick === "no" ? [] : [Number(node.dataset.input.split(":")[1])])),
       axes: controls.filter((node) => node.dataset.axes).flatMap((node) => node.dataset.axes.split(" ").map(Number)),
       dpad: controls.some((node) => node.dataset.dpad || node.dataset.name.startsWith("button-dpad-"))
     };
@@ -899,7 +1150,9 @@ async function loadControllerArtwork() {
     const svg = new DOMParser().parseFromString(sources[id], "image/svg+xml").documentElement;
     svg.setAttribute("data-labels", labels);
     svg.dataset.variant = Object.hasOwn(skins[id].variants, variant) ? variant : "original";
-    const serializer = new XMLSerializer(), rear = [], layers = [];
+    const serializer = new XMLSerializer(),
+      rear = [],
+      layers = [];
     const shell = svg.querySelector("#shell");
     // WebKit ignores CSS filter functions on SVG g elements (bugs.webkit.org/246106).
     // Keep one root per interactive control; all inner artwork transforms stay untouched.
@@ -960,7 +1213,7 @@ async function loadControllerArtwork() {
         }
       }
       // Preserve the SVG's painting order when isolating controls for WebKit filters.
-      (shell && (control.compareDocumentPosition(shell) & Node.DOCUMENT_POSITION_FOLLOWING) ? rear : layers).push(layer);
+      (shell && control.compareDocumentPosition(shell) & Node.DOCUMENT_POSITION_FOLLOWING ? rear : layers).push(layer);
       control.remove();
     }
     svg.classList.add("controller-background");
@@ -992,7 +1245,9 @@ function initControllerMapping() {
       function updateVariants() {
         const choices = byControllerArtwork.skins[$("#skin-input").val()]?.variants || {};
         const select = $('[name="variant"]');
-        select.find("option").each((_, option) => { option.disabled = option.value !== "original" && !Object.hasOwn(choices, option.value); });
+        select.find("option").each((_, option) => {
+          option.disabled = option.value !== "original" && !Object.hasOwn(choices, option.value);
+        });
         if (select.find(":selected").prop("disabled")) select.val("original");
       }
       $("#skin-input").on("change.controllerVariants", updateVariants);

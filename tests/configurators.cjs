@@ -171,7 +171,9 @@ test("configurator forms and previews initialize for every resource", async (t) 
         await page.locator('button[type="reset"][form="overlay-form"]').click();
         await page.waitForFunction(() => !document.querySelector('[name="customColors"]').checked && !new URL(document.getElementById("overlay-url").value).searchParams.has("customColors"));
         assert.equal(await page.locator('[name="controllerColor"]').inputValue(), "#2255cc", "Reset restores the opening draft, including disabled values");
-      } finally { await page.close(); }
+      } finally {
+        await page.close();
+      }
     });
 
     await t.test("controller mapping records raw input and preserves applied values until every row is valid", async () => {
