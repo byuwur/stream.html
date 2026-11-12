@@ -72,6 +72,169 @@ test("configurator forms and previews initialize for every resource", async (t) 
       });
     }
 
+    await t.test("controller folder IDs follow the requested order and SNES exposes its physical button names", async () => {
+      const page = await browser.newPage();
+      try {
+        await serve(page, assets);
+        await page.goto("https://stream.test/controller/?skin=snes&player=9#configure");
+        await page.waitForFunction(() => document.getElementById("overlay-url")?.value);
+        assert.equal(await page.locator("#skin-input").inputValue(), "snes");
+        const choices = await page.locator("#skin-input option").evaluateAll((options) => options.map((option) => [option.value, option.textContent]));
+        assert.equal(choices.length, 34);
+        assert.ok(choices.every(([id]) => id !== "move"));
+        for (const [id, name] of choices) assert.ok(!name.endsWith(`(${id})`), name);
+        assert.deepEqual(await page.locator("#skin-input optgroup").evaluateAll((groups) => groups.map((group) => group.label)), ["Nintendo", "PlayStation", "Xbox", "Sega", "Steam", "Other"]);
+        for (const id of ["ds3", "ds4", "ds5", "fgc", "fgc6", "fgc4", "gcn", "n64", "nes", "snes", "x360", "xone", "xseries"]) assert.ok(choices.some(([value]) => value === id));
+        await page.frameLocator("#overlay-preview").locator('svg[data-controller="snes"].controller-background').waitFor();
+        assert.equal(new URL(await page.locator("#overlay-url").inputValue()).searchParams.get("skin"), "snes");
+        await page.keyboard.press("F1");
+        await page.locator('[data-section="remap"]').click();
+        await page.locator("#prepend-mapping").click();
+        const outputs = await page
+          .locator(".mapping-target")
+          .first()
+          .locator("option")
+          .evaluateAll((options) => Object.fromEntries(options.map((option) => [option.value, option.textContent])));
+        assert.deepEqual([outputs[0], outputs[1], outputs[2], outputs[3]], ["B", "A", "Y", "X"]);
+        assert.deepEqual([outputs[4], outputs[5]], ["L", "R"]);
+        await page.locator("#skin-input").selectOption("steamdeck");
+        await page.waitForFunction(() => [...document.querySelectorAll(".mapping-target option")].some((option) => option.value === "6" && option.textContent === "L2"));
+        assert.equal(await page.locator('.mapping-target option[value="25"]').count(), 0, "The standard overlay omits rear grip controls");
+      } finally {
+        await page.close();
+      }
+    });
+
+    await t.test("controller custom appearance retains hidden values, eligibility, variants, and Reset", async () => {
+      const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
+      try {
+        await serve(page, assets);
+        await page.route("https://media.test/logo.svg", (route) => route.fulfill({ contentType: "image/svg+xml", body: '<svg xmlns="http://www.w3.org/2000/svg" width="8" height="4"><rect width="8" height="4" fill="#33bb77"/></svg>' }));
+        const change = async (name, value) => {
+          await page.locator(`[name="${name}"]`).evaluate((node, value) => {
+            if (node.type === "checkbox") node.checked = value === "yes";
+            else node.value = value;
+            node.dispatchEvent(new Event("change", { bubbles: true }));
+          }, value);
+          await page.waitForFunction(({ name, value }) => String(byStreamResource.settings[name]).replace(/^#/, "") === value.replace(/^#/, ""), { name, value });
+        };
+        await page.goto("https://stream.test/controller/?skin=ds2&player=9#configure");
+        await page.waitForFunction(() => document.getElementById("overlay-url")?.value);
+        assert.equal(await page.locator('[name="customColors"]').isChecked(), false);
+        assert.equal(await page.locator('[name="controllerColor"]').isDisabled(), true);
+        await change("variant", "silver");
+        await page.frameLocator("#overlay-preview").locator('.controller-background[data-variant="silver"]').waitFor();
+        await change("customColors", "yes");
+        assert.equal(await page.locator('[name="controllerColor"]').isEnabled(), true);
+        assert.equal(await page.locator('[name="customGuide"]').isDisabled(), true, "DualShock 2 has no invented guide button");
+        await change("controllerColor", "#2255cc");
+        await change("tintControls", "yes");
+        await change("customOutlineColor", "yes");
+        await change("outlineColor", "#7799aa");
+        await change("outlineWidth", "1.5");
+        assert.equal(await page.locator('[name="outlineWidth"]').getAttribute("type"), "range");
+        await change("tintOutlines", "yes");
+        assert.equal(await page.locator('[name="outlineColor"]').isDisabled(), true);
+        await change("tintOutlines", "no");
+        assert.equal(await page.locator('[name="outlineColor"]').inputValue(), "#7799aa");
+        await page.locator("#skin-input").selectOption("xone");
+        await page.waitForFunction(() => !document.querySelector('[name="customGuide"]').disabled);
+        await change("customGuide", "yes");
+        await change("guideSource", "image");
+        await change("guideImage", "https://media.test/logo.svg");
+        await change("guideScale", "125");
+        await change("guideOffsetX", "5");
+        await change("guideOffsetY", "-5");
+        await change("customColors", "no");
+        await page.waitForFunction(() => new URL(document.getElementById("overlay-url").value).searchParams.get("customColors") === "no");
+        const shared = new URL(await page.locator("#overlay-url").inputValue());
+        assert.equal(shared.searchParams.has("controllerColor"), false);
+        assert.equal(shared.searchParams.has("guideImage"), false);
+        assert.equal(await page.locator('[name="controllerColor"]').inputValue(), "#2255cc");
+        assert.equal(await page.locator('[name="guideImage"]').inputValue(), "https://media.test/logo.svg");
+        await page.goto("https://stream.test/controller/#configure");
+        await page.waitForFunction(() => document.getElementById("overlay-url")?.value);
+        assert.equal(await page.locator('[name="customColors"]').isChecked(), false);
+        assert.equal(await page.locator('[name="controllerColor"]').inputValue(), "#2255cc", "Existing editor preferences retain disabled customization across reopening");
+        assert.equal(await page.locator('[name="guideScale"]').inputValue(), "125");
+        await change("customColors", "yes");
+        await page.frameLocator("#overlay-preview").locator(".guide-logo-custom image").waitFor();
+        await change("controllerColor", "#334455");
+        await page.locator('button[type="reset"][form="overlay-form"]').click();
+        await page.waitForFunction(() => !document.querySelector('[name="customColors"]').checked && new URL(document.getElementById("overlay-url").value).searchParams.get("customColors") === "no");
+        assert.equal(await page.locator('[name="controllerColor"]').inputValue(), "#2255cc", "Reset restores the opening draft, including disabled values");
+      } finally { await page.close(); }
+    });
+
+    await t.test("controller mapping records raw input and preserves applied values until every row is valid", async () => {
+      const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
+      try {
+        const errors = [];
+        page.on("pageerror", (error) => errors.push(error.message));
+        await page.addInitScript(() => {
+          window.testPad = { id: "Mapping fixture", index: 0, buttons: Array.from({ length: 18 }, (_, id) => ({ value: id === 1 ? 1 : 0, pressed: id === 1 })), axes: [0, 0, 0, 0] };
+          Object.defineProperty(navigator, "getGamepads", { value: () => [window.testPad] });
+        });
+        await serve(page, assets);
+        await page.goto("https://stream.test/controller/#configure");
+        await page.waitForFunction(() => document.getElementById("overlay-url")?.value);
+        await page.keyboard.press("F1");
+        await page.locator('[data-section="remap"]').click();
+        await page.locator("#prepend-mapping").click();
+        await page.locator('.mapping-record[data-slot="primary"]').first().click();
+        await page.evaluate(() => {
+          testPad.buttons[1].value = 0;
+        });
+        await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+        assert.equal(await page.locator('.mapping-record[data-slot="primary"]').first().textContent(), "Listening\u2026", "Releasing an already-held input is ignored");
+        await page.evaluate(() => {
+          testPad.buttons[1].value = 1;
+        });
+        await page.waitForFunction(() => document.querySelector('.mapping-record[data-slot="primary"]').textContent === "Button 1");
+        await page.evaluate(() => {
+          testPad.buttons[1].value = 0;
+        });
+        await page.locator("#apply-mapping").click();
+        await page.waitForFunction(() => byStreamResource.settings.mapping.length === 1);
+        const accepted = await page.locator("#overlay-url").inputValue();
+        await page.locator("#prepend-mapping").click();
+        await page.locator("#apply-mapping").click();
+        assert.equal(await page.locator("#overlay-url").inputValue(), accepted, "An incomplete draft never replaces the applied mapping");
+        await page.locator('.mapping-record[data-slot="primary"]').nth(1).click();
+        await page.keyboard.press("Escape");
+        assert.equal(await page.locator("#cancel-mapping-capture").isVisible(), false);
+        assert.equal(await page.locator('[data-panel="remap"]').isVisible(), true, "Escape cancels capture before closing the mapping panel");
+        await page.locator('.mapping-record[data-slot="primary"]').nth(1).click();
+        await page.evaluate(() => {
+          testPad.buttons[0].value = 1;
+        });
+        await page.waitForFunction(() => document.querySelectorAll('.mapping-record[data-slot="primary"]')[1].textContent === "Button 0");
+        await page.evaluate(() => {
+          testPad.buttons[0].value = 0;
+        });
+        await page.locator(".mapping-target").nth(1).selectOption("0", { force: true });
+        await page.locator("#apply-mapping").click();
+        assert.equal(await page.locator("#overlay-url").inputValue(), accepted, "Duplicate outputs never replace the applied mapping");
+        assert.ok((await page.locator(".map-message").nth(1).textContent()).includes("already"));
+        await page.locator(".mapping-remove").nth(1).click();
+        await page.locator("#mapping-keyboard").click();
+        await page.waitForFunction(() => document.querySelector("#player-base").value === "9");
+        await page.locator('.mapping-record[data-slot="primary"]').first().click();
+        await page.keyboard.down("b");
+        await page.waitForFunction(() => document.querySelector('.mapping-record[data-slot="primary"]').textContent === "Key B");
+        await page.keyboard.up("b");
+        await page.locator("#apply-mapping").click();
+        await page.waitForFunction(() => byStreamResource.settings.mapping[0].choiceType === "keys" && byStreamResource.settings.mapping[0].choice === "KeyB" && byStreamResource.settings.player === "9");
+        const overlay = new URL(await page.locator("#overlay-url").inputValue());
+        assert.equal(overlay.searchParams.get("player"), "9");
+        await page.locator("form[data-configurator]").evaluate((form) => form.reset());
+        await page.waitForFunction(() => byStreamResource.settings.mapping.length === 0 && document.querySelectorAll("#mappings .mapping-row").length === 0);
+        assert.deepEqual(errors, []);
+      } finally {
+        await page.close();
+      }
+    });
+
     await t.test("fixed start toggles reveal timestamps and remove inactive anchors from URLs", async () => {
       for (const name of ["timer", "timeline", "reminder", "randomizer"]) {
         const page = await browser.newPage();

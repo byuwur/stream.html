@@ -10,7 +10,7 @@ const os = require("node:os");
 const path = require("node:path");
 const { pathToFileURL } = require("node:url");
 const test = require("node:test");
-const { chromium } = require("playwright");
+const { chromium, firefox, webkit } = require("playwright");
 const { root, runtimeAssets, launchOptions, loadAssets, resourceNames, standaloneHTML, serve } = require("./browser.cjs");
 
 // --- STANDALONE RESOURCE CONTRACTS ---
@@ -72,6 +72,879 @@ test("resources render and round-trip URLs without configurator assets", async (
         }
       });
     }
+
+    // --- COMPLETE CONTROLLER DOCUMENTS AND INPUT STATES ---
+    await t.test("integration SVGs render independently and own their geometry and painting order", async () => {
+      const page = await browser.newPage();
+      try {
+        const dependencies = [];
+        page.on("request", (request) => { if (!request.url().endsWith(".svg")) dependencies.push(request.url()); });
+        const files = (await fs.readdir(path.join(root, "controller", "controllers"))).filter((name) => name.endsWith(".svg"));
+        assert.equal(files.length, 32);
+        for (const file of files) {
+          await page.goto(pathToFileURL(path.join(root, "controller", "controllers", file)).href);
+          const result = await page.evaluate(() => {
+            const svg = document.documentElement;
+            const ids = [...svg.querySelectorAll("[id]")].map((node) => node.id);
+            const references = [...svg.querySelectorAll("*")].flatMap((node) => [...node.attributes].flatMap((attribute) => [...attribute.value.matchAll(/url\(#([^)]*)\)/g)].map((match) => match[1])));
+            const sticks = svg.querySelectorAll(".control[data-axes]").length;
+            return {
+              valid: svg.localName === "svg" && !svg.querySelector("parsererror"),
+              unique: new Set(ids).size === ids.length,
+              references: references.every((id) => ids.includes(id)),
+              shell: [...svg.querySelectorAll(".shell-base")].every((node) => {
+                const color = document.createElementNS(svg.namespaceURI, "circle");
+                color.style.fill = node.getAttribute("fill");
+                svg.append(color);
+                const matches = getComputedStyle(color).fill === getComputedStyle(node).fill;
+                color.remove();
+                return matches;
+              }),
+              sockets: svg.dataset.controller === "fgc" || svg.querySelectorAll(".analog-socket").length === sticks,
+              wordsHidden: [...svg.querySelectorAll(".word-label")].every((node) => getComputedStyle(node).display === "none"),
+              vectorLabels: !svg.querySelector(".hardware-icon text"),
+              rotatedLabelsAligned: svg.dataset.controller !== "steamdeck" || [2, 3].every((slot) => {
+                const control = svg.querySelector(`[data-input="button:${slot}"]`);
+                const face = control.querySelector(".button-face").getBoundingClientRect();
+                const glyph = control.querySelector(".hardware-icon").getBoundingClientRect();
+                return glyph.x > face.x && glyph.y > face.y && glyph.x + glyph.width < face.x + face.width && glyph.y + glyph.height < face.y + face.height;
+              }),
+              selfContained: ![...document.childNodes].some((node) => node.nodeType === Node.PROCESSING_INSTRUCTION_NODE),
+              compactStrokesScale: (() => {
+                svg.dataset.layout = "minimal";
+                const matches = [...svg.querySelectorAll(".vector-outline")].every((node) => getComputedStyle(node).vectorEffect === "none");
+                svg.dataset.layout = "full";
+                return matches;
+              })()
+            };
+          });
+          for (const [check, passed] of Object.entries(result)) assert.equal(passed, true, `${file}: ${check}`);
+        }
+        assert.deepEqual(dependencies, []);
+        await page.goto(pathToFileURL(path.join(root, "controller", "controllers", "ds2.svg")).href);
+        assert.equal(await page.evaluate(() => {
+          const shell = document.getElementById("shell");
+          const bumpers = [4, 5].map((slot) => document.getElementById(`input-${slot}`));
+          const triggers = [6, 7].map((slot) => document.getElementById(`input-${slot}`));
+          return bumpers.every((node) => node.compareDocumentPosition(shell) & Node.DOCUMENT_POSITION_FOLLOWING) && triggers.every((node, i) => {
+            const trigger = node.querySelector('.full-geometry .button-face'), bumper = bumpers[i].querySelector('.full-geometry .button-face'), bounds = trigger.getBBox();
+            for (let x = 0; x < 31; x++) for (let y = 0; y < 31; y++) {
+              const point = new DOMPoint(bounds.x + bounds.width * (x + 0.37) / 31, bounds.y + bounds.height * (y + 0.37) / 31);
+              if (trigger.isPointInFill(point) && bumper.isPointInFill(point)) return false;
+            }
+            return true;
+          });
+        }), true, "DualShock 2 bumpers paint behind the shell and triggers have an authored gap");
+      } finally { await page.close(); }
+    });
+
+    await t.test("Fight Stick skin choices share artwork and expose eight, six, or four face buttons", async () => {
+      const page = await browser.newPage(), native = await browser.newPage();
+      try {
+        await serve(page, assets, true);
+        await page.addInitScript(() => {
+          window.testPad = { id: "Fight Stick variants", index: 0, buttons: Array.from({ length: 40 }, () => ({ value: 0 })), axes: [0, 0, 0, 0] };
+          Object.defineProperty(navigator, "getGamepads", { value: () => [testPad] });
+        });
+        for (const [skin, slots] of [["fgc", [0, 1, 2, 3, 4, 5, 6, 7]], ["fgc6", [0, 1, 2, 3, 5, 7]], ["fgc4", [0, 1, 2, 3]]]) {
+          await native.goto(`${pathToFileURL(path.join(root, "controller/controllers/fgc.svg"))}${skin === "fgc" ? "" : `#${skin}`}`);
+          assert.deepEqual(await native.locator('.control[data-input]').evaluateAll((nodes) => nodes.filter((node) => Number(node.dataset.input.split(":")[1]) < 8 && getComputedStyle(node).display !== "none").map((node) => Number(node.dataset.input.split(":")[1])).sort()), slots, `${skin} renders independently`);
+          for (const layout of ["full", "minimal"]) {
+            await page.goto(`https://stream.test/controller/?player=1&skin=${skin}&layout=${layout}`);
+            await page.waitForSelector(".controller.active:not(.disconnected)");
+            const faceSlots = await page.locator('.control-layer[data-input]').evaluateAll((nodes) => nodes.map((node) => Number(node.dataset.input.split(":")[1])).filter((id) => id < 8).sort());
+            assert.deepEqual(faceSlots, slots);
+            assert.deepEqual(await page.evaluate((skin) => byControllerArtwork.skins[skin].buttons.filter((button) => button.id < 8).map((button) => button.id).sort(), skin), slots, "Mapping choices match visible buttons");
+            assert.equal(await page.locator('.control-layer.stick').count(), 1);
+            assert.equal(new URL(await page.evaluate(() => byStream.settingsURL(byStreamResource, byStreamResource.settings).href)).searchParams.get("skin"), skin);
+            for (const slot of slots) {
+              await page.evaluate((slot) => { testPad.buttons[slot].value = 1; }, slot);
+              await page.waitForFunction((slot) => document.querySelector(`.control-layer[data-input="button:${slot}"]`).classList.contains("pressed"), slot);
+              assert.equal(await page.locator(".control.pressed").count(), 1);
+              await page.evaluate((slot) => { testPad.buttons[slot].value = 0; }, slot);
+              await page.waitForFunction(() => !document.querySelector(".control.pressed"));
+            }
+          }
+        }
+      } finally { await page.close(); await native.close(); }
+    });
+
+    await t.test("native controller labels, contours, and shoulder spacing follow their hardware references", async () => {
+      const page = await browser.newPage();
+      try {
+        for (const skin of ["nes", "snes", "superfamicom", "gcn", "wiinunchuk", "ps", "ds2", "ds3", "ds4", "ds5", "steam", "steam2", "steamdeck", "wiiupro", "x360", "xseries"]) {
+          await page.goto(pathToFileURL(path.join(root, `controller/controllers/${skin}.svg`)).href);
+          const result = await page.evaluate((skin) => {
+            const root = document.documentElement, control = (slot) => root.querySelector(`[data-input="button:${slot}"]`), box = (node) => node.getBBox(), center = (b) => [b.x + b.width / 2, b.y + b.height / 2];
+            if (skin === "nes") return [0, 1].every((slot) => { const b = box(control(slot).querySelector(".full-hardware path")); const face = box(control(slot).querySelector('.button-face')); return b.width > b.height && Math.abs(b.x + b.width / 2 - face.x - face.width / 2) < 0.02; });
+            if (["snes", "superfamicom"].includes(skin)) return [0, 1, 2, 3].every((slot) => {
+              const g = control(slot), face = center(box(g.querySelector(".button-face"))), label = center(box(g.querySelector(".full-hardware path"))), right = ["X", "A"].includes(g.dataset.label);
+              return right ? label[0] > face[0] && label[1] < face[1] : label[0] < face[0] && label[1] > face[1];
+            });
+            if (skin === "gcn") return !root.querySelector(".shell-shadow") && root.querySelectorAll('#housing-shape use').length === 3 && [6, 7].every((slot) => box(control(slot).querySelector(".button-face")).height > 45);
+            if (skin === "wiinunchuk") {
+              const z = box(control(6).querySelector(".button-face")), c = box(control(4).querySelector(".button-face")), cap = box(control(10).querySelector(".button-face")), body = box(root.querySelector("#shell-surfaces > path"));
+              return Math.abs(center(z)[0] - center(cap)[0]) < 0.01 && Math.abs(center(c)[0] - center(cap)[0]) < 0.01 && z.y + z.height < c.y && c.y + c.height < cap.y - 12 && body.width / body.height > 0.3;
+            }
+            if (["steam", "steam2", "steamdeck", "wiiupro", "x360", "xseries"].includes(skin)) {
+              const solids = [...root.querySelectorAll('#shell .shell-base, #shell .shell-panel')].filter((node) => node.isPointInFill);
+              const inside = (shape, x, y) => shape.isPointInFill(new DOMPoint(x, y).matrixTransform(root.getCTM().inverse().multiply(shape.getCTM()).inverse()));
+              return [4, 5].every((slot) => {
+                const g = control(slot), face = g.querySelector('.full-geometry .button-face'), label = box(g.querySelector('.full-geometry .hardware-icon')), [cx, cy] = center(label);
+                return [-0.4, 0, 0.4].every((x) => [-0.4, 0, 0.4].every((y) => inside(face, cx + x * label.width, cy + y * label.height) && !solids.some((shape) => inside(shape, cx + x * label.width, cy + y * label.height))));
+              });
+            }
+            return [[6, 4], [7, 5]].every(([trigger, bumper]) => {
+              const t = box(control(trigger).querySelector(".button-face")), b = box(control(bumper).querySelector(".button-face"));
+              const edge = (shape, x, upper) => {
+                const bounds = box(shape), step = bounds.height / 150, inside = (y) => shape.isPointInFill(new DOMPoint(x, y));
+                for (let i = 0; i <= 150; i++) {
+                  const y = upper ? bounds.y + i * step : bounds.y + bounds.height - i * step;
+                  if (!inside(y)) continue;
+                  let lo = upper ? y - step : y, hi = upper ? y : y + step;
+                  for (let j = 0; j < 16; j++) { const mid = (lo + hi) / 2; if (inside(mid) === upper) hi = mid; else lo = mid; }
+                  return (lo + hi) / 2;
+                }
+                return NaN;
+              };
+              return Math.abs(t.width - b.width) < 0.02 && [0.25, 0.5, 0.75].every((ratio) => {
+                const x = t.x + t.width * ratio, gap = edge(control(bumper).querySelector('.button-face'), x, true) - edge(control(trigger).querySelector('.button-face'), x, false);
+                const outline = (parseFloat(getComputedStyle(control(trigger).querySelector('.button-face')).strokeWidth) + parseFloat(getComputedStyle(control(bumper).querySelector('.button-face')).strokeWidth)) / 2; return gap - outline > t.height * 0.05 && gap - outline < t.height * 0.10;
+              });
+            });
+          }, skin);
+          assert.equal(result, true, skin);
+        }
+      } finally { await page.close(); }
+    });
+
+    await t.test("controller symmetry preserves paired artwork, concentric sockets, and proportional compact grids", async () => {
+      const native = await browser.newPage(), page = await browser.newPage();
+      try {
+        await serve(page, assets, true);
+        const models = (await fs.readdir(path.join(root, "controller/controllers"))).filter((name) => name.endsWith(".svg")).map((name) => name.slice(0, -4));
+        for (const skin of models) {
+          await native.goto(pathToFileURL(path.join(root, "controller/controllers/" + skin + ".svg")).href);
+          const artwork = await native.evaluate((skin) => {
+            const svg = document.documentElement, input = (slot) => svg.querySelector('[data-input="button:' + slot + '"]'), face = (g) => g.querySelector('.full-geometry .button-face'), rootMatrix = (n) => svg.getCTM().inverse().multiply(n.getCTM());
+            const box = (n) => { const b = n.getBBox(), m = rootMatrix(n), a = new DOMPoint(b.x, b.y).matrixTransform(m), z = new DOMPoint(b.x + b.width, b.y + b.height).matrixTransform(m); return { x: Math.min(a.x, z.x), y: Math.min(a.y, z.y), w: Math.abs(z.x - a.x), h: Math.abs(z.y - a.y) }; };
+            const inside = (n, x, y) => n.isPointInFill(new DOMPoint(x, y).matrixTransform(rootMatrix(n).inverse()));
+            const baseNodes = [...svg.querySelectorAll('#shell .shell-base')], bases = baseNodes.filter((n) => n.isPointInFill), boxes = baseNodes.map(box), minX = Math.min(...boxes.map((b) => b.x)), maxX = Math.max(...boxes.map((b) => b.x + b.w)), axis = (minX + maxX) / 2;
+            let bodyErrors = 0;
+            if (!["gcn", "fgc", "wiinunchuk"].includes(skin) && boxes.length) {
+              const top = Math.min(...boxes.map((b) => b.y)), bottom = Math.max(...boxes.map((b) => b.y + b.h));
+              for (let i = 0; i < 36; i++) for (let j = 0; j < 45; j++) {
+                const x = minX + (axis - minX) * (i + 0.37) / 36, y = top + (bottom - top) * (j + 0.37) / 45;
+                if (bases.some((n) => inside(n, x, y)) !== bases.some((n) => inside(n, axis * 2 - x, y))) bodyErrors++;
+              }
+            }
+            const pairs = [];
+            if (!["fgc", "xbox", "nes", "famicom", "mastersystem", "genesis", "turbografx", "playdate", "wii", "wiinunchuk"].includes(skin)) pairs.push(skin === "wiiclassic" ? [6, 7] : [4, 5]);
+            if (["ps", "ds2", "ds3", "ds4", "ds5", "xbox", "x360", "xone", "xseries", "gcn", "wiiupro", "wiiu", "joycon", "switchpro", "steam", "steam2", "steamdeck", "dreamcast", "wiiclassic"].includes(skin)) pairs.push(skin === "wiiclassic" ? [4, 5] : [6, 7]);
+            const paired = pairs.filter(([a, b]) => input(a) && input(b)).every(([a, b]) => {
+              const left = face(input(a)), right = face(input(b)), l = box(left), r = box(right);
+              if (Math.abs(l.x + l.w / 2 + r.x + r.w / 2 - axis * 2) > 0.02 || Math.abs(l.y - r.y) > 0.02 || Math.abs(l.w - r.w) > 0.02 || Math.abs(l.h - r.h) > 0.02) return false;
+              for (let i = 0; i < 21; i++) for (let j = 0; j < 17; j++) { const x = l.x + l.w * (i + 0.31) / 21, y = l.y + l.h * (j + 0.31) / 17; if (inside(left, x, y) !== inside(right, axis * 2 - x, y)) return false; }
+              return true;
+            });
+            const proportional = [...svg.querySelectorAll('[data-compact-transform]')].every((n) => { const m = n.dataset.compactTransform.match(/-?[\d.]+/g).map(Number); return Math.abs(m[0] - m[3]) < 0.00002 && m[1] === 0 && m[2] === 0; });
+            return { bodyErrors, paired, proportional };
+          }, skin);
+          assert.equal(artwork.bodyErrors, 0, skin + " body silhouette is bilateral");
+          assert.equal(artwork.paired, true, skin + " shoulders and triggers mirror their counterpart");
+          assert.equal(artwork.proportional, true, skin + " never stretches controls for compact mode");
+          for (const layout of ["full", "minimal"]) {
+            await page.goto("https://stream.test/controller/?player=9&skin=" + skin + "&layout=" + layout);
+            await page.waitForSelector('.controller.active:not(.disconnected)');
+            const sticks = await page.locator('.control-layer.stick .press-visual .full-geometry').evaluateAll((nodes) => nodes.map((n) => { const b = n.getBoundingClientRect(); return { w: b.width, h: b.height }; }));
+            if (sticks.length === 2 && skin !== "gcn") assert.ok(Math.abs(sticks[0].w - sticks[1].w) < 0.15 && Math.abs(sticks[0].h - sticks[1].h) < 0.15, skin + "/" + layout + " has equal stick sizes");
+            const sockets = await page.locator('.fixed-layer[data-for="button:10"] .layout-position, .fixed-layer[data-for="button:11"] .layout-position').evaluateAll((nodes) => nodes.map((n) => { const b = n.getBoundingClientRect(); return { w: b.width, h: b.height }; }));
+            if (sockets.length === 2 && skin !== "gcn") assert.ok(Math.abs(sockets[0].w - sockets[1].w) < 0.15 && Math.abs(sockets[0].h - sockets[1].h) < 0.15, skin + "/" + layout + " has equal socket sizes");
+            if (skin === "xseries") {
+              const centered = await page.evaluate(() => { const pad = document.querySelector('.control-layer[data-input="button:12"] .layout-position').getBoundingClientRect(), dish = document.querySelector('.fixed-layer[data-for="button:12"] .layout-position circle').getBoundingClientRect(); return Math.abs(pad.x + pad.width / 2 - dish.x - dish.width / 2) < 0.15 && Math.abs(pad.y + pad.height / 2 - dish.y - dish.height / 2) < 0.15; });
+              assert.equal(centered, true, "Xbox Series D-pad remains centered in its dish in " + layout);
+            }
+            if (layout === "minimal" && ["snes", "superfamicom", "ps", "ds2", "ds3", "ds4", "ds5", "x360", "xone", "xseries", "joycon", "switchpro", "wiiclassic", "wiiu", "wiiupro", "steam", "steam2", "steamdeck", "dreamcast"].includes(skin)) {
+              assert.equal(await page.evaluate(() => {
+                const nodes = [0, 1, 2, 3].map((slot) => document.querySelector('.control-layer[data-input="button:' + slot + '"] .full-geometry .button-face')), boxes = nodes.map((node) => node.getBoundingClientRect()), centers = boxes.map((b) => [b.x + b.width / 2, b.y + b.height / 2]), strokes = nodes.map((node) => { const m = node.getScreenCTM(); return parseFloat(getComputedStyle(node).strokeWidth) * Math.hypot(m.a, m.b); });
+                return [[0, 1], [1, 3], [3, 2], [2, 0]].every(([a, b]) => { const distance = Math.hypot(centers[a][0] - centers[b][0], centers[a][1] - centers[b][1]), gap = distance - (boxes[a].width + boxes[b].width + strokes[a] + strokes[b]) / 2; return distance < boxes[a].width * 1.5 && gap > boxes[a].width * 0.1; });
+              }), true, skin + " keeps the compact face cluster close");
+            }
+          }
+        }
+      } finally { await native.close(); await page.close(); }
+    });
+
+    await t.test("compact grids retain gutters, horizontal shoulder bars, and simultaneous stick clearance", async () => {
+      const page = await browser.newPage();
+      try {
+        await serve(page, assets, true);
+        await page.addInitScript(() => {
+          window.testPad = { id: "Compact clearance", index: 0, buttons: Array.from({ length: 40 }, () => ({ value: 0 })), axes: [0, 0, 0, 0] };
+          Object.defineProperty(navigator, "getGamepads", { value: () => [testPad] });
+        });
+        const models = (await fs.readdir(path.join(root, "controller/controllers"))).filter((name) => name.endsWith(".svg")).map((name) => name.slice(0, -4));
+        for (const skin of models) {
+          await page.goto("https://stream.test/controller/?player=1&skin=" + skin + "&layout=minimal");
+          await page.waitForSelector(".controller.active:not(.disconnected)");
+          const spacing = await page.evaluate((skin) => {
+            const box = (slot) => document.querySelector('.control-layer[data-input="button:' + slot + '"] .press-visual').getBoundingClientRect();
+            const bars = [...document.querySelectorAll('.minimal-bar-base > rect')].map((node) => node.getBoundingClientRect()).sort((a, b) => a.x - b.x);
+            const separated = bars.every((b, i) => b.width > b.height * 2.5 && (!i || b.x > bars[i - 1].right));
+            const labels = [...document.querySelectorAll(".minimal-bar-base")].every((node) => {
+              const bar = node.querySelector("rect").getBoundingClientRect(), label = node.querySelector(".minimal-bar-label").getBoundingClientRect();
+              return label.width > 0 && label.height > 0 && label.x > bar.x && label.right < bar.right && label.y > bar.y && label.bottom < bar.bottom;
+            });
+            const belowFaces = ["nes", "famicom", "turbografx", "playdate"].includes(skin) ? [...document.querySelectorAll('.control-layer[data-input="button:8"], .control-layer[data-input="button:9"], .control-layer[data-input="button:16"]')].every((node) => node.querySelector('.press-visual').getBoundingClientRect().top > Math.max(box(0).bottom, box(1).bottom)) : true;
+            return { separated, belowFaces, labels };
+          }, skin);
+          assert.equal(spacing.separated, true, skin + " keeps long shoulder bars separate");
+          assert.equal(spacing.labels, true, skin + " keeps each shoulder label inside its bar");
+          assert.equal(spacing.belowFaces, true, skin + " puts auxiliary buttons below the face pair");
+          for (const mode of ["letters", "none", "icons"]) {
+            const shown = await page.evaluate((mode) => {
+              for (const svg of document.querySelectorAll('.controller svg')) svg.dataset.labels = mode;
+              return [...document.querySelectorAll('.minimal-bar-base .minimal-bar-label')].every((node) => (node.getBoundingClientRect().width > 0) === (mode !== "none"));
+            }, mode);
+            assert.equal(shown, true, skin + " honors bar labels in " + mode + " mode");
+          }
+          if (skin === "fgc") assert.equal(await page.locator('.control-layer[data-input="button:8"], .control-layer[data-input="button:9"]').count(), 0);
+          const axes = await page.locator('.control-layer.stick[data-axes]').evaluateAll((nodes) => nodes.map((node) => node.dataset.axes.split(" ").map(Number)));
+          if (axes.length !== 2) continue;
+          for (const layout of ["full", "minimal"]) {
+            await page.evaluate((layout) => byControllerArtwork.setLayout(document.querySelector('.controller'), layout), layout);
+            for (const vertical of [-1, 0, 1]) {
+              await page.evaluate(async ({ axes, vertical }) => {
+                testPad.axes.fill(0);
+                testPad.axes[axes[0][0]] = 1; testPad.axes[axes[0][1]] = vertical;
+                testPad.axes[axes[1][0]] = -1; testPad.axes[axes[1][1]] = vertical;
+                await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+              }, { axes, vertical });
+              assert.equal(await page.locator('.control-layer.stick[data-axes]').evaluateAll((nodes) => {
+                const bounds = nodes.map((node) => node.querySelector('.press-visual').getBoundingClientRect());
+                return bounds[0].right < bounds[1].left || bounds[1].right < bounds[0].left || bounds[0].bottom < bounds[1].top || bounds[1].bottom < bounds[0].top;
+              }), true, skin + "/" + layout + " sticks remain separate when both move inward");
+            }
+          }
+        }
+      } finally { await page.close(); }
+    });
+
+    await t.test("Wii Classic shoulders are digital, Saturn C and Z are distinct, and Steam lettering matches", async () => {
+      const page = await browser.newPage();
+      try {
+        await serve(page, assets, true);
+        await page.addInitScript(() => {
+          window.testPad = { id: "Shoulder mappings", index: 0, buttons: Array.from({ length: 40 }, () => ({ value: 0 })), axes: [0, 0, 0, 0] };
+          Object.defineProperty(navigator, "getGamepads", { value: () => [testPad] });
+        });
+        for (const layout of ["full", "minimal"]) {
+          await page.goto(`https://stream.test/controller/?player=1&skin=wiiclassic&layout=${layout}`);
+          await page.waitForSelector(".controller.active:not(.disconnected)");
+          assert.equal(await page.locator(".analog-trigger, .trigger-active").count(), 0);
+          await page.evaluate(() => { testPad.buttons[6].value = testPad.buttons[7].value = 0.25; });
+          await page.waitForFunction(() => document.querySelectorAll(".control.pressed").length === 2);
+          assert.deepEqual(await page.locator(".control.pressed").evaluateAll((nodes) => nodes.map((node) => node.dataset.label).sort()), ["L", "R"]);
+          await page.goto(`https://stream.test/controller/?player=1&skin=saturn&layout=${layout}`);
+          await page.waitForSelector(".controller.active:not(.disconnected)");
+          for (const [slot, label] of [[6, "Z"], [7, "C"]]) {
+            await page.evaluate((slot) => { testPad.buttons[slot].value = 1; }, slot);
+            await page.waitForFunction(() => document.querySelectorAll(".control.pressed").length === 1);
+            assert.equal(await page.locator(".control.pressed").getAttribute("data-label"), label);
+            await page.evaluate((slot) => { testPad.buttons[slot].value = 0; }, slot);
+            await page.waitForFunction(() => !document.querySelector(".control.pressed"));
+          }
+          for (const skin of ["steam2", "steamdeck"]) {
+            await page.goto(`https://stream.test/controller/?player=1&skin=${skin}&layout=${layout}`);
+            await page.waitForSelector(".controller.active:not(.disconnected)");
+            assert.equal(await page.locator('.control-layer[data-input] .hardware-icon path').evaluateAll((nodes) => nodes.filter((node) => Number(node.closest('.control-layer').dataset.input.split(":")[1]) < 4).every((node) => getComputedStyle(node).fill !== "none" && getComputedStyle(node).stroke === "none")), true, `${skin}/${layout} uses filled hardware lettering throughout`);
+          }
+        }
+      } finally { await page.close(); }
+    });
+
+    await t.test("stock variants, proportional outlines, and animated guide images preserve input", async () => {
+      const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
+      try {
+        const errors = [];
+        page.on("pageerror", (error) => errors.push(error.message));
+        await page.addInitScript(() => {
+          window.testPad = { id: "Appearance fixture", index: 0, buttons: Array.from({ length: 40 }, () => ({ value: 0 })), axes: [0, 0, 0, 0] };
+          Object.defineProperty(navigator, "getGamepads", { value: () => [testPad] });
+        });
+        await serve(page, assets, true);
+        const open = async (values = {}) => {
+          await page.goto(`https://stream.test/controller/?${new URLSearchParams({ player: "1", skin: "xone", ...values })}`);
+          await page.waitForSelector(".controller.active:not(.disconnected)");
+        };
+        const shellColor = () => page.locator(".controller-background .shell-base").first().evaluate((node) => getComputedStyle(node).fill);
+        await open();
+        const stock = await shellColor();
+        assert.equal(await page.evaluate(() => byStreamResource.settings.customColors), "no");
+        assert.equal(await page.locator(".controller").evaluate((node) => node.style.getPropertyValue("--controller-color")), "");
+        const baseline = await page.locator(".vector-outline:not(.control-detail):not(.button-detail)").evaluateAll((nodes) => nodes.filter((node) => !node.closest("defs, .marking, .hardware-icon, .guide-logo-original")).map((node) => getComputedStyle(node).strokeWidth));
+        await open({ customColors: "yes", outlineWidth: "1.5" });
+        const scaled = await page.locator(".vector-outline:not(.control-detail):not(.button-detail)").evaluateAll((nodes) => nodes.filter((node) => !node.closest("defs, .marking, .hardware-icon, .guide-logo-original")).map((node) => getComputedStyle(node).strokeWidth));
+        assert.ok(new Set(baseline).size > 1, "The fixture includes different original structural widths");
+        assert.equal(scaled.length, baseline.length);
+        // Computed SVG widths have limited decimal precision.
+        assert.ok(scaled.every((width, i) => Math.abs(parseFloat(width) - parseFloat(baseline[i]) * 1.5) < 0.00001));
+        await open({ controllerColor: "2255cc" });
+        assert.equal(await shellColor(), "rgb(34, 85, 204)", "Legacy color URLs enable customization");
+        await open({ customColors: "no", controllerColor: "2255cc", customGuide: "yes" });
+        assert.equal(await shellColor(), stock, "Explicit Off restores native artwork despite retained custom values");
+        assert.equal(await page.locator(".guide-logo-custom").count(), 0);
+        await open({ controllerColor: "invalid" });
+        assert.equal(await shellColor(), stock, "Invalid legacy colors retain the stock default");
+        for (const [variant, color] of [["silver", "rgb(174, 181, 191)"], ["white", "rgb(226, 228, 226)"]]) {
+          await open({ skin: "ds2", variant, customColors: "no" });
+          assert.equal(await shellColor(), color);
+        }
+        await open({ customColors: "yes", controllerColor: "2255cc", tintOutlines: "yes", customOutlineColor: "yes", outlineColor: "ff00ff" });
+        assert.equal(await page.locator(".controller-background .shell-base").first().evaluate((node) => getComputedStyle(node).stroke), "rgb(10, 24, 57)");
+        for (const guideSymbol of ["xbox", "playstation", "steam", "circle", "diamond", "star"]) {
+          await open({ customColors: "yes", customGuide: "yes", guideSymbol });
+          assert.equal(await page.locator(".guide-logo-custom").count(), 1, guideSymbol);
+        }
+        // Two independently encoded frames exercise actual SVG image animation, beyond the load event.
+        const frame = (index) => {
+          let value = 0, bits = 0;
+          const bytes = [];
+          for (const code of [4, index, 4, index, 4, index, 4, index, 5]) {
+            value |= code << bits;
+            bits += 3;
+            while (bits >= 8) { bytes.push(value & 255); value >>= 8; bits -= 8; }
+          }
+          if (bits) bytes.push(value & 255);
+          return Buffer.concat([Buffer.from("21f904000a0000002c00000000020002000002", "hex"), Buffer.from([bytes.length, ...bytes, 0])]);
+        };
+        const gif = Buffer.concat([Buffer.from("47494638396102000200800000ff00000000ff21ff0b4e45545343415045322e300301000000", "hex"), frame(0), frame(1), Buffer.from([0x3b])]);
+        const images = await page.evaluate(() => {
+          const canvas = document.createElement("canvas"); canvas.width = 8; canvas.height = 4;
+          const context = canvas.getContext("2d"); context.fillStyle = "#33bb77"; context.fillRect(0, 0, 8, 4);
+          return Object.fromEntries(["png", "jpeg", "webp"].map((type) => [type, canvas.toDataURL(`image/${type}`).split(",")[1]]));
+        });
+        await page.route("https://media.test/**", (route) => {
+          const type = new URL(route.request().url()).pathname.split(".").pop();
+          if (type === "gif") return route.fulfill({ contentType: "image/gif", body: gif });
+          if (type === "svg") return route.fulfill({ contentType: "image/svg+xml", body: '<svg xmlns="http://www.w3.org/2000/svg" width="8" height="4"><rect width="8" height="4" fill="#33bb77"/><script>parent.untrustedGuideExecuted=true</script></svg>' });
+          if (images[type]) return route.fulfill({ contentType: `image/${type}`, body: Buffer.from(images[type], "base64") });
+          return route.fulfill({ status: 404, body: "Missing image" });
+        });
+        for (const type of ["png", "jpeg", "webp", "svg"]) {
+          await open({ customColors: "yes", customGuide: "yes", guideSource: "image", guideImage: `https://media.test/guide.${type}` });
+          await page.waitForFunction(() => document.querySelector(".guide-logo-custom")?.style.visibility === "visible");
+          assert.equal(await page.locator(".guide-logo-custom image").getAttribute("preserveAspectRatio"), "xMidYMid meet");
+          assert.equal(await page.evaluate(() => window.untrustedGuideExecuted), undefined);
+        }
+        for (const layout of ["full", "minimal"]) {
+          await open({ customColors: "yes", customGuide: "yes", guideSource: "image", guideImage: "https://media.test/guide.gif", layout });
+          await page.waitForFunction(() => document.querySelector(".guide-logo-custom")?.style.visibility === "visible");
+          const image = page.locator(".guide-logo-custom image"), bounds = await image.boundingBox(), colors = new Set();
+          for (let i = 0; i < 8; i++) {
+            await page.waitForTimeout(70);
+            const png = await page.screenshot({ clip: { x: Math.floor(bounds.x + bounds.width / 2), y: Math.floor(bounds.y + bounds.height / 2), width: 1, height: 1 } });
+            colors.add(await page.evaluate(async (data) => {
+              const bitmap = await createImageBitmap(new Blob([Uint8Array.from(atob(data), (char) => char.charCodeAt(0))], { type: "image/png" }));
+              const canvas = document.createElement("canvas"); canvas.width = canvas.height = 1;
+              const context = canvas.getContext("2d"); context.drawImage(bitmap, 0, 0);
+              return [...context.getImageData(0, 0, 1, 1).data].slice(0, 3).join(",");
+            }, png.toString("base64")));
+          }
+          assert.deepEqual([...colors].sort(), ["0,0,255", "255,0,0"], `${layout} renders both GIF frames`);
+          await image.evaluate((node) => { window.originalGuideImage = node; });
+          await page.evaluate(() => { testPad.buttons[16].value = 1; byControllerArtwork.setLayout(document.querySelector(".controller"), byStreamResource.settings.layout === "full" ? "minimal" : "full"); });
+          await page.waitForFunction(() => document.querySelector('.control[data-name="button-meta"]').classList.contains("pressed"));
+          assert.equal(await image.evaluate((node) => node === originalGuideImage), true, "Input and layout updates keep the animated image mounted");
+        }
+        for (const guideImage of ["https://media.test/missing.invalid", "javascript:alert(1)", "data:image/svg+xml,<svg/>"]) {
+          await open({ customColors: "yes", customGuide: "yes", guideSource: "image", guideImage });
+          await page.waitForFunction(() => !document.querySelector(".guide-logo-custom"));
+          assert.equal(await page.locator(".guide-logo-original").evaluate((node) => getComputedStyle(node).display !== "none"), true);
+        }
+        assert.deepEqual(errors, []);
+      } finally { await page.close(); }
+    });
+
+    await t.test("flat controller library preserves controls, hardware colors, and editable layouts", async () => {
+      const page = await browser.newPage();
+      try {
+        const errors = [];
+        page.on("pageerror", (error) => errors.push(error.message));
+        await page.addInitScript(() => {
+          window.testPad = { id: "Library fixture", index: 0, buttons: Array.from({ length: 40 }, () => ({ value: 0 })), axes: [0, 0, 0, 0] };
+          Object.defineProperty(navigator, "getGamepads", { value: () => [testPad] });
+        });
+        await serve(page, assets, true);
+        const files = (await fs.readdir(path.join(root, "controller", "controllers"))).filter((name) => name.endsWith(".svg"));
+        assert.equal(files.length, 32);
+        assert.ok(!files.includes("move.svg"));
+        for (const file of files) {
+          const family = path.basename(file, ".svg");
+          const source = await fs.readFile(path.join(root, "controller", "controllers", file), "utf8");
+          assert.match(source, new RegExp(`data-controller="${family}"`));
+          assert.doesNotMatch(source, /data-label="[^"]*\?/, "Hardware labels retain their Unicode symbols");
+          assert.doesNotMatch(source, /<script\b|<image\b|foreignObject|data:image/i);
+          for (const layout of ["full", "minimal"]) {
+            let colors;
+            for (const color of ["111111", "ffffff", "205bba"]) {
+              await page.goto(`https://stream.test/controller/?player=1&skin=${family}&layout=${layout}&controllerColor=${color}&curve=1`);
+              await page.waitForSelector(".controller.active:not(.disconnected) .controller-background", { state: "attached" });
+              assert.equal(await page.evaluate((family) => byControllerArtwork.sources[family], family), source);
+              const fixed = await page.locator(".control-layer .button-face").evaluateAll((nodes) => nodes.map((node) => getComputedStyle(node).fill));
+              if (colors) assert.deepEqual(fixed, colors, `${family} preserves hardware colors`);
+              colors = fixed;
+              if (family === "fgc") assert.equal(await page.locator(".controller-background .shell-base").count(), 0, "Fight stick has no background panel");
+              else if (layout === "full") assert.equal(await page.locator(".controller-background .shell-base").first().evaluate((node) => getComputedStyle(node).fill), `rgb(${[0, 2, 4].map((i) => parseInt(color.slice(i, i + 2), 16)).join(", ")})`);
+            }
+            assert.equal(await page.locator(".controller.active [id]").evaluateAll((nodes) => new Set(nodes.map((node) => node.id)).size === nodes.length), true, `${family} has unique SVG IDs`);
+            if (family === "gcn" && layout === "full") {
+              assert.equal(await page.locator(".physical-shoulder").evaluateAll((nodes) => nodes.every((node, index) => node.compareDocumentPosition(document.querySelector(`.control-layer[data-input="button:${index + 4}"]`)) & Node.DOCUMENT_POSITION_FOLLOWING)), true, "GameCube physical shoulders retain source paint order behind ZL/ZR");
+            }
+            const controls = await page.locator(".control-layer").evaluateAll((nodes) => nodes.map((node) => ({ slot: Number(node.dataset.input.split(":")[1]), name: node.dataset.name, analog: node.classList.contains("analog-trigger"), click: node.dataset.stickClick !== "no" })));
+            assert.equal(new Set(controls.map((control) => control.name)).size, controls.length);
+            for (const control of controls.filter((control) => !control.analog && control.click)) {
+              await page.evaluate((slot) => { testPad.buttons[slot].value = 1; }, control.slot);
+              await page.waitForFunction((name) => document.querySelector(`.control[data-name="${name}"]`).classList.contains("pressed"), control.name);
+              assert.equal(await page.locator(".control.pressed").count(), 1, `${family}/${layout}/${control.name} is isolated`);
+              assert.equal(await page.locator(".control.pressed").evaluate((node) => getComputedStyle(node).filter), "invert(1)");
+              await page.evaluate((slot) => { testPad.buttons[slot].value = 0; }, control.slot);
+              await page.waitForFunction(() => !document.querySelector(".control.pressed"));
+            }
+            if (controls.some((control) => control.name === "stick-1")) {
+              await page.evaluate(() => { testPad.axes = [1, -1, 0, 0]; });
+              await page.waitForFunction(() => {
+                const node = document.querySelector('.control[data-name="stick-1"]');
+                const travel = 25 * Number(node.dataset.travelScale || 1) * (node.dataset.layout === "minimal" ? Number(node.dataset.compactScale) : 1);
+                const [x, y] = node.style.translate.split(" ").map(parseFloat);
+                return Math.abs(x - travel / Math.SQRT2) < 0.0001 && Math.abs(y + travel / Math.SQRT2) < 0.0001;
+              });
+              assert.equal(await page.locator('.control[data-name="stick-1"]').evaluate((node) => node.style.transform), "rotateX(25deg) rotateY(25deg)");
+              if (family === "wiinunchuk" && layout === "full") {
+                const cap = await page.locator('.control[data-name="stick-1"] .button-face').boundingBox();
+                const z = await page.locator('.control[data-input="button:6"] .press-visual .button-face').boundingBox();
+                assert.ok(cap.y > z.y + z.height, "Nunchuk Z clears the moving stick cap");
+              }
+              await page.evaluate(() => { testPad.axes = [0.01, 0.01, 0, 0]; });
+              await page.waitForFunction(() => document.querySelector('.control[data-name="stick-1"]').style.translate.match(/-?[\d.]+/g)?.every((value) => Number(value) === 0));
+              assert.equal(await page.locator('.control[data-name="stick-1"]').evaluate((node) => node.style.transform), "rotateX(0deg) rotateY(0deg)", "Curving respects the deadzone");
+            }
+            await page.evaluate(() => {
+              window.originalControls = [...document.querySelectorAll(".control-layer")];
+              byControllerArtwork.setLayout(document.querySelector(".controller"), byStreamResource.settings.layout === "full" ? "minimal" : "full");
+            });
+            assert.equal(await page.evaluate(() => originalControls.every((node, index) => node === document.querySelectorAll(".control-layer")[index])), true, "Layout changes reuse every control node");
+            assert.equal(await page.locator(".control-layer.stick").evaluateAll((nodes) => nodes.every((node) => {
+              const box = node.getBBox(), [x, y] = node.style.transformOrigin.split(" ").map(parseFloat);
+              return Math.abs(x - box.x - box.width / 2 + node.viewBox.baseVal.x) < 0.001 && Math.abs(y - box.y - box.height / 2 + node.viewBox.baseVal.y) < 0.001;
+            })), true, "Curving stays centered after switching layouts");
+            await page.evaluate(() => document.querySelectorAll(".controller svg").forEach((node) => { node.dataset.labels = "none"; }));
+            assert.equal(await page.locator(".marking").evaluateAll((nodes) => nodes.every((node) => getComputedStyle(node).display === "none")), true);
+          }
+        }
+        assert.deepEqual(errors, []);
+      } finally {
+        await page.close();
+      }
+    });
+
+    await t.test("optional control tint follows the shell without recoloring rubber or shoulders", async () => {
+      const page = await browser.newPage();
+      try {
+        await serve(page, assets, true);
+        const families = (await fs.readdir(path.join(root, "controller", "controllers"))).filter((name) => name.endsWith(".svg")).map((name) => path.basename(name, ".svg"));
+        for (const family of families)
+          for (const layout of ["full", "minimal"]) {
+            const url = `https://stream.test/controller/?player=9&skin=${family}&layout=${layout}&controllerColor=ff9900`;
+            await page.goto(url);
+            await page.waitForSelector(".controller.active:not(.disconnected)");
+            const surfaces = '.control-layer:not(.stick):not([data-name*="-shoulder-"]) .button-face, .control-layer:not(.stick):not([data-name*="-shoulder-"]) .gcn-face';
+            const hardware = '.control-layer.stick [fill], .control-layer[data-name*="-shoulder-"] [fill]';
+            const colors = await page.locator(surfaces).evaluateAll((nodes) => nodes.map((node) => getComputedStyle(node).fill));
+            const fixed = await page.locator(hardware).evaluateAll((nodes) => nodes.map((node) => getComputedStyle(node).fill));
+            await page.goto(url + "&tintControls=yes");
+            await page.waitForSelector(".controller.active:not(.disconnected)");
+            const tinted = await page.locator(surfaces).evaluateAll((nodes) => nodes.map((node) => getComputedStyle(node).fill));
+            assert.equal(tinted.length, colors.length);
+            assert.notDeepEqual(tinted, colors, `${family}/${layout} tints its button plastics`);
+            assert.deepEqual(await page.locator(hardware).evaluateAll((nodes) => nodes.map((node) => getComputedStyle(node).fill)), fixed);
+            await page.keyboard.down("j");
+            await page.keyboard.down("k");
+            await page.waitForFunction(() => document.querySelectorAll(".control.pressed").length === 2);
+            assert.equal(await page.locator(".control.pressed").evaluateAll((nodes) => nodes.every((node) => getComputedStyle(node).filter === "invert(1)")), true);
+            await page.keyboard.up("j");
+            await page.keyboard.up("k");
+            await page.waitForFunction(() => !document.querySelector(".control.pressed"));
+            assert.deepEqual(await page.locator(surfaces).evaluateAll((nodes) => nodes.map((node) => getComputedStyle(node).fill)), tinted);
+            if (family === "ds5" && layout === "full") await page.screenshot({ path: path.join(os.tmpdir(), "controller-ds5-tinted.png") });
+          }
+        await page.goto("https://stream.test/controller/?player=9&skin=ds5&tintControls=yes&controllerColor=2044dd");
+        await page.waitForSelector(".controller.active:not(.disconnected)");
+        const blue = await page.locator('.control[data-name="button-1"] .button-face').evaluate((node) => getComputedStyle(node).fill);
+        await page.goto("https://stream.test/controller/?player=9&skin=ds5&tintControls=yes&controllerColor=ff9900");
+        await page.waitForSelector(".controller.active:not(.disconnected)");
+        assert.notEqual(await page.locator('.control[data-name="button-1"] .button-face').evaluate((node) => getComputedStyle(node).fill), blue);
+      } finally {
+        await page.close();
+      }
+    });
+
+    await t.test("disconnected tint and opacity apply only until the selected pad reconnects", async () => {
+      const page = await browser.newPage();
+      try {
+        await page.addInitScript(() => {
+          window.testPads = [];
+          Object.defineProperty(navigator, "getGamepads", { value: () => testPads });
+        });
+        await serve(page, assets, true);
+        for (const layout of ["full", "minimal"]) {
+          await page.goto(`https://stream.test/controller/?player=1&skin=xseries&layout=${layout}&opacity=75&disconnectedOpacity=35&disconnectedTint=00ff0080`);
+          await page.waitForSelector(".controller.active.disconnected");
+          assert.equal(await page.locator(".controller").evaluate((node) => getComputedStyle(node).opacity), "0.35");
+          assert.match(await page.locator(".controller-layers").evaluate((node) => getComputedStyle(node).filter), /controller-disconnected-tint/);
+          const fixed = await page.locator(".button-face").evaluateAll((nodes) => nodes.map((node) => getComputedStyle(node).fill));
+          const tinted = await page.screenshot();
+          const tintedURL = page.url();
+          await page.goto(tintedURL.replace("disconnectedTint=00ff0080", "disconnectedTint=00000000"));
+          await page.waitForSelector(".controller.active.disconnected");
+          const untinted = await page.screenshot();
+          assert.equal(tinted.equals(untinted), false, "Tint changes rendered pixels");
+          await page.goto(tintedURL);
+          await page.waitForSelector(".controller.active.disconnected");
+          await page.evaluate(() => {
+            testPads = [{ id: "Reconnect fixture", index: 0, buttons: Array.from({ length: 23 }, () => ({ value: 0 })), axes: [0, 0, 0, 0] }];
+          });
+          await page.waitForSelector(".controller.active:not(.disconnected)");
+          assert.equal(await page.locator(".controller").evaluate((node) => getComputedStyle(node).opacity), "0.75");
+          assert.equal(await page.locator(".controller-layers").evaluate((node) => getComputedStyle(node).filter), "none");
+          assert.deepEqual(await page.locator(".button-face").evaluateAll((nodes) => nodes.map((node) => getComputedStyle(node).fill)), fixed);
+          await page.evaluate(() => {
+            testPads = [];
+          });
+          await page.waitForSelector(".controller.active.disconnected");
+          assert.equal(await page.locator(".controller").evaluate((node) => getComputedStyle(node).opacity), "0.35");
+        }
+        for (const value of [0, 100]) {
+          await page.goto(`https://stream.test/controller/?player=1&skin=xseries&disconnectedOpacity=${value}&disconnectedTint=00000000`);
+          await page.waitForSelector(".controller.active", { state: "attached" });
+          assert.equal(await page.locator(".controller").evaluate((node) => getComputedStyle(node).opacity), String(value / 100));
+        }
+      } finally {
+        await page.close();
+      }
+    });
+
+    await t.test("analog pressure fills preserve their base and release in both layouts", async () => {
+      const page = await browser.newPage();
+      try {
+        await page.addInitScript(() => {
+          window.testPad = { id: "Trigger fixture", index: 0, buttons: Array.from({ length: 40 }, () => ({ value: 0 })), axes: [0, 0, 0, 0] };
+          Object.defineProperty(navigator, "getGamepads", { value: () => [testPad] });
+        });
+        await serve(page, assets, true);
+        for (const skin of ["gcn", "ds5", "xone", "dreamcast", "steamdeck"]) {
+          await page.goto(`https://stream.test/controller/?player=1&skin=${skin}`);
+          await page.waitForSelector(".controller-background", { state: "attached" });
+          for (const layout of ["full", "minimal"]) {
+            await page.evaluate((layout) => byControllerArtwork.setLayout(document.querySelector(".controller"), layout), layout);
+            for (const pressure of [0, 0.25, 0.5, 0.75, 1, 0]) {
+              await page.evaluate((value) => { testPad.buttons[6].value = value; testPad.buttons[7].value = value; }, pressure);
+              await page.waitForFunction(({ pressure, layout }) => [...document.querySelectorAll(".analog-trigger")].every((node) => {
+                const id = node.querySelector(".trigger-active").getAttribute("clip-path").slice(5, -1);
+                const rect = node.querySelector(`[id="${id}"] rect`);
+                const horizontal = layout === "minimal";
+                const bounds = node.dataset.pressureFullBounds.split(" ").map(Number);
+                const inset = Math.min(parseFloat(getComputedStyle(node.querySelector(".full-geometry .vector-outline")).strokeWidth), bounds[2], bounds[3]);
+                const box = horizontal ? node.querySelector(".trigger-active").getBBox() : { height: bounds[3] - inset };
+                return Math.abs(Number(rect.getAttribute(horizontal ? "width" : "height")) / box[horizontal ? "width" : "height"] - pressure) < 0.000001;
+              }), { pressure, layout });
+              assert.equal(await page.locator(".analog-trigger").evaluateAll((nodes) => nodes.every((node) => getComputedStyle(node).filter === "none" && !node.style.clipPath && getComputedStyle(node).opacity === "1")), true, "Base and outline stay visible without whole-trigger inversion");
+            }
+          }
+        }
+        await page.goto("https://stream.test/controller/?player=1&skin=xone&strength=0");
+        await page.waitForSelector(".controller-background", { state: "attached" });
+        await page.evaluate(() => { testPad.buttons[6].value = 0.5; });
+        await page.waitForFunction(() => {
+          const node = document.querySelector('.control[data-input="button:6"]');
+          return Math.abs(Number(node.querySelector(".trigger-fill-rect").getAttribute("height")) - Number(node.dataset.pressureFullBounds.split(" ")[3]) + parseFloat(getComputedStyle(node.querySelector(".full-geometry .vector-outline")).strokeWidth)) < 0.00001;
+        });
+      } finally { await page.close(); }
+    });
+
+    await t.test("screen openings have true alpha and vector appearance settings remain independent", async () => {
+      const page = await browser.newPage();
+      try {
+        await serve(page, assets, true);
+        for (const skin of ["steamdeck", "wiiu", "dreamcast", "playdate"]) {
+          await page.goto(`https://stream.test/controller/?player=9&skin=${skin}&screenOpacity=0&customColors=yes&customOutlineColor=yes&outlineColor=ff00ff&outlineWidth=1.5&highlightIntensity=50&shadowIntensity=40`);
+          await page.waitForSelector(".controller.active:not(.disconnected)");
+          const box = await page.locator(".screen-surface").boundingBox();
+          box.inset = await page.locator(".screen-surface").evaluate((node) => {
+            const matrix = node.getScreenCTM();
+            return Math.ceil(parseFloat(getComputedStyle(node.nextElementSibling).strokeWidth) * Math.hypot(matrix.a, matrix.b) / 2) + 1;
+          });
+          const opaquePixels = await page.evaluate(async ({ x, image }) => {
+            const bitmap = await createImageBitmap(new Blob([Uint8Array.from(atob(image), c => c.charCodeAt(0))], { type: "image/png" }));
+            const canvas = document.createElement("canvas"); canvas.width = bitmap.width; canvas.height = bitmap.height;
+            const context = canvas.getContext("2d"); context.drawImage(bitmap, 0, 0);
+            const data = context.getImageData(0, 0, canvas.width, canvas.height).data;
+            let opaque = 0;
+            for (let py = Math.ceil(x.y) + x.inset; py < x.y + x.height - x.inset; py++)
+              for (let px = Math.ceil(x.x) + x.inset; px < x.x + x.width - x.inset; px++)
+                if (data[(py * canvas.width + px) * 4 + 3]) opaque++;
+            return opaque;
+          }, { x: box, image: (await page.screenshot({ omitBackground: true })).toString("base64") });
+          assert.equal(opaquePixels, 0, `${skin} screen reveals the layer underneath`);
+          assert.equal(await page.locator(".controller-background .shell-base").first().evaluate(node => getComputedStyle(node).stroke), "rgb(255, 0, 255)");
+          assert.equal(await page.locator(".controller-background .shell-base").first().evaluate(node => getComputedStyle(node).strokeWidth), "4.5px");
+          for (const opacity of [0, 50, 100]) {
+            const setting = opacity ? `&screenOpacity=${opacity}` : "";
+            await page.goto(`https://stream.test/controller/?player=9&skin=${skin}${setting}&controllerColor=${opacity === 50 ? "ffffff" : "111111"}&artworkFilterMode=custom&artworkFilterInvert=100`);
+            await page.waitForSelector(".controller.active:not(.disconnected)");
+            assert.equal(await page.evaluate(() => byStreamResource.settings.screenOpacity), opacity, "Screens default to a transparent opening");
+            await page.evaluate(() => {
+              const controller = document.querySelector(".controller");
+              byControllerArtwork.setLayout(controller, "minimal");
+              byControllerArtwork.setLayout(controller, "full");
+            });
+            const screen = await page.locator(".screen-surface").boundingBox();
+            const sample = async () => {
+              const png = await page.screenshot({ omitBackground: true, clip: { x: Math.floor(screen.x + screen.width / 2), y: Math.floor(screen.y + screen.height / 2), width: 1, height: 1 } });
+              return page.evaluate(async (image) => {
+                const bitmap = await createImageBitmap(new Blob([Uint8Array.from(atob(image), c => c.charCodeAt(0))], { type: "image/png" }));
+                const canvas = document.createElement("canvas"); canvas.width = canvas.height = 1;
+                const context = canvas.getContext("2d"); context.drawImage(bitmap, 0, 0);
+                return [...context.getImageData(0, 0, 1, 1).data];
+              }, png.toString("base64"));
+            };
+            assert.ok(Math.abs((await sample())[3] - 255 * opacity / 100) <= 1, `${skin} keeps independent screen alpha through filters and layout changes`);
+            if (!opacity) {
+              await page.evaluate(() => {
+                const backing = document.createElement("div");
+                backing.style.cssText = "position:fixed;inset:0;background:#3377bb;z-index:-1";
+                document.body.prepend(backing);
+              });
+              assert.deepEqual((await sample()).slice(0, 3), [51, 119, 187], "The backing color is visible through the screen");
+            }
+          }
+        }
+      } finally { await page.close(); }
+    });
+
+    await t.test("model-specific controls, compact bounds, and keyboard inputs remain coherent", async () => {
+      const page = await browser.newPage();
+      try {
+        await serve(page, assets, true);
+        const families = (await fs.readdir(path.join(root, "controller", "controllers"))).filter((name) => name.endsWith(".svg")).map((name) => path.basename(name, ".svg"));
+        for (const skin of families) {
+          await page.goto(`https://stream.test/controller/?player=9&skin=${skin}&layout=minimal`);
+          await page.waitForSelector(".controller.active:not(.disconnected) .controller-background", { state: "attached" });
+          const dimensions = await page.locator(".controller-background").evaluate((node) => ({ full: node.dataset.fullViewbox.split(" ").map(Number), compact: node.dataset.compactViewbox.split(" ").map(Number) }));
+          assert.ok(dimensions.compact[2] * dimensions.compact[3] < dimensions.full[2] * dimensions.full[3] * 0.4, `${skin} has its own compact canvas`);
+          const overflow = await page.locator(".control-layer .button-face, .control-layer .gcn-face, .fixed-layer .vector-outline").evaluateAll((faces) =>
+            faces.some((face) => {
+              const box = face.getBoundingClientRect();
+              if (!box.width || !box.height) return false;
+              const viewport = face.closest("svg").getBoundingClientRect();
+              return box.left < viewport.left - 2 || box.right > viewport.right + 2 || box.top < viewport.top - 2 || box.bottom > viewport.bottom + 2;
+            })
+          );
+          assert.equal(overflow, false, `${skin} packs visible controls within the drawing`);
+          assert.equal(await page.locator(".control-layer:not(.minimal-omit)").evaluateAll((controls) => controls.every((control) => [...control.querySelectorAll(".press-visual :is(path, rect, circle, ellipse, polygon, polyline)")].some((face) => {
+            if (face.closest(".word-label, .full-only-decoration")) return false;
+            const box = face.getBoundingClientRect();
+            return box.width > 0 && box.height > 0;
+          }))), true, `${skin} keeps every standard control visible`);
+          await page.keyboard.down("j");
+          await page.waitForFunction(() => document.querySelector('.control[data-name="button-1"]').classList.contains("pressed"));
+          await page.keyboard.up("j");
+          if (skin === "n64") {
+            assert.equal(await page.locator('.control[data-name^="button-c-"]').count(), 4);
+            await page.keyboard.down("h");
+            await page.waitForFunction(() => document.querySelector('.control[data-name="button-c-right"]').classList.contains("pressed"));
+            await page.keyboard.up("h");
+          }
+          if (skin === "fgc") {
+            assert.equal(await page.locator('.control[data-name="stick-2"]').count(), 0);
+            const base = await page.locator('.fixed-layer[data-for="button:10"] .vector-outline').boundingBox();
+            const ball = await page.locator('.control[data-name="stick-1"] .button-face').boundingBox();
+            assert.ok(Math.abs(ball.x + ball.width / 2 - base.x - base.width / 2) < 0.01 && Math.abs(ball.y + ball.height / 2 - base.y - base.height / 2) < 0.01, "The arcade ball rests at the center of its base");
+            await page.keyboard.down("Space");
+            await page.waitForFunction(() => parseFloat(document.querySelector('.control[data-name="stick-1"]').style.translate.split(" ")[1]) < 0);
+            await page.keyboard.up("Space");
+            await page.waitForFunction(() => document.querySelector('.control[data-name="stick-1"]').style.translate.split(" ").every((value) => parseFloat(value) === 0));
+          }
+        }
+        for (const layout of ["full", "minimal"]) {
+          await page.goto(`https://stream.test/controller/?player=9&skin=snes&layout=${layout}`);
+          await page.waitForSelector(".controller-background", { state: "attached" });
+          const controls = await page.evaluate(() =>
+            Object.fromEntries(
+              [0, 1, 2, 3].map((id) => {
+                const node = document.querySelector(`.control[data-name="${byControllerArtwork.names[id]}"] .button-face`);
+                return [byControllerArtwork.skins.snes.buttons.find((button) => button.id === id).letter, node.getBoundingClientRect().toJSON()];
+              })
+            )
+          );
+          assert.ok(controls.X.y < controls.A.y && controls.Y.x < controls.A.x && controls.B.y > controls.A.y);
+        }
+        for (const skin of ["xone", "ds4", "ds5", "xseries", "x360", "ds3"]) {
+          await page.goto(`https://stream.test/controller/?player=9&skin=${skin}`);
+          await page.waitForSelector(".controller-background", { state: "attached" });
+          assert.equal(await page.locator('.control[data-name="touch-pad"]').count(), ["ds4", "ds5", "xseries"].includes(skin) ? 1 : 0);
+        }
+      } finally {
+        await page.close();
+      }
+    });
+
+    await t.test("arcade lever rests centered and reaches all eight directions without doubled travel", async () => {
+      const page = await browser.newPage();
+      try {
+        await page.addInitScript(() => {
+          window.testPad = { id: "Arcade motion fixture", index: 0, buttons: Array.from({ length: 40 }, () => ({ value: 0 })), axes: [0, 0, 0, 0] };
+          Object.defineProperty(navigator, "getGamepads", { value: () => [testPad] });
+        });
+        await serve(page, assets, true);
+        const directions = [[0, -1], [1, -1], [1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1]];
+        for (const layout of ["full", "minimal"]) {
+          await page.goto(`https://stream.test/controller/?skin=fgc&player=1&layout=${layout}`);
+          await page.waitForSelector(".controller.active:not(.disconnected)");
+          const base = page.locator('.fixed-layer[data-for="button:10"] .vector-outline');
+          let fixedBounds = await base.boundingBox();
+          // Measure visible displacement relative to the ball radius, independent of viewport scaling.
+          const expectPosition = async (x, y) => {
+            await page.waitForFunction(({ x, y }) => {
+              const ball = document.querySelector('.control[data-name="stick-1"] .button-face').getBoundingClientRect();
+              const base = document.querySelector('.fixed-layer[data-for="button:10"] .vector-outline').getBoundingClientRect();
+              const dx = (ball.x + ball.width / 2 - base.x - base.width / 2) / (ball.width / 2);
+              const dy = (ball.y + ball.height / 2 - base.y - base.height / 2) / (ball.height / 2);
+              const magnitude = Math.max(1, Math.hypot(x, y));
+              return Math.abs(dx - x / magnitude * 40 / 53) < 0.005 && Math.abs(dy - y / magnitude * 40 / 53) < 0.005;
+            }, { x, y });
+            assert.deepEqual(await base.boundingBox(), fixedBounds, "The socket stays fixed");
+            assert.equal(await page.locator(".stick-shaft").evaluate((shaft) => {
+              const matrix = shaft.getScreenCTM();
+              const anchor = new DOMPoint(shaft.x1.baseVal.value, shaft.y1.baseVal.value).matrixTransform(matrix);
+              const tip = new DOMPoint(shaft.x2.baseVal.value, shaft.y2.baseVal.value).matrixTransform(matrix);
+              const socket = document.querySelector('.fixed-layer[data-for="button:10"] .vector-outline').getBoundingClientRect();
+              const ball = document.querySelector('.control[data-name="stick-1"] .button-face').getBoundingClientRect();
+              return Math.abs(anchor.x - socket.x - socket.width / 2) < 0.03 && Math.abs(anchor.y - socket.y - socket.height / 2) < 0.03 && Math.abs(tip.x - ball.x - ball.width / 2) < 0.03 && Math.abs(tip.y - ball.y - ball.height / 2) < 0.03;
+            }), true, "The gray shaft joins the fixed socket center to the current ball position");
+          };
+          await expectPosition(0, 0);
+          for (const input of ["axes", "dpad", "pressed"])
+            for (const [x, y] of directions) {
+              await page.evaluate(({ input, x, y }) => {
+                testPad.axes = input === "axes" ? [x, y, 0, 0] : [0, 0, 0, 0];
+                [12, 13, 14, 15].forEach((slot, i) => {
+                  const pressed = [y < 0, y > 0, x < 0, x > 0][i];
+                  testPad.buttons[slot] = input === "pressed" ? { pressed } : { value: input === "dpad" ? Number(pressed) : 0 };
+                });
+              }, { input, x, y });
+              await expectPosition(x, y);
+              await page.evaluate(() => { testPad.axes = [0, 0, 0, 0]; testPad.buttons.forEach((button) => { button.value = 0; button.pressed = false; }); });
+              await expectPosition(0, 0);
+            }
+          await page.evaluate(() => { testPad.axes = [-1, -1, 0, 0]; testPad.buttons[12].value = testPad.buttons[14].value = 1; });
+          await expectPosition(-1, -1);
+          await page.evaluate(() => { testPad.axes = [0.5, 0, 0, 0]; testPad.buttons[14].value = 0; });
+          await expectPosition(0, -1);
+          await page.evaluate(() => { testPad.buttons[12].value = 0; });
+          await expectPosition(0.5, 0);
+          await page.evaluate(() => { testPad.axes = [0.01, 0.01, 0, 0]; });
+          await expectPosition(0, 0);
+          await page.evaluate(() => { testPad.buttons[12] = { value: 0, pressed: true }; });
+          await expectPosition(0, -1);
+          await page.evaluate(() => { testPad.buttons[12].pressed = false; });
+          await expectPosition(0, 0);
+          const mapping = [{ targetType: "buttons", target: 12, choiceType: "buttons", choice: 20 }];
+          await page.goto(`https://stream.test/controller/?${new URLSearchParams({ skin: "fgc", player: "1", layout, mapping: JSON.stringify(mapping) })}`);
+          await page.waitForSelector(".controller.active:not(.disconnected)");
+          fixedBounds = await base.boundingBox();
+          await page.evaluate(() => { testPad.buttons[20] = { pressed: true }; });
+          await expectPosition(0, -1);
+          await page.evaluate(() => { testPad.buttons[20].pressed = false; });
+          await expectPosition(0, 0);
+        }
+      } finally {
+        await page.close();
+      }
+    });
+
+    await t.test("controller remaps original inputs, calibrates raw axes, and rejects invalid bindings", async () => {
+      const page = await browser.newPage();
+      try {
+        await page.addInitScript(() => {
+          window.testPad = { id: "Mapping fixture", index: 0, buttons: Array.from({ length: 23 }, () => ({ value: 0, pressed: false })), axes: [0, 0, -1, 0] };
+          Object.defineProperty(navigator, "getGamepads", { value: () => [window.testPad] });
+        });
+        await serve(page, assets, true);
+        const mapping = [
+          { targetType: "buttons", target: 0, choiceType: "buttons", choice: 1 },
+          { targetType: "buttons", target: 1, choiceType: "buttons", choice: 0 },
+          { targetType: "buttons", target: 6, choiceType: "axes", choice: 2, choiceOperand: "+", axesConfig: { type: "trigger", lowValue: -1, highValue: 1 } },
+          { targetType: "axes", target: 0, choiceType: "axes", choice: 3, axesConfig: { type: "stick", lowValue: 1, highValue: -1 } }
+        ];
+        const query = new URLSearchParams({ player: "1", offset: "20", mapping: JSON.stringify({ mapping }) });
+        await page.goto(`https://stream.test/controller/?${query}`);
+        await page.waitForFunction(() => document.querySelector(".controller.active:not(.disconnected)"));
+        await page.evaluate(() => {
+          testPad.buttons[1].value = 1;
+        });
+        await page.waitForFunction(() => document.querySelector('.controller.active [data-name="button-1"]').classList.contains("pressed"));
+        assert.equal(await page.locator('.controller.active [data-name="button-2"]').evaluate((element) => element.classList.contains("pressed")), false);
+        assert.equal(await page.evaluate(() => byStreamResource.gamepadSupport.gamepads[0].buttons[6].value), 0, "Calibrated triggers rest at zero even with a legacy half-axis marker");
+        await page.evaluate(() => {
+          testPad.axes[2] = 0;
+          testPad.axes[3] = 0.75;
+        });
+        await page.waitForFunction(() => byStreamResource.gamepadSupport.gamepads[0].buttons[6].value === 0.5);
+        await page.waitForFunction(() => {
+          const stick = document.querySelector('.controller.active [data-name="stick-1"]');
+          const [x, y = 0] = getComputedStyle(stick).translate.split(" ").map(parseFloat);
+          return Math.abs(x + 15 * Number(stick.dataset.travelScale)) < 0.0001 && y === 0;
+        });
+        const hat = { targetType: "dpad", choiceType: "axes", choice: 3, choiceOperand: "+", positions: { up: -1, upright: -0.714, right: -0.428, downright: -0.142, down: 0.142, downleft: 0.428, left: 0.714, upleft: 1 } };
+        await page.goto(`https://stream.test/controller/?${new URLSearchParams({ player: "1", mapping: JSON.stringify([hat]) })}`);
+        await page.waitForFunction(() => document.querySelector(".controller.active:not(.disconnected)"));
+        await page.evaluate(() => {
+          testPad.axes[3] = -0.714;
+        });
+        await page.waitForFunction(
+          () => document.querySelector('.controller.active [data-name="button-dpad-top"]').classList.contains("pressed") && document.querySelector('.controller.active [data-name="button-dpad-right"]').classList.contains("pressed")
+        );
+        const invalid = new URLSearchParams({ player: "1", mapping: JSON.stringify([mapping[0], { targetType: "buttons", target: "bad", choiceType: "buttons", choice: 0 }]) });
+        await page.goto(`https://stream.test/controller/?${invalid}`);
+        await page.waitForFunction(() => window.byStreamResource);
+        assert.deepEqual(await page.evaluate(() => byStreamResource.settings.mapping), [], "Invalid arrays never apply a partial remap");
+        const keyBinding = new URLSearchParams({ player: "9", mapping: JSON.stringify([{ targetType: "buttons", target: 0, choiceType: "keys", choice: "KeyB" }]) });
+        await page.goto(`https://stream.test/controller/?${keyBinding}`);
+        await page.waitForFunction(() => document.querySelector(".controller.active:not(.disconnected)"));
+        await page.keyboard.down("b");
+        await page.waitForFunction(() => document.querySelector('.controller.active [data-name="button-1"]').classList.contains("pressed"));
+        await page.keyboard.up("b");
+        await page.waitForFunction(() => !document.querySelector('.controller.active [data-name="button-1"]').classList.contains("pressed"));
+        const disabled = new URLSearchParams({ player: "9", mapping: JSON.stringify([{ targetType: "buttons", target: 0, disabled: true }]) });
+        await page.goto(`https://stream.test/controller/?${disabled}`);
+        await page.waitForFunction(() => document.querySelector(".controller.active:not(.disconnected)"));
+        await page.keyboard.down("j");
+        await page.waitForFunction(() => byStreamResource.gamepadSupport.gamepadsRaw[9].buttons[0] === 1);
+        assert.equal(await page.locator('.controller.active [data-name="button-1"]').evaluate((element) => element.classList.contains("pressed")), false);
+        await page.keyboard.up("j");
+        const rearGrip = new URLSearchParams({ player: "9", skin: "steamdeck", mapping: JSON.stringify([{ targetType: "buttons", target: 25, choiceType: "keys", choice: "KeyB" }]) });
+        await page.goto(`https://stream.test/controller/?${rearGrip}`);
+        await page.waitForSelector(".controller.active:not(.disconnected)");
+        await page.keyboard.down("b");
+        await page.waitForFunction(() => byStreamResource.gamepadSupport.gamepads[9].buttons[25].value === 1);
+        assert.equal(await page.locator('[data-name="button-grip-left"]').count(), 0, "Legacy mappings remain valid without floating rear buttons");
+        await page.keyboard.up("b");
+        await page.waitForFunction(() => byStreamResource.gamepadSupport.gamepads[9].buttons[25].value === 0);
+      } finally {
+        await page.close();
+      }
+    });
 
     await t.test("empty text, automatic widths, multiline credits, and overlay layout fixes", async () => {
       const page = await browser.newPage();
@@ -823,6 +1696,13 @@ test("resources render and round-trip URLs without configurator assets", async (
         await page.waitForFunction(() => document.querySelector("#overlay .primary")?.textContent === "Downloaded");
         assert.equal(await page.evaluate(() => typeof byConfigurator), "undefined");
         assert.match(await page.evaluate(() => byStream.settingsURL(byStreamResource, byStreamResource.settings).href), /\/index\.html\?text=Downloaded$/);
+        await fs.mkdir(path.join(directory, "controller"));
+        for (const asset of ["controller.js", "controller.css"]) await fs.copyFile(path.join(root, "controller", asset), path.join(directory, "controller", asset));
+        const controllerFile = path.join(directory, "controller/index.html");
+        await fs.writeFile(controllerFile, standaloneHTML(await fs.readFile(path.join(root, "controller/index.html"), "utf8")));
+        await page.goto(`${pathToFileURL(controllerFile).href}?player=9&skin=xone`);
+        await page.waitForFunction(() => document.querySelector('[role="alert"]')?.textContent.includes("require HTTP/HTTPS"));
+        assert.equal(await page.evaluate(() => typeof byConfigurator), "undefined");
       } finally {
         await page.close();
         assert.equal(path.dirname(directory), os.tmpdir());
@@ -831,5 +1711,212 @@ test("resources render and round-trip URLs without configurator assets", async (
     });
   } finally {
     await browser.close();
+  }
+});
+test("handheld D-pads paint the requested directions after artwork rotation", async () => {
+  const assets = await loadAssets(runtimeAssets);
+  const browser = await chromium.launch(launchOptions);
+  try {
+    const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
+    await serve(page, assets, true);
+    await page.addInitScript(() => {
+      window.testPad = { id: "Directional input", index: 0, buttons: Array.from({ length: 40 }, () => ({ value: 0 })), axes: [0, 0, 0, 0] };
+      Object.defineProperty(navigator, "getGamepads", { value: () => [testPad] });
+    });
+    for (const skin of ["steamdeck", "wiiu"])
+      for (const layout of ["full", "minimal"]) {
+        await page.goto(`https://stream.test/controller/?player=1&skin=${skin}&layout=${layout}`);
+        await page.waitForSelector(".controller.active:not(.disconnected)");
+        const bounds = await page.locator('.control[data-input="button:12"] .press-visual').evaluate((node) => node.getBoundingClientRect().toJSON());
+        const images = [];
+        const states = [[], [12], [13], [14], [15], [12, 15], []];
+        for (const pressed of states) {
+          await page.evaluate((pressed) => {
+            for (let slot = 12; slot <= 15; slot++) testPad.buttons[slot].value = Number(pressed.includes(slot));
+          }, pressed);
+          await page.waitForFunction((pressed) => [12, 13, 14, 15].every((slot) => document.querySelector(`.control[data-input="button:${slot}"]`).classList.contains("pressed") === pressed.includes(slot)), pressed);
+          images.push((await page.screenshot({ clip: { x: bounds.x, y: bounds.y, width: bounds.width, height: bounds.height } })).toString("base64"));
+        }
+        const samples = await page.evaluate(async (images) => {
+          const samples = [];
+          for (const data of images) {
+            const bitmap = await createImageBitmap(new Blob([Uint8Array.from(atob(data), (c) => c.charCodeAt(0))], { type: "image/png" }));
+            const canvas = document.createElement("canvas");
+            canvas.width = bitmap.width;
+            canvas.height = bitmap.height;
+            const context = canvas.getContext("2d");
+            context.drawImage(bitmap, 0, 0);
+            samples.push([[0.5, 0.18], [0.5, 0.82], [0.18, 0.5], [0.82, 0.5]].map(([x, y]) => [...context.getImageData(Math.floor(x * canvas.width), Math.floor(y * canvas.height), 1, 1).data]));
+            bitmap.close();
+          }
+          return samples;
+        }, images);
+        for (let state = 0; state < states.length; state++)
+          for (let direction = 0; direction < 4; direction++) {
+            const inverted = states[state].includes(direction + 12);
+            assert.ok(samples[state][direction].slice(0, 3).every((channel, i) => Math.abs(channel - (inverted ? 255 - samples[0][direction][i] : samples[0][direction][i])) <= 1), `${skin}/${layout}: ${states[state]} paints direction ${direction + 12} correctly`);
+          }
+      }
+  } finally {
+    await browser.close();
+  }
+});
+
+// Pixel checks exercise the browser's actual SVG filter painting, not just computed CSS.
+test("controller inversion paints and releases consistently across browser engines", async (t) => {
+  for (const [engine, type, options] of [
+    ["Chromium", chromium, launchOptions],
+    ["Firefox", firefox, {}],
+    ["WebKit", webkit, {}]
+  ]) {
+    let installed = true;
+    if (engine !== "Chromium") {
+      try {
+        await fs.access(type.executablePath());
+      } catch {
+        installed = false;
+      }
+    }
+    await t.test(engine, { skip: installed ? false : "Install this Playwright browser to run pixel checks" }, async () => {
+      const browser = await type.launch(options);
+      try {
+        // Handheld buttons need an OBS-sized canvas; thumbnail filters can rasterize their edges differently.
+        const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
+        await serve(page, new Map());
+        await page.route("**/controller/pixels.html", (route) => route.fulfill({ contentType: "text/html", body: "<style>body{margin:0;background:#808080}</style>" }));
+        await page.goto("https://stream.test/controller/pixels.html");
+        await page.addStyleTag({ content: await fs.readFile(path.join(root, "controller", "controller.css"), "utf8") });
+        await page.addScriptTag({ url: "https://stream.test/controller/controller.js" });
+        await page.evaluate(async () => {
+          window.byControllerArtwork = await loadControllerArtwork();
+        });
+        const ids = await page.evaluate(() => Object.keys(byControllerArtwork.skins));
+        for (const id of ids) {
+          await page.evaluate((id) => {
+            const artwork = byControllerArtwork.render(id, "full", "icons");
+            document.body.innerHTML = `<div class="controller active" style="position:relative;top:0;left:0;width:1280px;height:720px;--controller-color:#485368">${artwork.markup}</div>`;
+          }, id);
+          for (const layout of ["full", "minimal"]) {
+            await page.evaluate((layout) => {
+              const controller = document.querySelector(".controller");
+              byControllerArtwork.setLayout(controller, layout);
+              controller.style.width = "1280px";
+              controller.style.height = "720px";
+            }, layout);
+            const control = page.locator('.control[data-name="button-1"]');
+            assert.equal(await control.evaluate((node) => node.tagName), "svg", "Control owns a root SVG for WebKit filter painting");
+            const bounds = await control.evaluate((node) => {
+              const visual = node.querySelector(".press-visual");
+              const bounds = visual.getBoundingClientRect().toJSON();
+              // Native stock strokes can extend beyond SVG's fill-only client rectangle.
+              const stroke = Math.max(0, ...[...visual.querySelectorAll("path, circle, ellipse, rect, polygon")].map((shape) => {
+                const style = getComputedStyle(shape), matrix = shape.getScreenCTM();
+                if (style.stroke === "none") return 0;
+                return parseFloat(style.strokeWidth) / 2 * (style.vectorEffect === "non-scaling-stroke" ? 1 : Math.max(Math.hypot(matrix.a, matrix.b), Math.hypot(matrix.c, matrix.d)));
+              }));
+              return { x: bounds.x - stroke, y: bounds.y - stroke, width: bounds.width + stroke * 2, height: bounds.height + stroke * 2 };
+            });
+            await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+            const images = [await page.screenshot()];
+            await control.evaluate((node) => node.classList.add("pressed"));
+            await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+            images.push(await page.screenshot());
+            await control.evaluate((node) => node.classList.remove("pressed"));
+            await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+            images.push(await page.screenshot());
+            const result = await page.evaluate(
+              async ({ images, bounds }) => {
+                const pixels = [];
+                let width;
+                for (const data of images) {
+                  const image = await createImageBitmap(new Blob([Uint8Array.from(atob(data), (character) => character.charCodeAt(0))], { type: "image/png" }));
+                  const canvas = document.createElement("canvas");
+                  canvas.width = image.width;
+                  canvas.height = image.height;
+                  width = image.width;
+                  const context = canvas.getContext("2d");
+                  context.drawImage(image, 0, 0);
+                  pixels.push(context.getImageData(0, 0, canvas.width, canvas.height).data);
+                }
+                let changed = 0,
+                  inverted = 0,
+                  unrelated = 0,
+                  released = true;
+                const neighbors = [-width - 1, -width, -width + 1, -1, 1, width - 1, width, width + 1];
+                for (let i = 0; i < pixels[0].length; i += 4) {
+                  // Chromium can round antialiasing by one channel unit after a filter repaint.
+                  if ([0, 1, 2, 3].some((channel) => Math.abs(pixels[0][i + channel] - pixels[2][i + channel]) > 1)) released = false;
+                  if ([0, 1, 2].some((channel) => Math.abs(pixels[0][i + channel] - pixels[1][i + channel]) > 5)) {
+                    const x = (i / 4) % width, y = Math.floor(i / 4 / width);
+                    // Compositing can rasterize other SVG edges differently; protect their flat interiors.
+                    if (x < bounds.x - 4 || x > bounds.x + bounds.width + 4 || y < bounds.y - 4 || y > bounds.y + bounds.height + 4) {
+                      const flat = neighbors.every((offset) => [0, 1, 2].every((channel) => Math.abs(pixels[0][i + offset * 4 + channel] - pixels[0][i + channel]) <= 1));
+                      if (flat) unrelated++;
+                    } else {
+                      changed++;
+                      if ([0, 1, 2].every((channel) => Math.abs(pixels[0][i + channel] + pixels[1][i + channel] - 255) < 4)) inverted++;
+                    }
+                  }
+                }
+                return { changed, ratio: inverted / Math.max(1, changed), unrelated, released };
+              },
+              { images: images.map((image) => image.toString("base64")), bounds }
+            );
+            assert.ok(result.changed > 0 && result.ratio > 0.8, `${engine}/${id}/${layout} paints inverted colors`);
+            assert.equal(result.unrelated, 0, `${engine}/${id}/${layout} preserves unrelated colors`);
+            assert.equal(result.released, true, `${engine}/${id}/${layout} restores its idle pixels`);
+          }
+        }
+        const pressureModels = engine === "Chromium" ? await page.evaluate(() => Object.values(byControllerArtwork.skins).filter((skin) => skin.buttons.some((button) => button.analog)).map((skin) => skin.id)) : ["gcn", "ds5", "steamdeck"];
+        for (const id of pressureModels)
+          for (const outline of engine === "Chromium" ? [0.5, 2] : [1])
+            for (const input of await page.evaluate((id) => byControllerArtwork.skins[id].buttons.filter((button) => button.analog).map((button) => button.id), id))
+              for (const layout of ["full", "minimal"]) {
+                await page.evaluate(({ id, layout, outline }) => {
+                  const artwork = byControllerArtwork.render(id, layout, "icons");
+                  document.body.innerHTML = `<div class="controller active" style="position:relative;top:0;left:0;width:1280px;height:720px">${artwork.markup}</div>`;
+                  customizeControllerAppearance(document.querySelector(".controller"), { customColors: "yes", controllerColor: "#485368", outlineWidth: outline, customOutlineColor: "no", tintOutlines: "no", highlightIntensity: 12, shadowIntensity: 16, tintControls: "no", customGuide: "no" });
+                }, { id, layout, outline });
+                const images = [];
+                for (const pressure of [0, 0.25, 0.5, 0.75, 1, 0]) {
+                  await page.locator(`.analog-trigger[data-input="button:${input}"]`).evaluate((node, pressure) => {
+                    const id = node.querySelector(".trigger-active").getAttribute("clip-path").slice(5, -1);
+                    const rect = node.querySelector(`[id="${id}"] rect`);
+                    const horizontal = node.dataset.layout === "minimal";
+                    const [x, y, width, height] = node.dataset.pressureFullBounds.split(" ").map(Number);
+                    const inset = Math.min(parseFloat(getComputedStyle(node.querySelector(".full-geometry .vector-outline")).strokeWidth) / 2, width / 2, height / 2);
+                    const box = horizontal ? node.querySelector(".trigger-active").getBBox() : { x: x + inset, y: y + inset, width: width - inset * 2, height: height - inset * 2 };
+                    rect.setAttribute("x", String(box.x));
+                    rect.setAttribute("y", String(horizontal ? box.y : box.y + box.height * (1 - pressure)));
+                    rect.setAttribute("width", String(horizontal ? box.width * pressure : box.width));
+                    rect.setAttribute("height", String(horizontal ? box.height : box.height * pressure));
+                  }, pressure);
+                  await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+                  images.push((await page.screenshot()).toString("base64"));
+                }
+                const changed = await page.evaluate(async (images) => {
+                  let initial;
+                  const changes = [];
+                  for (const image of images) {
+                    const bitmap = await createImageBitmap(new Blob([Uint8Array.from(atob(image), (c) => c.charCodeAt(0))], { type: "image/png" }));
+                    const canvas = document.createElement("canvas"); canvas.width = bitmap.width; canvas.height = bitmap.height;
+                    const context = canvas.getContext("2d"); context.drawImage(bitmap, 0, 0);
+                    const pixels = context.getImageData(0, 0, canvas.width, canvas.height).data;
+                    initial ||= pixels;
+                    let count = 0;
+                    for (let i = 0; i < pixels.length; i += 4)
+                      if ([0, 1, 2].some((channel) => Math.abs(initial[i + channel] - pixels[i + channel]) > 5)) count++;
+                    changes.push(count);
+                  }
+                  return changes;
+                }, images);
+                assert.equal(changed[0], 0);
+                assert.equal(changed[5], 0, `${engine}/${id}/${input}/${layout}/${outline} releases its pressure fill`);
+                for (let i = 1; i <= 4; i++) assert.ok(changed[i] > changed[i - 1], `${engine}/${id}/${input}/${layout}/${outline} progressively paints pressure ${i * 25}%`);
+              }
+      } finally {
+        await browser.close();
+      }
+    });
   }
 });

@@ -349,7 +349,7 @@
       {
         id: "controller",
         name: "Controller",
-        description: "Gamepad or keyboard. Four skins. Every input on screen.",
+        description: "Gamepad or keyboard. 32 models. Full or compact layouts.",
         icon: "fa-gamepad",
         category: "interaction",
         status: "Beta",

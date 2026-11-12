@@ -1,0 +1,327 @@
+<svg xmlns="http://www.w3.org/2000/svg" id="ps" data-controller="ps" data-name="PlayStation Controller" data-platform="PlayStation" viewBox="1.658 23.70606 520.1218 378.05164" data-labels="icons" data-layout="full" role="img" aria-label="PlayStation Controller input display" font-family="Arial, sans-serif" data-full-viewbox="1.658 23.70606 520.1218 378.05164" data-compact-viewbox="0 0 141 71" data-source="PS.svg">
+  <title>PlayStation Controller</title>
+  <style>
+    .custom-colors .shell-base { fill: var(--controller-color); }
+    .custom-colors .shell-panel { fill: var(--controller-panel); }
+    .hardware-marking { opacity: 0.65; } .custom-colors .hardware-marking { fill: var(--controller-ink); }
+    .vector-outline { stroke-linecap: round; stroke-linejoin: round; }
+    .shell-highlight { fill: #ffffff; opacity: var(--highlight-intensity, 0.12); }
+    .shell-shadow { fill: #000000; opacity: var(--shadow-intensity, 0.16); }
+    .screen-surface { fill: #111111; opacity: var(--screen-opacity, 0); }
+    .word-label, .compact-geometry, .minimal-hardware { display: none; }
+    [data-labels="letters"] .hardware-icon { display: none; }
+    [data-labels="letters"] .word-label { display: inline; }
+    [data-labels="none"] .marking { display: none; }
+    [data-layout="minimal"] #shell, [data-layout="minimal"] .shell-decoration, [data-layout="minimal"] .full-only-decoration { display: none; }
+    [data-layout="minimal"] .minimal-hardware { display: inline; }
+    [data-layout="minimal"] .full-hardware { display: none; }
+    [data-layout="minimal"][data-labels="letters"] .compact-geometry.word-label { display: inline; }
+    [data-layout="minimal"] .minimal-omit, [data-layout="minimal"].minimal-omit { display: none; }
+    .player-indicator { fill: #20252c; stroke: #111111; stroke-width: 0.6; }
+    .player-indicator.lit { fill: var(--player-color, #65e374); }
+    .marking { pointer-events: none; }
+    [data-labels="letters"] .hardware-icon, [data-labels="none"] .marking { display: none; }
+
+    .custom-colors .socket-base { fill: var(--controller-socket); }
+    .guide-custom-housing { display: none; }
+
+    [data-layout="minimal"] .minimal-bar .full-geometry, [data-layout="minimal"].minimal-bar .full-geometry, [data-layout="minimal"] .minimal-bar .word-label, [data-layout="minimal"].minimal-bar .word-label { display: none; }
+    [data-layout="minimal"] .minimal-bar .compact-geometry, [data-layout="minimal"].minimal-bar .compact-geometry { display: inline; }
+</style>
+  <defs>
+    <g id="housing-shape">
+      <path d="M155.23 140.19h212.97784l6.31-23.4c1.67025-6.18278 6.4226-11.06 12.56-12.89 16.87-4.89 33.75-4.56 50.62 0.29 5.89223 1.72019 10.55289 6.24233 12.45 12.08l5.71 31c21.35046 13.42614 35.09607 36.15627 37.07 61.3l20.16 123.64c4.13761 25.3539-10.50305 50.02471-34.74 58.54-22.87546 8.05348-48.29898-0.44711-61.73-20.64l-37.81-72.53c-3.88863-7.45266-11.59384-12.12972-20-12.14h-194.17784c-8.40616 0.01028-16.11137 4.68734-20 12.14l-37.81 72.53c-13.43102 20.19289-38.85454 28.69348-61.73 20.64-24.23695-8.51529-38.87761-33.1861-34.74-58.54l20.16-123.64c1.97393-25.14373 15.71954-47.87386 37.07-61.3l5.71-31c1.89711-5.83767 6.55777-10.35981 12.45-12.08 16.87-4.85 33.75-5.18 50.62-0.29 6.1374 1.83 10.88975 6.70722 12.56 12.89z" fill="#ffffff" stroke="none" class=""/>
+    </g>
+    <mask id="highlight-rim" maskUnits="userSpaceOnUse" x="-1000" y="-1000" width="4000" height="4000">
+      <use href="#housing-shape"/>
+      <path d="M155.23 140.19h212.97784l6.31-23.4c1.67025-6.18278 6.4226-11.06 12.56-12.89 16.87-4.89 33.75-4.56 50.62 0.29 5.89223 1.72019 10.55289 6.24233 12.45 12.08l5.71 31c21.35046 13.42614 35.09607 36.15627 37.07 61.3l20.16 123.64c4.13761 25.3539-10.50305 50.02471-34.74 58.54-22.87546 8.05348-48.29898-0.44711-61.73-20.64l-37.81-72.53c-3.88863-7.45266-11.59384-12.12972-20-12.14h-194.17784c-8.40616 0.01028-16.11137 4.68734-20 12.14l-37.81 72.53c-13.43102 20.19289-38.85454 28.69348-61.73 20.64-24.23695-8.51529-38.87761-33.1861-34.74-58.54l20.16-123.64c1.97393-25.14373 15.71954-47.87386 37.07-61.3l5.71-31c1.89711-5.83767 6.55777-10.35981 12.45-12.08 16.87-4.85 33.75-5.18 50.62-0.29 6.1374 1.83 10.88975 6.70722 12.56 12.89z" fill="#000000" stroke="none" class="" transform="translate(4 5)"/>
+    </mask>
+    <mask id="shadow-rim" maskUnits="userSpaceOnUse" x="-1000" y="-1000" width="4000" height="4000">
+      <use href="#housing-shape"/>
+      <path d="M155.23 140.19h212.97784l6.31-23.4c1.67025-6.18278 6.4226-11.06 12.56-12.89 16.87-4.89 33.75-4.56 50.62 0.29 5.89223 1.72019 10.55289 6.24233 12.45 12.08l5.71 31c21.35046 13.42614 35.09607 36.15627 37.07 61.3l20.16 123.64c4.13761 25.3539-10.50305 50.02471-34.74 58.54-22.87546 8.05348-48.29898-0.44711-61.73-20.64l-37.81-72.53c-3.88863-7.45266-11.59384-12.12972-20-12.14h-194.17784c-8.40616 0.01028-16.11137 4.68734-20 12.14l-37.81 72.53c-13.43102 20.19289-38.85454 28.69348-61.73 20.64-24.23695-8.51529-38.87761-33.1861-34.74-58.54l20.16-123.64c1.97393-25.14373 15.71954-47.87386 37.07-61.3l5.71-31c1.89711-5.83767 6.55777-10.35981 12.45-12.08 16.87-4.85 33.75-5.18 50.62-0.29 6.1374 1.83 10.88975 6.70722 12.56 12.89z" fill="#000000" stroke="none" class="" transform="translate(-4 -5)"/>
+    </mask>
+    <clipPath id="dpad-12">
+      <polygon points="50.2998,152.46 172.42,152.46 111.3599,213.54"/>
+    </clipPath>
+    <clipPath id="dpad-13">
+      <polygon points="50.2998,274.62 172.42,274.62 111.3599,213.54"/>
+    </clipPath>
+    <clipPath id="dpad-14">
+      <polygon points="50.2998,152.46 50.2998,274.62 111.3599,213.54"/>
+    </clipPath>
+    <clipPath id="dpad-15">
+      <polygon points="172.42,152.46 172.42,274.62 111.3599,213.54"/>
+    </clipPath>
+  </defs>
+  <g id="input-5" class="control stock-neutral minimal-bar" data-name="button-right-shoulder-top" data-input="button:5" data-label="R1" data-bounds="381.50784 81.68516 61.23001 29.16484" data-compact-transform="matrix(0.45729 0 0 0.45729 -100.46052 -37.0224)" data-order="0" data-compact-scale="0.45729">
+    <g class="press-visual">
+      <g>
+        <g class="full-geometry shoulder-geometry">
+          <path d="M381.50784 110.85l0-10.87231a20.47687 14.86 90 0 1 10-14.37239 97.43736 70.71 90 0 1 40.48 0.31694 20.55954 14.92 90 0 1 10 13.4767l0.75 11.45106Z" fill="#64686b" stroke="rgb(0, 0, 0)" class="vector-outline button-face" stroke-width="3"/>
+          <g class="hardware-icon marking ">
+            <path d="M404.56705 95.50476V86.61556H408.12273Q411.67841 86.61556 411.67841 89.28232 411.67841 91.06016 408.12273 91.06016H404.56705M408.12273 91.06016L411.67841 95.50476" fill="none" stroke="var(--button-label-color, #a2a4a6)" stroke-width="1.25" stroke-linejoin="round" stroke-linecap="round"/>
+            <path d="M415.23405 88.3934L417.01189 86.61556V95.50476M414.34513 95.50476H419.67865" fill="none" stroke="var(--button-label-color, #a2a4a6)" stroke-width="1.25" stroke-linejoin="round" stroke-linecap="round"/>
+          </g>
+        </g>
+      </g>
+
+    <g class="compact-geometry minimal-bar-base"><rect x="381.50784" y="86.42704" width="61.23001" height="19.68108" rx="9.84054" fill="rgb(100, 104, 107)" stroke="#aeb6be" stroke-width="1.42141" class="vector-outline button-face"/><g class="marking minimal-bar-label"><path d="M402.4201 101.97509V90.56006H406.98611Q411.55212 90.56006 411.55212 93.98457 411.55212 96.26758 406.98611 96.26758H402.4201M406.98611 96.26758L411.55212 101.97509" fill="none" stroke="#c8ced4" stroke-width="1.57449" stroke-linejoin="round" stroke-linecap="round"/><path d="M416.11808 92.84307L418.40109 90.56006V101.97509M414.97658 101.97509H421.82559" fill="none" stroke="#c8ced4" stroke-width="1.57449" stroke-linejoin="round" stroke-linecap="round"/></g></g></g>
+    <text x="412.12285" y="91.06016" fill="var(--button-label-color, #a2a4a6)" stroke-width="0.3" font-family="Arial, sans-serif" font-size="8.8892" text-anchor="middle" dominant-baseline="central" class="word-label marking">R1</text>
+  </g>
+  <g id="input-4" class="control stock-neutral minimal-bar" data-name="button-left-shoulder-top" data-input="button:4" data-label="L1" data-bounds="80.7 81.68516 61.23 29.16484" data-compact-transform="matrix(0.45729 0 0 0.45729 1.09652 -37.02241)" data-order="1" data-compact-scale="0.45729">
+    <g class="press-visual">
+      <g>
+        <g class="full-geometry shoulder-geometry">
+          <path d="M141.93 110.85l0-10.87231a20.47687 14.86 90 0 0-10-14.37239 97.43736 70.71 90 0 0-40.48 0.31694 20.55954 14.92 90 0 0-10 13.4767l-0.75 11.45106Z" fill="#64686b" stroke="rgb(0, 0, 0)" class="vector-outline button-face" stroke-width="3"/>
+          <g class="hardware-icon marking ">
+            <path d="M103.75916 86.61556V95.50476H110.87052" fill="none" stroke="var(--button-label-color, #a2a4a6)" stroke-width="1.25" stroke-linejoin="round" stroke-linecap="round"/>
+            <path d="M114.42623 88.3934L116.20407 86.61556V95.50476M113.53731 95.50476H118.87083" fill="none" stroke="var(--button-label-color, #a2a4a6)" stroke-width="1.25" stroke-linejoin="round" stroke-linecap="round"/>
+          </g>
+        </g>
+      </g>
+
+    <g class="compact-geometry minimal-bar-base"><rect x="80.7" y="86.42704" width="61.23" height="19.68107" rx="9.84054" fill="rgb(100, 104, 107)" stroke="#aeb6be" stroke-width="1.42142" class="vector-outline button-face"/><g class="marking minimal-bar-label"><path d="M101.61221 90.56007V101.97509H110.74423" fill="none" stroke="#c8ced4" stroke-width="1.57449" stroke-linejoin="round" stroke-linecap="round"/><path d="M115.31028 92.84307L117.59328 90.56007V101.97509M114.16878 101.97509H121.01779" fill="none" stroke="#c8ced4" stroke-width="1.57449" stroke-linejoin="round" stroke-linecap="round"/></g></g></g>
+    <text x="111.31499" y="91.06016" fill="var(--button-label-color, #a2a4a6)" stroke-width="0.3" font-family="Arial, sans-serif" font-size="8.8892" text-anchor="middle" dominant-baseline="central" class="word-label marking">L1</text>
+  </g>
+  <g>
+    <g id="shell">
+      <g id="shell-surfaces">
+        <path d="M155.23 140.19h212.97784l6.31-23.4c1.67025-6.18278 6.4226-11.06 12.56-12.89 16.87-4.89 33.75-4.56 50.62 0.29 5.89223 1.72019 10.55289 6.24233 12.45 12.08l5.71 31c21.35046 13.42614 35.09607 36.15627 37.07 61.3l20.16 123.64c4.13761 25.3539-10.50305 50.02471-34.74 58.54-22.87546 8.05348-48.29898-0.44711-61.73-20.64l-37.81-72.53c-3.88863-7.45266-11.59384-12.12972-20-12.14h-194.17784c-8.40616 0.01028-16.11137 4.68734-20 12.14l-37.81 72.53c-13.43102 20.19289-38.85454 28.69348-61.73 20.64-24.23695-8.51529-38.87761-33.1861-34.74-58.54l20.16-123.64c1.97393-25.14373 15.71954-47.87386 37.07-61.3l5.71-31c1.89711-5.83767 6.55777-10.35981 12.45-12.08 16.87-4.85 33.75-5.18 50.62-0.29 6.1374 1.83 10.88975 6.70722 12.56 12.89z" fill="#bdbbb7" stroke="rgb(0, 0, 0)" class="vector-outline shell-base" stroke-width="3"/>
+        <circle cx="410.37" cy="213.39" r="82.75" fill="#a6a6a4" stroke="rgb(0, 0, 0)" class="vector-outline shell-panel" stroke-width="3"/>
+        <circle cx="112.96" cy="213.39" r="82.75" fill="#a6a6a4" stroke="rgb(0, 0, 0)" class="vector-outline shell-panel" stroke-width="3"/>
+        <path d="M469.07,191H438.71a4.06,4.06,0,0,1-4.06-4.06V156.53a4.07,4.07,0,0,0-4.07-4.07h-37a4.07,4.07,0,0,0-4.06,4.07v30.36a4.07,4.07,0,0,1-4.07,4.06H355.08A4.07,4.07,0,0,0,351,195v37a4.07,4.07,0,0,0,4.07,4.06h30.35a4.07,4.07,0,0,1,4.07,4.06v30.36a4.07,4.07,0,0,0,4.06,4.07h37a4.07,4.07,0,0,0,4.07-4.07V240.16a4.06,4.06,0,0,1,4.06-4.06h30.36a4.06,4.06,0,0,0,4.06-4.06V195A4.07,4.07,0,0,0,469.07,191Z" fill="#a6a6a4" stroke="rgb(0, 0, 0)" class="vector-outline shell-panel" stroke-width="3"/>
+        <path d="M256.63,224.75V195.61a47.19,47.19,0,0,1,4.69,1.14A50.91,50.91,0,0,1,268,199a8,8,0,0,1,5.15,7.55,11.29,11.29,0,0,1-.37,4,4.13,4.13,0,0,1-5.15,3,6.8,6.8,0,0,1-1.8-.64v-9.62a4.4,4.4,0,0,0-.2-1.61,1.4,1.4,0,0,0-1.52-1c-.71.1-.81.74-.88,1.33a7.48,7.48,0,0,0,0,.82v24Z" fill="#50545a" stroke="none" class="hardware-marking"/>
+        <path d="M264.5,222.56c3.27-1.16,6.54-2.31,9.81-3.49.66-.24,1.44-.33,1.83-1.07-.21-.54-.69-.6-1.14-.68a7.21,7.21,0,0,0-3.62.37l-6.88,2.42v-4a23.48,23.48,0,0,1,8.27-1.26,20.67,20.67,0,0,1,6.73,1.39,5.57,5.57,0,0,1,1.74.95,1.55,1.55,0,0,1,0,2.64,8.54,8.54,0,0,1-2.82,1.51l-13.5,4.84c-.13.05-.26.07-.43.12Z" fill="#50545a" stroke="none" class="hardware-marking"/>
+        <path d="M255.32,213.22v3.46a2.9,2.9,0,0,1,0,.38c-2.22.79-4.43,1.57-6.63,2.38-.47.17-1.22.27-1.11.91s.85.58,1.37.65c2,.26,3.83-.62,5.67-1.27l.71-.24v3.37a15.56,15.56,0,0,1-2.9.38A22.16,22.16,0,0,1,244,222a5.27,5.27,0,0,1-1.91-1.05,1.59,1.59,0,0,1,.18-2.71,21.18,21.18,0,0,1,5.18-2.27Z" fill="#50545a" stroke="none" class="hardware-marking"/>
+        <rect x="264.33" y="159.32" width="22.18" height="17.47" rx="0.64" fill="#50545a" stroke="none" class="hardware-marking"/>
+        <path d="M301.11,175.77l-9.7-15.27a.77.77,0,0,1,.65-1.18h19.39a.77.77,0,0,1,.65,1.18l-9.7,15.27A.76.76,0,0,1,301.11,175.77Z" fill="#50545a" stroke="none" class="hardware-marking"/>
+        <rect x="234.58" y="158.1" width="25.27" height="19.91" rx="8.33" fill="#50545a" stroke="none" class="hardware-marking"/>
+        <path d="M211.63,158.1h18.45a.64.64,0,0,1,.64.64v13.08a6.19,6.19,0,0,1-6.19,6.19H206.08a.64.64,0,0,1-.64-.64V164.29A6.19,6.19,0,0,1,211.63,158.1Z" fill="#50545a" stroke="none" class="hardware-marking"/>
+      </g>
+      <g mask="url(#highlight-rim)" class="shell-highlight">
+        <path d="M155.23 140.19h212.97784l6.31-23.4c1.67025-6.18278 6.4226-11.06 12.56-12.89 16.87-4.89 33.75-4.56 50.62 0.29 5.89223 1.72019 10.55289 6.24233 12.45 12.08l5.71 31c21.35046 13.42614 35.09607 36.15627 37.07 61.3l20.16 123.64c4.13761 25.3539-10.50305 50.02471-34.74 58.54-22.87546 8.05348-48.29898-0.44711-61.73-20.64l-37.81-72.53c-3.88863-7.45266-11.59384-12.12972-20-12.14h-194.17784c-8.40616 0.01028-16.11137 4.68734-20 12.14l-37.81 72.53c-13.43102 20.19289-38.85454 28.69348-61.73 20.64-24.23695-8.51529-38.87761-33.1861-34.74-58.54l20.16-123.64c1.97393-25.14373 15.71954-47.87386 37.07-61.3l5.71-31c1.89711-5.83767 6.55777-10.35981 12.45-12.08 16.87-4.85 33.75-5.18 50.62-0.29 6.1374 1.83 10.88975 6.70722 12.56 12.89z" stroke="none" class=""/>
+      </g>
+      <g mask="url(#shadow-rim)" class="shell-shadow">
+        <path d="M155.23 140.19h212.97784l6.31-23.4c1.67025-6.18278 6.4226-11.06 12.56-12.89 16.87-4.89 33.75-4.56 50.62 0.29 5.89223 1.72019 10.55289 6.24233 12.45 12.08l5.71 31c21.35046 13.42614 35.09607 36.15627 37.07 61.3l20.16 123.64c4.13761 25.3539-10.50305 50.02471-34.74 58.54-22.87546 8.05348-48.29898-0.44711-61.73-20.64l-37.81-72.53c-3.88863-7.45266-11.59384-12.12972-20-12.14h-194.17784c-8.40616 0.01028-16.11137 4.68734-20 12.14l-37.81 72.53c-13.43102 20.19289-38.85454 28.69348-61.73 20.64-24.23695-8.51529-38.87761-33.1861-34.74-58.54l20.16-123.64c1.97393-25.14373 15.71954-47.87386 37.07-61.3l5.71-31c1.89711-5.83767 6.55777-10.35981 12.45-12.08 16.87-4.85 33.75-5.18 50.62-0.29 6.1374 1.83 10.88975 6.70722 12.56 12.89z" stroke="none" class=""/>
+      </g>
+    </g>
+  </g>
+  <g id="input-6" class="control stock-neutral minimal-bar" data-name="button-left-shoulder-bottom-digital" data-input="button:6" data-label="L2" data-bounds="80.7 28.70606 61.23001 58.92666" data-compact-transform="matrix(0.45729 0 0 0.45729 -32.90348 -19.6004)" data-order="-24" data-reconstructed="yes" data-compact-scale="0.45729">
+    <g class="press-visual">
+      <g class="full-geometry shoulder-geometry">
+        <path d="M81.08429 59.64254l0.06629-7.36992 0.19843-8.49166c0.42019-6.46846 4.14566-10.4724 11.17642-12.01183l29.24213-3.06272c8.03337-0.03833 13.16914 3.03752 15.40733 9.22755l2.39976 14.33866 0.44034 7.36992c0 3.97403 1.91501 8.6104 1.91501 13.24677 0 4.63637-0.97968 9.27274-2.4492 13.24677-2.24719-3.16002-2.54747-4.28162-5.63316-6.332-2.43098-1.61534-5.66268-2.45584-8.44974-3.1933-8.27591-2.18982-17.02027-2.30813-25.34922-0.32557-3.71317 0.88385-8.14582 1.99244-11.26632 4.29791-3.15935 2.33417-3.41015 3.5528-5.63316 7.04958-1.46952-4.19852-2.4492-9.0968-2.4492-13.99508 0-4.89828 0.38429-9.99508 0.38429-13.99508z" fill="#64686b" class="button-face vector-outline" stroke="#111111" stroke-width="1.8"/>
+        <g class="hardware-icon marking ">
+          <path d="M100.97332 47.63296L101.93204 58.5911 110.69855 57.82413" fill="none" stroke="var(--button-label-color, #a2a4a6)" stroke-width="1.25" stroke-linejoin="round" stroke-linecap="round"/>
+          <path d="M112.12321 48.86588Q112.93141 45.48256 117.41054 46.19489 121.88966 46.90722 119.98565 50.38641L112.89018 57.63239 121.65669 56.86542" fill="none" stroke="var(--button-label-color, #a2a4a6)" stroke-width="1.25" stroke-linejoin="round" stroke-linecap="round"/>
+        </g>
+      </g>
+
+    <g class="compact-geometry minimal-bar-base"><rect x="80.7" y="48.32885" width="61.23001" height="19.68107" rx="9.84054" fill="rgb(100, 104, 107)" stroke="#aeb6be" stroke-width="1.42142" class="vector-outline button-face"/><g class="marking minimal-bar-label"><path d="M101.29206 52.74028L101.29206 63.87688 110.20135 63.87689" fill="none" stroke="#c8ced4" stroke-width="1.57449" stroke-linejoin="round" stroke-linecap="round"/><path d="M112.42868 54.96762Q113.54234 51.62663 117.99698 52.7403 122.45161 53.85396 120.22429 57.19494L112.42867 63.87689 121.33795 63.8769" fill="none" stroke="#c8ced4" stroke-width="1.57449" stroke-linejoin="round" stroke-linecap="round"/></g></g></g>
+    <text x="111.315" y="52.33106" fill="var(--button-label-color, #a2a4a6)" stroke-width="0.3" font-family="Arial, sans-serif" font-size="12.5201" text-anchor="middle" dominant-baseline="central" class="word-label marking">L2</text>
+  </g>
+  <g id="input-7" class="control stock-neutral minimal-bar" data-name="button-right-shoulder-bottom-digital" data-input="button:7" data-label="R2" data-bounds="381.50787 28.70606 61.22995 58.92666" data-compact-transform="matrix(0.45729 0 0 0.45729 -66.46071 -19.60043)" data-order="-23" data-reconstructed="yes" data-compact-scale="0.45729">
+    <g class="press-visual">
+      <g class="full-geometry shoulder-geometry">
+        <path d="M442.35355 59.64254l-0.06629-7.36992-0.19843-8.49166c-0.42019-6.46846-4.14566-10.4724-11.17642-12.01183l-29.24213-3.06272c-8.03337-0.03833-13.16914 3.03752-15.40733 9.22755l-2.39976 14.33866-0.44034 7.36992c0 3.97403-1.91501 8.6104-1.91501 13.24677 0 4.63637 0.97968 9.27274 2.4492 13.24677 2.24719-3.16002 2.54747-4.28162 5.63316-6.332 2.43098-1.61534 5.66268-2.45584 8.44974-3.1933 8.27591-2.18982 17.02027-2.30813 25.34922-0.32557 3.71317 0.88385 8.14582 1.99244 11.26632 4.29791 3.15935 2.33417 3.41015 3.5528 5.63316 7.04958 1.46952-4.19852 2.4492-9.0968 2.4492-13.99508 0-4.89828-0.38429-9.99508-0.38429-13.99508z" fill="#64686b" class="button-face vector-outline" stroke="#111111" stroke-width="1.8"/>
+        <g class="hardware-icon marking ">
+          <path d="M402.19642 56.8877L403.14276 46.071 407.46944 46.44954Q411.79611 46.82807 411.51221 50.07309 411.32295 52.23642 406.99627 51.85789L402.66959 51.47935M406.99627 51.85789L410.84977 57.64477" fill="none" stroke="var(--button-label-color, #a2a4a6)" stroke-width="1.25" stroke-linejoin="round" stroke-linecap="round"/>
+          <path d="M413.77018 49.18069Q415.13576 46.03031 419.36779 47.49051 423.59984 48.95072 421.1526 52.00646L413.01311 57.83404 421.66646 58.59111" fill="none" stroke="var(--button-label-color, #a2a4a6)" stroke-width="1.25" stroke-linejoin="round" stroke-linecap="round"/>
+        </g>
+      </g>
+
+    <g class="compact-geometry minimal-bar-base"><rect x="381.50787" y="48.32886" width="61.22995" height="19.68106" rx="9.84053" fill="rgb(100, 104, 107)" stroke="#aeb6be" stroke-width="1.4214" class="vector-outline button-face"/><g class="marking minimal-bar-label"><path d="M402.09992 63.87689L402.09992 52.7403 406.55456 52.7403Q411.00919 52.7403 411.00919 56.08128 411.0092 58.30859 406.55456 58.3086L402.09992 58.3086M406.55456 58.3086L411.00919 63.87688" fill="none" stroke="#c8ced4" stroke-width="1.57448" stroke-linejoin="round" stroke-linecap="round"/><path d="M413.23651 54.96762Q414.35018 51.62664 418.8048 52.7403 423.25944 53.85395 421.03212 57.19494L413.23651 63.87689 422.14577 63.87689" fill="none" stroke="#c8ced4" stroke-width="1.57448" stroke-linejoin="round" stroke-linecap="round"/></g></g></g>
+    <text x="412.12284" y="52.33106" fill="var(--button-label-color, #a2a4a6)" stroke-width="0.3" font-family="Arial, sans-serif" font-size="12.5201" text-anchor="middle" dominant-baseline="central" class="word-label marking">R2</text>
+  </g>
+  <g id="input-8" class="control stock-neutral" data-name="button-select" data-input="button:8" data-label="Select" data-bounds="214.17999 250.81 27.91 15.69" data-compact-transform="matrix(0.35829 0 0 0.35829 -20.73849 -73.6735)" data-order="6" data-compact-scale="0.35829">
+    <g class="press-visual">
+      <g transform="matrix(1 0 0 1 0 0)">
+        <g class="full-geometry">
+          <rect x="214.18" y="250.81" width="27.91" height="15.69" rx="2.79" fill="#64686b" stroke="rgb(0, 0, 0)" class="vector-outline button-face stock-plastic" stroke-width="3"/>
+        </g>
+      </g>
+      <g class="word-label marking full-only-decoration">
+        <text x="228.1349925994873" y="258.6549973487854" fill="var(--button-label-color, #a2a4a6)" font-family="Arial, sans-serif" font-size="5.962199840545654" text-anchor="middle" dominant-baseline="central">Select</text>
+      </g>
+      <g class="compact-geometry word-label marking" transform="matrix(3.10111 0 0 3.10111 62.22555 125.30722)">
+        <text x="53.5" y="43.0" fill="var(--button-label-color, #a2a4a6)" font-family="Arial, sans-serif" font-size="2.0000000000000004" text-anchor="middle" dominant-baseline="central">Select</text>
+      </g>
+    </g>
+  </g>
+  <g id="input-9" class="control stock-neutral" data-name="button-start" data-input="button:9" data-label="Start" data-bounds="280.85999 250.90269 27.74609 15.57298" data-compact-transform="matrix(0.36041 0 0 0.36041 -26.22473 -74.23417)" data-order="7" data-compact-scale="0.36041">
+    <g class="press-visual">
+      <g transform="matrix(1 0 0 1 0 0)">
+        <g class="full-geometry">
+          <path d="M280.86,253v11.41c0,1.45,1.92,2.44,3.7,1.93l22.3-6.48c2.43-.71,2.29-3.35-.21-3.9L284.35,251C282.6,250.58,280.86,251.57,280.86,253Z" fill="#64686b" stroke="rgb(0, 0, 0)" class="vector-outline button-face stock-plastic" stroke-width="3"/>
+        </g>
+      </g>
+      <g class="word-label marking full-only-decoration">
+        <text x="294.7330322265625" y="258.6891860961914" fill="var(--button-label-color, #a2a4a6)" font-family="Arial, sans-serif" font-size="5.9177334594726565" text-anchor="middle" dominant-baseline="central">Start</text>
+      </g>
+      <g class="compact-geometry word-label marking" transform="matrix(3.0829 0 0 3.0829 89.72023 126.12452)">
+        <text x="66.5" y="43.0" fill="var(--button-label-color, #a2a4a6)" font-family="Arial, sans-serif" font-size="2.4" text-anchor="middle" dominant-baseline="central">Start</text>
+      </g>
+    </g>
+  </g>
+  <g id="input-0" class="control stock-neutral" data-name="button-1" data-input="button:0" data-label="Cross" data-bounds="394.5058 232.78581 35.1284 35.1284" data-compact-transform="matrix(0.51241 0 0 0.51241 -100.1475 -69.78209)" data-order="20" data-compact-scale="0.51241">
+    <g class="press-visual">
+      <g>
+        <g class="full-geometry">
+          <circle cx="412.07001" cy="250.35" r="17.5642" fill="#64686b" stroke="rgb(0, 0, 0)" class="vector-outline button-face stock-plastic" stroke-width="3"/>
+          <g class="hardware-icon marking" fill="none" stroke="#76a7dc" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round">
+            <path d="M405.79957 244.07957L418.3404 256.62041M405.79957 256.62041L418.3404 244.07957"/>
+          </g>
+        </g>
+      </g>
+      <g class="word-label marking full-only-decoration">
+        <text x="412.06999" y="250.34999" fill="var(--button-label-color, #a2a4a6)" font-family="Arial, sans-serif" font-size="8.837329101562501" text-anchor="middle" dominant-baseline="central">Cross</text>
+      </g>
+      <g class="compact-geometry word-label marking" transform="matrix(2.42704 0 0 2.42704 174.21959 118.87024)">
+        <text x="98" y="54.17277" fill="var(--button-label-color, #a2a4a6)" font-family="Arial, sans-serif" font-size="3.641188879814043" text-anchor="middle" dominant-baseline="central">Cross</text>
+      </g>
+    </g>
+  </g>
+  <g id="input-1" class="control stock-neutral" data-name="button-2" data-input="button:1" data-label="Circle" data-bounds="430.4158 195.9608 35.1284 35.1284" data-compact-transform="matrix(0.51241 0 0 0.51241 -102.04802 -67.41271)" data-order="22" data-compact-scale="0.51241">
+    <g class="press-visual">
+      <g>
+        <g class="full-geometry">
+          <circle cx="447.98" cy="213.525" r="17.5642" fill="#64686b" stroke="rgb(0, 0, 0)" class="vector-outline button-face stock-plastic" stroke-width="3"/>
+          <g class="hardware-icon marking" fill="none" stroke="#ec787f" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round">
+            <circle cx="447.97999" cy="213.52499" r="7.61408"/>
+          </g>
+        </g>
+      </g>
+      <g class="word-label marking full-only-decoration">
+        <text x="447.98" y="213.52499" fill="var(--button-label-color, #a2a4a6)" font-family="Arial, sans-serif" font-size="7.364440917968751" text-anchor="middle" dominant-baseline="central">Circle</text>
+      </g>
+      <g class="compact-geometry word-label marking" transform="matrix(2.42704 0 0 2.42704 174.21959 118.87024)">
+        <text x="112.79577" y="39" fill="var(--button-label-color, #a2a4a6)" font-family="Arial, sans-serif" font-size="3.0343240665117026" text-anchor="middle" dominant-baseline="central">Circle</text>
+      </g>
+    </g>
+  </g>
+  <g id="input-3" class="control stock-neutral" data-name="button-4" data-input="button:3" data-label="Triangle" data-bounds="394.5058 159.1358 35.1284 35.1284" data-compact-transform="matrix(0.51241 0 0 0.51241 -100.1475 -65.04334)" data-order="24" data-compact-scale="0.51241">
+    <g class="press-visual">
+      <g>
+        <g class="full-geometry">
+          <circle cx="412.07001" cy="176.7" r="17.5642" fill="#64686b" stroke="rgb(0, 0, 0)" class="vector-outline button-face stock-plastic" stroke-width="3"/>
+          <g class="hardware-icon marking" fill="none" stroke="#73c6ad" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round">
+            <path d="M412.06999 167.74226L421.02773 183.86619H403.11225Z"/>
+          </g>
+        </g>
+      </g>
+      <g class="word-label marking full-only-decoration">
+        <text x="412.06999" y="176.7" fill="var(--button-label-color, #a2a4a6)" font-family="Arial, sans-serif" font-size="5.523330688476563" text-anchor="middle" dominant-baseline="central">Triangle</text>
+      </g>
+      <g class="compact-geometry word-label marking" transform="matrix(2.42704 0 0 2.42704 174.21959 118.87024)">
+        <text x="98" y="23.82723" fill="var(--button-label-color, #a2a4a6)" font-family="Arial, sans-serif" font-size="2.275743049883777" text-anchor="middle" dominant-baseline="central">Triangle</text>
+      </g>
+    </g>
+  </g>
+  <g id="input-2" class="control stock-neutral" data-name="button-3" data-input="button:2" data-label="Square" data-bounds="358.59579 195.9608 35.1284 35.1284" data-compact-transform="matrix(0.51241 0 0 0.51241 -98.24698 -67.41271)" data-order="26" data-compact-scale="0.51241">
+    <g class="press-visual">
+      <g>
+        <g class="full-geometry">
+          <circle cx="376.16" cy="213.525" r="17.5642" fill="#64686b" stroke="rgb(0, 0, 0)" class="vector-outline button-face stock-plastic" stroke-width="3"/>
+          <g class="hardware-icon marking" fill="none" stroke="#d797cd" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round">
+            <rect x="369.17296" y="206.53796" width="13.97407" height="13.97407"/>
+          </g>
+        </g>
+      </g>
+      <g class="word-label marking full-only-decoration">
+        <text x="376.15999" y="213.52499" fill="var(--button-label-color, #a2a4a6)" font-family="Arial, sans-serif" font-size="7.364440917968751" text-anchor="middle" dominant-baseline="central">Square</text>
+      </g>
+      <g class="compact-geometry word-label marking" transform="matrix(2.42704 0 0 2.42704 174.21959 118.87024)">
+        <text x="83.20423" y="39" fill="var(--button-label-color, #a2a4a6)" font-family="Arial, sans-serif" font-size="3.0343240665117026" text-anchor="middle" dominant-baseline="central">Square</text>
+      </g>
+    </g>
+  </g>
+  <g id="input-12" class="control stock-neutral" data-name="button-dpad-top" data-input="button:12" data-label="↑" data-bounds="50.27989 152.46001 122.15999 122.15999" data-compact-transform="matrix(0.2947 0 0 0.2947 -2.81726 -20.92928)" data-order="912" data-compact-scale="0.2947">
+    <g class="press-visual">
+      <g transform="matrix(1 0 0 1 0 0)">
+        <g class="full-geometry">
+          <g clip-path="url(#dpad-12)">
+            <path d="M54.36,191h30.36c2.2439,0.00001 4.06449,-1.81611 4.07,-4.06v-30.41c-0.00266,-1.07851 0.42392,-2.11376 1.18561,-2.87732c0.76169,-0.76356 1.79588,-1.19268 2.87439,-1.19268h18.5099v0.0201h18.53999c2.21653,0.03812 3.99488,1.84315 4,4.06v30.36c-0.00001,2.2439 1.81611,4.06449 4.06,4.07h30.41c1.07851,-0.00266 2.11376,0.42392 2.87732,1.18561c0.76356,0.76169 1.19268,1.79588 1.19268,2.87439v18.5099h-0.0201l0,18.53999c-0.03812,2.21653 -1.84315,3.99488 -4.06,4h-30.36c-2.2439,-0.00001 -4.06449,1.81611 -4.07,4.06l0,30.41c0.00266,1.07851 -0.42392,2.11376 -1.18561,2.87732c-0.76169,0.76356 -1.79588,1.19268 -2.87439,1.19268h-18.5099v-0.0201h-18.53999c-2.21653,-0.03812 -3.99488,-1.84315 -4,-4.06l0,-30.36c0.00001,-2.2439 -1.81611,-4.06449 -4.06,-4.07h-30.41c-1.07851,0.00266 -2.11376,-0.42392 -2.87732,-1.18561c-0.76356,-0.76169 -1.19268,-1.79588 -1.19268,-2.87439v-18.5099l0.0201,0v-18.53999c0.03812,-2.21653 1.84315,-3.99488 4.06,-4z" fill="#64686b" stroke="rgb(0, 0, 0)" class="vector-outline button-face stock-plastic" stroke-width="3"/>
+            <path d="M123.46,235.52l-8.34-8.41a3.65,3.65,0,0,0-4.8,0L102,235.52a3.66,3.66,0,0,0-1.23,2.73v13.42a3.63,3.63,0,0,0,3.63,3.63h16.69a3.62,3.62,0,0,0,3.63-3.63V238.25A3.66,3.66,0,0,0,123.46,235.52Z" fill="#64686b" stroke="rgb(0, 0, 0)" class="vector-outline button-face control-detail stock-plastic" stroke-width="3"/>
+            <path d="M123.46,194.75l-8.34,8.4a3.63,3.63,0,0,1-4.8,0l-8.35-8.4a3.66,3.66,0,0,1-1.23-2.74V178.6a3.64,3.64,0,0,1,3.63-3.64h16.69a3.63,3.63,0,0,1,3.63,3.64V192A3.66,3.66,0,0,1,123.46,194.75Z" fill="#64686b" stroke="rgb(0, 0, 0)" class="vector-outline button-face control-detail stock-plastic" stroke-width="3"/>
+            <path d="M91.88,225.87l8.4-8.34a3.63,3.63,0,0,0,0-4.8l-8.4-8.34a3.69,3.69,0,0,0-2.74-1.24H75.73a3.64,3.64,0,0,0-3.64,3.64v16.68a3.64,3.64,0,0,0,3.64,3.64H89.14A3.65,3.65,0,0,0,91.88,225.87Z" fill="#64686b" stroke="rgb(0, 0, 0)" class="vector-outline button-face control-detail stock-plastic" stroke-width="3"/>
+            <path d="M132.65,225.87l-8.41-8.34a3.65,3.65,0,0,1,0-4.8l8.41-8.34a3.67,3.67,0,0,1,2.73-1.24H148.8a3.63,3.63,0,0,1,3.63,3.64v16.68a3.63,3.63,0,0,1-3.63,3.64H135.38A3.63,3.63,0,0,1,132.65,225.87Z" fill="#64686b" stroke="rgb(0, 0, 0)" class="vector-outline button-face control-detail stock-plastic" stroke-width="3"/>
+            <path d="M106.2,164.56h12.21a.2.2,0,0,0,.13-.35L112.43,159a.18.18,0,0,0-.25,0l-6.11,5.18A.2.2,0,0,0,106.2,164.56Z" fill="#64686b" stroke="rgb(0, 0, 0)" class="vector-outline button-face control-detail stock-plastic" stroke-width="3"/>
+            <path d="M106.2,262.23h12.21a.2.2,0,0,1,.13.35l-6.11,5.18a.2.2,0,0,1-.25,0l-6.11-5.18A.2.2,0,0,1,106.2,262.23Z" fill="#64686b" stroke="rgb(0, 0, 0)" class="vector-outline button-face control-detail stock-plastic" stroke-width="3"/>
+            <path d="M160.19,207.93v12.21a.21.21,0,0,0,.36.13l5.17-6.11a.18.18,0,0,0,0-.25l-5.17-6.11A.2.2,0,0,0,160.19,207.93Z" fill="#64686b" stroke="rgb(0, 0, 0)" class="vector-outline button-face control-detail stock-plastic" stroke-width="3"/>
+            <path d="M62.53,207.93v12.21a.21.21,0,0,1-.36.13L57,214.16a.2.2,0,0,1,0-.25l5.18-6.11A.2.2,0,0,1,62.53,207.93Z" fill="#64686b" stroke="rgb(0, 0, 0)" class="vector-outline button-face control-detail stock-plastic" stroke-width="3"/>
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g id="input-13" class="control stock-neutral" data-name="button-dpad-bottom" data-input="button:13" data-label="↓" data-bounds="50.27989 152.46001 122.15999 122.15999" data-compact-transform="matrix(0.2947 0 0 0.2947 -2.81726 -20.92928)" data-order="913" data-compact-scale="0.2947">
+    <g class="press-visual">
+      <g transform="matrix(1 0 0 1 0 0)">
+        <g class="full-geometry">
+          <g clip-path="url(#dpad-13)">
+            <path d="M54.36,191h30.36c2.2439,0.00001 4.06449,-1.81611 4.07,-4.06v-30.41c-0.00266,-1.07851 0.42392,-2.11376 1.18561,-2.87732c0.76169,-0.76356 1.79588,-1.19268 2.87439,-1.19268h18.5099v0.0201h18.53999c2.21653,0.03812 3.99488,1.84315 4,4.06v30.36c-0.00001,2.2439 1.81611,4.06449 4.06,4.07h30.41c1.07851,-0.00266 2.11376,0.42392 2.87732,1.18561c0.76356,0.76169 1.19268,1.79588 1.19268,2.87439v18.5099h-0.0201l0,18.53999c-0.03812,2.21653 -1.84315,3.99488 -4.06,4h-30.36c-2.2439,-0.00001 -4.06449,1.81611 -4.07,4.06l0,30.41c0.00266,1.07851 -0.42392,2.11376 -1.18561,2.87732c-0.76169,0.76356 -1.79588,1.19268 -2.87439,1.19268h-18.5099v-0.0201h-18.53999c-2.21653,-0.03812 -3.99488,-1.84315 -4,-4.06l0,-30.36c0.00001,-2.2439 -1.81611,-4.06449 -4.06,-4.07h-30.41c-1.07851,0.00266 -2.11376,-0.42392 -2.87732,-1.18561c-0.76356,-0.76169 -1.19268,-1.79588 -1.19268,-2.87439v-18.5099l0.0201,0v-18.53999c0.03812,-2.21653 1.84315,-3.99488 4.06,-4z" fill="#64686b" stroke="rgb(0, 0, 0)" class="vector-outline button-face stock-plastic" stroke-width="3"/>
+            <path d="M123.46,235.52l-8.34-8.41a3.65,3.65,0,0,0-4.8,0L102,235.52a3.66,3.66,0,0,0-1.23,2.73v13.42a3.63,3.63,0,0,0,3.63,3.63h16.69a3.62,3.62,0,0,0,3.63-3.63V238.25A3.66,3.66,0,0,0,123.46,235.52Z" fill="#64686b" stroke="rgb(0, 0, 0)" class="vector-outline button-face control-detail stock-plastic" stroke-width="3"/>
+            <path d="M123.46,194.75l-8.34,8.4a3.63,3.63,0,0,1-4.8,0l-8.35-8.4a3.66,3.66,0,0,1-1.23-2.74V178.6a3.64,3.64,0,0,1,3.63-3.64h16.69a3.63,3.63,0,0,1,3.63,3.64V192A3.66,3.66,0,0,1,123.46,194.75Z" fill="#64686b" stroke="rgb(0, 0, 0)" class="vector-outline button-face control-detail stock-plastic" stroke-width="3"/>
+            <path d="M91.88,225.87l8.4-8.34a3.63,3.63,0,0,0,0-4.8l-8.4-8.34a3.69,3.69,0,0,0-2.74-1.24H75.73a3.64,3.64,0,0,0-3.64,3.64v16.68a3.64,3.64,0,0,0,3.64,3.64H89.14A3.65,3.65,0,0,0,91.88,225.87Z" fill="#64686b" stroke="rgb(0, 0, 0)" class="vector-outline button-face control-detail stock-plastic" stroke-width="3"/>
+            <path d="M132.65,225.87l-8.41-8.34a3.65,3.65,0,0,1,0-4.8l8.41-8.34a3.67,3.67,0,0,1,2.73-1.24H148.8a3.63,3.63,0,0,1,3.63,3.64v16.68a3.63,3.63,0,0,1-3.63,3.64H135.38A3.63,3.63,0,0,1,132.65,225.87Z" fill="#64686b" stroke="rgb(0, 0, 0)" class="vector-outline button-face control-detail stock-plastic" stroke-width="3"/>
+            <path d="M106.2,164.56h12.21a.2.2,0,0,0,.13-.35L112.43,159a.18.18,0,0,0-.25,0l-6.11,5.18A.2.2,0,0,0,106.2,164.56Z" fill="#64686b" stroke="rgb(0, 0, 0)" class="vector-outline button-face control-detail stock-plastic" stroke-width="3"/>
+            <path d="M106.2,262.23h12.21a.2.2,0,0,1,.13.35l-6.11,5.18a.2.2,0,0,1-.25,0l-6.11-5.18A.2.2,0,0,1,106.2,262.23Z" fill="#64686b" stroke="rgb(0, 0, 0)" class="vector-outline button-face control-detail stock-plastic" stroke-width="3"/>
+            <path d="M160.19,207.93v12.21a.21.21,0,0,0,.36.13l5.17-6.11a.18.18,0,0,0,0-.25l-5.17-6.11A.2.2,0,0,0,160.19,207.93Z" fill="#64686b" stroke="rgb(0, 0, 0)" class="vector-outline button-face control-detail stock-plastic" stroke-width="3"/>
+            <path d="M62.53,207.93v12.21a.21.21,0,0,1-.36.13L57,214.16a.2.2,0,0,1,0-.25l5.18-6.11A.2.2,0,0,1,62.53,207.93Z" fill="#64686b" stroke="rgb(0, 0, 0)" class="vector-outline button-face control-detail stock-plastic" stroke-width="3"/>
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g id="input-14" class="control stock-neutral" data-name="button-dpad-left" data-input="button:14" data-label="←" data-bounds="50.27989 152.46001 122.15999 122.15999" data-compact-transform="matrix(0.2947 0 0 0.2947 -2.81726 -20.92928)" data-order="914" data-compact-scale="0.2947">
+    <g class="press-visual">
+      <g transform="matrix(1 0 0 1 0 0)">
+        <g class="full-geometry">
+          <g clip-path="url(#dpad-14)">
+            <path d="M54.36,191h30.36c2.2439,0.00001 4.06449,-1.81611 4.07,-4.06v-30.41c-0.00266,-1.07851 0.42392,-2.11376 1.18561,-2.87732c0.76169,-0.76356 1.79588,-1.19268 2.87439,-1.19268h18.5099v0.0201h18.53999c2.21653,0.03812 3.99488,1.84315 4,4.06v30.36c-0.00001,2.2439 1.81611,4.06449 4.06,4.07h30.41c1.07851,-0.00266 2.11376,0.42392 2.87732,1.18561c0.76356,0.76169 1.19268,1.79588 1.19268,2.87439v18.5099h-0.0201l0,18.53999c-0.03812,2.21653 -1.84315,3.99488 -4.06,4h-30.36c-2.2439,-0.00001 -4.06449,1.81611 -4.07,4.06l0,30.41c0.00266,1.07851 -0.42392,2.11376 -1.18561,2.87732c-0.76169,0.76356 -1.79588,1.19268 -2.87439,1.19268h-18.5099v-0.0201h-18.53999c-2.21653,-0.03812 -3.99488,-1.84315 -4,-4.06l0,-30.36c0.00001,-2.2439 -1.81611,-4.06449 -4.06,-4.07h-30.41c-1.07851,0.00266 -2.11376,-0.42392 -2.87732,-1.18561c-0.76356,-0.76169 -1.19268,-1.79588 -1.19268,-2.87439v-18.5099l0.0201,0v-18.53999c0.03812,-2.21653 1.84315,-3.99488 4.06,-4z" fill="#64686b" stroke="rgb(0, 0, 0)" class="vector-outline button-face stock-plastic" stroke-width="3"/>
+            <path d="M123.46,235.52l-8.34-8.41a3.65,3.65,0,0,0-4.8,0L102,235.52a3.66,3.66,0,0,0-1.23,2.73v13.42a3.63,3.63,0,0,0,3.63,3.63h16.69a3.62,3.62,0,0,0,3.63-3.63V238.25A3.66,3.66,0,0,0,123.46,235.52Z" fill="#64686b" stroke="rgb(0, 0, 0)" class="vector-outline button-face control-detail stock-plastic" stroke-width="3"/>
+            <path d="M123.46,194.75l-8.34,8.4a3.63,3.63,0,0,1-4.8,0l-8.35-8.4a3.66,3.66,0,0,1-1.23-2.74V178.6a3.64,3.64,0,0,1,3.63-3.64h16.69a3.63,3.63,0,0,1,3.63,3.64V192A3.66,3.66,0,0,1,123.46,194.75Z" fill="#64686b" stroke="rgb(0, 0, 0)" class="vector-outline button-face control-detail stock-plastic" stroke-width="3"/>
+            <path d="M91.88,225.87l8.4-8.34a3.63,3.63,0,0,0,0-4.8l-8.4-8.34a3.69,3.69,0,0,0-2.74-1.24H75.73a3.64,3.64,0,0,0-3.64,3.64v16.68a3.64,3.64,0,0,0,3.64,3.64H89.14A3.65,3.65,0,0,0,91.88,225.87Z" fill="#64686b" stroke="rgb(0, 0, 0)" class="vector-outline button-face control-detail stock-plastic" stroke-width="3"/>
+            <path d="M132.65,225.87l-8.41-8.34a3.65,3.65,0,0,1,0-4.8l8.41-8.34a3.67,3.67,0,0,1,2.73-1.24H148.8a3.63,3.63,0,0,1,3.63,3.64v16.68a3.63,3.63,0,0,1-3.63,3.64H135.38A3.63,3.63,0,0,1,132.65,225.87Z" fill="#64686b" stroke="rgb(0, 0, 0)" class="vector-outline button-face control-detail stock-plastic" stroke-width="3"/>
+            <path d="M106.2,164.56h12.21a.2.2,0,0,0,.13-.35L112.43,159a.18.18,0,0,0-.25,0l-6.11,5.18A.2.2,0,0,0,106.2,164.56Z" fill="#64686b" stroke="rgb(0, 0, 0)" class="vector-outline button-face control-detail stock-plastic" stroke-width="3"/>
+            <path d="M106.2,262.23h12.21a.2.2,0,0,1,.13.35l-6.11,5.18a.2.2,0,0,1-.25,0l-6.11-5.18A.2.2,0,0,1,106.2,262.23Z" fill="#64686b" stroke="rgb(0, 0, 0)" class="vector-outline button-face control-detail stock-plastic" stroke-width="3"/>
+            <path d="M160.19,207.93v12.21a.21.21,0,0,0,.36.13l5.17-6.11a.18.18,0,0,0,0-.25l-5.17-6.11A.2.2,0,0,0,160.19,207.93Z" fill="#64686b" stroke="rgb(0, 0, 0)" class="vector-outline button-face control-detail stock-plastic" stroke-width="3"/>
+            <path d="M62.53,207.93v12.21a.21.21,0,0,1-.36.13L57,214.16a.2.2,0,0,1,0-.25l5.18-6.11A.2.2,0,0,1,62.53,207.93Z" fill="#64686b" stroke="rgb(0, 0, 0)" class="vector-outline button-face control-detail stock-plastic" stroke-width="3"/>
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g id="input-15" class="control stock-neutral" data-name="button-dpad-right" data-input="button:15" data-label="→" data-bounds="50.27989 152.46001 122.15999 122.15999" data-compact-transform="matrix(0.2947 0 0 0.2947 -2.81726 -20.92928)" data-order="915" data-compact-scale="0.2947">
+    <g class="press-visual">
+      <g transform="matrix(1 0 0 1 0 0)">
+        <g class="full-geometry">
+          <g clip-path="url(#dpad-15)">
+            <path d="M54.36,191h30.36c2.2439,0.00001 4.06449,-1.81611 4.07,-4.06v-30.41c-0.00266,-1.07851 0.42392,-2.11376 1.18561,-2.87732c0.76169,-0.76356 1.79588,-1.19268 2.87439,-1.19268h18.5099v0.0201h18.53999c2.21653,0.03812 3.99488,1.84315 4,4.06v30.36c-0.00001,2.2439 1.81611,4.06449 4.06,4.07h30.41c1.07851,-0.00266 2.11376,0.42392 2.87732,1.18561c0.76356,0.76169 1.19268,1.79588 1.19268,2.87439v18.5099h-0.0201l0,18.53999c-0.03812,2.21653 -1.84315,3.99488 -4.06,4h-30.36c-2.2439,-0.00001 -4.06449,1.81611 -4.07,4.06l0,30.41c0.00266,1.07851 -0.42392,2.11376 -1.18561,2.87732c-0.76169,0.76356 -1.79588,1.19268 -2.87439,1.19268h-18.5099v-0.0201h-18.53999c-2.21653,-0.03812 -3.99488,-1.84315 -4,-4.06l0,-30.36c0.00001,-2.2439 -1.81611,-4.06449 -4.06,-4.07h-30.41c-1.07851,0.00266 -2.11376,-0.42392 -2.87732,-1.18561c-0.76356,-0.76169 -1.19268,-1.79588 -1.19268,-2.87439v-18.5099l0.0201,0v-18.53999c0.03812,-2.21653 1.84315,-3.99488 4.06,-4z" fill="#64686b" stroke="rgb(0, 0, 0)" class="vector-outline button-face stock-plastic" stroke-width="3"/>
+            <path d="M123.46,235.52l-8.34-8.41a3.65,3.65,0,0,0-4.8,0L102,235.52a3.66,3.66,0,0,0-1.23,2.73v13.42a3.63,3.63,0,0,0,3.63,3.63h16.69a3.62,3.62,0,0,0,3.63-3.63V238.25A3.66,3.66,0,0,0,123.46,235.52Z" fill="#64686b" stroke="rgb(0, 0, 0)" class="vector-outline button-face control-detail stock-plastic" stroke-width="3"/>
+            <path d="M123.46,194.75l-8.34,8.4a3.63,3.63,0,0,1-4.8,0l-8.35-8.4a3.66,3.66,0,0,1-1.23-2.74V178.6a3.64,3.64,0,0,1,3.63-3.64h16.69a3.63,3.63,0,0,1,3.63,3.64V192A3.66,3.66,0,0,1,123.46,194.75Z" fill="#64686b" stroke="rgb(0, 0, 0)" class="vector-outline button-face control-detail stock-plastic" stroke-width="3"/>
+            <path d="M91.88,225.87l8.4-8.34a3.63,3.63,0,0,0,0-4.8l-8.4-8.34a3.69,3.69,0,0,0-2.74-1.24H75.73a3.64,3.64,0,0,0-3.64,3.64v16.68a3.64,3.64,0,0,0,3.64,3.64H89.14A3.65,3.65,0,0,0,91.88,225.87Z" fill="#64686b" stroke="rgb(0, 0, 0)" class="vector-outline button-face control-detail stock-plastic" stroke-width="3"/>
+            <path d="M132.65,225.87l-8.41-8.34a3.65,3.65,0,0,1,0-4.8l8.41-8.34a3.67,3.67,0,0,1,2.73-1.24H148.8a3.63,3.63,0,0,1,3.63,3.64v16.68a3.63,3.63,0,0,1-3.63,3.64H135.38A3.63,3.63,0,0,1,132.65,225.87Z" fill="#64686b" stroke="rgb(0, 0, 0)" class="vector-outline button-face control-detail stock-plastic" stroke-width="3"/>
+            <path d="M106.2,164.56h12.21a.2.2,0,0,0,.13-.35L112.43,159a.18.18,0,0,0-.25,0l-6.11,5.18A.2.2,0,0,0,106.2,164.56Z" fill="#64686b" stroke="rgb(0, 0, 0)" class="vector-outline button-face control-detail stock-plastic" stroke-width="3"/>
+            <path d="M106.2,262.23h12.21a.2.2,0,0,1,.13.35l-6.11,5.18a.2.2,0,0,1-.25,0l-6.11-5.18A.2.2,0,0,1,106.2,262.23Z" fill="#64686b" stroke="rgb(0, 0, 0)" class="vector-outline button-face control-detail stock-plastic" stroke-width="3"/>
+            <path d="M160.19,207.93v12.21a.21.21,0,0,0,.36.13l5.17-6.11a.18.18,0,0,0,0-.25l-5.17-6.11A.2.2,0,0,0,160.19,207.93Z" fill="#64686b" stroke="rgb(0, 0, 0)" class="vector-outline button-face control-detail stock-plastic" stroke-width="3"/>
+            <path d="M62.53,207.93v12.21a.21.21,0,0,1-.36.13L57,214.16a.2.2,0,0,1,0-.25l5.18-6.11A.2.2,0,0,1,62.53,207.93Z" fill="#64686b" stroke="rgb(0, 0, 0)" class="vector-outline button-face control-detail stock-plastic" stroke-width="3"/>
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+  <style data-variant-id="black" data-variant-name="Black">
+    [data-controller="ps"][data-variant="black"] .shell-base { fill: #292c31; }
+    [data-controller="ps"][data-variant="black"] .shell-panel { fill: #3b4046; }
+    [data-controller="ps"][data-variant="black"] .stock-plastic { fill: #353b40; }
+    [data-controller="ps"][data-variant="black"] .stock-neutral, [data-controller="ps"][data-variant="black"].stock-neutral { --button-label-color: #86898c; }
+    [data-controller="ps"][data-variant="black"] .hardware-marking { fill: #cbd0d5; }
+  </style>
+  <style data-variant-id="white" data-variant-name="White">
+    [data-controller="ps"][data-variant="white"] .shell-base { fill: #e2e4e2; }
+    [data-controller="ps"][data-variant="white"] .shell-panel { fill: #c4c8c8; }
+    [data-controller="ps"][data-variant="white"] .stock-plastic { fill: #353b40; }
+    [data-controller="ps"][data-variant="white"] .stock-neutral, [data-controller="ps"][data-variant="white"].stock-neutral { --button-label-color: #86898c; }
+    [data-controller="ps"][data-variant="white"] .hardware-marking { fill: #555d65; }
+  </style>
+</svg>

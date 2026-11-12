@@ -12,7 +12,7 @@ All 22 overlays are available as prereleases. **Alpha** means early testing; **B
 
 | Tool                                                                       | Status | Purpose                                                                                    | Local entry point         |
 | -------------------------------------------------------------------------- | ------ | ------------------------------------------------------------------------------------------ | ------------------------- |
-| [Controller](https://byuwur.github.io/stream.html/controller/)             | Beta   | Gamepad/keyboard input with Xbox, PlayStation, fight-stick, and GameCube skins. | `controller/index.html`   |
+| [Controller](https://byuwur.github.io/stream.html/controller/)             | Beta   | Gamepad/keyboard input with 32 controller models, compact layouts, and editable color. | `controller/index.html`   |
 | [Social popup](https://byuwur.github.io/stream.html/popup/)                | Beta   | Animated accounts with 90+ platforms, fonts, colors, and timing.                           | `popup/index.html`        |
 | [Main scene](https://byuwur.github.io/stream.html/main/)                   | Beta   | Starting/BRB/ending scenes with branding, countdown, accounts, and schedule.               | `main/index.html`         |
 | [Clock](https://byuwur.github.io/stream.html/clock/)                       | Alpha  | Digital, analog, split-flap, and minimal clocks.                                           | `clock/index.html`        |
@@ -51,7 +51,7 @@ Help improve stream.html on GitHub: [contribute a pull request](https://github.c
 - **Advanced → Restore resource defaults** clears this resource's saved configuration and reloads the defaults declared in its JavaScript.
 - Invalid form values keep the last valid preview and stop URL generation. Invalid/unknown URL values retain defaults. Clearing display text leaves it empty and hides its container; whitespace-only text also becomes empty. Clearing other resource fields restores their defaults. List editors retain their row editing and validation behavior.
 
-Generated links include only values that differ from the declared defaults, plus each resource's explicit `urlRequired` fields. Off/default appearance values are omitted, and missing parameters use resource defaults. Controller always includes `player` and `skin`; Popup includes `accounts`; Main includes `sceneTitle`. Imports use defaults for missing values; empty text stays empty and its text container is hidden. Cleared numbers and invalid zero values restore their field defaults when editing finishes; opening a bare editor still resumes saved preferences. Explicit empty arrays/maps such as `accounts=[]` remain valid ways to remove list content.
+Generated links include only values that differ from the declared defaults, plus each resource's explicit `urlRequired` fields. Off/default appearance values are omitted, and missing parameters use resource defaults. Controller always includes `player`, `skin`, and `customColors`; Popup includes `accounts`; Main includes `sceneTitle`. Imports use defaults for missing values; empty text stays empty and its text container is hidden. Cleared numbers and invalid zero values restore their field defaults when editing finishes; opening a bare editor still resumes saved preferences. Explicit empty arrays/maps such as `accounts=[]` remain valid ways to remove list content.
 
 The form handles encoding and list add/edit/reorder/remove. Colors use 3/4/6/8 hex digits without `#`, including alpha: `fontColor=fff`, `backgroundColor=00000000`. Runtime restores `#`; older encoded hashes work. Invalid colors retain defaults; RGB/HSL/named colors are outside the contract.
 
@@ -121,21 +121,58 @@ Current URLs use percentages for opacity, deadzone, and scale: `100` means 100%,
 
 ![Controller preview](controller/prev.jpg)
 
-[Example: Player 1, Xbox](https://byuwur.github.io/stream.html/controller/?player=1&skin=1)
+[Example: Player 1, Xbox One](https://byuwur.github.io/stream.html/controller/?player=1&skin=xone)
 
-| Parameter                                | Meaning                                                                             |
-| ---------------------------------------- | ----------------------------------------------------------------------------------- |
-| `player`                                 | Gamepads `1`–`4` (default `1`); keyboard `9`.                                       |
-| `skin`                                   | `1` Xbox, `2` PlayStation, `3` fight stick, `4` GameCube.                           |
-| `opacity`                                | `0`–`100`%; default `100`.                                                          |
-| `offset`, `deadzone`                     | Stick travel in pixels; deadzone `0`–`100`% (default `25`).                         |
-| `strength`, `curve`                      | `strength=0` disables trigger meters; `curve=1` enables stick curving.              |
-| `rotation`                               | Maximum steering-wheel rotation in degrees.                                         |
-| `mapping`                                | Custom Mapping binding array; `[]` uses defaults. Legacy `{"mapping":[...]}` works. |
-| `mirror`, `fitMargin`                    | Mirror artwork horizontally; vertical fit margin in pixels (default `8`).           |
-| `horizontalPosition`, `verticalPosition` | Signed pixel offsets from the viewport center; both default to `0`.                 |
+| Parameter | Meaning |
+| --- | --- |
+| `player` | Gamepads `1`–`4` (default `1`); keyboard `9`. |
+| `skin` | `xseries` Xbox Series (default), `ds5` DualSense, `fgc` Fight Stick (8 buttons), `fgc6` (6 buttons), `fgc4` (4 buttons), `xone` Xbox One, `ds4` DualShock 4, `x360` Xbox 360, `ds3` DualShock 3, `gcn` GameCube, `n64` Nintendo 64, `snes` SNES, `nes` NES. |
+| `layout`, `buttonLabels` | `full` (default) or `minimal`; `icons` (default), `letters`, or `none`. |
+| `variant` | A stock palette supported by that model, such as PS2 `silver` or `white`; default `original` uses its SVG base palette. Available while Custom colors is Off. |
+| `customColors` | Default `no` preserves the SVG palette, structural strokes, and guide symbol. `yes` enables the optional appearance controls. |
+| `tintControls` | Optional button-plastic tint derived from `controllerColor`; default `no` preserves hardware colors. Rubber sticks and shoulders stay unchanged. |
+| `disconnectedTint`, `disconnectedOpacity` | Disconnected tint (alpha controls strength; transparent disables it) and opacity `0` to `100`% (default `5`). Connected appearance is unchanged. |
+| `controllerColor` | Custom body color, initially `000000`. Applies only with `customColors=yes`; flat panel/socket tones follow it. |
+| `tintOutlines`, `customOutlineColor`, `outlineColor` | Both switches default to `no`, retaining native stroke colors. Automatic tint derives darker outlines from the shell and takes precedence over an enabled manual color. |
+| `outlineWidth` | Multiplies each structural stroke's original width; `0.5`–`2`, default `1`. Hardware lettering, fine details, and composite filled borders retain their proportions. |
+| `highlightIntensity`, `shadowIntensity` | Independent vector shading intensity, `0`–`100`%; defaults `12` and `16`. |
+| `customGuide`, `guideSource` | Eligible system/home buttons retain their original symbol by default. Enable `customGuide=yes` with Custom colors to choose `symbol` or `image`. |
+| `guideSymbol`, `guideImage` | Original hardware, Xbox, PlayStation, Steam, circle, diamond, or star; alternatively a safe HTTP(S)/relative PNG, JPEG, WebP, SVG, or animated GIF image URL. Failed images restore the original emblem. |
+| `guideColorMode`, `guideColor` | `original` preserves symbol/image colors. `custom` recolors symbols or applies an alpha-preserving monochrome image tint. |
+| `guideScale`, `guideOffsetX`, `guideOffsetY` | Scale `50`–`150`% (default `100`), offsets `-25`–`25`% (default `0`). Content preserves aspect ratio and is clipped within the native button area. |
+| `screenOpacity` | Display interior opacity, `0`–`100`%; default `0` creates an alpha opening while retaining the bezel. |
+| `opacity` | `0`–`100`%; default `100`. |
+| `offset`, `deadzone` | Stick travel in source pixels, scaled for the fighting stick and compact layouts; deadzone `0`–`100`% (default `5`). |
+| `strength`, `curve` | `strength=1` uses proportional trigger filling (default); `strength=0` uses a digital state; `curve=1` enables stick curving. |
+| `rotation` | Maximum steering-wheel rotation in degrees. |
+| `mapping` | Custom Mapping binding array; `[]` uses defaults. Legacy `{"mapping":[...]}` works. |
+| `mirror`, `fitMargin` | Mirror artwork horizontally; viewport fit margin in pixels (default `16`). |
+| `horizontalPosition`, `verticalPosition` | Signed pixel offsets from the viewport center; both default to `0`. |
 
-Press a gamepad button for detection or **F** for keyboard input. Focus the preview/OBS Interact first. Keyboard defaults live in `bySettingsKB` in `controller/index.html`; detection depends on browser/OS. **Custom Mapping** chooses a base and captures bindings. Skins fit the viewport automatically. Appearance controls also expose background, disconnected opacity, scale, tilt, offsets, and artwork filters.
+The selector groups 34 skin choices by platform from 32 front-facing SVG models. Existing named skin IDs remain valid. Fight Stick offers 8-, 6-, and 4-button choices (`fgc`, `fgc6`, `fgc4`) from source-authored views in one `fgc.svg`; the reduced layouts retain their original button positions and bindings.
+
+- Nintendo: `nes`, `famicom`, `snes`, `superfamicom`, `n64`, `gcn`, `wii`, `wiinunchuk`, `wiiclassic`, `wiiupro`, `wiiu`, `joycon`, `switchpro`.
+- PlayStation: `ps`, `ds2`, `ds3`, `ds4`, `ds5`.
+- Xbox: `xbox`, `x360`, `xone`, `xseries`.
+- Sega: `mastersystem`, `genesis`, `saturn`, `dreamcast`.
+- Steam: `steam` (2015), `steam2` (2026), `steamdeck`.
+- Other: `turbografx`, `playdate`, `fgc`, `fgc6`, `fgc4`.
+
+Each model owns one `controller/controllers/<id>.svg`; Fight Stick variants share `fgc.svg`. SVG attributes declare its name, platform, logical inputs, analog behavior, native bounds, and compact transforms. Shared JavaScript moves the same control nodes between layouts. Each compact layout has fitted bounds and a controller-specific composition; shoulders and triggers occupy aligned sections with long horizontal pill bars where requested. Full mode retains each model's hardware shapes, with mirrored shoulders and matching trigger contours. Stick housings and recessed sockets stay stationary around the moving caps. Minimal controls retain their native proportions; alternate wide bars are authored in the SVG rather than stretched from full-mode artwork. Dark stick caps use a lighter gray to make their movement clear against the recessed sockets. The renderer retains separate SVG roots per control for WebKit filter painting. Each SVG embeds its default appearance and renders independently. Its geometry and painting order remain authoritative; `controller.css` handles the application layers and pressed states. Native SVG groups provide the compact shoulder bars; no controller metadata files or duplicate SVG drawings are used.
+
+All 39 purchased originals are preserved in [`_art/controller-illustrations/`](_art/controller-illustrations/). Nine perspective illustrations are reference-only: `360-A`, `ONEX-A`, `PS4-A`, `PS5-A`, `STEAM2-A`, `SWITCH-A`, `SWITCH-B`, `SWITCHPRO-A`, and `SX-A`. Steam Deck and Wii U artwork is rotated into its normal horizontal orientation. The Nunchuk front is reconstructed from the supplied angled reference; rear controls use visible indicators.
+
+The integration SVGs contain their stock colors and model-specific palette variants. Custom colors starts Off; its disabled drafts remain in the existing editor preferences, including after reopening, while shared URLs omit inactive options. Legacy links with an explicit controller color enable customization unless `customColors=no` is present. Older absolute outline widths are converted to the bounded relative scale.
+
+With Custom colors enabled, `controllerColor` changes the shell with flat panel, socket, highlight, and shadow regions. Fixed hardware colors remain intact unless `tintControls=yes`. `buttonLabels=icons|letters|none` selects hardware markings, letters, or hidden markings; directional details and system emblems remain identifiable. Digital presses invert independently. Analog triggers retain their inactive base and outline while a contrasting fill grows bottom-to-top, or left-to-right in compact mode. `strength=0` keeps the saved disabled-pressure setting and displays a digital press. Steam Deck, Wii U, Dreamcast VMU, and Playdate screen interiors support true alpha with `screenOpacity=0`.
+
+Guide customization replaces the emblem inside an existing SVG slot without changing its binding or housing. SVG image URLs load as images rather than injected markup. Animated GIFs stay mounted through input frames and direct layout switching; Chromium tests verify changing rendered frames. Verify playback in your OBS build separately.
+
+The [Steam hardware specifications](https://www.steamdeck.com/en/tech), [Nintendo Nunchuk controls](https://www.nintendo.co.jp/hardware/wiiu/accessories/nunchuk/index.html), and [GamePad Viewer](https://gamepadviewer.com/) were used as hardware/interaction references. Trackpad clicks can be assigned through Custom Mapping. Rear grips, final-click indicators, rails, volume, and crank activation are omitted from the visual controls; existing saved mappings retain their logical output indices. Browser Gamepad API exposure depends on the device/adapter; touch coordinates, motion, and native crank-angle tracking are not implemented.
+
+Controller requires HTTP/HTTPS because browsers block fetching editable SVG resources from `file://`. No build step is needed. Tests in `tests/resources.cjs` cover control isolation, palettes, trigger pressure, alpha openings, layout reuse, and rendered-pixel inversion in Chromium, Firefox, and WebKit. Unavailable engines are explicitly skipped; WebKit testing does not establish OBS or Safari behavior on Apple hardware.
+
+Choose **Keyboard** for automatic keyboard input; **F** also connects the keyboard for input detection. **Custom Mapping** shows connected devices, model-specific outputs, and recording controls. Add a binding, choose the output, select **Record input**, press the input, then **Apply mapping**. Keyboard capture accepts any identified key (`choiceType: "keys"` with its physical `KeyboardEvent.code`); older button/axis keyboard bindings still work. Escape or **Cancel recording** cancels the capture. Incomplete or duplicate bindings keep the applied mapping unchanged. Clear the binding draft and apply to restore standard input; Reset restores the opening configuration. Axis ranges and packed D-pad hats remain available for unusual adapters. DualSense microphone mute has its own output (`22`); bind it through Custom Mapping when an adapter exposes that input at a different raw index. N64 C buttons use the right stick on standard pads, with custom mapping targets 18-21 for dedicated C buttons. Skins fit the viewport automatically. Appearance controls retain background, opacity, scale, tilt, offsets, and artwork filters.
 
 ## Social popup
 

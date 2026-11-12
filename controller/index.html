@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Controller Overlay for OBS | stream.HTML</title>
-    <meta name="description" content="Show gamepad or keyboard input in OBS with Xbox, PlayStation, fight-stick, and GameCube skins. Free controller overlay by BONYUR." />
+    <meta name="description" content="Show input in OBS with 32 controller models, compact speedrun layouts, vector customization, and custom mapping. Free controller overlay by BONYUR." />
     <meta name="author" content="Andrés Trujillo [Mateus] byUwUr" />
     <meta name="robots" content="index, follow, max-image-preview:large" />
     <meta name="theme-color" content="#660000" />
@@ -15,7 +15,7 @@
     <meta property="og:site_name" content="stream.HTML" />
     <meta property="og:locale" content="en_US" />
     <meta property="og:title" content="Controller Overlay for OBS | stream.HTML" />
-    <meta property="og:description" content="Show gamepad or keyboard input in OBS with Xbox, PlayStation, fight-stick, and GameCube skins. Free controller overlay by BONYUR." />
+    <meta property="og:description" content="Show input in OBS with 32 controller models, compact speedrun layouts, vector customization, and custom mapping. Free controller overlay by BONYUR." />
     <meta property="og:url" content="https://byuwur.github.io/stream.html/controller/" />
     <meta property="og:image" content="https://byuwur.github.io/stream.html/controller/prev.jpg" />
     <meta property="og:image:type" content="image/jpeg" />
@@ -25,7 +25,7 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:creator" content="@byUwUr" />
     <meta name="twitter:title" content="Controller Overlay for OBS | stream.HTML" />
-    <meta name="twitter:description" content="Show gamepad or keyboard input in OBS with Xbox, PlayStation, fight-stick, and GameCube skins. Free controller overlay by BONYUR." />
+    <meta name="twitter:description" content="Show input in OBS with 32 controller models, compact speedrun layouts, vector customization, and custom mapping. Free controller overlay by BONYUR." />
     <meta name="twitter:image" content="https://byuwur.github.io/stream.html/controller/prev.jpg" />
     <meta name="twitter:image:alt" content="Controller Overlay by BONYUR: OBS overlay configurator and live preview." />
   </head>
@@ -58,53 +58,16 @@
     </script>
     <!-- Overlay: contains no configurator controls. -->
     <template id="overlay-markup">
+      <svg width="0" height="0" aria-hidden="true" style="position: absolute">
+        <defs>
+          <filter id="controller-disconnected-tint" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+            <feFlood flood-color="#66000066" />
+            <feComposite in2="SourceGraphic" operator="atop" />
+          </filter>
+        </defs>
+      </svg>
       <div class="container" id="gamepads">
-        <!-- One artwork template, cloned for each player slot. -->
-        <template id="controller-artwork">
-          <div class="triggers">
-            <span class="trigger left" data-name="button-left-shoulder-bottom"></span>
-            <span class="trigger right" data-name="button-right-shoulder-bottom"></span>
-            <span class="trigger-button left" data-name="button-left-shoulder-bottom-digital"></span>
-            <span class="trigger-button right" data-name="button-right-shoulder-bottom-digital"></span>
-          </div>
-          <div class="bumpers">
-            <span class="bumper left" data-name="button-left-shoulder-top"></span>
-            <span class="bumper right" data-name="button-right-shoulder-top"></span>
-          </div>
-          <div class="touchpad" data-name="touch-pad"></div>
-          <div class="quadrant"></div>
-          <div class="meta" data-name="button-meta"></div>
-          <div class="arrows">
-            <span class="back" data-name="button-select"></span>
-            <span class="start" data-name="button-start"></span>
-          </div>
-          <div class="abxy">
-            <span class="button a" data-name="button-1"></span>
-            <span class="button b" data-name="button-2"></span>
-            <span class="button x" data-name="button-3"></span>
-            <span class="button y" data-name="button-4"></span>
-          </div>
-          <div class="sticks">
-            <span class="stick left" data-name="stick-1"></span>
-            <span class="stick right" data-name="stick-2"></span>
-          </div>
-          <div class="wheels">
-            <span class="wheel left" data-name="stick-1-wheel"></span>
-            <span class="wheel right" data-name="stick-2-wheel"></span>
-          </div>
-          <div class="dpad">
-            <span class="face up" data-name="button-dpad-top"></span>
-            <span class="face down" data-name="button-dpad-bottom"></span>
-            <span class="face left" data-name="button-dpad-left"></span>
-            <span class="face right" data-name="button-dpad-right"></span>
-          </div>
-          <div class="fstick" data-name="arcade-stick"></div>
-        </template>
-        <div class="controller xbox disconnected" id="gamepad-1"></div>
-        <div class="controller xbox disconnected" id="gamepad-2"></div>
-        <div class="controller xbox disconnected" id="gamepad-3"></div>
-        <div class="controller xbox disconnected" id="gamepad-4"></div>
-        <div class="controller xbox disconnected" id="gamepad-9"></div>
+        <div class="controller disconnected"></div>
       </div>
     </template>
 
@@ -126,6 +89,5 @@
     <!-- Configurator: URL toolbar, settings, preview, and help. -->
     <div id="configurator"></div>
     <script src="../configurator.js" defer></script>
-    <script src="./configurator.js" defer></script>
   </body>
 </html>

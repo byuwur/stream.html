@@ -1,0 +1,178 @@
+<svg xmlns="http://www.w3.org/2000/svg" id="playdate" data-controller="playdate" data-name="Playdate" data-platform="Other" viewBox="68.67 84.71 385.61 317.03" data-labels="icons" data-layout="full" role="img" aria-label="Playdate input display" font-family="Arial, sans-serif" data-full-viewbox="68.67 84.71 385.61 317.03" data-compact-viewbox="0 2 106 49" data-source="PDATE.svg">
+  <title>Playdate</title>
+  <style>
+    .custom-colors .shell-base { fill: var(--controller-color); }
+    .custom-colors .shell-panel { fill: var(--controller-panel); }
+    .hardware-marking { opacity: 0.65; } .custom-colors .hardware-marking { fill: var(--controller-ink); }
+    .vector-outline { stroke-linecap: round; stroke-linejoin: round; }
+    .shell-highlight { fill: #ffffff; opacity: var(--highlight-intensity, 0.12); }
+    .shell-shadow { fill: #000000; opacity: var(--shadow-intensity, 0.16); }
+    .screen-surface { fill: #111111; opacity: var(--screen-opacity, 0); }
+    .word-label, .compact-geometry, .minimal-hardware { display: none; }
+    [data-labels="letters"] .hardware-icon { display: none; }
+    [data-labels="letters"] .word-label { display: inline; }
+    [data-labels="none"] .marking { display: none; }
+    [data-layout="minimal"] #shell, [data-layout="minimal"] .shell-decoration, [data-layout="minimal"] .full-only-decoration { display: none; }
+    [data-layout="minimal"] .minimal-hardware { display: inline; }
+    [data-layout="minimal"] .full-hardware { display: none; }
+    [data-layout="minimal"][data-labels="letters"] .compact-geometry.word-label { display: inline; }
+    [data-layout="minimal"] .minimal-omit, [data-layout="minimal"].minimal-omit { display: none; }
+    .player-indicator { fill: #20252c; stroke: #111111; stroke-width: 0.6; }
+    .player-indicator.lit { fill: var(--player-color, #65e374); }
+    .marking { pointer-events: none; }
+    [data-labels="letters"] .hardware-icon, [data-labels="none"] .marking { display: none; }
+
+    .custom-colors .socket-base { fill: var(--controller-socket); }
+    .guide-custom-housing { display: none; }
+  </style>
+  <defs>
+    <mask id="screen-cutout" maskUnits="userSpaceOnUse" x="-1000" y="-1000" width="4000" height="4000">
+      <rect x="-1000" y="-1000" width="4000" height="4000" fill="#ffffff" />
+      <rect x="94" y="111" width="225" height="136" fill="#000000" />
+    </mask>
+    <g id="housing-shape">
+      <rect x="76.67" y="92.71" width="291.27" height="301.03" rx="12.13" fill="#ffffff" stroke="none" class="" />
+    </g>
+    <mask id="highlight-rim" maskUnits="userSpaceOnUse" x="-1000" y="-1000" width="4000" height="4000">
+      <use href="#housing-shape" />
+      <rect x="76.67" y="92.71" width="291.27" height="301.03" rx="12.13" fill="#000000" stroke="none" class="" transform="translate(4 5)" />
+    </mask>
+    <mask id="shadow-rim" maskUnits="userSpaceOnUse" x="-1000" y="-1000" width="4000" height="4000">
+      <use href="#housing-shape" />
+      <rect x="76.67" y="92.71" width="291.27" height="301.03" rx="12.13" fill="#000000" stroke="none" class="" transform="translate(-4 -5)" />
+    </mask>
+    <clipPath id="dpad-12">
+      <polygon points="106.41,287.59 186.38,287.59 146.395,327.575" />
+    </clipPath>
+    <clipPath id="dpad-13">
+      <polygon points="106.41,367.56 186.38,367.56 146.395,327.575" />
+    </clipPath>
+    <clipPath id="dpad-14">
+      <polygon points="106.41,287.59 106.41,367.56 146.395,327.575" />
+    </clipPath>
+    <clipPath id="dpad-15">
+      <polygon points="186.38,287.59 186.38,367.56 146.395,327.575" />
+    </clipPath>
+  </defs>
+  <g>
+    <g id="shell">
+      <g id="shell-surfaces" mask="url(#screen-cutout)">
+        <rect x="76.67" y="92.71" width="291.27" height="301.03" rx="12.13" fill="#f0cb28" stroke="rgb(0, 0, 0)" class="vector-outline shell-base" stroke-width="3" />
+        <circle cx="93.67" cy="377.21" r="11.7" fill="#d4ac1d" stroke="rgb(0, 0, 0)" class="vector-outline shell-panel" stroke-width="3" />
+        <circle cx="93.67" cy="377.21" r="5.51" fill="#d4ac1d" stroke="rgb(0, 0, 0)" class="vector-outline shell-panel" stroke-width="3" />
+        <circle cx="350.73" cy="377.21" r="11.7" fill="#d4ac1d" stroke="rgb(0, 0, 0)" class="vector-outline shell-panel" stroke-width="3" />
+        <circle cx="350.73" cy="377.21" r="5.51" fill="#d4ac1d" stroke="rgb(0, 0, 0)" class="vector-outline shell-panel" stroke-width="3" />
+        <circle cx="350.73" cy="108.77" r="11.7" fill="#d4ac1d" stroke="rgb(0, 0, 0)" class="vector-outline shell-panel" stroke-width="3" />
+        <circle cx="350.73" cy="108.77" r="5.51" fill="#d4ac1d" stroke="rgb(0, 0, 0)" class="vector-outline shell-panel" stroke-width="3" />
+        <rect x="343.76" y="161.43" width="13.94" height="49.93" rx="5.78" fill="#d4ac1d" stroke="rgb(0, 0, 0)" class="vector-outline shell-panel" stroke-width="3" />
+        <path d="M320.91,97.27H95.3a14.47,14.47,0,0,0-14.47,14.47v135.1A14.47,14.47,0,0,0,95.3,261.31H320.91a14.47,14.47,0,0,0,14.47-14.47V111.74A14.47,14.47,0,0,0,320.91,97.27Zm1.57,150.61H93.73V110.7H322.48Z" fill="rgb(0, 0, 0)" stroke="none" />
+      </g>
+      <rect x="94" y="111" width="225" height="136" class="screen-surface" />
+      <rect x="94" y="111" width="225" height="136" fill="none" class="vector-outline" stroke="#111111" stroke-width="3" />
+      <g mask="url(#highlight-rim)" class="shell-highlight">
+        <rect x="76.67" y="92.71" width="291.27" height="301.03" rx="12.13" stroke="none" class="" />
+      </g>
+      <g mask="url(#shadow-rim)" class="shell-shadow">
+        <rect x="76.67" y="92.71" width="291.27" height="301.03" rx="12.13" stroke="none" class="" />
+      </g>
+    </g>
+  </g>
+  <g transform="matrix(1 0 0 1 0 0)" class="shell-decoration">
+    <g class="full-geometry">
+      <rect x="367.94" y="230.05" width="28.12" height="27.31" fill="#eeeeee" stroke="rgb(0, 0, 0)" class="vector-outline button-face" stroke-width="3" />
+      <rect x="400.61" y="149.56" width="45.67" height="40.06" rx="5.48" fill="#eeeeee" stroke="rgb(0, 0, 0)" class="vector-outline button-face" stroke-width="3" />
+      <rect x="396.06" y="155.93" width="4.55" height="27.31" transform="matrix(-1 0 0 -1 796.67 339.18)" fill="#eeeeee" stroke="rgb(0, 0, 0)" class="vector-outline button-face" stroke-width="3" />
+      <path d="M373.63,155.93h22.43a0,0,0,0,1,0,0v92.12a9.3,9.3,0,0,1-9.3,9.3h-3.82a9.3,9.3,0,0,1-9.3-9.3V155.93A0,0,0,0,1,373.63,155.93Z" fill="#eeeeee" stroke="rgb(0, 0, 0)" class="vector-outline button-face" stroke-width="3" />
+      <circle cx="384.85" cy="248.1" r="4.34" fill="#eeeeee" stroke="rgb(0, 0, 0)" class="vector-outline button-face" stroke-width="3" />
+    </g>
+  </g>
+  <g id="input-16" class="control stock-neutral" data-name="button-meta" data-input="button:16" data-label="Home" data-bounds="339.03 126.15001 23.4 23.4" data-compact-transform="matrix(0.51282 0 0 0.51282 -103.86154 -28.69231)" data-order="6" data-compact-scale="0.51282">
+    <g class="press-visual">
+      <g transform="matrix(1 0 0 1 0 0)">
+        <g class="full-geometry">
+          <circle cx="350.73" cy="137.85" r="11.7" fill="#3b4147" stroke="rgb(0, 0, 0)" class="vector-outline button-face stock-plastic" stroke-width="3" />
+        </g>
+      </g>
+      <g class="word-label marking full-only-decoration">
+        <text x="350.729998588562" y="137.85000896453857" fill="#111111" font-family="Arial, sans-serif" font-size="7.799999872843426" text-anchor="middle" dominant-baseline="central">Home</text>
+      </g>
+      <g class="compact-geometry word-label marking" transform="matrix(3.34286 0 0 3.34286 190.27286 -9.2357)">
+        <text x="48.0" y="44.0" fill="#111111" font-family="Arial, sans-serif" font-size="2.3333333333333335" text-anchor="middle" dominant-baseline="central">Home</text>
+      </g>
+    </g>
+  </g>
+  <g id="input-1" class="control" data-name="button-2" data-input="button:1" data-label="B" data-bounds="236.22 289.92001 34.68 34.68" data-compact-transform="matrix(0.69204 0 0 0.69204 -114.47405 -191.63669)" data-order="7" data-compact-scale="0.69204">
+    <g class="press-visual">
+      <g transform="matrix(1 0 0 1 0 0)">
+        <g class="full-geometry">
+          <circle cx="253.56" cy="307.26" r="17.34" fill="#ffffcc" stroke="rgb(0, 0, 0)" class="vector-outline button-face" stroke-width="3" />
+        </g>
+      </g>
+      <g class="word-label marking full-only-decoration">
+        <text x="253.56000137329102" y="307.26001358032227" fill="var(--button-label-color, #9e9e7e)" font-family="Arial, sans-serif" font-size="13.178400115966797" text-anchor="middle" dominant-baseline="central">B</text>
+      </g>
+      <g class="compact-geometry word-label marking" transform="matrix(2.15395 0 0 2.15395 125.29139 255.56513)">
+        <text x="59.550312939434605" y="24.0" fill="var(--button-label-color, #9e9e7e)" font-family="Arial, sans-serif" font-size="8.050312939434619" text-anchor="middle" dominant-baseline="central">B</text>
+      </g>
+    </g>
+  </g>
+  <g id="input-0" class="control" data-name="button-1" data-input="button:0" data-label="A" data-bounds="294.16 289.92001 34.68 34.68" data-compact-transform="matrix(0.69204 0 0 0.69204 -124.57093 -191.63669)" data-order="8" data-compact-scale="0.69204">
+    <g class="press-visual">
+      <g transform="matrix(1 0 0 1 0 0)">
+        <g class="full-geometry">
+          <circle cx="311.5" cy="307.26" r="17.34" fill="#ffffcc" stroke="rgb(0, 0, 0)" class="vector-outline button-face" stroke-width="3" />
+        </g>
+      </g>
+      <g class="word-label marking full-only-decoration">
+        <text x="311.50000381469727" y="307.26001358032227" fill="var(--button-label-color, #9e9e7e)" font-family="Arial, sans-serif" font-size="13.178400115966797" text-anchor="middle" dominant-baseline="central">A</text>
+      </g>
+      <g class="compact-geometry word-label marking" transform="matrix(2.15395 0 0 2.15395 125.29139 255.56513)">
+        <text x="86.44968706056537" y="24.0" fill="var(--button-label-color, #9e9e7e)" font-family="Arial, sans-serif" font-size="8.050312939434619" text-anchor="middle" dominant-baseline="central">A</text>
+      </g>
+    </g>
+  </g>
+  <g id="input-12" class="control" data-name="button-dpad-top" data-input="button:12" data-label="↑" data-bounds="106.40997 287.59 79.96999 79.96994" data-compact-transform="matrix(0.40015 0 0 0.40015 -37.57996 -107.07916)" data-order="912" data-compact-scale="0.40015">
+    <g class="press-visual">
+      <g transform="matrix(1 0 0 1 0 0)">
+        <g class="full-geometry">
+          <g clip-path="url(#dpad-12)">
+            <path d="M138.12331,291.02039c2.19328,-2.19516 5.16872,-3.42906 8.27168,-3.43038c6.46496,0.0027 11.705,5.24441 11.705,11.71v16.58h16.57c3.10477,-0.00265 6.08328,1.22885 8.27961,3.42331c2.19516,2.19328 3.42906,5.16872 3.43038,8.27168c-0.0027,6.46496 -5.24441,11.705 -11.71,11.705h-16.58v16.57c0.00265,3.10477 -1.22885,6.08328 -3.42331,8.27961c-2.19328,2.19516 -5.16872,3.42906 -8.27168,3.43038c-6.46496,-0.0027 -11.705,-5.24441 -11.705,-11.71v-16.58h-16.57c-3.10477,0.00265 -6.08328,-1.22885 -8.27961,-3.42331c-2.19516,-2.19328 -3.42906,-5.16872 -3.43038,-8.27168c0.0027,-6.46496 5.24441,-11.705 11.71,-11.705h16.58v-16.57c-0.00265,-3.10477 1.22885,-6.08328 3.42331,-8.27961z" fill="#eeeeee" stroke="rgb(0, 0, 0)" class="vector-outline button-face" stroke-width="3" />
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g id="input-13" class="control" data-name="button-dpad-bottom" data-input="button:13" data-label="↓" data-bounds="106.40997 287.59 79.96999 79.96994" data-compact-transform="matrix(0.40015 0 0 0.40015 -37.57996 -107.07916)" data-order="913" data-compact-scale="0.40015">
+    <g class="press-visual">
+      <g transform="matrix(1 0 0 1 0 0)">
+        <g class="full-geometry">
+          <g clip-path="url(#dpad-13)">
+            <path d="M138.12331,291.02039c2.19328,-2.19516 5.16872,-3.42906 8.27168,-3.43038c6.46496,0.0027 11.705,5.24441 11.705,11.71v16.58h16.57c3.10477,-0.00265 6.08328,1.22885 8.27961,3.42331c2.19516,2.19328 3.42906,5.16872 3.43038,8.27168c-0.0027,6.46496 -5.24441,11.705 -11.71,11.705h-16.58v16.57c0.00265,3.10477 -1.22885,6.08328 -3.42331,8.27961c-2.19328,2.19516 -5.16872,3.42906 -8.27168,3.43038c-6.46496,-0.0027 -11.705,-5.24441 -11.705,-11.71v-16.58h-16.57c-3.10477,0.00265 -6.08328,-1.22885 -8.27961,-3.42331c-2.19516,-2.19328 -3.42906,-5.16872 -3.43038,-8.27168c0.0027,-6.46496 5.24441,-11.705 11.71,-11.705h16.58v-16.57c-0.00265,-3.10477 1.22885,-6.08328 3.42331,-8.27961z" fill="#eeeeee" stroke="rgb(0, 0, 0)" class="vector-outline button-face" stroke-width="3" />
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g id="input-14" class="control" data-name="button-dpad-left" data-input="button:14" data-label="←" data-bounds="106.40997 287.59 79.96999 79.96994" data-compact-transform="matrix(0.40015 0 0 0.40015 -37.57996 -107.07916)" data-order="914" data-compact-scale="0.40015">
+    <g class="press-visual">
+      <g transform="matrix(1 0 0 1 0 0)">
+        <g class="full-geometry">
+          <g clip-path="url(#dpad-14)">
+            <path d="M138.12331,291.02039c2.19328,-2.19516 5.16872,-3.42906 8.27168,-3.43038c6.46496,0.0027 11.705,5.24441 11.705,11.71v16.58h16.57c3.10477,-0.00265 6.08328,1.22885 8.27961,3.42331c2.19516,2.19328 3.42906,5.16872 3.43038,8.27168c-0.0027,6.46496 -5.24441,11.705 -11.71,11.705h-16.58v16.57c0.00265,3.10477 -1.22885,6.08328 -3.42331,8.27961c-2.19328,2.19516 -5.16872,3.42906 -8.27168,3.43038c-6.46496,-0.0027 -11.705,-5.24441 -11.705,-11.71v-16.58h-16.57c-3.10477,0.00265 -6.08328,-1.22885 -8.27961,-3.42331c-2.19516,-2.19328 -3.42906,-5.16872 -3.43038,-8.27168c0.0027,-6.46496 5.24441,-11.705 11.71,-11.705h16.58v-16.57c-0.00265,-3.10477 1.22885,-6.08328 3.42331,-8.27961z" fill="#eeeeee" stroke="rgb(0, 0, 0)" class="vector-outline button-face" stroke-width="3" />
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g id="input-15" class="control" data-name="button-dpad-right" data-input="button:15" data-label="→" data-bounds="106.40997 287.59 79.96999 79.96994" data-compact-transform="matrix(0.40015 0 0 0.40015 -37.57996 -107.07916)" data-order="915" data-compact-scale="0.40015">
+    <g class="press-visual">
+      <g transform="matrix(1 0 0 1 0 0)">
+        <g class="full-geometry">
+          <g clip-path="url(#dpad-15)">
+            <path d="M138.12331,291.02039c2.19328,-2.19516 5.16872,-3.42906 8.27168,-3.43038c6.46496,0.0027 11.705,5.24441 11.705,11.71v16.58h16.57c3.10477,-0.00265 6.08328,1.22885 8.27961,3.42331c2.19516,2.19328 3.42906,5.16872 3.43038,8.27168c-0.0027,6.46496 -5.24441,11.705 -11.71,11.705h-16.58v16.57c0.00265,3.10477 -1.22885,6.08328 -3.42331,8.27961c-2.19328,2.19516 -5.16872,3.42906 -8.27168,3.43038c-6.46496,-0.0027 -11.705,-5.24441 -11.705,-11.71v-16.58h-16.57c-3.10477,0.00265 -6.08328,-1.22885 -8.27961,-3.42331c-2.19516,-2.19328 -3.42906,-5.16872 -3.43038,-8.27168c0.0027,-6.46496 5.24441,-11.705 11.71,-11.705h16.58v-16.57c-0.00265,-3.10477 1.22885,-6.08328 3.42331,-8.27961z" fill="#eeeeee" stroke="rgb(0, 0, 0)" class="vector-outline button-face" stroke-width="3" />
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>
