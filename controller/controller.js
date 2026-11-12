@@ -63,7 +63,21 @@ async function initControllerResource() {
         label: "Player Number:",
         section: "Input",
         description: "Choose a player, all slots, or connected inputs only. Keyboard uses J/K/U/I for face buttons, WASD for the left stick, and arrows for the D-pad; Custom Mapping can use any identified key.",
-        options: { 1: "Player 1", 2: "Player 2", 3: "Player 3", 4: "Player 4", 5: "Player 5", 6: "Player 6", 7: "Player 7", 8: "Player 8", 9: "Keyboard", "all-gamepads": "All", "all-inputs": "All + Keyboard", gamepads: "All connected", all: "All connected + Keyboard" },
+        options: {
+          1: "Player 1",
+          2: "Player 2",
+          3: "Player 3",
+          4: "Player 4",
+          5: "Player 5",
+          6: "Player 6",
+          7: "Player 7",
+          8: "Player 8",
+          9: "Keyboard",
+          "all-gamepads": "All",
+          "all-inputs": "All + Keyboard",
+          gamepads: "All connected",
+          all: "All connected + Keyboard"
+        },
         id: "player-input",
         icon: "fa-user"
       },
@@ -1361,8 +1375,8 @@ function initControllerMapping() {
         select.val(Object.hasOwn(choices, value) ? value : "original").trigger("change.select2");
       }
       $("#skin-input").on("change.controllerVariants", () => updateVariants());
-      // Imports update fields without bubbling; only editing Skin resets the selected palette.
-      $("form[data-configurator]").on("change.controllerVariants", "#skin-input", () => updateVariants("original"));
+      // Imports retain explicit palettes; Skin edits preserve Default and Sequential (all).
+      $("form[data-configurator]").on("change.controllerVariants", "#skin-input", () => updateVariants(settings.variant === "sequential" ? "sequential" : "original"));
       updateVariants();
       const platforms = new Map();
       for (const option of [...document.querySelectorAll("#skin-input option")]) {
