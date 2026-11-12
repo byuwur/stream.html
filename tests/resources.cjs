@@ -287,7 +287,9 @@ test("resources render and round-trip URLs without configurator assets", async (
                   [cx, cy] = center(label);
                 const bounds = box(face),
                   coveredBase = skin !== "steamdeck" || [0.01, 0.5, 0.99].every((ratio) => solids.some((shape) => inside(shape, bounds.x + bounds.width * ratio, bounds.y + bounds.height - 0.1)));
-                return coveredBase && [-0.4, 0, 0.4].every((x) => [-0.4, 0, 0.4].every((y) => inside(face, cx + x * label.width, cy + y * label.height) && !solids.some((shape) => inside(shape, cx + x * label.width, cy + y * label.height))));
+                return (
+                  coveredBase && [-0.4, 0, 0.4].every((x) => [-0.4, 0, 0.4].every((y) => inside(face, cx + x * label.width, cy + y * label.height) && !solids.some((shape) => inside(shape, cx + x * label.width, cy + y * label.height))))
+                );
               });
             }
             return [
@@ -487,9 +489,12 @@ test("resources render and round-trip URLs without configurator assets", async (
                   (node) => node.querySelector(".press-visual").getBoundingClientRect().top > Math.max(box(0).bottom, box(1).bottom)
                 )
               : true;
-            return { separated, belowFaces, labels };
+            const directions = skin === "joycon" ? [12, 13, 14, 15].map(box) : [];
+            const dpadSeparated = directions.every((a, i) => directions.slice(i + 1).every((b) => a.right < b.left || b.right < a.left || a.bottom < b.top || b.bottom < a.top));
+            return { separated, belowFaces, labels, dpadSeparated };
           }, skin);
           assert.equal(spacing.separated, true, skin + " keeps long shoulder bars separate");
+          assert.equal(spacing.dpadSeparated, true, skin + " keeps all four D-pad directions visible and separate");
           assert.equal(spacing.labels, true, skin + " keeps each shoulder label inside its bar");
           assert.equal(spacing.belowFaces, true, skin + " puts auxiliary buttons below the face pair");
           for (const mode of ["letters", "none", "icons"]) {
@@ -605,13 +610,9 @@ test("resources render and round-trip URLs without configurator assets", async (
         const stock = await shellColor();
         assert.equal(await page.evaluate(() => byStreamResource.settings.customColors), "no");
         assert.equal(await page.locator(".controller").evaluate((node) => node.style.getPropertyValue("--controller-color")), "");
-        const baseline = await page
-          .locator(".vector-outline")
-          .evaluateAll((nodes) => nodes.filter((node) => !node.closest("defs, .marking, .hardware-icon, .guide-logo-original")).map((node) => getComputedStyle(node).strokeWidth));
+        const baseline = await page.locator(".vector-outline").evaluateAll((nodes) => nodes.filter((node) => !node.closest("defs, .marking, .hardware-icon, .guide-logo-original")).map((node) => getComputedStyle(node).strokeWidth));
         await open({ customColors: "yes", outlineWidth: "1.5" });
-        const scaled = await page
-          .locator(".vector-outline")
-          .evaluateAll((nodes) => nodes.filter((node) => !node.closest("defs, .marking, .hardware-icon, .guide-logo-original")).map((node) => getComputedStyle(node).strokeWidth));
+        const scaled = await page.locator(".vector-outline").evaluateAll((nodes) => nodes.filter((node) => !node.closest("defs, .marking, .hardware-icon, .guide-logo-original")).map((node) => getComputedStyle(node).strokeWidth));
         assert.deepEqual([...new Set(baseline)], ["3px"], "All structural outlines share the same authored width");
         assert.equal(scaled.length, baseline.length);
         // Computed SVG widths have limited decimal precision.

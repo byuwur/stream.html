@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" id="xbox" data-controller="xbox" data-name="Duke"
   data-platform="Xbox" viewBox="15.1345 -8.4705 492.7084 448.2322" data-labels="icons"
   data-layout="full" role="img" aria-label="Duke input display" font-family="Arial, sans-serif"
-  data-full-viewbox="15.1345 -8.4705 492.7084 448.2322" data-compact-viewbox="0 0 174 77.12766"
+  data-full-viewbox="15.1345 -8.4705 492.7084 448.2322" data-compact-viewbox="0 0 174 65"
   data-source="OGX.svg">
   <title>Duke</title>
   <style>
@@ -353,8 +353,8 @@
   </g>
   <g id="input-0" class="control" data-name="button-1" data-input="button:0" data-label="A"
     data-bounds="368.66183 178.07056 45.9801 52.13771"
-    data-compact-transform="matrix(0.35015 0 0 0.35015 0.86231 -12.47974)" data-order="35"
-    data-compact-scale="0.35015">
+    data-compact-transform="matrix(0.37816 0 0 0.37816 -10.10864 -32.67676)" data-order="35"
+    data-compact-scale="0.37816">
     <g class="press-visual">
       <g transform="matrix(1 0 0 1 0 0)">
         <g class="full-geometry">
@@ -383,8 +383,8 @@
   </g>
   <g id="input-1" class="control" data-name="button-2" data-input="button:1" data-label="B"
     data-bounds="410.79901 199.62842 45.9801 52.13773"
-    data-compact-transform="matrix(0.35015 0 0 0.35015 4.10789 -13.02826)" data-order="36"
-    data-compact-scale="0.35015">
+    data-compact-transform="matrix(0.37816 0 0 0.37816 -8.04341 -33.82916)" data-order="36"
+    data-compact-scale="0.37816">
     <g class="press-visual">
       <g transform="matrix(1 0 0 1 0 0)">
         <g class="full-geometry">
@@ -413,8 +413,8 @@
   </g>
   <g id="input-3" class="control" data-name="button-4" data-input="button:3" data-label="Y"
     data-bounds="412.59943 150.72333 45.9801 52.13771"
-    data-compact-transform="matrix(0.35015 0 0 0.35015 3.47747 -15.90405)" data-order="37"
-    data-compact-scale="0.35015">
+    data-compact-transform="matrix(0.37816 0 0 0.37816 -8.72426 -35.33502)" data-order="37"
+    data-compact-scale="0.37816">
     <g class="press-visual">
       <g transform="matrix(1 0 0 1 0 0)">
         <g class="full-geometry">
@@ -441,8 +441,8 @@
   </g>
   <g id="input-2" class="control" data-name="button-3" data-input="button:2" data-label="X"
     data-bounds="368.6702 127.61456 45.9801 52.13773"
-    data-compact-transform="matrix(0.35015 0 0 0.35015 0.85938 -14.81249)" data-order="38"
-    data-compact-scale="0.35015">
+    data-compact-transform="matrix(0.37816 0 0 0.37816 -10.11181 -33.59614)" data-order="38"
+    data-compact-scale="0.37816">
     <g class="press-visual">
       <g transform="matrix(1 0 0 1 0 0)">
         <g class="full-geometry">
@@ -469,8 +469,8 @@
   </g>
   <g id="input-29" class="control stock-neutral" data-name="button-right-shoulder-top"
     data-input="button:5" data-label="Black" data-bounds="392.14542 89.18029 34.21869 38.80162"
-    data-compact-transform="matrix(0.26301 0 0 0.26301 37.3602 -6.55837)" data-order="39"
-    data-compact-scale="0.26301">
+    data-compact-transform="matrix(0.28405 0 0 0.28405 28.74915 -23.32167)" data-order="39"
+    data-compact-scale="0.28405">
     <g class="press-visual">
       <g transform="matrix(1 0 0 1 0 0)">
         <g class="full-geometry">
@@ -494,8 +494,8 @@
   </g>
   <g id="input-30" class="control stock-neutral" data-name="button-left-shoulder-top"
     data-input="button:4" data-label="White" data-bounds="432.4722 113.71395 34.21869 38.80161"
-    data-compact-transform="matrix(0.27763 0 0 0.27763 36.18445 -6.95612)" data-order="40"
-    data-compact-scale="0.27763">
+    data-compact-transform="matrix(0.29984 0 0 0.29984 26.19906 -24.39132)" data-order="40"
+    data-compact-scale="0.29984">
     <g class="press-visual">
       <g transform="matrix(1 0 0 1 0 0)">
         <g class="full-geometry">

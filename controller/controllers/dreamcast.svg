@@ -2,7 +2,7 @@
   data-name="Dreamcast" data-platform="Sega" viewBox="40.1263 14.38572 440.2659 457.12638"
   data-labels="icons" data-layout="full" role="img" aria-label="Dreamcast input display"
   font-family="Arial, sans-serif" data-full-viewbox="40.1263 14.38572 440.2659 457.12638"
-  data-compact-viewbox="-1.08352 0 160.68383 101" data-source="DREAMCAST.svg">
+  data-compact-viewbox="0 0 160 94" data-source="DREAMCAST.svg">
   <title>Dreamcast</title>
   <style>
     .custom-colors .shell-base { fill: var(--controller-color); }
@@ -144,9 +144,9 @@
   <g id="input-6" class="control analog-trigger stock-neutral minimal-bar"
     data-name="button-left-shoulder-bottom-digital" data-input="button:6" data-label="L"
     data-bounds="91.22 30.09 50.28 61.2"
-    data-compact-transform="matrix(1.02308 0 0 1.02308 -87.32348 -60.50089)" data-order="-24"
+    data-compact-transform="matrix(1.06097 0 0 1.06097 -94.77991 -63.075)" data-order="-24"
     data-reconstructed="yes" data-pressure-full-bounds="91.22 30.09 50.28 61.2"
-    data-compact-scale="1.02308">
+    data-compact-scale="1.06097">
     <g class="press-visual">
       <g class="full-geometry shoulder-geometry">
         <path
@@ -199,9 +199,9 @@
   <g id="input-7" class="control analog-trigger stock-neutral minimal-bar"
     data-name="button-right-shoulder-bottom-digital" data-input="button:7" data-label="R"
     data-bounds="379.01999 30.09 50.28 61.2"
-    data-compact-transform="matrix(1.02308 0 0 1.02308 -285.20885 -60.50094)" data-order="-23"
+    data-compact-transform="matrix(1.06097 0 0 1.06097 -301.47586 -63.07505)" data-order="-23"
     data-reconstructed="yes" data-pressure-full-bounds="379.01999 30.09 50.28 61.2"
-    data-compact-scale="1.02308">
+    data-compact-scale="1.06097">
     <g class="press-visual">
       <g class="full-geometry shoulder-geometry">
         <path
@@ -259,7 +259,7 @@
   </g>
   <g id="input-3" class="control" data-name="button-4" data-input="button:3" data-label="Y"
     data-bounds="389.38501 147.41 32.78 32.78"
-    data-compact-transform="matrix(0.65894 0 0 0.65894 -140.38111 -76.73426)" data-order="2"
+    data-compact-transform="matrix(0.65894 0 0 0.65894 -141.38073 -75.93411)" data-order="2"
     data-compact-scale="0.65894">
     <g class="press-visual">
       <g transform="matrix(1 0 0 1 0 0)">
@@ -289,7 +289,7 @@
   </g>
   <g id="input-0" class="control" data-name="button-1" data-input="button:0" data-label="A"
     data-bounds="389.38501 219.09 32.78 32.78"
-    data-compact-transform="matrix(0.65894 0 0 0.65894 -140.38111 -84.36703)" data-order="3"
+    data-compact-transform="matrix(0.65894 0 0 0.65894 -141.38073 -83.16681)" data-order="3"
     data-compact-scale="0.65894">
     <g class="press-visual">
       <g transform="matrix(1 0 0 1 0 0)">
@@ -319,7 +319,7 @@
   </g>
   <g id="input-2" class="control" data-name="button-3" data-input="button:2" data-label="X"
     data-bounds="350.88 183.25 32.78 32.78"
-    data-compact-transform="matrix(0.65894 0 0 0.65894 -134.80863 -80.55064)" data-order="4"
+    data-compact-transform="matrix(0.65894 0 0 0.65894 -136.0083 -79.55046)" data-order="4"
     data-compact-scale="0.65894">
     <g class="press-visual">
       <g transform="matrix(1 0 0 1 0 0)">
@@ -348,7 +348,7 @@
   </g>
   <g id="input-1" class="control" data-name="button-2" data-input="button:1" data-label="B"
     data-bounds="427.89001 183.25 32.78 32.78"
-    data-compact-transform="matrix(0.65894 0 0 0.65894 -145.95358 -80.55064)" data-order="5"
+    data-compact-transform="matrix(0.65894 0 0 0.65894 -146.75315 -79.55046)" data-order="5"
     data-compact-scale="0.65894">
     <g class="press-visual">
       <g transform="matrix(1 0 0 1 0 0)">
@@ -378,7 +378,7 @@
   </g>
   <g id="input-9" class="control stock-neutral" data-name="button-start" data-input="button:9"
     data-label="Start" data-bounds="240.65097 324.384 35.83783 34.09274"
-    data-compact-transform="matrix(0.22323 0 0 0.22323 25.28001 -67.21675)" data-order="7"
+    data-compact-transform="matrix(0.22323 0 0 0.22323 24.28001 -67.21675)" data-order="7"
     data-compact-scale="0.22323">
     <g class="press-visual">
       <g transform="matrix(1 0 0 1 0 0)">
@@ -404,7 +404,7 @@
   </g>
   <g id="input-12" class="control stock-neutral" data-name="button-dpad-top" data-input="button:12"
     data-label="↑" data-bounds="91.0409 225.62376 68.36517 68.36516"
-    data-compact-transform="matrix(0.49733 0 0 0.49733 20.7227 -49.2093)" data-order="912"
+    data-compact-transform="matrix(0.49733 0 0 0.49733 13.7227 -57.2093)" data-order="912"
     data-compact-scale="0.49733">
     <g class="press-visual">
       <g transform="matrix(1 0 0 1 0 0)">
@@ -423,7 +423,7 @@
   </g>
   <g id="input-13" class="control stock-neutral" data-name="button-dpad-bottom"
     data-input="button:13" data-label="↓" data-bounds="91.0409 225.62376 68.36517 68.36516"
-    data-compact-transform="matrix(0.49733 0 0 0.49733 20.7227 -49.2093)" data-order="913"
+    data-compact-transform="matrix(0.49733 0 0 0.49733 13.7227 -57.2093)" data-order="913"
     data-compact-scale="0.49733">
     <g class="press-visual">
       <g transform="matrix(1 0 0 1 0 0)">
@@ -442,7 +442,7 @@
   </g>
   <g id="input-14" class="control stock-neutral" data-name="button-dpad-left" data-input="button:14"
     data-label="←" data-bounds="91.0409 225.62376 68.36517 68.36516"
-    data-compact-transform="matrix(0.49733 0 0 0.49733 20.7227 -49.2093)" data-order="914"
+    data-compact-transform="matrix(0.49733 0 0 0.49733 13.7227 -57.2093)" data-order="914"
     data-compact-scale="0.49733">
     <g class="press-visual">
       <g transform="matrix(1 0 0 1 0 0)">
@@ -461,7 +461,7 @@
   </g>
   <g id="input-15" class="control stock-neutral" data-name="button-dpad-right"
     data-input="button:15" data-label="→" data-bounds="91.0409 225.62376 68.36517 68.36516"
-    data-compact-transform="matrix(0.49733 0 0 0.49733 20.7227 -49.2093)" data-order="915"
+    data-compact-transform="matrix(0.49733 0 0 0.49733 13.7227 -57.2093)" data-order="915"
     data-compact-scale="0.49733">
     <g class="press-visual">
       <g transform="matrix(1 0 0 1 0 0)">
@@ -479,7 +479,7 @@
     </g>
   </g>
   <g id="socket-10" class="fixed-control" data-for="button:10"
-    data-compact-transform="matrix(0.73892 0 0 0.73892 -44.03202 -69.24877)">
+    data-compact-transform="matrix(0.5278 0 0 0.5278 -28.02287 -38.46341)">
     <g class="analog-socket">
       <circle cx="104.25" cy="160.03" r="43.42" fill="#777d81" class="vector-outline socket-base"
         stroke="#111111" stroke-width="3" />
@@ -487,8 +487,8 @@
   </g>
   <g id="input-10" class="control stick stock-neutral" data-name="stick-1" data-input="button:10"
     data-label="L3" data-bounds="75.83 131.61 56.84 56.84" data-axes="0 1" data-stick-click="yes"
-    data-compact-transform="matrix(0.73892 0 0 0.73892 -44.03202 -69.24877)" data-order="14"
-    data-compact-scale="0.73892" data-travel-scale="0.6">
+    data-compact-transform="matrix(0.5278 0 0 0.5278 -28.02287 -38.46341)" data-order="14"
+    data-compact-scale="0.5278" data-travel-scale="0.6">
     <g class="press-visual">
       <g transform="matrix(1 0 0 1 0 0)">
         <g class="full-geometry">

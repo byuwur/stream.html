@@ -435,8 +435,8 @@
   </g>
   <g id="input-12" class="control stock-neutral" data-name="button-dpad-top" data-input="button:12"
     data-label="↑" data-bounds="50.27989 152.46001 122.15999 122.15999"
-    data-compact-transform="matrix(0.2947 0 0 0.2947 -2.81726 -20.92928)" data-order="912"
-    data-compact-scale="0.2947">
+    data-compact-transform="matrix(0.36018 0 0 0.36018 -10.10998 -34.91356)" data-order="912"
+    data-compact-scale="0.36018">
     <g class="press-visual">
       <g transform="matrix(1 0 0 1 0 0)">
         <g class="full-geometry">
@@ -484,8 +484,8 @@
   </g>
   <g id="input-13" class="control stock-neutral" data-name="button-dpad-bottom"
     data-input="button:13" data-label="↓" data-bounds="50.27989 152.46001 122.15999 122.15999"
-    data-compact-transform="matrix(0.2947 0 0 0.2947 -2.81726 -20.92928)" data-order="913"
-    data-compact-scale="0.2947">
+    data-compact-transform="matrix(0.36018 0 0 0.36018 -10.10998 -34.91356)" data-order="913"
+    data-compact-scale="0.36018">
     <g class="press-visual">
       <g transform="matrix(1 0 0 1 0 0)">
         <g class="full-geometry">
@@ -533,8 +533,8 @@
   </g>
   <g id="input-14" class="control stock-neutral" data-name="button-dpad-left" data-input="button:14"
     data-label="←" data-bounds="50.27989 152.46001 122.15999 122.15999"
-    data-compact-transform="matrix(0.2947 0 0 0.2947 -2.81726 -20.92928)" data-order="914"
-    data-compact-scale="0.2947">
+    data-compact-transform="matrix(0.36018 0 0 0.36018 -10.10998 -34.91356)" data-order="914"
+    data-compact-scale="0.36018">
     <g class="press-visual">
       <g transform="matrix(1 0 0 1 0 0)">
         <g class="full-geometry">
@@ -582,8 +582,8 @@
   </g>
   <g id="input-15" class="control stock-neutral" data-name="button-dpad-right"
     data-input="button:15" data-label="→" data-bounds="50.27989 152.46001 122.15999 122.15999"
-    data-compact-transform="matrix(0.2947 0 0 0.2947 -2.81726 -20.92928)" data-order="915"
-    data-compact-scale="0.2947">
+    data-compact-transform="matrix(0.36018 0 0 0.36018 -10.10998 -34.91356)" data-order="915"
+    data-compact-scale="0.36018">
     <g class="press-visual">
       <g transform="matrix(1 0 0 1 0 0)">
         <g class="full-geometry">

@@ -729,7 +729,7 @@
     </g>
   </g>
   <g id="socket-10" data-for="button:10" data-order="61" class="fixed-control"
-    data-compact-transform="matrix(0.48563 0 0 0.48563 -34.30998 -32.00027)">
+    data-compact-transform="matrix(0.44921 0 0 0.44921 -27.23678 -26.45025)">
     <g transform="translate(1051.1 0) rotate(90)">
       <circle cx="152.38" cy="856.9" r="43.28" fill="#34393e" stroke="rgb(0, 0, 0)"
         class="vector-outline stick-housing" stroke-width="3" />
@@ -741,8 +741,8 @@
   </g>
   <g id="input-10" class="control stick stock-neutral" data-name="stick-1" data-input="button:10"
     data-label="L3" data-bounds="169.48997 127.67001 49.42 49.42" data-axes="0 1"
-    data-stick-click="yes" data-compact-transform="matrix(0.48563 0 0 0.48563 -34.30998 -32.00027)"
-    data-order="62" data-compact-scale="0.48563" data-travel-scale="0.44">
+    data-stick-click="yes" data-compact-transform="matrix(0.44921 0 0 0.44921 -27.23678 -26.45025)"
+    data-order="62" data-compact-scale="0.44921" data-travel-scale="0.44">
     <g class="press-visual">
       <g transform="matrix(0 1 -1 0 1051.1 0)">
         <g class="full-geometry">
@@ -755,7 +755,7 @@
     </g>
   </g>
   <g id="socket-11" data-for="button:11" data-order="42" class="fixed-control"
-    data-compact-transform="matrix(0.48563 0 0 0.48563 -309.69081 -32.00027)">
+    data-compact-transform="matrix(0.44921 0 0 0.44921 -278.81421 -26.45025)">
     <g transform="translate(1051.1 0) rotate(90)">
       <circle cx="152.38" cy="203.35997" r="43.28" fill="#34393e" stroke="rgb(0, 0, 0)"
         class="vector-outline stick-housing" stroke-width="3" />
@@ -767,8 +767,8 @@
   </g>
   <g id="input-11" class="control stick stock-neutral" data-name="stick-2" data-input="button:11"
     data-label="R3" data-bounds="823.03001 127.67001 49.42 49.42" data-axes="2 3"
-    data-stick-click="yes" data-compact-transform="matrix(0.48563 0 0 0.48563 -309.69081 -32.00027)"
-    data-order="64" data-compact-scale="0.48563" data-travel-scale="0.44">
+    data-stick-click="yes" data-compact-transform="matrix(0.44921 0 0 0.44921 -278.81421 -26.45025)"
+    data-order="64" data-compact-scale="0.44921" data-travel-scale="0.44">
     <g class="press-visual">
       <g transform="matrix(0 1 -1 0 1051.1 0)">
         <g class="full-geometry">
