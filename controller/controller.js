@@ -62,8 +62,8 @@ async function initControllerResource() {
         default: "1",
         label: "Player Number:",
         section: "Input",
-        description: "Choose a gamepad or Keyboard. Keyboard uses J/K/U/I for face buttons, WASD for the left stick, and arrows for the D-pad; Custom Mapping can use any identified key.",
-        options: { 1: "Player 1", 2: "Player 2", 3: "Player 3", 4: "Player 4", 5: "Player 5", 6: "Player 6", 7: "Player 7", 8: "Player 8", 9: "Keyboard", gamepads: "All connected", all: "All connected + Keyboard" },
+        description: "Choose a player, all slots, or connected inputs only. Keyboard uses J/K/U/I for face buttons, WASD for the left stick, and arrows for the D-pad; Custom Mapping can use any identified key.",
+        options: { 1: "Player 1", 2: "Player 2", 3: "Player 3", 4: "Player 4", 5: "Player 5", 6: "Player 6", 7: "Player 7", 8: "Player 8", 9: "Keyboard", "all-gamepads": "All", "all-inputs": "All + Keyboard", gamepads: "All connected", all: "All connected + Keyboard" },
         id: "player-input",
         icon: "fa-user"
       },
@@ -445,7 +445,7 @@ async function initControllerResource() {
         bySettingsKB.buttons.fill(0);
         bySettingsKB.axes.fill(0);
       });
-      if (["9", "all"].includes(settings.player)) this.connectKeyboard();
+      if (["9", "all", "all-inputs"].includes(settings.player)) this.connectKeyboard();
       this.startPolling();
     },
     onKeyboardConnect(event) {
@@ -786,11 +786,16 @@ async function initControllerResource() {
     controllerEvents?.abort();
     controllerEvents = new AbortController();
     const container = document.getElementById("gamepads");
-    const players = ["gamepads", "all"].includes(settings.player)
-      ? Object.keys(gamepadSupport.gamepads)
-          .filter((slot) => slot !== "9" || settings.player === "all")
-          .map((slot) => (Number(slot) === 9 ? 9 : Number(slot) + 1))
-      : [Number(settings.player)];
+    let players;
+    if (["all-gamepads", "all-inputs"].includes(settings.player)) {
+      players = Array.from({ length: settings.player === "all-inputs" ? 9 : 8 }, (_, index) => index + 1);
+    } else if (["gamepads", "all"].includes(settings.player)) {
+      players = Object.keys(gamepadSupport.gamepads)
+        .filter((slot) => slot !== "9" || settings.player === "all")
+        .map((slot) => (Number(slot) === 9 ? 9 : Number(slot) + 1));
+    } else {
+      players = [Number(settings.player)];
+    }
     container.replaceChildren();
     container.dataset.gamepadCount = gamepadSupport.connectedCount;
     tester.controls.clear();

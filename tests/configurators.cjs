@@ -281,8 +281,8 @@ test("configurator forms and previews initialize for every resource", async (t) 
         await serve(page, assets);
         await page.goto("https://stream.test/controller/?player=all&skin=xseries#configure");
         await page.waitForFunction(() => document.getElementById("overlay-url")?.value);
-        assert.deepEqual(await page.locator("#player-input option").evaluateAll((nodes) => nodes.map((node) => node.value)), ["1", "2", "3", "4", "5", "6", "7", "8", "9", "gamepads", "all"]);
-        assert.deepEqual(await page.locator("#player-input option").evaluateAll((nodes) => nodes.slice(-3).map((node) => node.textContent)), ["Keyboard", "All connected", "All connected + Keyboard"]);
+        assert.deepEqual(await page.locator("#player-input option").evaluateAll((nodes) => nodes.map((node) => node.value)), ["1", "2", "3", "4", "5", "6", "7", "8", "9", "all-gamepads", "all-inputs", "gamepads", "all"]);
+        assert.deepEqual(await page.locator("#player-input option").evaluateAll((nodes) => nodes.slice(-5).map((node) => node.textContent)), ["Keyboard", "All", "All + Keyboard", "All connected", "All connected + Keyboard"]);
         assert.deepEqual(await page.locator('[name="layout"] option').evaluateAll((nodes) => nodes.map((node) => node.textContent)), ["Full", "Minimal"]);
         await page.frameLocator("#overlay-preview").locator('#gamepads[data-gamepad-count="8"] #gamepad-9').waitFor({ state: "attached" });
         assert.equal(await page.frameLocator("#overlay-preview").locator(".controller.active").count(), 9);
@@ -340,6 +340,28 @@ test("configurator forms and previews initialize for every resource", async (t) 
           testPads[7].connected = true;
         });
         await page.waitForFunction(() => !!document.querySelector('#player-base option[value="8"]'));
+      } finally {
+        await page.close();
+      }
+    });
+
+    await t.test("controller All options preview every slot without connected gamepads", async () => {
+      const page = await browser.newPage();
+      try {
+        await serve(page, assets);
+        await page.addInitScript(() => {
+          Object.defineProperty(navigator, "getGamepads", { value: () => [] });
+        });
+        await page.goto("https://stream.test/controller/?player=all-inputs&skin=xseries#configure");
+        await page.waitForFunction(() => document.getElementById("overlay-url")?.value);
+        for (const [mode, count, disconnected] of [["all-inputs", 9, 8], ["all-gamepads", 8, 8], ["gamepads", 0, 0], ["all", 1, 0]]) {
+          await page.locator("#player-input").selectOption(mode);
+          await page.waitForFunction((mode) => document.querySelector("#overlay-preview").contentWindow.byStreamResource?.settings.player === mode, mode);
+          await page.frameLocator("#overlay-preview").locator('#gamepads[data-gamepad-count="0"]').waitFor({ state: "attached" });
+          assert.equal(await page.frameLocator("#overlay-preview").locator(".controller.active").count(), count, mode);
+          assert.equal(await page.frameLocator("#overlay-preview").locator(".controller.disconnected").count(), disconnected, mode);
+          assert.equal(new URL(await page.locator("#overlay-url").inputValue()).searchParams.get("player"), mode);
+        }
       } finally {
         await page.close();
       }

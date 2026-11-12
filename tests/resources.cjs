@@ -2338,6 +2338,63 @@ test("eight gamepads keep independent players, LEDs, and keyboard through reconn
   }
 });
 
+test("All player modes retain disconnected slots and keep keyboard input separate", async () => {
+  const assets = await loadAssets(["_functions.min.js"]);
+  const browser = await chromium.launch(launchOptions);
+  try {
+    const page = await browser.newPage();
+    const errors = [];
+    page.on("pageerror", (error) => errors.push(error.message));
+    await serve(page, assets, true);
+    await page.addInitScript(() => {
+      window.testPads = [];
+      Object.defineProperty(navigator, "getGamepads", { value: () => testPads });
+    });
+    await page.goto("https://stream.test/controller/?player=all-gamepads&skin=gcn&variant=sequential");
+    await page.waitForSelector('#gamepads[data-gamepad-count="0"] #gamepad-8');
+    assert.equal(await page.locator(".controller.active").count(), 8);
+    assert.equal(await page.locator(".controller.disconnected").count(), 8);
+    assert.equal(await page.locator("#gamepad-9").count(), 0);
+    const palettes = () => page.locator(".controller-background").evaluateAll((nodes) => nodes.map((node) => node.dataset.variant));
+    const expected = ["original", "indigo", "silver", "white", "original", "indigo", "silver", "white"];
+    assert.deepEqual(await palettes(), expected);
+    await page.evaluate(() => {
+      window.originalSlot = document.getElementById("gamepad-6");
+      testPads[5] = { id: "P6 fixture", index: 5, buttons: [{ value: 1 }], axes: [] };
+    });
+    await page.waitForSelector('#gamepads[data-gamepad-count="1"] #gamepad-6:not(.disconnected) .control[data-name="button-1"].pressed');
+    assert.equal(await page.locator(".controller.active").count(), 8);
+    assert.equal(await page.locator(".controller.disconnected").count(), 7);
+    assert.deepEqual(await palettes(), expected, "Fixed slots retain their palette sequence on connection changes");
+    await page.evaluate(() => { testPads[5] = null; });
+    await page.waitForSelector('#gamepads[data-gamepad-count="0"] #gamepad-6.disconnected');
+    await page.waitForFunction(() => !document.querySelector('#gamepad-6 .control[data-name="button-1"]').classList.contains("pressed"));
+    assert.equal(await page.evaluate(() => originalSlot === document.getElementById("gamepad-6")), true, "Connection changes update existing fixed slots");
+    await page.keyboard.press("f");
+    await page.waitForFunction(() => byStreamResource.gamepadSupport.kb);
+    assert.equal(await page.locator(".controller.active").count(), 8);
+    assert.equal(await page.locator("#gamepad-9").count(), 0, "All excludes keyboard even after it is activated");
+
+    await page.goto("https://stream.test/controller/?player=all-inputs&skin=xseries");
+    await page.waitForSelector('#gamepads[data-gamepad-count="0"] #gamepad-9:not(.disconnected)');
+    assert.equal(await page.locator(".controller.active").count(), 9);
+    assert.equal(await page.locator(".controller.disconnected").count(), 8);
+    assert.equal(await page.evaluate(() => byStreamResource.gamepadSupport.gamepadsRaw[9] === bySettingsKB), true);
+    await page.keyboard.down("j");
+    await page.waitForSelector('#gamepad-9 .control[data-name="button-1"].pressed');
+    await page.evaluate(() => { testPads[0] = { id: "P1 fixture", index: 0, buttons: [{ value: 1 }], axes: [] }; });
+    await page.waitForSelector('#gamepads[data-gamepad-count="1"] #gamepad-1:not(.disconnected) .control[data-name="button-1"].pressed');
+    assert.equal(await page.locator(".controller.active").count(), 9);
+    assert.equal(await page.locator('.control[data-name="button-1"].pressed').count(), 2);
+    await page.keyboard.up("j");
+    await page.waitForFunction(() => !document.querySelector('#gamepad-9 .control[data-name="button-1"]').classList.contains("pressed"));
+    assert.equal(await page.locator('#gamepad-1 .control[data-name="button-1"].pressed').count(), 1);
+    assert.deepEqual(errors, []);
+  } finally {
+    await browser.close();
+  }
+});
+
 test("sequential controller variants cycle visible palettes through layout and connection changes", async () => {
   const assets = await loadAssets(["_functions.min.js"]);
   const browser = await chromium.launch(launchOptions);
