@@ -1598,7 +1598,7 @@ test("resources render and round-trip URLs without configurator assets", async (
     });
 
     await t.test("scrolling ticker rebuilds copies when only the viewport grows", async () => {
-      const page = await browser.newPage({ viewport: { width: 400, height: 400 } });
+      const page = await browser.newPage({ viewport: { width: 400, height: 400 }, deviceScaleFactor: 3 });
       try {
         await serve(page, assets, true);
         const entries = JSON.stringify([{ text: "Ticker", prefix: "", icon: "" }]);
