@@ -839,8 +839,8 @@
           const key = `${section}:${field.subsection}`;
           if (!subsections.has(key)) {
             const id = `subsection-${subsections.size}`;
-            const subsection = $(/* HTML */ `<section class="field-subsection border-top mt-3"></section>`).attr("aria-labelledby", `${id}-toggle`).appendTo(container);
-            const heading = $(/* HTML */ `<button class="accordion-button collapsed px-0 py-2 fs-6 fw-medium text-primary bg-transparent" type="button" data-bs-toggle="collapse" aria-expanded="false"></button>`)
+            const subsection = $(/* HTML */ `<section class="field-subsection mt-3"></section>`).attr("aria-labelledby", `${id}-toggle`).appendTo(container);
+            const heading = $(/* HTML */ `<button class="accordion-button collapsed px-3 py-2 fs-6 fw-semibold text-primary bg-transparent" type="button" data-bs-toggle="collapse" aria-expanded="false"></button>`)
               .attr({ id: `${id}-toggle`, "data-bs-target": `#${id}`, "aria-controls": id })
               .text(field.subsection)
               .prepend(
@@ -852,7 +852,7 @@
             const content = $(/* HTML */ `<div class="subsection-collapse collapse"></div>`)
               .attr({ id, "aria-labelledby": `${id}-toggle`, "data-config-subsection": field.subsection })
               .appendTo(subsection);
-            subsections.set(key, $(/* HTML */ `<div class="pt-2 pb-1"></div>`).appendTo(content));
+            subsections.set(key, $(/* HTML */ `<div class="px-3 pt-3 pb-1"></div>`).appendTo(content));
           }
           container = subsections.get(key);
         }

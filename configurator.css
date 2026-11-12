@@ -109,6 +109,13 @@ body {
 .bywr-configurator .settings-panel .accordion {
   --bs-accordion-btn-focus-box-shadow: 0 0 0 0.2rem color-mix(in srgb, var(--primary-foreground) 25%, transparent);
 }
+.bywr-configurator .field-subsection {
+  border: 0.0625rem solid var(--bs-border-color);
+  border-inline-start: 0.1875rem solid var(--primary-foreground);
+}
+.bywr-configurator .field-subsection > .accordion-header {
+  background: var(--bs-tertiary-bg);
+}
 /* Apply the entry offset immediately; only the return to rest should transition. */
 .bywr-configurator .motion-enter {
   translate: -0.5rem;
