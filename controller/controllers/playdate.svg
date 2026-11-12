@@ -2,7 +2,7 @@
   data-name="Playdate" data-platform="Other" viewBox="68.67 84.71 385.61 317.03" data-labels="icons"
   data-layout="full" role="img" aria-label="Playdate input display" font-family="Arial, sans-serif"
   data-full-viewbox="68.67 84.71 385.61 317.03" data-compact-viewbox="0 2 106 49"
-  data-source="PDATE.svg">
+  data-source="PDATE.svg" data-player-leds="202.572 98 1.361">
   <title>Playdate</title>
   <style>
     .custom-colors .shell-base { fill: var(--controller-color); }

@@ -2,7 +2,7 @@
   data-platform="Nintendo" viewBox="15.0659 -14.35 495.3002 488.24" data-labels="icons"
   data-layout="full" role="img" aria-label="N64 input display" font-family="Arial, sans-serif"
   data-full-viewbox="15.0659 -14.35 495.3002 488.24" data-compact-viewbox="0 0 128 84"
-  data-source="N64.svg">
+  data-source="N64.svg" data-player-leds="237.34 47.27 1.748">
   <title>N64</title>
   <style>
     .custom-colors .shell-base { fill: var(--controller-color); }

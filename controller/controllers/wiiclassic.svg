@@ -2,7 +2,8 @@
   data-name="Wii Classic" data-platform="Nintendo" viewBox="16.26 76.68 490.41 302.13"
   data-labels="icons" data-layout="full" role="img" aria-label="Wii Classic input display"
   font-family="Arial, sans-serif" data-full-viewbox="16.26 76.68 490.41 302.13"
-  data-compact-viewbox="-2 0 179 80" data-source="WIIPRO.svg">
+  data-compact-viewbox="-2 0 179 80" data-source="WIIPRO.svg"
+  data-player-leds="237.631 148.404 1.731">
   <title>Wii Classic</title>
   <style>
     .custom-colors .shell-base { fill: var(--controller-color); }

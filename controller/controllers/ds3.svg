@@ -2,7 +2,8 @@
   data-platform="PlayStation" viewBox="1.648 23.71098 520.1234 378.04672" data-labels="icons"
   data-layout="full" role="img" aria-label="DualShock 3 input display"
   font-family="Arial, sans-serif" data-full-viewbox="1.648 23.71098 520.1234 378.04672"
-  data-compact-viewbox="-2.00025 0 181.00025 78" data-source="PS3.svg">
+  data-compact-viewbox="-2.00025 0 181.00025 78" data-source="PS3.svg"
+  data-player-leds="230.5 117.99 1.836">
   <title>DualShock 3</title>
   <style>
     .custom-colors .shell-base { fill: var(--controller-color); }

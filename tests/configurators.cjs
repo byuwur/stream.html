@@ -184,6 +184,76 @@ test("configurator forms and previews initialize for every resource", async (t) 
       }
     });
 
+    await t.test("controller editor selects all eight gamepads and previews their player LEDs", async () => {
+      const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
+      try {
+        await page.addInitScript(() => {
+          window.testPads = Array.from({ length: 8 }, (_, index) => ({ id: `Pad ${index}`, index, connected: true, buttons: Array.from({ length: 18 }, () => ({ value: 0 })), axes: [0, 0, 0, 0] }));
+          Object.defineProperty(navigator, "getGamepads", { value: () => testPads });
+        });
+        await serve(page, assets);
+        await page.goto("https://stream.test/controller/?player=all&skin=xseries#configure");
+        await page.waitForFunction(() => document.getElementById("overlay-url")?.value);
+        assert.deepEqual(await page.locator("#player-input option").evaluateAll((nodes) => nodes.map((node) => node.value)), ["1", "2", "3", "4", "5", "6", "7", "8", "9", "gamepads", "all"]);
+        assert.deepEqual(await page.locator("#player-input option").evaluateAll((nodes) => nodes.slice(-3).map((node) => node.textContent)), ["Keyboard", "All connected", "All connected + Keyboard"]);
+        assert.deepEqual(await page.locator('[name="layout"] option').evaluateAll((nodes) => nodes.map((node) => node.textContent)), ["Full", "Minimal"]);
+        await page.frameLocator("#overlay-preview").locator('#gamepads[data-gamepad-count="8"] #gamepad-9').waitFor({ state: "attached" });
+        assert.equal(await page.frameLocator("#overlay-preview").locator(".controller.active").count(), 9);
+        const indicators = page.locator('[name="showPlayerIndicators"]');
+        assert.equal(await indicators.isChecked(), false);
+        assert.equal(new URL(await page.locator("#overlay-url").inputValue()).searchParams.has("showPlayerIndicators"), false);
+        assert.equal(await page.frameLocator("#overlay-preview").locator(".player-indicator:visible, .player-ring:visible").count(), 0);
+        await indicators.evaluate((node) => {
+          node.checked = true;
+          node.dispatchEvent(new Event("change", { bubbles: true }));
+        });
+        await page.waitForFunction(() => document.querySelector("#overlay-preview").contentWindow.byStreamResource?.settings.showPlayerIndicators === "yes");
+        await page.frameLocator("#overlay-preview").locator("#gamepad-9 .player-leds-layer").waitFor();
+        assert.equal(new URL(await page.locator("#overlay-url").inputValue()).searchParams.get("showPlayerIndicators"), "yes");
+        await indicators.evaluate((node) => {
+          node.checked = false;
+          node.dispatchEvent(new Event("change", { bubbles: true }));
+        });
+        await page.waitForFunction(() => document.querySelector("#overlay-preview").contentWindow.byStreamResource?.settings.showPlayerIndicators === "no");
+        assert.equal(await page.frameLocator("#overlay-preview").locator(".player-indicator:visible, .player-ring:visible").count(), 0);
+        assert.equal(new URL(await page.locator("#overlay-url").inputValue()).searchParams.has("showPlayerIndicators"), false);
+        await indicators.evaluate((node) => {
+          node.checked = true;
+          node.dispatchEvent(new Event("change", { bubbles: true }));
+        });
+        await page.waitForFunction(() => document.querySelector("#overlay-preview").contentWindow.byStreamResource?.settings.showPlayerIndicators === "yes");
+        await page.frameLocator("#overlay-preview").locator("#gamepad-9 .player-leds-layer").waitFor();
+        await page.locator("#player-input").selectOption("gamepads");
+        await page.waitForFunction(() => new URL(document.getElementById("overlay-url").value).searchParams.get("player") === "gamepads");
+        await page.frameLocator("#overlay-preview").locator('#gamepads[data-gamepad-count="8"] #gamepad-8').waitFor();
+        assert.equal(await page.frameLocator("#overlay-preview").locator(".controller.active").count(), 8);
+        assert.equal(await page.frameLocator("#overlay-preview").locator("#gamepad-9").count(), 0);
+        await page.keyboard.press("F1");
+        await page.locator('[data-section="remap"]').click();
+        assert.deepEqual(await page.locator("#player-base option").evaluateAll((nodes) => nodes.map((node) => node.value)), ["1", "2", "3", "4", "5", "6", "7", "8", "9"]);
+        await page.locator("#player-base").selectOption("8");
+        await page.waitForFunction(() => new URL(document.getElementById("overlay-url").value).searchParams.get("player") === "8");
+        await page.frameLocator("#overlay-preview").locator("#gamepad-8:not(.disconnected)").waitFor();
+        assert.equal(
+          await page
+            .frameLocator("#overlay-preview")
+            .locator(".player-leds-layer [data-player]")
+            .evaluateAll((nodes) => nodes.map((node) => (node.classList.contains("lit") ? "X" : "-")).join("")),
+          "X-XX"
+        );
+        await page.evaluate(() => {
+          testPads[7].connected = false;
+        });
+        await page.waitForFunction(() => !document.querySelector('#player-base option[value="8"]'));
+        await page.evaluate(() => {
+          testPads[7].connected = true;
+        });
+        await page.waitForFunction(() => !!document.querySelector('#player-base option[value="8"]'));
+      } finally {
+        await page.close();
+      }
+    });
+
     await t.test("controller mapping records raw input and preserves applied values until every row is valid", async () => {
       const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
       try {

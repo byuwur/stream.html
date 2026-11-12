@@ -2,7 +2,7 @@
   data-platform="Xbox" viewBox="22.46 -10.88061 478.07 420.90701" data-labels="icons"
   data-layout="full" role="img" aria-label="Series input display" font-family="Arial, sans-serif"
   data-full-viewbox="22.46 -10.88061 478.07 420.90701" data-compact-viewbox="-2 0 180 78"
-  data-source="SX.svg">
+  data-source="SX.svg" data-player-leds="237.841 147.47 1.687">
   <title>Series</title>
   <style>
     .custom-colors .shell-base { fill: var(--controller-color); }

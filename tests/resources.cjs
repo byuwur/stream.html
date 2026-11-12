@@ -2199,6 +2199,297 @@ test("default keyboard separates WASD, arrow D-pad, and Q/E shoulders", async ()
   }
 });
 
+test("eight gamepads keep independent players, LEDs, and keyboard through reconnections", async () => {
+  const assets = await loadAssets(["_functions.min.js"]);
+  const browser = await chromium.launch(launchOptions);
+  try {
+    const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
+    const errors = [];
+    page.on("pageerror", (error) => errors.push(error.message));
+    await serve(page, assets, true);
+    await page.addInitScript(() => {
+      window.testPads = Array.from({ length: 8 }, (_, index) => ({ id: `Pad ${index}`, index, connected: true, buttons: Array.from({ length: 18 }, () => ({ value: 0 })), axes: [0, 0, 0, 0] }));
+      Object.defineProperty(navigator, "getGamepads", { value: () => testPads });
+    });
+    await page.goto("https://stream.test/controller/?showPlayerIndicators=yes&player=all&skin=xseries");
+    await page.waitForSelector('#gamepads[data-gamepad-count="8"] #gamepad-9');
+    assert.equal(await page.locator(".controller.active:not(.disconnected)").count(), 9);
+    const patterns = ["X---", "-X--", "--X-", "---X", "X--X", "-X-X", "--XX", "X-XX", "XXXX"];
+    assert.deepEqual(
+      await page.locator(".controller").evaluateAll((nodes) => nodes.map((node) => [...node.querySelectorAll(".player-leds-layer [data-player]")].map((led) => (led.classList.contains("lit") ? "X" : "-")).join(""))),
+      patterns
+    );
+    assert.equal(await page.evaluate(() => new Set([...document.querySelectorAll("[id]")].map((node) => node.id)).size === document.querySelectorAll("[id]").length), true, "Instances have independent SVG IDs");
+
+    for (let player = 1; player <= 8; player++) {
+      await page.evaluate((player) => {
+        testPads[player - 1].buttons[0].value = 1;
+        testPads[player - 1].buttons[6].value = player / 8;
+        testPads[player - 1].axes[0] = player / 8;
+      }, player);
+      await page.waitForFunction((player) => document.querySelectorAll('.control[data-name="button-1"].pressed').length === player, player);
+      assert.equal(await page.locator(`#gamepad-${player} .control[data-name="button-1"]`).evaluate((node) => node.classList.contains("pressed")), true);
+      assert.equal(await page.locator('#gamepad-9 .control[data-name="button-1"]').evaluate((node) => node.classList.contains("pressed")), false);
+    }
+    await page.keyboard.down("j");
+    await page.waitForSelector('#gamepad-9 .control[data-name="button-1"].pressed');
+    assert.equal(await page.evaluate(() => byStreamResource.gamepadSupport.gamepadsRaw[9] === bySettingsKB), true);
+    assert.equal(await page.evaluate(() => byStreamResource.gamepadSupport.connectedCount), 8);
+    await page.keyboard.up("j");
+    await page.waitForFunction(() => !document.querySelector('#gamepad-9 .control[data-name="button-1"]').classList.contains("pressed"));
+    assert.equal(await page.locator('.control[data-name="button-1"].pressed').count(), 8);
+    assert.equal(
+      await page.locator(".controller").evaluateAll((nodes) =>
+        nodes.every((node, index) => {
+          const box = node.getBoundingClientRect();
+          return (
+            box.width > 0 &&
+            box.height > 0 &&
+            box.left >= 0 &&
+            box.top >= 0 &&
+            box.right <= innerWidth &&
+            box.bottom <= innerHeight &&
+            nodes.slice(index + 1).every((other) => {
+              const next = other.getBoundingClientRect();
+              return box.right <= next.left || next.right <= box.left || box.bottom <= next.top || next.bottom <= box.top;
+            })
+          );
+        })
+      ),
+      true,
+      "All nine inputs fit without overlap"
+    );
+
+    await page.evaluate(() => {
+      testPads[2] = null;
+    });
+    await page.waitForSelector('#gamepads[data-gamepad-count="7"]', { state: "attached" });
+    assert.equal(await page.locator("#gamepad-3").count(), 0);
+    assert.equal(await page.locator("#gamepad-8").count(), 1, "Other players retain their assignments");
+    await page.evaluate(() => {
+      testPads[2] = { id: "Reconnected pad", index: 9, connected: true, buttons: [{ value: 1 }], axes: [0, 0, 0, 0] };
+    });
+    await page.waitForSelector('#gamepads[data-gamepad-count="8"] #gamepad-3 .control[data-name="button-1"].pressed');
+    assert.deepEqual(await page.evaluate(() => [byStreamResource.gamepadSupport.gamepadsRaw[2].index, byStreamResource.gamepadSupport.gamepadsRaw[9].id]), [9, "Keyboard"], "Browser index 9 never replaces keyboard P9");
+    await page.evaluate(() => testPads.push({ id: "Overflow", index: 12, buttons: [], axes: [] }));
+    await page.waitForTimeout(100);
+    assert.equal(await page.evaluate(() => byStreamResource.gamepadSupport.connectedCount), 8);
+    await page.evaluate(() => {
+      testPads.fill(null);
+    });
+    await page.waitForSelector('#gamepads[data-gamepad-count="0"] #gamepad-9');
+    assert.equal(await page.locator(".controller.active").count(), 1, "Keyboard remains available without connected gamepads");
+
+    await page.goto("https://stream.test/controller/?showPlayerIndicators=yes&player=gamepads&skin=xseries");
+    await page.waitForSelector('#gamepads[data-gamepad-count="8"] #gamepad-8');
+    assert.equal(await page.locator(".controller.active").count(), 8);
+    assert.equal(await page.locator("#gamepad-9").count(), 0, "All connected displays gamepads only");
+    await page.keyboard.press("f");
+    await page.waitForFunction(() => byStreamResource.gamepadSupport.kb);
+    assert.equal(await page.locator("#gamepad-9").count(), 0, "Activating keyboard input does not add it to the gamepads-only view");
+    await page.evaluate(() => {
+      testPads.fill(null);
+    });
+    await page.waitForSelector('#gamepads[data-gamepad-count="0"]', { state: "attached" });
+    assert.equal(await page.locator(".controller.active").count(), 0);
+    await page.evaluate(() => {
+      testPads[0] = { id: "Reconnected", index: 0, buttons: [], axes: [] };
+    });
+    await page.waitForSelector("#gamepad-1:not(.disconnected)");
+    assert.equal(await page.locator(".controller.active").count(), 1);
+
+    await page.goto("https://stream.test/controller/?showPlayerIndicators=yes&player=7&skin=ds3");
+    await page.waitForSelector("#gamepad-7:not(.disconnected)");
+    await page.evaluate(() => {
+      testPads[6].buttons[0].value = 1;
+    });
+    await page.waitForSelector('#gamepad-7 .control[data-name="button-1"].pressed');
+    assert.equal(await page.locator(".controller-background [data-player]").evaluateAll((leds) => leds.map((led) => (led.classList.contains("lit") ? "X" : "-")).join("")), "--XX");
+    await page.evaluate(() => {
+      testPads[6].connected = false;
+    });
+    await page.waitForSelector("#gamepad-7.disconnected");
+    await page.waitForFunction(() => !document.querySelector('#gamepad-7 .control[data-name="button-1"]').classList.contains("pressed"));
+    await page.evaluate(() => {
+      testPads[6].connected = true;
+    });
+    await page.waitForSelector('#gamepad-7:not(.disconnected) .control[data-name="button-1"].pressed');
+    for (const skin of ["xseries", "ds3"]) {
+      await page.goto(`https://stream.test/controller/?showPlayerIndicators=yes&player=8&skin=${skin}&mirror=yes`);
+      await page.waitForSelector("#gamepad-8:not(.disconnected)");
+      assert.equal(
+        await page.locator(".player-indicator[data-player]").evaluateAll((nodes) =>
+          nodes
+            .filter((node) => {
+              const box = node.getBoundingClientRect();
+              return box.width > 0 && getComputedStyle(node).visibility === "visible";
+            })
+            .sort((a, b) => a.getBoundingClientRect().left - b.getBoundingClientRect().left)
+            .map((node) => (node.classList.contains("lit") ? "X" : "-"))
+            .join("")
+        ),
+        "X-XX",
+        `${skin} keeps the player pattern readable when mirrored`
+      );
+    }
+    assert.deepEqual(errors, []);
+  } finally {
+    await browser.close();
+  }
+});
+
+test("controller layouts preserve native lamps, use plain square LEDs, and keep Xbox 360 guide indicators", async () => {
+  const assets = await loadAssets(["_functions.min.js"]);
+  const browser = await chromium.launch(launchOptions);
+  try {
+    const page = await browser.newPage();
+    await serve(page, assets, true);
+    await page.goto("https://stream.test/controller/?showPlayerIndicators=yes&player=9&skin=xseries");
+    await page.waitForSelector("#gamepad-9:not(.disconnected)");
+    assert.equal(await page.evaluate(() => byStreamResource.settings.showPlayerIndicators), "yes");
+    const skins = await page.evaluate(() => Object.keys(byControllerArtwork.skins));
+    for (const skin of skins) {
+      await page.goto(`https://stream.test/controller/?showPlayerIndicators=yes&player=9&skin=${skin}`);
+      await page.waitForSelector("#gamepad-9:not(.disconnected)");
+      assert.equal(await page.locator(".player-led-bezel").count(), 0, `${skin} has no LED bezel`);
+      if (skin === "x360") {
+        assert.equal(await page.locator(".player-leds-layer .player-indicator").count(), 4, "Xbox 360 has a row available for minimal mode");
+      } else {
+        assert.equal(
+          await page
+            .locator(".player-leds-layer .player-indicator")
+            .evaluateAll((nodes) => nodes.length === 4 && nodes.every((node) => node.tagName === "rect" && node.getAttribute("width") === node.getAttribute("height") && !node.hasAttribute("rx"))),
+          true,
+          `${skin} uses four unrounded squares`
+        );
+        assert.equal(await page.locator(".controller-background .player-indicator[data-player]").count(), ["ds3", "wii", "wiinunchuk", "wiiupro"].includes(skin) ? 4 : 0, `${skin} retains only its native shell indicators`);
+      }
+      for (const layout of ["full", "minimal", "full"]) {
+        await page.evaluate((layout) => byControllerArtwork.setLayout(document.querySelector(".controller"), layout), layout);
+        const geometry = await page.locator(".player-leds-layer .player-indicator").evaluateAll((nodes) => nodes.map((node) => [Number(node.getAttribute("x")), Number(node.getAttribute("width")), Number(node.getAttribute("height"))]));
+        assert.deepEqual(geometry, [0, 1, 2, 3].map((index) => layout === "minimal" ? [index * 15, 5, 5] : [index * 8, 3, 3]), `${skin} preserves minimal sizes and uses smaller full-layout lamps`);
+        if (skin === "x360") {
+          const rings = await page
+            .locator(".player-ring[data-player]")
+            .evaluateAll((nodes) =>
+              nodes.map((node) => ({
+                player: Number(node.dataset.player),
+                lit: node.classList.contains("lit"),
+                stroke: getComputedStyle(node).stroke,
+                visible: node.getBoundingClientRect().width > 0 && getComputedStyle(node).visibility === "visible"
+              }))
+            );
+          assert.deepEqual(
+            rings.map((ring) => ring.player),
+            [1, 2, 3, 4]
+          );
+          assert.ok(
+            rings.every((ring) => ring.lit && ring.visible && ring.stroke === "rgb(101, 227, 116)"),
+            `Xbox 360 ${layout} identifies keyboard with all four guide segments`
+          );
+          if (layout === "full") {
+            assert.equal(await page.locator(".player-leds-layer").isVisible(), false, "Xbox 360 full mode uses its guide ring only");
+            continue;
+          }
+        }
+        const visible = await page.locator(".player-indicator[data-player]").evaluateAll((nodes) =>
+          nodes
+            .filter((node) => {
+              const box = node.getBoundingClientRect();
+              return box.width > 0 && box.height > 0 && getComputedStyle(node).visibility === "visible";
+            })
+            .map((node) => ({ player: Number(node.dataset.player), lit: node.classList.contains("lit"), fill: getComputedStyle(node).fill }))
+        );
+        assert.deepEqual(
+          visible.map((led) => led.player),
+          [1, 2, 3, 4],
+          `${skin} ${layout} has exactly four visible lamps`
+        );
+        assert.ok(
+          visible.every((led) => led.lit && led.fill === "rgb(101, 227, 116)"),
+          `${skin} ${layout} shows keyboard XXXX`
+        );
+        if (layout === "full") {
+          const overlap = await page.evaluate(() => {
+            const visible = (node) => {
+              const box = node.getBoundingClientRect();
+              return box.width > 0 && box.height > 0 && getComputedStyle(node).visibility === "visible";
+            };
+            const lamps = [...document.querySelectorAll(".player-indicator")].filter(visible);
+            const markings = [...document.querySelectorAll(".hardware-marking, .guide-logo-slot, .screen-surface")].filter(visible);
+            return lamps.some((lamp) => markings.some((marking) => {
+              const a = lamp.getBoundingClientRect(), b = marking.getBoundingClientRect();
+              return a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
+            }));
+          });
+          assert.equal(overlap, false, `${skin} indicators clear logos and screens`);
+        }
+      }
+    }
+    await page.goto("https://stream.test/controller/?showPlayerIndicators=yes&player=8&skin=famicom");
+    await page.waitForSelector("#gamepad-8");
+    assert.equal(
+      await page
+        .locator('[data-player-number="8"].lit')
+        .textContent()
+        .then((value) => value.trim()),
+      "8"
+    );
+    const patterns = ["X---", "-X--", "--X-", "---X", "X--X", "-X-X", "--XX", "X-XX", "XXXX"];
+    for (let player = 1; player <= 9; player++) {
+      await page.goto(`https://stream.test/controller/?showPlayerIndicators=yes&player=${player}&skin=x360`);
+      await page.waitForSelector(".controller.active");
+      for (const layout of ["full", "minimal"]) {
+        await page.evaluate((layout) => byControllerArtwork.setLayout(document.querySelector(".controller"), layout), layout);
+        assert.equal(await page.locator(".player-leds-layer").isVisible(), layout === "minimal");
+        assert.equal(
+          await page.locator(".player-ring[data-player]").evaluateAll((nodes) => nodes.map((node) => (node.classList.contains("lit") ? "X" : "-")).join("")),
+          patterns[player - 1],
+          `Xbox 360 P${player} ${layout} uses the assigned guide pattern`
+        );
+      }
+    }
+  } finally {
+    await browser.close();
+  }
+});
+
+test("player indicators default to hidden without hiding the guide or blocking input", async () => {
+  const assets = await loadAssets(["_functions.min.js"]);
+  const browser = await chromium.launch(launchOptions);
+  try {
+    const page = await browser.newPage();
+    await serve(page, assets, true);
+    for (const skin of ["xseries", "ds3", "wii", "wiiupro", "x360", "joycon"]) {
+      for (const layout of ["full", "minimal"]) {
+        await page.goto(`https://stream.test/controller/?player=9&skin=${skin}&layout=${layout}`);
+        await page.waitForSelector("#gamepad-9:not(.disconnected)");
+        assert.equal(await page.evaluate(() => byStreamResource.settings.showPlayerIndicators), "no");
+        assert.equal(await page.locator(".player-indicator:visible, .player-ring:visible").count(), 0, `${skin} ${layout} hides all indicators`);
+        const guide = page.locator(".guide-logo-slot");
+        if (await guide.count()) assert.equal(await guide.isVisible(), true, `${skin} keeps its guide logo`);
+        await page.keyboard.down("j");
+        await page.waitForSelector('.control[data-name="button-1"].pressed');
+        await page.keyboard.up("j");
+      }
+    }
+    await page.goto("https://stream.test/controller/?player=8&skin=joycon&mirror=yes&showPlayerIndicators=yes");
+    await page.waitForSelector("#gamepad-8");
+    for (const layout of ["full", "minimal", "full"]) {
+      await page.evaluate((layout) => byControllerArtwork.setLayout(document.querySelector(".controller"), layout), layout);
+      const state = await page.locator(".player-leds-layer .player-indicator").evaluateAll((nodes, layout) => nodes.sort((a, b) => {
+        const key = layout === "full" ? "top" : "left";
+        return a.getBoundingClientRect()[key] - b.getBoundingClientRect()[key];
+      }).map((node) => node.classList.contains("lit") ? "X" : "-").join(""), layout);
+      assert.equal(state, "X-XX", `Joy-Con ${layout} keeps the player order after mirroring and layout changes`);
+      const box = await page.locator(".player-leds").boundingBox();
+      assert.equal(box.height > box.width, layout === "full", "Joy-Con uses a vertical row only in full mode");
+    }
+  } finally {
+    await browser.close();
+  }
+});
+
 test("handheld D-pads paint the requested directions after artwork rotation", async () => {
   const assets = await loadAssets(runtimeAssets);
   const browser = await chromium.launch(launchOptions);

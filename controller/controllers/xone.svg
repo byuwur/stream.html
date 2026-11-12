@@ -2,7 +2,7 @@
   data-platform="Xbox" viewBox="15.8719 -0.26003 491.2007 410.72383" data-labels="icons"
   data-layout="full" role="img" aria-label="One input display" font-family="Arial, sans-serif"
   data-full-viewbox="15.8719 -0.26003 491.2007 410.72383" data-compact-viewbox="-2 0 180 78"
-  data-source="ONEX.svg">
+  data-source="ONEX.svg" data-player-leds="237.581 147.399 1.734">
   <title>One</title>
   <style>
     .custom-colors .shell-base { fill: var(--controller-color); }

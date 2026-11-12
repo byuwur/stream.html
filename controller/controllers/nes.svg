@@ -2,7 +2,7 @@
   data-platform="Nintendo" viewBox="8.55 134.59 511.34 217.27" data-labels="icons"
   data-layout="full" role="img" aria-label="NES input display" font-family="Arial, sans-serif"
   data-full-viewbox="8.55 134.59 511.34 217.27" data-compact-viewbox="0 2 106 49"
-  data-source="NES.svg">
+  data-source="NES.svg" data-player-leds="222.632 177.292 1.805">
   <title>NES</title>
   <style>
     .custom-colors .shell-base { fill: var(--controller-color); }

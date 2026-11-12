@@ -2,7 +2,8 @@
   data-name="Master System" data-platform="Sega" viewBox="5.18 134.97 513.58 216.49"
   data-labels="icons" data-layout="full" role="img" aria-label="Master System input display"
   font-family="Arial, sans-serif" data-full-viewbox="5.18 134.97 513.58 216.49"
-  data-compact-viewbox="2.5 5.5 96 37" data-source="MASTERSYSTEM.svg">
+  data-compact-viewbox="2.5 5.5 96 37" data-source="MASTERSYSTEM.svg"
+  data-player-leds="432.524 156.28 1.813">
   <title>Master System</title>
   <style>
     .custom-colors .shell-base { fill: var(--controller-color); }

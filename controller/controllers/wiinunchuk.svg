@@ -2,7 +2,8 @@
   data-name="Wii Nunchuk" data-platform="Nintendo" viewBox="94 0.92 400 484.59" data-labels="icons"
   data-layout="full" role="img" aria-label="Wii Nunchuk input display"
   font-family="Arial, sans-serif" data-full-viewbox="94 0.92 400 484.59"
-  data-compact-viewbox="-1.00051 -1.0001 182.00051 80.0001" data-source="WII.svg">
+  data-compact-viewbox="-1.00051 -1.0001 182.00051 80.0001" data-source="WII.svg"
+  data-player-leds="353.88 37.04 1.412">
   <title>Wii Nunchuk</title>
   <style>
     .custom-colors .shell-base { fill: var(--controller-color); }

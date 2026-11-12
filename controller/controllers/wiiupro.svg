@@ -2,7 +2,7 @@
   data-platform="Nintendo" viewBox="15.8989 35.45543 490.9187 374.33097" data-labels="icons"
   data-layout="full" role="img" aria-label="Wii U Pro input display" font-family="Arial, sans-serif"
   data-full-viewbox="15.8989 35.45543 490.9187 374.33097" data-compact-viewbox="-2 0 179 80"
-  data-source="WIIUPRO.svg">
+  data-source="WIIUPRO.svg" data-player-leds="231.9 107.52 1.733">
   <title>Wii U Pro</title>
   <style>
     .custom-colors .shell-base { fill: var(--controller-color); }

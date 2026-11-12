@@ -2,7 +2,8 @@
   data-name="Dreamcast" data-platform="Sega" viewBox="40.1263 14.38572 440.2659 457.12638"
   data-labels="icons" data-layout="full" role="img" aria-label="Dreamcast input display"
   font-family="Arial, sans-serif" data-full-viewbox="40.1263 14.38572 440.2659 457.12638"
-  data-compact-viewbox="0 0 160 94" data-source="DREAMCAST.svg">
+  data-compact-viewbox="0 0 160 94" data-source="DREAMCAST.svg"
+  data-player-leds="239.321 222.669 1.554">
   <title>Dreamcast</title>
   <style>
     .custom-colors .shell-base { fill: var(--controller-color); }

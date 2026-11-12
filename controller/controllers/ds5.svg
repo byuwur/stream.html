@@ -2,7 +2,7 @@
   data-platform="PlayStation" viewBox="22.5571 18.49769 478.0901 384.80791" data-labels="icons"
   data-layout="full" role="img" aria-label="DualSense input display" font-family="Arial, sans-serif"
   data-full-viewbox="22.5571 18.49769 478.0901 384.80791" data-compact-viewbox="-2 0 181 78"
-  data-source="PS5.svg">
+  data-source="PS5.svg" data-player-leds="238.375 278.469 1.687">
   <title>DualSense</title>
   <style>
     .custom-colors .shell-base { fill: var(--controller-color); }

@@ -2,7 +2,8 @@
   data-platform="Sega" viewBox="21.7322 101.22119 479.4956 281.00171" data-labels="icons"
   data-layout="full" role="img" aria-label="Saturn input display" font-family="Arial, sans-serif"
   data-full-viewbox="21.7322 101.22119 479.4956 281.00171"
-  data-compact-viewbox="0 1.5 112 67" data-source="SATURN.svg">
+  data-compact-viewbox="0 1.5 112 67" data-source="SATURN.svg"
+  data-player-leds="238.658 151.462 1.692">
   <title>Saturn</title>
   <style>
     .custom-colors .shell-base { fill: var(--controller-color); }

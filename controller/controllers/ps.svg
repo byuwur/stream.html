@@ -2,7 +2,7 @@
   data-platform="PlayStation" viewBox="1.658 23.70606 520.1218 378.05164" data-labels="icons"
   data-layout="full" role="img" aria-label="PlayStation input display"
   font-family="Arial, sans-serif" data-full-viewbox="1.658 23.70606 520.1218 378.05164"
-  data-compact-viewbox="0 0 141 71" data-source="PS.svg">
+  data-compact-viewbox="0 0 141 71" data-source="PS.svg" data-player-leds="236.714 236.246 1.836">
   <title>PlayStation</title>
   <style>
     .custom-colors .shell-base { fill: var(--controller-color); }

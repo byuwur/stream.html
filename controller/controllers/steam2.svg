@@ -2,7 +2,8 @@
   data-platform="Steam" viewBox="16.4452 22.32785 490.0656 414.94135" data-labels="icons"
   data-layout="full" role="img" aria-label="Steam 2026 input display"
   font-family="Arial, sans-serif" data-full-viewbox="16.4452 22.32785 490.0656 414.94135"
-  data-compact-viewbox="-2.00044 0 180.00044 84.6581" data-source="STEAM2.svg">
+  data-compact-viewbox="-2.00044 0 180.00044 84.6581" data-source="STEAM2.svg"
+  data-player-leds="238.145 107.405 1.73">
   <title>Steam 2026</title>
   <style>
     .custom-colors .shell-base { fill: var(--controller-color); }

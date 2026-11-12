@@ -2,7 +2,7 @@
   data-platform="Nintendo" viewBox="8.7575 -17.65 514.2206 453.3792" data-labels="icons"
   data-layout="full" role="img" aria-label="GCN input display" font-family="Arial, sans-serif"
   data-full-viewbox="8.7575 -17.65 514.2206 453.3792" data-compact-viewbox="0.5 0.5 170 80"
-  data-source="GC.svg">
+  data-source="GC.svg" data-player-leds="239.498 69.278 1.815">
   <title>GCN</title>
   <style>
     .custom-colors .shell-base { fill: var(--controller-color); }

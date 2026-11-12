@@ -2,7 +2,8 @@
   data-name="Switch Pro" data-platform="Nintendo" viewBox="24.8432 45.1682 473.2736 364.9722"
   data-labels="icons" data-layout="full" role="img" aria-label="Switch Pro input display"
   font-family="Arial, sans-serif" data-full-viewbox="24.8432 45.1682 473.2736 364.9722"
-  data-compact-viewbox="-2.0003 0 179.0003 80" data-source="SWTICHPRO.svg">
+  data-compact-viewbox="-2.0003 0 179.0003 80" data-source="SWTICHPRO.svg"
+  data-player-leds="231.455 293.495 1.67">
   <title>Switch Pro</title>
   <style>
     .custom-colors .shell-base { fill: var(--controller-color); }

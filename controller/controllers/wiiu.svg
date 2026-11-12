@@ -3,7 +3,7 @@
   data-layout="full" role="img" aria-label="Wii U GamePad input display"
   font-family="Arial, sans-serif" data-orientation="portrait"
   data-full-viewbox="37.01 27.73392 701.62 424.46608" data-compact-viewbox="-2 0 179 80"
-  data-source="WIIU.svg">
+  data-source="WIIU.svg" data-player-leds="354.574 90.286 2.476">
   <title>Wii U GamePad</title>
   <style>
     .custom-colors .shell-base { fill: var(--controller-color); }

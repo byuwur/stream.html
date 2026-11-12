@@ -36,10 +36,26 @@ body {
   position: relative;
 }
 .controller .control-layer,
-.controller .fixed-layer {
+.controller .fixed-layer,
+.controller .player-leds-layer {
   position: absolute;
   inset: 0;
   pointer-events: none;
+}
+.player-leds-layer[data-layout="full"][data-native-leds="true"] {
+  display: none;
+}
+.controller .player-indicator {
+  fill: #24342a;
+  stroke: #111111;
+  stroke-width: 0.6;
+}
+.player-leds .player-indicator {
+  stroke-width: 0.4;
+}
+.controller .player-indicator.lit {
+  fill: #65e374;
+  filter: drop-shadow(0 0 0.6px #65e374);
 }
 /* Independent SVG roots keep pressed inversion working in WebKit. */
 .control.pressed {

@@ -2,7 +2,7 @@
   data-platform="Steam" viewBox="26.653 10.90531 474.8894 405.79479" data-labels="icons"
   data-layout="full" role="img" aria-label="Steam 2015 input display"
   font-family="Arial, sans-serif" data-full-viewbox="26.653 10.90531 474.8894 405.79479"
-  data-compact-viewbox="-2 0 180 78" data-source="STEAM.svg">
+  data-compact-viewbox="-2 0 180 78" data-source="STEAM.svg" data-player-leds="240.374 106.486 1.676">
   <title>Steam 2015</title>
   <style>
     .custom-colors .shell-base { fill: var(--controller-color); }

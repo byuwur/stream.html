@@ -2,7 +2,7 @@
   data-platform="PlayStation" viewBox="16.7991 17.94777 492.977 384.03853" data-labels="icons"
   data-layout="full" role="img" aria-label="DualShock 4 input display"
   font-family="Arial, sans-serif" data-full-viewbox="16.7991 17.94777 492.977 384.03853"
-  data-compact-viewbox="-2 0 181 78" data-source="PS4.svg">
+  data-compact-viewbox="-2 0 181 78" data-source="PS4.svg" data-player-leds="241.16 273.39 1.74">
   <title>DualShock 4</title>
   <style>
     .custom-colors .shell-base { fill: var(--controller-color); }

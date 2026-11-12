@@ -2,7 +2,8 @@
   data-platform="Sega" viewBox="21.0609 115.6167 480.8212 255.2246" data-labels="icons"
   data-layout="full" role="img" aria-label="Genesis input display" font-family="Arial, sans-serif"
   data-full-viewbox="21.0609 115.6167 480.8212 255.2246"
-  data-compact-viewbox="0 0 150 80" data-source="SEGAGEN.svg">
+  data-compact-viewbox="0 0 150 80" data-source="SEGAGEN.svg"
+  data-player-leds="236.862 137.97 1.697">
   <title>Genesis</title>
   <style>
     .custom-colors .shell-base { fill: var(--controller-color); }

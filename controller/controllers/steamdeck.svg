@@ -3,7 +3,7 @@
   data-layout="full" role="img" aria-label="Steam Deck input display"
   font-family="Arial, sans-serif" data-orientation="portrait"
   data-full-viewbox="45.98 9 949.98 446.35" data-compact-viewbox="-2 0 180 80.33688"
-  data-source="STEAMDECK.svg">
+  data-source="STEAMDECK.svg" data-player-leds="484.9 84.1 2.6">
   <title>Steam Deck</title>
   <style>
     .custom-colors .shell-base { fill: var(--controller-color); }

@@ -2,7 +2,7 @@
   data-platform="Nintendo" viewBox="313.04 0.92 180.96 484.59" data-labels="icons"
   data-layout="full" role="img" aria-label="Wiimote input display" font-family="Arial, sans-serif"
   data-full-viewbox="313.04 0.92 180.96 484.59" data-compact-viewbox="0 0 109 79"
-  data-source="WII.svg">
+  data-source="WII.svg" data-player-leds="367.02 37.04 0.639">
   <title>Wiimote</title>
   <style>
     .custom-colors .shell-base { fill: var(--controller-color); }

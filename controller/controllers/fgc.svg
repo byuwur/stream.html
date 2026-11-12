@@ -1,7 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" class="controller-art" viewBox="-8 -8 936 550" role="img"
   aria-label="FGC (8 buttons) input display" id="fgc" data-controller="fgc"
   data-name="FGC (8 buttons)" data-platform="Other" data-labels="icons" data-layout="full"
-  data-full-viewbox="-8 -8 936 550" data-compact-viewbox="-4.6 0.5 133.6 60.5">
+  data-full-viewbox="-8 -8 936 550" data-compact-viewbox="-4.6 0.5 133.6 60.5"
+  data-player-leds="73.26 25 3.304">
   <title>FGC (8 buttons)</title>
   <view id="fgc6" viewBox="-8 -8 758 550" data-name="FGC (6 buttons)"
     data-exclude=".eight-button-only" data-compact-viewbox="-4.6 0.5 112.6 60.5" />

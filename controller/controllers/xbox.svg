@@ -2,7 +2,7 @@
   data-platform="Xbox" viewBox="15.1345 -8.4705 492.7084 448.2322" data-labels="icons"
   data-layout="full" role="img" aria-label="Duke input display" font-family="Arial, sans-serif"
   data-full-viewbox="15.1345 -8.4705 492.7084 448.2322" data-compact-viewbox="0 0 174 65"
-  data-source="OGX.svg">
+  data-source="OGX.svg" data-player-leds="238.024 98.391 1.739">
   <title>Duke</title>
   <style>
     .custom-colors .shell-base { fill: var(--controller-color); }

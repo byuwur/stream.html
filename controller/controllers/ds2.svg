@@ -2,7 +2,7 @@
   data-platform="PlayStation" viewBox="1.098 23.70607 520.1234 378.05163" data-labels="icons"
   data-layout="full" role="img" aria-label="DualShock 2 input display"
   font-family="Arial, sans-serif" data-full-viewbox="1.098 23.70607 520.1234 378.05163"
-  data-compact-viewbox="-2 0 181 78" data-source="PS2.svg">
+  data-compact-viewbox="-2 0 181 78" data-source="PS2.svg" data-player-leds="236.714 243.246 1.836">
   <title>DualShock 2</title>
   <style>
     .custom-colors .shell-base { fill: var(--controller-color); }

@@ -63,7 +63,7 @@ async function initControllerResource() {
         label: "Player Number:",
         section: "Input",
         description: "Choose a gamepad or Keyboard. Keyboard uses J/K/U/I for face buttons, WASD for the left stick, and arrows for the D-pad; Custom Mapping can use any identified key.",
-        options: { 1: "Player 1", 2: "Player 2", 3: "Player 3", 4: "Player 4", 9: "Keyboard" },
+        options: { 1: "Player 1", 2: "Player 2", 3: "Player 3", 4: "Player 4", 5: "Player 5", 6: "Player 6", 7: "Player 7", 8: "Player 8", 9: "Keyboard", gamepads: "All connected", all: "All connected + Keyboard" },
         id: "player-input",
         icon: "fa-user"
       },
@@ -77,7 +77,19 @@ async function initControllerResource() {
         id: "skin-input",
         icon: "fa-gamepad"
       },
-      layout: { type: "select", default: "full", label: "Layout", section: "Appearance", options: { full: "Full controller", minimal: "Minimal / speedrun" } },
+      layout: { type: "select", default: "full", label: "Layout", section: "Appearance", options: { full: "Full", minimal: "Minimal" } },
+      showPlayerIndicators: {
+        type: "switch",
+        default: "no",
+        label: "Player indicators",
+        section: "Appearance",
+        checkedValue: "yes",
+        uncheckedValue: "no",
+        options: { yes: "On", no: "Off" },
+        styleSelector: ".player-leds-layer, .player-indicator, .player-ring",
+        styleProperty: "display",
+        styleValue: (settings) => (settings.showPlayerIndicators === "yes" ? "" : "none")
+      },
       buttonLabels: { type: "select", default: "icons", label: "Button labels", section: "Appearance", options: { icons: "Hardware symbols", letters: "Button letters", none: "Hidden" } },
       variant: {
         type: "select",
@@ -369,7 +381,7 @@ async function initControllerResource() {
         step: "any",
         styleSelector: ".controller",
         styleProperty: "left",
-        styleValue: (settings) => `calc(50% + ${settings.horizontalPosition}px)`
+        styleValue: (settings) => `calc(var(--player-left, 50%) + ${settings.horizontalPosition}px)`
       },
       verticalPosition: {
         type: "number",
@@ -382,7 +394,7 @@ async function initControllerResource() {
         step: "any",
         styleSelector: ".controller",
         styleProperty: "top",
-        styleValue: (settings) => `calc(50% + ${settings.verticalPosition}px)`
+        styleValue: (settings) => `calc(var(--player-top, 50%) + ${settings.verticalPosition}px)`
       },
       fitMargin: { type: "number", default: 16, label: "Fit margin (px)", section: "Size & placement", min: 0, max: 1000, step: "any" },
       ...byStream.placementFields(".controller"),
@@ -411,11 +423,14 @@ async function initControllerResource() {
 
   /**
    * Polling publishes controller-input each frame and controller-connections when pads change.
-   * Both event details contain raw pads at their browser indices; keyboard input uses slot 9.
+   * Both event details use player slots 0–7; keyboard input stays in slot 9.
+   * A pad's index remains its browser index, independently of its assigned player slot.
    */
   const gamepadSupport = {
     gamepads: [],
     gamepadsRaw: [],
+    slots: new Map(),
+    connectedCount: 0,
     kb: false,
     ticking: false,
     frame: 0,
@@ -430,7 +445,7 @@ async function initControllerResource() {
         bySettingsKB.buttons.fill(0);
         bySettingsKB.axes.fill(0);
       });
-      if (settings.player === "9") this.connectKeyboard();
+      if (["9", "all"].includes(settings.player)) this.connectKeyboard();
       this.startPolling();
     },
     onKeyboardConnect(event) {
@@ -458,33 +473,46 @@ async function initControllerResource() {
       if (!gamepadSupport.ticking) return;
       gamepadSupport.pollGamepads();
       document.dispatchEvent(new CustomEvent("controller-input", { detail: gamepadSupport.gamepadsRaw }));
-      for (const index of Object.keys(gamepadSupport.gamepads)) gamepadSupport.updateDisplay(Number(index));
+      for (const player of tester.controls.keys()) gamepadSupport.updateDisplay(player === 9 ? 9 : player - 1);
       gamepadSupport.frame = requestAnimationFrame(gamepadSupport.tick);
     },
     pollGamepads() {
       const previous = this.gamepads;
-      const pads = navigator.getGamepads?.() ?? [];
+      const pads = Array.from(navigator.getGamepads?.() ?? []).filter((pad) => pad && pad.connected !== false);
+      for (const [index, slot] of this.slots) {
+        if (!pads.some((pad) => pad.index === index && pad.id === previous[slot]?.id)) this.slots.delete(index);
+      }
       this.gamepads = [];
       this.gamepadsRaw = [];
       for (const pad of pads) {
-        if (!pad || pad.index === 9) continue;
-        this.gamepadsRaw[pad.index] = pad;
-        this.gamepads[pad.index] = settings.mapping.length ? remapGamepad(pad) : pad;
+        if (!this.slots.has(pad.index)) {
+          const free = Array.from({ length: 8 }, (_, slot) => slot).filter((slot) => ![...this.slots.values()].includes(slot));
+          // Retain the traditional index + 1 selection when that player is free.
+          const slot = free.includes(pad.index) ? pad.index : free[0];
+          if (slot === undefined) continue;
+          this.slots.set(pad.index, slot);
+        }
+        const slot = this.slots.get(pad.index);
+        this.gamepadsRaw[slot] = pad;
+        this.gamepads[slot] = settings.mapping.length ? remapGamepad(pad) : pad;
       }
+      this.connectedCount = this.slots.size;
       if (this.kb) {
         this.gamepadsRaw[9] = bySettingsKB;
         this.gamepads[9] = settings.mapping.length ? remapGamepad(bySettingsKB) : bySettingsKB;
       }
-      const changed = Object.keys(previous).join() !== Object.keys(this.gamepads).join() || Object.keys(this.gamepads).some((index) => previous[index]?.id !== this.gamepads[index].id);
+      const changed =
+        Object.keys(previous).join() !== Object.keys(this.gamepads).join() || Object.keys(this.gamepads).some((index) => previous[index]?.id !== this.gamepads[index].id || previous[index]?.index !== this.gamepads[index].index);
       if (changed) {
+        if (byStreamOverlay && ["gamepads", "all"].includes(settings.player)) initController();
         tester.updateGamepads(this.gamepads);
         document.dispatchEvent(new CustomEvent("controller-connections", { detail: this.gamepadsRaw }));
       }
     },
     updateDisplay(index) {
-      const pad = this.gamepads[index];
+      const pad = this.gamepads[index] || { buttons: [], axes: [] };
       const player = index === 9 ? 9 : index + 1;
-      if (tester.player !== player) return;
+      if (!tester.controls.has(player)) return;
       const buttons = byControllerArtwork.names;
       buttons.forEach((name, id) => {
         // Two-axis NES adapters can expose the D-pad as axes instead of standard buttons.
@@ -539,10 +567,11 @@ async function initControllerResource() {
     DIGITAL_THRESHOLD: 0.1,
     ROTATE_BOUNDARY: resource.fields.rotation.default,
     controls: new Map(),
-    player: null,
     keys: new Set(),
     keyCodes: new Set(),
     updateGamepads(pads = []) {
+      const container = document.getElementById("gamepads");
+      if (container) container.dataset.gamepadCount = gamepadSupport.connectedCount;
       document.querySelectorAll(".controller").forEach((controller) => {
         const player = Number(controller.id.replace("gamepad-", ""));
         controller.classList.toggle("disconnected", !pads[player === 9 ? 9 : player - 1]);
@@ -563,7 +592,7 @@ async function initControllerResource() {
       bySettingsKB.axes = [0, 1, 2, 3].map((axis) => Number(tester.keys.has(bySettingsKB.axesBtns[axis * 2 + 1])) - Number(tester.keys.has(bySettingsKB.axesBtns[axis * 2])));
     },
     updateButton(value, player, name, threshold = this.ANALOGUE_BUTTON_THRESHOLD) {
-      const control = this.controls.get(name);
+      const control = this.controls.get(player)?.get(name);
       if (!control || control.node.classList.contains("analog-trigger") || control.node.dataset.stickClick === "no") return;
       const pressed = buttonValue(value) > threshold;
       if (control.pressed === pressed) return;
@@ -571,7 +600,7 @@ async function initControllerResource() {
       control.node.classList.toggle("pressed", pressed);
     },
     updateTrigger(value, player, name) {
-      const control = this.controls.get(`${name}-digital`);
+      const control = this.controls.get(player)?.get(`${name}-digital`);
       if (!control?.fill) return;
       const value01 = Math.max(0, Math.min(1, buttonValue(value)));
       const pressure = this.TRIGGER_DISPLAY_TYPE ? value01 : Number(value01 > this.DIGITAL_THRESHOLD);
@@ -585,7 +614,7 @@ async function initControllerResource() {
       control.fill.setAttribute("height", String(horizontal ? box.height : box.height * pressure));
     },
     updateAxis(horizontal, vertical, player, name, buttons) {
-      const control = this.controls.get(name);
+      const control = this.controls.get(player)?.get(name);
       if (!control) return;
       const stick = control.node;
       // Arcade D-pad input and axes share one position; simultaneous input never doubles travel.
@@ -601,7 +630,7 @@ async function initControllerResource() {
       const magnitude = Math.max(1, Math.hypot(horizontal, vertical));
       const x = active ? (horizontal / magnitude) * travel : 0;
       const y = active ? (vertical / magnitude) * travel : 0;
-      const wheel = this.controls.get(`${name}-wheel`)?.node;
+      const wheel = this.controls.get(player)?.get(`${name}-wheel`)?.node;
       const rotation = horizontal * this.ROTATE_BOUNDARY;
       if (wheel && control.rotation !== rotation) {
         control.rotation = rotation;
@@ -756,42 +785,67 @@ async function initControllerResource() {
   function initController() {
     controllerEvents?.abort();
     controllerEvents = new AbortController();
-    const active = document.querySelector(".controller");
-    active.id = `gamepad-${settings.player}`;
-    const artwork = byControllerArtwork.render(settings.skin, settings.layout, settings.buttonLabels, settings.customColors === "yes" ? "original" : settings.variant);
-    active.innerHTML = `<div class="controller-layers">${artwork.markup}</div>`;
-    active.classList.add("active");
-    active.style.width = `${artwork.width}px`;
-    active.style.height = `${artwork.height}px`;
-    active.style.opacity = settings.opacity / 100;
-    active.style.setProperty("--screen-opacity", settings.screenOpacity / 100);
-    customizeControllerAppearance(active, settings);
-    for (const indicator of active.querySelectorAll("[data-player]")) {
-      indicator.classList.toggle("lit", Number(indicator.dataset.player) === Number(settings.player));
-    }
-    for (const numeral of active.querySelectorAll("[data-player-number]")) {
-      numeral.classList.toggle("lit", Number(numeral.dataset.playerNumber) === Number(settings.player));
-    }
-    tester.player = Number(settings.player);
+    const container = document.getElementById("gamepads");
+    const players = ["gamepads", "all"].includes(settings.player)
+      ? Object.keys(gamepadSupport.gamepads)
+          .filter((slot) => slot !== "9" || settings.player === "all")
+          .map((slot) => (Number(slot) === 9 ? 9 : Number(slot) + 1))
+      : [Number(settings.player)];
+    container.replaceChildren();
+    container.dataset.gamepadCount = gamepadSupport.connectedCount;
     tester.controls.clear();
-    for (const node of active.querySelectorAll("[data-name]")) {
-      const fillArtwork = node.querySelector(".trigger-active");
-      const clip = fillArtwork?.getAttribute("clip-path").slice(5, -1);
-      const shaft = active.querySelector(`.fixed-layer[data-for="${node.dataset.input}"] .stick-shaft`);
-      tester.controls.set(node.dataset.name, { node, shaft, fillArtwork, fillBounds: triggerBounds(node, fillArtwork), fill: clip ? node.querySelector(`[id="${clip}"] .trigger-fill-rect`) : null });
-    }
-    active.addEventListener(
-      "controller-layout",
-      () => {
-        for (const control of tester.controls.values()) {
-          control.pressure = undefined;
-          control.x = control.y = undefined;
-          if (control.fillArtwork) control.fillBounds = triggerBounds(control.node, control.fillArtwork);
+    for (const player of players) mountController(player);
+    const controllers = [...container.querySelectorAll(".controller")];
+    function mountController(player) {
+      const active = document.createElement("div");
+      active.className = "controller active";
+      active.id = `gamepad-${player}`;
+      active.setAttribute("aria-label", player === 9 ? "Keyboard" : `Player ${player}`);
+      container.append(active);
+      const artwork = byControllerArtwork.render(settings.skin, settings.layout, settings.buttonLabels, settings.customColors === "yes" ? "original" : settings.variant, `p${player}`);
+      active.innerHTML = `<div class="controller-layers">${artwork.markup}</div>`;
+      active.style.width = `${artwork.width}px`;
+      active.style.height = `${artwork.height}px`;
+      active.style.opacity = settings.opacity / 100;
+      active.style.setProperty("--screen-opacity", settings.screenOpacity / 100);
+      customizeControllerAppearance(active, settings);
+      function updatePlayerIndicators() {
+        const litLeds = [[], [1], [2], [3], [4], [1, 4], [2, 4], [3, 4], [1, 3, 4], [1, 2, 3, 4]][player];
+        for (const indicator of active.querySelectorAll("[data-player]")) {
+          const lamp = Number(indicator.dataset.player);
+          const layer = indicator.closest(".player-leds-layer");
+          const rotation = layer?.dataset.layout === "full" ? Number(layer.dataset.playerLeds?.split(" ")[3] || 0) : 0;
+          // Mirroring reverses horizontal rows; vertical lamps still read from top to bottom.
+          const reverse = settings.mirror === "yes" && indicator.classList.contains("player-indicator") && rotation % 180 === 0;
+          indicator.classList.toggle("lit", litLeds.includes(reverse ? 5 - lamp : lamp));
         }
-        fitController();
-      },
-      { signal: controllerEvents.signal }
-    );
+      }
+      updatePlayerIndicators();
+      for (const numeral of active.querySelectorAll("[data-player-number]")) {
+        numeral.classList.toggle("lit", Number(numeral.dataset.playerNumber) === player);
+      }
+      const controls = new Map();
+      tester.controls.set(player, controls);
+      for (const node of active.querySelectorAll("[data-name]")) {
+        const fillArtwork = node.querySelector(".trigger-active");
+        const clip = fillArtwork?.getAttribute("clip-path").slice(5, -1);
+        const shaft = active.querySelector(`.fixed-layer[data-for="${node.dataset.input}"] .stick-shaft`);
+        controls.set(node.dataset.name, { node, shaft, fillArtwork, fillBounds: triggerBounds(node, fillArtwork), fill: clip ? node.querySelector(`[id="${clip}"] .trigger-fill-rect`) : null });
+      }
+      active.addEventListener(
+        "controller-layout",
+        () => {
+          updatePlayerIndicators();
+          for (const control of controls.values()) {
+            control.pressure = undefined;
+            control.x = control.y = undefined;
+            if (control.fillArtwork) control.fillBounds = triggerBounds(control.node, control.fillArtwork);
+          }
+          fitController();
+        },
+        { signal: controllerEvents.signal }
+      );
+    }
     for (const [name, property] of [
       ["offset", "STICK_OFFSET"],
       ["deadzone", "ANALOGUE_STICK_THRESHOLD"],
@@ -803,15 +857,23 @@ async function initControllerResource() {
     tester.STICK_CURVING = settings.curve === "1";
 
     function fitController() {
-      // Layout changes move the cap's rotation center as well as its artwork.
-      for (const stick of active.querySelectorAll(".control-layer.stick")) {
-        const box = stick.getBBox();
-        const viewport = stick.viewBox.baseVal;
-        stick.style.transformOrigin = `${box.x + box.width / 2 - viewport.x}px ${box.y + box.height / 2 - viewport.y}px`;
-      }
-      const margin = settings.fitMargin;
-      const scale = Math.max(0, Math.min((innerHeight - margin * 2) / active.offsetHeight, (innerWidth - margin * 2) / active.offsetWidth));
-      active.style.transform = `translate(-50%, -50%) scale(${settings.mirror === "yes" ? -scale : scale}, ${scale})`;
+      const columns = Math.max(1, Math.min(controllers.length, Math.ceil(Math.sqrt((controllers.length * innerWidth) / innerHeight))));
+      const rows = Math.max(1, Math.ceil(controllers.length / columns));
+      controllers.forEach((active, index) => {
+        // Layout changes move the cap's rotation center as well as its artwork.
+        for (const stick of active.querySelectorAll(".control-layer.stick")) {
+          const box = stick.getBBox();
+          const viewport = stick.viewBox.baseVal;
+          stick.style.transformOrigin = `${box.x + box.width / 2 - viewport.x}px ${box.y + box.height / 2 - viewport.y}px`;
+        }
+        const margin = settings.fitMargin;
+        const cellWidth = innerWidth / columns,
+          cellHeight = innerHeight / rows;
+        const scale = Math.max(0, Math.min((cellHeight - margin * 2) / active.offsetHeight, (cellWidth - margin * 2) / active.offsetWidth));
+        active.style.setProperty("--player-left", `${cellWidth * ((index % columns) + 0.5)}px`);
+        active.style.setProperty("--player-top", `${cellHeight * (Math.floor(index / columns) + 0.5)}px`);
+        active.style.transform = `translate(-50%, -50%) scale(${settings.mirror === "yes" ? -scale : scale}, ${scale})`;
+      });
     }
     fitController();
     window.addEventListener("resize", fitController, { signal: controllerEvents.signal });
@@ -1139,6 +1201,11 @@ async function loadControllerArtwork() {
       if (position) position.setAttribute("transform", minimal ? svg.dataset.compactTransform : svg.dataset.fullTransform || "");
     }
     background.style.visibility = minimal ? "hidden" : "visible";
+    for (const lamp of controller.querySelectorAll(".player-leds-layer .player-indicator")) {
+      lamp.setAttribute("x", String((Number(lamp.dataset.player) - 1) * (minimal ? 15 : 8)));
+      lamp.setAttribute("width", minimal ? "5" : "3");
+      lamp.setAttribute("height", minimal ? "5" : "3");
+    }
     const [, , width, height] = viewBox.trim().split(/\s+/).map(Number);
     controller.style.width = `${width}px`;
     controller.style.height = `${height}px`;
@@ -1146,7 +1213,7 @@ async function loadControllerArtwork() {
     return { width, height };
   }
 
-  function render(id, layout, labels, variant = "original") {
+  function render(id, layout, labels, variant = "original", instance = "") {
     const svg = new DOMParser().parseFromString(sources[id], "image/svg+xml").documentElement;
     svg.setAttribute("data-labels", labels);
     svg.dataset.variant = Object.hasOwn(skins[id].variants, variant) ? variant : "original";
@@ -1220,7 +1287,41 @@ async function loadControllerArtwork() {
     svg.querySelectorAll("[data-name]").forEach((node) => node.removeAttribute("data-name"));
     const mount = document.createElement("div");
     mount.append(...rear, svg, ...layers);
+    // Native lamps and Xbox 360's guide ring replace the shared row in full mode.
+    const leds = svg.cloneNode(false);
+    leds.removeAttribute("id");
+    leds.classList.remove("controller-background");
+    leds.classList.add("player-leds-layer");
+    leds.setAttribute("aria-hidden", "true");
+    const [cx, cy, cw, ch] = svg.dataset.compactViewbox.split(" ").map(Number);
+    svg.dataset.compactViewbox = `${cx} ${cy - 8} ${cw} ${ch + 8}`;
+    const [lx, ly, scale, rotation = 0] = (svg.dataset.playerLeds || "0 0 1").split(" ").map(Number);
+    leds.dataset.fullTransform = `translate(${lx} ${ly}) rotate(${rotation}) scale(${scale})`;
+    leds.dataset.compactTransform = `translate(${cx + cw / 2 - 25} ${cy - 6.5})`;
+    leds.dataset.nativeLeds = String(id === "x360" || !!svg.querySelector(".player-indicator[data-player]"));
+    const lamps = document.createElementNS(svg.namespaceURI, "g");
+    lamps.classList.add("layout-position", "player-leds");
+    lamps.innerHTML = [1, 2, 3, 4].map((lamp) => `<rect class="player-indicator" data-player="${lamp}" x="${(lamp - 1) * 15}" y="0" width="5" height="5"/>`).join("");
+    leds.append(lamps);
+    mount.append(leds);
     const size = setLayout(mount, layout);
+    // Instances must not share clip paths, masks, filters, or their CSS ID selectors.
+    if (instance) {
+      const ids = new Map([...mount.querySelectorAll("[id]")].map((node) => [node.id, `${instance}-${node.id}`]));
+      for (const node of mount.querySelectorAll("*")) {
+        if (node.id) node.id = ids.get(node.id);
+        for (const attribute of [...node.attributes]) {
+          if (attribute.name === "id") continue;
+          let value = attribute.value;
+          for (const [original, replacement] of ids) {
+            value = value.replaceAll(`url(#${original})`, `url(#${replacement})`);
+            if (value === `#${original}`) value = `#${replacement}`;
+          }
+          if (value !== attribute.value) node.setAttribute(attribute.name, value);
+        }
+        if (node.localName === "style") node.textContent = node.textContent.replace(/#([\w-]+)/g, (match, name) => (ids.has(name) ? `#${ids.get(name)}` : match));
+      }
+    }
     return { ...size, markup: [...mount.children].map((node) => serializer.serializeToString(node)).join("") };
   }
   return { skins, names, render, setLayout, sources, guideSymbols };
@@ -1358,7 +1459,7 @@ function initControllerMapping() {
         input.empty();
         for (const [index, pad] of Object.entries(pads)) {
           const player = Number(index) === 9 ? 9 : Number(index) + 1;
-          if (![1, 2, 3, 4, 9].includes(player)) continue;
+          if (player < 1 || player > 9) continue;
           $("<option></option>")
             .val(player)
             .text(player === 9 ? "Keyboard" : `Player ${player} — ${pad.id}`)

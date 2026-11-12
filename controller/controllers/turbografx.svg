@@ -2,7 +2,7 @@
   data-name="TurboGrafx-16" data-platform="Other" viewBox="2.68 113.7826 517.72 258.8676"
   data-labels="icons" data-layout="full" role="img" aria-label="TurboGrafx-16 input display"
   font-family="Arial, sans-serif" data-full-viewbox="2.68 113.7826 517.72 258.8676"
-  data-compact-viewbox="0 2 106 49" data-source="TGFX.svg">
+  data-compact-viewbox="0 2 106 49" data-source="TGFX.svg" data-player-leds="235.047 148.48 1.827">
   <title>TurboGrafx-16</title>
   <style>
     .custom-colors .shell-base { fill: var(--controller-color); }
