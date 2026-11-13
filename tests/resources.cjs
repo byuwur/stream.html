@@ -156,8 +156,13 @@ test("resources render and round-trip URLs without configurator assets", async (
     await t.test("standalone F2 and configure links warn without loading an editor", async () => {
       const page = await browser.newPage();
       try {
-        const errors = [], requests = [];
+        const errors = [],
+          requests = [],
+          warnings = [];
         page.on("pageerror", (error) => errors.push(error.message));
+        page.on("console", (message) => {
+          if (message.type() === "warning" && message.text().includes("configurator is not included")) warnings.push(message.text());
+        });
         page.on("request", (request) => {
           if (/configurator\.(js|css)|jquery|bootstrap|select2|pickr/.test(request.url())) requests.push(request.url());
         });
@@ -166,18 +171,24 @@ test("resources render and round-trip URLs without configurator assets", async (
         await page.goto(url);
         await page.locator("#overlay .primary").filter({ hasText: "Standalone" }).waitFor();
         await page.keyboard.press("Shift+F2");
-        assert.equal(await page.locator("#configurator-warning").count(), 0);
+        assert.equal(warnings.length, 0);
+        const warned = page.waitForEvent("console", { predicate: (message) => message.type() === "warning" && message.text().includes("configurator is not included") });
         await page.keyboard.press("F2");
-        await page.locator("#configurator-warning").waitFor();
+        await warned;
+        assert.equal(warnings.length, 1);
         assert.equal(page.url(), url);
         await page.keyboard.press("F2");
-        assert.equal(await page.locator("#configurator-warning").count(), 1);
-        assert.equal(await page.locator("#configurator-warning a").first().getAttribute("href"), "https://byuwur.github.io/stream.html/watermark/?text=Standalone#configure");
-        assert.equal(await page.locator("#configurator-warning a").last().getAttribute("href"), "https://github.com/byuwur/stream.html");
-        await page.evaluate(() => { location.hash = "configure"; });
+        assert.equal(warnings.length, 1);
+        assert.match(warnings[0], /https:\/\/byuwur.github.io\/stream.html\//);
+        assert.match(warnings[0], /https:\/\/github.com\/byuwur\/stream.html/);
+        await page.evaluate(() => {
+          location.hash = "configure";
+        });
         assert.equal(await page.locator("#overlay .primary").textContent(), "Standalone");
-        await page.goto(`${url}#configure`);
-        await page.locator("#configurator-warning").waitFor();
+        await page.reload();
+        await page.locator("#overlay .primary").filter({ hasText: "Standalone" }).waitFor();
+        assert.equal(warnings.length, 2);
+        assert.equal(await page.locator("#configurator-warning").count(), 0);
         assert.equal(await page.evaluate(() => typeof byConfigurator), "undefined");
         assert.deepEqual(requests, []);
         assert.deepEqual(errors, []);
@@ -2210,6 +2221,10 @@ test("resources render and round-trip URLs without configurator assets", async (
       const directory = await fs.mkdtemp(path.join(os.tmpdir(), "stream-resource-"));
       const page = await browser.newPage();
       try {
+        const warnings = [];
+        page.on("console", (message) => {
+          if (message.type() === "warning" && message.text().includes("configurator is not included")) warnings.push(message.text());
+        });
         // The downloaded fixture contains renderer files only; no editor files are available.
         await fs.mkdir(path.join(directory, "watermark"));
         await fs.copyFile(path.join(root, "resource.js"), path.join(directory, "resource.js"));
@@ -2221,9 +2236,12 @@ test("resources render and round-trip URLs without configurator assets", async (
         await page.goto(`${pathToFileURL(file).href}?text=Downloaded`);
         await page.waitForFunction(() => document.querySelector("#overlay .primary")?.textContent === "Downloaded");
         assert.equal(await page.evaluate(() => typeof byConfigurator), "undefined");
+        const warned = page.waitForEvent("console", { predicate: (message) => message.type() === "warning" && message.text().includes("configurator is not included") });
         await page.keyboard.press("F2");
-        await page.locator("#configurator-warning").waitFor();
-        assert.equal(await page.locator("#configurator-warning a").first().getAttribute("href"), "https://byuwur.github.io/stream.html/watermark/?text=Downloaded#configure");
+        await warned;
+        assert.equal(warnings.length, 1);
+        assert.equal(await page.locator("#configurator-warning").count(), 0);
+        assert.match(warnings[0], /https:\/\/byuwur.github.io\/stream.html\//);
         assert.match(await page.evaluate(() => byStream.settingsURL(byStreamResource, byStreamResource.settings).href), /\/index\.html\?text=Downloaded$/);
         await fs.mkdir(path.join(directory, "controller"));
         for (const asset of ["controller.js", "controller.css"]) await fs.copyFile(path.join(root, "controller", asset), path.join(directory, "controller", asset));
