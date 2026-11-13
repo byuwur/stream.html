@@ -14,14 +14,16 @@
   const byConfigurator = global.byConfigurator;
   if (byConfigurator.initialized) return;
   byConfigurator.VERSION = "9.1"; // 2026-11-11
-  const root = new URL(".", document.currentScript.src);
+  const root = new URL(document.currentScript.dataset.root || ".", document.currentScript.src || location.href);
 
   const byStream = global.byStream;
   const { readURLParameters, settingsURL, fieldEnabled, parseLocale, parseZone } = byStream;
   let parameterError = "";
   let compressedFields = new Set();
   const preferencePath = new URL(".", location.href).pathname;
-  const preferenceKey = `stream.html.settings.${encodeURIComponent(preferencePath)}`;
+  // Portable distributions share a folder; source pages retain their existing preference keys.
+  const preferenceResource = document.currentScript.dataset.preferenceResource;
+  const preferenceKey = `stream.html.settings.${encodeURIComponent(preferencePath)}${preferenceResource ? `.${preferenceResource}` : ""}`;
   let savedPreferences = { query: "", advanced: null, collapsed: [] };
 
   /**

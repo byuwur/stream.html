@@ -76,10 +76,13 @@
   // Resource handlers replace this before the optional editor's DOMContentLoaded handler awaits it.
   byStream.ready = Promise.resolve();
   const editorImports = document.getElementById("configurator-assets");
-  const editorReady = location.search.length > 1 && !location.hash ? Promise.resolve() : loadConfigurator().catch((error) => {
-    console.warn(error);
-    warnMissingConfigurator();
-  });
+  const editorReady =
+    location.search.length > 1 && !location.hash
+      ? Promise.resolve()
+      : loadConfigurator().catch((error) => {
+          console.warn(error);
+          warnMissingConfigurator();
+        });
 
   // Editor imports stay inert in overlays; preserve their declared dependency order when editing.
   async function loadConfigurator() {
@@ -90,8 +93,7 @@
         continue;
       }
       await new Promise((resolve, reject) => {
-        const script = document.createElement("script");
-        script.src = source.src;
+        const script = source.cloneNode(true);
         script.onload = resolve;
         script.onerror = () => reject(new Error(`Unable to load editor script: ${source.src}`));
         document.head.append(script);
@@ -104,6 +106,7 @@
     if (global !== global.top || configuratorWarning) return;
     configuratorWarning = true;
     console.warn("stream.html: The configurator is not included in this distribution. Configure this resource online: https://byuwur.github.io/stream.html/ — Repository: https://github.com/byuwur/stream.html");
+    /**
     const warning = document.createElement("aside");
     warning.id = "configurator-warning";
     warning.setAttribute("role", "alert");
@@ -122,6 +125,7 @@
     for (const link of [editor, repository]) link.style.color = "#eee";
     warning.append(editor, " or download the editor files from the ", repository, ".");
     document.body.append(warning);
+     */
   }
 
   global.addEventListener("keydown", (event) => {
@@ -1211,59 +1215,61 @@
     }
     const overlay = (!editorImports && !global.byConfigurator) || (location.search.length > 1 && !location.hash);
     // Only an attached editor supplies saved preferences; standalone overlays use their URL alone.
-    byStream.ready = editorReady.then(() => {
-      const search = overlay ? location.search : (byStream.prepareResource?.(resource) ?? location.search);
-      return readURLParameters(resource.fields, search);
-    }).then((parameters) => {
-      resource.normalizeParameters?.(parameters.values);
-      // Resolve one settings object for both consumers before either the renderer or editor starts.
-      const settings = { ...resource.constants, ...Object.fromEntries(Object.entries(resource.fields).map(([name, field]) => [name, structuredClone(field.default)])) };
-      applyParameters(resource.fields, settings, parameters.values);
-      global.byStreamOverlay = overlay;
-      if (!editorImports && !global.byConfigurator && location.hash) warnMissingConfigurator();
-      global.addEventListener("hashchange", () => {
-        if (!editorImports && !global.byConfigurator) {
-          if (location.hash) warnMissingConfigurator();
-          return;
+    byStream.ready = editorReady
+      .then(() => {
+        const search = overlay ? location.search : (byStream.prepareResource?.(resource) ?? location.search);
+        return readURLParameters(resource.fields, search);
+      })
+      .then((parameters) => {
+        resource.normalizeParameters?.(parameters.values);
+        // Resolve one settings object for both consumers before either the renderer or editor starts.
+        const settings = { ...resource.constants, ...Object.fromEntries(Object.entries(resource.fields).map(([name, field]) => [name, structuredClone(field.default)])) };
+        applyParameters(resource.fields, settings, parameters.values);
+        global.byStreamOverlay = overlay;
+        if (!editorImports && !global.byConfigurator && location.hash) warnMissingConfigurator();
+        global.addEventListener("hashchange", () => {
+          if (!editorImports && !global.byConfigurator) {
+            if (location.hash) warnMissingConfigurator();
+            return;
+          }
+          if (overlay !== (location.search.length > 1 && !location.hash)) location.reload();
+        });
+        if (overlay) {
+          document.documentElement.setAttribute("data-overlay", "");
+          document.documentElement.dataset.animate = settings.animate;
+          document.body.append(document.getElementById("overlay-markup").content.cloneNode(true));
+          // Metadata-driven CSS is emitted once; selectors also cover rows a renderer creates later.
+          const emptyTextStyle = document.createElement("style");
+          emptyTextStyle.textContent = "#overlay :is(h1,h2,h3,p,.primary,.secondary,.eyebrow,.schedule-state,.badge-icon):empty { display: none !important; } #overlay .panel:empty { display: none !important; }";
+          emptyTextStyle.textContent += 'html[data-animate="no"] *, html[data-animate="no"] *::before, html[data-animate="no"] *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }';
+          document.body.append(emptyTextStyle);
+          const overrides = [];
+          for (const [name, field] of Object.entries(resource.fields)) {
+            // A zero maximum removes authored CSS caps; other neutral values preserve their base styles.
+            const unlimited = (field.styleProperty === "max-width" || field.styleProperty === "max-height") && settings[name] === 0;
+            if (!field.styleSelector || !fieldEnabled(resource.fields, settings, name) || (!unlimited && !field.styleValue && settings[name] === field.styleDefault && field.default === field.styleDefault)) continue;
+            const value = unlimited ? "none" : field.styleValue ? field.styleValue(settings) : field.type === "font" ? byFont.family(settings[name], '"Courier New", Courier, monospace') : `${settings[name]}${field.styleUnit || ""}`;
+            if (value !== "") overrides.push([field, value]);
+          }
+          if (overrides.length) {
+            const style = document.createElement("style");
+            document.body.append(style);
+            // Ordering needs a flex parent even when the resource's original layout did not use one.
+            for (const parent of new Set(overrides.map(([field]) => field.styleParent).filter(Boolean))) {
+              const index = style.sheet.insertRule(`:where(${parent}) {}`, style.sheet.cssRules.length);
+              style.sheet.cssRules[index].style.setProperty("display", "flex", "important");
+              style.sheet.cssRules[index].style.setProperty("flex-direction", "column");
+            }
+            for (const [field, value] of overrides) {
+              const index = style.sheet.insertRule(`${field.styleSelector} {}`, style.sheet.cssRules.length);
+              // Explicit overrides also apply to rotating rows and inline renderer styles.
+              style.sheet.cssRules[index].style.setProperty(field.styleProperty, value, "important");
+            }
+          }
         }
-        if (overlay !== (location.search.length > 1 && !location.hash)) location.reload();
+        global.byStreamResource = { ...resource, settings, parameterRules: resource.fields, urlParameters: parameters, ...integrations };
+        return settings;
       });
-      if (overlay) {
-        document.documentElement.setAttribute("data-overlay", "");
-        document.documentElement.dataset.animate = settings.animate;
-        document.body.append(document.getElementById("overlay-markup").content.cloneNode(true));
-        // Metadata-driven CSS is emitted once; selectors also cover rows a renderer creates later.
-        const emptyTextStyle = document.createElement("style");
-        emptyTextStyle.textContent = "#overlay :is(h1,h2,h3,p,.primary,.secondary,.eyebrow,.schedule-state,.badge-icon):empty { display: none !important; } #overlay .panel:empty { display: none !important; }";
-        emptyTextStyle.textContent += 'html[data-animate="no"] *, html[data-animate="no"] *::before, html[data-animate="no"] *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }';
-        document.body.append(emptyTextStyle);
-        const overrides = [];
-        for (const [name, field] of Object.entries(resource.fields)) {
-          // A zero maximum removes authored CSS caps; other neutral values preserve their base styles.
-          const unlimited = (field.styleProperty === "max-width" || field.styleProperty === "max-height") && settings[name] === 0;
-          if (!field.styleSelector || !fieldEnabled(resource.fields, settings, name) || (!unlimited && !field.styleValue && settings[name] === field.styleDefault && field.default === field.styleDefault)) continue;
-          const value = unlimited ? "none" : field.styleValue ? field.styleValue(settings) : field.type === "font" ? byFont.family(settings[name], '"Courier New", Courier, monospace') : `${settings[name]}${field.styleUnit || ""}`;
-          if (value !== "") overrides.push([field, value]);
-        }
-        if (overrides.length) {
-          const style = document.createElement("style");
-          document.body.append(style);
-          // Ordering needs a flex parent even when the resource's original layout did not use one.
-          for (const parent of new Set(overrides.map(([field]) => field.styleParent).filter(Boolean))) {
-            const index = style.sheet.insertRule(`:where(${parent}) {}`, style.sheet.cssRules.length);
-            style.sheet.cssRules[index].style.setProperty("display", "flex", "important");
-            style.sheet.cssRules[index].style.setProperty("flex-direction", "column");
-          }
-          for (const [field, value] of overrides) {
-            const index = style.sheet.insertRule(`${field.styleSelector} {}`, style.sheet.cssRules.length);
-            // Explicit overrides also apply to rotating rows and inline renderer styles.
-            style.sheet.cssRules[index].style.setProperty(field.styleProperty, value, "important");
-          }
-        }
-      }
-      global.byStreamResource = { ...resource, settings, parameterRules: resource.fields, urlParameters: parameters, ...integrations };
-      return settings;
-    });
     return byStream.ready;
   }
 

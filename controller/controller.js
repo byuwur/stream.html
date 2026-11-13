@@ -25,8 +25,7 @@ async function initControllerResource() {
     console.error(error);
     const message = document.createElement("p");
     message.setAttribute("role", "alert");
-    message.textContent =
-      location.protocol === "file:" ? "Controller SVG resources require HTTP/HTTPS. Open this overlay through a local web server or its hosted URL." : `${error.message} Check the controller SVG files, then reload.`;
+    message.textContent = location.protocol === "file:" ? "Controller SVG resources require HTTP/HTTPS. Open this overlay through a local web server or its hosted URL." : `${error.message} Check the controller SVG files, then reload.`;
     document.body.appendChild(message);
     return;
   }
