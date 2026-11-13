@@ -1203,7 +1203,11 @@
         ...options
       });
       byConfigurator.initSelect2Motion(jqSelect);
-      jqSelect.next(".select2-container").addClass("stream-select2");
+      // Keep the enclosing label from moving focus back to the hidden native select.
+      jqSelect
+        .next(".select2-container")
+        .addClass("stream-select2")
+        .on("click", ".select2-selection--single", (event) => event.preventDefault());
       jqSelect.off("select2:open.streamSelect2").on("select2:open.streamSelect2", () => {
         const widget = jqSelect.data("select2");
         /**

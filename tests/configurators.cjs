@@ -256,10 +256,13 @@ test("configurator forms and previews initialize for every resource", async (t) 
         await waitSettings("gcn", "indigo");
         assert.equal(await variant.inputValue(), "indigo", "URL imports can select palettes absent from the previous skin");
         await page.frameLocator("#overlay-preview").locator('.controller-background[data-controller="gcn"][data-variant="indigo"]').waitFor();
-        await page.locator('label:has([name="variant"]) .select2-selection').click();
+        // Release after Select2's deferred focus to expose the enclosing label's default action.
+        await page.locator('label:has([name="variant"]) .select2-selection').click({ delay: 50 });
         assert.deepEqual(await page.locator('.select2-results__option[role="option"]').allTextContents(), ["Default", "Indigo", "Silver", "White", ...palettes.map(([, name]) => name), "Sequential (all)"]);
         assert.equal(await page.locator(".select2-results__option--disabled").count(), 0);
+        assert.equal(await page.locator(".select2-container--open .select2-search__field").evaluate((node) => node === document.activeElement), true, "The dropdown retains keyboard focus after the label click");
         await page.keyboard.press("Escape");
+        await page.locator(".select2-dropdown").waitFor({ state: "hidden" });
 
         await page.locator('[data-settings-view="json"]').click();
         await page.locator("#settings-json").fill(JSON.stringify({ skin: "joycon", variant: "neon", player: "9" }));
