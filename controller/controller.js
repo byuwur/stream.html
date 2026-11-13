@@ -1886,9 +1886,10 @@ function initControllerMapping() {
             .find('[data-panel="info"]')
             .append(
               /* HTML */ `<p class="small mt-3">
-                Controller input is based on <a href="https://github.com/html5rocks/www.html5rocks.com/tree/master/content/tutorials/doodles/gamepad/static/gamepad-tester" target="_blank" rel="noopener">Gamepad.js and Tester.js</a> by
-                Marcin Wichary.
-              </p>`
+                  Controller input is based on <a href="https://github.com/html5rocks/www.html5rocks.com/tree/master/content/tutorials/doodles/gamepad/static/gamepad-tester" target="_blank" rel="noopener">Gamepad.js and Tester.js</a> by
+                  Marcin Wichary.
+                </p>
+                <p class="small mt-3">Controller SVGs by <a href="https://mimicrymedia.itch.io/controller-pack" target="_blank" rel="noopener">MimicryMedia</a>.</p>`
             );
           $("<button type='button' data-section='remap' class='btn btn-sm btn-outline-light border-0'><i class='fa-solid fa-gamepad me-2' aria-hidden='true'></i>Custom Mapping</button>").insertBefore($(help).find(".help-close"));
           initSelect2($("#player-base"));
