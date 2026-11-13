@@ -1,5 +1,5 @@
 /*
- * File: tests/resources.cjs
+ * File: __tests__/resources.cjs
  * Desc: Standalone resource rendering, URL validation, and local-file use without configurator imports.
  */
 

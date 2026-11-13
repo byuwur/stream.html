@@ -1,5 +1,5 @@
 /*
- * File: tests/browser.cjs
+ * File: __tests__/browser.cjs
  * Desc: Browser fixtures shared by independent resource and configurator suites; no tests run on import.
  */
 

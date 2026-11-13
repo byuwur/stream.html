@@ -1,5 +1,5 @@
 /*
- * File: tests/configurators.cjs
+ * File: __tests__/configurators.cjs
  * Desc: Configurator forms, previews, URL editing, copy, and reset; resource-only checks live in resources.cjs.
  */
 

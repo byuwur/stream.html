@@ -37,7 +37,7 @@ jobs:
         run: |
           node --check resource.js
           if [ "${{ matrix.suite }}" = "configurators" ]; then node --check configurator.js; fi
-          node --test tests/${{ matrix.suite }}.cjs
+          node --test __tests__/${{ matrix.suite }}.cjs
 
   rendering:
     name: Firefox and WebKit rendering
@@ -56,4 +56,4 @@ jobs:
         env:
           NODE_PATH: ${{ runner.temp }}/stream-tests/node_modules
           RENDER_ENGINES: firefox,webkit
-        run: node --test --test-name-pattern="controller inversion paints and releases" tests/resources.cjs
+        run: node --test --test-name-pattern="controller inversion paints and releases" __tests__/resources.cjs
