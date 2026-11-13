@@ -15,7 +15,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     fields: {
       content: {
         type: "textarea",
-        default: "https://byuwur.github.io/stream.html/",
+        // default: "https://byuwur.github.io/stream.html/",
+        default: "https://stream.byuwur.co/",
         label: "Text or URL",
         section: "Content & behavior",
         description: "Up to 600 UTF-16 characters. The code is generated locally; no remote QR service. Maximum 1,200 UTF-8 bytes.",

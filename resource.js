@@ -105,7 +105,8 @@
   function warnMissingConfigurator() {
     if (global !== global.top || configuratorWarning) return;
     configuratorWarning = true;
-    console.warn("stream.html: The configurator is not included in this distribution. Configure this resource online: https://byuwur.github.io/stream.html/ — Repository: https://github.com/byuwur/stream.html");
+    // console.warn("stream.html: The configurator is not included in this distribution. Configure this resource online: https://byuwur.github.io/stream.html/ — Repository: https://github.com/byuwur/stream.html");
+    console.warn("stream.html: The configurator is not included in this distribution. Configure this resource online: https://stream.byuwur.co/ — Repository: https://github.com/byuwur/stream.html");
     /**
     const warning = document.createElement("aside");
     warning.id = "configurator-warning";

@@ -4,12 +4,15 @@
 
 Browser overlays for your stream. Configure a tool and copy its URL into OBS. Free. Forever. No account, install, or build step.
 
-[Open stream.html](https://byuwur.github.io/stream.html/) · [Configurator demo](https://byuwur.github.io/stream.html/configurator.html)
+<!-- [Open stream.html](https://byuwur.github.io/stream.html/) · [Configurator demo](https://byuwur.github.io/stream.html/configurator.html) -->
+
+[Open stream.html](https://stream.byuwur.co/) · [Configurator demo](https://stream.byuwur.co/configurator.html)
 
 ## Available overlays
 
 All 22 overlays are available as prereleases. **Alpha** means early testing; **Beta** means broader testing. Features may change, and bugs are expected. Try your setup before going live. Status pills appear beside tool titles on the landing page, in the tool picker, and in the configurator heading.
 
+<!--
 | Tool                                                                       | Status | Purpose                                                                                | Local entry point         |
 | -------------------------------------------------------------------------- | ------ | -------------------------------------------------------------------------------------- | ------------------------- |
 | [Controller](https://byuwur.github.io/stream.html/controller/)             | Beta   | Gamepad/keyboard input with 32 controller models, compact layouts, and editable color. | `controller/index.html`   |
@@ -34,6 +37,32 @@ All 22 overlays are available as prereleases. **Alpha** means early testing; **B
 | [Randomizer](https://byuwur.github.io/stream.html/randomizer/)             | Alpha  | Seeded draws for challenges, games, and choices.                                       | `randomizer/index.html`   |
 | [Quote Display](https://byuwur.github.io/stream.html/quotes/)              | Alpha  | Rotating quotes, tips, and trivia.                                                     | `quotes/index.html`       |
 | [Keyboard Shortcut Sheet](https://byuwur.github.io/stream.html/shortcuts/) | Alpha  | Editable shortcut guide without keyboard monitoring.                                   | `shortcuts/index.html`    |
+-->
+
+| Tool                                                           | Status | Purpose                                                                                | Local entry point         |
+| -------------------------------------------------------------- | ------ | -------------------------------------------------------------------------------------- | ------------------------- |
+| [Controller](https://stream.byuwur.co/controller/)             | Beta   | Gamepad/keyboard input with 32 controller models, compact layouts, and editable color. | `controller/index.html`   |
+| [Social popup](https://stream.byuwur.co/popup/)                | Beta   | Animated accounts with 90+ platforms, fonts, colors, and timing.                       | `popup/index.html`        |
+| [Main scene](https://stream.byuwur.co/main/)                   | Beta   | Starting/BRB/ending scenes with branding, countdown, accounts, and schedule.           | `main/index.html`         |
+| [Clock](https://stream.byuwur.co/clock/)                       | Alpha  | Digital, analog, split-flap, and minimal clocks.                                       | `clock/index.html`        |
+| [Timer / Countdown](https://stream.byuwur.co/timer/)           | Alpha  | Countdown or elapsed timer with an optional fixed start.                               | `timer/index.html`        |
+| [Webcam Frame](https://stream.byuwur.co/webcam/)               | Alpha  | Transparent frame for your camera.                                                     | `webcam/index.html`       |
+| [Ticker](https://stream.byuwur.co/ticker/)                     | Alpha  | Scrolling news, commands, and reminders.                                               | `ticker/index.html`       |
+| [Watermark](https://stream.byuwur.co/watermark/)               | Alpha  | Text, monogram, or logo branding.                                                      | `watermark/index.html`    |
+| [Lower Thirds](https://stream.byuwur.co/lower-thirds/)         | Alpha  | Broadcast cards for guests, games, and moments.                                        | `lower-thirds/index.html` |
+| [QR / Link Card](https://stream.byuwur.co/qr/)                 | Alpha  | Locally generated QR code and link card.                                               | `qr/index.html`           |
+| [Periodic Reminder](https://stream.byuwur.co/reminder/)        | Alpha  | Automatic reminders on your schedule.                                                  | `reminder/index.html`     |
+| [Stream Badge](https://stream.byuwur.co/badge/)                | Alpha  | LIVE, AFK, recording, and custom labels.                                               | `badge/index.html`        |
+| [Credits Roll](https://stream.byuwur.co/credits/)              | Alpha  | Closing credits for your community.                                                    | `credits/index.html`      |
+| [Schedule](https://stream.byuwur.co/schedule/)                 | Alpha  | Dated run of show with current-segment highlighting.                                   | `schedule/index.html`     |
+| [Sponsor Carousel](https://stream.byuwur.co/sponsors/)         | Alpha  | Rotating public logos and messages.                                                    | `sponsors/index.html`     |
+| [Info Board](https://stream.byuwur.co/info/)                   | Alpha  | Rules, game settings, commands, and other stream details.                              | `info/index.html`         |
+| [Screen Effects](https://stream.byuwur.co/effects/)            | Alpha  | Rain, snow, confetti, and floating symbols.                                            | `effects/index.html`      |
+| [Camera HUD](https://stream.byuwur.co/hud/)                    | Alpha  | Recording indicator, timecode, and camera styling.                                     | `hud/index.html`          |
+| [Progress Timeline](https://stream.byuwur.co/timeline/)        | Alpha  | Progress from a starting time to an ending time.                                       | `timeline/index.html`     |
+| [Randomizer](https://stream.byuwur.co/randomizer/)             | Alpha  | Seeded draws for challenges, games, and choices.                                       | `randomizer/index.html`   |
+| [Quote Display](https://stream.byuwur.co/quotes/)              | Alpha  | Rotating quotes, tips, and trivia.                                                     | `quotes/index.html`       |
+| [Keyboard Shortcut Sheet](https://stream.byuwur.co/shortcuts/) | Alpha  | Editable shortcut guide without keyboard monitoring.                                   | `shortcuts/index.html`    |
 
 Open a tool, adjust its fields, check the preview, then **Copy URL** into an OBS **Browser** source with **Local file** unchecked. Use **1920 × 1080** for Main; size Controller/Popup to your layout.
 
@@ -134,7 +163,9 @@ Current URLs use percentages for opacity, deadzone, and scale: `100` means 100%,
 
 ![Controller preview](controller/prev.jpg)
 
-[Example: Player 1, Xbox One](https://byuwur.github.io/stream.html/controller/?player=1&skin=xone)
+<!-- [Example: Player 1, Xbox One](https://byuwur.github.io/stream.html/controller/?player=1&skin=xone) -->
+
+[Example: Player 1, Xbox One](https://stream.byuwur.co/controller/?player=1&skin=xone)
 
 | Parameter | Meaning |
 | --- | --- |
@@ -214,7 +245,9 @@ Invalid JSON/platforms retain the two byUwUr default accounts; blank handles kee
 
 ![Main scene preview](main/prev.jpg)
 
-[Example: Starting soon](https://byuwur.github.io/stream.html/main/?sceneTitle=Starting+soon&tagline=Your+channel&countdownTime=5&displayBranding=no&displaySocial=no)
+<!-- [Example: Starting soon](https://byuwur.github.io/stream.html/main/?sceneTitle=Starting+soon&tagline=Your+channel&countdownTime=5&displayBranding=no&displaySocial=no) -->
+
+[Example: Starting soon](https://stream.byuwur.co/main/?sceneTitle=Starting+soon&tagline=Your+channel&countdownTime=5&displayBranding=no&displaySocial=no)
 
 | Parameter | Meaning |
 | --- | --- |

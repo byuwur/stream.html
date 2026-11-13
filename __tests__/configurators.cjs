@@ -1152,3 +1152,40 @@ test("universal image inputs", async (t) => {
     await browser.close();
   }
 });
+
+test("platform assets and navigation follow both hosting roots", async (t) => {
+  const assets = await loadAssets(editorAssets);
+  const browser = await chromium.launch(launchOptions);
+  try {
+    for (const base of ["https://stream.byuwur.co/", "https://byuwur.github.io/stream.html/"]) {
+      await t.test(base, async () => {
+        const page = await browser.newPage();
+        try {
+          await serve(page, assets, false, base);
+          const controller = new URL("controller/", base).href;
+          await page.goto(base);
+          await page.locator('a[href="' + controller + '"]').click();
+          await page.locator("form[data-configurator] [name]").first().waitFor();
+          assert.equal(page.url(), controller);
+          assert.equal(await page.locator('link[rel="icon"]').getAttribute("href"), "../stream.html.png");
+          assert.equal(await page.locator('link[rel="canonical"]').getAttribute("href"), "https://stream.byuwur.co/controller/");
+          const logo = page.locator(".home-link img");
+          assert.equal(await logo.getAttribute("src"), new URL("stream.html.png", base).href);
+          await logo.evaluate(image => image.decode());
+          assert.equal(await page.locator(".home-link").getAttribute("href"), base);
+          assert.equal(new URL(await page.locator("#overlay-url").inputValue()).pathname, new URL(controller).pathname);
+          await page.locator("#tool-picker").selectOption("clock");
+          await page.waitForURL(new URL("clock/", base).href);
+          await page.locator("form[data-configurator] [name]").first().waitFor();
+          await page.locator(".home-link").click();
+          await page.waitForURL(base);
+          await page.locator('a[href="' + controller + '"]').waitFor();
+        } finally {
+          await page.close();
+        }
+      });
+    }
+  } finally {
+    await browser.close();
+  }
+});

@@ -60,17 +60,20 @@ function standaloneHTML(html) {
  * @param {import("playwright").Page} page Page whose requests belong to this fixture.
  * @param {Map<string, Object>} assets CDN URLs mapped to Playwright fulfillment options.
  * @param {boolean} [standalone=false] Strip configurator imports from served resource pages.
+ * @param {string} [baseURL="https://stream.test/"] Hosted project root, including its optional path prefix.
  * @returns {Promise<void>} Resolves after the route handler is registered.
  */
-async function serve(page, assets, standalone = false) {
+async function serve(page, assets, standalone = false, baseURL = "https://stream.test/") {
+  const base = new URL(baseURL);
   await page.route("**/*", async (route) => {
     const url = new URL(route.request().url());
     if (assets.has(url.href)) return route.fulfill(assets.get(url.href));
     if (url.protocol === "file:") return route.continue();
-    if (url.origin !== "https://stream.test") return route.abort();
+    if (url.origin !== base.origin) return route.abort();
+    if (!url.pathname.startsWith(base.pathname)) return route.fulfill({ status: 404, body: "Not found" });
     let file, body;
     try {
-      const pathname = decodeURIComponent(url.pathname).replaceAll("\\", "/");
+      const pathname = decodeURIComponent(url.pathname.slice(base.pathname.length - 1)).replaceAll("\\", "/");
       if (pathname.includes("\0")) return route.fulfill({ status: 400, body: "Invalid path" });
       file = path.resolve(root, `.${pathname}`, pathname.endsWith("/") ? "index.html" : "");
       const relative = path.relative(root, file);

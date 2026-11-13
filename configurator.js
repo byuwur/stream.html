@@ -598,7 +598,8 @@
             <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
               <div class="d-flex align-items-center gap-2">
                 <a class="home-link flex-shrink-0" href="./" aria-label="stream.html home">
-                  <img src="https://byuwur.github.io/stream.html/stream.html.png" alt="" />
+                  <!-- <img src="https://byuwur.github.io/stream.html/stream.html.png" alt="" /> -->
+                  <img src="${new URL("stream.html.png", root).href}" alt="" />
                 </a>
                 <div class="tool-switcher position-relative flex-shrink-0 me-2" data-tool="template">
                   <select id="tool-picker" class="form-select rounded-0" aria-label="Choose a tool" aria-keyshortcuts="Alt+Shift+M"></select>
