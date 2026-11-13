@@ -193,6 +193,54 @@ body {
   min-height: 0;
   resize: none;
 }
+.bywr-configurator .image-input {
+  min-width: 0;
+  width: 100%;
+}
+.bywr-configurator .image-input .image-url {
+  min-width: 0;
+  width: 100%;
+  border-radius: 0.375rem 0.375rem 0 0;
+}
+.bywr-configurator .image-input:has(.image-actions:not([hidden])) .image-url {
+  border-bottom-width: 0;
+}
+.bywr-configurator .image-actions > :is(select, button) {
+  flex: 0 0 50%;
+  width: 50%;
+  min-width: 0;
+  padding: 0.375rem 0.75rem;
+  font: inherit;
+  font-size: 1rem;
+  line-height: 1.5;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.bywr-configurator .image-actions > .image-provider {
+  padding-right: 2rem;
+  border-right: 0;
+  border-radius: 0 0 0 0.375rem;
+}
+.bywr-configurator .image-actions > .image-browse {
+  border-radius: 0 0 0.375rem 0;
+}
+.bywr-configurator .image-input :is(input, select, button):focus {
+  position: relative;
+  z-index: 1;
+}
+.bywr-configurator .image-input :is(select, button):focus-visible {
+  box-shadow: 0 0 0 0.2rem color-mix(in srgb, var(--primary-foreground) 25%, transparent);
+}
+.bywr-configurator .image-dragging {
+  outline: 0.125rem solid var(--primary-foreground);
+  outline-offset: 0.125rem;
+}
+.bywr-configurator .image-status {
+  display: block;
+  margin-top: 0.25rem;
+  overflow-wrap: anywhere;
+}
 .bywr-configurator .entry-row .stream-select2 {
   flex: 1 1 0;
   width: 0 !important;

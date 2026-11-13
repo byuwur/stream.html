@@ -28,13 +28,14 @@ document.addEventListener("DOMContentLoaded", async () => {
         maxlength: 160
       },
       logoUrl: {
+        image: true,
         type: "url",
         default: "https://byuwur.github.io/img/logo.png",
         label: "Logo URL",
         section: "Content & behavior",
         when: ["kind", "logo"],
-        description: "Public HTTP(S) image, relative path, or downloaded file URL. No uploads.",
-        maxlength: 1000
+        description: "Image URL, relative path, or small PNG/JPEG/WebP/GIF data URI.",
+        maxlength: 65536
       },
       fontFamily: {
         type: "font",

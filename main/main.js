@@ -94,13 +94,14 @@ document.addEventListener("DOMContentLoaded", async () => {
         icon: "fa-list"
       },
       backgroundUrl: {
+        image: (values) => values.backgroundType === "image",
         type: "text",
         default: "https://byuwur.github.io/img/logo.png",
         label: "Background URL or relative path",
         when: ["displayBackground", "yes"],
         section: "Background",
-        description: "Public media URL or relative file path. Does not upload a file.",
-        maxlength: 160,
+        description: "Image or video URL or relative path. Image uploads are available in Image mode.",
+        maxlength: 65536,
         icon: "fa-pen"
       },
       backgroundColor: {
@@ -156,13 +157,14 @@ document.addEventListener("DOMContentLoaded", async () => {
         icon: "fa-list"
       },
       logoUrl: {
+        image: true,
         type: "text",
         default: "https://byuwur.github.io/img/logo.png",
         label: "Logo URL or relative image path",
         section: "Branding",
         when: ["displayBranding", "yes"],
         description: "Image URL or relative path. Clearing restores the default logo URL.",
-        maxlength: 160,
+        maxlength: 65536,
         icon: "fa-pen"
       },
       logoScale: {

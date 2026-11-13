@@ -572,6 +572,8 @@
     let jsonEdited = false;
     let previewURL = "";
     const jsonInput = $("#settings-json")[0];
+    const imageInputs = new Map();
+    const imageOptions = { base64MaxBytes: 16384, ...byConfigurator.imageOptions };
 
     // ==========
     // ==== GENERATED FORM ====
@@ -842,8 +844,10 @@
           }
           container = subsections.get(key);
         }
-        const label = $(/* HTML */ `<label class="config-field form-label d-flex flex-column gap-1 w-100 mb-3"></label>`).appendTo(container);
-        const caption = $(/* HTML */ `<span class="field-caption small"></span>`)
+        const label = $(field.image ? /* HTML */ `<div class="config-field form-label d-flex flex-column gap-1 w-100 mb-3"></div>` : /* HTML */ `<label class="config-field form-label d-flex flex-column gap-1 w-100 mb-3"></label>`).appendTo(
+          container
+        );
+        const caption = $(field.image ? /* HTML */ `<label class="field-caption small"></label>` : /* HTML */ `<span class="field-caption small"></span>`)
           .text(field.label || name)
           .appendTo(label);
         caption.prepend(
@@ -873,6 +877,7 @@
         control.attr({ name, id: field.id || `field-${name}`, "data-title": field.label, "data-description": field.description || "" });
         for (const key of ["min", "max", "maxlength", "placeholder"]) if (field[key] !== undefined && field[key] !== Infinity) control.attr(key, field[key]);
         if (field.optional && !field.placeholder) control.attr("placeholder", field.default === "" ? "Off" : String(field.default));
+        if (field.image) caption.attr("for", control.attr("id"));
         control.appendTo(label);
         if (field.type === "switch") caption.add(control).wrapAll(/* HTML */ `<span class="d-flex align-items-center justify-content-between gap-3"></span>`);
         if (field.description) $(/* HTML */ `<small class="text-body-secondary"></small>`).text(field.description).appendTo(label);
@@ -1244,6 +1249,296 @@
     }
 
     // ==========
+    // ==== SHARED IMAGE INPUTS ====
+    // ==========
+
+    // A secure same-origin integration owns GoFile's Premium token and both API calls.
+    // The static editor never makes anonymous uploads that only return sharing pages.
+    function gofileEndpoint() {
+      if (!imageOptions.gofileUploadURL) return null;
+      try {
+        const url = new URL(imageOptions.gofileUploadURL, location.href);
+        return url.protocol === "https:" && url.origin === location.origin && !url.username && !url.password ? url.href : null;
+      } catch {
+        return null;
+      }
+    }
+
+    function imageValueAllowed(value) {
+      if (!/^data:/i.test(value)) return true;
+      const encoded = value.slice(value.indexOf(",") + 1);
+      const bytes = (encoded.length * 3) / 4 - (encoded.endsWith("==") ? 2 : encoded.endsWith("=") ? 1 : 0);
+      return byStream.safeImage(value) && bytes <= imageOptions.base64MaxBytes;
+    }
+
+    /**
+     * Replace one field's feedback and timer together; inactive feedback occupies no space.
+     * @param {jQuery} status Field-local live region.
+     * @param {string} state loading, success, error, or empty to dismiss.
+     * @param {string} [message=""] Plain feedback text, never server HTML.
+     * @returns {void}
+     */
+    function setImageStatus(status, state, message = "") {
+      clearTimeout(status.data("dismissTimer"));
+      status.removeData("dismissTimer").empty().prop("hidden", !state).removeClass("text-success text-danger text-body-secondary");
+      status.attr({ role: state === "error" ? "alert" : "status", "aria-live": state === "error" ? "assertive" : "polite" });
+      if (!state) return;
+      const icon = state === "loading" ? "fa-spinner fa-spin" : state === "success" ? "fa-check" : "fa-triangle-exclamation";
+      status.addClass(state === "error" ? "text-danger" : state === "success" ? "text-success" : "text-body-secondary");
+      status.append($(/* HTML */ `<i aria-hidden="true"></i>`).addClass(`fa-solid ${icon} me-1`), document.createTextNode(message));
+      if (state !== "loading")
+        status.data(
+          "dismissTimer",
+          setTimeout(() => setImageStatus(status, ""), state === "success" ? 5000 : 10000)
+        );
+    }
+
+    function cancelImageInputs() {
+      imageInputs.forEach((widget) => widget.cancel());
+    }
+
+    /**
+     * Enhance the original image value with providers, native browsing, drop handling, and feedback.
+     * Each field owns one abortable operation; only its latest completion may write native events.
+     * @param {HTMLInputElement} input Original named control or entry-row data field.
+     * @param {function(): boolean} [enabled] Whether the current media configuration accepts images.
+     * @returns {void}
+     */
+    function initImageInput(input, enabled = () => true) {
+      if (imageInputs.has(input)) return;
+      const jqInput = $(input);
+      jqInput.removeClass("rounded-0").addClass("image-url").wrap(/* HTML */ `<div class="image-input" role="group"></div>`);
+      const component = jqInput.parent();
+      const title = input.getAttribute("aria-label") || input.dataset.title || "Image";
+      component.attr("aria-label", title);
+      const actions = $(/* HTML */ `<div class="image-actions d-flex"></div>`).appendTo(component);
+      const provider = $(/* HTML */ `<select class="image-provider form-select bg-body-secondary border-secondary-subtle"></select>`).attr("aria-label", `${title} provider`).appendTo(actions);
+      for (const [value, text] of [
+        ["manual", "Manual"],
+        ["catbox", "Catbox.moe"],
+        ["gofile", "Gofile.io"],
+        ["base64", "Base64"]
+      ])
+        provider.append(new Option(text, value));
+      const browse = $(/* HTML */ `<button type="button" class="image-browse btn bg-body-secondary text-body border border-secondary-subtle"><i class="fa-solid fa-folder-open me-1" aria-hidden="true"></i>Browse…</button>`)
+        .attr("aria-label", `Browse ${title}`)
+        .appendTo(actions);
+      const picker = $(/* HTML */ `<input type="file" accept="image/png,image/jpeg,image/webp,image/gif" hidden />`).appendTo(component);
+      const status = $(/* HTML */ `<small class="image-status" role="status" aria-live="polite" aria-atomic="true" hidden></small>`).appendTo(component);
+      let revision = 0;
+      let controller;
+      let requestTimer;
+      let applying = false;
+      let destroyed = false;
+      const available = () => !destroyed && input.isConnected && !input.disabled && enabled();
+      function cancel() {
+        revision++;
+        clearTimeout(requestTimer);
+        controller?.abort();
+        controller = null;
+        component.removeAttr("aria-busy").removeClass("image-dragging");
+        setImageStatus(status, "");
+      }
+      function sync() {
+        const active = available();
+        actions.prop("hidden", !active);
+        provider.add(browse).prop("disabled", !active);
+        if (!active) cancel();
+      }
+      function destroy() {
+        cancel();
+        destroyed = true;
+        imageInputs.delete(input);
+        jqInput.off(".imageInput");
+        component.off(".imageInput");
+      }
+      imageInputs.set(input, { cancel, sync, destroy });
+
+      // Adapters receive the original file and share cancellation, validation, and application.
+      const providers = {
+        async catbox(file, signal) {
+          const body = new FormData();
+          body.append("reqtype", "fileupload");
+          body.append("fileToUpload", file);
+          const response = await fetch("https://catbox.moe/user/api.php", { method: "POST", body, signal, credentials: "omit" });
+          if (!response.ok) throw new Error(response.status === 413 ? "File exceeds the size limit." : `Catbox returned HTTP ${response.status}.`);
+          const value = (await response.text()).trim();
+          let url;
+          try {
+            url = new URL(value);
+          } catch {
+            throw new Error("Invalid server response.");
+          }
+          if (url.protocol !== "https:" || url.hostname !== "files.catbox.moe" || !/\.(png|jpe?g|webp|gif)$/i.test(url.pathname) || url.search || url.hash || url.username || url.password) throw new Error("Invalid server response.");
+          return url.href;
+        },
+        async gofile(file, signal) {
+          const endpoint = gofileEndpoint();
+          if (!endpoint) throw new Error("Direct image links require GoFile Premium and a secure integration. Try Catbox instead.");
+          const body = new FormData();
+          body.append("file", file);
+          const response = await fetch(endpoint, { method: "POST", body, signal, credentials: "same-origin" });
+          if (!response.ok) throw new Error(response.status === 413 ? "File exceeds the size limit." : `GoFile integration returned HTTP ${response.status}.`);
+          const result = await response.json();
+          if (result.status === "error-notPremium") throw new Error("Direct image links require GoFile Premium.");
+          const data = result.data;
+          if (result.status !== "ok" || !data || typeof data.directLink !== "string") throw new Error("Invalid server response: a public direct image link is required.");
+          let url;
+          try {
+            url = new URL(data.directLink);
+          } catch {
+            throw new Error("Invalid server response.");
+          }
+          if (
+            url.protocol !== "https:" ||
+            !url.hostname.endsWith(".gofile.io") ||
+            !url.pathname.startsWith("/download/direct/") ||
+            url.search ||
+            url.hash ||
+            url.username ||
+            url.password ||
+            (data.expireTime !== undefined && data.expireTime !== 4102444800) ||
+            ["sourceIpsAllowed", "domainsAllowed", "domainsBlocked", "auth"].some((key) => data[key] !== undefined && (!Array.isArray(data[key]) || data[key].length))
+          )
+            throw new Error("GoFile must return an unrestricted, permanent direct image link.");
+          return url.href;
+        },
+        base64(file, signal) {
+          return new Promise((resolve, reject) => {
+            if (signal.aborted) return reject(new DOMException("Canceled", "AbortError"));
+            const reader = new FileReader();
+            const abort = () => reader.abort();
+            signal.addEventListener("abort", abort, { once: true });
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = () => reject(new Error("Unable to read the image."));
+            reader.onabort = () => reject(new DOMException("Canceled", "AbortError"));
+            reader.onloadend = () => signal.removeEventListener("abort", abort);
+            reader.readAsDataURL(file);
+          });
+        }
+      };
+
+      // Loading the image rejects HTML, corrupt files, and non-renderable URLs before application.
+      function checkImage(value, signal) {
+        return new Promise((resolve, reject) => {
+          const image = new Image();
+          const finish = (error) => {
+            image.onload = image.onerror = null;
+            signal.removeEventListener("abort", abort);
+            image.removeAttribute("src");
+            error ? reject(error) : resolve();
+          };
+          const abort = () => finish(new DOMException("Canceled", "AbortError"));
+          image.onload = () => finish();
+          image.onerror = () => finish(new Error("The returned image could not be loaded. Check network or CORS access."));
+          image.crossOrigin = "anonymous";
+          image.referrerPolicy = "no-referrer";
+          signal.addEventListener("abort", abort, { once: true });
+          if (signal.aborted) return abort();
+          image.src = value;
+        });
+      }
+
+      async function processFile(file) {
+        if (!file || !available()) return;
+        cancel();
+        if (provider.val() === "manual") provider.val("catbox");
+        let selected = provider.val();
+        const operation = revision;
+        const current = () => operation === revision && available();
+        controller = new AbortController();
+        const operationController = controller;
+        const { signal } = operationController;
+        const timeout = (requestTimer = setTimeout(() => operationController.abort(), 60000));
+        setImageStatus(status, "loading", selected === "base64" ? "Converting image to Base64…" : `Uploading to ${selected === "catbox" ? "Catbox" : "GoFile"}…`);
+        component.attr("aria-busy", "true");
+        try {
+          if (!file.size) throw new Error("The image file is empty.");
+          if (selected === "base64" && file.size > imageOptions.base64MaxBytes) throw new Error("Image is too large to embed. Try Catbox instead.");
+          if (selected !== "base64" && file.size > 200000000) throw new Error("File exceeds the size limit.");
+          const mime = byStream.imageType(new Uint8Array(await file.slice(0, 12).arrayBuffer()));
+          if (!current()) return;
+          if (!mime || (file.type && file.type !== mime)) throw new Error("Unsupported image format. Use PNG, JPEG, WebP, or GIF.");
+          // A missing MIME type is safe after signature detection; wrapping leaves every byte intact.
+          const imageFile = file.type ? file : new File([file], file.name, { type: mime });
+          let value;
+          try {
+            value = await providers[selected](imageFile, signal);
+          } catch (error) {
+            if (!current() || signal.aborted || selected !== "catbox") throw error;
+            if (!gofileEndpoint()) throw new Error(`${uploadError(error)} GoFile fallback requires Premium and a secure integration.`);
+            setImageStatus(status, "loading", "Catbox failed. Trying GoFile…");
+            try {
+              value = await providers.gofile(imageFile, signal);
+              selected = "gofile";
+            } catch (fallbackError) {
+              throw new Error(`Catbox: ${uploadError(error)} GoFile fallback: ${uploadError(fallbackError)}`);
+            }
+          }
+          if (!current()) return;
+          if (!byStream.safeImage(value) || !imageValueAllowed(value) || (input.maxLength >= 0 && value.length > input.maxLength)) throw new Error("Invalid or oversized image value.");
+          await checkImage(value, signal);
+          if (!current()) return;
+          applying = true;
+          try {
+            input.value = value;
+            provider.val(selected);
+            input.dispatchEvent(new Event("input", { bubbles: true }));
+            input.dispatchEvent(new Event("change", { bubbles: true }));
+          } finally {
+            applying = false;
+          }
+          if (current()) setImageStatus(status, "success", selected === "base64" ? "Image embedded as Base64." : "Image uploaded. URL applied.");
+        } catch (error) {
+          if (current()) setImageStatus(status, "error", `${selected === "base64" ? "Conversion" : "Upload"} failed: ${signal.aborted ? "Request timed out. Try again." : uploadError(error)}`);
+        } finally {
+          clearTimeout(timeout);
+          if (current()) {
+            controller = null;
+            component.removeAttr("aria-busy");
+          }
+        }
+      }
+      function uploadError(error) {
+        if (error instanceof TypeError) return "Network request failed. Check connectivity or browser CORS restrictions.";
+        if (error instanceof SyntaxError || !error.message) return "Invalid server response.";
+        return error.message;
+      }
+      jqInput.on("input.imageInput change.imageInput", () => {
+        if (applying) return;
+        cancel();
+        provider.val("manual");
+      });
+      provider.on("input change", (event) => {
+        event.stopPropagation();
+        cancel();
+      });
+      browse.on("click", () => {
+        picker.val("");
+        picker[0].click();
+      });
+      picker.on("input change", (event) => {
+        event.stopPropagation();
+        if (event.type === "change") processFile(picker[0].files[0]);
+      });
+      component
+        .on("dragenter.imageInput dragover.imageInput", (event) => {
+          event.preventDefault();
+          if (available()) component.addClass("image-dragging");
+        })
+        .on("dragleave.imageInput", (event) => {
+          if (!component[0].contains(event.relatedTarget)) component.removeClass("image-dragging");
+        })
+        .on("drop.imageInput", (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          component.removeClass("image-dragging");
+          processFile(event.originalEvent.dataTransfer?.files[0]);
+        });
+      sync();
+    }
+
+    // ==========
     // ==== ORDERED LIST AND MAP EDITORS ====
     // ==========
 
@@ -1333,10 +1628,10 @@
         textFields.forEach(([key, title, type = "text"], index) => {
           const value = map ? entry[choices ? 1 : index] : strings ? entry : entry[key];
           const input = $(type === "textarea" ? "<textarea></textarea>" : "<input />", {
-            type: type === "textarea" ? undefined : type,
+            type: type === "textarea" ? undefined : type === "image" ? "text" : type,
             rows: type === "textarea" ? 3 : undefined,
             step: type === "datetime-local" ? "1" : undefined,
-            maxlength: 160,
+            maxlength: type === "image" ? 65536 : 160,
             "data-field": key,
             "aria-label": title,
             placeholder: title,
@@ -1344,6 +1639,11 @@
           })
             .val(type === "datetime-local" ? localTimestamp(value) : value)
             .appendTo(jqRow);
+          if (type === "image") {
+            initImageInput(input[0]);
+            input.parent().addClass("mb-1");
+            return;
+          }
           input.wrap(/* HTML */ `<span class="input-group mb-1"></span>`);
           $(/* HTML */ `<span class="input-group-text"></span>`)
             .append(
@@ -1354,6 +1654,7 @@
             .insertBefore(input);
         });
         jqRow.appendTo(jqEditor);
+        jqRow.find(".image-url").each((_, input) => imageInputs.get(input)?.sync());
         if (choiceKey === "platform") {
           initSelect2(jqSelect, { templateResult: platformOption, templateSelection: platformOption });
         } else if (choices) initSelect2(jqSelect);
@@ -1376,13 +1677,13 @@
             return [
               ...(choices ? [jqRow.find("select").val()] : []),
               ...jqRow
-                .find("input, textarea")
+                .find("[data-field]")
                 .get()
                 .map((input) => input.value)
             ];
-          if (strings) return jqRow.find("input, textarea").val();
+          if (strings) return jqRow.find("[data-field]").val();
           const entry = choices ? { [choiceKey]: jqRow.find("select").val() } : {};
-          jqRow.find("input, textarea").each(function () {
+          jqRow.find("[data-field]").each(function () {
             const jqInput = $(this);
             const value = jqInput.val();
             entry[jqInput.data("field")] = jqInput.is('[type="datetime-local"]') && value ? utcTimestamp(value) : value;
@@ -1392,10 +1693,10 @@
         // Repeated platform rows are valid arrays; duplicate map keys would silently erase earlier rows.
         const duplicate = map && new Set(values.map(([key]) => key)).size !== values.length;
         jqOutput.val(duplicate ? "" : JSON.stringify(map ? Object.fromEntries(values) : values));
-        jqRows.find("input, textarea").each(function () {
-          this.setCustomValidity("");
+        jqRows.find("[data-field]").each(function () {
+          this.setCustomValidity(!this.classList.contains("image-url") || imageValueAllowed(this.value) ? "" : "Image is too large to embed. Try Catbox instead.");
         });
-        jqRows.find("input, textarea")[0]?.setCustomValidity(duplicate ? "Use a different key for each row." : byStream.validParameter(parameterRules, name, jqOutput.val()) ? "" : "Invalid list. Check the entries or remove rows.");
+        jqRows.find("[data-field]")[0]?.setCustomValidity(duplicate ? "Use a different key for each row." : byStream.validParameter(parameterRules, name, jqOutput.val()) ? "" : "Invalid list. Check the entries or remove rows.");
         jqAdd.prop("disabled", jqRows.length >= limit);
       }
       // Release row widgets before rebuilding, retaining the opening values for native Reset.
@@ -1405,6 +1706,7 @@
         jqEditor.find("select").each(function () {
           if ($(this).data("select2")) $(this).off(".streamMotion").select2("close").select2("destroy");
         });
+        jqEditor.find(".image-url").each((_, input) => imageInputs.get(input)?.destroy());
         jqEditor.empty();
         (map ? Object.entries(entries) : entries).forEach(addRow);
         sync();
@@ -1414,6 +1716,7 @@
         const jqRow = $(this).closest(".entry-row");
         const action = $(this).data("action");
         if (action === "remove") {
+          jqRow.find(".image-url").each((_, input) => imageInputs.get(input)?.destroy());
           jqRow.find("input, textarea, select, button").prop("disabled", true);
           setVisible(jqRow, false).then((finished) => {
             if (!finished) return;
@@ -2381,6 +2684,7 @@
         const wrapper = $(input).closest(".conditional-field");
         changes.push([wrapper, !input.disabled]);
       }
+      imageInputs.forEach((widget) => widget.sync());
       // Hide empty headings too, so disabled descendants do not leave blank groups in the form.
       jqForm.find(".field-subsection, [data-config-section]").each((_, container) => {
         const empty = !$(container)
@@ -2430,7 +2734,11 @@
         return true;
       }
       const jqField = $(field);
-      const valid = byStream.validParameter(parameterRules, field.name, jqField.val() ?? "");
+      const rule = parameterRules[field.name];
+      let valid = byStream.validParameter(parameterRules, field.name, jqField.val() ?? "");
+      if (valid && rule.image) valid = imageValueAllowed(field.value);
+      const imageKeys = rule.entries?.textFields.filter(([, , type]) => type === "image").map(([key]) => key);
+      if (valid && imageKeys?.length) valid = JSON.parse(field.value).every((entry) => imageKeys.every((key) => imageValueAllowed(entry[key])));
       field.setCustomValidity(valid ? "" : "Enter a valid value for this setting.");
       // Hidden controls are excluded from native validation, including the account JSON.
       const accepted = field.checkValidity() && valid;
@@ -2480,6 +2788,7 @@
      * @returns {void}
      */
     function loadSettings(values) {
+      cancelImageInputs();
       resource.normalizeParameters?.(values);
       const loaded = { ...resource.constants, ...Object.fromEntries(Object.entries(parameterRules).map(([name, field]) => [name, structuredClone(field.default)])) };
       byStream.applyParameters(parameterRules, loaded, values);
@@ -2512,6 +2821,27 @@
           });
         if (["timezone", "timezones", "locale"].includes(field.type)) initRegionalField(name);
       }
+      for (const input of fields) {
+        const rule = parameterRules[input.name];
+        if (rule.image)
+          initImageInput(input, () =>
+            typeof rule.image === "function" ? rule.image(Object.fromEntries(fields.map((field) => [field.name, field.type === "checkbox" ? (field.checked ? field.value : field.dataset.uncheckedValue) : field.value]))) : true
+          );
+      }
+      const imageObserver = new MutationObserver(() => {
+        imageInputs.forEach((widget, input) => {
+          if (!input.isConnected) widget.destroy();
+        });
+      });
+      imageObserver.observe(form, { childList: true, subtree: true });
+      global.addEventListener("pagehide", () => {
+        cancelImageInputs();
+        imageObserver.disconnect();
+      });
+      global.addEventListener("pageshow", (event) => {
+        if (event.persisted) imageObserver.observe(form, { childList: true, subtree: true });
+      });
+      jqForm.on("reset", cancelImageInputs);
       if (resource.presets) initAppearancePresets();
       initTimestampFields(Object.keys(resource.fields).filter((name) => resource.fields[name].type === "datetime"));
       $("#accessibility-toggle").on("click", function (event) {
@@ -2526,7 +2856,7 @@
       initFontPickers();
       initHelpDialog(initResourceHelp);
       initColorPickers();
-      jqForm.find("select").each((_, select) => initSelect2(select));
+      jqForm.find("select:not(.image-provider)").each((_, select) => initSelect2(select));
       // View requests also supersede earlier clicks while asynchronous validation is pending.
       let settingsViewGeneration = 0;
       // All editing surfaces share a revision so queued work cannot overwrite a newer draft.
@@ -2587,6 +2917,7 @@
       });
       $(jsonInput)
         .on("input", (event) => {
+          cancelImageInputs();
           jsonEdited = true;
           urlEdited = false;
           setMessage("#json-status", "");
@@ -2657,6 +2988,7 @@
         .on("mouseleave focusout", () => $("#copy-url .copy-label").text("Copy URL"));
       $("#overlay-url")
         .on("input", function (event) {
+          cancelImageInputs();
           urlEdited = true;
           jsonEdited = false;
           urlGeneration++;

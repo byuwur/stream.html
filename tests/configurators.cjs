@@ -9,22 +9,24 @@ const test = require("node:test");
 const { chromium } = require("playwright");
 const { runtimeAssets, launchOptions, loadAssets, resourceNames, serve } = require("./browser.cjs");
 
+const editorAssets = [
+  ...runtimeAssets,
+  "js/jquery.min.js",
+  "js/select2.full.min.js",
+  "js/popper.min.js",
+  "js/bootstrap.min.js",
+  "js/pickr.min.js",
+  "_common.min.js",
+  "css/bootstrap.min.css",
+  "css/select2.min.css",
+  "css/pickr.min.css",
+  "css/animate.min.css",
+  "_common.min.css"
+];
+
 // --- CONFIGURATOR INTEGRATION ---
 test("configurator forms and previews initialize for every resource", async (t) => {
-  const assets = await loadAssets([
-    ...runtimeAssets,
-    "js/jquery.min.js",
-    "js/select2.full.min.js",
-    "js/popper.min.js",
-    "js/bootstrap.min.js",
-    "js/pickr.min.js",
-    "_common.min.js",
-    "css/bootstrap.min.css",
-    "css/select2.min.css",
-    "css/pickr.min.css",
-    "css/animate.min.css",
-    "_common.min.css"
-  ]);
+  const assets = await loadAssets(editorAssets);
   const browser = await chromium.launch(launchOptions);
   try {
     // --- ALL RESOURCE EDITORS ---
@@ -43,6 +45,9 @@ test("configurator forms and previews initialize for every resource", async (t) 
           assert.equal(await page.locator("form[data-configurator]").count(), 1, "Repeated initialization preserves the editor");
           assert.equal(await page.locator('[name="animate"]').isChecked(), true, name + " enables resource animation by default");
           if (["schedule", "info"].includes(name)) assert.equal(await page.locator('[name="widthMode"]').isChecked(), true, name + " fills width by default");
+          const imageFields = { controller: ["guideImage"], main: ["backgroundUrl", "logoUrl"], qr: ["logoUrl"], watermark: ["logoUrl"] }[name] || [];
+          for (const field of imageFields) assert.equal(await page.locator(`[name="${field}"]`).locator("..").locator(".image-provider").count(), 1, `${name} enhances ${field}`);
+          assert.equal(await page.locator(".image-input").count(), imageFields.length + (["lower-thirds", "sponsors"].includes(name) ? 2 : 0));
           const url = new URL(await page.locator("#overlay-url").inputValue());
           assert.equal(url.hash, "");
           assert.equal(url.pathname, `/${name}/`);
@@ -702,6 +707,445 @@ test("configurator forms and previews initialize for every resource", async (t) 
         assert.equal(new URL(await page.locator("#overlay-url").inputValue()).searchParams.get("text"), "Opening");
       } finally {
         await page.close();
+      }
+    });
+  } finally {
+    await browser.close();
+  }
+});
+
+test("universal image inputs", async (t) => {
+  const assets = await loadAssets(editorAssets);
+  const browser = await chromium.launch(launchOptions);
+  try {
+    async function open(tool = "qr", options = {}) {
+      const page = await browser.newPage();
+      await serve(page, assets);
+      await page.addInitScript((options) => {
+        window.byConfigurator = { imageOptions: options };
+      }, options);
+      const images = await page.evaluate(() => {
+        const canvas = document.createElement("canvas");
+        canvas.width = canvas.height = 2;
+        canvas.getContext("2d").fillRect(0, 0, 2, 2);
+        return Object.fromEntries(["png", "jpeg", "webp"].map((type) => [type, canvas.toDataURL(`image/${type}`).split(",")[1]]));
+      });
+      // Two GIF frames; exact byte comparison below ensures conversion keeps the animation.
+      images.gif = Buffer.from("47494638396101000100800000000000ffffff21ff0b4e45545343415045322e30030100000021f904000a0000002c000000000100010000020244010021f904000a0000002c00000000010001000002024c01003b", "hex").toString("base64");
+      const png = Buffer.from(images.png, "base64");
+      const calls = [];
+      let catbox = { status: 200, body: "https://files.catbox.moe/test.png" };
+      let gofile = { status: "ok", data: { directLink: "https://store.gofile.io/download/direct/test/image.png" } };
+      await page.route("https://catbox.moe/user/api.php", (route) => {
+        calls.push({ provider: "catbox", body: route.request().postDataBuffer().toString("latin1"), headers: route.request().headers() });
+        return catbox.abort ? route.abort("failed") : route.fulfill({ ...catbox, contentType: "text/plain" });
+      });
+      await page.route("https://stream.test/image-upload", (route) => {
+        calls.push({ provider: "gofile", body: route.request().postDataBuffer().toString("latin1") });
+        return route.fulfill({ json: gofile });
+      });
+      await page.route(/https:\/\/(?:files\.catbox\.moe|store\.gofile\.io)\/.*/, (route) => route.fulfill({ body: png, contentType: "image/png", headers: { "access-control-allow-origin": "*" } }));
+      await page.goto(`https://stream.test/${tool}/?${tool === "main" ? "displayBackground=yes&" : ""}#configure`);
+      await page.waitForFunction(() => document.getElementById("overlay-url")?.value);
+      const input = page.locator(".image-url").first();
+      const component = input.locator("..");
+      return {
+        page,
+        images,
+        calls,
+        input,
+        component,
+        provider: component.locator(".image-provider"),
+        picker: component.locator('input[type="file"]'),
+        status: component.locator(".image-status"),
+        file: (type = "png", buffer = Buffer.from(images[type], "base64")) => ({ name: `image.${type}`, mimeType: `image/${type}`, buffer }),
+        catbox: (response) => {
+          catbox = response;
+        },
+        gofile: (response) => {
+          gofile = response;
+        }
+      };
+    }
+    async function drop(component, file) {
+      await component.evaluate(
+        (element, file) => {
+          const dataTransfer = new DataTransfer();
+          dataTransfer.items.add(new File([Uint8Array.from(atob(file.base64), (c) => c.charCodeAt(0))], file.name, { type: file.type }));
+          const event = new DragEvent("drop", { bubbles: true, cancelable: true, dataTransfer });
+          element.dispatchEvent(event);
+          if (!event.defaultPrevented) throw new Error("Drop must prevent browser navigation");
+        },
+        { base64: file.buffer.toString("base64"), name: file.name, type: file.mimeType }
+      );
+    }
+    async function success(fixture) {
+      await fixture.page.waitForFunction(() => document.querySelector(".image-status.text-success:not([hidden])"));
+    }
+    async function failure(fixture, text) {
+      await fixture.status.filter({ hasText: text }).and(fixture.page.locator(".text-danger")).waitFor({ state: "visible" });
+      assert.equal(await fixture.status.getAttribute("role"), "alert");
+    }
+
+    await t.test("connected layout, keyboard browsing, cancellation, manual edits, and native updates", async () => {
+      const f = await open();
+      const { page } = f;
+      try {
+        await page.setViewportSize({ width: 360, height: 800 });
+        const value = await f.input.inputValue();
+        assert.equal(await f.provider.inputValue(), "manual");
+        await f.provider.selectOption("base64");
+        assert.equal(await f.input.inputValue(), value);
+        assert.equal(await f.status.isVisible(), false);
+        await f.input.focus();
+        await page.keyboard.press("Tab");
+        assert.equal(await f.provider.evaluate((element) => document.activeElement === element), true);
+        await page.keyboard.press("Tab");
+        const browse = f.component.locator(".image-browse");
+        assert.equal(await browse.evaluate((element) => document.activeElement === element), true);
+        const chooser = page.waitForEvent("filechooser");
+        await browse.press("Enter");
+        await (await chooser).setFiles([]);
+        assert.equal(await f.provider.inputValue(), "base64");
+        assert.equal(await f.input.inputValue(), value);
+        await browse.focus();
+        await page.waitForFunction(() => getComputedStyle(document.querySelector(".image-browse")).boxShadow !== "none");
+        const layout = await f.component.evaluate((element) => {
+          const input = element.querySelector(".image-url");
+          const select = element.querySelector("select");
+          const button = element.querySelector("button");
+          const a = input.getBoundingClientRect(),
+            b = select.getBoundingClientRect(),
+            c = button.getBoundingClientRect();
+          return {
+            connected: Math.abs(a.bottom - b.top) < 1 && Math.abs(b.right - c.left) < 1,
+            equal: Math.abs(b.width - c.width) < 1,
+            overflow: element.scrollWidth > element.clientWidth,
+            border: getComputedStyle(input).borderBottomWidth,
+            focus: getComputedStyle(button).boxShadow,
+            radius: getComputedStyle(input).borderTopLeftRadius
+          };
+        });
+        assert.equal(layout.connected, true);
+        assert.equal(layout.equal, true);
+        assert.equal(layout.overflow, false);
+        assert.equal(layout.border, "0px");
+        assert.notEqual(layout.focus, "none");
+        assert.notEqual(layout.radius, "0px");
+        await f.provider.selectOption("manual");
+        const chooser2 = page.waitForEvent("filechooser");
+        await browse.click();
+        await (await chooser2).setFiles(f.file());
+        await success(f);
+        assert.equal(await f.provider.inputValue(), "catbox");
+        assert.equal(await f.input.inputValue(), "https://files.catbox.moe/test.png");
+        assert.match(f.calls[0].body, /name="reqtype"\r\n\r\nfileupload/);
+        assert.match(f.calls[0].body, /name="fileToUpload"; filename="image.png"/);
+        assert.ok(f.calls[0].body.includes(f.file().buffer.toString("latin1")), "Original file is uploaded unchanged");
+        assert.equal(f.calls[0].headers.authorization, undefined);
+        assert.equal(f.calls[0].headers.cookie, undefined);
+        await page.waitForFunction(() => new URL(document.getElementById("overlay-url").value).searchParams.get("logoUrl") === "https://files.catbox.moe/test.png");
+        await f.input.fill("https://example.com/manual.png");
+        assert.equal(await f.provider.inputValue(), "manual");
+        assert.equal(await f.status.isVisible(), false);
+        await page.waitForFunction(() => new URL(document.getElementById("overlay-url").value).searchParams.get("logoUrl") === "https://example.com/manual.png");
+        await f.provider.selectOption("base64");
+        await f.input.evaluate((input, value) => {
+          input.value = value;
+          input.dispatchEvent(new InputEvent("input", { bubbles: true, inputType: "insertFromPaste" }));
+        }, `data:image/png;base64,${f.images.png}`);
+        assert.equal(await f.provider.inputValue(), "manual");
+        assert.equal(await f.input.evaluate((input) => byStream.safeImage(input.value)), true);
+      } finally {
+        await page.close();
+      }
+    });
+
+    await t.test("Base64 preserves PNG, JPEG, WebP and animated GIF bytes, round trips, JSON, compression and reset", async () => {
+      const f = await open();
+      const { page } = f;
+      try {
+        for (const type of ["png", "jpeg", "webp", "gif"]) {
+          await f.provider.selectOption("base64");
+          await drop(f.component, f.file(type));
+          const uri = `data:image/${type};base64,${f.images[type]}`;
+          await page.waitForFunction((uri) => document.querySelector(".image-url")?.value === uri, uri);
+          await success(f);
+          assert.equal(await f.input.inputValue(), uri);
+          assert.equal(await f.provider.inputValue(), "base64");
+          await page.waitForFunction((uri) => new URL(document.getElementById("overlay-url").value).searchParams.get("logoUrl") === uri, uri);
+          await page.waitForFunction((uri) => document.getElementById("overlay-preview").contentDocument?.querySelector(".qr-logo")?.getAttribute("src") === uri, uri);
+          assert.equal(await page.frameLocator("#overlay-preview").locator(".qr-logo").getAttribute("src"), uri);
+        }
+        assert.equal(f.calls.length, 0);
+        await page.locator('[data-settings-view="json"]').click();
+        const json = JSON.parse(await page.locator("#settings-json").inputValue());
+        assert.equal(json.logoUrl, await f.input.inputValue());
+        assert.equal(
+          Object.keys(json).some((key) => /provider|upload/i.test(key)),
+          false
+        );
+        json.logoUrl = `data:image/png;base64,${Buffer.concat([Buffer.from(f.images.png, "base64"), Buffer.alloc(1024)]).toString("base64")}`;
+        await page.locator("#settings-json").fill(JSON.stringify(json));
+        await page.waitForFunction((value) => document.querySelector(".image-url").value === value, json.logoUrl);
+        await page.locator('[data-settings-view="form"]').click();
+        assert.equal(await f.provider.isEnabled(), true);
+        assert.equal(await f.component.locator(".image-actions").isHidden(), false);
+        await page.locator("#advanced-options").click();
+        await page.locator("#short-url").check();
+        await page.locator('input[name="compression-scope"][value="all"]').check();
+        await page.waitForFunction(() => !document.getElementById("copy-url").disabled && new URL(document.getElementById("overlay-url").value).searchParams.has("data"));
+        const compressed = await page.locator("#overlay-url").inputValue();
+        await page.keyboard.press("Escape");
+        await page.goto(`${compressed}#configure`);
+        await page.waitForFunction((uri) => document.querySelector(".image-url")?.value === uri, json.logoUrl);
+        await page.locator(".image-url").fill("https://example.com/other.png");
+        await page.locator('[type="reset"][form="overlay-form"]').click();
+        await page.waitForFunction((uri) => document.querySelector(".image-url")?.value === uri, json.logoUrl);
+        assert.equal(await page.locator(".image-status").isVisible(), false);
+        await page.reload();
+        await page.waitForFunction((uri) => document.querySelector(".image-url")?.value === uri, json.logoUrl);
+      } finally {
+        await page.close();
+      }
+    });
+
+    await t.test("format and size limits preserve the existing value and report actual upload failures", async () => {
+      const f = await open();
+      try {
+        const original = await f.input.inputValue();
+        await f.provider.selectOption("base64");
+        await f.picker.setInputFiles(f.file("png", Buffer.alloc(16385)));
+        await failure(f, "Image is too large to embed. Try Catbox instead.");
+        assert.equal(await f.input.inputValue(), original);
+        for (const file of [{ name: "bad.svg", mimeType: "image/svg+xml", buffer: Buffer.from("<svg/>") }, { ...f.file(), mimeType: "video/mp4" }, f.file("png", Buffer.from("not an image"))]) {
+          await f.picker.setInputFiles(file);
+          await failure(f, "Unsupported image format");
+          assert.equal(await f.input.inputValue(), original);
+        }
+        await f.provider.selectOption("catbox");
+        for (const [response, reason] of [
+          [{ status: 503, body: "Unavailable" }, "HTTP 503"],
+          [{ status: 413, body: "Too large" }, "size limit"],
+          [{ abort: true }, "Network request failed"],
+          [{ status: 200, body: "<html>bad response</html>" }, "Invalid server response"],
+          [{ status: 200, body: "https://gofile.io/d/example" }, "Invalid server response"],
+          [{ status: 200, body: "http://files.catbox.moe/image.png" }, "Invalid server response"]
+        ]) {
+          f.catbox(response);
+          await f.picker.setInputFiles(f.file());
+          await failure(f, reason);
+          assert.equal(await f.input.inputValue(), original);
+          assert.match(await f.status.textContent(), /GoFile fallback requires Premium/);
+          assert.equal(await f.status.locator("html").count(), 0);
+        }
+        await f.input.fill(`data:image/png;base64,${Buffer.concat([f.file().buffer, Buffer.alloc(17000)]).toString("base64")}`);
+        await f.page.waitForFunction(() => document.querySelector(".image-url").getAttribute("aria-invalid") === "true");
+        assert.equal(await f.page.locator("#overlay-url").inputValue(), "");
+        await f.input.fill(original);
+        await f.provider.selectOption("gofile");
+        const requests = f.calls.length;
+        await f.picker.setInputFiles(f.file());
+        await failure(f, "Direct image links require GoFile Premium");
+        assert.equal(f.calls.length, requests, "Unavailable GoFile does not upload or create guest content");
+        assert.equal(await f.input.inputValue(), original);
+      } finally {
+        await f.page.close();
+      }
+    });
+
+    await t.test("GoFile integration accepts only permanent public direct images and enables one Catbox fallback", async () => {
+      const f = await open("qr", { gofileUploadURL: "/image-upload" });
+      try {
+        const original = await f.input.inputValue();
+        await f.provider.selectOption("gofile");
+        for (const response of [
+          { status: "error-notPremium" },
+          { status: "ok", data: { downloadPage: "https://gofile.io/d/example" } },
+          { status: "ok", data: { directLink: "https://gofile.io/d/example" } },
+          { status: "ok", data: { directLink: "https://store.gofile.io/download/web/id/image.png" } },
+          ...[{ expireTime: 2000000000 }, { auth: ["secret"] }, { domainsAllowed: ["stream.test"] }, { sourceIpsAllowed: ["127.0.0.1"] }].map((restriction) => ({
+            status: "ok",
+            data: { directLink: "https://store.gofile.io/download/direct/id/image.png", ...restriction }
+          }))
+        ]) {
+          f.gofile(response);
+          await f.picker.setInputFiles(f.file());
+          await failure(f, /GoFile|direct image/);
+          assert.equal(await f.input.inputValue(), original);
+        }
+        f.gofile({ status: "ok", data: { directLink: "https://store.gofile.io/download/direct/id/image.png", expireTime: 4102444800, auth: [] } });
+        await f.picker.setInputFiles(f.file());
+        await success(f);
+        assert.equal(await f.provider.inputValue(), "gofile");
+        assert.equal(await f.input.inputValue(), "https://store.gofile.io/download/direct/id/image.png");
+        f.catbox({ abort: true });
+        await f.provider.selectOption("catbox");
+        const count = f.calls.length;
+        await f.picker.setInputFiles(f.file());
+        await success(f);
+        assert.deepEqual(
+          f.calls.slice(count).map((call) => call.provider),
+          ["catbox", "gofile"]
+        );
+        assert.equal(await f.provider.inputValue(), "gofile");
+        assert.ok(f.calls.at(-1).body.includes(f.file().buffer.toString("latin1")));
+        f.gofile({ status: "error-notPremium" });
+        f.catbox({ status: 503, body: "Unavailable" });
+        await f.provider.selectOption("catbox");
+        const previous = await f.input.inputValue();
+        const failedCount = f.calls.length;
+        await f.picker.setInputFiles(f.file());
+        await failure(f, "Catbox: Catbox returned HTTP 503. GoFile fallback: Direct image links require GoFile Premium.");
+        assert.equal(await f.input.inputValue(), previous);
+        assert.equal(await f.provider.inputValue(), "catbox");
+        assert.deepEqual(
+          f.calls.slice(failedCount).map((call) => call.provider),
+          ["catbox", "gofile"]
+        );
+      } finally {
+        await f.page.close();
+      }
+    });
+
+    await t.test("progress, timed feedback, safe replacement, manual editing, provider changes and reset cancel stale work", async () => {
+      const f = await open();
+      const { page } = f;
+      try {
+        await page.clock.install();
+        await page.clock.pauseAt(await page.evaluate(() => Date.now()));
+        await f.provider.selectOption("base64");
+        await f.picker.setInputFiles(f.file());
+        await success(f);
+        await page.clock.fastForward(4999);
+        assert.equal(await f.status.isVisible(), true);
+        await page.clock.fastForward(1);
+        assert.equal(await f.status.isVisible(), false);
+        await f.picker.setInputFiles(f.file("png", Buffer.alloc(16385)));
+        await failure(f, "too large");
+        await page.clock.fastForward(9999);
+        assert.equal(await f.status.isVisible(), true);
+        await page.clock.fastForward(1);
+        assert.equal(await f.status.isVisible(), false);
+        // This deliberately non-cooperating fetch resolves even after AbortController cancellation.
+        await page.evaluate(() => {
+          const native = window.fetch;
+          window.releases = [];
+          window.fetch = (url, options) => (url === "https://catbox.moe/user/api.php" ? new Promise((resolve) => window.releases.push((value) => resolve(new Response(value)))) : native(url, options));
+        });
+        await f.provider.selectOption("catbox");
+        for (const action of ["manual", "provider", "reset", "replace"]) {
+          const before = await f.input.inputValue();
+          const count = await page.evaluate(() => releases.length);
+          await f.provider.selectOption("catbox");
+          await f.picker.setInputFiles(f.file());
+          await page.waitForFunction((count) => releases.length > count, count);
+          assert.match(await f.status.textContent(), /Uploading to Catbox/);
+          assert.equal(await f.input.inputValue(), before);
+          if (action === "manual") await f.input.fill("https://example.com/newer.png");
+          if (action === "provider") await f.provider.selectOption("base64");
+          if (action === "reset") await page.locator('[type="reset"][form="overlay-form"]').click();
+          if (action === "replace") {
+            await drop(f.component, f.file());
+            await page.waitForFunction((count) => releases.length === count + 2, count);
+            await page.evaluate((index) => releases[index]("https://files.catbox.moe/new.png"), count + 1);
+            await success(f);
+          }
+          const expected = await f.input.inputValue();
+          await page.evaluate((index) => releases[index]("https://files.catbox.moe/stale.png"), count);
+          await page.evaluate(async () => {
+            await Promise.resolve();
+            await Promise.resolve();
+          });
+          assert.equal(await f.input.inputValue(), expected);
+          assert.equal(await f.status.isVisible(), action === "replace");
+        }
+      } finally {
+        await page.close();
+      }
+    });
+
+    await t.test("row images have independent feedback, serialize once, cancel on removal, and mixed video remains editable", async () => {
+      const f = await open("sponsors");
+      try {
+        const rows = f.page.locator(".entry-row");
+        assert.equal(await f.page.locator(".image-input").count(), 2);
+        await rows.first().locator('[data-field="name"]').fill("data:display text");
+        assert.equal(
+          await rows
+            .first()
+            .locator('[data-field="name"]')
+            .evaluate((input) => input.checkValidity()),
+          true,
+          "Image limits do not validate unrelated row text"
+        );
+        await f.provider.selectOption("base64");
+        await f.picker.setInputFiles(f.file());
+        await success(f);
+        assert.equal(await rows.nth(1).locator(".image-status").isVisible(), false);
+        await f.page.waitForFunction((uri) => JSON.parse(document.querySelector('[name="entries"]').value)[0].imageUrl === uri, `data:image/png;base64,${f.images.png}`);
+        const values = JSON.parse(await f.page.locator('[name="entries"]').inputValue());
+        assert.deepEqual(Object.keys(values[0]), ["name", "text", "imageUrl"]);
+        await rows.nth(1).locator(".image-provider").selectOption("base64");
+        await rows
+          .nth(1)
+          .locator('input[type="file"]')
+          .setInputFiles(f.file("png", Buffer.alloc(16385)));
+        assert.equal(await f.status.isVisible(), true);
+        await rows.nth(1).locator(".image-status.text-danger").waitFor();
+        await rows.first().locator('[data-action="remove"]').click();
+        await f.page.waitForFunction(() => document.querySelectorAll(".entry-row").length === 1);
+        assert.equal(await rows.first().locator(".image-status.text-danger").isVisible(), true);
+        await f.page.locator('[type="reset"][form="overlay-form"]').click();
+        await f.page.waitForFunction(() => document.querySelectorAll(".entry-row").length === 2);
+        assert.equal(await f.page.locator(".image-status:not([hidden])").count(), 0);
+        await f.page.locator('[data-settings-view="json"]').click();
+        const imported = { entries: [{ name: "Image", text: "", imageUrl: `data:image/png;base64,${Buffer.concat([f.file().buffer, Buffer.alloc(17000)]).toString("base64")}` }] };
+        await f.page.locator("#settings-json").fill(JSON.stringify(imported));
+        await f.page.waitForFunction(() => document.querySelector('[name="entries"]').getAttribute("aria-invalid") === "true");
+        assert.equal(await f.page.locator("#overlay-url").inputValue(), "");
+        imported.entries[0].imageUrl = `data:image/png;base64,${f.images.png}`;
+        await f.page.locator("#settings-json").fill(JSON.stringify(imported));
+        await f.page.waitForFunction(() => document.getElementById("overlay-url").value);
+        await f.page.locator('[data-settings-view="form"]').click();
+        assert.equal(await f.page.locator(".image-provider").isEnabled(), true);
+        await f.page.evaluate(() => {
+          const native = window.fetch;
+          window.fetch = (url, options) =>
+            url === "https://catbox.moe/user/api.php"
+              ? new Promise((resolve) => {
+                  window.releaseRemovedImage = () => resolve(new Response("https://files.catbox.moe/removed.png"));
+                })
+              : native(url, options);
+        });
+        await f.page.locator(".image-provider").selectOption("catbox");
+        await f.page.locator('.image-input input[type="file"]').setInputFiles(f.file());
+        await f.page.waitForFunction(() => window.releaseRemovedImage);
+        await rows.first().locator('[data-action="remove"]').click();
+        await f.page.waitForFunction(() => document.querySelectorAll(".entry-row").length === 0);
+        await f.page.evaluate(async () => {
+          releaseRemovedImage();
+          await Promise.resolve();
+          await Promise.resolve();
+        });
+        assert.equal(await f.page.locator(".image-status:not([hidden])").count(), 0);
+        assert.equal(await f.page.locator('[name="entries"]').inputValue(), "[]");
+      } finally {
+        await f.page.close();
+      }
+      const main = await open("main");
+      try {
+        const background = main.page.locator('[name="backgroundUrl"]').locator("..");
+        assert.equal(await background.locator(".image-actions").isHidden(), false);
+        await main.page.selectOption('[name="backgroundType"]', "video");
+        assert.equal(await background.locator(".image-actions").isHidden(), true);
+        await main.page.locator('[name="backgroundUrl"]').fill("https://example.com/video.webm");
+        await main.page.waitForFunction(() => new URL(document.getElementById("overlay-url").value).searchParams.get("backgroundUrl") === "https://example.com/video.webm");
+        await main.page.selectOption('[name="backgroundType"]', "image");
+        assert.equal(await background.locator(".image-actions").isHidden(), false);
+        assert.equal(await main.page.locator('[name="backgroundUrl"]').inputValue(), "https://example.com/video.webm");
+      } finally {
+        await main.page.close();
       }
     });
   } finally {

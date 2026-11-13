@@ -230,14 +230,15 @@ async function initControllerResource() {
         retainInactive: true
       },
       guideImage: {
+        image: true,
         type: "text",
         default: "",
         label: "Image URL",
         section: "Appearance",
         subsection: "Guide button",
         description: "HTTPS images, including animated GIFs. Failed images retain the original symbol.",
-        maxlength: 2048,
-        validate: (value) => (byStream.safeImage(value) ? value : null),
+        maxlength: 65536,
+        validate: (value) => (value.length <= 65536 && byStream.safeImage(value) ? value : null),
         when: ["guideSource", "image"],
         retainInactive: true
       },

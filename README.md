@@ -2,7 +2,7 @@
 
 ![stream.html preview](prev.jpg)
 
-Browser overlays for your stream. Configure a tool and copy its URL into OBS. Free. Forever. No account, upload, install, or build step.
+Browser overlays for your stream. Configure a tool and copy its URL into OBS. Free. Forever. No account, install, or build step.
 
 [Open stream.html](https://byuwur.github.io/stream.html/) · [Configurator demo](https://byuwur.github.io/stream.html/configurator.html)
 
@@ -67,7 +67,20 @@ Main offers countdown formats for hours/minutes/seconds, total minutes, total se
 
 Timer, Timeline, Reminder, and timed Randomizer start when the overlay page loads. **Use fixed start time** (`useStartTime=yes`) is Off by default and reveals the start timestamp when enabled. Fixed anchors survive copied URLs and reloads; inactive timestamps are omitted. Timeline uses `duration` (seconds, default `3600`) on load, or its start/end timestamps with the switch On. Timer deadline mode still uses an absolute end time; Restart always starts on load. Existing links with a start timestamp need `useStartTime=yes` to retain their fixed schedule. Schedule activities keep their explicit calendar dates.
 
-Media fields reference public HTTP(S) URLs or paths relative to the tool HTML. Local file URLs need downloaded use. No uploads or Base64 `data:` media. Keep private information out of shared URLs.
+Media fields accept public HTTP(S) URLs or paths relative to the tool HTML. Local file URLs need downloaded use. Image fields also accept PNG, JPEG, WebP, and GIF Base64 data URIs. Keep private information out of shared URLs.
+
+### Image inputs
+
+Every image field, including card rows, has a URL input, provider selector, and **Browse** button. Drop an image anywhere on that component or browse for a file. PNG, JPEG/JPG, WebP, and GIF are supported; animated GIF bytes are preserved. SVG and video uploads are rejected. Main's background upload controls appear only in Image mode; video URLs keep their existing behavior.
+
+- **Manual** accepts an existing URL, relative image path, or supported image data URI. Editing the text selects Manual, dismisses feedback, and cancels pending work. Browse/drop from Manual selects **Catbox.moe** after a file is chosen; canceling the picker changes nothing.
+- **Catbox.moe** uploads the original file anonymously, up to 200 MB. The editor checks the HTTPS image URL and loads it before applying it. Uploads are public; no account or key is needed. Network, HTTP, CORS, and invalid-response failures preserve the old value. A browser network failure cannot establish a regional block; try another connection or Base64 for a small image. No public proxy is used.
+- **Gofile.io** needs Premium public direct links and a secure integration; ordinary sharing/download pages cannot render as overlay images. The default static site reports this restriction without uploading. Catbox fallback runs only when that integration is configured, announces the attempt, and changes the selector only after success.
+- **Base64** converts locally without uploading. The default limit is **16 KiB of original data**, including pasted data URIs. Larger files show `Image is too large to embed. Try Catbox instead.` Compression may help, but embedded images still produce long URLs; test the copied URL in your OBS build. Raw Base64, SVG, and video data URIs are unsupported.
+
+Changing provider affects only the next Browse/drop; it never changes the existing image. Pending operations keep the current value. Feedback appears below its own field: progress lasts until completion, success dismisses after 5 seconds, and errors after 10 seconds. Manual edits, Reset, imports, and removed rows cancel stale operations and feedback. The provider never enters JSON, saved settings, or overlay URLs.
+
+For a custom deployment, set `byConfigurator.imageOptions` before editor initialization. `base64MaxBytes` changes the local embedding limit (default `16384`); image values still have a 65,536-character safety bound and lists a 1 MiB bound. `gofileUploadURL` optionally names an HTTPS endpoint on the editor's own origin. It receives multipart `file` and must authenticate/authorize its own users, enforce limits, and keep the Premium token server-side. The server uploads to `https://upload.gofile.io/uploadfile` with multipart `file` and its token, then calls `POST https://api.gofile.io/contents/{contentId}/directlinks` without access restrictions. Return the official `{ "status": "ok", "data": { "directLink": "https://store.gofile.io/download/direct/.../image.png" } }` shape. Links with authentication, domain/IP restrictions, query credentials, or expiry are rejected (the official never-expires sentinel `4102444800` is accepted). The image must load anonymously with CORS enabled. This repository contains no server or credentials. See the current [GoFile API](https://gofile.io/api#direct-links) and [Catbox API](https://catbox.moe/tools.php).
 
 ### Keyboard shortcuts
 
@@ -101,7 +114,7 @@ Form values, expanded sections, and Advanced options are remembered per resource
 
 Plain values need no marker. Escape literal text starting with `dr:` or `raw:` as `raw:<original text>`; generated links do this automatically. `#configure` restores compression choices. Invalid compressed fields retain defaults without discarding valid neighbors; Advanced shows a warning.
 
-Whole-query decoding is capped at one MiB. Individual values use the field's UTF-8 text limit, allowing up to four bytes per character, capped at one MiB. Media remains referenced by URL.
+Whole-query decoding is capped at one MiB. Individual values use the field's UTF-8 text limit, allowing up to four bytes per character, capped at one MiB. Images may also use the bounded Base64 data URIs described above.
 
 Each tool imports [SPA.js `_functions.min.js`](https://cdn.jsdelivr.net/gh/byuwur/spa.js@latest/_functions.min.js) with a regular HTML script tag before `resource.js`. For offline use, save the helper and update its `src`. These helpers need no jQuery/SPA initialization. Browsers without native raw-DEFLATE support can use readable links.
 
@@ -249,7 +262,7 @@ Maximum widths and heights accept `0` for Auto: no fixed maximum. Positive value
 
 Optional display text may have an empty default; do not use a space as a placeholder. Optional non-text features use explicit switches. Main background media starts Off while retaining a valid image URL. Regional controls show the current computer's time zone and browser locale. Generated URLs still omit default values.
 
-Declare image paths in resource field defaults; renderers read the resolved settings instead of embedding fallback image paths in CSS or markup.
+Declare image paths in resource field defaults; renderers read the resolved settings instead of embedding fallback image paths in CSS or markup. Mark image fields with `image: true`, or an `image(settings)` predicate for mixed media. Entry-row image controls use `[key, label, "image"]` in `entries.textFields`. The optional configurator owns uploads and conversion; standalone renderers only receive the image value.
 
 Shadows, glows, filters, offsets, element edges, and fades use numeric inputs, color pickers, and choices in dedicated subsections. Position and offset controls accept positive and negative values. Inactive effect controls are hidden and disabled; selecting a custom effect reveals its settings. Raw CSS-string parameters are no longer fields and fall back to defaults. The `shadowFields()`, `filterFields()`, `offsetFields()`, `insetFields()`, and `fadeFields()` helpers declare these ordinary URL fields.
 

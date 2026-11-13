@@ -3097,3 +3097,66 @@ test("controller inversion paints and releases consistently across browser engin
     });
   }
 });
+
+test("standalone image data URIs validate and survive existing resource URL contracts", async () => {
+  const assets = await loadAssets(runtimeAssets);
+  const browser = await chromium.launch(launchOptions);
+  const page = await browser.newPage();
+  try {
+    await serve(page, assets, true);
+    await page.goto("https://stream.test/qr/?content=test");
+    await page.waitForFunction(() => window.byStreamResource && window.byStreamOverlay);
+    const uri = await page.evaluate(() => {
+      const canvas = document.createElement("canvas");
+      canvas.width = canvas.height = 2;
+      canvas.getContext("2d").fillRect(0, 0, 2, 2);
+      const values = ["png", "jpeg", "webp"].map((type) => canvas.toDataURL(`image/${type}`));
+      for (const value of values) if (!byStream.safeImage(value)) throw new Error(`Rejected raster data URI: ${value.slice(0, 30)}`);
+      const invalid = [
+        "javascript:alert(1)",
+        "data:image/svg+xml;base64,PHN2Zy8+",
+        "data:video/webm;base64,AAAA",
+        "data:image/png;base64,AAAA",
+        "data:image/png;base64,%%%",
+        values[0].replace("image/png", "image/jpeg"),
+        `data:image/png;base64,${"A".repeat(65536)}`
+      ];
+      for (const value of invalid) if (byStream.safeImage(value)) throw new Error(`Accepted invalid image: ${value.slice(0, 40)}`);
+      if (!byStream.safeImage("../image.png") || !byStream.safeImage("https://example.com/image.gif") || byStream.safeImage("file:///image.png")) throw new Error("Existing URL/path rules changed");
+      return values[0];
+    });
+    for (const [tool, field, extras] of [
+      ["qr", "logoUrl", { content: "test" }],
+      ["watermark", "logoUrl", { kind: "logo" }],
+      ["main", "logoUrl", {}],
+      ["main", "backgroundUrl", { displayBackground: "yes", backgroundType: "image" }],
+      ["controller", "guideImage", { customColors: "yes", customGuide: "yes", guideSource: "image" }],
+      ["lower-thirds", "entries", { entries: JSON.stringify([{ name: "Image", subtitle: "", icon: "", imageUrl: uri }]) }],
+      ["sponsors", "entries", { entries: JSON.stringify([{ name: "Image", text: "", imageUrl: uri }]) }]
+    ]) {
+      const value = field === "entries" ? extras.entries : uri;
+      const query = new URLSearchParams({ ...extras, [field]: value });
+      await page.goto(`https://stream.test/${tool}/?${query}`);
+      await page.waitForFunction(() => window.byStreamResource && window.byStreamOverlay);
+      const result = await page.evaluate(
+        async ({ field, value }) => {
+          if (window.byConfigurator || window.jQuery) throw new Error("Standalone image rendering loaded the editor");
+          const resource = byStreamResource;
+          if (JSON.stringify(resource.settings[field]) !== JSON.stringify(field === "entries" ? JSON.parse(value) : value)) throw new Error("Image settings lost");
+          const url = byStream.settingsURL(resource, resource.settings);
+          const packed = await compress_url_data(url.search.slice(1));
+          const decoded = await byStream.readURLParameters(resource.fields, `?data=${packed}`);
+          if (decoded.values.get(field) !== value) throw new Error("Compressed image value lost");
+          const image = [...document.images].find((image) => image.src === (field === "entries" ? JSON.parse(value)[0].imageUrl : value));
+          if (image) await image.decode();
+          return url.searchParams.get(field);
+        },
+        { field, value }
+      );
+      assert.equal(result, value, `${tool} ${field} keeps the original serialized image value`);
+    }
+  } finally {
+    await page.close();
+    await browser.close();
+  }
+});

@@ -19,6 +19,7 @@
  * @property {string} type Control/value kind: text, multiline, number, select, switch, color, font, entries, mapping, timestamp, locale, timezone, or timezones.
  * @property {ResourceValue} [default] Resource default; missing/empty scalars receive a neutral default before use.
  * @property {string} label Human-readable control label.
+ * @property {boolean|function(ResourceSettings): boolean} [image] Image input; a predicate limits uploads in mixed media fields.
  * @property {string} [description] Help text shown beside the control and in parameter help.
  * @property {string} [section] Top-level group; insertion order determines display order.
  * @property {string} [subsection] Nested control group inside the section.
@@ -317,7 +318,7 @@
         if (Math.abs(steps - Math.round(steps)) > 1e-8) return false;
       }
     }
-    if (name.endsWith("Url") && !safeImage(value)) return false;
+    if ((rule.image || name.endsWith("Url")) && !safeImage(value)) return false;
     return true;
   }
 
@@ -1361,12 +1362,39 @@
   }
 
   /**
-   * Allow empty, relative, or HTTP(S) media; file: is accepted only from a downloaded file: page.
+   * Identify supported raster signatures without decoding or changing the image bytes.
+   * @param {Uint8Array} bytes The first twelve or more bytes of a file.
+   * @returns {string} Supported MIME type, or empty for an unknown format.
+   */
+  function imageType(bytes) {
+    if ([137, 80, 78, 71, 13, 10, 26, 10].every((byte, i) => bytes[i] === byte)) return "image/png";
+    if (bytes[0] === 255 && bytes[1] === 216 && bytes[2] === 255) return "image/jpeg";
+    const text = String.fromCharCode(...bytes.slice(0, 12));
+    if (text.startsWith("GIF87a") || text.startsWith("GIF89a")) return "image/gif";
+    if (text.startsWith("RIFF") && text.slice(8, 12) === "WEBP") return "image/webp";
+    return "";
+  }
+
+  /**
+   * Allow relative/HTTP(S) media and bounded, signature-checked raster Base64 data URIs.
+   * file: is accepted only from a downloaded file: page. No SVG, video data, or raw Base64.
    * @param {string} value Raw form or URL value to validate or format.
    * @returns {boolean} Whether the media value is empty or uses an allowed protocol and local-file boundary.
    */
   function safeImage(value) {
     if (!value) return true;
+    if (/^data:/i.test(value)) {
+      // Bound decoding independently of editor limits and the URL transport's 1 MiB cap.
+      if (value.length > 65536) return false;
+      const match = /^data:(image\/(?:png|jpeg|webp|gif));base64,([A-Za-z0-9+/]+={0,2})$/i.exec(value);
+      if (!match || match[2].length % 4 !== 0) return false;
+      try {
+        const bytes = Uint8Array.from(atob(match[2]), (character) => character.charCodeAt(0));
+        return imageType(bytes) === match[1].toLowerCase();
+      } catch {
+        return false;
+      }
+    }
     try {
       // Resolve relative paths against the resource page and reject local files from hosted pages.
       const url = new URL(value, location.href);
@@ -1445,6 +1473,7 @@
     parseZones,
     parseTimestamp,
     safeImage,
+    imageType,
     watch
   });
 

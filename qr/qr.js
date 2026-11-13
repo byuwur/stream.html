@@ -39,13 +39,14 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       showLogo: { type: "switch", default: "yes", label: "Logo", section: "Content & behavior", checkedValue: "yes", uncheckedValue: "no", options: { yes: "On", no: "Off" } },
       logoUrl: {
+        image: true,
         type: "url",
         default: "https://byuwur.github.io/img/logo.png",
         label: "Logo above QR",
         when: ["showLogo", "yes"],
         section: "Content & behavior",
-        description: "Public HTTP(S) image, relative path, or downloaded file URL. No uploads.",
-        maxlength: 1000
+        description: "Image URL, relative path, or small PNG/JPEG/WebP/GIF data URI.",
+        maxlength: 65536
       },
       foreground: {
         type: "color",

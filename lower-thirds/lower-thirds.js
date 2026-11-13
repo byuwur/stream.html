@@ -32,13 +32,13 @@ document.addEventListener("DOMContentLoaded", async () => {
         label: "Ordered cards",
         section: "Content & behavior",
         validate: parseEntries,
-        maxlength: 8000,
+        maxlength: 1048576,
         entries: {
           textFields: [
             ["name", "Name"],
             ["subtitle", "Subtitle"],
             ["icon", "Unicode icon"],
-            ["imageUrl", "Public image URL"]
+            ["imageUrl", "Image URL", "image"]
           ],
           newEntry: { name: "", subtitle: "", icon: "", imageUrl: "" },
           limit: 40
@@ -264,11 +264,11 @@ document.addEventListener("DOMContentLoaded", async () => {
    * @returns {Array<unknown>|Object|null}
    */
   function parseEntries(value) {
-    if (value.length > 8000) return null;
+    if (value.length > 1048576) return null;
     try {
       const entries = JSON.parse(value);
       const keys = ["name", "subtitle", "icon", "imageUrl"];
-      if (!Array.isArray(entries) || entries.length > 40 || !entries.every((e) => e && keys.every((k) => typeof e[k] === "string" && e[k].length <= 160) && byStream.safeImage(e.imageUrl))) return null;
+      if (!Array.isArray(entries) || entries.length > 40 || !entries.every((e) => e && keys.every((k) => typeof e[k] === "string" && e[k].length <= (k === "imageUrl" ? 65536 : 160)) && byStream.safeImage(e.imageUrl))) return null;
       return entries.map((e) => Object.fromEntries(keys.map((k) => [k, e[k]])));
     } catch {
       return null;
