@@ -15,11 +15,19 @@ const { root, runtimeAssets, launchOptions, loadAssets, resourceNames, standalon
 
 test("browser fixtures contain decoded and symlink paths and reject malformed paths", async (t) => {
   let handler;
-  await serve({ route: async (pattern, callback) => { handler = callback; } }, new Map());
-  const request = (pathname) => handler({
-    request: () => ({ url: () => `https://stream.test${pathname}` }),
-    fulfill: async (response) => response
-  });
+  await serve(
+    {
+      route: async (pattern, callback) => {
+        handler = callback;
+      }
+    },
+    new Map()
+  );
+  const request = (pathname) =>
+    handler({
+      request: () => ({ url: () => `https://stream.test${pathname}` }),
+      fulfill: async (response) => response
+    });
   for (const pathname of ["/%2e%2e%2fCODING_STANDARDS.md", "/%2e%2e%5cCODING_STANDARDS.md", "/..%2fstream.html-other/secret.txt", "/clock/%2e%2e%2f%2e%2e%2fCODING_STANDARDS.md"]) {
     assert.equal((await request(pathname)).status, 403, pathname);
   }
@@ -28,7 +36,7 @@ test("browser fixtures contain decoded and symlink paths and reject malformed pa
   assert.equal((await request("/README.md")).body.toString(), await fs.readFile(path.join(root, "README.md"), "utf8"));
   assert.equal((await request("/clock/")).contentType, "text/html");
   const realpath = fs.realpath;
-  t.mock.method(fs, "realpath", async (file) => file === path.join(root, "README.md") ? path.join(root, "..", "README.md") : realpath(file));
+  t.mock.method(fs, "realpath", async (file) => (file === path.join(root, "README.md") ? path.join(root, "..", "README.md") : realpath(file)));
   assert.equal((await request("/README.md")).status, 403, "Symlinks cannot escape the repository");
 });
 
@@ -97,7 +105,8 @@ test("resources render and round-trip URLs without configurator assets", async (
       for (const name of await resourceNames()) {
         const page = await browser.newPage();
         try {
-          const errors = [], requests = [];
+          const errors = [],
+            requests = [];
           page.on("pageerror", (error) => errors.push(error.message));
           page.on("request", (request) => {
             if (/configurator\.(js|css)|jquery|bootstrap|select2|pickr|popper|_common\.|animate\.min\.css/.test(request.url())) requests.push(request.url());
