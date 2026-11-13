@@ -74,6 +74,63 @@
   if (byStream.initialized) return;
   // Resource handlers replace this before the optional editor's DOMContentLoaded handler awaits it.
   byStream.ready = Promise.resolve();
+  const editorImports = document.getElementById("configurator-assets");
+  const editorReady = location.search.length > 1 && !location.hash ? Promise.resolve() : loadConfigurator().catch((error) => {
+    console.warn(error);
+    warnMissingConfigurator();
+  });
+
+  // Editor imports stay inert in overlays; preserve their declared dependency order when editing.
+  async function loadConfigurator() {
+    if (!editorImports) return;
+    for (const source of editorImports.content.children) {
+      if (source.tagName !== "SCRIPT") {
+        document.head.append(source.cloneNode(true));
+        continue;
+      }
+      await new Promise((resolve, reject) => {
+        const script = document.createElement("script");
+        script.src = source.src;
+        script.onload = resolve;
+        script.onerror = () => reject(new Error(`Unable to load editor script: ${source.src}`));
+        document.head.append(script);
+      });
+    }
+  }
+
+  let configuratorWarning = false;
+  function warnMissingConfigurator() {
+    if (global !== global.top || configuratorWarning) return;
+    configuratorWarning = true;
+    console.warn("stream.html: The configurator is not included in this distribution. Configure this resource online: https://byuwur.github.io/stream.html/ — Repository: https://github.com/byuwur/stream.html");
+    const warning = document.createElement("aside");
+    warning.id = "configurator-warning";
+    warning.setAttribute("role", "alert");
+    warning.style.cssText = "position:fixed;inset:1rem 1rem auto;z-index:2147483647;padding:1rem;background:#111;color:#eee;border:1px solid #eee;font:1rem/1.5 sans-serif";
+    warning.textContent = "The configurator is not included in this standalone resource. Edit these settings in the ";
+    const editor = document.createElement("a");
+    const tool = document.documentElement.dataset.tool;
+    const url = new URL(tool === "template" ? "configurator.html" : `${tool}/`, "https://byuwur.github.io/stream.html/");
+    url.search = location.search;
+    url.hash = "configure";
+    editor.href = url.href;
+    editor.textContent = "official hosted editor";
+    const repository = document.createElement("a");
+    repository.href = "https://github.com/byuwur/stream.html";
+    repository.textContent = "repository";
+    for (const link of [editor, repository]) link.style.color = "#eee";
+    warning.append(editor, " or download the editor files from the ", repository, ".");
+    document.body.append(warning);
+  }
+
+  global.addEventListener("keydown", (event) => {
+    if (global !== global.top || !global.byStreamOverlay) return;
+    if (event.key !== "F2" || event.repeat || event.defaultPrevented || event.isComposing || event.ctrlKey || event.altKey || event.metaKey || event.shiftKey) return;
+    if (event.target?.isContentEditable || event.target?.matches?.("input, textarea, select")) return;
+    event.preventDefault();
+    if (editorImports) location.hash = "configure";
+    else warnMissingConfigurator();
+  });
 
   /**
    * Decode URL transport markers; readable parameters override packed values.
@@ -1151,16 +1208,23 @@
       field.label = field.label.replace(" size override", " size");
       field.description = `0 or clearing restores the default (${field.default}${field.styleUnit || ""}).`;
     }
-    const overlay = location.search.length > 1 && !location.hash;
+    const overlay = (!editorImports && !global.byConfigurator) || (location.search.length > 1 && !location.hash);
     // Only an attached editor supplies saved preferences; standalone overlays use their URL alone.
-    const search = overlay ? location.search : (byStream.prepareResource?.(resource) ?? location.search);
-    byStream.ready = readURLParameters(resource.fields, search).then((parameters) => {
+    byStream.ready = editorReady.then(() => {
+      const search = overlay ? location.search : (byStream.prepareResource?.(resource) ?? location.search);
+      return readURLParameters(resource.fields, search);
+    }).then((parameters) => {
       resource.normalizeParameters?.(parameters.values);
       // Resolve one settings object for both consumers before either the renderer or editor starts.
       const settings = { ...resource.constants, ...Object.fromEntries(Object.entries(resource.fields).map(([name, field]) => [name, structuredClone(field.default)])) };
       applyParameters(resource.fields, settings, parameters.values);
       global.byStreamOverlay = overlay;
+      if (!editorImports && !global.byConfigurator && location.hash) warnMissingConfigurator();
       global.addEventListener("hashchange", () => {
+        if (!editorImports && !global.byConfigurator) {
+          if (location.hash) warnMissingConfigurator();
+          return;
+        }
         if (overlay !== (location.search.length > 1 && !location.hash)) location.reload();
       });
       if (overlay) {

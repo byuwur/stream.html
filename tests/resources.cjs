@@ -13,6 +13,25 @@ const test = require("node:test");
 const { chromium, firefox, webkit } = require("playwright");
 const { root, runtimeAssets, launchOptions, loadAssets, resourceNames, standaloneHTML, serve } = require("./browser.cjs");
 
+test("browser fixtures contain decoded and symlink paths and reject malformed paths", async (t) => {
+  let handler;
+  await serve({ route: async (pattern, callback) => { handler = callback; } }, new Map());
+  const request = (pathname) => handler({
+    request: () => ({ url: () => `https://stream.test${pathname}` }),
+    fulfill: async (response) => response
+  });
+  for (const pathname of ["/%2e%2e%2fCODING_STANDARDS.md", "/%2e%2e%5cCODING_STANDARDS.md", "/..%2fstream.html-other/secret.txt", "/clock/%2e%2e%2f%2e%2e%2fCODING_STANDARDS.md"]) {
+    assert.equal((await request(pathname)).status, 403, pathname);
+  }
+  for (const pathname of ["/%", "/%C0%AF", "/%00README.md"]) assert.equal((await request(pathname)).status, 400, pathname);
+  assert.equal((await request("/missing-file.txt")).status, 404);
+  assert.equal((await request("/README.md")).body.toString(), await fs.readFile(path.join(root, "README.md"), "utf8"));
+  assert.equal((await request("/clock/")).contentType, "text/html");
+  const realpath = fs.realpath;
+  t.mock.method(fs, "realpath", async (file) => file === path.join(root, "README.md") ? path.join(root, "..", "README.md") : realpath(file));
+  assert.equal((await request("/README.md")).status, 403, "Symlinks cannot escape the repository");
+});
+
 // --- STANDALONE RESOURCE CONTRACTS ---
 test("resources render and round-trip URLs without configurator assets", async (t) => {
   const assets = await loadAssets(runtimeAssets);
@@ -74,6 +93,99 @@ test("resources render and round-trip URLs without configurator assets", async (
     }
 
     // --- COMPLETE CONTROLLER DOCUMENTS AND INPUT STATES ---
+    await t.test("hosted overlays render without requesting editor dependencies", async () => {
+      for (const name of await resourceNames()) {
+        const page = await browser.newPage();
+        try {
+          const errors = [], requests = [];
+          page.on("pageerror", (error) => errors.push(error.message));
+          page.on("request", (request) => {
+            if (/configurator\.(js|css)|jquery|bootstrap|select2|pickr|popper|_common\.|animate\.min\.css/.test(request.url())) requests.push(request.url());
+          });
+          await serve(page, assets);
+          await page.goto(`https://stream.test/${name}/?test=1`);
+          await page.waitForFunction(() => window.byStreamResource && window.byStreamOverlay);
+          assert.equal(await page.evaluate(() => typeof byConfigurator), "undefined", name);
+          assert.deepEqual(requests, [], name);
+          assert.deepEqual(errors, [], name);
+        } finally {
+          await page.close();
+        }
+      }
+    });
+
+    await t.test("unavailable and invalid controller models leave unrelated models usable", async () => {
+      for (const response of [
+        { status: 404, body: "Not found" },
+        { contentType: "image/svg+xml", body: '<svg xmlns="http://www.w3.org/2000/svg" data-controller="ds5"/>' },
+        { contentType: "image/svg+xml", body: '<svg xmlns="http://www.w3.org/2000/svg" data-controller="ds5"><broken></svg>' }
+      ]) {
+        const page = await browser.newPage();
+        try {
+          const errors = [];
+          page.on("pageerror", (error) => errors.push(error.message));
+          await serve(page, assets, true);
+          await page.route("**/controllers/ds5.svg", (route) => route.fulfill(response));
+          await page.goto("https://stream.test/controller/?player=9&skin=xone&variant=arctic&layout=minimal");
+          await page.locator('svg[data-controller="xone"].controller-background').waitFor({ state: "attached" });
+          assert.deepEqual(await page.evaluate(() => [byStreamResource.settings.skin, byStreamResource.settings.variant, byStreamResource.settings.layout]), ["xone", "arctic", "minimal"]);
+          assert.equal(await page.evaluate(() => Object.keys(byControllerArtwork.skins).length), 33);
+          assert.deepEqual(errors, []);
+          const packed = await page.evaluate(() => compress_url_data("player=9&skin=ds5"));
+          await page.goto(`https://stream.test/controller/?data=${packed}`);
+          await page.locator('[role="alert"]').filter({ hasText: "Unable to load controller model ds5.svg" }).waitFor();
+          await page.goto("https://stream.test/controller/?player=9&skin=ds5");
+          await page.locator('[role="alert"]').filter({ hasText: "Unable to load controller model ds5.svg" }).waitFor();
+          assert.equal(await page.locator(".controller-background").count(), 0);
+          assert.deepEqual(errors, []);
+        } finally {
+          await page.close();
+        }
+      }
+      const page = await browser.newPage();
+      try {
+        await serve(page, assets, true);
+        await page.route("**/controllers/fgc.svg", (route) => route.abort());
+        await page.goto("https://stream.test/controller/?player=9&skin=fgc4");
+        await page.locator('[role="alert"]').filter({ hasText: "Unable to load controller model fgc.svg" }).waitFor();
+      } finally {
+        await page.close();
+      }
+    });
+
+    await t.test("standalone F2 and configure links warn without loading an editor", async () => {
+      const page = await browser.newPage();
+      try {
+        const errors = [], requests = [];
+        page.on("pageerror", (error) => errors.push(error.message));
+        page.on("request", (request) => {
+          if (/configurator\.(js|css)|jquery|bootstrap|select2|pickr/.test(request.url())) requests.push(request.url());
+        });
+        await serve(page, assets, true);
+        const url = "https://stream.test/watermark/?text=Standalone";
+        await page.goto(url);
+        await page.locator("#overlay .primary").filter({ hasText: "Standalone" }).waitFor();
+        await page.keyboard.press("Shift+F2");
+        assert.equal(await page.locator("#configurator-warning").count(), 0);
+        await page.keyboard.press("F2");
+        await page.locator("#configurator-warning").waitFor();
+        assert.equal(page.url(), url);
+        await page.keyboard.press("F2");
+        assert.equal(await page.locator("#configurator-warning").count(), 1);
+        assert.equal(await page.locator("#configurator-warning a").first().getAttribute("href"), "https://byuwur.github.io/stream.html/watermark/?text=Standalone#configure");
+        assert.equal(await page.locator("#configurator-warning a").last().getAttribute("href"), "https://github.com/byuwur/stream.html");
+        await page.evaluate(() => { location.hash = "configure"; });
+        assert.equal(await page.locator("#overlay .primary").textContent(), "Standalone");
+        await page.goto(`${url}#configure`);
+        await page.locator("#configurator-warning").waitFor();
+        assert.equal(await page.evaluate(() => typeof byConfigurator), "undefined");
+        assert.deepEqual(requests, []);
+        assert.deepEqual(errors, []);
+      } finally {
+        await page.close();
+      }
+    });
+
     await t.test("integration SVGs render independently and own their geometry and painting order", async () => {
       const page = await browser.newPage();
       try {
@@ -2109,6 +2221,9 @@ test("resources render and round-trip URLs without configurator assets", async (
         await page.goto(`${pathToFileURL(file).href}?text=Downloaded`);
         await page.waitForFunction(() => document.querySelector("#overlay .primary")?.textContent === "Downloaded");
         assert.equal(await page.evaluate(() => typeof byConfigurator), "undefined");
+        await page.keyboard.press("F2");
+        await page.locator("#configurator-warning").waitFor();
+        assert.equal(await page.locator("#configurator-warning a").first().getAttribute("href"), "https://byuwur.github.io/stream.html/watermark/?text=Downloaded#configure");
         assert.match(await page.evaluate(() => byStream.settingsURL(byStreamResource, byStreamResource.settings).href), /\/index\.html\?text=Downloaded$/);
         await fs.mkdir(path.join(directory, "controller"));
         for (const asset of ["controller.js", "controller.css"]) await fs.copyFile(path.join(root, "controller", asset), path.join(directory, "controller", asset));
@@ -2795,6 +2910,7 @@ test("controller inversion paints and releases consistently across browser engin
     ["Firefox", firefox, {}],
     ["WebKit", webkit, {}]
   ]) {
+    if (process.env.RENDER_ENGINES && !process.env.RENDER_ENGINES.split(",").includes(engine.toLowerCase())) continue;
     let installed = true;
     if (engine !== "Chromium") {
       try {
@@ -2803,7 +2919,7 @@ test("controller inversion paints and releases consistently across browser engin
         installed = false;
       }
     }
-    await t.test(engine, { skip: installed ? false : "Install this Playwright browser to run pixel checks" }, async () => {
+    await t.test(engine, { skip: installed || process.env.CI ? false : "Install this Playwright browser to run pixel checks" }, async () => {
       const browser = await type.launch(options);
       try {
         // Handheld buttons need an OBS-sized canvas; thumbnail filters can rasterize their edges differently.

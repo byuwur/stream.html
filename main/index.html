@@ -103,21 +103,23 @@
     </template>
 
     <!-- ===== CONFIGURATOR ===== -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.7/css/bootstrap.min.css" data-editor-style media="not all" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.7/css/pickr.min.css" data-editor-style media="not all" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.7/_common.min.css" data-editor-style media="not all" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.7/css/select2.min.css" data-editor-style media="not all" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.7/css/animate.min.css" data-editor-style media="not all" />
-    <link rel="stylesheet" href="../configurator.css" data-editor-style media="not all" />
-    <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.7/js/jquery.min.js" defer></script>
-    <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.7/js/select2.full.min.js" defer></script>
-    <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.7/js/popper.min.js" defer></script>
-    <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.7/js/bootstrap.min.js" defer></script>
-    <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.7/js/pickr.min.js" defer></script>
-    <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.7/_common.min.js" defer></script>
+    <template id="configurator-assets">
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.7/css/bootstrap.min.css" data-editor-style media="not all" />
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.7/css/pickr.min.css" data-editor-style media="not all" />
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.7/_common.min.css" data-editor-style media="not all" />
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.7/css/select2.min.css" data-editor-style media="not all" />
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.7/css/animate.min.css" data-editor-style media="not all" />
+      <link rel="stylesheet" href="../configurator.css" data-editor-style media="not all" />
+      <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.7/js/jquery.min.js" defer></script>
+      <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.7/js/select2.full.min.js" defer></script>
+      <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.7/js/popper.min.js" defer></script>
+      <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.7/js/bootstrap.min.js" defer></script>
+      <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.7/js/pickr.min.js" defer></script>
+      <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.7/_common.min.js" defer></script>
 
-    <!-- Configurator: URL toolbar, settings, preview, and help. -->
+      <!-- Configurator: URL toolbar, settings, preview, and help. -->
+      <script src="../configurator.js" defer></script>
+    </template>
     <div id="configurator"></div>
-    <script src="../configurator.js" defer></script>
   </body>
 </html>

@@ -18,15 +18,15 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 async function initControllerResource() {
-  initControllerMapping();
   try {
-    window.byControllerArtwork = await loadControllerArtwork();
+    const { values } = await byStream.readURLParameters({ skin: {} });
+    window.byControllerArtwork = await loadControllerArtwork(values.get("skin") || "xseries");
   } catch (error) {
     console.error(error);
     const message = document.createElement("p");
     message.setAttribute("role", "alert");
     message.textContent =
-      location.protocol === "file:" ? "Controller SVG resources require HTTP/HTTPS. Open this overlay through a local web server or its hosted URL." : "Unable to load controller resources. Check the controller SVG files, then reload.";
+      location.protocol === "file:" ? "Controller SVG resources require HTTP/HTTPS. Open this overlay through a local web server or its hosted URL." : `${error.message} Check the controller SVG files, then reload.`;
     document.body.appendChild(message);
     return;
   }
@@ -913,6 +913,7 @@ async function initControllerResource() {
   }
 
   const settings = await byStream.initResource(resource, { gamepadSupport, buttonValue, copyGamepad });
+  initControllerMapping();
   gamepadSupport.init();
   if (byStreamOverlay) initController();
 }
@@ -1076,7 +1077,7 @@ function customizeControllerAppearance(controller, settings) {
   reveal();
 }
 
-async function loadControllerArtwork() {
+async function loadControllerArtwork(requiredSkin) {
   // Discovery/order only. Names, bindings, geometry, and layouts belong to the SVGs.
   const families = [
     "nes",
@@ -1156,33 +1157,48 @@ async function loadControllerArtwork() {
   ];
   const sources = {},
     skins = {},
-    guideSymbols = {};
-  await Promise.all(
+    guideSymbols = {},
+    failures = {};
+  const responses = await Promise.allSettled(
     families.map(async (id) => {
-      const response = await fetch(new URL(`./controllers/${id}.svg`, controllerResourceURL), { cache: "no-cache" });
+      const response = await fetch(new URL(`./controllers/${id}.svg`, controllerResourceURL));
       if (!response.ok) throw new Error(`Unable to load ${id}.svg: ${response.status}`);
-      sources[id] = await response.text();
+      return response.text();
     })
   );
-  for (const id of families) {
-    const svg = new DOMParser().parseFromString(sources[id], "image/svg+xml").documentElement;
-    if (svg.localName !== "svg" || svg.dataset.controller !== id) throw new Error(`Invalid controller SVG: ${id}`);
-    register(svg);
-    for (const view of svg.querySelectorAll("view[data-name]")) {
-      const variant = svg.cloneNode(true);
-      variant.id = variant.dataset.controller = view.id;
-      variant.dataset.name = view.dataset.name;
-      variant.setAttribute("aria-label", `${view.dataset.name} input display`);
-      variant.querySelector("title").textContent = view.dataset.name;
-      variant.dataset.fullViewbox = view.getAttribute("viewBox");
-      variant.dataset.compactViewbox = view.dataset.compactViewbox;
-      variant.setAttribute("viewBox", variant.dataset.fullViewbox);
-      variant.querySelectorAll(view.dataset.exclude).forEach((node) => node.remove());
-      variant.querySelectorAll("view[data-name]").forEach((node) => node.remove());
-      sources[view.id] = new XMLSerializer().serializeToString(variant);
-      register(variant);
+  for (const [index, id] of families.entries()) {
+    try {
+      if (responses[index].status === "rejected") throw responses[index].reason;
+      sources[id] = responses[index].value;
+      const svg = new DOMParser().parseFromString(sources[id], "image/svg+xml").documentElement;
+      if (svg.localName !== "svg" || svg.querySelector("parsererror") || svg.dataset.controller !== id || !svg.querySelector(".control[data-input]")) throw new Error(`Invalid controller SVG: ${id}.svg`);
+      register(svg);
+      for (const view of svg.querySelectorAll("view[data-name]")) {
+        const variant = svg.cloneNode(true);
+        variant.id = variant.dataset.controller = view.id;
+        variant.dataset.name = view.dataset.name;
+        variant.setAttribute("aria-label", `${view.dataset.name} input display`);
+        variant.querySelector("title").textContent = view.dataset.name;
+        variant.dataset.fullViewbox = view.getAttribute("viewBox");
+        variant.dataset.compactViewbox = view.dataset.compactViewbox;
+        variant.setAttribute("viewBox", variant.dataset.fullViewbox);
+        variant.querySelectorAll(view.dataset.exclude).forEach((node) => node.remove());
+        variant.querySelectorAll("view[data-name]").forEach((node) => node.remove());
+        sources[view.id] = new XMLSerializer().serializeToString(variant);
+        register(variant);
+      }
+    } catch (error) {
+      delete sources[id];
+      delete skins[id];
+      failures[id] = error;
+      console.warn(`Controller model unavailable: ${id}.svg`, error);
     }
   }
+  // Keep the complete catalog for mappings, guide symbols, and direct layout/model updates.
+  // A broken optional model must not silently replace an explicitly requested model.
+  const selected = families.includes(requiredSkin) || ["fgc6", "fgc4"].includes(requiredSkin) ? requiredSkin : "xseries";
+  const required = ["fgc6", "fgc4"].includes(selected) ? "fgc" : selected;
+  if ((requiredSkin && !skins[selected]) || !Object.keys(skins).length) throw new Error(`Unable to load controller model ${required}.svg.`, { cause: failures[required] });
 
   // Alternate skins reuse source-authored SVG views and their existing controls.
   function register(svg) {

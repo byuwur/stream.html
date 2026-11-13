@@ -33,7 +33,27 @@ jobs:
       - name: Check ${{ matrix.name }}
         env:
           NODE_PATH: ${{ runner.temp }}/stream-tests/node_modules
+          RENDER_ENGINES: chromium
         run: |
           node --check resource.js
           if [ "${{ matrix.suite }}" = "configurators" ]; then node --check configurator.js; fi
           node --test tests/${{ matrix.suite }}.cjs
+
+  rendering:
+    name: Firefox and WebKit rendering
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install rendering test tools
+        run: |
+          npm install --prefix "$RUNNER_TEMP/stream-tests" --no-package-lock playwright@1.63.0
+          node "$RUNNER_TEMP/stream-tests/node_modules/playwright/cli.js" install --with-deps firefox webkit
+      - name: Check Firefox and WebKit painting
+        env:
+          NODE_PATH: ${{ runner.temp }}/stream-tests/node_modules
+          RENDER_ENGINES: firefox,webkit
+        run: node --test --test-name-pattern="controller inversion paints and releases" tests/resources.cjs

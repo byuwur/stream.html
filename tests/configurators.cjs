@@ -72,6 +72,43 @@ test("configurator forms and previews initialize for every resource", async (t) 
       });
     }
 
+    await t.test("F2 enters the hosted editor and returns to the edited overlay", async () => {
+      const page = await browser.newPage();
+      try {
+        const errors = [];
+        page.on("pageerror", (error) => errors.push(error.message));
+        await serve(page, assets);
+        await page.goto("https://stream.test/watermark/?text=Opening");
+        await page.locator("#overlay .primary").filter({ hasText: "Opening" }).waitFor();
+        assert.equal(await page.evaluate(() => typeof jQuery), "undefined");
+        await page.keyboard.press("Shift+F2");
+        assert.equal(new URL(page.url()).hash, "");
+        await page.keyboard.press("F2");
+        await page.locator('#overlay-form [name="text"]').waitFor();
+        assert.equal(new URL(page.url()).hash, "#configure");
+        const frame = page.frameLocator("#overlay-preview");
+        await frame.locator("#overlay .primary").filter({ hasText: "Opening" }).waitFor();
+        await frame.locator("body").evaluate((body) => { body.tabIndex = -1; });
+        await frame.locator("body").press("F2");
+        assert.equal(await frame.locator("form[data-configurator]").count(), 0);
+        assert.equal(await frame.locator("#configurator-warning").count(), 0);
+        const text = page.locator('#overlay-form [name="text"]');
+        await text.fill("Edited");
+        await text.dispatchEvent("change");
+        await page.waitForFunction(() => new URL(document.getElementById("overlay-url").value).searchParams.get("text") === "Edited");
+        await text.press("F2");
+        await page.locator("#overlay .primary").filter({ hasText: "Edited" }).waitFor();
+        assert.equal(new URL(page.url()).hash, "");
+        assert.equal(await page.evaluate(() => typeof jQuery), "undefined");
+        // Bare entry points still load the editor and restore its saved preferences.
+        await page.goto("https://stream.test/watermark/");
+        await page.waitForFunction(() => document.querySelector('#overlay-form [name="text"]')?.value === "Edited");
+        assert.deepEqual(errors, []);
+      } finally {
+        await page.close();
+      }
+    });
+
     await t.test("controller folder IDs follow the requested order and SNES exposes its physical button names", async () => {
       const page = await browser.newPage();
       try {

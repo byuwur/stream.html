@@ -5,7 +5,7 @@
  * Native settings, field factories, validation, and overlay startup belong to resource.js.
  * Removing this script leaves resource rendering functional.
  *
- * File map: overlay editing shortcut; preferences and the query preparation hook;
+ * File map: preferences and the query preparation hook;
  * field icons and catalog; generated form and JSON editor; URL/preview updates and widgets;
  * help/navigation; conditional validation and editor startup.
  */
@@ -15,20 +15,6 @@
   if (byConfigurator.initialized) return;
   byConfigurator.VERSION = "9.1"; // 2026-11-11
   const root = new URL(".", document.currentScript.src);
-
-  // F2 belongs to the optional editor; native overlays do not need this script or its dependencies.
-  if (document.getElementById("configurator") && location.search.length > 1 && !location.hash) {
-    global.addEventListener("keydown", (event) => {
-      // Preview frames must never navigate into a nested configurator.
-      if (global !== global.top) return;
-      if (event.key !== "F2" || event.repeat || event.defaultPrevented || event.ctrlKey || event.altKey || event.metaKey || event.shiftKey) return;
-      if (event.target?.isContentEditable || event.target?.matches?.("input, textarea, select")) return;
-      event.preventDefault();
-      location.hash = "configure";
-    });
-    byConfigurator.initialized = true;
-    return;
-  }
 
   const byStream = global.byStream;
   const { readURLParameters, settingsURL, fieldEnabled, parseLocale, parseZone } = byStream;
@@ -2703,14 +2689,16 @@
     }
   };
 
-  document.addEventListener("DOMContentLoaded", async () => {
+  async function startConfigurator() {
     // Resource handlers may still be decoding compressed settings when DOMContentLoaded reaches us.
     await byStream.ready;
     const parameters = global.byStreamResource?.urlParameters;
     parameterError = parameters?.error || "";
     compressedFields = location.search ? parameters?.compressedFields || new Set() : new Set();
     byConfigurator.init();
-  });
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", startConfigurator);
+  else startConfigurator();
 
   byConfigurator.initialized = true;
 })(window);

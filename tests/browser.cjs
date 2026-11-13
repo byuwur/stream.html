@@ -68,12 +68,21 @@ async function serve(page, assets, standalone = false) {
     if (assets.has(url.href)) return route.fulfill(assets.get(url.href));
     if (url.protocol === "file:") return route.continue();
     if (url.origin !== "https://stream.test") return route.abort();
-    const file = path.join(root, decodeURIComponent(url.pathname), url.pathname.endsWith("/") ? "index.html" : "");
-    let body;
+    let file, body;
     try {
+      const pathname = decodeURIComponent(url.pathname).replaceAll("\\", "/");
+      if (pathname.includes("\0")) return route.fulfill({ status: 400, body: "Invalid path" });
+      file = path.resolve(root, `.${pathname}`, pathname.endsWith("/") ? "index.html" : "");
+      const relative = path.relative(root, file);
+      if (relative === ".." || relative.startsWith(`..${path.sep}`) || path.isAbsolute(relative)) return route.fulfill({ status: 403, body: "Forbidden" });
+      // Resolve symlinks as well as dot segments before opening a repository fixture.
+      file = await fs.realpath(file);
+      const resolved = path.relative(await fs.realpath(root), file);
+      if (resolved === ".." || resolved.startsWith(`..${path.sep}`) || path.isAbsolute(resolved)) return route.fulfill({ status: 403, body: "Forbidden" });
       body = await fs.readFile(file);
     } catch (error) {
-      if (error.code === "ENOENT") return route.fulfill({ status: 404, body: "Not found" });
+      if (error instanceof URIError) return route.fulfill({ status: 400, body: "Invalid path" });
+      if (["ENOENT", "ENOTDIR", "EISDIR", "EINVAL"].includes(error.code)) return route.fulfill({ status: 404, body: "Not found" });
       throw error;
     }
     if (standalone && file.endsWith(".html")) body = standaloneHTML(body.toString());
