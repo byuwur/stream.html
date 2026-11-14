@@ -39,6 +39,7 @@ test("configurator forms and previews initialize for every resource", async (t) 
           await serve(page, assets);
           await page.goto(`https://stream.test/${name}/#configure`);
           await page.waitForFunction(() => document.querySelector("form[data-configurator] [name]") && document.getElementById("overlay-url")?.value);
+          assert.equal(await page.evaluate(() => document.characterSet), "UTF-8");
           assert.equal(await page.evaluate(() => byStreamOverlay), false);
           assert.equal(await page.locator("form[data-configurator]").count(), 1);
           await page.evaluate(() => byConfigurator.init());
@@ -93,7 +94,9 @@ test("configurator forms and previews initialize for every resource", async (t) 
         assert.equal(new URL(page.url()).hash, "#configure");
         const frame = page.frameLocator("#overlay-preview");
         await frame.locator("#overlay .primary").filter({ hasText: "Opening" }).waitFor();
-        await frame.locator("body").evaluate((body) => { body.tabIndex = -1; });
+        await frame.locator("body").evaluate((body) => {
+          body.tabIndex = -1;
+        });
         await frame.locator("body").press("F2");
         assert.equal(await frame.locator("form[data-configurator]").count(), 0);
         assert.equal(await frame.locator("#configurator-warning").count(), 0);
@@ -1164,6 +1167,8 @@ test("platform assets and navigation follow both hosting roots", async (t) => {
           await serve(page, assets, false, base);
           const controller = new URL("controller/", base).href;
           await page.goto(base);
+          assert.equal(await page.evaluate(() => document.characterSet), "UTF-8");
+          assert.equal(await page.evaluate(() => byCommon.CTA_BONYUR_BANK.rare.messages.includes("Hágale pues")), true, "Shared CTA text preserves accented characters");
           await page.locator('a[href="' + controller + '"]').click();
           await page.locator("form[data-configurator] [name]").first().waitFor();
           assert.equal(page.url(), controller);
@@ -1171,7 +1176,7 @@ test("platform assets and navigation follow both hosting roots", async (t) => {
           assert.equal(await page.locator('link[rel="canonical"]').getAttribute("href"), "https://stream.byuwur.co/controller/");
           const logo = page.locator(".home-link img");
           assert.equal(await logo.getAttribute("src"), new URL("stream.html.png", base).href);
-          await logo.evaluate(image => image.decode());
+          await logo.evaluate((image) => image.decode());
           assert.equal(await page.locator(".home-link").getAttribute("href"), base);
           assert.equal(new URL(await page.locator("#overlay-url").inputValue()).pathname, new URL(controller).pathname);
           await page.locator("#tool-picker").selectOption("clock");

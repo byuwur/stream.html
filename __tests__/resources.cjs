@@ -59,6 +59,7 @@ test("resources render and round-trip URLs without configurator assets", async (
           await serve(page, assets, true);
           await page.goto(`https://stream.test/${name}/?test=1`);
           await page.waitForFunction(() => window.byStreamResource && window.byStreamOverlay);
+          assert.equal(await page.evaluate(() => document.characterSet), "UTF-8");
           await page.evaluate(() => {
             const resource = byStreamResource;
             if (resource.fields.edgePadding && resource.fields.edgePadding.default !== 16) throw new Error("Viewport edge padding must default to 16px");
@@ -2244,6 +2245,7 @@ test("resources render and round-trip URLs without configurator assets", async (
         await serve(page, assets, true);
         await page.goto(`${pathToFileURL(file).href}?text=Downloaded`);
         await page.waitForFunction(() => document.querySelector("#overlay .primary")?.textContent === "Downloaded");
+        assert.equal(await page.evaluate(() => document.characterSet), "UTF-8");
         assert.equal(await page.evaluate(() => typeof byConfigurator), "undefined");
         const warned = page.waitForEvent("console", { predicate: (message) => message.type() === "warning" && message.text().includes("configurator is not included") });
         await page.keyboard.press("F2");
