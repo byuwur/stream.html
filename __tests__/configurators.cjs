@@ -455,7 +455,7 @@ test("configurator forms and previews initialize for every resource", async (t) 
           testPad.buttons[1].value = 0;
         });
         await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))));
-        assert.equal(await page.locator('.mapping-record[data-slot="primary"]').first().textContent(), "Listening\u2026", "Releasing an already-held input is ignored");
+        assert.equal(await page.locator('.mapping-record[data-slot="primary"]').first().textContent(), "Listening...", "Releasing an already-held input is ignored");
         await page.evaluate(() => {
           testPad.buttons[1].value = 1;
         });

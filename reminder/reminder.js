@@ -15,7 +15,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     fields: {
       entries: {
         type: "entries",
-        default: ["Water break. The next round can wait.", "Relax your hands. We’re here for a good time."],
+        default: ["Water break. The next round can wait.", "Relax your hands. We're here for a good time."],
         label: "Reminder messages",
         section: "Content & behavior",
         validate: parseEntries,

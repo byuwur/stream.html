@@ -86,7 +86,7 @@ The form handles encoding and list add/edit/reorder/remove. Colors use 3/4/6/8 h
 
 Fonts include 350 Google families, system fonts, and installed families/CSS stacks. Fonts and visible samples load on demand; OBS needs access to the chosen font or uses the tool's fallback. Theme preference is local. Every resource has an **Animate** switch, On by default and independent of the system reduced-motion preference. Off disables resource motion while preserving content updates, timing, and gamepad input. The configurator keeps its own animations. Timer and Timeline bars and rings interpolate from the clock between text updates; this pauses while hidden and becomes immediate clock ticks with Animate Off.
 
-All 22 resources keep transparent canvases. Resource defaults use the BONYUR palette: off-white `#eee`, charcoal `#111`, dark crimson `#600`/`#300`. Compact cards favor 40% charcoal surfaces, 12 px backdrop blur, 8–12 px padding, 6 px corners, and faint borders/shadows. Main retains its 6 px dark-crimson frame, inset 24 px, with transparent space inside and blur on its cards. Popup uses 40% charcoal and crimson surfaces and blurs its text box; Webcam blurs only its label so camera content stays clear. Text sizes keep labels and supporting copy close to their main value; Clock defaults to 32 px digits with 20 px labels/date. Clock starts as a single horizontal line; Timer, Timeline, QR, Schedule, and shortcut layouts favor compact rows. Main and Popup use the same palette, with ready-to-edit byUwUr content. Camera and effects canvases retain transparent content areas. Text uses `"Courier New", Courier, monospace`; the configurator uses Archivo. Explicit URL settings override the defaults, and the BONYUR appearance preset restores the card palette without replacing content or layout.
+All 22 resources keep transparent canvases. Resource defaults use the BONYUR palette: off-white `#eee`, charcoal `#111`, dark crimson `#600`/`#300`. Compact cards favor 40% charcoal surfaces, 12 px backdrop blur, 8-12 px padding, 6 px corners, and faint borders/shadows. Main retains its 6 px dark-crimson frame, inset 24 px, with transparent space inside and blur on its cards. Popup uses 40% charcoal and crimson surfaces and blurs its text box; Webcam blurs only its label so camera content stays clear. Text sizes keep labels and supporting copy close to their main value; Clock defaults to 32 px digits with 20 px labels/date. Clock starts as a single horizontal line; Timer, Timeline, QR, Schedule, and shortcut layouts favor compact rows. Main and Popup use the same palette, with ready-to-edit byUwUr content. Camera and effects canvases retain transparent content areas. Text uses `"Courier New", Courier, monospace`; the configurator uses Archivo. Explicit URL settings override the defaults, and the BONYUR appearance preset restores the card palette without replacing content or layout.
 
 Backdrop blur samples content within the same browser page; it cannot blur other OBS sources underneath the Browser Source. Use background alpha for translucent surfaces; overall opacity below 100% can isolate the backdrop and suppress the blur.
 
@@ -169,7 +169,7 @@ Current URLs use percentages for opacity, deadzone, and scale: `100` means 100%,
 
 | Parameter | Meaning |
 | --- | --- |
-| `player` | Gamepads `1`–`8` (default `1`); keyboard `9`; `all-gamepads` always shows P1-P8 and `all-inputs` adds keyboard. `gamepads` and `all` show only connected inputs without/with keyboard. |
+| `player` | Gamepads `1`-`8` (default `1`); keyboard `9`; `all-gamepads` always shows P1-P8 and `all-inputs` adds keyboard. `gamepads` and `all` show only connected inputs without/with keyboard. |
 | `skin` | `xseries` Xbox Series (default), `ds5` DualSense, `fgc` Fight Stick (8 buttons), `fgc6` (6 buttons), `fgc4` (4 buttons), `xone` Xbox One, `ds4` DualShock 4, `x360` Xbox 360, `ds3` DualShock 3, `gcn` GameCube, `n64` Nintendo 64, `snes` SNES, `nes` NES. |
 | `showPlayerIndicators` | `no` (default) hides player lamps, including Xbox 360 guide segments; `yes` shows them. |
 | `layout`, `buttonLabels` | `full` (default) or `minimal`; `icons` (default), `letters`, or `none`. |
@@ -179,15 +179,15 @@ Current URLs use percentages for opacity, deadzone, and scale: `100` means 100%,
 | `disconnectedTint`, `disconnectedOpacity` | Disconnected tint (alpha controls strength; transparent disables it) and opacity `0` to `100`% (default `5`). Connected appearance is unchanged. |
 | `controllerColor` | Custom body color, initially `000000`. Applies only with `customColors=yes`; flat panel/socket tones follow it. |
 | `tintOutlines`, `customOutlineColor`, `outlineColor` | Both switches default to `no`, retaining native stroke colors. Automatic tint derives darker outlines from the shell and takes precedence over an enabled manual color. |
-| `outlineWidth` | Multiplies each structural stroke's original width; `0.5`–`2`, default `1`. Hardware lettering, fine details, and composite filled borders retain their proportions. |
-| `highlightIntensity`, `shadowIntensity` | Independent vector shading intensity, `0`–`100`%; defaults `12` and `16`. |
+| `outlineWidth` | Multiplies each structural stroke's original width; `0.5`-`2`, default `1`. Hardware lettering, fine details, and composite filled borders retain their proportions. |
+| `highlightIntensity`, `shadowIntensity` | Independent vector shading intensity, `0`-`100`%; defaults `12` and `16`. |
 | `customGuide`, `guideSource` | Eligible system/home buttons retain their original symbol by default. Enable `customGuide=yes` with Custom colors to choose `symbol` or `image`. |
 | `guideSymbol`, `guideImage` | Original hardware, Xbox, PlayStation, Steam, circle, diamond, or star; alternatively a safe HTTP(S)/relative PNG, JPEG, WebP, SVG, or animated GIF image URL. Failed images restore the original emblem. |
 | `guideColorMode`, `guideColor` | `original` preserves symbol/image colors. `custom` recolors symbols or applies an alpha-preserving monochrome image tint. |
-| `guideScale`, `guideOffsetX`, `guideOffsetY` | Scale `50`–`150`% (default `100`), offsets `-25`–`25`% (default `0`). Content preserves aspect ratio and is clipped within the native button area. |
-| `screenOpacity` | Display interior opacity, `0`–`100`%; default `0` creates an alpha opening while retaining the bezel. |
-| `opacity` | `0`–`100`%; default `100`. |
-| `offset`, `deadzone` | Stick travel in source pixels, scaled for the fighting stick and compact layouts; deadzone `0`–`100`% (default `5`). |
+| `guideScale`, `guideOffsetX`, `guideOffsetY` | Scale `50`-`150`% (default `100`), offsets `-25`-`25`% (default `0`). Content preserves aspect ratio and is clipped within the native button area. |
+| `screenOpacity` | Display interior opacity, `0`-`100`%; default `0` creates an alpha opening while retaining the bezel. |
+| `opacity` | `0`-`100`%; default `100`. |
+| `offset`, `deadzone` | Stick travel in source pixels, scaled for the fighting stick and compact layouts; deadzone `0`-`100`% (default `5`). |
 | `strength`, `curve` | `strength=1` uses proportional trigger filling (default); `strength=0` uses a digital state; `curve=1` enables stick curving. |
 | `rotation` | Maximum steering-wheel rotation in degrees. |
 | `mapping` | Custom Mapping binding array; `[]` uses defaults. Legacy `{"mapping":[...]}` works. |
@@ -231,13 +231,13 @@ Choose platforms, handles, and order. Repeated platforms are allowed. Brand icon
 | --- | --- |
 | `mode` | `right` (default) or `left`. |
 | `accounts` | Ordered rows, e.g. `[{"platform":"twitch","handle":"/byUwUr"},{"platform":"twitch","handle":"/byUwUr_es"}]`; up to 100 accounts, 160 characters/handle, 20,000 JSON characters. `[]` hides it. |
-| `pauseTime`, `inbetweenPauseTime` | Seconds/account and between cycles: `0`–`3600`, default `3` each. |
-| `animationSpeed` | Playback speed `0`–`500`%; `100` is normal and `0` pauses animation. |
-| `scale` | `-500`–`500`%, anchored to the selected top corner; `100` keeps the original size. |
+| `pauseTime`, `inbetweenPauseTime` | Seconds/account and between cycles: `0`-`3600`, default `3` each. |
+| `animationSpeed` | Playback speed `0`-`500`%; `100` is normal and `0` pauses animation. |
+| `scale` | `-500`-`500`%, anchored to the selected top corner; `100` keeps the original size. |
 | `iconBoxColor`, `textBoxColor`, `iconColor`, `fontColor` | Hex colors without `#`; defaults use deep red `#600`, off-white `#eee`, and translucent charcoal. |
-| `primaryFont`, `fontWeight` | Font family and weight `100`–`900`, step `100` (default `600`); Courier/monospace fallback. |
-| `fontSize`, `textYOffset` | Size `8`–`100` px (default `48`); offset `-100`–`100` px. |
-| `opacity`, `cornerInset`, `textPadding` | Optional opacity `0`–`100`%, signed corner inset on both axes, and horizontal text padding in pixels. |
+| `primaryFont`, `fontWeight` | Font family and weight `100`-`900`, step `100` (default `600`); Courier/monospace fallback. |
+| `fontSize`, `textYOffset` | Size `8`-`100` px (default `48`); offset `-100`-`100` px. |
+| `opacity`, `cornerInset`, `textPadding` | Optional opacity `0`-`100`%, signed corner inset on both axes, and horizontal text padding in pixels. |
 
 Invalid JSON/platforms retain the two byUwUr default accounts; blank handles keep their slots. Font readiness and remeasurement keep animation aligned. Separate account-name and icon typography, text-box borders/shadows, placement, and filters are available in the form.
 
@@ -252,18 +252,18 @@ Invalid JSON/platforms retain the two byUwUr default accounts; blank handles kee
 | Parameter | Meaning |
 | --- | --- |
 | `sceneTitle`, `tagline` | Multiline title up to 300 characters; subtitle up to 160. |
-| `countdownTime`, `countdownMessage`, `countdownOverMessage` | Minutes `0`–`1440` (default `4`); during/after messages. |
+| `countdownTime`, `countdownMessage`, `countdownOverMessage` | Minutes `0`-`1440` (default `4`); during/after messages. |
 | `countdownFormat` | `stopwatch` (total minutes/seconds, default), `clock`, `hours`, `units`, or total `seconds`. |
 | `displayCountdown`, `displayBranding`, `displaySocial`, `displaySchedule`, `displayLabels` | `yes`/`no` toggles. Branding hides only the logo. |
-| `primaryFont`, `titleSize`, `subtitleSize` | Font family and sizes `8`–`200` px; Courier/monospace fallback. |
+| `primaryFont`, `titleSize`, `subtitleSize` | Font family and sizes `8`-`200` px; Courier/monospace fallback. |
 | `primaryTextColor`, `subTextColor`, `accentColor`, `frameColor`, `contentBackgrounds`, `backgroundColor` | Hex without `#`; background defaults to transparent `00000000`, accent and frame to dark crimson `440000` at 8 px. |
-| `frameWidth`, `frameInset` | Border thickness `0`–`100` px (default `6`); optional signed inset in pixels. |
-| `logoUrl`, `logoOpacity`, `logoScale` | Image URL/path (default `https://byuwur.github.io/img/logo.png`), opacity `0`–`100`% (default `4`), scale `-500`–`500`% (default `100`). |
-| `displayBackground`, `backgroundType`, `backgroundUrl`, `backgroundScale` | Media toggle (Off by default), `image`/`video`, media URL/path, and scale `-500`–`500`%. Enable the toggle to show media; the default URL is the BONYUR logo. |
-| `backgroundBlur`, `backgroundOverlayOpacity`, `backgroundOverlay` | Blur `0`–`100` px, tint opacity `0`–`100`%, tint color. |
+| `frameWidth`, `frameInset` | Border thickness `0`-`100` px (default `6`); optional signed inset in pixels. |
+| `logoUrl`, `logoOpacity`, `logoScale` | Image URL/path (default `https://byuwur.github.io/img/logo.png`), opacity `0`-`100`% (default `4`), scale `-500`-`500`% (default `100`). |
+| `displayBackground`, `backgroundType`, `backgroundUrl`, `backgroundScale` | Media toggle (Off by default), `image`/`video`, media URL/path, and scale `-500`-`500`%. Enable the toggle to show media; the default URL is the BONYUR logo. |
+| `backgroundBlur`, `backgroundOverlayOpacity`, `backgroundOverlay` | Blur `0`-`100` px, tint opacity `0`-`100`%, tint color. |
 | `accounts` | Ordered rows with `platform`, `handle`, and `heading`; platforms may repeat. Up to 100 rows, 160 characters per text field, 20,000 JSON characters. Blank handles/`[]` hide accounts. |
 | `scheduleEntries` | Weekday-to-text map, e.g. `{"monday":"Activity"}`; up to seven days, 160 characters/text, 4,000 JSON characters. `{}` hides it. |
-| `animationSpeed` | Social animation speed `0`–`500`%; `100` is normal and `0` pauses animation. |
+| `animationSpeed` | Social animation speed `0`-`500`%; `100` is normal and `0` pauses animation. |
 
 Invalid lists retain defaults. Individual controls cover title/subtitle, countdown and completion text, social names/icons, schedule text, event headings, card surfaces, and scene filters. Each visible section has its own positioning or scale controls where applicable. Follower/donation/subscriber labels are editable text, without live service updates.
 
@@ -287,7 +287,7 @@ The runtime exposes `byStream.ready`, the same promise returned by `initResource
 
 Declare sections, subsections, and fields in display order: primary content and behavior first, then common appearance, size and placement, composition, and detailed styling or effects. Keep related fields together; appearance presets belong in Appearance.
 
-Resource size and offset controls use pixels, including the configurator demo. The configurator interface keeps its rem-based styling. Opacity, deadzone, fades, grayscale, sepia, and invert use `0`–`100`%. Animation speed, brightness, contrast, and saturation accept `0`–`500`%, with `100` as normal. Scale uses `-500`–`500`%, where `100` preserves size and negative values flip both axes. URL values use these same units.
+Resource size and offset controls use pixels, including the configurator demo. The configurator interface keeps its rem-based styling. Opacity, deadzone, fades, grayscale, sepia, and invert use `0`-`100`%. Animation speed, brightness, contrast, and saturation accept `0`-`500`%, with `100` as normal. Scale uses `-500`-`500`%, where `100` preserves size and negative values flip both axes. URL values use these same units.
 
 Field `options` maps stored IDs to displayed labels. Selects show named defaults or Off where an override can be disabled, including the scale/tilt origin. Binary settings use `type: "switch"` with explicit checked/unchecked values. Every field has an icon, with explicit `icon` metadata taking priority over the shared property/purpose choices. `textFields()`, `surfaceFields()`, `placementFields()`, and `layoutFields()` return ordinary fields with concrete defaults. Missing/empty scalar defaults receive neutral values: `0` for offsets/tilt/spacing, `100` for scale/opacity, Courier New for fonts, white or transparent colors, and valid select choices. Numeric fallbacks respect the field's bounds. Resources can replace a generated field's `.default` before `initResource()`; supplied values, including `0` and `false`, take precedence. Neutral generated values preserve base CSS through `styleDefault`; resource-specific defaults that differ from that value apply normally. Text sizes, line heights, and other fields marked `zeroIsDefault` expose their concrete resource defaults; entering `0` or clearing them restores that displayed value. Legacy zero URL/JSON values normalize through the same rules. Maximum width `0` fits content; the Fill width toggle appears directly below Width only at `0` and switches it to available-width sizing. Camera frames, Info Board, and Schedule default to filling the available width. Clearing a field restores its resource default; the Reset button restores the opening configuration. Lower order values appear first; changing order enables a flex layout.
 

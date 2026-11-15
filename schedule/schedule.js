@@ -8,7 +8,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const resource = {
     version: "1.1",
     title: "Schedule",
-    description: "What’s on next? A dated run of show with automatic current-segment highlighting.",
+    description: "What's on next? A dated run of show with automatic current-segment highlighting.",
     preview: [960, 540],
     urlRequired: ["entries"],
     presets: true,
@@ -388,7 +388,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const rows = settings.entries.map((entry) => {
     const row = element("section", "schedule-entry", undefined, list);
     element("p", "primary", entry.title, row);
-    element("p", "secondary", `${format(new Date(entry.startTime))} — ${format(new Date(entry.endTime))}`, row);
+    element("p", "secondary", `${format(new Date(entry.startTime))} - ${format(new Date(entry.endTime))}`, row);
     const status = element("span", "schedule-state", "", row);
     return { row, status, start: Date.parse(entry.startTime), end: Date.parse(entry.endTime) };
   });

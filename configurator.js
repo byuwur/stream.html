@@ -454,7 +454,7 @@
       {
         id: "schedule",
         name: "Schedule",
-        description: "What’s on next? A dated run of show with automatic current-segment highlighting.",
+        description: "What's on next? A dated run of show with automatic current-segment highlighting.",
         icon: "fa-calendar-days",
         category: "time",
         status: "Alpha",
@@ -1323,7 +1323,7 @@
         ["base64", "Base64"]
       ])
         provider.append(new Option(text, value));
-      const browse = $(/* HTML */ `<button type="button" class="image-browse btn bg-body-secondary text-body border border-secondary-subtle"><i class="fa-solid fa-folder-open me-1" aria-hidden="true"></i>Browse…</button>`)
+      const browse = $(/* HTML */ `<button type="button" class="image-browse btn bg-body-secondary text-body border border-secondary-subtle"><i class="fa-solid fa-folder-open me-1" aria-hidden="true"></i>Browse...</button>`)
         .attr("aria-label", `Browse ${title}`)
         .appendTo(actions);
       const picker = $(/* HTML */ `<input type="file" accept="image/png,image/jpeg,image/webp,image/gif" hidden />`).appendTo(component);
@@ -1453,7 +1453,7 @@
         const operationController = controller;
         const { signal } = operationController;
         const timeout = (requestTimer = setTimeout(() => operationController.abort(), 60000));
-        setImageStatus(status, "loading", selected === "base64" ? "Converting image to Base64…" : `Uploading to ${selected === "catbox" ? "Catbox" : "GoFile"}…`);
+        setImageStatus(status, "loading", selected === "base64" ? "Converting image to Base64..." : `Uploading to ${selected === "catbox" ? "Catbox" : "GoFile"}...`);
         component.attr("aria-busy", "true");
         try {
           if (!file.size) throw new Error("The image file is empty.");
@@ -1470,7 +1470,7 @@
           } catch (error) {
             if (!current() || signal.aborted || selected !== "catbox") throw error;
             if (!gofileEndpoint()) throw new Error(`${uploadError(error)} GoFile fallback requires Premium and a secure integration.`);
-            setImageStatus(status, "loading", "Catbox failed. Trying GoFile…");
+            setImageStatus(status, "loading", "Catbox failed. Trying GoFile...");
             try {
               value = await providers.gofile(imageFile, signal);
               selected = "gofile";
@@ -1821,7 +1821,7 @@
         const jqPicker = $(/* HTML */ `<input type="datetime-local" step="1" required />`)
           .attr({ class: `${jqField.attr("class")} timestamp-picker`, "aria-label": title })
           .insertBefore(jqField);
-        const jqNote = $(/* HTML */ `<small class="text-body-secondary"></small>`).text("Choose in this computer’s time zone. The URL stores an absolute time.").insertAfter(jqPicker);
+        const jqNote = $(/* HTML */ `<small class="text-body-secondary"></small>`).text("Choose in this computer's time zone. The URL stores an absolute time.").insertAfter(jqPicker);
         const jqNow = $(/* HTML */ `<button type="button" class="btn btn-sm btn-outline-primary align-self-start"></button>`)
           .text("Use current time")
           .prepend($(/* HTML */ `<i class="fa-solid fa-clock me-2" aria-hidden="true"></i>`))
@@ -2555,7 +2555,7 @@
       $(/* HTML */ `<a></a>`, { href: homeURL, text: "Home", class: "link-body-emphasis" }).appendTo(jqLinks);
       jqDialog.find(".modal-header [data-section]").each((_, tab) => {
         const section = tab.dataset.section;
-        jqLinks.append(" \u00b7 ");
+        jqLinks.append(" · ");
         $(/* HTML */ `<a></a>`, { href: `#${section}`, text: section === "params" ? "Parameter reference" : tab.textContent.trim(), class: "link-body-emphasis" }).appendTo(jqLinks);
       });
       $(document).on("click", 'a[href^="#"]', function (event) {

@@ -25,7 +25,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       label: {
         type: "text",
-        default: "WHAT’S NEXT?",
+        default: "WHAT'S NEXT?",
         label: "Heading",
         section: "Content & behavior",
         maxlength: 160

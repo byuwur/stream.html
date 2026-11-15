@@ -437,7 +437,7 @@ async function initControllerResource() {
 
   /**
    * Polling publishes controller-input each frame and controller-connections when pads change.
-   * Both event details use player slots 0–7; keyboard input stays in slot 9.
+   * Both event details use player slots 0-7; keyboard input stays in slot 9.
    * A pad's index remains its browser index, independently of its assigned player slot.
    */
   const gamepadSupport = {
@@ -1432,7 +1432,7 @@ function initControllerMapping() {
         "C right",
         "Microphone mute"
       ];
-      const axisNames = ["Left stick — horizontal", "Left stick — vertical", "Right stick — horizontal", "Right stick — vertical"];
+      const axisNames = ["Left stick - horizontal", "Left stick - vertical", "Right stick - horizontal", "Right stick - vertical"];
       const section = $(/* HTML */ `
         <section id="remap" hidden>
           <article>
@@ -1503,7 +1503,7 @@ function initControllerMapping() {
           if (player < 1 || player > 9) continue;
           $("<option></option>")
             .val(player)
-            .text(player === 9 ? "Keyboard" : `Player ${player} — ${pad.id}`)
+            .text(player === 9 ? "Keyboard" : `Player ${player} - ${pad.id}`)
             .appendTo(input);
         }
         const preferred = input
@@ -1665,7 +1665,7 @@ function initControllerMapping() {
         if (button.dataset.slot === "direction" && row.data("primary")?.choiceType !== "axes") return message(row, "Record the hat axis first.", true);
         capture = { row, button, kind, pair, slot: button.dataset.slot, direction: button.dataset.direction, snapshot: copyGamepad(pad), timeout: setTimeout(() => cancelCapture("Recording timed out. Try again."), 10000) };
         gamepadSupport.captureKeyboard = Number($("#player-base").val()) === 9;
-        $(button).text("Listening…");
+        $(button).text("Listening...");
         $("#cancel-mapping-capture").removeClass("d-none");
         message(
           row,

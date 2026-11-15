@@ -71,7 +71,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       completion: {
         type: "text",
-        default: "LET’S GO",
+        default: "LET'S GO",
         label: "Completion message",
         section: "Content & behavior",
         maxlength: 160
