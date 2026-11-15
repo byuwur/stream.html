@@ -139,7 +139,7 @@
       }
       const container = target.parent().closest(".subsection-collapse.show, .accordion-collapse.show, .modal-content, .entry-list")[0];
       if (visible && container && !containers.has(container)) containers.set(container, container.getBoundingClientRect().height);
-      targets.push({ target, visible, container, height: visible ? 0 : target[0].getBoundingClientRect().height });
+      targets.push({ target, visible, container, finished: false, height: visible ? 0 : target[0].getBoundingClientRect().height });
     }
     if (!targets.length) return Promise.all(pending).then((results) => results.every(Boolean));
     targets.forEach(({ target, visible, height }) => {
@@ -163,7 +163,7 @@
       resizeContainers(heights);
     });
     targets.forEach((item) => {
-      item.effect = finished.then(() => item.finished === true);
+      item.effect = finished.then(() => item.finished);
       item.target.data("visibilityEffect", item.effect);
       pending.push(item.effect);
     });
@@ -534,7 +534,7 @@
       }
     ],
     get availableTools() {
-      return this.tools.filter((tool) => tool.ready === true);
+      return this.tools.filter(({ ready = false }) => ready);
     }
   };
 

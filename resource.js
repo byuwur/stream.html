@@ -107,7 +107,7 @@
     configuratorWarning = true;
     // console.warn("stream.html: The configurator is not included in this distribution. Configure this resource online: https://byuwur.github.io/stream.html/ - Repository: https://github.com/byuwur/stream.html");
     console.warn("stream.html: The configurator is not included in this distribution. Configure this resource online: https://stream.byuwur.co/ - Repository: https://github.com/byuwur/stream.html");
-    /**
+    /*
     const warning = document.createElement("aside");
     warning.id = "configurator-warning";
     warning.setAttribute("role", "alert");
@@ -126,7 +126,7 @@
     for (const link of [editor, repository]) link.style.color = "#eee";
     warning.append(editor, " or download the editor files from the ", repository, ".");
     document.body.append(warning);
-     */
+    */
   }
 
   global.addEventListener("keydown", (event) => {
@@ -1189,10 +1189,11 @@
       options: { yes: "On", no: "Off" }
     };
     if (resource.fields.width) {
+      const { contentSized = true } = resource.fields.width;
       resource.fields.width.description = "0 fits content, or fills the available space when Fill width is enabled.";
       const widthMode = {
         type: "switch",
-        default: resource.fields.width.contentSized === false ? "fill" : "content",
+        default: contentSized ? "content" : "fill",
         label: "Fill width",
         section: resource.fields.width.section,
         when: ["width", "0"],
@@ -1240,10 +1241,10 @@
           document.documentElement.dataset.animate = settings.animate;
           document.body.append(document.getElementById("overlay-markup").content.cloneNode(true));
           // Metadata-driven CSS is emitted once; selectors also cover rows a renderer creates later.
-          const emptyTextStyle = document.createElement("style");
-          emptyTextStyle.textContent = "#overlay :is(h1,h2,h3,p,.primary,.secondary,.eyebrow,.schedule-state,.badge-icon):empty { display: none !important; } #overlay .panel:empty { display: none !important; }";
-          emptyTextStyle.textContent += 'html[data-animate="no"] *, html[data-animate="no"] *::before, html[data-animate="no"] *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }';
-          document.body.append(emptyTextStyle);
+          const style = document.createElement("style");
+          style.textContent = "#overlay :is(h1,h2,h3,p,.primary,.secondary,.eyebrow,.schedule-state,.badge-icon):empty { display: none !important; } #overlay .panel:empty { display: none !important; }";
+          style.textContent += 'html[data-animate="no"] *, html[data-animate="no"] *::before, html[data-animate="no"] *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }';
+          document.body.append(style);
           const overrides = [];
           for (const [name, field] of Object.entries(resource.fields)) {
             // A zero maximum removes authored CSS caps; other neutral values preserve their base styles.
@@ -1253,8 +1254,6 @@
             if (value !== "") overrides.push([field, value]);
           }
           if (overrides.length) {
-            const style = document.createElement("style");
-            document.body.append(style);
             // Ordering needs a flex parent even when the resource's original layout did not use one.
             for (const parent of new Set(overrides.map(([field]) => field.styleParent).filter(Boolean))) {
               const index = style.sheet.insertRule(`:where(${parent}) {}`, style.sheet.cssRules.length);

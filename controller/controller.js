@@ -492,7 +492,11 @@ async function initControllerResource() {
     },
     pollGamepads() {
       const previous = this.gamepads;
-      const pads = Array.from(navigator.getGamepads?.() ?? []).filter((pad) => pad && pad.connected !== false);
+      const pads = Array.from(navigator.getGamepads?.() ?? []).filter((pad) => {
+        if (!pad) return false;
+        const { connected = true } = pad;
+        return connected;
+      });
       for (const [index, slot] of this.slots) {
         if (!pads.some((pad) => pad.index === index && pad.id === previous[slot]?.id)) this.slots.delete(index);
       }
