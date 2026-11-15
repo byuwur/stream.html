@@ -7,19 +7,22 @@
 const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
 const path = require("node:path");
+const { readFileSync } = require("node:fs");
 
 // --- PINNED DEPENDENCIES AND BROWSER OPTIONS ---
 const root = path.join(__dirname, "..");
-const spaBase = "https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.7/";
-const runtimeAssets = ["_functions.min.js", "_fonts.min.js", "js/gsap.min.js", "js/morphSVGplugin.min.js"];
+const spaVersion = readFileSync(path.join(root, "resource.js"), "utf8").match(/byStream\.SPA_VERSION = "([^"]+)"/)[1];
+const spaBase = `https://cdn.jsdelivr.net/gh/byuwur/spa.js@${spaVersion}/`;
+const runtimeAssets = ["_load.min.js", "_functions.min.js", "_fonts.min.js", "js/gsap.min.js", "js/morphSVGplugin.min.js"];
 const launchOptions = { channel: process.env.BROWSER_CHANNEL || undefined, executablePath: process.env.CHROMIUM_EXECUTABLE_PATH || undefined };
 
 // --- CDN FIXTURES ---
 // Load only the caller's dependencies before browser routing, keeping fetch failures inside its suite.
 async function loadAssets(files) {
+  const dependencies = [...new Set(["_load.min.js", ...files])];
   return new Map(
     await Promise.all(
-      files.map(async (file) => {
+      dependencies.map(async (file) => {
         const url = `${spaBase}${file}`;
         const response = await fetch(url);
         assert.ok(response.ok, `Unable to load ${url}: ${response.status}`);
@@ -51,7 +54,7 @@ async function resourceNames() {
 function standaloneHTML(html) {
   const boundary = html.indexOf("<!-- ===== CONFIGURATOR ===== -->");
   assert.ok(boundary >= 0, "Resource must mark its optional configurator imports");
-  return `${html.slice(0, boundary)}</body></html>`;
+  return html.replace(/<template id="configurator-assets">[\s\S]*?<\/template>/, "").replace(/<div id="configurator"><\/div>/, "");
 }
 
 // --- REQUEST ROUTING ---

@@ -33,20 +33,30 @@
     <!-- <meta name="twitter:image" content="https://byuwur.github.io/stream.html/prev.jpg" /> -->
     <meta name="twitter:image" content="https://stream.byuwur.co/prev.jpg" />
     <meta name="twitter:image:alt" content="stream.html by BONYUR: free OBS overlays for controller input, social popups, and stream scenes." />
+    <script id="spa-loader" src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.11/_load.min.js"></script>
+    <script>
+      const HOST = new URL(".", document.getElementById("spa-loader").src).href;
+      const SPA_STYLES = [
+        { path: "/css/bootstrap.min.css", optional: false },
+        { path: "/css/fontawesome.min.css", optional: true },
+        { path: "/_common.min.css", optional: false },
+        { path: "/_transitions.min.css", optional: true },
+        { path: "/css/animate.min.css", optional: false },
+        { path: "/css/select2.min.css", optional: false }
+      ];
+      const spaReady = byLoad(SPA_STYLES, { host: HOST, before: document.getElementById("spa-loader"), defer: false }).catch(console.error);
+    </script>
+    <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.11/_transitions.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.11/js/jquery.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.11/_common.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.11/js/select2.full.min.js" defer></script>
   </head>
 
   <body class="d-flex flex-column min-vh-100 bg-dark text-white light-links">
     <!-- ===== HOMEPAGE ===== -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.7/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.7/css/fontawesome.min.css" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.7/_common.min.css" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.7/css/animate.min.css" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.7/css/select2.min.css" />
-    <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.7/js/jquery.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.7/_common.min.js" defer></script>
-    <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.7/js/select2.full.min.js" defer></script>
     <script src="./resource.js" defer></script>
     <script src="./configurator.js" defer></script>
+
     <!-- Shared tool categories and icons. -->
     <!-- ===== RESOURCE ===== -->
     <main class="home-layout row g-0 flex-md-nowrap flex-grow-1 overflow-hidden">
@@ -116,128 +126,6 @@
       </div>
     </footer>
 
-    <script>
-      if (typeof jQuery === "undefined" && !window.jQuery) console.error("Init index.html FAILED. No jQuery found.");
-      else
-        window.jQuery(function () {
-          const $ = window.jQuery;
-          // ==========
-          // ==== SHARED TOOL METADATA ====
-          // ==========
-
-          const jqCategory = $("#tool-category").on("change", filterTools);
-          const jqGallery = $(".home-tools");
-          const tools = byConfigurator.catalog.availableTools;
-          $("#tool-count").text(`${tools.length} browser overlay${tools.length === 1 ? "" : "s"}`);
-          byConfigurator.catalog.categories.forEach((group) => {
-            $(/* HTML */ `<option></option>`, { value: group.id, text: group.name }).attr("data-icon", group.icon).appendTo(jqCategory);
-          });
-          tools.forEach((tool, index) => {
-            const jqCard = $($("#home-tool-template").prop("content").firstElementChild).clone();
-            const group = byConfigurator.catalog.categories.find((group) => group.id === tool.category);
-            jqCard
-              .attr({
-                "data-tool": tool.id,
-                "data-category": tool.category,
-                "aria-label": `Configure ${tool.name} (${tool.status})`,
-                href: new URL(`${tool.id}/${location.protocol === "file:" ? "index.html" : ""}`, byConfigurator.catalog.root).href
-              })
-              .css({
-                backgroundImage: `url("${new URL(`${tool.id}/prev.jpg`, byConfigurator.catalog.root).href}")`,
-                viewTransitionName: `tool-${tool.id}`
-              });
-            jqCard.find("[data-home-title]").text(tool.name);
-            jqCard.find(".resource-status").text(tool.status);
-            jqCard.find("p").text(tool.description);
-            jqCard.find(".home-tool-top span").text(`${String(index + 1).padStart(2, "0")} | ${group.name}`);
-            jqCard.find(".home-tool-top i").attr("class", `fa-solid ${tool.icon} flex-shrink-0 lh-1 m-0`);
-            jqCard.find("[data-home-cta]").text(byCommon.randomCTAMessage());
-            jqCard.find(".overlay").css("background", byCommon.randomAccentColor({ tone: "dark", gradient: true, angle: 180 }));
-            jqCard.appendTo(jqGallery);
-          });
-
-          // ==========
-          // ==== SEARCH AND CATEGORY FILTERS ====
-          // ==========
-
-          /**
-           * Move and resize matching cards; read the latest inputs when overlapping transitions update.
-           * @param {boolean} [animate=true] Animate.
-           * @returns {Promise<unknown>} The resulting asynchronous value.
-           */
-          async function filterTools(animate = true) {
-            const update = () => {
-              const query = $("#tool-search").val().trim().toLocaleLowerCase();
-              const category = jqCategory.val();
-              let count = 0;
-              jqGallery.find(".home-tool").each(function () {
-                const jqCard = $(this);
-                const matchesQuery = jqCard.text().toLocaleLowerCase().includes(query);
-                const matchesCategory = category === "all" || jqCard.attr("data-category") === category;
-                jqCard.prop("hidden", !matchesQuery || !matchesCategory);
-                if (matchesQuery && matchesCategory) jqCard.attr("data-result-index", ++count);
-              });
-              $("#catalog-empty").prop("hidden", count > 0);
-              jqGallery.attr("data-result-count", count).scrollTop(0);
-            };
-            if (!animate || !document.startViewTransition || !CSS.supports("view-transition-group", "contain") || $("html").hasClass("no-motion")) return update();
-            try {
-              await document.startViewTransition(update).ready;
-            } catch (error) {
-              // Rapid typing can replace a transition before its snapshots are ready.
-              if (error.name !== "AbortError") throw error;
-            }
-          }
-
-          /**
-           * Keep category labels as text; Font Awesome icons are declared on the native options.
-           * @param {Object} option Select2 option data.
-           * @returns {unknown}
-           */
-          function categoryOption(option) {
-            if (!option.id) return option.text;
-            const icon = $(option.element).attr("data-icon") || "fa-layer-group";
-            const label = $(/* HTML */ `<span></span>`);
-            $(/* HTML */ `<i></i>`, { class: `fa-solid ${icon} fa-fw me-2`, "aria-hidden": "true" }).appendTo(label);
-            label.append($(/* HTML */ `<span></span>`).text(option.text));
-            return label;
-          }
-
-          $("#tool-search").on("input", filterTools);
-          if ($.fn.select2) {
-            jqCategory.select2({
-              width: "100%",
-              dropdownAutoWidth: true,
-              minimumResultsForSearch: Infinity,
-              dropdownCssClass: "home-category-dropdown",
-              templateResult: categoryOption,
-              templateSelection: categoryOption
-            });
-            byConfigurator.initSelect2Motion(jqCategory);
-            const widget = jqCategory.data("select2");
-            /**
-             * Show every category when it fits; keep scrolling within the available viewport space.
-             * @returns {void}
-             */
-            function fitCategoryDropdown() {
-              if (!widget.isOpen()) return;
-              const bounds = widget.$container[0].getBoundingClientRect();
-              const space = Math.max(bounds.top, innerHeight - bounds.bottom);
-              widget.$results.css("max-height", Math.max(0, space - 12));
-              widget.dropdown._positionDropdown();
-            }
-            jqCategory.on("select2:open", fitCategoryDropdown);
-            $(window).on("resize.homeCategory", fitCategoryDropdown);
-            // Keep the menu outside the scrolling intro, capped to the whole filter row as it resizes.
-            new ResizeObserver(([entry]) => {
-              widget.dropdown.$dropdown.css("max-width", entry.contentRect.width);
-              fitCategoryDropdown();
-            }).observe(jqCategory.closest(".catalog-filter")[0]);
-          }
-          filterTools(false);
-          $("#year-txt").text(new Date().getFullYear());
-        });
-    </script>
     <style>
       /* ========== HOMEPAGE LAYOUT AND FILTERS ========== */
       .home-layout,
@@ -258,8 +146,6 @@
       }
       .home-tools {
         display: grid;
-        view-transition-name: tools;
-        view-transition-group: contain;
         grid-template-columns: minmax(0, 1fr);
         grid-auto-rows: max-content;
         align-content: start;
@@ -386,45 +272,6 @@
       .stream-home .home-tools {
         --animate-duration: 0.24s;
       }
-      /* Capture only the gallery, keep the filters interactive, and clip moving cards. */
-      .stream-home {
-        view-transition-name: none;
-      }
-      .stream-home::view-transition {
-        pointer-events: none;
-      }
-      .stream-home::view-transition-group-children(tools) {
-        overflow: clip;
-      }
-      .stream-home::view-transition-group(*) {
-        animation-duration: 0.3s !important;
-        animation-timing-function: ease;
-      }
-      .stream-home::view-transition-old(*) {
-        display: none;
-      }
-      .stream-home::view-transition-new(*) {
-        animation: none;
-      }
-      .stream-home::view-transition-new(*):only-child {
-        animation: home-tool-enter 0.3s ease both;
-      }
-      .stream-home::view-transition-old(*):only-child {
-        display: block;
-        animation: home-tool-exit 0.3s ease both;
-      }
-      @keyframes home-tool-enter {
-        from {
-          opacity: 0;
-          transform: translateX(-0.5rem);
-        }
-      }
-      @keyframes home-tool-exit {
-        to {
-          opacity: 0;
-          transform: translateX(-0.5rem);
-        }
-      }
       .stream-home a:hover,
       .stream-home a:hover * {
         text-decoration: none !important;
@@ -505,10 +352,7 @@
       }
       /* The explicit accessibility toggle still disables landing motion. */
       .stream-home.no-motion *,
-      .stream-home.no-motion .home-tool::before,
-      .stream-home.no-motion::view-transition-group(*),
-      .stream-home.no-motion::view-transition-old(*),
-      .stream-home.no-motion::view-transition-new(*) {
+      .stream-home.no-motion .home-tool::before {
         animation: none !important;
         transition: none !important;
       }
@@ -577,5 +421,125 @@
         }
       }
     </style>
+    <script>
+      document.addEventListener("DOMContentLoaded", async () => {
+        // Deferred imports finish before this event; dynamically loaded styles still need awaiting.
+        await spaReady;
+        if (typeof jQuery === "undefined" && !window.jQuery) console.error("Init index.html FAILED. No jQuery found.");
+        else
+          window.jQuery(function () {
+            const $ = window.jQuery;
+            // ==========
+            // ==== SHARED TOOL METADATA ====
+            // ==========
+
+            const jqCategory = $("#tool-category").on("change", filterTools);
+            const jqGallery = $(".home-tools");
+            const tools = byConfigurator.catalog.availableTools;
+            $("#tool-count").text(`${tools.length} browser overlay${tools.length === 1 ? "" : "s"}`);
+            byConfigurator.catalog.categories.forEach((group) => {
+              $(/* HTML */ `<option></option>`, { value: group.id, text: group.name }).attr("data-icon", group.icon).appendTo(jqCategory);
+            });
+            tools.forEach((tool, index) => {
+              const jqCard = $($("#home-tool-template").prop("content").firstElementChild).clone();
+              const group = byConfigurator.catalog.categories.find((group) => group.id === tool.category);
+              jqCard
+                .attr({
+                  "data-tool": tool.id,
+                  "data-category": tool.category,
+                  "aria-label": `Configure ${tool.name} (${tool.status})`,
+                  href: new URL(`${tool.id}/${location.protocol === "file:" ? "index.html" : ""}`, byConfigurator.catalog.root).href
+                })
+                .css({
+                  backgroundImage: `url("${new URL(`${tool.id}/prev.jpg`, byConfigurator.catalog.root).href}")`
+                });
+              jqCard.find("[data-home-title]").text(tool.name);
+              jqCard.find(".resource-status").text(tool.status);
+              jqCard.find("p").text(tool.description);
+              jqCard.find(".home-tool-top span").text(`${String(index + 1).padStart(2, "0")} | ${group.name}`);
+              jqCard.find(".home-tool-top i").attr("class", `fa-solid ${tool.icon} flex-shrink-0 lh-1 m-0`);
+              jqCard.find("[data-home-cta]").text(byCommon.randomCTAMessage());
+              jqCard.find(".overlay").css("background", byCommon.randomAccentColor({ tone: "dark", gradient: true, angle: 180 }));
+              jqCard.appendTo(jqGallery);
+            });
+
+            // ==========
+            // ==== SEARCH AND CATEGORY FILTERS ====
+            // ==========
+
+            /**
+             * Filter matching cards and ease the updated gallery with the shared helper.
+             * @param {boolean} [animate=true] Animate.
+             * @returns {void}
+             */
+            function filterTools(animate = true) {
+              const update = () => {
+                const query = $("#tool-search").val().trim().toLocaleLowerCase();
+                const category = jqCategory.val();
+                let count = 0;
+                jqGallery.find(".home-tool").each(function () {
+                  const jqCard = $(this);
+                  const matchesQuery = jqCard.text().toLocaleLowerCase().includes(query);
+                  const matchesCategory = category === "all" || jqCard.attr("data-category") === category;
+                  jqCard.prop("hidden", !matchesQuery || !matchesCategory);
+                  if (matchesQuery && matchesCategory) jqCard.attr("data-result-index", ++count);
+                });
+                $("#catalog-empty").prop("hidden", count > 0);
+                jqGallery.attr("data-result-count", count).scrollTop(0);
+              };
+              if (!animate || typeof byTransition !== "function") return update();
+              byTransition(jqGallery[0], update, { children: true });
+            }
+
+            /**
+             * Keep category labels as text; Font Awesome icons are declared on the native options.
+             * @param {Object} option Select2 option data.
+             * @returns {unknown}
+             */
+            function categoryOption(option) {
+              if (!option.id) return option.text;
+              const icon = $(option.element).attr("data-icon") || "fa-layer-group";
+              const label = $(/* HTML */ `<span></span>`);
+              $(/* HTML */ `<i></i>`, { class: `fa-solid ${icon} fa-fw me-2`, "aria-hidden": "true" }).appendTo(label);
+              label.append($(/* HTML */ `<span></span>`).text(option.text));
+              return label;
+            }
+
+            $("#tool-search").on("input", filterTools);
+            if ($.fn.select2) {
+              jqCategory.select2({
+                width: "100%",
+                dropdownAutoWidth: true,
+                minimumResultsForSearch: Infinity,
+                dropdownCssClass: "home-category-dropdown",
+                templateResult: categoryOption,
+                templateSelection: categoryOption
+              });
+              byConfigurator.initSelect2Motion(jqCategory);
+              const widget = jqCategory.data("select2");
+              /**
+               * Show every category when it fits; keep scrolling within the available viewport space.
+               * @returns {void}
+               */
+              function fitCategoryDropdown() {
+                if (!widget.isOpen()) return;
+                const bounds = widget.$container[0].getBoundingClientRect();
+                const space = Math.max(bounds.top, innerHeight - bounds.bottom);
+                widget.$results.css("max-height", Math.max(0, space - 12));
+                widget.dropdown._positionDropdown();
+              }
+              jqCategory.on("select2:open", fitCategoryDropdown);
+              $(window).on("resize.homeCategory", fitCategoryDropdown);
+              // Keep the menu outside the scrolling intro, capped to the whole filter row as it resizes.
+              new ResizeObserver(([entry]) => {
+                widget.dropdown.$dropdown.css("max-width", entry.contentRect.width);
+                fitCategoryDropdown();
+              }).observe(jqCategory.closest(".catalog-filter")[0]);
+            }
+            filterTools(false);
+            $("#year-txt").text(new Date().getFullYear());
+          });
+      });
+    </script>
   </body>
 </html>

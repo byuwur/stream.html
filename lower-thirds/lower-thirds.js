@@ -1,5 +1,6 @@
 // Lower Thirds: validated URL settings and an native renderer with shared URL setup.
 document.addEventListener("DOMContentLoaded", async () => {
+  await byStream.assetsReady;
   // ==========
   // ==== RESOURCE DEFINITION ====
   // ==========

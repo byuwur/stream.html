@@ -2630,8 +2630,7 @@
     // ==========
 
     /**
-     * Reveal visible field groups with the library fade and a short horizontal transition.
-     * One layout read starts the whole batch; completed effects remove their temporary classes.
+     * Ease newly visible field groups with the optional shared transition helper.
      * @param {HTMLElement|jQuery} container Newly opened group or conditional field wrapper.
      * @returns {void}
      */
@@ -2643,14 +2642,10 @@
           // A closed group can briefly have dimensions while editor styles are still loading.
           return $(this).is(":visible") && !$(this).parents("[hidden], [inert], .collapse:not(.show)").length;
         });
-      if (!controls.length) return;
-      controls.off(".fieldReveal").removeClass("animate__animated animate__fadeIn").addClass("motion-enter");
-      void controls[0].offsetWidth;
-      controls.addClass("animate__animated animate__fadeIn").on("animationend.fieldReveal animationcancel.fieldReveal", function (event) {
-        if (event.target !== this) return;
-        // A replay can cancel an earlier effect; a hidden field needs cleanup instead.
-        if (event.type === "animationcancel" && $(this).is(":visible")) return;
-        $(this).off(".fieldReveal").removeClass("motion-enter animate__animated animate__fadeIn");
+      controls.each(function () {
+        const reveal = (field) => field.classList.remove("motion-enter", "animate__animated", "animate__fadeIn");
+        if (typeof global.byTransition === "function") global.byTransition(this, reveal);
+        else reveal(this);
       });
     }
 

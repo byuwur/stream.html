@@ -1,10 +1,11 @@
 /**
  * File: main/main.js
  * @file Scene parameter validation, rendering, countdown, and rotating cards.
- * Deps: configurator.js, GSAP, and SPA.js/_fonts.js.
+ * Deps: resource.js, GSAP, and the declared SPA.js helpers/fonts.
  */
 
 document.addEventListener("DOMContentLoaded", async () => {
+  await byStream.assetsReady;
   // ==========
   // ==== RESOURCE DEFINITION ====
   // ==========

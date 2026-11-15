@@ -36,14 +36,55 @@
   </head>
 
   <body>
-    <!-- ===== SHARED PAGE SETUP ===== -->
+    <!-- ===== SHARED IMPORTS: resource and configurator ===== -->
+    <script type="application/json" id="shared-assets" data-source="https://cdn.jsdelivr.net/gh/byuwur/spa.js" data-spa-version="v20.11">
+      [{ "path": "/_functions.min.js", "optional": false }]
+    </script>
 
     <!-- ===== RESOURCE ===== -->
     <link rel="stylesheet" href="./controller.css" data-renderer-style />
-    <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.7/_functions.min.js" defer></script>
     <script src="../resource.js" defer></script>
-    <script src="./controller.js?v=1.4" defer></script>
+    <script src="./controller.js" defer></script>
     <!-- Keyboard bindings stay explicit and independent from URL settings. -->
+    <!-- Overlay: contains no configurator controls. -->
+    <template id="overlay-markup">
+      <svg width="0" height="0" aria-hidden="true" style="position: absolute">
+        <defs>
+          <filter id="controller-disconnected-tint" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+            <feFlood flood-color="#66000066" />
+            <feComposite in2="SourceGraphic" operator="atop" />
+          </filter>
+        </defs>
+      </svg>
+      <div class="container" id="gamepads">
+        <div class="controller disconnected"></div>
+      </div>
+    </template>
+
+    <!-- ===== CONFIGURATOR ===== -->
+    <template id="configurator-assets">
+      <script type="application/json" data-load data-source="https://cdn.jsdelivr.net/gh/byuwur/spa.js" data-spa-version="v20.11">
+        [
+          { "path": "/css/bootstrap.min.css", "optional": false },
+          { "path": "/css/pickr.min.css", "optional": false },
+          { "path": "/_common.min.css", "optional": false },
+          { "path": "/css/fontawesome.min.css", "optional": true },
+          { "path": "/css/select2.min.css", "optional": false },
+          { "path": "/css/animate.min.css", "optional": false },
+          { "path": "/js/jquery.min.js", "optional": false },
+          { "path": "/js/select2.full.min.js", "optional": false },
+          { "path": "/js/popper.min.js", "optional": false },
+          { "path": "/js/bootstrap.min.js", "optional": false },
+          { "path": "/js/pickr.min.js", "optional": false },
+          { "path": "/_common.min.js", "optional": false },
+          { "path": "/_transitions.min.js", "optional": true }
+        ]
+      </script>
+      <link rel="stylesheet" href="../configurator.css" data-editor-style media="not all" />
+      <script src="../configurator.js" defer></script>
+      <script src="./mapping.js" defer></script>
+    </template>
+    <div id="configurator"></div>
     <script>
       document.addEventListener("DOMContentLoaded", () => {
         window.bySettingsKB = {
@@ -65,41 +106,5 @@
         };
       });
     </script>
-    <!-- Overlay: contains no configurator controls. -->
-    <template id="overlay-markup">
-      <svg width="0" height="0" aria-hidden="true" style="position: absolute">
-        <defs>
-          <filter id="controller-disconnected-tint" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
-            <feFlood flood-color="#66000066" />
-            <feComposite in2="SourceGraphic" operator="atop" />
-          </filter>
-        </defs>
-      </svg>
-      <div class="container" id="gamepads">
-        <div class="controller disconnected"></div>
-      </div>
-    </template>
-
-    <!-- ===== CONFIGURATOR ===== -->
-    <template id="configurator-assets">
-      <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.7/css/bootstrap.min.css" data-editor-style media="not all" />
-      <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.7/css/pickr.min.css" data-editor-style media="not all" />
-      <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.7/_common.min.css" data-editor-style media="not all" />
-      <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.7/css/fontawesome.min.css" />
-      <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.7/css/select2.min.css" data-editor-style media="not all" />
-      <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.7/css/animate.min.css" data-editor-style media="not all" />
-      <link rel="stylesheet" href="../configurator.css" data-editor-style media="not all" />
-      <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.7/js/jquery.min.js" defer></script>
-      <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.7/js/select2.full.min.js" defer></script>
-      <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.7/js/popper.min.js" defer></script>
-      <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.7/js/bootstrap.min.js" defer></script>
-      <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.7/js/pickr.min.js" defer></script>
-      <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.7/_common.min.js" defer></script>
-
-      <!-- Configurator: URL toolbar, settings, preview, and help. -->
-      <script src="../configurator.js" defer></script>
-      <script src="./mapping.js" defer></script>
-    </template>
-    <div id="configurator"></div>
   </body>
 </html>

@@ -5,12 +5,17 @@
 
 // --- DEPENDENCIES ---
 const assert = require("node:assert/strict");
+const fs = require("node:fs/promises");
+const path = require("node:path");
 const test = require("node:test");
 const { chromium } = require("playwright");
-const { runtimeAssets, launchOptions, loadAssets, resourceNames, serve } = require("./browser.cjs");
+const { root, runtimeAssets, launchOptions, loadAssets, resourceNames, serve } = require("./browser.cjs");
 
 const editorAssets = [
   ...runtimeAssets,
+  "_transitions.css",
+  "_transitions.min.css",
+  "_transitions.min.js",
   "js/jquery.min.js",
   "js/select2.full.min.js",
   "js/popper.min.js",
@@ -21,8 +26,81 @@ const editorAssets = [
   "css/select2.min.css",
   "css/pickr.min.css",
   "css/animate.min.css",
-  "_common.min.css"
+  "_common.min.css",
+  "_fonts.css"
 ];
+
+// Shared helpers are available in both modes; animation engines belong to renderer frames.
+test("shared, renderer-only, and configurator-only imports stay in their modes", async () => {
+  const assets = await loadAssets(editorAssets);
+  const browser = await chromium.launch(launchOptions);
+  try {
+    for (const name of ["watermark", "main", "popup", "controller"]) {
+      const page = await browser.newPage();
+      try {
+        const requests = [];
+        page.on("request", (request) => requests.push(request.url()));
+        const editorSource = "https://assets.test/editor-spa.js";
+        const fixtures = new Map([...assets, ...[...assets].map(([url, body]) => [url.replace("https://cdn.jsdelivr.net/gh/byuwur/spa.js", editorSource), body])]);
+        await serve(page, fixtures);
+        if (name === "controller") {
+          const html = (await fs.readFile(path.join(root, "controller/index.html"), "utf8")).replaceAll('data-load data-source="https://cdn.jsdelivr.net/gh/byuwur/spa.js"', `data-load data-source="${editorSource}"`);
+          await page.route("https://stream.test/controller/", (route) => route.fulfill({ contentType: "text/html", body: html }));
+        }
+        await page.goto(`https://stream.test/${name}/?test=1`);
+        await page.waitForFunction(() => window.byStreamResource && window.byStreamOverlay);
+        assert.deepEqual(
+          await page.evaluate(() => ({
+            fonts: Boolean(window.byFont),
+            urls: typeof compress_url_data === "function",
+            animation: Boolean(window.gsap),
+            morph: Boolean(window.MorphSVGPlugin),
+            editor: Boolean(window.byConfigurator),
+            jquery: Boolean(window.jQuery)
+          })),
+          { fonts: name !== "controller", urls: true, animation: ["main", "popup"].includes(name), morph: name === "popup", editor: false, jquery: false },
+          name
+        );
+        assert.ok(!requests.some((url) => /\/(?:configurator\.(?:js|css)|mapping\.js)(?:[?#]|$)/.test(url)), "Overlay mode never requests editor files");
+        await page.goto(`https://stream.test/${name}/#configure`);
+        await page.locator("form[data-configurator] [name]").first().waitFor({ state: "attached" });
+        assert.deepEqual(
+          await page.evaluate(() => ({
+            fonts: Boolean(window.byFont),
+            urls: typeof compress_url_data === "function",
+            animation: Boolean(window.gsap),
+            morph: Boolean(window.MorphSVGPlugin),
+            editor: Boolean(window.byConfigurator),
+            jquery: Boolean(window.jQuery)
+          })),
+          { fonts: name !== "controller", urls: true, animation: false, morph: false, editor: true, jquery: true },
+          name
+        );
+        if (name === "controller") {
+          assert.ok(
+            requests.some((url) => url.startsWith(`${editorSource}@`) && url.endsWith("/css/bootstrap.min.css")),
+            "Styles use their declared source"
+          );
+          assert.ok(
+            requests.some((url) => url.startsWith(`${editorSource}@`) && url.endsWith("/js/jquery.min.js")),
+            "Scripts use their declared source"
+          );
+          assert.ok(requests.includes("https://stream.test/configurator.css"), "Local stylesheet stays document-relative");
+          assert.ok(requests.includes("https://stream.test/controller/mapping.js"), "Local mapping editor loads after the shared configurator");
+          assert.ok(!requests.includes("https://stream.test/controller/configurator.js"));
+          assert.equal(await page.evaluate(() => typeof byConfigurator.configureResource), "function");
+        }
+        const preview = page.frameLocator("#overlay-preview");
+        await preview.locator("html[data-overlay]").waitFor({ state: "attached" });
+        assert.equal(await preview.locator("html").evaluate(() => Boolean(window.gsap)), ["main", "popup"].includes(name));
+      } finally {
+        await page.close();
+      }
+    }
+  } finally {
+    await browser.close();
+  }
+});
 
 // --- CONFIGURATOR INTEGRATION ---
 test("configurator forms and previews initialize for every resource", async (t) => {
@@ -379,6 +457,7 @@ test("configurator forms and previews initialize for every resource", async (t) 
         await page.frameLocator("#overlay-preview").locator("#gamepad-9 .player-leds-layer").waitFor();
         await page.locator("#player-input").selectOption("gamepads");
         await page.waitForFunction(() => new URL(document.getElementById("overlay-url").value).searchParams.get("player") === "gamepads");
+        await page.waitForFunction(() => document.getElementById("overlay-preview").contentWindow.byStreamResource?.settings.player === "gamepads");
         await page.frameLocator("#overlay-preview").locator('#gamepads[data-gamepad-count="8"] #gamepad-8').waitFor();
         assert.equal(await page.frameLocator("#overlay-preview").locator(".controller.active").count(), 8);
         assert.equal(await page.frameLocator("#overlay-preview").locator("#gamepad-9").count(), 0);
@@ -1166,9 +1245,64 @@ test("platform assets and navigation follow both hosting roots", async (t) => {
         try {
           await serve(page, assets, false, base);
           const controller = new URL("controller/", base).href;
-          await page.goto(base);
+          let resumeCSS;
+          const heldCSS = new Promise((resolve) => {
+            resumeCSS = resolve;
+          });
+          const stylesheet = [...assets.keys()].find((url) => url.endsWith("/css/bootstrap.min.css"));
+          const cssRequested = page.waitForRequest(stylesheet);
+          await page.route(stylesheet, async (route) => {
+            await heldCSS;
+            await route.fallback();
+          });
+          let resumeJS;
+          const heldJS = new Promise((resolve) => {
+            resumeJS = resolve;
+          });
+          const script = [...assets.keys()].find((url) => url.endsWith("/js/jquery.min.js"));
+          const jsRequested = page.waitForRequest(script);
+          await page.route(script, async (route) => {
+            await heldJS;
+            await route.fallback();
+          });
+          const pageNavigation = page.goto(base);
+          pageNavigation.catch(() => {});
+          await cssRequested;
+          await page.locator("body").waitFor({ state: "attached" });
+          const visibilityBeforeStyles = await page.locator("body").evaluate((body) => getComputedStyle(body).visibility);
+          const opacityBeforeStyles = await page.locator("html").evaluate((root) => getComputedStyle(root).opacity);
+          resumeCSS();
+          await jsRequested;
+          assert.equal(await page.locator("body").evaluate((body) => getComputedStyle(body).visibility), "visible", "Styled landing content is visible before JavaScript finishes");
+          resumeJS();
+          await pageNavigation;
+          assert.equal(visibilityBeforeStyles, "visible", "Landing content stays visible while stylesheets load");
+          assert.equal(opacityBeforeStyles, "1", "Startup does not force page transparency");
+          // DOMContentLoaded does not wait for dynamically loaded SPA styles and scripts.
+          await page.evaluate(() => spaReady);
           assert.equal(await page.evaluate(() => document.characterSet), "UTF-8");
           assert.equal(await page.evaluate(() => byCommon.CTA_BONYUR_BANK.rare.messages.includes("Hágale pues")), true, "Shared CTA text preserves accented characters");
+          const filtered = await page.evaluate(() => {
+            const search = document.getElementById("tool-search");
+            const gallery = document.querySelector(".home-tools");
+            const original = gallery.firstElementChild;
+            search.value = "clock";
+            search.dispatchEvent(new Event("input", { bubbles: true }));
+            return {
+              animated: gallery.getAnimations().length > 0,
+              visible: [...gallery.querySelectorAll(".home-tool:not([hidden])")].every((card) => card.textContent.toLocaleLowerCase().includes("clock")),
+              preserved: gallery.firstElementChild === original
+            };
+          });
+          assert.deepEqual(filtered, { animated: true, visible: true, preserved: true });
+          await page.evaluate(() => {
+            document.documentElement.classList.add("no-motion");
+            const search = document.getElementById("tool-search");
+            search.value = "";
+            search.dispatchEvent(new Event("input", { bubbles: true }));
+          });
+          assert.equal(await page.locator(".home-tools").evaluate((gallery) => gallery.getAnimations().length), 0, "Disabling motion still updates the catalog immediately");
+          await page.evaluate(() => document.documentElement.classList.remove("no-motion"));
           await page.locator('a[href="' + controller + '"]').click();
           await page.locator("form[data-configurator] [name]").first().waitFor();
           assert.equal(page.url(), controller);

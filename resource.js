@@ -1,7 +1,7 @@
 /**
  * File: resource.js
  * @file Native resource fields, URL validation, styling, formatting, and overlay startup.
- * Dependencies: SPA.js _functions.js for compressed URLs; _fonts.js for font overrides.
+ * Dependencies: declared shared/resource imports; configurator-only libraries stay optional.
  * Resources own defaults and rendering. No configurator, jQuery, or editor UI is required.
  *
  * File map: shared field types; URL decoding and validation; field factories;
@@ -73,32 +73,77 @@
   global.byStream = global.byStream || {};
   const byStream = global.byStream;
   if (byStream.initialized) return;
-  // Resource handlers replace this before the optional editor's DOMContentLoaded handler awaits it.
-  byStream.ready = Promise.resolve();
+  byStream.SPA_VERSION = "v20.11";
+  const sharedImports = document.getElementById("shared-assets");
   const editorImports = document.getElementById("configurator-assets");
-  const editorReady =
-    location.search.length > 1 && !location.hash
-      ? Promise.resolve()
-      : loadConfigurator().catch((error) => {
-          console.warn(error);
-          warnMissingConfigurator();
-        });
-
-  // Editor imports stay inert in overlays; preserve their declared dependency order when editing.
-  async function loadConfigurator() {
-    if (!editorImports) return;
-    for (const source of editorImports.content.children) {
-      if (source.tagName !== "SCRIPT") {
-        document.head.append(source.cloneNode(true));
-        continue;
-      }
+  const resourceImports = document.getElementById("resource-assets");
+  /**
+   * Resolve an external asset group's source; the shared SPA version overrides its HTML fallback.
+   * @param {HTMLScriptElement} list JSON import group with data-source and data-spa-version.
+   * @returns {string} Versioned dependency host.
+   */
+  function assetHost(list) {
+    return `${list.dataset.source}@${byStream.SPA_VERSION || list.dataset.spaVersion}`;
+  }
+  byStream.assetsReady = (async () => {
+    if (!sharedImports && !resourceImports) return;
+    if (typeof global.byLoad !== "function") {
       await new Promise((resolve, reject) => {
-        const script = source.cloneNode(true);
+        const script = document.createElement("script");
+        script.src = `${assetHost(sharedImports || resourceImports)}/_load.min.js`;
+        script.charset = "UTF-8";
+        script.async = false;
+        script.defer = true;
         script.onload = resolve;
-        script.onerror = () => reject(new Error(`Unable to load editor script: ${source.src}`));
+        script.onerror = () => reject(new Error(`Unable to load dependency loader: ${script.src}`));
         document.head.append(script);
       });
     }
+    if (sharedImports) await global.byLoad(JSON.parse(sharedImports.textContent), { host: assetHost(sharedImports) });
+    const overlay = !editorImports || (location.search.length > 1 && !location.hash);
+    if (overlay && resourceImports) await global.byLoad(JSON.parse(resourceImports.textContent), { host: assetHost(resourceImports) });
+  })();
+  // Resource handlers replace this before the optional editor's DOMContentLoaded handler awaits it.
+  byStream.ready = byStream.assetsReady;
+  const editorReady = (async () => {
+    await byStream.assetsReady;
+    if (location.search.length > 1 && !location.hash) return;
+    try {
+      await loadConfigurator();
+    } catch (error) {
+      console.warn(error);
+      warnMissingConfigurator();
+    }
+  })();
+
+  /**
+   * Load the optional editor's external groups and local tags in their declared order.
+   * Styles remain disabled until configure mode activates them; overlays never load this template.
+   * @returns {Promise<void>} Resolves after required editor dependencies load; failures reject.
+   */
+  async function loadConfigurator() {
+    if (!editorImports) return;
+    const files = [];
+    for (const source of editorImports.content.children) {
+      if (source.matches('script[type="application/json"][data-load]')) {
+        const host = assetHost(source);
+        for (const file of JSON.parse(source.textContent)) {
+          const entry = typeof file === "string" ? { path: file, optional: /\/fontawesome\.min\.css(?:[?#]|$)/i.test(file) } : file;
+          files.push({ ...entry, path: entry.path.startsWith("/") ? `${host}${entry.path}` : entry.path });
+        }
+        continue;
+      }
+      if (source.tagName !== "SCRIPT" && source.tagName !== "LINK") {
+        document.head.append(source.cloneNode(true));
+        continue;
+      }
+      const attributes = Object.fromEntries([...source.attributes].filter((attr) => !["src", "href", "rel"].includes(attr.name)).map((attr) => [attr.name, attr.value]));
+      files.push({ path: source.getAttribute(source.tagName === "LINK" ? "href" : "src"), attributes, optional: source.hasAttribute("data-load-optional") });
+    }
+    for (const file of files) {
+      if (/\.css(?:[?#]|$)/i.test(file.path)) file.attributes = { ...file.attributes, "data-editor-style": "", media: "not all" };
+    }
+    await global.byLoad(files);
   }
 
   let configuratorWarning = false;

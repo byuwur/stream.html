@@ -41,6 +41,45 @@ test("browser fixtures contain decoded and symlink paths and reject malformed pa
 });
 
 // --- STANDALONE RESOURCE CONTRACTS ---
+test("shared resource imports honor their source, SPA version, and per-page fallback", async () => {
+  const assets = await loadAssets(runtimeAssets);
+  const source = await fs.readFile(path.join(root, "resource.js"), "utf8");
+  const version = source.match(/byStream\.SPA_VERSION = "([^"]+)"/)[1];
+  const browser = await chromium.launch(launchOptions);
+  try {
+    for (const [override, host] of [
+      ["v99.0", "https://cdn.jsdelivr.net/gh/byuwur/spa.js"],
+      ["", "https://assets.test/spa.js"]
+    ]) {
+      const page = await browser.newPage();
+      try {
+        const expected = override || version;
+        const fixtures = new Map([...assets].map(([url, body]) => [url.replace(`https://cdn.jsdelivr.net/gh/byuwur/spa.js@${version}/`, `${host}@${expected}/`), body]));
+        const requests = [];
+        page.on("request", (request) => {
+          if (request.url().startsWith(`${host}@`)) requests.push(request.url());
+        });
+        await serve(page, fixtures, true);
+        const html = standaloneHTML(await fs.readFile(path.join(root, "watermark/index.html"), "utf8")).replaceAll('data-source="https://cdn.jsdelivr.net/gh/byuwur/spa.js"', `data-source="${host}"`);
+        await page.route("https://stream.test/watermark/?text=Versioned", (route) => route.fulfill({ contentType: "text/html", body: html }));
+        await page.route("**/resource.js", (route) => route.fulfill({ contentType: "text/javascript", body: source.replace(`byStream.SPA_VERSION = "${version}"`, `byStream.SPA_VERSION = "${override}"`) }));
+        await page.goto("https://stream.test/watermark/?text=Versioned");
+        await page.locator("#overlay .primary").filter({ hasText: "Versioned" }).waitFor();
+        assert.ok(requests.length > 1);
+        assert.ok(
+          requests.every((url) => url.includes(`@${expected}/`)),
+          `Dependencies use ${expected}`
+        );
+        assert.equal(await page.evaluate(() => typeof byConfigurator), "undefined");
+      } finally {
+        await page.close();
+      }
+    }
+  } finally {
+    await browser.close();
+  }
+});
+
 test("resources render and round-trip URLs without configurator assets", async (t) => {
   const assets = await loadAssets(runtimeAssets);
   const browser = await chromium.launch(launchOptions);
@@ -189,7 +228,7 @@ test("resources render and round-trip URLs without configurator assets", async (
         assert.equal(page.url(), url);
         await page.keyboard.press("F2");
         assert.equal(warnings.length, 1);
-        assert.match(warnings[0], /https:\/\/byuwur.github.io\/stream.html\//);
+        assert.match(warnings[0], /https:\/\/stream\.byuwur\.co\//);
         assert.match(warnings[0], /https:\/\/github.com\/byuwur\/stream.html/);
         await page.evaluate(() => {
           location.hash = "configure";
@@ -2252,7 +2291,7 @@ test("resources render and round-trip URLs without configurator assets", async (
         await warned;
         assert.equal(warnings.length, 1);
         assert.equal(await page.locator("#configurator-warning").count(), 0);
-        assert.match(warnings[0], /https:\/\/byuwur.github.io\/stream.html\//);
+        assert.match(warnings[0], /https:\/\/stream\.byuwur\.co\//);
         assert.match(await page.evaluate(() => byStream.settingsURL(byStreamResource, byStreamResource.settings).href), /\/index\.html\?text=Downloaded$/);
         await fs.mkdir(path.join(directory, "controller"));
         for (const asset of ["controller.js", "controller.css"]) await fs.copyFile(path.join(root, "controller", asset), path.join(directory, "controller", asset));

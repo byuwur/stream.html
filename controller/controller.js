@@ -18,6 +18,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 async function initControllerResource() {
+  await byStream.assetsReady;
   try {
     const { values } = await byStream.readURLParameters({ skin: {} });
     window.byControllerArtwork = await loadControllerArtwork(values.get("skin") || "xseries");

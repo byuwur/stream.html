@@ -1,10 +1,11 @@
 /**
  * File: popup/popup.js
  * @file Popup parameter validation and animated social-account rendering.
- * Deps: configurator.js, GSAP, MorphSVGPlugin, and SPA.js/_fonts.js.
+ * Deps: resource.js, GSAP, MorphSVGPlugin, and the declared SPA.js helpers/fonts.
  */
 
 document.addEventListener("DOMContentLoaded", async () => {
+  await byStream.assetsReady;
   // ==========
   // ==== RESOURCE DEFINITION ====
   // ==========
