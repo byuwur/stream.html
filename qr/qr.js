@@ -7,7 +7,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Defaults, URL constraints, and the field metadata consumed by the optional editor.
   const resource = {
-    version: "1.1",
+    version: "1.2",
     title: "QR / Link Card",
     description: "A locally generated, scannable link card. Point viewers to something good.",
     preview: [960, 540],

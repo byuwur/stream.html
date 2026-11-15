@@ -7,7 +7,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Defaults, URL constraints, and the field metadata consumed by the optional editor.
   const resource = {
-    version: "1.1",
+    version: "1.2",
     title: "Lower Thirds",
     description: "Introduce a guest, a game, or a moment with a broadcast card.",
     preview: [960, 540],

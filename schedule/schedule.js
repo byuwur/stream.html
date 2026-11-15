@@ -7,7 +7,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Defaults, URL constraints, and the field metadata consumed by the optional editor.
   const resource = {
-    version: "1.1",
+    version: "1.2",
     title: "Schedule",
     description: "What's on next? A dated run of show with automatic current-segment highlighting.",
     preview: [960, 540],

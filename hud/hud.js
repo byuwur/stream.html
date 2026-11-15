@@ -7,7 +7,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Defaults, URL constraints, and the field metadata consumed by the optional editor.
   const resource = {
-    version: "1.1",
+    version: "1.2",
     title: "Camera HUD",
     description: "REC, timecode, and a little nostalgia for your camera view.",
     preview: [1280, 720],

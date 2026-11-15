@@ -12,7 +12,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Defaults, URL constraints, and the field metadata consumed by the optional editor.
   const resource = {
-    version: "1.2", // 2026-11-10
+    version: "1.3", // 2026-11-15
     title: "Social popup",
     description: "Your social accounts, one animated popup at a time.",
     preview: [1280, 360],

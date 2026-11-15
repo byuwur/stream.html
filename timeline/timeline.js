@@ -7,7 +7,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Defaults, URL constraints, and the field metadata consumed by the optional editor.
   const resource = {
-    version: "1.1",
+    version: "1.2",
     title: "Progress Timeline",
     description: "From a beginning to an ending. Show where you are, and what remains.",
     preview: [960, 540],
