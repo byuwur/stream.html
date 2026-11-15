@@ -9,7 +9,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const resource = {
     version: "1.2",
     title: "Lower Thirds",
-    description: "Introduce a guest, a game, or a moment with a broadcast card.",
+    description: "Broadcast cards for guests, games, and moments.",
     preview: [960, 540],
     urlRequired: ["entries"],
     presets: true,
@@ -76,7 +76,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         default: "Courier New",
         label: "Font family",
         section: "Appearance",
-        description: "Search Google Fonts or use an installed font. Online fonts need internet; system fonts provide a fallback.",
+        description: "Google or installed fonts; offline uses a system fallback.",
         maxlength: 100
       },
       fontSize: {
@@ -138,7 +138,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         type: "number",
         default: 0,
         label: "Maximum width (px)",
-        description: "0 = Auto (no fixed maximum).",
+        description: "0 removes the limit.",
         section: "Size & placement",
         min: 0,
         max: 3840,
@@ -183,7 +183,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         default: 51.2,
         optional: true,
         label: "Image size (px)",
-        description: "0 = Auto (preserve the image proportions).",
+        description: "0 keeps the image proportions.",
         section: "Details",
         subsection: "Image",
         min: 0,

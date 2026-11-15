@@ -9,7 +9,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const resource = {
     version: "1.2",
     title: "Schedule",
-    description: "What's on next? A dated run of show with automatic current-segment highlighting.",
+    description: "Dated activities with current-segment highlighting.",
     preview: [960, 540],
     urlRequired: ["entries"],
     presets: true,
@@ -73,7 +73,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         default: "America/Bogota",
         label: "Display time zone",
         section: "Date & time",
-        description: "Search by IANA name or current UTC offset. Entries keep their explicit UTC offsets.",
+        description: "Display zone; entries keep their original UTC offsets.",
         validate: byStream.parseZone,
         maxlength: 160
       },
@@ -82,7 +82,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         default: "en-US",
         label: "Locale",
         section: "Date & time",
-        description: "Search by locale code, language, or region. Empty uses browser locale.",
+        description: "Blank uses the browser's locale.",
         validate: byStream.parseLocale,
         maxlength: 160
       },
@@ -101,7 +101,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         default: "Courier New",
         label: "Font family",
         section: "Appearance",
-        description: "Search Google Fonts or use an installed font. Online fonts need internet; system fonts provide a fallback.",
+        description: "Google or installed fonts; offline uses a system fallback.",
         maxlength: 100
       },
       fontSize: {
@@ -164,7 +164,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         default: 0,
         contentSized: false,
         label: "Maximum width (px)",
-        description: "0 = Auto (no fixed maximum).",
+        description: "0 removes the limit.",
         section: "Size & placement",
         min: 0,
         max: 3840,
@@ -208,7 +208,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         default: 0,
         optional: true,
         label: "Maximum list height (px)",
-        description: "0 = Auto (no fixed maximum).",
+        description: "0 removes the limit.",
         section: "Size & placement",
         min: 0,
         max: 10000,
@@ -219,7 +219,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       ...byStream.placementFields("#overlay .panel"),
       ...byStream.insetFields("statusInset", "Status position", "#overlay .schedule-state"),
-      columns: { type: "number", default: 0, label: "Activity columns", description: "0 automatically fits columns to the activities and available width.", section: "Composition", min: 0, max: 6, step: 1 },
+      columns: { type: "number", default: 0, label: "Activity columns", description: "0 fits columns to the activities and available width.", section: "Composition", min: 0, max: 6, step: 1 },
       spacing: { type: "number", default: 16, optional: true, label: "Activity gap (px)", section: "Composition", min: 0, max: 1000, step: "any", styleSelector: "#overlay .schedule-list", styleProperty: "gap", styleUnit: "px" },
       ...byStream.layoutFields("#overlay .panel", { heading: ["Heading", "#overlay .eyebrow"], list: ["Activities", "#overlay .schedule-list"] }),
       ...byStream.layoutFields("#overlay .schedule-entry", { activity: ["Activity", "#overlay .schedule-entry .primary"], time: ["Time", "#overlay .schedule-entry .secondary"] }, "activity"),

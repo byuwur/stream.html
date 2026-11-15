@@ -9,7 +9,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const resource = {
     version: "1.2",
     title: "QR / Link Card",
-    description: "A locally generated, scannable link card. Point viewers to something good.",
+    description: "Locally generated QR codes and link cards.",
     preview: [960, 540],
     urlRequired: ["content"],
     presets: true,
@@ -20,7 +20,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         default: "https://stream.byuwur.co/",
         label: "Text or URL",
         section: "Content & behavior",
-        description: "Up to 600 UTF-16 characters. The code is generated locally; no remote QR service. Maximum 1,200 UTF-8 bytes.",
+        description: "Max 600 UTF-16 characters and 1,200 UTF-8 bytes.",
         validate: parseContent,
         maxlength: 600,
         rows: 3
@@ -47,7 +47,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         label: "Logo above QR",
         when: ["showLogo", "yes"],
         section: "Content & behavior",
-        description: "Image URL, relative path, or small PNG/JPEG/WebP/GIF data URI.",
+        description: "Image URL/path or small PNG/JPEG/WebP/GIF data URI.",
         maxlength: 65536
       },
       foreground: {
@@ -55,7 +55,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         default: "#330000",
         label: "QR foreground",
         section: "Appearance",
-        description: "Opaque dark #RRGGBB colors keep the code readable.",
+        description: "Use opaque dark #RRGGBB colors.",
         maxlength: 7,
         validate: parseDark
       },
@@ -64,7 +64,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         default: "#FFFFFF",
         label: "QR background",
         section: "Appearance",
-        description: "Opaque light #RRGGBB colors keep the code readable.",
+        description: "Use opaque light #RRGGBB colors.",
         maxlength: 7,
         validate: parseLight
       },
@@ -73,7 +73,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         default: "Courier New",
         label: "Font family",
         section: "Appearance",
-        description: "Search Google Fonts or use an installed font. Online fonts need internet; system fonts provide a fallback.",
+        description: "Google or installed fonts; offline uses a system fallback.",
         maxlength: 100
       },
       fontSize: {
@@ -135,7 +135,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         default: 180,
         label: "QR size (px)",
         section: "Size & placement",
-        description: "Rounded to whole modules; expands if needed to keep modules at least 3 px.",
+        description: "Expands to keep whole modules at least 3 px.",
         min: 180,
         max: 1000,
         step: 1
@@ -144,7 +144,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         type: "number",
         default: 480,
         label: "Maximum width (px)",
-        description: "0 = Auto (no fixed maximum).",
+        description: "0 removes the limit.",
         section: "Size & placement",
         min: 0,
         max: 3840,
@@ -211,7 +211,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         default: 96,
         optional: true,
         label: "Maximum logo width (px)",
-        description: "0 = Auto (no fixed maximum).",
+        description: "0 removes the limit.",
         section: "Details",
         when: ["logoUrl"],
         subsection: "Logo",
@@ -227,7 +227,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         default: 48,
         optional: true,
         label: "Maximum logo height (px)",
-        description: "0 = Auto (no fixed maximum).",
+        description: "0 removes the limit.",
         section: "Details",
         when: ["logoUrl"],
         subsection: "Logo",

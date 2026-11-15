@@ -9,7 +9,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const resource = {
     version: "1.2",
     title: "Screen Effects",
-    description: "A little atmosphere. Rain, snow, confetti, and floating symbols.",
+    description: "Rain, snow, confetti, and floating symbols.",
     preview: [960, 540],
     urlRequired: ["effect"],
     presets: true,
@@ -53,7 +53,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         default: "on",
         label: "Animation",
         section: "Content & behavior",
-        description: "Choose off for a static pattern.",
+        description: "Off keeps the pattern static.",
         checkedValue: "on",
         uncheckedValue: "off",
         options: { on: "on", off: "off" }
@@ -88,7 +88,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         label: "Performance",
         section: "Content & behavior",
         subsection: "Pattern variation",
-        description: "Low caps particles at 50 and removes blur.",
+        description: "Low: up to 50 particles, no blur.",
         options: { standard: "standard", low: "low" }
       },
       seed: {

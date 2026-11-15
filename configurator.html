@@ -134,7 +134,7 @@
         const resource = {
           version: "1.0",
           title: "This is the form.",
-          description: "Your next overlay starts here. Edit a field and watch the demo preview change.",
+          description: "Live preview of overlay settings.",
           preview: [1280, 720],
           urlRequired: ["message"],
           fields: {
@@ -143,7 +143,6 @@
               default: "Something awesome starts here.",
               label: "This is a text field.",
               section: "This is a section.",
-              description: "Example plain text displayed in the demo preview.",
               maxlength: 160,
               icon: "fa-pen",
               rows: 2
@@ -153,7 +152,6 @@
               default: 48,
               label: "This is a number field (px).",
               section: "This is a section.",
-              description: "Example text size in pixels.",
               min: 8,
               max: 96,
               step: "any",
@@ -164,7 +162,7 @@
               default: "#FFFFFF",
               label: "This is a color field (HEX).",
               section: "This is a section.",
-              description: "Example text color. Pickr uses HEX, including alpha.",
+              description: "HEX colors support transparency.",
               maxlength: 160,
               icon: "fa-palette"
             },

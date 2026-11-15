@@ -461,7 +461,7 @@
           default: 0,
           label: `${label} size override (px)`,
           section,
-          description: "Use 0 to turn off the size override and keep the base size.",
+          description: "0 keeps the base size.",
           min: 0,
           max: 400,
           step: "any",
@@ -476,7 +476,7 @@
           default: "",
           label: `${label} color`,
           section,
-          description: "Clearing the field restores its default color.",
+          description: "Blank restores the default color.",
           maxlength: 80,
           optional: true,
           styleSelector: selector,
@@ -606,7 +606,7 @@
   function placementFields(selector) {
     const shared = { default: "", optional: true, section: "Size & placement", styleSelector: selector };
     return initializeDefaults({
-      visualScale: { ...shared, type: "number", label: "Visual scale (%)", description: "100% is the original size. Negative values flip both axes.", min: -500, max: 500, step: "any", styleProperty: "scale", styleUnit: "%" },
+      visualScale: { ...shared, type: "number", label: "Visual scale (%)", description: "100% keeps size; negatives flip both axes.", min: -500, max: 500, step: "any", styleProperty: "scale", styleUnit: "%" },
       tilt: { ...shared, type: "number", label: "Tilt (degrees)", min: -360, max: 360, step: "any", styleProperty: "rotate", styleUnit: "deg" },
       ...offsetFields("visualOffset", "Visual offset", selector),
       transformOrigin: {
@@ -809,7 +809,7 @@
         min: -2000,
         max: 2000,
         step: "any",
-        description: "Use 0 to keep the resource's edge placement."
+        description: "0 keeps the original edge placement."
       };
     Object.assign(fields[`${name}Top`], {
       styleSelector: selector,
@@ -889,7 +889,7 @@
         ...(conditions[name] ? { when: conditions[name] } : {}),
         type: "number",
         label: `${elementLabel} order`,
-        description: "Lower values appear first. Empty preserves the original order.",
+        description: "Lower values come first; blank keeps the original order.",
         min: -100,
         max: 100,
         step: 1,
@@ -967,7 +967,7 @@
         label: "Date format",
         section: "Date & time",
         ...(dateWhen ? { when: dateWhen } : {}),
-        description: "Patterns use Gregorian dates. Month names follow the selected locale.",
+        description: "Gregorian dates; month names use the selected locale.",
         options: dateFormats
       },
       timeFormat: {
@@ -975,7 +975,7 @@
         default: timeFormat,
         label: "Time of day format",
         section: "Date & time",
-        description: "Choose a 12- or 24-hour pattern, with or without seconds. Localized time uses the resource's locale and hour settings.",
+        description: "Localized time follows the locale and hour settings.",
         options: timeFormats
       }
     };
@@ -1228,14 +1228,14 @@
       default: "yes",
       label: "Animate",
       section: "Animation",
-      description: "Enable resource animations, regardless of the system reduced-motion preference.",
+      description: "Animate even when the system prefers reduced motion.",
       checkedValue: "yes",
       uncheckedValue: "no",
       options: { yes: "On", no: "Off" }
     };
     if (resource.fields.width) {
       const { contentSized = true } = resource.fields.width;
-      resource.fields.width.description = "0 fits content, or fills the available space when Fill width is enabled.";
+      resource.fields.width.description = "0 fits content; Fill width uses the available space.";
       const widthMode = {
         type: "switch",
         default: contentSized ? "content" : "fill",
@@ -1258,7 +1258,7 @@
       if (field.type === "number" && ["font-size", "line-height"].includes(field.styleProperty) && field.default > 0) field.zeroIsDefault = true;
       if (!field.zeroIsDefault) continue;
       field.label = field.label.replace(" size override", " size");
-      field.description = `0 or clearing restores the default (${field.default}${field.styleUnit || ""}).`;
+      field.description = `0 or blank restores ${field.default}${field.styleUnit || ""}.`;
     }
     const overlay = (!editorImports && !global.byConfigurator) || (location.search.length > 1 && !location.hash);
     // Only an attached editor supplies saved preferences; standalone overlays use their URL alone.

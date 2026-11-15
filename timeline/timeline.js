@@ -9,7 +9,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const resource = {
     version: "1.2",
     title: "Progress Timeline",
-    description: "From a beginning to an ending. Show where you are, and what remains.",
+    description: "Progress between a start and end time.",
     preview: [960, 540],
     urlRequired: ["style", "startTime", "endTime"],
     presets: true,
@@ -19,7 +19,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         default: "no",
         label: "Use fixed start time",
         section: "Content & behavior",
-        description: "Off starts when the page loads. On uses the timestamp and preserves progress across reloads.",
+        description: "Off starts on load; On keeps progress across reloads.",
         checkedValue: "yes",
         uncheckedValue: "no",
         options: { yes: "On", no: "Off" }
@@ -50,7 +50,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         label: "End timestamp",
         section: "Content & behavior",
         when: ["useStartTime", "yes"],
-        description: "Must follow start; an invalid range displays a clear message.",
+        description: "Must be later than the start.",
         validate: byStream.parseTimestamp,
         maxlength: 160
       },
@@ -110,7 +110,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         default: "Courier New",
         label: "Font family",
         section: "Appearance",
-        description: "Search Google Fonts or use an installed font. Online fonts need internet; system fonts provide a fallback.",
+        description: "Google or installed fonts; offline uses a system fallback.",
         maxlength: 100
       },
       fontSize: {
@@ -172,7 +172,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         type: "number",
         default: 640,
         label: "Maximum width (px)",
-        description: "0 = Auto (no fixed maximum).",
+        description: "0 removes the limit.",
         section: "Size & placement",
         min: 0,
         max: 3840,

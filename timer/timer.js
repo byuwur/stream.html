@@ -9,7 +9,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const resource = {
     version: "1.2",
     title: "Timer / Countdown",
-    description: "A countdown or elapsed timer, with an optional fixed start for reloads.",
+    description: "Countdown or elapsed timer with an optional fixed start.",
     preview: [960, 540],
     urlRequired: ["mode", "startTime", "endTime"],
     presets: true,
@@ -19,7 +19,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         default: "duration",
         label: "Timer mode",
         section: "Content & behavior",
-        description: "Duration counts down and Elapsed counts up from page load, unless a fixed start is enabled. Restart always begins again on load.",
+        description: "Duration counts down; Elapsed counts up. Restart resets on load.",
         options: { duration: "duration", deadline: "deadline", elapsed: "elapsed", restart: "restart" }
       },
       duration: {
@@ -38,7 +38,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         label: "Use fixed start time",
         section: "Content & behavior",
         when: ["mode", "duration", "deadline", "elapsed"],
-        description: "Off starts when the page loads. On uses the timestamp and preserves progress across reloads.",
+        description: "Off starts on load; On keeps progress across reloads.",
         checkedValue: "yes",
         uncheckedValue: "no",
         options: { yes: "On", no: "Off" }
@@ -49,7 +49,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         label: "Start timestamp",
         section: "Content & behavior",
         when: ["useStartTime", "yes"],
-        description: "ISO time with zone, e.g. 2026-10-10T18:00:00-05:00.",
+        description: "ISO timestamp with Z or UTC offset.",
         validate: byStream.parseTimestamp,
         maxlength: 160
       },
@@ -59,7 +59,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         label: "Deadline timestamp",
         section: "Content & behavior",
         when: ["mode", "deadline"],
-        description: "Used in deadline mode; include Z or a UTC offset.",
+        description: "Include Z or a UTC offset.",
         validate: byStream.parseTimestamp,
         maxlength: 160
       },
@@ -110,7 +110,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         default: "yes",
         label: "Show milliseconds",
         section: "Date & time",
-        description: "Refreshes at 20 Hz when enabled.",
+        description: "Updates 20 times per second.",
         checkedValue: "yes",
         uncheckedValue: "no",
         options: { no: "no", yes: "yes" }
@@ -121,7 +121,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         default: "Courier New",
         label: "Font family",
         section: "Appearance",
-        description: "Search Google Fonts or use an installed font. Online fonts need internet; system fonts provide a fallback.",
+        description: "Google or installed fonts; offline uses a system fallback.",
         maxlength: 100
       },
       fontSize: {
@@ -183,7 +183,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         type: "number",
         default: 480,
         label: "Maximum width (px)",
-        description: "0 = Auto (no fixed maximum).",
+        description: "0 removes the limit.",
         section: "Size & placement",
         min: 0,
         max: 3840,

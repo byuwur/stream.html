@@ -337,7 +337,7 @@
       {
         id: "controller",
         name: "Controller",
-        description: "Gamepad or keyboard. 32 models. Full or compact layouts.",
+        description: "Gamepad or keyboard input with 32 controller models.",
         icon: "fa-gamepad",
         category: "interaction",
         status: "Beta",
@@ -346,7 +346,7 @@
       {
         id: "popup",
         name: "Social popup",
-        description: "Your accounts, one animated popup at a time. Pick from 90+ platforms.",
+        description: "Animated social accounts from 90+ platforms.",
         icon: "fa-comment",
         category: "branding",
         status: "Beta",
@@ -355,7 +355,7 @@
       {
         id: "main",
         name: "Main scene",
-        description: "Starting, BRB, ending, and intermission. Make each moment yours.",
+        description: "Starting, BRB, ending, and intermission scenes.",
         icon: "fa-clapperboard",
         category: "scenes",
         status: "Beta",
@@ -364,7 +364,7 @@
       {
         id: "clock",
         name: "Clock",
-        description: "Your time, anywhere. Digital, analog, split flap, or beautifully minimal.",
+        description: "Digital, analog, split-flap, and minimal clocks.",
         icon: "fa-clock",
         category: "time",
         status: "Alpha",
@@ -373,7 +373,7 @@
       {
         id: "timer",
         name: "Timer / Countdown",
-        description: "A reload-safe countdown or elapsed timer for your next run.",
+        description: "Countdown or elapsed timer with an optional fixed start.",
         icon: "fa-hourglass-half",
         category: "time",
         status: "Alpha",
@@ -382,7 +382,7 @@
       {
         id: "webcam",
         name: "Webcam Frame",
-        description: "A clean, transparent frame to place above your camera in OBS.",
+        description: "A transparent frame for your camera.",
         icon: "fa-video",
         category: "scenes",
         status: "Alpha",
@@ -391,7 +391,7 @@
       {
         id: "ticker",
         name: "Ticker",
-        description: "News, commands, and reminders in a seamless scrolling strip.",
+        description: "Scrolling news, commands, and reminders.",
         icon: "fa-align-left",
         category: "information",
         status: "Alpha",
@@ -400,7 +400,7 @@
       {
         id: "watermark",
         name: "Watermark",
-        description: "A signature for your stream. Text, monogram, or your own logo.",
+        description: "Text, monogram, or logo branding.",
         icon: "fa-stamp",
         category: "branding",
         status: "Alpha",
@@ -409,7 +409,7 @@
       {
         id: "lower-thirds",
         name: "Lower Thirds",
-        description: "Introduce a guest, a game, or a moment with a broadcast card.",
+        description: "Broadcast cards for guests, games, and moments.",
         icon: "fa-id-card",
         category: "branding",
         status: "Alpha",
@@ -418,7 +418,7 @@
       {
         id: "qr",
         name: "QR / Link Card",
-        description: "A locally generated, scannable link card. Point viewers to something good.",
+        description: "Locally generated QR codes and link cards.",
         icon: "fa-qrcode",
         category: "information",
         status: "Alpha",
@@ -427,7 +427,7 @@
       {
         id: "reminder",
         name: "Periodic Reminder",
-        description: "Gentle automatic reminders, on your schedule.",
+        description: "Automatic reminders at set intervals.",
         icon: "fa-bell",
         category: "information",
         status: "Alpha",
@@ -436,7 +436,7 @@
       {
         id: "badge",
         name: "Stream Badge",
-        description: "LIVE. AFK. RECORDING. Give the moment a name.",
+        description: "Live, AFK, recording, and custom status labels.",
         icon: "fa-tag",
         category: "branding",
         status: "Alpha",
@@ -445,7 +445,7 @@
       {
         id: "credits",
         name: "Credits Roll",
-        description: "Give your people a proper send-off. Closing credits, made yours.",
+        description: "Scrolling credits for your community.",
         icon: "fa-scroll",
         category: "information",
         status: "Alpha",
@@ -454,7 +454,7 @@
       {
         id: "schedule",
         name: "Schedule",
-        description: "What's on next? A dated run of show with automatic current-segment highlighting.",
+        description: "Dated activities with current-segment highlighting.",
         icon: "fa-calendar-days",
         category: "time",
         status: "Alpha",
@@ -463,7 +463,7 @@
       {
         id: "sponsors",
         name: "Sponsor Carousel",
-        description: "Spotlight public logos and messages, one partner at a time.",
+        description: "Rotating sponsor logos and messages.",
         icon: "fa-handshake",
         category: "branding",
         status: "Alpha",
@@ -472,7 +472,7 @@
       {
         id: "info",
         name: "Info Board",
-        description: "Stream rules, game settings, commands, and the details worth keeping on screen.",
+        description: "Stream rules, game settings, and commands.",
         icon: "fa-circle-info",
         category: "information",
         status: "Alpha",
@@ -481,7 +481,7 @@
       {
         id: "effects",
         name: "Screen Effects",
-        description: "A little atmosphere. Rain, snow, confetti, and floating symbols.",
+        description: "Rain, snow, confetti, and floating symbols.",
         icon: "fa-wand-magic-sparkles",
         category: "scenes",
         status: "Alpha",
@@ -490,7 +490,7 @@
       {
         id: "hud",
         name: "Camera HUD",
-        description: "REC, timecode, and a little nostalgia for your camera view.",
+        description: "Camera overlay with a recording indicator and timecode.",
         icon: "fa-camera",
         category: "scenes",
         status: "Alpha",
@@ -499,7 +499,7 @@
       {
         id: "timeline",
         name: "Progress Timeline",
-        description: "From a beginning to an ending. Show where you are, and what remains.",
+        description: "Progress between a start and end time.",
         icon: "fa-bars-progress",
         category: "time",
         status: "Alpha",
@@ -508,7 +508,7 @@
       {
         id: "randomizer",
         name: "Randomizer",
-        description: "Pick a challenge, a game, or your next move. A seed makes every draw reproducible.",
+        description: "Repeatable seeded draws for games, challenges, and choices.",
         icon: "fa-shuffle",
         category: "interaction",
         status: "Alpha",
@@ -517,7 +517,7 @@
       {
         id: "quotes",
         name: "Quote Display",
-        description: "A thought, a tip, a little trivia. Keep the good words coming.",
+        description: "Rotating quotes, tips, and trivia.",
         icon: "fa-quote-left",
         category: "information",
         status: "Alpha",
@@ -526,7 +526,7 @@
       {
         id: "shortcuts",
         name: "Keyboard Shortcut Sheet",
-        description: "Keep the controls in sight. An editable guide, without keyboard monitoring.",
+        description: "An editable shortcut guide without keyboard monitoring.",
         icon: "fa-keyboard",
         category: "interaction",
         status: "Alpha",
@@ -830,7 +830,7 @@
           const key = `${section}:${field.subsection}`;
           if (!subsections.has(key)) {
             const id = `subsection-${subsections.size}`;
-            const subsection = $(/* HTML */ `<section class="field-subsection mt-3"></section>`).attr("aria-labelledby", `${id}-toggle`).appendTo(container);
+            const subsection = $(/* HTML */ `<section class="field-subsection my-3"></section>`).attr("aria-labelledby", `${id}-toggle`).appendTo(container);
             const heading = $(/* HTML */ `<button class="accordion-button collapsed px-3 py-2 fs-6 fw-semibold text-primary bg-transparent" type="button" data-bs-toggle="collapse" aria-expanded="false"></button>`)
               .attr({ id: `${id}-toggle`, "data-bs-target": `#${id}`, "aria-controls": id })
               .text(field.subsection)

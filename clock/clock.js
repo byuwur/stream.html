@@ -9,7 +9,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const resource = {
     version: "1.2",
     title: "Clock",
-    description: "Your time, anywhere. Digital, analog, split flap, or beautifully minimal.",
+    description: "Digital, analog, split-flap, and minimal clocks.",
     preview: [960, 540],
     urlRequired: ["layout"],
     presets: true,
@@ -33,7 +33,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         default: "America/Bogota",
         label: "Time zone",
         section: "Date & time",
-        description: "Search by IANA name or current UTC offset. Empty uses the OBS computer zone.",
+        description: "Blank uses the OBS computer's time zone.",
         validate: byStream.parseZone,
         maxlength: 160
       },
@@ -44,7 +44,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         label: "Additional time zones",
         when: ["showExtraZones", "yes"],
         section: "Date & time",
-        description: "Choose up to three additional clocks, in display order. Offsets include current daylight saving time.",
+        description: "Up to 3 clocks, in order; offsets reflect daylight saving time.",
         validate: byStream.parseZones,
         maxlength: 400
       },
@@ -54,7 +54,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         label: "Hour format",
         section: "Date & time",
         when: ["timeFormat", "locale"],
-        description: "Used when Time of day format is Localized time.",
+        description: "Applies only to Localized time.",
         options: { 24: "24", 12: "12" }
       },
       seconds: {
@@ -63,7 +63,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         label: "Show seconds",
         section: "Date & time",
         when: ["timeFormat", "locale"],
-        description: "Used when Time of day format is Localized time.",
+        description: "Applies only to Localized time.",
         checkedValue: "yes",
         uncheckedValue: "no",
         options: { yes: "yes", no: "no" }
@@ -74,7 +74,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         label: "Show AM / PM",
         section: "Date & time",
         when: ["timeFormat", "locale"],
-        description: "Used when Time of day format is Localized time.",
+        description: "Applies only to Localized time.",
         checkedValue: "yes",
         uncheckedValue: "no",
         options: { yes: "yes", no: "no" }
@@ -104,7 +104,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         default: "en-US",
         label: "Locale",
         section: "Date & time",
-        description: "Search by locale code, language, or region. Empty uses browser locale.",
+        description: "Blank uses the browser's locale.",
         validate: byStream.parseLocale,
         maxlength: 160
       },
@@ -114,7 +114,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         default: "Courier New",
         label: "Font family",
         section: "Appearance",
-        description: "Search Google Fonts or use an installed font. Online fonts need internet; system fonts provide a fallback.",
+        description: "Google or installed fonts; offline uses a system fallback.",
         maxlength: 100
       },
       fontSize: {
@@ -186,7 +186,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         type: "number",
         default: 360,
         label: "Maximum width (px)",
-        description: "0 = Auto (no fixed maximum).",
+        description: "0 removes the limit.",
         section: "Size & placement",
         min: 0,
         max: 3840,
@@ -231,7 +231,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         default: "single-line",
         label: "Composition",
         section: "Composition",
-        description: "Single line puts the heading, time, and date in one row and scales them to fit.",
+        description: "Single line fits the heading, time, and date in one row.",
         options: { stacked: "Stacked clocks", inline: "Side-by-side clocks", "single-line": "Single line" }
       },
       spacing: {

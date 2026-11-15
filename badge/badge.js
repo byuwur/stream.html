@@ -9,7 +9,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const resource = {
     version: "1.2",
     title: "Stream Badge",
-    description: "LIVE. AFK. RECORDING. Give the moment a name.",
+    description: "Live, AFK, recording, and custom status labels.",
     preview: [960, 540],
     urlRequired: ["label"],
     presets: true,
@@ -51,7 +51,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         default: "Courier New",
         label: "Font family",
         section: "Appearance",
-        description: "Search Google Fonts or use an installed font. Online fonts need internet; system fonts provide a fallback.",
+        description: "Google or installed fonts; offline uses a system fallback.",
         maxlength: 100
       },
       fontSize: {
@@ -104,7 +104,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         type: "number",
         default: 128,
         label: "Maximum width (px)",
-        description: "0 = Auto (no fixed maximum).",
+        description: "0 removes the limit.",
         section: "Size & placement",
         min: 0,
         max: 3840,

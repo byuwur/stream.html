@@ -9,7 +9,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const resource = {
     version: "1.2",
     title: "Camera HUD",
-    description: "REC, timecode, and a little nostalgia for your camera view.",
+    description: "Camera overlay with a recording indicator and timecode.",
     preview: [1280, 720],
     urlRequired: ["style"],
     presets: true,
@@ -58,7 +58,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         label: "Timestamp time zone",
         section: "Date & time",
         when: ["timestamp", "yes"],
-        description: "Search by IANA name or current UTC offset. Empty uses OBS computer zone.",
+        description: "Blank uses the OBS computer's time zone.",
         validate: byStream.parseZone,
         maxlength: 160
       },
@@ -68,7 +68,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         default: "Courier New",
         label: "Font family",
         section: "Appearance",
-        description: "Search Google Fonts or use an installed font. Online fonts need internet; system fonts provide a fallback.",
+        description: "Google or installed fonts; offline uses a system fallback.",
         maxlength: 100
       },
       fontSize: {
@@ -122,7 +122,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         type: "number",
         default: 1920,
         label: "Maximum width (px)",
-        description: "0 = Auto (no fixed maximum).",
+        description: "0 removes the limit.",
         section: "Size & placement",
         min: 0,
         max: 3840,

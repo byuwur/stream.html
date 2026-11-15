@@ -9,7 +9,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const resource = {
     version: "1.2",
     title: "Watermark",
-    description: "A signature for your stream. Text, monogram, or your own logo.",
+    description: "Text, monogram, or logo branding.",
     preview: [960, 540],
     urlRequired: ["text"],
     presets: true,
@@ -35,7 +35,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         label: "Logo URL",
         section: "Content & behavior",
         when: ["kind", "logo"],
-        description: "Image URL, relative path, or small PNG/JPEG/WebP/GIF data URI.",
+        description: "Image URL/path or small PNG/JPEG/WebP/GIF data URI.",
         maxlength: 65536
       },
       fontFamily: {
@@ -43,7 +43,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         default: "Courier New",
         label: "Font family",
         section: "Appearance",
-        description: "Search Google Fonts or use an installed font. Online fonts need internet; system fonts provide a fallback.",
+        description: "Google or installed fonts; offline uses a system fallback.",
         maxlength: 100
       },
       fontSize: {
@@ -105,7 +105,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         type: "number",
         default: 120,
         label: "Maximum width (px)",
-        description: "0 = Auto (no fixed maximum).",
+        description: "0 removes the limit.",
         section: "Size & placement",
         min: 0,
         max: 3840,
@@ -146,7 +146,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         type: "number",
         default: 100,
         label: "Maximum logo height (px)",
-        description: "0 = Auto (no fixed maximum).",
+        description: "0 removes the limit.",
         section: "Size & placement",
         when: ["kind", "logo"],
         min: 0,

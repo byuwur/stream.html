@@ -9,7 +9,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const resource = {
     version: "1.2",
     title: "Keyboard Shortcut Sheet",
-    description: "Keep the controls in sight. An editable guide, without keyboard monitoring.",
+    description: "An editable shortcut guide without keyboard monitoring.",
     preview: [960, 540],
     urlRequired: ["entries"],
     presets: true,
@@ -57,7 +57,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         default: "Courier New",
         label: "Font family",
         section: "Appearance",
-        description: "Search Google Fonts or use an installed font. Online fonts need internet; system fonts provide a fallback.",
+        description: "Google or installed fonts; offline uses a system fallback.",
         maxlength: 100
       },
       fontSize: {
@@ -119,7 +119,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         type: "number",
         default: 0,
         label: "Maximum width (px)",
-        description: "0 = Auto (no fixed maximum).",
+        description: "0 removes the limit.",
         section: "Size & placement",
         min: 0,
         max: 3840,
@@ -163,7 +163,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         default: 0,
         optional: true,
         label: "Maximum shortcut list height (px)",
-        description: "0 = Auto (no fixed maximum).",
+        description: "0 removes the limit.",
         section: "Size & placement",
         min: 0,
         max: 10000,
@@ -173,7 +173,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         styleUnit: "px"
       },
       ...byStream.placementFields("#overlay .panel"),
-      columns: { type: "number", default: 0, label: "Shortcut columns", description: "0 automatically fits columns to the shortcuts and available width.", section: "Composition", min: 0, max: 4, step: 1 },
+      columns: { type: "number", default: 0, label: "Shortcut columns", description: "0 fits columns to the shortcuts and available width.", section: "Composition", min: 0, max: 4, step: 1 },
       spacing: {
         type: "number",
         default: 16,

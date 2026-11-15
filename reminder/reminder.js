@@ -9,7 +9,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const resource = {
     version: "1.2",
     title: "Periodic Reminder",
-    description: "Gentle automatic reminders, on your schedule.",
+    description: "Automatic reminders at set intervals.",
     preview: [960, 540],
     urlRequired: ["entries", "startTime"],
     presets: true,
@@ -67,7 +67,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         label: "Use fixed start time",
         section: "Content & behavior",
         subsection: "Scheduling",
-        description: "Off starts when the page loads. On uses the timestamp and preserves progress across reloads.",
+        description: "Off starts on load; On keeps progress across reloads.",
         checkedValue: "yes",
         uncheckedValue: "no",
         options: { yes: "On", no: "Off" }
@@ -79,7 +79,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         section: "Content & behavior",
         subsection: "Scheduling",
         when: ["useStartTime", "yes"],
-        description: "An ISO timestamp with Z or UTC offset. Reloads preserve this schedule.",
+        description: "ISO timestamp with Z or UTC offset.",
         validate: byStream.parseTimestamp,
         maxlength: 160
       },
@@ -89,7 +89,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         label: "Quiet period starts",
         section: "Content & behavior",
         subsection: "Scheduling",
-        description: "HH:MM in the selected time zone. Matching start/end disables the quiet period.",
+        description: "HH:MM in the selected zone; equal start/end disables quiet hours.",
         validate: parseQuiet,
         maxlength: 160
       },
@@ -99,7 +99,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         label: "Quiet period ends",
         section: "Content & behavior",
         subsection: "Scheduling",
-        description: "Quiet periods may span midnight. Matching start/end disables the quiet period.",
+        description: "May cross midnight; equal start/end disables quiet hours.",
         validate: parseQuiet,
         maxlength: 160
       },
@@ -109,7 +109,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         label: "Quiet period time zone",
         section: "Content & behavior",
         subsection: "Scheduling",
-        description: "Search by IANA name or current UTC offset. Empty uses OBS computer zone.",
+        description: "Blank uses the OBS computer's time zone.",
         validate: byStream.parseZone,
         maxlength: 160
       },
@@ -118,7 +118,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         default: "Courier New",
         label: "Font family",
         section: "Appearance",
-        description: "Search Google Fonts or use an installed font. Online fonts need internet; system fonts provide a fallback.",
+        description: "Google or installed fonts; offline uses a system fallback.",
         maxlength: 100
       },
       fontSize: {
@@ -180,7 +180,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         type: "number",
         default: 650,
         label: "Maximum width (px)",
-        description: "0 = Auto (no fixed maximum).",
+        description: "0 removes the limit.",
         section: "Size & placement",
         min: 0,
         max: 3840,

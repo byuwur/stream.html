@@ -9,7 +9,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const resource = {
     version: "1.2",
     title: "Credits Roll",
-    description: "Give your people a proper send-off. Closing credits, made yours.",
+    description: "Scrolling credits for your community.",
     preview: [960, 540],
     urlRequired: ["entries"],
     presets: true,
@@ -92,7 +92,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         default: "Courier New",
         label: "Font family",
         section: "Appearance",
-        description: "Search Google Fonts or use an installed font. Online fonts need internet; system fonts provide a fallback.",
+        description: "Google or installed fonts; offline uses a system fallback.",
         maxlength: 100
       },
       fontSize: {
@@ -154,7 +154,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         type: "number",
         default: 0,
         label: "Maximum width (px)",
-        description: "0 = Auto (no fixed maximum).",
+        description: "0 removes the limit.",
         section: "Size & placement",
         min: 0,
         max: 3840,

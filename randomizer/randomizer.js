@@ -9,7 +9,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const resource = {
     version: "1.2",
     title: "Randomizer",
-    description: "Pick a challenge, a game, or your next move. A seed makes every draw reproducible.",
+    description: "Repeatable seeded draws for games, challenges, and choices.",
     preview: [960, 540],
     urlRequired: ["entries", "startTime"],
     presets: true,
@@ -64,7 +64,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         section: "Content & behavior",
         subsection: "Draw state",
         when: ["mode", "automatic"],
-        description: "Off starts when the page loads. On uses the timestamp and preserves progress across reloads.",
+        description: "Off starts on load; On keeps progress across reloads.",
         checkedValue: "yes",
         uncheckedValue: "no",
         options: { yes: "On", no: "Off" }
@@ -76,7 +76,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         section: "Content & behavior",
         when: ["useStartTime", "yes"],
         subsection: "Draw state",
-        description: "ISO timestamp with explicit zone. Seed + draw number determines the result.",
+        description: "ISO timestamp with Z or UTC offset.",
         validate: byStream.parseTimestamp,
         maxlength: 160
       },
@@ -107,7 +107,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         default: "Courier New",
         label: "Font family",
         section: "Appearance",
-        description: "Search Google Fonts or use an installed font. Online fonts need internet; system fonts provide a fallback.",
+        description: "Google or installed fonts; offline uses a system fallback.",
         maxlength: 100
       },
       fontSize: {
@@ -169,7 +169,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         type: "number",
         default: 0,
         label: "Maximum width (px)",
-        description: "0 = Auto (no fixed maximum).",
+        description: "0 removes the limit.",
         section: "Size & placement",
         min: 0,
         max: 3840,
