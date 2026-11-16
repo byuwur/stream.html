@@ -3,7 +3,9 @@
 /**
  * File: upload_image.php
  * Standalone image uploads through developer-defined providers. Deploy on the HTTPS PHP host only.
- * cURL conventions adapted from spa.php make_http_request() (MIT, byUwUr).
+ * HTTP helper adapted from spa.php/_functions.php make_http_request() (MIT).
+ * Upload validation and guard clauses follow academyapp.com.co/app/write/foto.php.
+ * Copyright (c) 2026 Andrés Trujillo [Mateus] byUwUr
  */
 
 declare(strict_types=1);
@@ -16,12 +18,13 @@ const IMAGE_UPLOAD_PIXELS = 16000000;
 const IMAGE_UPLOAD_WINDOW = 600;
 const IMAGE_UPLOAD_REQUESTS = 10;
 
-/** Send a public plain-text response; internal failures never enter the body. */
-function image_upload_response(int $status, string $message): void
+/** Finish with a public plain-text response, following Academyapp's endpoint guard clauses. */
+function image_upload_response(int $status, string $message): never
 {
   http_response_code($status);
   header('Content-Type: text/plain; charset=utf-8');
   echo $message;
+  exit;
 }
 
 /**
@@ -121,20 +124,23 @@ function image_upload_catbox_response(string $response): ?string
 }
 
 /**
- * Forward original bytes once using a resolved provider and the shared HTTPS transport.
- * @return array [HTTP status, public URL or safe error, optional safe diagnostic header].
- * Never returns upstream HTML, raw cURL errors, or server paths.
+ * Standalone multipart adaptation of spa.php/_functions.php make_http_request().
+ * Uses validate_value()'s native URL check without framework sessions, globals, or console output.
+ * @return array [Response body or false, cURL error number, upstream HTTP status].
  */
-function image_upload_forward(string $path, string $mime, string $extension, array $provider): array
+function make_http_request(string $url, array $post): array
 {
-  $request = curl_init($provider['endpoint']);
+  if (!filter_var($url, FILTER_VALIDATE_URL) || parse_url($url, PHP_URL_SCHEME) !== 'https')
+    throw new RuntimeException('invalid upload endpoint');
+  $request = curl_init($url);
   if (!$request) throw new RuntimeException('curl initialization failed');
   $response = '';
-  $fields = $provider['fields'];
-  $fields[$provider['file']] = new CURLFile($path, $mime, 'image.' . $extension);
   curl_setopt_array($request, [
     CURLOPT_POST => true,
-    CURLOPT_POSTFIELDS => $fields,
+    // Passing the array directly preserves CURLFile multipart data instead of URL-encoding it.
+    CURLOPT_POSTFIELDS => $post,
+    // Avoid the observed Hostinger-to-Catbox HTTP/2 stream failure (cURL error 92).
+    CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
     CURLOPT_CONNECTTIMEOUT => 10,
     CURLOPT_TIMEOUT => 40,
     CURLOPT_RETURNTRANSFER => true,
@@ -153,8 +159,21 @@ function image_upload_forward(string $path, string $mime, string $extension, arr
   $completed = curl_exec($request);
   $error = curl_errno($request);
   $status = curl_getinfo($request, CURLINFO_RESPONSE_CODE);
+  return [$completed === false ? false : $response, $error, $status];
+}
+
+/**
+ * Forward original bytes using a resolved provider and the local HTTP helper.
+ * @return array [HTTP status, public URL or safe error, optional safe diagnostic header].
+ * Never returns upstream HTML, raw cURL errors, or server paths.
+ */
+function image_upload_forward(string $path, string $mime, string $extension, array $provider): array
+{
+  $fields = $provider['fields'];
+  $fields[$provider['file']] = new CURLFile($path, $mime, 'image.' . $extension);
+  [$response, $error, $status] = make_http_request($provider['endpoint'], $fields);
   $diagnostic = 'transport=' . $error . '; upstream=' . $status;
-  if ($completed === false || $error || $status < 200 || $status >= 300) {
+  if ($response === false || $error || $status < 200 || $status >= 300) {
     error_log('stream image upload: transport=' . $error . ' HTTP=' . $status);
     if ($error === CURLE_OPERATION_TIMEDOUT) return [504, 'Upload timed out. No automatic retry was made.', $diagnostic];
     return [502, 'Image host unavailable. No automatic retry was made.', $diagnostic];
@@ -184,62 +203,44 @@ function upload_image(): void
   if ($method !== 'POST') {
     header('Allow: POST, OPTIONS');
     image_upload_response(405, 'Use POST multipart/form-data.');
-    return;
   }
   try {
     $retry = image_upload_rate_limit($_SERVER['REMOTE_ADDR'] ?? 'unknown');
     if ($retry) {
       header('Retry-After: ' . $retry);
       image_upload_response(429, 'Upload limit reached. Please wait before trying again.');
-      return;
     }
     // Detect PHP-discarded POST bodies as well as our own file limit; allow multipart overhead.
     $length = (int) ($_SERVER['CONTENT_LENGTH'] ?? 0);
     $post_limit = ini_parse_quantity(ini_get('post_max_size'));
-    if ($length > IMAGE_UPLOAD_BYTES + 65536 || ($post_limit > 0 && $length > $post_limit)) {
+    if ($length > IMAGE_UPLOAD_BYTES + 65536 || ($post_limit > 0 && $length > $post_limit))
       image_upload_response(413, 'Image exceeds the 8 MiB upload limit.');
-      return;
-    }
-    if (!str_starts_with(strtolower($_SERVER['CONTENT_TYPE'] ?? ''), 'multipart/form-data;')) {
+    if (!str_starts_with(strtolower($_SERVER['CONTENT_TYPE'] ?? ''), 'multipart/form-data;'))
       image_upload_response(400, 'Use multipart/form-data with fileToUpload.');
-      return;
-    }
     $default = getenv('STREAM_UPLOAD_PROVIDER');
     $name = $_POST['provider'] ?? ($default === false || $default === '' ? IMAGE_UPLOAD_DEFAULT_PROVIDER : $default);
     $provider = is_string($name) ? image_upload_provider($name) : null;
     if ($provider === null) {
       if (!array_key_exists('provider', $_POST)) throw new RuntimeException('configured provider unavailable');
       image_upload_response(400, 'Unsupported image provider.');
-      return;
     }
     $file = $_FILES['fileToUpload'] ?? null;
-    if (!$file || !is_array($file) || !isset($file['error']) || !is_int($file['error'])) {
+    if (!$file || !is_array($file) || !isset($file['error']) || !is_int($file['error']))
       image_upload_response(400, 'Missing image file. Check the server upload limits.');
-      return;
-    }
-    if (in_array($file['error'], [UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE], true)) {
+    if (in_array($file['error'], [UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE], true))
       image_upload_response(413, 'Image exceeds the upload limit. Maximum 8 MiB.');
-      return;
-    }
     if (in_array($file['error'], [UPLOAD_ERR_NO_TMP_DIR, UPLOAD_ERR_CANT_WRITE, UPLOAD_ERR_EXTENSION], true)) {
       error_log('stream image upload: PHP upload processing failure code=' . $file['error']);
       image_upload_response(503, 'Image upload service unavailable.');
-      return;
     }
-    if ($file['error'] !== UPLOAD_ERR_OK) {
+    if ($file['error'] !== UPLOAD_ERR_OK)
       image_upload_response(400, 'Image upload was incomplete or missing.');
-      return;
-    }
     $path = $file['tmp_name'] ?? null;
-    if (!is_string($path) || !is_uploaded_file($path)) {
+    if (!is_string($path) || !is_uploaded_file($path))
       image_upload_response(400, 'Invalid uploaded file.');
-      return;
-    }
     $bytes = filesize($path);
-    if (!$bytes || $bytes > IMAGE_UPLOAD_BYTES) {
+    if (!$bytes || $bytes > IMAGE_UPLOAD_BYTES)
       image_upload_response($bytes ? 413 : 400, $bytes ? 'Image exceeds the 8 MiB upload limit.' : 'The image file is empty.');
-      return;
-    }
     if (!extension_loaded('curl') || !extension_loaded('fileinfo') || !function_exists('imagecreatefromstring'))
       throw new RuntimeException('required PHP extension unavailable');
     [$mime, $extension] = image_upload_type($path);

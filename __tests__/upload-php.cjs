@@ -29,12 +29,15 @@ test("PHP upload validates multipart, limits abuse, and safely handles fixed Cat
     function curl_exec($request) {
       $mode = json_decode(file_get_contents(getenv('STREAM_TEST_MODE')), true);
       $file = $GLOBALS['options'][CURLOPT_POSTFIELDS]['fileToUpload'];
+      $GLOBALS['attempts'] = ($GLOBALS['attempts'] ?? 0) + 1;
       file_put_contents(getenv('STREAM_TEST_CAPTURE'), json_encode([
+        'attempts' => $GLOBALS['attempts'],
         'url' => $GLOBALS['upstream'], 'reqtype' => $GLOBALS['options'][CURLOPT_POSTFIELDS]['reqtype'],
         'mime' => $file->getMimeType(), 'name' => $file->getPostFilename(),
         'hash' => hash_file('sha256', $file->getFilename()),
         'verifyPeer' => $GLOBALS['options'][CURLOPT_SSL_VERIFYPEER], 'verifyHost' => $GLOBALS['options'][CURLOPT_SSL_VERIFYHOST],
         'redirects' => $GLOBALS['options'][CURLOPT_FOLLOWLOCATION], 'protocols' => $GLOBALS['options'][CURLOPT_PROTOCOLS],
+        'http11' => $GLOBALS['options'][CURLOPT_HTTP_VERSION] === CURL_HTTP_VERSION_1_1,
         'connectTimeout' => $GLOBALS['options'][CURLOPT_CONNECTTIMEOUT], 'timeout' => $GLOBALS['options'][CURLOPT_TIMEOUT]
       ]));
       if (!isset($mode['body'])) return false;
@@ -112,10 +115,12 @@ test("PHP upload validates multipart, limits abuse, and safely handles fixed Cat
         assert.equal(response.status, 200, `${type}: ${text}`);
         assert.equal(text, "https://files.catbox.moe/image.png");
         const forwarded = JSON.parse(await fs.readFile(capture));
+        assert.equal(forwarded.attempts, 1, "The local HTTP helper sends each upload once");
         assert.equal(forwarded.hash, require("node:crypto").createHash("sha256").update(buffer).digest("hex"));
         assert.equal(forwarded.url, "https://catbox.moe/user/api.php"); assert.equal(forwarded.reqtype, "fileupload");
         assert.equal(forwarded.mime, `image/${type}`); assert.equal(forwarded.name, `image.${type === "jpeg" ? "jpg" : type}`);
         assert.equal(forwarded.verifyPeer, true); assert.equal(forwarded.verifyHost, 2); assert.equal(forwarded.redirects, false);
+        assert.equal(forwarded.http11, true, "Upstream uploads avoid the observed HTTP/2 stream failure");
         assert.ok(forwarded.connectTimeout > 0 && forwarded.timeout <= 40);
       }
     });
@@ -164,6 +169,7 @@ test("PHP upload validates multipart, limits abuse, and safely handles fixed Cat
         [{ errno: 7, status: 0 }, 502, "transport=7; upstream=0"],
         [{ errno: 28, status: 0 }, 504, "transport=28; upstream=0"],
         [{ errno: 60, status: 0 }, 502, "transport=60; upstream=0"],
+        [{ errno: 92, status: 0 }, 502, "transport=92; upstream=0"],
         [{ status: 302, body: "https://files.catbox.moe/image.png" }, 502, "transport=0; upstream=302"],
         [{ errno: 23, body: "x".repeat(4097) }, 502, "transport=23; upstream=200"],
         ...[
@@ -181,6 +187,7 @@ test("PHP upload validates multipart, limits abuse, and safely handles fixed Cat
         const result = await upload(png);
         assert.equal(result.response.status, status);
         assert.equal(result.response.headers.get("x-upload-diagnostic"), diagnostic);
+        assert.equal(JSON.parse(await fs.readFile(capture)).attempts, 1, "Transport failures never replay the upload");
       }
     });
     await t.test("per-client limiter ignores forwarded IPs, expires, and fails closed on corruption", async () => {
