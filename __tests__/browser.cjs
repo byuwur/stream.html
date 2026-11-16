@@ -8,28 +8,44 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
 const path = require("node:path");
 const { readFileSync } = require("node:fs");
+const { chromium, firefox, webkit } = require("playwright");
 
 // --- PINNED DEPENDENCIES AND BROWSER OPTIONS ---
 const root = path.join(__dirname, "..");
 const spaVersion = readFileSync(path.join(root, "resource.js"), "utf8").match(/byStream\.SPA_VERSION = "([^"]+)"/)[1];
 const spaBase = `https://cdn.jsdelivr.net/gh/byuwur/spa.js@${spaVersion}/`;
 const runtimeAssets = ["_load.min.js", "_functions.min.js", "_fonts.min.js", "js/gsap.min.js", "js/morphSVGplugin.min.js"];
-const launchOptions = { channel: process.env.BROWSER_CHANNEL || undefined, executablePath: process.env.CHROMIUM_EXECUTABLE_PATH || undefined };
+const engine = process.env.BROWSER_ENGINE || "chromium";
+assert.ok(["chromium", "firefox", "webkit"].includes(engine), "Unsupported BROWSER_ENGINE");
 
-// --- CDN FIXTURES ---
-// Load only the caller's dependencies before browser routing, keeping fetch failures inside its suite.
+/**
+ * Launch the selected engine with bounded startup; executable/channel overrides belong to Chromium.
+ * @returns {Promise<import("playwright").Browser>} Browser owned and closed by the calling suite.
+ */
+function launchBrowser() {
+  return { chromium, firefox, webkit }[engine].launch({ timeout: 10000, ...(engine === "chromium" ? { channel: process.env.BROWSER_CHANNEL, executablePath: process.env.CHROMIUM_EXECUTABLE_PATH } : {}) });
+}
+
+// --- LOCAL DEPENDENCY FIXTURES ---
+/**
+ * Read real SPA.js assets from its local checkout behind the resource's declared URLs.
+ * @param {string[]} files Relative SPA.js asset paths required by this suite.
+ * @returns {Promise<Map<string, Object>>} Browser fulfillment bodies; missing files fail setup.
+ */
 async function loadAssets(files) {
-  const dependencies = [...new Set(["_load.min.js", ...files])];
-  return new Map(
-    await Promise.all(
-      dependencies.map(async (file) => {
-        const url = `${spaBase}${file}`;
-        const response = await fetch(url, { signal: AbortSignal.timeout(15000) });
-        assert.ok(response.ok, `Unable to load ${url}: ${response.status}`);
-        return [url, { body: await response.text(), contentType: file.endsWith(".css") ? "text/css" : "text/javascript" }];
-      })
-    )
-  );
+  const directory = process.env.SPA_ASSETS_ROOT || path.join(root, "../spa.js");
+  const assets = new Map();
+  for (const file of new Set(["_load.min.js", ...files])) {
+    let body;
+    try {
+      body = await fs.readFile(path.join(directory, file));
+    } catch (error) {
+      if (error.code !== "ENOENT") throw error;
+      body = await fs.readFile(path.join(directory, file.replace(/\.min(?=\.(?:css|js)$)/, "")));
+    }
+    assets.set(`${spaBase}${file}`, { body, contentType: file.endsWith(".css") ? "text/css" : "text/javascript" });
+  }
+  return assets;
 }
 
 // --- RESOURCE DISCOVERY ---
@@ -71,7 +87,8 @@ async function serve(page, assets, standalone = false, baseURL = "https://stream
   await page.route("**/*", async (route) => {
     const url = new URL(route.request().url());
     if (assets.has(url.href)) return route.fulfill(assets.get(url.href));
-    if (url.protocol === "file:") return route.continue();
+    // Keep browser-owned local reads native; WebKit also routes upload preview blob URLs.
+    if (["file:", "blob:", "data:"].includes(url.protocol)) return route.continue();
     if (url.origin !== base.origin) return route.abort();
     if (!url.pathname.startsWith(base.pathname)) return route.fulfill({ status: 404, body: "Not found" });
     let file, body;
@@ -98,4 +115,4 @@ async function serve(page, assets, standalone = false, baseURL = "https://stream
 }
 
 // --- SUITE FIXTURES ---
-module.exports = { root, runtimeAssets, launchOptions, loadAssets, resourceNames, standaloneHTML, serve };
+module.exports = { root, runtimeAssets, launchBrowser, loadAssets, resourceNames, standaloneHTML, serve };

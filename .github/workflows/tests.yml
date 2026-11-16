@@ -5,11 +5,6 @@ on:
     branches: [main]
   pull_request:
   workflow_dispatch:
-    inputs:
-      extended:
-        description: Run detailed resource, configurator, input, and cross-browser checks
-        type: boolean
-        default: false
 
 permissions:
   contents: read
@@ -19,35 +14,62 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  core:
-    name: Core (chromium)
-    runs-on: ubuntu-24.04
-    container:
-      image: mcr.microsoft.com/playwright:v1.63.0-noble
-      options: --ipc=host
-    timeout-minutes: 5
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-          cache-dependency-path: .github/package-lock.json
-      - name: Install test tools
-        timeout-minutes: 2
-        run: npm --prefix .github ci --ignore-scripts --no-audit --no-fund
-      - name: Check shared source and core behavior
-        env:
-          NODE_PATH: ${{ github.workspace }}/.github/node_modules
-        run: |
-          node --check resource.js
-          node --check configurator.js
-          npm --prefix .github test
+  resources_chromium:
+    name: resources (chromium)
+    uses: ./.github/workflows/browser-check.yml
+    with:
+      browser: chromium
+      suite: resources
+
+  resources_firefox:
+    name: resources (firefox)
+    needs: resources_chromium
+    if: ${{ !cancelled() }}
+    uses: ./.github/workflows/browser-check.yml
+    with:
+      browser: firefox
+      suite: resources
+
+  resources_webkit:
+    name: resources (webkit)
+    needs: resources_firefox
+    if: ${{ !cancelled() }}
+    uses: ./.github/workflows/browser-check.yml
+    with:
+      browser: webkit
+      suite: resources
+
+  configurators_chromium:
+    name: configurators (chromium)
+    needs: resources_webkit
+    if: ${{ !cancelled() }}
+    uses: ./.github/workflows/browser-check.yml
+    with:
+      browser: chromium
+      suite: configurators
+
+  configurators_firefox:
+    name: configurators (firefox)
+    needs: configurators_chromium
+    if: ${{ !cancelled() }}
+    uses: ./.github/workflows/browser-check.yml
+    with:
+      browser: firefox
+      suite: configurators
+
+  configurators_webkit:
+    name: configurators (webkit)
+    needs: configurators_firefox
+    if: ${{ !cancelled() }}
+    uses: ./.github/workflows/browser-check.yml
+    with:
+      browser: webkit
+      suite: configurators
 
   uploads:
     name: PHP uploads
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 3
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -60,61 +82,3 @@ jobs:
           coverage: none
       - run: php -l upload_image.php
       - run: node --test __tests__/upload-php.cjs
-
-  browser:
-    if: github.event_name == 'workflow_dispatch' && inputs.extended
-    name: ${{ matrix.name }}
-    runs-on: ubuntu-24.04
-    container:
-      image: mcr.microsoft.com/playwright:v1.63.0-noble
-      options: --ipc=host
-    timeout-minutes: 10
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - suite: resources
-            name: Resources
-          - suite: configurators
-            name: Configurators
-          - suite: inputs
-            name: Keyboard, mouse, and Input History
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-      - name: Install browser test tools
-        run: |
-          npm install --prefix "$RUNNER_TEMP/stream-tests" --no-package-lock --no-audit --no-fund playwright@1.63.0
-      - name: Check ${{ matrix.name }}
-        env:
-          NODE_PATH: ${{ runner.temp }}/stream-tests/node_modules
-          RENDER_ENGINES: chromium
-        run: |
-          node --check resource.js
-          if [ "${{ matrix.suite }}" = "configurators" ]; then node --check configurator.js; fi
-          node --test __tests__/${{ matrix.suite }}.cjs
-
-  rendering:
-    if: github.event_name == 'workflow_dispatch' && inputs.extended
-    name: Firefox and WebKit rendering
-    runs-on: ubuntu-24.04
-    container:
-      image: mcr.microsoft.com/playwright:v1.63.0-noble
-      options: --ipc=host
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-      - name: Install rendering test tools
-        run: |
-          npm install --prefix "$RUNNER_TEMP/stream-tests" --no-package-lock --no-audit --no-fund playwright@1.63.0
-      - name: Check Firefox and WebKit painting
-        env:
-          NODE_PATH: ${{ runner.temp }}/stream-tests/node_modules
-          HOME: /root
-          RENDER_ENGINES: firefox,webkit
-        run: node --test --test-name-pattern="controller inversion paints and releases" __tests__/resources.cjs

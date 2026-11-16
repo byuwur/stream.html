@@ -394,19 +394,20 @@ The catalog owns order, cards/count, navigation, and displayed release status; s
 
 ### Landing and checks
 
-Routine [CI](.github/workflows/tests.yml) runs a small offline Chromium suite for the shared resource initializer, URL validation, and settings round trips, plus the PHP upload boundary tests. New controls, appearance options, and per-model variants do not need individual CI tests unless they protect a core contract or a real regression. Browser core tests have a 30-second execution limit; routine jobs have a five-minute limit and superseded runs are canceled.
+The resource library owns the main automated contract: shared settings/URL validation, startup of every standalone resource, and keyboard/mouse press/release cleanup. Configurators get small smoke checks for editing a preview, opening the generated renderer URL, and reporting upload responses. Option catalogs, palettes, per-model permutations, and pixel sweeps are not separate automated gates.
 
 ```sh
 npm --prefix .github ci --ignore-scripts
 export NODE_PATH="$PWD/.github/node_modules"
 npm --prefix .github test
+npm --prefix .github run test:configurator
 php -l upload_image.php
 node --test __tests__/upload-php.cjs
 ```
 
-`BROWSER_CHANNEL=chrome` uses installed Chrome; `CHROMIUM_EXECUTABLE_PATH` selects a Chromium executable. On PowerShell set `$env:NODE_PATH = "$PWD/.github/node_modules"`. PHP checks require PHP 8.2+ with the deployment extensions (`PHP_BINARY` may select PHP). They use local multipart requests and deterministic cURL substitutes; they never upload to Catbox.
+Check out SPA.js at `v20.12` beside this repository, or set `SPA_ASSETS_ROOT` to that checkout. The suites serve real local dependency files behind the declared URLs and do not fetch the CDN. `BROWSER_CHANNEL=chrome` or `CHROMIUM_EXECUTABLE_PATH` can select installed Chrome. On PowerShell set `$env:NODE_PATH = "$PWD/.github/node_modules"`.
 
-Detailed resource, configurator, keyboard/mouse/history, and Firefox/WebKit suites remain opt-in: run `npm --prefix .github run test:extended`, individual `__tests__/*.cjs` files, or dispatch the workflow with **extended** enabled. These integration suites fetch the declared pinned CDN assets with a 15-second timeout per fetch; their network/setup errors are separate from the offline core result. `RENDER_ENGINES=chromium` limits pixel checks to Chromium. Release distributions retain artifact integrity, offline startup, URL round trips, and publication checks. OBS and endurance remain manual checks.
+[CI](.github/workflows/tests.yml) keeps resource and configurator jobs separate: resources run in Chromium, Firefox, then WebKit, followed by configurators in the same order. Explicit job dependencies guarantee the order; failures remain visible and later passes continue unless the workflow is canceled. Browser tests are bounded to 30/60 seconds, test steps to two minutes, and jobs to three minutes. The matching browser image supplies preinstalled engines. `BROWSER_ENGINE` selects an engine locally. PHP boundary checks stay separate. PHP checks need PHP 8.2+ with the deployment extensions (`PHP_BINARY` may select PHP); local cURL substitutes never upload to Catbox. Release artifact integrity/startup and publication safeguards remain mandatory. OBS, appearance review, real devices, and endurance remain manual checks.
 
 ## Release distributions
 
