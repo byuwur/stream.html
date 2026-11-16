@@ -1,0 +1,22 @@
+{
+  "name": "stream.html",
+  "private": true,
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "release:build": "node scripts/build.mjs",
+    "release:test": "node --test tests/release.mjs tests/release-browser.mjs tests/publish-release.mjs",
+    "release:experiment": "node tests/controller-experiment.mjs",
+    "test": "node --test ../__tests__/resources.cjs ../__tests__/inputs.cjs",
+    "test:configurator": "node --test ../__tests__/configurators.cjs"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.2",
+    "fflate": "0.8.3",
+    "parse5": "8.1.1",
+    "playwright": "1.63.0",
+    "prettier": "3.10.1",
+    "yaml": "2.9.1"
+  }
+}

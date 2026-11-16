@@ -1,0 +1,140 @@
+name: Publish versioned distributions
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  distributions:
+    if: github.event_name != 'push' || github.ref_type != 'tag'
+    runs-on: ubuntu-24.04
+    container:
+      image: mcr.microsoft.com/playwright:v1.63.0-noble
+      options: --ipc=host
+    timeout-minutes: 6
+    env:
+      SPA_ASSETS_ROOT: ${{ github.workspace }}/spa.js
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/checkout@v4
+        with:
+          repository: byuwur/spa.js
+          ref: v20.12
+          path: spa.js
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: .github/package-lock.json
+      - run: npm --prefix .github ci --ignore-scripts --no-audit --no-fund
+      - name: Build development distributions
+        env:
+          RELEASE_TAG: v0.0.0-ci
+        run: node .github/scripts/build.mjs
+      - run: npm --prefix .github run release:test
+        timeout-minutes: 3
+
+  validate:
+    if: github.event_name == 'push' && github.ref_type == 'tag'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: .github/package-lock.json
+      - run: npm --prefix .github ci --ignore-scripts --no-audit --no-fund
+      - name: Validate tag, commit, branch, and release state
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node .github/scripts/build.mjs --check
+
+  build:
+    needs: [validate]
+    runs-on: ubuntu-24.04
+    container:
+      image: mcr.microsoft.com/playwright:v1.63.0-noble
+      options: --ipc=host
+    timeout-minutes: 6
+    env:
+      SPA_ASSETS_ROOT: ${{ github.workspace }}/spa.js
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: byuwur/spa.js
+          ref: v20.12
+          path: spa.js
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: .github/package-lock.json
+      - run: npm --prefix .github ci --ignore-scripts --no-audit --no-fund
+      - name: Build tagged distributions
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: node .github/scripts/build.mjs
+      - name: Core source tests
+        env:
+          NODE_PATH: ${{ github.workspace }}/.github/node_modules
+        run: npm --prefix .github test
+      - name: Validate every distribution
+        timeout-minutes: 3
+        run: npm --prefix .github run release:test
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tested-distributions
+          path: dist/assets/
+          if-no-files-found: error
+          retention-days: 7
+
+  publish:
+    if: github.event_name == 'push' && github.ref_type == 'tag'
+    needs: [validate, build]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: .github/package-lock.json
+      - run: npm --prefix .github ci --ignore-scripts --no-audit --no-fund
+      - uses: actions/download-artifact@v4
+        with:
+          name: tested-distributions
+          path: dist/assets/
+      - name: Upload into a draft and publish only the complete release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node .github/scripts/build.mjs --publish

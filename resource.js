@@ -117,20 +117,34 @@
   })();
 
   /**
-   * Load the optional editor's external groups and local tags in their declared order.
+   * Load the optional editor's external groups, local tags, and inline scripts in declared order.
    * Styles remain disabled until configure mode activates them; overlays never load this template.
    * @returns {Promise<void>} Resolves after required editor dependencies load; failures reject.
    */
   async function loadConfigurator() {
     if (!editorImports) return;
-    const files = [];
     for (const source of editorImports.content.children) {
       if (source.matches('script[type="application/json"][data-load]')) {
         const host = assetHost(source);
+        const files = [];
         for (const file of JSON.parse(source.textContent)) {
           const entry = typeof file === "string" ? { path: file, optional: /\/fontawesome\.min\.css(?:[?#]|$)/i.test(file) } : file;
           files.push({ ...entry, path: entry.path.startsWith("/") ? `${host}${entry.path}` : entry.path });
         }
+        for (const file of files) {
+          if (/\.css(?:[?#]|$)/i.test(file.path)) file.attributes = { ...file.attributes, "data-editor-style": "", media: "not all" };
+        }
+        await global.byLoad(files);
+        continue;
+      }
+      if (source.tagName === "SCRIPT" && !source.hasAttribute("src")) {
+        // Inline scripts need a fresh task after DOMContentLoaded so resource handlers set ready first.
+        await global.byLoad([]);
+        await new Promise((resolve) => setTimeout(resolve, 0));
+        const script = document.createElement("script");
+        for (const attribute of source.attributes) script.setAttribute(attribute.name, attribute.value);
+        script.textContent = source.textContent;
+        document.head.append(script);
         continue;
       }
       if (source.tagName !== "SCRIPT" && source.tagName !== "LINK") {
@@ -138,12 +152,9 @@
         continue;
       }
       const attributes = Object.fromEntries([...source.attributes].filter((attr) => !["src", "href", "rel"].includes(attr.name)).map((attr) => [attr.name, attr.value]));
-      files.push({ path: source.getAttribute(source.tagName === "LINK" ? "href" : "src"), attributes, optional: source.hasAttribute("data-load-optional") });
+      if (source.tagName === "LINK") Object.assign(attributes, { "data-editor-style": "", media: "not all" });
+      await global.byLoad([{ path: source.getAttribute(source.tagName === "LINK" ? "href" : "src"), attributes, optional: source.hasAttribute("data-load-optional") }]);
     }
-    for (const file of files) {
-      if (/\.css(?:[?#]|$)/i.test(file.path)) file.attributes = { ...file.attributes, "data-editor-style": "", media: "not all" };
-    }
-    await global.byLoad(files);
   }
 
   let configuratorWarning = false;
