@@ -504,7 +504,7 @@
     <g class="press-visual">
       <g transform="matrix(1 0 0 1 0 0)">
         <g class="full-geometry">
-          <circle cx="260.98999" cy="124.95815999999999" r="18.24823" fill="#eeeeee"
+          <circle cx="260.98999" cy="124.95815999999999" r="19.06" fill="#eeeeee"
             stroke="#111111" stroke-width="3"
             class="guide-custom-housing button-face vector-outline" />
         </g>

@@ -13,6 +13,210 @@ const test = require("node:test");
 const { chromium, firefox, webkit } = require("playwright");
 const { root, runtimeAssets, launchOptions, loadAssets, resourceNames, standaloneHTML, serve } = require("./browser.cjs");
 
+test("controller shell textures clip native surfaces and isolate tint in Chromium", async (t) => {
+  const assets = await loadAssets(runtimeAssets);
+  const browser = await chromium.launch(launchOptions);
+  const page = await browser.newPage({ viewport: { width: 800, height: 600 } });
+  try {
+    await serve(page, assets, true);
+    const texture = await page.evaluate(() => {
+      const canvas = document.createElement("canvas");
+      canvas.width = 120; canvas.height = 60;
+      const context = canvas.getContext("2d");
+      context.fillStyle = "#cc8855"; context.fillRect(0, 0, 120, 60);
+      context.fillStyle = "#6699aa"; context.fillRect(0, 0, 30, 60);
+      return canvas.toDataURL();
+    });
+    const imageURL = "https://media.test/shell.png";
+    // Deliberately omit CORS: SVG images need display access, never pixel access.
+    await page.route(imageURL, (route) => route.fulfill({ contentType: "image/png", body: Buffer.from(texture.split(",")[1], "base64") }));
+    const requests = [];
+    page.on("request", (request) => requests.push(request.url()));
+    /** Open the real renderer and wait for either a loaded texture or its explicit fallback. */
+    async function open(skin, extra = {}) {
+      const query = new URLSearchParams({ player: "9", skin, animate: "no", ...extra });
+      await page.goto(`https://stream.test/controller/?${query}`);
+      await page.locator(".controller.active:not(.disconnected)").waitFor();
+      if (extra.shellImage && extra.layout !== "minimal" && !skin.startsWith("fgc"))
+        await page.waitForFunction(() => document.querySelector(".controller")?.dataset.shellTexture);
+    }
+    /** Capture actual page pixels, including transparent gaps and independent SVG control layers. */
+    async function pixels() { return (await page.screenshot({ omitBackground: true })).toString("base64"); }
+    /** Compare screenshot pixels without reading a remote image through canvas. */
+    async function difference(before, after) {
+      return page.evaluate(async ([before, after]) => {
+        const values = [];
+        for (const png of [before, after]) {
+          const bitmap = await createImageBitmap(new Blob([Uint8Array.from(atob(png), (c) => c.charCodeAt(0))], { type: "image/png" }));
+          const canvas = document.createElement("canvas"); canvas.width = bitmap.width; canvas.height = bitmap.height;
+          const context = canvas.getContext("2d"); context.drawImage(bitmap, 0, 0);
+          values.push(context.getImageData(0, 0, canvas.width, canvas.height).data);
+          bitmap.close();
+        }
+        let changed = 0, alpha = 0, outside = 0;
+        const surfaces = [...document.querySelectorAll('.controller-background [id$="shell-surfaces"] :is(.shell-base, .shell-panel, .stock-center):not(.socket-base):not(.analog-socket)')];
+        const inverses = surfaces.map((surface) => surface.getScreenCTM().inverse());
+        for (let i = 0; i < values[0].length; i += 4) {
+          if (Math.abs(values[0][i + 3] - values[1][i + 3]) > 2) alpha++;
+          if (![0, 1, 2].some((channel) => Math.abs(values[0][i + channel] - values[1][i + channel]) > 10)) continue;
+          changed++;
+          const point = new DOMPoint((i / 4) % 800 + 0.5, Math.floor(i / 4 / 800) + 0.5);
+          if (!surfaces.some((surface, index) => {
+            const geometry = surface.localName === "use" ? document.getElementById(surface.getAttribute("href").slice(1)) : surface;
+            return geometry.isPointInFill(point.matrixTransform(inverses[index]));
+          })) outside++;
+        }
+        return { changed, alpha, outside };
+      }, [before, after]);
+    }
+    for (const skin of ["ds5", "ds4", "joycon", "wii", "wiiu", "gcn", "xone"]) {
+      await t.test(`${skin} paints shell plastics, preserving outlines, controls, and transparency`, async () => {
+        await open(skin);
+        const solid = await pixels();
+        const controls = await page.locator(".control-layer").evaluateAll((nodes) => nodes.map((node) => node.innerHTML));
+        const strokes = await page.locator(".controller-background .vector-outline").evaluateAll((nodes) => nodes.map((node) => [getComputedStyle(node).stroke, getComputedStyle(node).strokeWidth]));
+        await open(skin, { shellAppearance: "image", shellImage: imageURL });
+        assert.equal(await page.locator(".controller").getAttribute("data-shell-texture"), "ready");
+        assert.deepEqual(await page.locator(".control-layer").evaluateAll((nodes) => nodes.map((node) => node.innerHTML)), controls);
+        assert.deepEqual(await page.locator(".controller-background .vector-outline").evaluateAll((nodes) => nodes.map((node) => [getComputedStyle(node).stroke, getComputedStyle(node).strokeWidth])), strokes);
+        const result = await difference(solid, await pixels());
+        assert.ok(result.changed > 1000, `${skin}: actual texture paint ${JSON.stringify(result)}`);
+        assert.equal(result.alpha, 0, `${skin}: existing alpha and gaps are preserved`);
+        assert.ok(result.outside < 100, `${skin}: changed pixels stay inside authored shell paths ${JSON.stringify(result)}`);
+      });
+    }
+    await t.test("fit, transforms, opacity, and four tint modes affect only shell image pixels", async () => {
+      const base = { shellAppearance: "image", shellImage: imageURL };
+      await open("ds5", base);
+      const original = await pixels();
+      for (const [setting, value] of [["shellFit", "contain"], ["shellFit", "stretch"], ["shellPositionX", "20"], ["shellPositionY", "20"], ["shellScale", "150"], ["shellRotation", "45"], ["shellOpacity", "30"]]) {
+        await open("ds5", { ...base, [setting]: value });
+        assert.ok((await difference(original, await pixels())).changed > 200, `${setting} changes actual paint`);
+      }
+      await open("ds5", { ...base, shellAppearance: "tint", shellTintColor: "22cc66", shellTintStrength: "0" });
+      assert.equal((await difference(original, await pixels())).changed, 0, "Zero tint retains original pixels");
+      const blends = [];
+      for (const mode of ["multiply", "overlay", "soft-light", "color"]) {
+        await open("ds5", { ...base, shellAppearance: "tint", shellTintColor: "22cc66", shellTintStrength: "75", shellBlendMode: mode });
+        const painted = await pixels();
+        const result = await difference(original, painted);
+        assert.ok(result.changed > 1000, `${mode} changes texture pixels`);
+        assert.equal(result.alpha, 0);
+        assert.ok(result.outside < 100);
+        for (const previous of blends) assert.ok((await difference(previous, painted)).changed > 500, `${mode} is a distinct composition`);
+        blends.push(painted);
+      }
+    });
+    await t.test("tint preserves translucent texture alpha and exposes the configured shell base", async () => {
+      const translucent = await page.evaluate(() => {
+        const canvas = document.createElement("canvas"); canvas.width = 120; canvas.height = 60;
+        const context = canvas.getContext("2d");
+        context.fillStyle = "#cc885580"; context.fillRect(0, 0, 60, 60);
+        context.fillStyle = "#6699aa40"; context.fillRect(60, 0, 30, 60);
+        return canvas.toDataURL();
+      });
+      const url = "https://media.test/translucent.png";
+      await page.route(url, (route) => route.fulfill({ contentType: "image/png", body: Buffer.from(translucent.split(",")[1], "base64") }));
+      const base = { shellAppearance: "image", shellImage: url, customColors: "yes", controllerColor: "448866" };
+      await open("ds5", base);
+      const original = await pixels();
+      await open("ds5", { ...base, shellAppearance: "tint", shellTintColor: "ffffff", shellTintStrength: "75" });
+      const result = await difference(original, await pixels());
+      assert.equal(result.changed, 0, "White Multiply preserves original translucent image pixels");
+      assert.equal(result.alpha, 0, "Tint does not alter the existing transparent controller outline");
+    });
+    await t.test("minimal, shell-less, failed images, multiple instances, input, and layout transitions", async () => {
+      await open("ds5", { layout: "minimal", shellAppearance: "image", shellImage: imageURL });
+      assert.equal(await page.locator(".shell-texture-definitions").count(), 0);
+      await page.evaluate(() => byControllerArtwork.setLayout(document.getElementById("gamepad-9"), "full"));
+      await page.waitForFunction(() => document.querySelector('[data-shell-texture="ready"]'));
+      assert.equal(await page.locator(".shell-texture-image").count(), 1, "Initial minimal layouts can restore their configured shell");
+      await open("fgc", { shellAppearance: "image", shellImage: imageURL });
+      assert.equal(await page.locator(".shell-texture-definitions").count(), 0);
+      await open("ds5", { shellAppearance: "image", shellImage: "https://media.test/missing.png" });
+      assert.equal(await page.locator(".controller").getAttribute("data-shell-texture"), "fallback");
+      assert.equal(await page.locator(".shell-texture-definitions").count(), 0);
+      await open("ds5", { player: "all-inputs", shellAppearance: "image", shellImage: imageURL, mirror: "yes", scale: "80" });
+      await page.waitForFunction(() => document.querySelectorAll('[data-shell-texture="ready"]').length === 9);
+      const ids = await page.locator(".shell-texture-definitions [id]").evaluateAll((nodes) => nodes.map((node) => node.id));
+      assert.equal(new Set(ids).size, ids.length);
+      await page.keyboard.down("j");
+      await page.locator("#gamepad-9 .control-layer.pressed").first().waitFor();
+      await page.keyboard.up("j");
+      await page.evaluate(() => byControllerArtwork.setLayout(document.getElementById("gamepad-9"), "minimal"));
+      assert.equal(await page.locator("#gamepad-9 .controller-background").evaluate((node) => getComputedStyle(node).visibility), "hidden");
+      await page.evaluate(() => byControllerArtwork.setLayout(document.getElementById("gamepad-9"), "full"));
+      assert.equal(await page.locator("#gamepad-9 .controller-background").evaluate((node) => getComputedStyle(node).visibility), "visible");
+      assert.equal(await page.locator("#gamepad-9 .shell-texture-image").count(), 1, "Layout/input frames retain image lifetime");
+      assert.equal(requests.some((url) => url.includes("upload_image.php")), false, "Overlay rendering never calls PHP");
+    });
+  } finally {
+    await page.close();
+    await browser.close();
+  }
+});
+
+test("custom guides paint above shells, cover emblem cutouts, and retain image fallback", async () => {
+  const assets = await loadAssets(runtimeAssets);
+  const browser = await chromium.launch(launchOptions);
+  const page = await browser.newPage({ viewport: { width: 1000, height: 720 } });
+  const errors = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  try {
+    await serve(page, assets, true);
+    await page.route("https://media.test/missing.png", (route) => route.fulfill({ status: 404, body: "Missing" }));
+    /** Count the replacement color in rendered pixels rather than only checking SVG markup. */
+    async function logoPixels() {
+      const png = (await page.screenshot({ omitBackground: true })).toString("base64");
+      return page.evaluate(async (png) => {
+        const bitmap = await createImageBitmap(new Blob([Uint8Array.from(atob(png), (char) => char.charCodeAt(0))], { type: "image/png" }));
+        const canvas = document.createElement("canvas"); canvas.width = bitmap.width; canvas.height = bitmap.height;
+        const context = canvas.getContext("2d"); context.drawImage(bitmap, 0, 0); bitmap.close();
+        const pixels = context.getImageData(0, 0, canvas.width, canvas.height).data;
+        let count = 0;
+        for (let i = 0; i < pixels.length; i += 4) if (pixels[i] > 240 && pixels[i + 1] < 15 && pixels[i + 2] > 240 && pixels[i + 3] > 240) count++;
+        return count;
+      }, png);
+    }
+    for (const skin of ["ds3", "ds4", "ds5", "x360", "xone", "xseries", "joycon", "switchpro", "steam", "steam2", "steamdeck", "wii", "wiinunchuk", "wiiclassic", "wiiupro", "wiiu"]) {
+      const query = new URLSearchParams({ player: "9", skin, animate: "no", customGuide: "yes", guideSymbol: "star", guideColorMode: "custom", guideColor: "ff00ff" });
+      await page.goto(`https://stream.test/controller/?${query}`);
+      await page.locator(".guide-logo-custom").waitFor();
+      const visible = await logoPixels();
+      assert.ok(visible > 20, `${skin} paints a visible replacement`);
+      await page.locator(".controller-background").evaluate((node) => node.style.visibility = "hidden");
+      assert.equal(await logoPixels(), visible, `${skin} shell cannot obscure the replacement`);
+      await page.locator(".controller-background").evaluate((node) => node.style.visibility = "");
+      if (["ds5", "x360", "xone", "xseries"].includes(skin)) {
+        const uncovered = await page.locator(".guide-logo-slot").evaluate((slot) => {
+          const original = slot.querySelector(".guide-logo-original");
+          original.style.display = "inline";
+          const box = original.getBBox(), paths = [...original.querySelectorAll("path")];
+          const housing = slot.parentElement.querySelector(".guide-custom-housing");
+          let uncovered = 0;
+          for (let x = box.x; x < box.x + box.width; x += 0.25) for (let y = box.y; y < box.y + box.height; y += 0.25) {
+            const point = new DOMPoint(x, y);
+            if (paths.some((path) => path.isPointInFill(point)) && !housing.isPointInFill(point)) uncovered++;
+          }
+          original.style.display = "none";
+          return uncovered;
+        });
+        assert.equal(uncovered, 0, `${skin} replacement housing covers the complete stock emblem`);
+      }
+      await page.locator(".guide-logo-custom").evaluate((node) => node.removeAttribute("clip-path"));
+      assert.equal(await logoPixels(), visible, `${skin} default logo fits its button without clipping`);
+      await page.evaluate(() => byControllerArtwork.setLayout(document.querySelector(".controller"), "minimal"));
+      assert.ok(await logoPixels() > 20, `${skin} retains the custom guide in minimal layout`);
+    }
+    await page.goto("https://stream.test/controller/?player=9&skin=ds5&customGuide=yes&guideSource=image&guideImage=https%3A%2F%2Fmedia.test%2Fmissing.png");
+    await page.locator(".guide-logo-original").waitFor();
+    await page.waitForFunction(() => !document.querySelector(".guide-logo-custom"));
+    assert.equal(await page.locator(".guide-custom-housing").evaluate((node) => getComputedStyle(node).display), "none");
+    assert.equal(await page.locator(".guide-logo-original").evaluate((node) => getComputedStyle(node).display), "inline");
+    assert.deepEqual(errors, []);
+  } finally { await browser.close(); }
+});
+
 test("browser fixtures contain decoded and symlink paths and reject malformed paths", async (t) => {
   let handler;
   await serve(

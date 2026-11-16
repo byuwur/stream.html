@@ -1,0 +1,177 @@
+html,
+body {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: transparent;
+}
+[hidden] {
+  display: none !important;
+}
+#keyboard-overlay {
+  position: absolute;
+  inset: 0;
+  box-sizing: border-box;
+  pointer-events: none;
+}
+#input-scene {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: flex;
+  align-items: center;
+  width: max-content;
+  transform: translate(-50%, -50%);
+}
+#keyboard,
+#mouse {
+  flex: 0 0 auto;
+}
+#keyboard > svg,
+#mouse > svg {
+  display: block;
+  overflow: visible;
+}
+.keyboard-definitions {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.keyboard-shell {
+  fill: var(--shell);
+  stroke: var(--outline);
+}
+[data-shell="minimal"] .keyboard-shell {
+  fill-opacity: 0.5;
+}
+[data-shell="none"] :is(.keyboard-shell, .shell-texture, .shell-highlight) {
+  display: none;
+}
+[data-shell="outline"] :is(.keyboard-shell, .shell-texture) {
+  fill: none;
+}
+[data-shell="outline"] .shell-texture {
+  display: none;
+}
+[data-shell="gaming"] .keyboard-shell {
+  stroke: var(--pressed);
+  stroke-width: 2;
+}
+.shell-highlight {
+  fill: none;
+  stroke: var(--highlight);
+  stroke-width: 2;
+  opacity: var(--highlight-opacity);
+}
+.key-surface,
+.mouse-button {
+  fill: var(--key);
+}
+.key-outline,
+.mouse-outline {
+  fill: var(--outline);
+  stroke: var(--outline);
+  stroke-width: var(--outline-extra);
+  opacity: var(--outline-opacity);
+  filter: var(--outline-filter, none);
+  pointer-events: none;
+}
+.key-legend,
+.key-text {
+  fill: var(--legend);
+  font-family: "Courier New", monospace;
+  font-weight: 700;
+  pointer-events: none;
+}
+.key-action {
+  opacity: 0.8;
+}
+.key-light {
+  fill: var(--highlight);
+  opacity: var(--highlight-opacity);
+  pointer-events: none;
+}
+.input-key {
+  overflow: visible;
+  filter: drop-shadow(0 2px 1px color-mix(in srgb, var(--shadow) calc(var(--shadow-opacity) * 100%), transparent));
+}
+.key-pressed-fill {
+  fill: var(--pressed);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--release) ease-out;
+}
+.input-key.pressed .key-pressed-fill {
+  opacity: 0.9;
+  transition: none;
+}
+.input-key.pressed :is(.key-legend, .key-text) {
+  fill: var(--pressed-legend);
+}
+[data-keycap="outline"] :is(.key-surface, .key-light) {
+  fill: transparent;
+}
+[data-effect="invert"] .input-key.pressed {
+  filter: invert(1);
+}
+[data-effect="invert"] .input-key.pressed .key-pressed-fill {
+  opacity: 0;
+}
+[data-effect="depth"] .input-key {
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: transform var(--release) ease-out;
+}
+html:not([data-animate="no"]) [data-effect="depth"] .input-key.pressed {
+  transform: translateY(1px) scale(0.97);
+  transition: none;
+}
+html:not([data-animate="no"]) [data-effect="glow"] .input-key.pressed {
+  filter: drop-shadow(0 0 3px var(--pressed));
+}
+.surface-image {
+  opacity: var(--image-opacity);
+}
+.mouse-shell {
+  fill: var(--shell);
+}
+.mouse-button {
+  transition: fill var(--release) ease-out;
+}
+.mouse-button.pressed {
+  fill: var(--pressed);
+  transition: none;
+}
+.mouse-side {
+  stroke: var(--outline);
+  stroke-width: 1;
+}
+.mouse-wheel-direction {
+  fill: var(--pressed);
+  opacity: 0;
+}
+.mouse-wheel-direction.pressed {
+  opacity: 1;
+}
+.mouse-movement-track {
+  fill: none;
+  stroke: var(--outline);
+  stroke-width: 0.5;
+  opacity: 0.4;
+}
+.mouse-movement {
+  fill: var(--legend);
+  opacity: 0.2;
+}
+.moving .mouse-movement {
+  opacity: 1;
+  transform: translate(var(--move-x), var(--move-y));
+}
+.input-history .input-key {
+  --key: var(--history-entry);
+  --outline: var(--history-ink);
+  --legend: var(--history-ink);
+  --highlight-opacity: 0;
+  --shadow-opacity: 0;
+}

@@ -344,6 +344,15 @@
         ready: true
       },
       {
+        id: "keyboard",
+        name: "Keyboard & Mouse",
+        description: "Live keyboard, mouse, and optional ephemeral Input History.",
+        icon: "fa-keyboard",
+        category: "interaction",
+        status: "Alpha",
+        ready: true
+      },
+      {
         id: "popup",
         name: "Social popup",
         description: "Animated social accounts from 90+ platforms.",
@@ -847,10 +856,11 @@
           }
           container = subsections.get(key);
         }
-        const label = $(field.image ? /* HTML */ `<div class="config-field form-label d-flex flex-column gap-1 w-100 mb-3"></div>` : /* HTML */ `<label class="config-field form-label d-flex flex-column gap-1 w-100 mb-3"></label>`).appendTo(
-          container
-        );
-        const caption = $(field.image ? /* HTML */ `<label class="field-caption small"></label>` : /* HTML */ `<span class="field-caption small"></span>`)
+        const widget = !["switch", "select", "entries", "mapping"].includes(field.type) || (field.type === "select" && Object.keys(field.options).length <= 3);
+        const label = $(
+          field.image || widget ? /* HTML */ `<div class="config-field form-label d-flex flex-column gap-1 w-100 mb-3"></div>` : /* HTML */ `<label class="config-field form-label d-flex flex-column gap-1 w-100 mb-3"></label>`
+        ).appendTo(container);
+        const caption = $(field.image || widget ? /* HTML */ `<label class="field-caption small"></label>` : /* HTML */ `<span class="field-caption small"></span>`)
           .text(field.label || name)
           .appendTo(label);
         caption.prepend(
@@ -880,7 +890,7 @@
         control.attr({ name, id: field.id || `field-${name}`, "data-title": field.label, "data-description": field.description || "" });
         for (const key of ["min", "max", "maxlength", "placeholder"]) if (field[key] !== undefined && field[key] !== Infinity) control.attr(key, field[key]);
         if (field.optional && !field.placeholder) control.attr("placeholder", field.default === "" ? "Off" : String(field.default));
-        if (field.image) caption.attr("for", control.attr("id"));
+        if (field.image || widget) caption.attr("for", control.attr("id"));
         control.appendTo(label);
         if (field.type === "switch") caption.add(control).wrapAll(/* HTML */ `<span class="d-flex align-items-center justify-content-between gap-3"></span>`);
         if (field.description) $(/* HTML */ `<small class="text-body-secondary"></small>`).text(field.description).appendTo(label);
@@ -1179,6 +1189,93 @@
     // ==== SELECT2 CONTROLS ====
     // ==========
 
+    /** Pair a bounded number's canonical text box with an unnamed, synchronized slider. */
+    function initNumberRange(input, rule) {
+      if (!Number.isFinite(rule.min) || !Number.isFinite(rule.max)) return;
+      const jqInput = $(input);
+      const row = $(/* HTML */ `<div class="number-range d-flex align-items-center gap-2"></div>`).insertBefore(jqInput);
+      const slider = $(/* HTML */ `<input type="range" class="form-range m-0 flex-grow-1" />`)
+        .attr({ min: rule.min, max: rule.max, step: 1, "aria-label": `${rule.label} slider`, "aria-controls": input.id, "data-number-field": input.name })
+        .appendTo(row);
+      jqInput.addClass("range-value flex-shrink-0").appendTo(row);
+      /** Reflect accepted source values/availability without replacing an incomplete numeric draft. */
+      function sync() {
+        const value = Number(input.value);
+        if (input.value !== "" && Number.isFinite(value) && value >= rule.min && value <= rule.max) slider.val(value);
+        slider.prop("disabled", input.disabled);
+      }
+      slider.on("input change", function (event) {
+        event.stopPropagation();
+        jqInput.val(this.value).trigger(event.type);
+      });
+      jqInput.on("input change sync.controls", sync);
+      sync();
+    }
+
+    /** Add a field-local reset to its declared resource default without changing the opening Reset baseline. */
+    function initFieldRestore(input, rule) {
+      if (["switch", "select", "entries", "mapping"].includes(rule.type)) return;
+      const jqInput = $(input);
+      let row = jqInput.closest(".number-range");
+      if (!row.length) {
+        row = $(/* HTML */ `<div class="field-value d-flex align-items-start gap-2"></div>`);
+        const component = jqInput.closest(".image-input, .input-group");
+        const timestamp = jqInput.siblings(".timestamp-picker");
+        if (component.length) row.insertBefore(component).append(component);
+        else if (timestamp.length) row.insertBefore(timestamp).append(timestamp.add(jqInput));
+        else {
+          const regional = jqInput.siblings("[data-regional-picker]");
+          const picker = regional.length ? regional : jqInput;
+          const enhanced = picker.next(".select2-container");
+          row.insertBefore(jqInput).append(jqInput.add(regional).add(enhanced));
+        }
+      }
+      const button = $(/* HTML */ `<button type="button" class="field-restore btn btn-outline-secondary rounded-0 flex-shrink-0"><i class="fa-solid fa-rotate-left" aria-hidden="true"></i></button>`)
+        .attr({ "data-restore-field": input.name, "aria-label": `Restore ${rule.label} to default`, title: "Restore resource default" })
+        .appendTo(row);
+      button.on("click", () => {
+        if (input.disabled) return;
+        imageInputs.get(input)?.cancel();
+        const value = String(rule.default);
+        if (input.tagName === "SELECT" && ![...input.options].some((option) => option.value === value)) input.add(new Option(value, value));
+        jqInput.val(value).trigger("input").trigger("change");
+      });
+      jqInput.on("sync.controls", () => button.prop("disabled", input.disabled));
+      button.prop("disabled", input.disabled);
+    }
+
+    /** Enhance a small native select with keyboard-accessible segmented buttons; the select stays authoritative. */
+    function initChoiceButtons(select, rule) {
+      if (select.options.length > 3 || !select.options.length) return;
+      const jqSelect = $(select).addClass("visually-hidden").attr({ tabindex: -1, "aria-hidden": "true", "data-choice-buttons": "" });
+      const group = $(/* HTML */ `<div class="choice-buttons btn-group w-100" role="group"></div>`).attr("aria-label", rule.label).insertAfter(jqSelect);
+      for (const option of select.options) $(/* HTML */ `<button type="button" class="btn btn-outline-primary"></button>`).text(option.text).attr("data-value", option.value).appendTo(group);
+      /** Reflect imports, Reset, and conditional availability from the original select. */
+      function sync() {
+        group.find("button").each(function () {
+          const active = this.dataset.value === select.value;
+          $(this)
+            .toggleClass("active", active)
+            .attr({ "aria-pressed": String(active), tabindex: active ? 0 : -1 })
+            .prop("disabled", select.disabled);
+        });
+      }
+      group.on("click", "button", function () {
+        jqSelect.val(this.dataset.value).trigger("change");
+      });
+      group.on("keydown", "button", function (event) {
+        if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home", "End"].includes(event.key)) return;
+        event.preventDefault();
+        const buttons = group.find("button:not(:disabled)").get();
+        const index = buttons.indexOf(this);
+        const next = event.key === "Home" ? 0 : event.key === "End" ? buttons.length - 1 : (index + (event.key === "ArrowLeft" || event.key === "ArrowUp" ? -1 : 1) + buttons.length) % buttons.length;
+        buttons[next]?.focus();
+        buttons[next]?.click();
+      });
+      jqSelect.on("change sync.controls", sync);
+      sync();
+    }
+
     /**
      * Enhance existing controls; retain Select2's automatic above/below positioning.
      * @param {HTMLSelectElement|jQuery} select Native control or its jQuery wrapper; its value and events are preserved.
@@ -1187,7 +1284,7 @@
      */
     function initSelect2(select, options = {}) {
       const jqSelect = $(select);
-      if (!$.fn.select2 || jqSelect.data("select2")) return;
+      if (!$.fn.select2 || jqSelect.data("select2") || jqSelect.is("[data-choice-buttons]")) return;
       const jqParent = jqSelect.closest(".modal, dialog");
       jqSelect.select2({
         width: "100%",
@@ -1255,18 +1352,7 @@
     // ==== SHARED IMAGE INPUTS ====
     // ==========
 
-    // A secure same-origin integration owns GoFile's Premium token and both API calls.
-    // The static editor never makes anonymous uploads that only return sharing pages.
-    function gofileEndpoint() {
-      if (!imageOptions.gofileUploadURL) return null;
-      try {
-        const url = new URL(imageOptions.gofileUploadURL, location.href);
-        return url.protocol === "https:" && url.origin === location.origin && !url.username && !url.password ? url.href : null;
-      } catch {
-        return null;
-      }
-    }
-
+    /** Enforce the separate 16 KiB embedding limit without restricting manual remote paths. */
     function imageValueAllowed(value) {
       if (!/^data:/i.test(value)) return true;
       const encoded = value.slice(value.indexOf(",") + 1);
@@ -1296,6 +1382,7 @@
         );
     }
 
+    /** Invalidate every field before Reset, import, or page disposal. */
     function cancelImageInputs() {
       imageInputs.forEach((widget) => widget.cancel());
     }
@@ -1319,7 +1406,6 @@
       for (const [value, text] of [
         ["manual", "Manual"],
         ["catbox", "Catbox.moe"],
-        ["gofile", "Gofile.io"],
         ["base64", "Base64"]
       ])
         provider.append(new Option(text, value));
@@ -1334,6 +1420,7 @@
       let applying = false;
       let destroyed = false;
       const available = () => !destroyed && input.isConnected && !input.disabled && enabled();
+      /** Invalidate completions before aborting this field's reader or request. */
       function cancel() {
         revision++;
         clearTimeout(requestTimer);
@@ -1342,12 +1429,14 @@
         component.removeAttr("aria-busy").removeClass("image-dragging");
         setImageStatus(status, "");
       }
+      /** Keep upload actions aligned with the original field's availability. */
       function sync() {
         const active = available();
         actions.prop("hidden", !active);
         provider.add(browse).prop("disabled", !active);
         if (!active) cancel();
       }
+      /** Dispose a removed entry's upload lifecycle and listeners. */
       function destroy() {
         cancel();
         destroyed = true;
@@ -1359,53 +1448,29 @@
 
       // Adapters receive the original file and share cancellation, validation, and application.
       const providers = {
+        /** Upload original bytes once through the fixed, credential-free PHP endpoint. */
         async catbox(file, signal) {
           const body = new FormData();
           body.append("reqtype", "fileupload");
           body.append("fileToUpload", file);
-          const response = await fetch("https://catbox.moe/user/api.php", { method: "POST", body, signal, credentials: "omit" });
-          if (!response.ok) throw new Error(response.status === 413 ? "File exceeds the size limit." : `Catbox returned HTTP ${response.status}.`);
+          const response = await fetch("https://stream.byuwur.co/upload_image.php", { method: "POST", body, signal, credentials: "omit" });
+          if (!response.ok) {
+            const errors = {
+              400: "The upload was incomplete. Check the file and server upload limits.",
+              413: "Image exceeds the 8 MiB upload limit.",
+              415: "Unsupported or malformed image. Use PNG, JPEG, WebP, or GIF (up to 16 megapixels).",
+              429: "Upload limit reached. Wait a few minutes before trying again.",
+              502: "Catbox is unavailable or returned an invalid response.",
+              503: "Image upload service unavailable. Check the hosted PHP configuration.",
+              504: "Upload timed out. No automatic retry was made."
+            };
+            throw new Error(errors[response.status] || `Upload service returned HTTP ${response.status}.`);
+          }
           const value = (await response.text()).trim();
-          let url;
-          try {
-            url = new URL(value);
-          } catch {
-            throw new Error("Invalid server response.");
-          }
-          if (url.protocol !== "https:" || url.hostname !== "files.catbox.moe" || !/\.(png|jpe?g|webp|gif)$/i.test(url.pathname) || url.search || url.hash || url.username || url.password) throw new Error("Invalid server response.");
-          return url.href;
+          if (!/^https:\/\/files\.catbox\.moe\/[a-z0-9_-]+\.(?:png|jpe?g|webp|gif)$/i.test(value)) throw new Error("Invalid server response.");
+          return value;
         },
-        async gofile(file, signal) {
-          const endpoint = gofileEndpoint();
-          if (!endpoint) throw new Error("Direct image links require GoFile Premium and a secure integration. Try Catbox instead.");
-          const body = new FormData();
-          body.append("file", file);
-          const response = await fetch(endpoint, { method: "POST", body, signal, credentials: "same-origin" });
-          if (!response.ok) throw new Error(response.status === 413 ? "File exceeds the size limit." : `GoFile integration returned HTTP ${response.status}.`);
-          const result = await response.json();
-          if (result.status === "error-notPremium") throw new Error("Direct image links require GoFile Premium.");
-          const data = result.data;
-          if (result.status !== "ok" || !data || typeof data.directLink !== "string") throw new Error("Invalid server response: a public direct image link is required.");
-          let url;
-          try {
-            url = new URL(data.directLink);
-          } catch {
-            throw new Error("Invalid server response.");
-          }
-          if (
-            url.protocol !== "https:" ||
-            !url.hostname.endsWith(".gofile.io") ||
-            !url.pathname.startsWith("/download/direct/") ||
-            url.search ||
-            url.hash ||
-            url.username ||
-            url.password ||
-            (data.expireTime !== undefined && data.expireTime !== 4102444800) ||
-            ["sourceIpsAllowed", "domainsAllowed", "domainsBlocked", "auth"].some((key) => data[key] !== undefined && (!Array.isArray(data[key]) || data[key].length))
-          )
-            throw new Error("GoFile must return an unrestricted, permanent direct image link.");
-          return url.href;
-        },
+        /** Read a deliberately selected small image locally; cancellation aborts the reader. */
         base64(file, signal) {
           return new Promise((resolve, reject) => {
             if (signal.aborted) return reject(new DOMException("Canceled", "AbortError"));
@@ -1421,7 +1486,8 @@
         }
       };
 
-      // Loading the image rejects HTML, corrupt files, and non-renderable URLs before application.
+      // Displayability needs no cross-origin pixel access; ordinary images may omit CORS headers.
+      /** Decode one image, cleaning up handlers on load, failure, or cancellation. */
       function checkImage(value, signal) {
         return new Promise((resolve, reject) => {
           const image = new Image();
@@ -1432,9 +1498,8 @@
             error ? reject(error) : resolve();
           };
           const abort = () => finish(new DOMException("Canceled", "AbortError"));
-          image.onload = () => finish();
-          image.onerror = () => finish(new Error("The returned image could not be loaded. Check network or CORS access."));
-          image.crossOrigin = "anonymous";
+          image.onload = () => finish(image.naturalWidth * image.naturalHeight > 16000000 ? new Error("Image dimensions exceed 16 megapixels.") : null);
+          image.onerror = () => finish(new Error("The image could not be loaded. Check the file or network access."));
           image.referrerPolicy = "no-referrer";
           signal.addEventListener("abort", abort, { once: true });
           if (signal.aborted) return abort();
@@ -1442,42 +1507,37 @@
         });
       }
 
+      /** Validate browse/drop identically; only this field's current operation may apply a value. */
       async function processFile(file) {
         if (!file || !available()) return;
         cancel();
         if (provider.val() === "manual") provider.val("catbox");
-        let selected = provider.val();
+        const selected = provider.val();
         const operation = revision;
         const current = () => operation === revision && available();
         controller = new AbortController();
         const operationController = controller;
         const { signal } = operationController;
         const timeout = (requestTimer = setTimeout(() => operationController.abort(), 60000));
-        setImageStatus(status, "loading", selected === "base64" ? "Converting image to Base64..." : `Uploading to ${selected === "catbox" ? "Catbox" : "GoFile"}...`);
+        setImageStatus(status, "loading", selected === "base64" ? "Converting image to Base64..." : "Uploading to Catbox...");
         component.attr("aria-busy", "true");
         try {
           if (!file.size) throw new Error("The image file is empty.");
           if (selected === "base64" && file.size > imageOptions.base64MaxBytes) throw new Error("Image is too large to embed. Try Catbox instead.");
-          if (selected !== "base64" && file.size > 200000000) throw new Error("File exceeds the size limit.");
+          if (selected !== "base64" && file.size > 8388608) throw new Error("Image exceeds the 8 MiB upload limit.");
           const mime = byStream.imageType(new Uint8Array(await file.slice(0, 12).arrayBuffer()));
           if (!current()) return;
           if (!mime || (file.type && file.type !== mime)) throw new Error("Unsupported image format. Use PNG, JPEG, WebP, or GIF.");
           // A missing MIME type is safe after signature detection; wrapping leaves every byte intact.
           const imageFile = file.type ? file : new File([file], file.name, { type: mime });
-          let value;
+          const localURL = URL.createObjectURL(imageFile);
           try {
-            value = await providers[selected](imageFile, signal);
-          } catch (error) {
-            if (!current() || signal.aborted || selected !== "catbox") throw error;
-            if (!gofileEndpoint()) throw new Error(`${uploadError(error)} GoFile fallback requires Premium and a secure integration.`);
-            setImageStatus(status, "loading", "Catbox failed. Trying GoFile...");
-            try {
-              value = await providers.gofile(imageFile, signal);
-              selected = "gofile";
-            } catch (fallbackError) {
-              throw new Error(`Catbox: ${uploadError(error)} GoFile fallback: ${uploadError(fallbackError)}`);
-            }
+            await checkImage(localURL, signal);
+          } finally {
+            URL.revokeObjectURL(localURL);
           }
+          if (!current()) return;
+          const value = await providers[selected](imageFile, signal);
           if (!current()) return;
           if (!byStream.safeImage(value) || !imageValueAllowed(value) || (input.maxLength >= 0 && value.length > input.maxLength)) throw new Error("Invalid or oversized image value.");
           await checkImage(value, signal);
@@ -1502,6 +1562,7 @@
           }
         }
       }
+      /** Translate transport failures into safe field-local feedback. */
       function uploadError(error) {
         if (error instanceof TypeError) return "Network request failed. Check connectivity or browser CORS restrictions.";
         if (error instanceof SyntaxError || !error.message) return "Invalid server response.";
@@ -1584,12 +1645,13 @@
      * @param {Object} options Optional choices/key, text field key/label/type triples, defaults, and row limit.
      * @param {Object<string, string>} options.choices Stored choice IDs mapped to their displayed labels.
      * @param {string} options.choiceKey Entry property that stores the chosen ID.
+     * @param {string} [options.choiceLabel] Accessible name for the choice control.
      * @param {Array<Array<string>>} options.textFields Entry property names paired with their labels.
      * @param {Object} options.newEntry Initial value for a newly added entry.
      * @param {number} [options.limit=100] Maximum number of accepted entries.
      * @returns {void}
      */
-    function initEntryEditor(name, entries, { choices, choiceKey, textFields, newEntry, limit = 100 }) {
+    function initEntryEditor(name, entries, { choices, choiceKey, choiceLabel = choiceKey === "platform" ? "Platform" : "Day", textFields, newEntry, limit = 100 }) {
       const jqOutput = $(form.elements[name]);
       const jqSection = jqOutput.closest(".entry-editor");
       const jqEditor = jqSection.find(".entry-list");
@@ -1609,7 +1671,7 @@
         const jqRow = $(/* HTML */ `<div class="entry-row p-2 mb-2 border border-secondary-subtle bg-body-tertiary"></div>`).html(/* HTML */ `
           <div class="d-flex align-items-center gap-1 mb-1">
             <i class="entry-icon text-primary fa-fw fa-solid fa-calendar-days" aria-hidden="true"></i>
-            <select class="form-select rounded-0 bg-body-secondary border-secondary-subtle flex-grow-1" aria-label="${choiceKey === "platform" ? "Platform" : "Day"}"></select>
+            <select class="form-select rounded-0 bg-body-secondary border-secondary-subtle flex-grow-1" aria-label="${choiceLabel}"></select>
             <div class="btn-group flex-shrink-0" role="group" aria-label="Entry controls">
               <button type="button" class="btn btn-sm btn-outline-primary" data-action="up" aria-label="Move entry up" title="Move up">
                 <i class="fa-solid fa-arrow-up" aria-hidden="true"></i>
@@ -1626,8 +1688,9 @@
         const jqSelect = jqRow.find("select");
         if (!choices) jqRow.find("select, .entry-icon").remove();
         if (choiceKey === "platform") jqRow.find(".entry-icon").remove();
+        if (strings && choices) jqRow.find(".entry-icon").remove();
         Object.entries(choices || {}).forEach(([value, title]) => $(/* HTML */ `<option></option>`).val(value).text(title).appendTo(jqSelect));
-        jqSelect.val(map ? entry[0] : entry[choiceKey]);
+        jqSelect.val(map ? entry[0] : strings ? entry : entry[choiceKey]);
         textFields.forEach(([key, title, type = "text"], index) => {
           const value = map ? entry[choices ? 1 : index] : strings ? entry : entry[key];
           const input = $(type === "textarea" ? "<textarea></textarea>" : "<input />", {
@@ -1684,7 +1747,7 @@
                 .get()
                 .map((input) => input.value)
             ];
-          if (strings) return jqRow.find("[data-field]").val();
+          if (strings) return jqRow.find(choices ? "select" : "[data-field]").val();
           const entry = choices ? { [choiceKey]: jqRow.find("select").val() } : {};
           jqRow.find("[data-field]").each(function () {
             const jqInput = $(this);
@@ -1696,10 +1759,11 @@
         // Repeated platform rows are valid arrays; duplicate map keys would silently erase earlier rows.
         const duplicate = map && new Set(values.map(([key]) => key)).size !== values.length;
         jqOutput.val(duplicate ? "" : JSON.stringify(map ? Object.fromEntries(values) : values));
-        jqRows.find("[data-field]").each(function () {
+        jqRows.find("[data-field], select").each(function () {
           this.setCustomValidity(!this.classList.contains("image-url") || imageValueAllowed(this.value) ? "" : "Image is too large to embed. Try Catbox instead.");
         });
-        jqRows.find("[data-field]")[0]?.setCustomValidity(duplicate ? "Use a different key for each row." : byStream.validParameter(parameterRules, name, jqOutput.val()) ? "" : "Invalid list. Check the entries or remove rows.");
+        const validationControl = jqRows.find("[data-field]")[0] || jqRows.find("select")[0];
+        validationControl?.setCustomValidity(duplicate ? "Use a different key for each row." : byStream.validParameter(parameterRules, name, jqOutput.val()) ? "" : "Invalid list. Check the entries or remove rows.");
         jqAdd.prop("disabled", jqRows.length >= limit);
       }
       // Release row widgets before rebuilding, retaining the opening values for native Reset.
@@ -1815,7 +1879,7 @@
         const jqField = $(form.elements[name]);
         if (!jqField.length) continue;
         const initial = jqField.val();
-        const title = jqField.closest("label").find(".field-caption").text() || name;
+        const title = jqField.closest(".config-field").find(".field-caption").first().text() || name;
         // The visible picker uses local wall time; the named hidden input keeps absolute UTC for URLs.
         jqField.attr({ type: "hidden", "data-title": title });
         const jqPicker = $(/* HTML */ `<input type="datetime-local" step="1" required />`)
@@ -1991,7 +2055,7 @@
       for (const input of fields) {
         if (parameterRules[input.name]?.type !== "color") continue;
         const jqInput = $(input);
-        const title = `${jqInput.closest("label").text().trim() || input.name} picker`;
+        const title = `${jqInput.closest(".config-field").find(".field-caption").first().text().trim() || input.name} picker`;
         const jqSwatch = $(/* HTML */ `<span class="input-group-text p-1"><span></span></span>`);
         jqInput.wrap(/* HTML */ `<span class="input-group"></span>`).before(jqSwatch);
         const optional = parameterRules[input.name].optional;
@@ -2682,6 +2746,7 @@
         const wrapper = $(input).closest(".conditional-field");
         changes.push([wrapper, !input.disabled]);
       }
+      for (const input of fields) $(input).triggerHandler("sync.controls");
       imageInputs.forEach((widget) => widget.sync());
       // Hide empty headings too, so disabled descendants do not leave blank groups in the form.
       jqForm.find(".field-subsection, [data-config-section]").each((_, container) => {
@@ -2812,6 +2877,8 @@
       };
       const { initResourceHelp } = byConfigurator.configureResource?.(resource, editor) || {};
       for (const [name, field] of Object.entries(resource.fields)) {
+        if (field.type === "number") initNumberRange(form.elements[name], field);
+        if (field.type === "select") initChoiceButtons(form.elements[name], field);
         if (field.entries)
           initEntryEditor(name, settings[name], {
             ...field.entries,
@@ -2855,6 +2922,7 @@
       initHelpDialog(initResourceHelp);
       initColorPickers();
       jqForm.find("select:not(.image-provider)").each((_, select) => initSelect2(select));
+      for (const input of fields) initFieldRestore(input, parameterRules[input.name]);
       // View requests also supersede earlier clicks while asynchronous validation is pending.
       let settingsViewGeneration = 0;
       // All editing surfaces share a revision so queued work cannot overwrite a newer draft.

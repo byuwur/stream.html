@@ -5,6 +5,8 @@
  */
 
 const controllerResourceURL = document.currentScript.src;
+// These authored plastic surfaces exclude independent sockets, controls, and screen openings.
+const controllerShellSelector = '[id$="shell-surfaces"] :is(.shell-base, .shell-panel, .stock-center):not(.socket-base):not(.analog-socket)';
 const controllerInk = (channels) => {
   const luminance = channels.map((channel) => {
     const value = channel / 255;
@@ -114,12 +116,62 @@ async function initControllerResource() {
         when: (values) => values.customColors !== "yes" && Object.keys(byControllerArtwork.skins[values.skin]?.variants || {}).length > 0,
         retainInactive: true
       },
+      shellAppearance: {
+        type: "select",
+        default: "solid",
+        label: "Shell appearance",
+        section: "Appearance",
+        subsection: "Shell texture",
+        options: { solid: "Solid color", image: "Image", tint: "Image + tint" },
+        when: (values) => values.layout !== "minimal" && byControllerArtwork.skins[values.skin]?.shell,
+        retainInactive: true
+      },
+      shellImage: {
+        image: true,
+        type: "text",
+        default: "",
+        label: "Shell image",
+        section: "Appearance",
+        subsection: "Shell texture",
+        description: "Fits the existing shell surfaces; failed loads keep the solid shell.",
+        maxlength: 65536,
+        validate: (value) => (value.length <= 65536 && byStream.safeImage(value) ? value : null),
+        when: ["shellAppearance", "image", "tint"],
+        retainInactive: true
+      },
+      shellFit: {
+        type: "select",
+        default: "cover",
+        label: "Image fit",
+        section: "Appearance",
+        subsection: "Shell texture",
+        options: { cover: "Cover", contain: "Contain", stretch: "Stretch" },
+        when: ["shellAppearance", "image", "tint"],
+        retainInactive: true
+      },
+      shellPositionX: { type: "number", default: 0, label: "Image position X (%)", section: "Appearance", subsection: "Shell texture", min: -100, max: 100, when: ["shellAppearance", "image", "tint"], retainInactive: true },
+      shellPositionY: { type: "number", default: 0, label: "Image position Y (%)", section: "Appearance", subsection: "Shell texture", min: -100, max: 100, when: ["shellAppearance", "image", "tint"], retainInactive: true },
+      shellScale: { type: "number", default: 100, label: "Image scale (%)", section: "Appearance", subsection: "Shell texture", min: 10, max: 500, when: ["shellAppearance", "image", "tint"], retainInactive: true },
+      shellRotation: { type: "number", default: 0, label: "Image rotation (deg)", section: "Appearance", subsection: "Shell texture", min: -180, max: 180, when: ["shellAppearance", "image", "tint"], retainInactive: true },
+      shellOpacity: { type: "number", default: 100, label: "Image opacity (%)", section: "Appearance", subsection: "Shell texture", min: 0, max: 100, when: ["shellAppearance", "image", "tint"], retainInactive: true },
+      shellTintColor: { type: "color", default: "#ffffff", label: "Tint color", section: "Appearance", subsection: "Shell texture", maxlength: 9, when: ["shellAppearance", "tint"], retainInactive: true },
+      shellTintStrength: { type: "number", default: 0, label: "Tint strength (%)", section: "Appearance", subsection: "Shell texture", min: 0, max: 100, when: ["shellAppearance", "tint"], retainInactive: true },
+      shellBlendMode: {
+        type: "select",
+        default: "multiply",
+        label: "Blend mode",
+        section: "Appearance",
+        subsection: "Shell texture",
+        options: { multiply: "Multiply", overlay: "Overlay", "soft-light": "Soft-light", color: "Color" },
+        when: ["shellAppearance", "tint"],
+        retainInactive: true
+      },
       customColors: {
         type: "switch",
         default: "no",
         label: "Custom colors",
         section: "Appearance",
-        description: "Off keeps the original colors, outlines, and guide symbol.",
+        description: "Off keeps the original shell and control colors.",
         checkedValue: "yes",
         uncheckedValue: "no",
         options: { yes: "On", no: "Off" }
@@ -131,7 +183,7 @@ async function initControllerResource() {
         section: "Appearance",
         description: "Body color, including optional control and outline tints.",
         maxlength: 9,
-        when: (values) => values.customColors === "yes" && (byControllerArtwork.skins[values.skin]?.shell || values.tintControls === "yes" || values.tintOutlines === "yes"),
+        when: (values) => (values.customColors === "yes" && (byControllerArtwork.skins[values.skin]?.shell || values.tintControls === "yes")) || values.tintOutlines === "yes",
         retainInactive: true
       },
       tintControls: {
@@ -155,7 +207,6 @@ async function initControllerResource() {
         checkedValue: "yes",
         uncheckedValue: "no",
         options: { yes: "On", no: "Off" },
-        when: ["customColors", "yes"],
         retainInactive: true
       },
       customOutlineColor: {
@@ -181,7 +232,6 @@ async function initControllerResource() {
         max: 2,
         step: 0.05,
         description: "Scales outlines; hardware symbols and filled borders stay unchanged.",
-        when: ["customColors", "yes"],
         retainInactive: true
       },
       highlightIntensity: {
@@ -192,7 +242,7 @@ async function initControllerResource() {
         subsection: "Vector details",
         min: 0,
         max: 100,
-        when: (values) => values.customColors === "yes" && byControllerArtwork.skins[values.skin]?.highlights,
+        when: (values) => byControllerArtwork.skins[values.skin]?.highlights,
         retainInactive: true
       },
       shadowIntensity: {
@@ -203,7 +253,7 @@ async function initControllerResource() {
         subsection: "Vector details",
         min: 0,
         max: 100,
-        when: (values) => values.customColors === "yes" && byControllerArtwork.skins[values.skin]?.shadows,
+        when: (values) => byControllerArtwork.skins[values.skin]?.shadows,
         retainInactive: true
       },
       customGuide: {
@@ -215,7 +265,7 @@ async function initControllerResource() {
         checkedValue: "yes",
         uncheckedValue: "no",
         options: { yes: "On", no: "Off" },
-        when: (values) => values.customColors === "yes" && byControllerArtwork.skins[values.skin]?.guide,
+        when: (values) => byControllerArtwork.skins[values.skin]?.guide,
         retainInactive: true
       },
       guideSource: { type: "select", default: "symbol", label: "Logo source", section: "Appearance", subsection: "Guide button", options: { symbol: "Symbol", image: "Image URL" }, when: ["customGuide", "yes"], retainInactive: true },
@@ -253,7 +303,7 @@ async function initControllerResource() {
         retainInactive: true
       },
       guideColor: { type: "color", default: "#ffffff", label: "Custom logo color", section: "Appearance", subsection: "Guide button", maxlength: 9, when: ["guideColorMode", "custom"], retainInactive: true },
-      guideScale: { type: "number", default: 100, label: "Logo scale (%)", section: "Appearance", subsection: "Guide button", min: 50, max: 150, step: 5, when: ["customGuide", "yes"], retainInactive: true },
+      guideScale: { type: "number", default: 100, label: "Logo scale (%)", section: "Appearance", subsection: "Guide button", min: 50, max: 150, step: 1, when: ["customGuide", "yes"], retainInactive: true },
       guideOffsetX: { type: "number", default: 0, label: "Logo position X (%)", section: "Appearance", subsection: "Guide button", min: -25, max: 25, step: 1, when: ["customGuide", "yes"], retainInactive: true },
       guideOffsetY: { type: "number", default: 0, label: "Logo position Y (%)", section: "Appearance", subsection: "Guide button", min: -25, max: 25, step: 1, when: ["customGuide", "yes"], retainInactive: true },
       screenOpacity: {
@@ -411,6 +461,19 @@ async function initControllerResource() {
         styleValue: (settings) => `calc(var(--player-top, 50%) + ${settings.verticalPosition}px)`
       },
       fitMargin: { type: "number", default: 16, label: "Fit margin (px)", section: "Size & placement", min: 0, max: 1000, step: "any" },
+      ...byStream.inputHistory.fields(),
+      historySticks: {
+        type: "switch",
+        default: "no",
+        label: "Stick direction transitions",
+        section: "Input History",
+        when: ["showHistory", "yes"],
+        retainInactive: true,
+        checkedValue: "yes",
+        uncheckedValue: "no",
+        options: { yes: "On", no: "Off" },
+        description: "Records discrete direction changes, without per-frame entries."
+      },
       ...byStream.placementFields(".controller"),
       ...byStream.filterFields("artworkFilter", "Artwork", ".controller")
     }
@@ -488,6 +551,7 @@ async function initControllerResource() {
       gamepadSupport.pollGamepads();
       document.dispatchEvent(new CustomEvent("controller-input", { detail: gamepadSupport.gamepadsRaw }));
       for (const player of tester.controls.keys()) gamepadSupport.updateDisplay(player === 9 ? 9 : player - 1);
+      if (history) updateControllerHistory();
       gamepadSupport.frame = requestAnimationFrame(gamepadSupport.tick);
     },
     pollGamepads() {
@@ -534,7 +598,7 @@ async function initControllerResource() {
       const buttons = byControllerArtwork.names;
       buttons.forEach((name, id) => {
         // Two-axis NES adapters can expose the D-pad as axes instead of standard buttons.
-        const axis = settings.skin === "nes" && id >= 12 && id <= 15 && pad.buttons[id] === undefined ? [-(pad.axes[1] ?? 0), pad.axes[1] ?? 0, -(pad.axes[0] ?? 0), pad.axes[0] ?? 0][id - 12] : pad.buttons[id];
+        const axis = digitalValue(pad, id);
         tester.updateButton(axis, player, name, id === 6 || id === 7 ? tester.DIGITAL_THRESHOLD : tester.ANALOGUE_BUTTON_THRESHOLD);
       });
       if (settings.skin === "n64") {
@@ -548,6 +612,98 @@ async function initControllerResource() {
       tester.updateAxis(pad.axes[2] ?? 0, pad.axes[3] ?? 0, player, "stick-2", pad.buttons);
     }
   };
+
+  /** Read the same model-specific digital value for artwork and history from the mapped pad. */
+  function digitalValue(pad, id) {
+    if (settings.skin === "nes" && id >= 12 && id <= 15 && pad.buttons[id] === undefined) return [-(pad.axes[1] ?? 0), pad.axes[1] ?? 0, -(pad.axes[0] ?? 0), pad.axes[0] ?? 0][id - 12];
+    if (settings.skin === "n64" && id >= 18 && id <= 21) return pad.buttons[id] ?? [-(pad.axes[3] ?? 0), pad.axes[3] ?? 0, -(pad.axes[2] ?? 0), pad.axes[2] ?? 0][id - 18];
+    return pad.buttons[id];
+  }
+
+  /** Resolve a control's digital D-pad override once for both lever painting and direction history. */
+  function stickInput(control, x, y, buttons) {
+    if (!control.dataset.dpad) return { x, y, digital: false };
+    const [up, down, left, right] = control.dataset.dpad.split(" ").map((id) => buttons[Number(id)]?.pressed || buttonValue(buttons[Number(id)]) > tester.ANALOGUE_STICK_THRESHOLD);
+    return up || down || left || right ? { x: Number(right) - Number(left), y: Number(down) - Number(up), digital: true } : { x, y, digital: false };
+  }
+
+  /** Diff only selected players' mapped inputs, using the existing poll; no second loop/listeners. */
+  function updateControllerHistory() {
+    for (let player = 1; player <= 9; player++) {
+      const source = `p${player}`;
+      const controls = tester.controls.get(player);
+      const pad = gamepadSupport.gamepads[player === 9 ? 9 : player - 1];
+      const tokens = [];
+      if (controls && pad) {
+        byControllerArtwork.names.forEach((name, id) => {
+          const control = controls.get(name);
+          if (!control || control.node.dataset.stickClick === "no") return;
+          const threshold = id === 6 || id === 7 ? tester.DIGITAL_THRESHOLD : settings.skin === "n64" && id >= 18 && id <= 21 ? tester.ANALOGUE_STICK_THRESHOLD : tester.ANALOGUE_BUTTON_THRESHOLD;
+          if (buttonValue(digitalValue(pad, id)) <= threshold) return;
+          const label = control.node.dataset.label || control.node.getAttribute("aria-label") || name;
+          tokens.push({ id: `${source}:${name}`, source, sourceLabel: player === 9 ? "KB" : `P${player}`, label, prompt: () => controllerHistoryPrompt(control.node) });
+        });
+        for (const [index, name] of [
+          [0, "stick-1"],
+          [2, "stick-2"]
+        ]) {
+          const control = controls.get(name);
+          if (!control) continue;
+          const { x, y, digital } = stickInput(control.node, pad.axes[index] ?? 0, pad.axes[index + 1] ?? 0, pad.buttons);
+          if (!digital && settings.historySticks !== "yes") continue;
+          // A neutral band and 8 directions produce discrete transitions instead of an analog log.
+          if (Math.hypot(x, y) <= Math.max(0.2, tester.ANALOGUE_STICK_THRESHOLD)) continue;
+          const direction = Math.round(Math.atan2(y, x) / (Math.PI / 4));
+          const label = ["Left", "Up-left", "Up", "Up-right", "Right", "Down-right", "Down", "Down-left", "Left"][direction + 4];
+          tokens.push({
+            id: `${source}:${name}:${label}`,
+            source,
+            sourceLabel: player === 9 ? "KB" : `P${player}`,
+            label: digital ? label : `${index ? "RS" : "LS"} ${label}`,
+            prompt: () => controllerHistoryPrompt(control.node, direction)
+          });
+        }
+      }
+      history.update(source, tokens);
+    }
+  }
+
+  let historyPromptId = 0;
+  /** Clone/crop native controls with private IDs; optional stick direction is in eighth-turn units. */
+  function controllerHistoryPrompt(control, direction = null) {
+    const box = control.getBBox();
+    if (!box.width || !box.height) return null;
+    const prompt = control.cloneNode(true);
+    prompt.setAttribute("viewBox", `${box.x - 2} ${box.y - 2} ${box.width + 4} ${box.height + 4}`);
+    prompt.removeAttribute("class");
+    prompt.removeAttribute("style");
+    prompt.removeAttribute("id");
+    const prefix = `history-${++historyPromptId}-`;
+    const references = new Map([...prompt.querySelectorAll("[id]")].map((node) => [node.id, `${prefix}${node.id}`]));
+    for (const node of prompt.querySelectorAll("*")) {
+      if (node.id) node.id = references.get(node.id);
+      for (const attribute of [...node.attributes]) {
+        if (attribute.name === "id") continue;
+        let value = attribute.value;
+        for (const [original, replacement] of references) {
+          value = value.replaceAll(`url(#${original})`, `url(#${replacement})`);
+          if (value === `#${original}`) value = `#${replacement}`;
+        }
+        if (value !== attribute.value) node.setAttribute(attribute.name, value);
+      }
+      if (node.localName === "style") node.textContent = node.textContent.replace(/#([\w-]+)/g, (match, name) => (references.has(name) ? `#${references.get(name)}` : match));
+    }
+    if (direction !== null) {
+      const arrow = document.createElementNS(prompt.namespaceURI, "path");
+      arrow.setAttribute("d", "M-4 0 H4 M1 -3 L4 0 1 3");
+      arrow.setAttribute("fill", "none");
+      arrow.setAttribute("stroke", "currentColor");
+      arrow.setAttribute("stroke-width", "1.5");
+      arrow.setAttribute("transform", `translate(${box.x + box.width / 2} ${box.y + box.height / 2}) rotate(${direction * 45}) scale(${Math.min(box.width, box.height) / 12})`);
+      prompt.append(arrow);
+    }
+    return prompt;
+  }
 
   // ==========
 
@@ -596,7 +752,7 @@ async function initControllerResource() {
       });
     },
     updateInputKB(event) {
-      if (event.type === "keydown" && event.target?.closest?.("input, textarea, select, [contenteditable=true]") && !gamepadSupport.captureKeyboard) return;
+      if (event.type === "keydown" && (event.isComposing || event.target?.closest?.("input, textarea, select, [contenteditable]:not([contenteditable='false'])")) && !gamepadSupport.captureKeyboard) return;
       if ((gamepadSupport.captureKeyboard || byStreamOverlay) && (bySettingsKB.btns.includes(event.keyCode) || bySettingsKB.axesBtns.includes(event.keyCode))) event.preventDefault();
       if (event.type === "keydown") {
         tester.keys.add(event.keyCode);
@@ -636,13 +792,7 @@ async function initControllerResource() {
       if (!control) return;
       const stick = control.node;
       // Arcade D-pad input and axes share one position; simultaneous input never doubles travel.
-      if (stick.dataset.dpad) {
-        const [up, down, left, right] = stick.dataset.dpad.split(" ").map((id) => buttons[Number(id)]?.pressed || buttonValue(buttons[Number(id)]) > this.ANALOGUE_STICK_THRESHOLD);
-        if (up || down || left || right) {
-          horizontal = Number(right) - Number(left);
-          vertical = Number(down) - Number(up);
-        }
-      }
+      ({ x: horizontal, y: vertical } = stickInput(stick, horizontal, vertical, buttons));
       const active = Math.hypot(horizontal, vertical) >= this.ANALOGUE_STICK_THRESHOLD;
       const travel = this.STICK_OFFSET * Number(stick.dataset.travelScale || 1) * (stick.dataset.layout === "minimal" ? Number(stick.dataset.compactScale || 1) : 1);
       const magnitude = Math.max(1, Math.hypot(horizontal, vertical));
@@ -834,6 +984,7 @@ async function initControllerResource() {
       active.style.opacity = settings.opacity / 100;
       active.style.setProperty("--screen-opacity", settings.screenOpacity / 100);
       customizeControllerAppearance(active, settings);
+      customizeControllerShell(active, settings, controllerEvents.signal);
       function updatePlayerIndicators() {
         const litLeds = [[], [1], [2], [3], [4], [1, 4], [2, 4], [3, 4], [1, 3, 4], [1, 2, 3, 4]][player];
         for (const indicator of active.querySelectorAll("[data-player]")) {
@@ -861,6 +1012,7 @@ async function initControllerResource() {
         "controller-layout",
         () => {
           updatePlayerIndicators();
+          customizeControllerShell(active, settings, controllerEvents.signal);
           for (const control of controls.values()) {
             control.pressure = undefined;
             control.x = control.y = undefined;
@@ -882,7 +1034,10 @@ async function initControllerResource() {
     tester.STICK_CURVING = settings.curve === "1";
 
     function fitController() {
-      const columns = Math.max(1, Math.min(controllers.length, Math.ceil(Math.sqrt((controllers.length * innerWidth) / innerHeight))));
+      const naturalWidth = Math.max(1, ...controllers.map((active) => active.offsetWidth));
+      const naturalHeight = Math.max(1, ...controllers.map((active) => active.offsetHeight));
+      const area = (controllers.length ? history?.available(naturalWidth, naturalHeight, settings.fitMargin) : null) || { x: 0, y: 0, width: innerWidth, height: innerHeight };
+      const columns = Math.max(1, Math.min(controllers.length, Math.ceil(Math.sqrt((controllers.length * area.width) / Math.max(1, area.height)))));
       const rows = Math.max(1, Math.ceil(controllers.length / columns));
       controllers.forEach((active, index) => {
         // Layout changes move the cap's rotation center as well as its artwork.
@@ -892,14 +1047,15 @@ async function initControllerResource() {
           stick.style.transformOrigin = `${box.x + box.width / 2 - viewport.x}px ${box.y + box.height / 2 - viewport.y}px`;
         }
         const margin = settings.fitMargin;
-        const cellWidth = innerWidth / columns,
-          cellHeight = innerHeight / rows;
+        const cellWidth = area.width / columns,
+          cellHeight = area.height / rows;
         const scale = Math.max(0, Math.min((cellHeight - margin * 2) / active.offsetHeight, (cellWidth - margin * 2) / active.offsetWidth));
-        active.style.setProperty("--player-left", `${cellWidth * ((index % columns) + 0.5)}px`);
-        active.style.setProperty("--player-top", `${cellHeight * (Math.floor(index / columns) + 0.5)}px`);
+        active.style.setProperty("--player-left", `${area.x + cellWidth * ((index % columns) + 0.5)}px`);
+        active.style.setProperty("--player-top", `${area.y + cellHeight * (Math.floor(index / columns) + 0.5)}px`);
         active.style.transform = `translate(-50%, -50%) scale(${settings.mirror === "yes" ? -scale : scale}, ${scale})`;
       });
     }
+    history?.onResize(fitController);
     fitController();
     window.addEventListener("resize", fitController, { signal: controllerEvents.signal });
     tester.updateGamepads(gamepadSupport.gamepads);
@@ -917,6 +1073,7 @@ async function initControllerResource() {
   }
 
   const settings = await byStream.initResource(resource, { gamepadSupport, buttonValue, copyGamepad });
+  const history = byStreamOverlay ? byStream.inputHistory.create(settings) : null;
   gamepadSupport.init();
   if (byStreamOverlay) initController();
 }
@@ -970,29 +1127,30 @@ function tintControllerControls(controller, color) {
   }
 }
 
-// Each mount starts from the unchanged SVG. Only enabled customization adds overrides.
+/** Apply independent shell colors, vector details, and guide customization to a fresh mount. */
 function customizeControllerAppearance(controller, settings) {
   controller.classList.toggle("custom-colors", settings.customColors === "yes");
   for (const name of ["--controller-color", "--controller-panel", "--controller-socket", "--controller-ink", "--highlight-intensity", "--shadow-intensity"]) controller.style.removeProperty(name);
-  if (settings.customColors !== "yes") return;
   let hex = settings.controllerColor.replace("#", "");
   if (hex.length <= 4) hex = [...hex].map((digit) => digit + digit).join("");
   const channels = [0, 2, 4].map((i) => parseInt(hex.slice(i, i + 2), 16));
   const light = channels.reduce((sum, channel) => sum + channel, 0) > 384;
   const panel = channels.map((channel) => Math.round(light ? channel * 0.86 : channel + (255 - channel) * 0.1));
-  controller.style.setProperty("--controller-color", settings.controllerColor);
-  controller.style.setProperty("--controller-panel", `#${panel.map((channel) => channel.toString(16).padStart(2, "0")).join("")}`);
-  controller.style.setProperty(
-    "--controller-socket",
-    `#${channels
-      .map((channel) =>
-        Math.round(channel * 0.4)
-          .toString(16)
-          .padStart(2, "0")
-      )
-      .join("")}`
-  );
-  controller.style.setProperty("--controller-ink", controllerInk(channels));
+  if (settings.customColors === "yes") {
+    controller.style.setProperty("--controller-color", settings.controllerColor);
+    controller.style.setProperty("--controller-panel", `#${panel.map((channel) => channel.toString(16).padStart(2, "0")).join("")}`);
+    controller.style.setProperty(
+      "--controller-socket",
+      `#${channels
+        .map((channel) =>
+          Math.round(channel * 0.4)
+            .toString(16)
+            .padStart(2, "0")
+        )
+        .join("")}`
+    );
+    controller.style.setProperty("--controller-ink", controllerInk(channels));
+  }
   controller.style.setProperty("--highlight-intensity", settings.highlightIntensity / 100);
   controller.style.setProperty("--shadow-intensity", settings.shadowIntensity / 100);
   const outline =
@@ -1014,7 +1172,7 @@ function customizeControllerAppearance(controller, settings) {
     node.style.strokeWidth = `${parseFloat(style.strokeWidth) * settings.outlineWidth}px`;
     if (outline && !node.matches(".control-detail, .button-detail")) node.style.stroke = outline;
   }
-  if (settings.tintControls === "yes") tintControllerControls(controller, settings.controllerColor);
+  if (settings.customColors === "yes" && settings.tintControls === "yes") tintControllerControls(controller, settings.controllerColor);
   if (settings.customGuide !== "yes") return;
   const slot = controller.querySelector(".guide-logo-slot");
   if (!slot) return;
@@ -1032,6 +1190,9 @@ function customizeControllerAppearance(controller, settings) {
     original.style.display = "none";
     if (housing) housing.style.display = "inline";
     content.style.visibility = "visible";
+    // Stock emblems may sit behind shell cutouts; replacements must cover those cutouts.
+    const layer = slot.closest("svg");
+    layer.parentElement.insertBefore(layer, layer.parentElement.querySelector(".player-leds-layer"));
   };
   if (settings.guideSource === "image") {
     if (!settings.guideImage || !byStream.safeImage(settings.guideImage)) return;
@@ -1078,6 +1239,144 @@ function customizeControllerAppearance(controller, settings) {
   content.append(artwork);
   slot.append(content);
   reveal();
+}
+
+/**
+ * Fill only authored shell plastics with a stable SVG texture, leaving strokes and paint order intact.
+ * Native pattern fills use the existing paths as their exact clipping geometry, including holes.
+ * Each surface maps the same root-space composition back through its own transform; decoding and
+ * tint filters are shared within this instance and never recreated during input frames.
+ * @param {HTMLElement} controller Freshly mounted controller instance.
+ * @param {Object} settings Validated resource settings; solid/minimal/unsupported models do no work.
+ * @param {AbortSignal} signal Aborted when these controller instances are replaced.
+ * @returns {void} Keeps original fills until load; failure or timeout retains the solid artwork.
+ */
+function customizeControllerShell(controller, settings, signal) {
+  if (settings.shellAppearance === "solid" || !settings.shellImage || !byStream.safeImage(settings.shellImage)) return;
+  const svg = controller.querySelector(".controller-background");
+  if (svg.dataset.layout === "minimal" || svg.querySelector(".shell-texture-definitions")) return;
+  const surfaces = [...svg.querySelectorAll(controllerShellSelector)];
+  if (!surfaces.length) return;
+  const ns = svg.namespaceURI;
+  const definitions = document.createElementNS(ns, "defs");
+  definitions.classList.add("shell-texture-definitions");
+  const toRoot = svg.getCTM().inverse();
+  const boxes = surfaces.flatMap((surface) => {
+    const box = surface.getBBox();
+    const matrix = toRoot.multiply(surface.getCTM());
+    return [
+      [box.x, box.y],
+      [box.x + box.width, box.y],
+      [box.x, box.y + box.height],
+      [box.x + box.width, box.y + box.height]
+    ].map(([x, y]) => new DOMPoint(x, y).matrixTransform(matrix));
+  });
+  const x = Math.min(...boxes.map((point) => point.x)),
+    y = Math.min(...boxes.map((point) => point.y));
+  const width = Math.max(...boxes.map((point) => point.x)) - x,
+    height = Math.max(...boxes.map((point) => point.y)) - y;
+  if (width <= 0 || height <= 0) return;
+  const prefix = `${controller.id}-shell-texture`;
+  const composition = document.createElementNS(ns, "g");
+  composition.id = prefix;
+  const image = document.createElementNS(ns, "image");
+  image.classList.add("shell-texture-image");
+  image.setAttribute("x", x);
+  image.setAttribute("y", y);
+  image.setAttribute("width", width);
+  image.setAttribute("height", height);
+  image.setAttribute("preserveAspectRatio", settings.shellFit === "stretch" ? "none" : `xMidYMid ${settings.shellFit === "contain" ? "meet" : "slice"}`);
+  image.setAttribute("opacity", settings.shellOpacity / 100);
+  const cx = x + width / 2,
+    cy = y + height / 2;
+  image.setAttribute("transform", `translate(${cx + (width * settings.shellPositionX) / 100} ${cy + (height * settings.shellPositionY) / 100}) rotate(${settings.shellRotation}) scale(${settings.shellScale / 100}) translate(${-cx} ${-cy})`);
+  if (settings.shellAppearance === "tint" && settings.shellTintStrength > 0) {
+    // SourceGraphic + flood are a closed composition: no page background or other SVG layers enter.
+    const filter = document.createElementNS(ns, "filter");
+    filter.id = `${prefix}-tint`;
+    filter.setAttribute("x", "0");
+    filter.setAttribute("y", "0");
+    filter.setAttribute("width", "1");
+    filter.setAttribute("height", "1");
+    filter.setAttribute("color-interpolation-filters", "sRGB");
+    // Blend against an opaque copy, then restore source alpha once. Otherwise partial tint
+    // would multiply translucent image alpha by itself and change its transparency.
+    const opaque = document.createElementNS(ns, "feComponentTransfer");
+    opaque.setAttribute("in", "SourceGraphic");
+    opaque.setAttribute("result", "opaque-image");
+    const opacity = document.createElementNS(ns, "feFuncA");
+    opacity.setAttribute("type", "linear");
+    opacity.setAttribute("slope", "0");
+    opacity.setAttribute("intercept", "1");
+    opaque.append(opacity);
+    const flood = document.createElementNS(ns, "feFlood");
+    flood.setAttribute("flood-color", settings.shellTintColor);
+    flood.setAttribute("flood-opacity", settings.shellTintStrength / 100);
+    flood.setAttribute("result", "tint");
+    const blend = document.createElementNS(ns, "feBlend");
+    blend.setAttribute("in", "tint");
+    blend.setAttribute("in2", "opaque-image");
+    blend.setAttribute("mode", CSS.supports("mix-blend-mode", settings.shellBlendMode) ? settings.shellBlendMode : "multiply");
+    const alpha = document.createElementNS(ns, "feComposite");
+    alpha.setAttribute("in2", "SourceAlpha");
+    alpha.setAttribute("operator", "in");
+    filter.append(opaque, flood, blend, alpha);
+    definitions.append(filter);
+    image.setAttribute("filter", `url(#${filter.id})`);
+  }
+  composition.append(image);
+  definitions.append(composition);
+  const fills = surfaces.map((surface, index) => {
+    const pattern = document.createElementNS(ns, "pattern");
+    pattern.id = `${prefix}-${index}`;
+    pattern.setAttribute("patternUnits", "userSpaceOnUse");
+    pattern.setAttribute("x", x);
+    pattern.setAttribute("y", y);
+    pattern.setAttribute("width", width);
+    pattern.setAttribute("height", height);
+    // An explicit viewBox keeps tile content in root coordinates even when its origin is nonzero.
+    pattern.setAttribute("viewBox", `${x} ${y} ${width} ${height}`);
+    pattern.setAttribute("preserveAspectRatio", "none");
+    pattern.setAttribute("patternTransform", toRoot.multiply(surface.getCTM()).inverse().toString());
+    const base = document.createElementNS(ns, "rect");
+    base.setAttribute("x", x);
+    base.setAttribute("y", y);
+    base.setAttribute("width", width);
+    base.setAttribute("height", height);
+    base.setAttribute("fill", getComputedStyle(surface).fill);
+    const texture = document.createElementNS(ns, "use");
+    texture.setAttribute("href", `#${prefix}`);
+    pattern.append(base, texture);
+    definitions.append(pattern);
+    return `url(#${pattern.id})`;
+  });
+  let timer;
+  /** Release loading callbacks; a failed load leaves every original surface unchanged. */
+  function finish(loaded) {
+    clearTimeout(timer);
+    image.onload = image.onerror = null;
+    signal.removeEventListener("abort", abort);
+    if (loaded && controller.isConnected && !signal.aborted) {
+      surfaces.forEach((surface, index) => {
+        surface.style.fill = fills[index];
+      });
+      controller.dataset.shellTexture = "ready";
+    } else {
+      definitions.remove();
+      controller.dataset.shellTexture = "fallback";
+      if (!signal.aborted) console.warn("Controller shell image could not be loaded; using solid shell colors.");
+    }
+  }
+  /** A replaced controller must never receive a delayed texture result. */
+  function abort() {
+    finish(false);
+  }
+  image.onload = () => finish(true);
+  image.onerror = () => finish(false);
+  signal.addEventListener("abort", abort, { once: true });
+  timer = setTimeout(() => finish(false), 30000);
+  svg.prepend(definitions);
+  image.setAttribute("href", new URL(settings.shellImage, location.href).href);
 }
 
 async function loadControllerArtwork(requiredSkin) {
@@ -1216,7 +1515,7 @@ async function loadControllerArtwork(requiredSkin) {
       platform: svg.dataset.platform,
       screen: !!svg.querySelector(".screen-surface"),
       guide: !!svg.querySelector(".guide-logo-slot"),
-      shell: !!svg.querySelector(".shell-base"),
+      shell: !!svg.querySelector(controllerShellSelector),
       highlights: !!svg.querySelector(".shell-highlight"),
       shadows: !!svg.querySelector(".shell-shadow"),
       variants: Object.fromEntries([...svg.querySelectorAll("style[data-variant-id]")].map((node) => [node.dataset.variantId, node.dataset.variantName])),
@@ -1366,3 +1665,312 @@ async function loadControllerArtwork(requiredSkin) {
   }
   return { skins, names, render, setLayout, sources, guideSymbols };
 }
+
+/** Embedded ephemeral input history; capture and teardown belong to this resource. */
+(() => {
+  /** Return ordinary resource fields; no input content enters the settings schema. */
+  function fields() {
+    const section = "Input History";
+    const active = { section, when: ["showHistory", "yes"], retainInactive: true };
+    const result = {
+      showHistory: { type: "switch", default: "no", label: "Show Input History", section, checkedValue: "yes", uncheckedValue: "no", options: { yes: "On", no: "Off" } },
+      historyStyle: { ...active, type: "select", default: "svg", label: "Prompts", options: { svg: "SVG artwork", text: "Plain text" } },
+      historyOrientation: { ...active, type: "select", default: "vertical", label: "Orientation", options: { vertical: "Vertical", horizontal: "Horizontal" } },
+      historyOrder: { ...active, type: "select", default: "first", label: "Newest entry", options: { first: "First (top / left)", last: "Last (bottom / right)" } },
+      historyGroupWindow: { ...active, type: "number", default: 60, label: "Combination window (ms)", min: 0, max: 250, step: 1 },
+      historyAggregate: { ...active, type: "switch", default: "yes", label: "Count consecutive presses", checkedValue: "yes", uncheckedValue: "no", options: { yes: "On", no: "Off" } },
+      historyAnimation: { ...active, type: "select", default: "slide", label: "Entry animation", options: { slide: "Slide", fade: "Fade", none: "Off" }, when: (settings) => settings.showHistory === "yes" && settings.animate !== "no" },
+      historyPosition: { ...active, type: "select", default: "bottom-left", label: "Position", subsection: "Size & placement", options: { "top-left": "Top left", "top-right": "Top right", "bottom-left": "Bottom left", "bottom-right": "Bottom right", center: "Center" } }
+    };
+    for (const [name, label, value, min, max] of [
+      ["Width", "Width (px)", 0, 0, 3840], ["Height", "Height (px)", 0, 0, 2160],
+      ["Size", "Prompt / text size (px)", 32, 12, 160], ["Scale", "Scale (%)", 100, -500, 500],
+      ["X", "Horizontal offset (px)", 0, -3840, 3840], ["Y", "Vertical offset (px)", 0, -2160, 2160],
+      ["Gap", "Entry spacing (px)", 6, 0, 100], ["Padding", "Padding (px)", 8, 0, 100], ["Opacity", "Opacity (%)", 100, 0, 100]
+    ]) {
+      const id = `history${name}`;
+      result[id] = { ...active, type: "number", default: value, label, min, max, step: "any", subsection: "Size & placement" };
+      if (name === "Width" || name === "Height") {
+        result[id].description = "0 sizes automatically for the selected orientation.";
+        result[`${id}Mode`] = { ...active, type: "switch", default: "auto", label: "Fill parent", subsection: "Size & placement", when: [id, "0"], checkedValue: "fill", uncheckedValue: "auto", options: { fill: "Fill parent", auto: "Automatic" } };
+      }
+    }
+    for (const [name, label, value] of [["Color", "Text / symbols", "#EEEEEE"], ["Background", "Container background", "#11111166"], ["EntryColor", "Entry surface", "#111111CC"], ["BorderColor", "Entry outline", "#EEEEEE33"]]) {
+      result[`history${name}`] = { ...active, type: "color", default: value, label, maxlength: 9, subsection: "Colors" };
+    }
+    return result;
+  }
+
+  /**
+   * Mount a history, or return null while disabled. Nothing is persisted or transmitted.
+   * @param {Object} settings Validated resource settings.
+   * @param {HTMLElement} [parent=document.body] Overlay-owned mount.
+   * @returns {Object|null} press/release/update/pulse/clear/destroy; destroy releases observers and frames.
+   */
+  function create(settings, parent = document.body) {
+    if (settings.showHistory !== "yes") return null;
+    const style = document.createElement("style");
+    style.textContent = `
+.input-history-position {
+  position: absolute;
+  inset: 16px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-start;
+  pointer-events: none;
+}
+.input-history-position[data-position^="top"] { align-items: flex-start; }
+.input-history-position[data-position$="right"] { justify-content: flex-end; }
+.input-history-position[data-position="center"] { align-items: center; justify-content: center; }
+.input-history {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--history-gap);
+  padding: var(--history-padding);
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--history-background);
+  color: var(--history-ink);
+  font: 600 var(--history-size)/1.2 "Courier New", monospace;
+  contain: layout paint;
+}
+.input-history[data-orientation="horizontal"] { flex-direction: row; align-items: flex-start; }
+.history-entry {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+  gap: 0.2em;
+  max-width: 100%;
+  min-height: 1.5em;
+  overflow: hidden;
+  padding: 0.12em 0.25em;
+  border: 1px solid var(--history-border);
+  border-radius: 5px;
+  background: var(--history-entry);
+  white-space: nowrap;
+}
+.history-entry small { font-size: 0.45em; }
+.history-prompt { display: inline-flex; min-width: 0; flex-shrink: 1; }
+.history-prompt svg { display: block; width: 1.5em; height: 1.5em; overflow: hidden; }
+.history-count { font: inherit; font-size: 0.65em; }
+.history-count:empty { display: none; }
+.input-history[data-compact="true"] .history-entry { flex-direction: column; align-items: center; width: 100%; }
+.input-history[data-compact="true"] .history-prompt { max-width: 100%; white-space: normal; overflow-wrap: anywhere; text-align: center; }
+`;
+    const position = document.createElement("div");
+    position.className = "input-history-position";
+    position.dataset.position = settings.historyPosition;
+    position.style.translate = `${settings.historyX}px ${settings.historyY}px`;
+    const root = document.createElement("div");
+    root.className = "input-history";
+    root.setAttribute("role", "img");
+    root.setAttribute("aria-label", "Recent inputs");
+    root.dataset.orientation = settings.historyOrientation;
+    root.dataset.order = settings.historyOrder;
+    const horizontal = settings.historyOrientation === "horizontal";
+    const keyHeight = settings.historySize * (settings.historyStyle === "svg" ? 1.5 : 1.2);
+    const entryHeight = Math.max(settings.historySize * 1.5, keyHeight + settings.historySize * 0.24 + 2);
+    const narrow = !horizontal && settings.historyWidth === 0 && settings.historyWidthMode !== "fill";
+    root.dataset.compact = String(narrow);
+    root.style.width = settings.historyWidth ? `${settings.historyWidth}px` : !narrow ? "100%" : `${Math.ceil(settings.historySize * 2 + 2 + settings.historyPadding * 2)}px`;
+    root.style.height = settings.historyHeight ? `${settings.historyHeight}px` : !horizontal || settings.historyHeightMode === "fill" ? "100%" : `${Math.ceil(entryHeight + settings.historyPadding * 2)}px`;
+    const scale = settings.historyScale / 100;
+    const maximumHeight = `calc((100vh - 32px) / ${Math.abs(scale) || 1})`;
+    root.style.maxWidth = `calc((100vw - 32px) / ${Math.abs(scale) || 1})`;
+    root.style.maxHeight = maximumHeight;
+    root.style.transform = `scale(${scale})`;
+    root.style.transformOrigin = settings.historyPosition === "center" ? "center" : settings.historyPosition.replace("-", " ");
+    root.style.opacity = settings.historyOpacity / 100;
+    for (const [name, value] of Object.entries({ size: `${settings.historySize}px`, gap: `${settings.historyGap}px`, padding: `${settings.historyPadding}px`, ink: settings.historyColor, background: settings.historyBackground, entry: settings.historyEntryColor, border: settings.historyBorderColor })) root.style.setProperty(`--history-${name}`, value);
+    position.append(style, root);
+    parent.append(position);
+    // Only active controls and mounted rows are retained. The oldest row is always at rows[0].
+    const held = new Map();
+    const rows = [];
+    const events = new AbortController();
+    let frame = 0;
+    let disposed = false;
+    let layoutChanged;
+
+    /** Subscribe the visualization's existing fit function to changes in the history's occupied area. */
+    function onResize(callback) {
+      layoutChanged = callback;
+    }
+
+    /**
+     * Return the largest useful viewport rectangle outside this history, for the source's own fit function.
+     * @param {number} width Natural visualization width in pixels.
+     * @param {number} height Natural visualization height in pixels.
+     * @param {number} [padding=16] Viewport inset in pixels.
+     * @returns {Object} x/y/width/height rectangle; capture/render ownership stays with the resource.
+     */
+    function available(width, height, padding = 16) {
+      const area = { x: padding, y: padding, width: Math.max(0, innerWidth - padding * 2), height: Math.max(0, innerHeight - padding * 2) };
+      root.style.maxHeight = maximumHeight;
+      let box = root.getBoundingClientRect();
+      if (box.right <= area.x || box.left >= innerWidth - padding || box.bottom <= area.y || box.top >= innerHeight - padding || settings.historyScale === 0) return area;
+      const gap = 12;
+      // A fully filled history still leaves a usable band for the visualization.
+      const maxHeight = Math.max(0, area.height - Math.min(height, area.height / 2) - gap);
+      if (box.width > area.width / 2 && box.height > maxHeight) {
+        root.style.maxHeight = `${maxHeight / (Math.abs(scale) || 1)}px`;
+        box = root.getBoundingClientRect();
+      }
+      const candidates = [
+        { ...area, height: Math.max(0, box.top - gap - area.y) },
+        { ...area, y: Math.max(area.y, box.bottom + gap), height: Math.max(0, innerHeight - padding - box.bottom - gap) },
+        { ...area, width: Math.max(0, box.left - gap - area.x) },
+        { ...area, x: Math.max(area.x, box.right + gap), width: Math.max(0, innerWidth - padding - box.right - gap) }
+      ];
+      const score = (candidate) => Math.min(candidate.width / Math.max(1, width), candidate.height / Math.max(1, height));
+      candidates.sort((a, b) => score(b) - score(a) || b.width * b.height - a.width * a.height);
+      return candidates[0];
+    }
+
+    /** Measure once per input frame/resize and immediately remove displaced rows and their records. */
+    function trim() {
+      frame = 0;
+      const horizontal = settings.historyOrientation === "horizontal";
+      const limit = (horizontal ? root.clientWidth : root.clientHeight) - settings.historyPadding * 2;
+      if (limit <= 0 || root.clientHeight <= 0 || root.clientWidth <= 0) return clear();
+      const sizes = rows.map((row) => horizontal ? row.node.offsetWidth : row.node.offsetHeight);
+      let used = sizes.reduce((sum, size) => sum + size, 0) + Math.max(0, rows.length - 1) * settings.historyGap;
+      while (rows.length > 1 && used > limit + 0.5) {
+        used -= sizes.shift() + settings.historyGap;
+        const oldest = rows.shift().node;
+        for (const animation of oldest.getAnimations()) animation.cancel();
+        oldest.remove();
+      }
+    }
+
+    /** Coalesce capacity work rather than measuring on each physical input. */
+    function scheduleTrim() {
+      if (!frame && !disposed) frame = requestAnimationFrame(trim);
+    }
+
+    /** Paint a row's current combination using safe labels and source-owned SVG clones. */
+    function paint(row) {
+      const content = document.createDocumentFragment();
+      if (row.sourceLabel) {
+        const source = document.createElement("small");
+        source.textContent = row.sourceLabel;
+        content.append(source);
+      }
+      row.tokens.forEach((token, index) => {
+        if (index) {
+          const plus = document.createElement("span");
+          plus.textContent = "+";
+          content.append(plus);
+        }
+        const prompt = settings.historyStyle === "svg" ? token.prompt?.() : null;
+        const cap = document.createElement("span");
+        cap.className = "history-prompt";
+        cap.title = token.label;
+        if (prompt) {
+          prompt.setAttribute("aria-label", token.label);
+          cap.append(prompt);
+        } else cap.textContent = token.label;
+        content.append(cap);
+      });
+      const count = document.createElement("b");
+      count.className = "history-count";
+      count.textContent = row.count > 1 ? `×${row.count}` : "";
+      content.append(count);
+      row.node.replaceChildren(content);
+      row.signature = row.tokens.map((token) => token.id).sort().join("|");
+      scheduleTrim();
+    }
+
+    /**
+     * Record a new physical press; repeat events and still-held inputs are ignored.
+     * @param {Object} token Stable id, label, source, optional modifier/sourceLabel and SVG prompt factory.
+     */
+    function press(token) {
+      if (disposed || document.hidden || held.has(token.id)) return;
+      const modifiers = [...held.values()].filter((input) => input.modifier && input.source === token.source);
+      const now = performance.now();
+      let last = rows.at(-1);
+      const overlap = last?.tokens.some((input) => held.has(input.id));
+      held.set(token.id, token);
+      // A long-held modifier joins the next action instead of leaving a redundant solo modifier row.
+      const modifierRow = last && last.count === 1 && last.tokens.every((input) => input.modifier && held.has(input.id));
+      if (last && last.source === token.source && last.count === 1 && !last.tokens.some((input) => input.id === token.id) && ((overlap && now - last.time <= settings.historyGroupWindow) || modifierRow)) {
+        last.tokens = [...new Map([...last.tokens, ...modifiers, token].map((input) => [input.id, input])).values()];
+        paint(last);
+        return;
+      }
+      const tokens = [...modifiers, token];
+      const signature = tokens.map((input) => input.id).sort().join("|");
+      if (settings.historyAggregate === "yes" && last?.signature === signature) {
+        last.count++;
+        last.time = now;
+        const count = last.node.querySelector(".history-count");
+        count.textContent = `×${last.count}`;
+        scheduleTrim();
+        return;
+      }
+      const node = document.createElement("div");
+      node.className = "history-entry";
+      last = { node, tokens, source: token.source, sourceLabel: token.sourceLabel, count: 1, time: now };
+      rows.push(last);
+      if (settings.historyOrder === "first") root.prepend(node);
+      else root.append(node);
+      paint(last);
+      if (settings.animate !== "no" && settings.historyAnimation !== "none") {
+        const offset = settings.historyOrder === "first" ? -10 : 10;
+        const transform = settings.historyOrientation === "horizontal" ? `translateX(${offset}px)` : `translateY(${offset}px)`;
+        node.animate([{ opacity: 0, transform: settings.historyAnimation === "slide" ? transform : "none" }, { opacity: 1, transform: "none" }], { duration: 140, easing: "ease-out" });
+      }
+    }
+
+    /** Release one physical ID; no recorded text or release log is retained. */
+    function release(id) {
+      held.delete(id);
+    }
+
+    /** Diff a source's current digital state using the caller's existing polling loop. */
+    function update(source, tokens) {
+      const next = new Set(tokens.map((token) => token.id));
+      for (const [id, token] of held) if (token.source === source && !next.has(id)) release(id);
+      for (const token of tokens) press(token);
+    }
+
+    /** Record one instantaneous wheel/directional action. */
+    function pulse(token) {
+      press(token);
+      release(token.id);
+    }
+
+    /** Remove all displayed and active input data, including pending layout work. */
+    function clear() {
+      cancelAnimationFrame(frame);
+      frame = 0;
+      held.clear();
+      rows.length = 0;
+      for (const animation of root.getAnimations({ subtree: true })) animation.cancel();
+      root.replaceChildren();
+    }
+
+    /** End this overlay-owned history's lifetime; safe to call more than once. */
+    function destroy() {
+      disposed = true;
+      layoutChanged = undefined;
+      clear();
+      observer.disconnect();
+      events.abort();
+      position.remove();
+    }
+
+    const observer = new ResizeObserver(() => { scheduleTrim(); layoutChanged?.(); });
+    observer.observe(root);
+    window.addEventListener("blur", () => held.clear(), { signal: events.signal });
+    document.addEventListener("visibilitychange", () => { if (document.hidden) held.clear(); }, { signal: events.signal });
+    window.addEventListener("pagehide", (event) => { if (event.persisted) clear(); else destroy(); }, { signal: events.signal });
+    return { press, release, update, pulse, clear, destroy, available, onResize };
+  }
+
+  byStream.inputHistory = { fields, create };
+})();

@@ -469,7 +469,7 @@
           <path
             d="M257.6371629518139 196.48724174314643A27.1104 27.1104 0 0 1 232.99275325685352 171.8428320481861"
             fill="none" stroke="#303d30" stroke-width="3" class="player-ring" data-player="4" />
-          <circle cx="259.99998999999997" cy="169.48000499999998" r="20.897599999999997"
+          <circle cx="259.99998999999997" cy="169.48000499999998" r="23.4"
             fill="#eeeeee" stroke="#111111" stroke-width="3"
             class="guide-custom-housing button-face vector-outline" />
         </g>

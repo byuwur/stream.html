@@ -7,6 +7,7 @@
 const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
 const path = require("node:path");
+const { pathToFileURL } = require("node:url");
 const test = require("node:test");
 const { chromium } = require("playwright");
 const { root, runtimeAssets, launchOptions, loadAssets, resourceNames, serve } = require("./browser.cjs");
@@ -102,6 +103,223 @@ test("shared, renderer-only, and configurator-only imports stay in their modes",
   }
 });
 
+test("bounded numbers pair sliders with exact inputs and small selects use synchronized choice buttons", async () => {
+  const assets = await loadAssets(editorAssets);
+  const browser = await chromium.launch(launchOptions);
+  const page = await browser.newPage();
+  const errors = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  try {
+    await serve(page, assets);
+    await page.goto("https://stream.test/keyboard/?mode=both&layout=wasd#configure");
+    await page.waitForFunction(() => document.getElementById("overlay-url")?.value);
+    await page.locator('[data-expand-sections="true"]').click();
+    assert.equal(await page.evaluate(() => Object.entries(byStreamResource.fields).filter(([, rule]) => rule.type === "number" && Number.isFinite(rule.min) && Number.isFinite(rule.max)).every(([name]) => document.querySelectorAll(`[data-number-field="${name}"]`).length === 1)), true);
+    const opacity = page.locator('[name="opacity"]');
+    const slider = page.locator('[data-number-field="opacity"]');
+    assert.equal(await page.locator("[data-number-field]").evaluateAll((sliders) => sliders.every((slider) => slider.step === "1")), true);
+    await slider.evaluate((node) => { node.value = "35"; node.dispatchEvent(new Event("input", { bubbles: true })); });
+    assert.equal(await opacity.inputValue(), "35");
+    await page.waitForFunction(() => byStreamResource.settings.opacity === 35);
+    await slider.focus();
+    await slider.press("ArrowRight");
+    await page.waitForFunction(() => byStreamResource.settings.opacity === 36);
+    assert.equal(await opacity.inputValue(), "36");
+    await opacity.fill("64.5");
+    assert.equal(await slider.inputValue(), "65");
+    await page.waitForFunction(() => byStreamResource.settings.opacity === 64.5);
+    const acceptedURL = await page.locator("#overlay-url").inputValue();
+    await opacity.fill("101");
+    await page.waitForTimeout(320);
+    assert.equal(await page.evaluate(() => document.getElementById("overlay-preview").contentWindow.location.href), acceptedURL, "Out-of-range numeric drafts preserve the accepted preview");
+    assert.equal(await page.locator("#copy-url").isDisabled(), true);
+    assert.equal(await slider.inputValue(), "65");
+    await opacity.fill("0");
+    await page.waitForFunction(() => byStreamResource.settings.opacity === 0);
+    assert.equal(await slider.inputValue(), "0");
+    const platforms = page.getByRole("group", { name: "Platform labels", exact: true });
+    assert.equal(await platforms.getByRole("button").count(), 2);
+    await platforms.getByRole("button", { name: "macOS", exact: true }).click();
+    await page.waitForFunction(() => byStreamResource.settings.platform === "mac");
+    assert.equal(await platforms.getByRole("button", { name: "macOS", exact: true }).getAttribute("aria-pressed"), "true");
+    await platforms.getByRole("button", { name: "macOS", exact: true }).press("ArrowLeft");
+    await page.waitForFunction(() => byStreamResource.settings.platform === "windows");
+    assert.equal(await page.locator('[name="mode"]').getAttribute("data-choice-buttons"), null, "Four choices retain the dropdown");
+    const promptButtons = page.locator('[name="historyStyle"]').locator("..").locator(".choice-buttons button");
+    assert.equal(await promptButtons.first().isDisabled(), true);
+    await page.locator('[data-settings-view="json"]').click();
+    await page.locator("#settings-json").fill(JSON.stringify({ mode: "hidden", platform: "mac", showHistory: "yes", opacity: 25, historyOrientation: "horizontal" }));
+    await page.locator("#settings-json").blur();
+    await page.waitForFunction(() => byStreamResource.settings.mode === "hidden");
+    await page.locator('[data-settings-view="form"]').click();
+    assert.equal(await slider.inputValue(), "25");
+    assert.equal(await platforms.getByRole("button", { name: "macOS", exact: true }).getAttribute("aria-pressed"), "true");
+    await page.locator('button[type="reset"][form="overlay-form"]').click();
+    await page.waitForFunction(() => byStreamResource.settings.opacity === 100 && byStreamResource.settings.mode === "both");
+    assert.equal(await slider.inputValue(), "100");
+    assert.equal(await platforms.getByRole("button", { name: "Windows", exact: true }).getAttribute("aria-pressed"), "true");
+    assert.equal(await promptButtons.first().isDisabled(), true);
+    assert.deepEqual(errors, []);
+  } finally { await browser.close(); }
+});
+
+test("field restore uses resource defaults while Reset retains opening values and history starts at zero", async () => {
+  const assets = await loadAssets(editorAssets);
+  const browser = await chromium.launch(launchOptions);
+  const page = await browser.newPage();
+  const errors = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  try {
+    await serve(page, assets);
+    for (const name of ["keyboard", "controller"]) {
+      await page.goto(`https://stream.test/${name}/#configure`);
+      await page.waitForFunction(() => document.getElementById("overlay-url")?.value);
+      for (const dimension of ["historyWidth", "historyHeight"]) assert.equal(await page.locator(`[name="${dimension}"]`).inputValue(), "0", `${name} ${dimension} default`);
+      await page.goto(`https://stream.test/${name}/?showHistory=yes&historyWidth=1280&historyHeight=220&opacity=42#configure`);
+      await page.waitForFunction(() => document.getElementById("overlay-url")?.value);
+      await page.locator('[data-expand-sections="true"]').click();
+      for (const dimension of ["historyWidth", "historyHeight"]) {
+        await page.locator(`[data-restore-field="${dimension}"]`).click();
+        await page.waitForFunction((dimension) => byStreamResource.settings[dimension] === 0, dimension);
+        assert.equal(await page.locator(`[name="${dimension}"]`).inputValue(), "0");
+        assert.equal(await page.locator(`[data-number-field="${dimension}"]`).inputValue(), "0");
+        assert.equal(new URL(await page.locator("#overlay-url").inputValue()).searchParams.has(dimension), false);
+      }
+      assert.equal(await page.locator('[name="opacity"]').inputValue(), "42", "Other fields retain their values");
+      await page.locator('button[type="reset"][form="overlay-form"]').click();
+      await page.waitForFunction(() => byStreamResource.settings.historyWidth === 1280 && byStreamResource.settings.historyHeight === 220);
+      if (name === "controller") for (const field of ["guideScale", "outlineWidth"]) {
+        assert.equal(await page.locator(`[name="${field}"]`).getAttribute("type"), "number");
+        assert.equal(await page.locator(`[data-number-field="${field}"]`).count(), 1, "Shared controls create one slider and one exact input");
+      }
+    }
+    await page.goto("https://stream.test/watermark/?text=Custom&fontFamily=Arial&textColor=112233&kind=logo&logoUrl=https%3A%2F%2Fmedia.test%2Fcustom.png#configure");
+    await page.waitForFunction(() => document.getElementById("overlay-url")?.value);
+    await page.locator('[data-expand-sections="true"]').click();
+    for (const field of ["text", "fontFamily", "logoUrl", "textColor"]) {
+      await page.locator(`[data-restore-field="${field}"]`).click();
+      await page.waitForFunction((field) => byStreamResource.settings[field] === byStreamResource.fields[field].default, field);
+      assert.equal(await page.locator(`[name="${field}"]`).inputValue(), await page.evaluate((field) => String(byStreamResource.fields[field].default), field));
+    }
+    assert.equal(await page.locator('[name="fontFamily"]').locator("..").locator(".select2-container").count(), 1);
+    assert.equal(await page.locator('[name="logoUrl"]').locator("..").locator(".image-provider").count(), 1);
+    assert.equal(await page.locator(".config-field").first().evaluate((node) => getComputedStyle(node).borderBottomWidth), "1px");
+    await page.goto("https://stream.test/clock/?timeZone=UTC&locale=es-CO#configure");
+    await page.waitForFunction(() => document.getElementById("overlay-url")?.value);
+    await page.locator('[data-expand-sections="true"]').click();
+    for (const field of ["timeZone", "locale"]) {
+      await page.locator(`[data-restore-field="${field}"]`).click();
+      await page.waitForFunction((field) => byStreamResource.settings[field] === byStreamResource.fields[field].default, field);
+      assert.equal(await page.locator(`[name="${field}"]`).locator("..").locator(".select2-container").count(), 1);
+    }
+    await page.goto("https://stream.test/timer/?mode=deadline&endTime=2030-01-01T00%3A00%3A00Z#configure");
+    await page.waitForFunction(() => document.getElementById("overlay-url")?.value);
+    await page.locator('[data-expand-sections="true"]').click();
+    await page.locator('[data-restore-field="endTime"]').click();
+    await page.waitForFunction(() => byStreamResource.settings.endTime === byStreamResource.fields.endTime.default);
+    assert.equal(await page.locator('[name="endTime"]').locator("..").locator(".timestamp-picker").inputValue(), await page.evaluate(() => {
+      const date = new Date(byStreamResource.fields.endTime.default);
+      return new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, 19);
+    }));
+    assert.deepEqual(errors, []);
+  } finally { await browser.close(); }
+});
+
+test("keyboard editor keeps native URL/JSON/reset behavior, inactive drafts, and focused-preview input", async () => {
+  const assets = await loadAssets(editorAssets);
+  const browser = await chromium.launch(launchOptions);
+  const page = await browser.newPage();
+  const errors = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  try {
+    await serve(page, assets);
+    await page.goto("https://stream.test/keyboard/?mode=both&layout=wasd#configure");
+    await page.waitForFunction(() => document.getElementById("overlay-url")?.value);
+    const preview = page.frameLocator("#overlay-preview");
+    await preview.locator('#keyboard-overlay[data-ready="yes"]').waitFor();
+    assert.equal(await page.locator('[name="historyStyle"]').isDisabled(), true);
+    assert.equal(await page.locator('[name="shellImage"]').isDisabled(), true);
+    assert.equal(await page.locator('[name="shellImage"]').locator("..").locator(".image-provider").count(), 1);
+    assert.equal(await page.locator('[name="showKeyboard"], [name="showMouse"]').count(), 0);
+    assert.equal(await page.locator('[name="mode"] option[value="hidden"]').textContent(), "Hidden");
+    /** Apply a native form value even inside a collapsed subsection. */
+    async function change(name, value) {
+      await page.locator(`[name="${name}"]`).evaluate((node, value) => {
+        if (node.type === "checkbox") node.checked = value === "yes";
+        else node.value = value;
+        node.dispatchEvent(new Event("change", { bubbles: true }));
+      }, value);
+      await page.waitForTimeout(320);
+    }
+    await page.locator('[data-expand-sections="true"]').click();
+    const keys = page.locator(".entry-editor").filter({ has: page.locator('[name="displayedKeys"]') });
+    await keys.locator(".add-entry").click();
+    assert.equal(await keys.locator(".entry-row input").count(), 0, "Physical keys use a select rather than a text input");
+    const choice = keys.locator('select[aria-label="Physical key"]').first();
+    assert.ok(await choice.locator('option[value="ShiftRight"]').count());
+    await choice.selectOption("KeyA");
+    await page.waitForFunction(() => document.querySelector('[name="displayedKeys"]').value === '["KeyA"]');
+    const positions = await keys.locator(".entry-row").first().evaluate((row) => ({ select: row.querySelector(".select2-container").getBoundingClientRect().right, controls: row.querySelector(".btn-group").getBoundingClientRect().left }));
+    assert.ok(positions.controls >= positions.select, "Row options sit to the right of the key selector");
+    await keys.locator(".add-entry").click();
+    await keys.locator('select[aria-label="Physical key"]').nth(1).selectOption("KeyD");
+    await keys.locator('.entry-row [data-action="up"]').nth(1).click();
+    await page.waitForFunction(() => document.querySelector('[name="displayedKeys"]').value === '["KeyD","KeyA"]');
+    await keys.locator('select[aria-label="Physical key"]').nth(1).selectOption("KeyD");
+    await page.waitForTimeout(320);
+    assert.equal(await page.locator("#copy-url").isDisabled(), true, "Duplicate physical keys are rejected");
+    await keys.locator('.entry-row [data-action="up"]').nth(1).click();
+    await keys.locator('select[aria-label="Physical key"]').nth(1).selectOption("KeyA");
+    await page.waitForFunction(() => !document.querySelector("#copy-url").disabled);
+    assert.equal(await keys.locator("select").evaluateAll((selects) => selects.every((select) => select.validity.valid)), true, "Reordering and correcting duplicates clears stale row validity");
+    await page.locator('button[type="reset"][form="overlay-form"]').click();
+    await page.waitForFunction(() => document.querySelector('[name="displayedKeys"]').value === '[]');
+    await change("showHistory", "yes");
+    await change("historyStyle", "text");
+    await preview.locator(".input-history").waitFor();
+    await page.locator('[name="keySize"]').focus();
+    await page.keyboard.press("KeyE");
+    assert.equal(await preview.locator(".history-entry").count(), 0, "Editor input does not enter preview history");
+    await change("keySize", "44");
+    await preview.locator("body").click({ position: { x: 5, y: 5 } });
+    await page.keyboard.press("KeyE");
+    assert.match(await preview.locator(".history-entry").first().innerText(), /E/);
+    await change("historySource", "mouse");
+    await change("mode", "mouse");
+    assert.equal(await page.locator('[name="layout"]').isDisabled(), true);
+    assert.equal(await page.locator('[name="layout"]').inputValue(), "wasd");
+    assert.equal(new URL(await page.locator("#overlay-url").inputValue()).searchParams.has("layout"), false);
+    await change("mode", "both");
+    assert.equal(await page.locator('[name="layout"]').inputValue(), "wasd");
+    await change("historySource", "keyboard");
+    await change("mode", "hidden");
+    await preview.locator('.input-history').waitFor();
+    assert.equal(await preview.locator("#keyboard").isVisible(), false);
+    assert.equal(await preview.locator("#mouse").isVisible(), false);
+    await page.locator('[data-settings-view="json"]').click();
+    const json = JSON.parse(await page.locator("#settings-json").inputValue());
+    assert.equal(json.showHistory, "yes");
+    assert.equal(json.layout, "wasd");
+    await page.locator("#settings-json").fill(JSON.stringify({ mode: "keyboard", layout: "arrows", showHistory: "yes", historyStyle: "text", historyOrientation: "horizontal" }));
+    await page.locator("#settings-json").blur();
+    await page.waitForFunction(() => new URL(document.getElementById("overlay-url").value).searchParams.get("layout") === "arrows");
+    await preview.locator('[data-code="ArrowUp"]').waitFor();
+    assert.equal(await preview.locator(".input-history").getAttribute("data-orientation"), "horizontal");
+    await page.locator('button[type="reset"][form="overlay-form"]').click();
+    await page.waitForFunction(() => new URL(document.getElementById("overlay-url").value).searchParams.get("layout") === "wasd");
+    assert.equal(new URL(await page.locator("#overlay-url").inputValue()).searchParams.has("showHistory"), false);
+    await preview.locator('#keyboard-overlay[data-ready="yes"]').waitFor();
+    assert.equal(await preview.locator(".input-history").count(), 0);
+    const overlayURL = await page.locator("#overlay-url").inputValue();
+    await page.goto(overlayURL);
+    await page.locator('#keyboard-overlay[data-ready="yes"]').waitFor();
+    await page.keyboard.press("F2");
+    await page.waitForFunction(() => document.getElementById("overlay-url")?.value);
+    assert.equal(new URL(page.url()).hash, "#configure");
+    assert.deepEqual(errors, []);
+  } finally { await browser.close(); }
+});
+
 // --- CONFIGURATOR INTEGRATION ---
 test("configurator forms and previews initialize for every resource", async (t) => {
   const assets = await loadAssets(editorAssets);
@@ -124,7 +342,7 @@ test("configurator forms and previews initialize for every resource", async (t) 
           assert.equal(await page.locator("form[data-configurator]").count(), 1, "Repeated initialization preserves the editor");
           assert.equal(await page.locator('[name="animate"]').isChecked(), true, name + " enables resource animation by default");
           if (["schedule", "info"].includes(name)) assert.equal(await page.locator('[name="widthMode"]').isChecked(), true, name + " fills width by default");
-          const imageFields = { controller: ["guideImage"], main: ["backgroundUrl", "logoUrl"], qr: ["logoUrl"], watermark: ["logoUrl"] }[name] || [];
+          const imageFields = { controller: ["guideImage", "shellImage"], keyboard: ["shellImage", "keyImage"], main: ["backgroundUrl", "logoUrl"], qr: ["logoUrl"], watermark: ["logoUrl"] }[name] || [];
           for (const field of imageFields) assert.equal(await page.locator(`[name="${field}"]`).locator("..").locator(".image-provider").count(), 1, `${name} enhances ${field}`);
           assert.equal(await page.locator(".image-input").count(), imageFields.length + (["lower-thirds", "sponsors"].includes(name) ? 2 : 0));
           const url = new URL(await page.locator("#overlay-url").inputValue());
@@ -271,7 +489,8 @@ test("configurator forms and previews initialize for every resource", async (t) 
         await change("customOutlineColor", "yes");
         await change("outlineColor", "#7799aa");
         await change("outlineWidth", "1.5");
-        assert.equal(await page.locator('[name="outlineWidth"]').getAttribute("type"), "range");
+        assert.equal(await page.locator('[name="outlineWidth"]').getAttribute("type"), "number");
+        assert.equal(await page.locator('[data-number-field="outlineWidth"]').count(), 1);
         await change("tintOutlines", "yes");
         assert.equal(await page.locator('[name="outlineColor"]').isDisabled(), true);
         await change("tintOutlines", "no");
@@ -288,7 +507,9 @@ test("configurator forms and previews initialize for every resource", async (t) 
         await page.waitForFunction(() => !new URL(document.getElementById("overlay-url").value).searchParams.has("customColors"));
         const shared = new URL(await page.locator("#overlay-url").inputValue());
         assert.equal(shared.searchParams.has("controllerColor"), false);
-        assert.equal(shared.searchParams.has("guideImage"), false);
+        assert.equal(shared.searchParams.get("guideImage"), "https://media.test/logo.svg", "Guide customization is independent of Custom colors");
+        assert.equal(shared.searchParams.get("outlineWidth"), "1.5", "Vector details remain independent");
+        assert.equal(await page.locator('[name="customGuide"]').isEnabled(), true);
         assert.equal(await page.locator('[name="controllerColor"]').inputValue(), "#2255cc");
         assert.equal(await page.locator('[name="guideImage"]').inputValue(), "https://media.test/logo.svg");
         await page.goto("https://stream.test/controller/#configure");
@@ -305,6 +526,54 @@ test("configurator forms and previews initialize for every resource", async (t) 
       } finally {
         await page.close();
       }
+    });
+
+    await t.test("shell controls share uploads, retain drafts, serialize, and reset independently", async () => {
+      const page = await browser.newPage();
+      try {
+        await serve(page, assets);
+        await page.goto("https://stream.test/controller/?player=9&skin=ds5#configure");
+        await page.waitForFunction(() => document.getElementById("overlay-url")?.value);
+        /** Apply through the real named form fields, including controls inside collapsed subsections. */
+        async function change(name, value) {
+          await page.locator(`[name="${name}"]`).evaluate((node, value) => {
+            node.value = value; node.dispatchEvent(new Event("change", { bubbles: true }));
+          }, value);
+          await page.waitForFunction(({ name, value }) => String(byStreamResource.settings[name]).replace(/^#/, "") === value.replace(/^#/, ""), { name, value });
+        }
+        assert.equal(await page.locator('[name="shellImage"]').isDisabled(), true);
+        assert.equal(await page.locator('[name="outlineWidth"]').isEnabled(), true);
+        assert.equal(await page.locator('[name="customGuide"]').isEnabled(), true);
+        await change("shellAppearance", "tint");
+        assert.equal(await page.locator('[name="shellImage"]').locator("..").locator(".image-provider").isEnabled(), true);
+        const uri = await page.evaluate(() => { const canvas = document.createElement("canvas"); canvas.width = canvas.height = 2; return canvas.toDataURL(); });
+        await change("shellImage", uri);
+        await change("shellPositionX", "15"); await change("shellRotation", "30");
+        await change("shellTintColor", "#44bb77"); await change("shellTintStrength", "65");
+        const shared = new URL(await page.locator("#overlay-url").inputValue());
+        assert.equal(shared.searchParams.get("shellImage"), uri);
+        assert.equal(shared.searchParams.get("shellTintStrength"), "65");
+        await page.frameLocator("#overlay-preview").locator('[data-shell-texture="ready"]').waitFor();
+        await change("layout", "minimal");
+        assert.equal(await page.locator('[name="shellAppearance"]').isDisabled(), true);
+        assert.equal(new URL(await page.locator("#overlay-url").inputValue()).searchParams.has("shellImage"), false);
+        await change("layout", "full");
+        assert.equal(await page.locator('[name="shellImage"]').inputValue(), uri);
+        await page.locator('[name="skin"]').selectOption("fgc");
+        await page.waitForFunction(() => document.querySelector('[name="shellAppearance"]').disabled);
+        await page.locator('[name="skin"]').selectOption("ds5");
+        await page.waitForFunction(() => !document.querySelector('[name="shellImage"]').disabled);
+        await page.locator("#reset-shell-adjustments").evaluate((node) => node.click());
+        await page.waitForFunction(() => byStreamResource.settings.shellPositionX === 0 && byStreamResource.settings.shellTintStrength === 0);
+        assert.equal(await page.locator('[name="shellImage"]').inputValue(), uri);
+        assert.equal(await page.locator('[name="shellRotation"]').inputValue(), "0");
+        await page.locator('[data-settings-view="json"]').click();
+        assert.equal(JSON.parse(await page.locator("#settings-json").inputValue()).shellImage, uri);
+        await page.goto(`${shared.href}#configure`);
+        await page.waitForFunction(() => document.getElementById("overlay-url")?.value);
+        assert.equal(await page.locator('[name="shellPositionX"]').inputValue(), "15");
+        assert.equal(await page.locator('[name="shellTintStrength"]').inputValue(), "65");
+      } finally { await page.close(); }
     });
 
     await t.test("controller variants reset named palettes, preserve Default and Sequential on Skin edits, and retain imports and Reset", async () => {
@@ -817,16 +1086,11 @@ test("universal image inputs", async (t) => {
       const png = Buffer.from(images.png, "base64");
       const calls = [];
       let catbox = { status: 200, body: "https://files.catbox.moe/test.png" };
-      let gofile = { status: "ok", data: { directLink: "https://store.gofile.io/download/direct/test/image.png" } };
-      await page.route("https://catbox.moe/user/api.php", (route) => {
+      await page.route("https://stream.byuwur.co/upload_image.php", (route) => {
         calls.push({ provider: "catbox", body: route.request().postDataBuffer().toString("latin1"), headers: route.request().headers() });
         return catbox.abort ? route.abort("failed") : route.fulfill({ ...catbox, contentType: "text/plain" });
       });
-      await page.route("https://stream.test/image-upload", (route) => {
-        calls.push({ provider: "gofile", body: route.request().postDataBuffer().toString("latin1") });
-        return route.fulfill({ json: gofile });
-      });
-      await page.route(/https:\/\/(?:files\.catbox\.moe|store\.gofile\.io)\/.*/, (route) => route.fulfill({ body: png, contentType: "image/png", headers: { "access-control-allow-origin": "*" } }));
+      await page.route(/https:\/\/files\.catbox\.moe\/.*/, (route) => route.fulfill({ body: png, contentType: "image/png" }));
       await page.goto(`https://stream.test/${tool}/?${tool === "main" ? "displayBackground=yes&" : ""}#configure`);
       await page.waitForFunction(() => document.getElementById("overlay-url")?.value);
       const input = page.locator(".image-url").first();
@@ -843,9 +1107,6 @@ test("universal image inputs", async (t) => {
         file: (type = "png", buffer = Buffer.from(images[type], "base64")) => ({ name: `image.${type}`, mimeType: `image/${type}`, buffer }),
         catbox: (response) => {
           catbox = response;
-        },
-        gofile: (response) => {
-          gofile = response;
         }
       };
     }
@@ -1007,8 +1268,8 @@ test("universal image inputs", async (t) => {
         }
         await f.provider.selectOption("catbox");
         for (const [response, reason] of [
-          [{ status: 503, body: "Unavailable" }, "HTTP 503"],
-          [{ status: 413, body: "Too large" }, "size limit"],
+          [{ status: 503, body: "<html>internal path secret</html>" }, "service unavailable"],
+          [{ status: 413, body: "Too large" }, "8 MiB"],
           [{ abort: true }, "Network request failed"],
           [{ status: 200, body: "<html>bad response</html>" }, "Invalid server response"],
           [{ status: 200, body: "https://gofile.io/d/example" }, "Invalid server response"],
@@ -1018,73 +1279,45 @@ test("universal image inputs", async (t) => {
           await f.picker.setInputFiles(f.file());
           await failure(f, reason);
           assert.equal(await f.input.inputValue(), original);
-          assert.match(await f.status.textContent(), /GoFile fallback requires Premium/);
+          assert.doesNotMatch(await f.status.textContent(), /internal path|secret|fallback/);
           assert.equal(await f.status.locator("html").count(), 0);
         }
         await f.input.fill(`data:image/png;base64,${Buffer.concat([f.file().buffer, Buffer.alloc(17000)]).toString("base64")}`);
         await f.page.waitForFunction(() => document.querySelector(".image-url").getAttribute("aria-invalid") === "true");
         assert.equal(await f.page.locator("#overlay-url").inputValue(), "");
         await f.input.fill(original);
-        await f.provider.selectOption("gofile");
-        const requests = f.calls.length;
-        await f.picker.setInputFiles(f.file());
-        await failure(f, "Direct image links require GoFile Premium");
-        assert.equal(f.calls.length, requests, "Unavailable GoFile does not upload or create guest content");
-        assert.equal(await f.input.inputValue(), original);
+        assert.deepEqual(await f.provider.locator("option").evaluateAll((nodes) => nodes.map((node) => node.value)), ["manual", "catbox", "base64"]);
       } finally {
         await f.page.close();
       }
     });
 
-    await t.test("GoFile integration accepts only permanent public direct images and enables one Catbox fallback", async () => {
+    await t.test("hosted limit, malformed files, timeouts, and disabled GoFile never retry", async () => {
       const f = await open("qr", { gofileUploadURL: "/image-upload" });
       try {
         const original = await f.input.inputValue();
-        await f.provider.selectOption("gofile");
-        for (const response of [
-          { status: "error-notPremium" },
-          { status: "ok", data: { downloadPage: "https://gofile.io/d/example" } },
-          { status: "ok", data: { directLink: "https://gofile.io/d/example" } },
-          { status: "ok", data: { directLink: "https://store.gofile.io/download/web/id/image.png" } },
-          ...[{ expireTime: 2000000000 }, { auth: ["secret"] }, { domainsAllowed: ["stream.test"] }, { sourceIpsAllowed: ["127.0.0.1"] }].map((restriction) => ({
-            status: "ok",
-            data: { directLink: "https://store.gofile.io/download/direct/id/image.png", ...restriction }
-          }))
-        ]) {
-          f.gofile(response);
+        await f.picker.setInputFiles(f.file("png", Buffer.alloc(8388609)));
+        await failure(f, "8 MiB");
+        assert.equal(f.calls.length, 0);
+        await f.picker.setInputFiles(f.file("png", f.file().buffer.subarray(0, 28)));
+        await failure(f, "could not be loaded");
+        assert.equal(f.calls.length, 0, "Malformed files never reach the hosted endpoint");
+        const boundary = Buffer.concat([f.file().buffer, Buffer.alloc(8388608 - f.file().buffer.length)]);
+        await f.picker.setInputFiles(f.file("png", boundary));
+        await success(f);
+        assert.ok(f.calls[0].body.includes(boundary.toString("latin1")), "Exactly 8 MiB is accepted unchanged");
+        await f.input.fill(original);
+        await f.provider.selectOption("catbox");
+        for (const status of [429, 502, 504]) {
+          f.catbox({ status, body: "<html>private backend details</html>" });
+          const before = f.calls.length;
           await f.picker.setInputFiles(f.file());
-          await failure(f, /GoFile|direct image/);
+          await failure(f, status === 429 ? "limit reached" : status === 502 ? "unavailable" : "timed out");
+          assert.equal(f.calls.length, before + 1, "No fallback or retry after an ambiguous failure");
           assert.equal(await f.input.inputValue(), original);
+          assert.doesNotMatch(await f.status.textContent(), /private backend/);
         }
-        f.gofile({ status: "ok", data: { directLink: "https://store.gofile.io/download/direct/id/image.png", expireTime: 4102444800, auth: [] } });
-        await f.picker.setInputFiles(f.file());
-        await success(f);
-        assert.equal(await f.provider.inputValue(), "gofile");
-        assert.equal(await f.input.inputValue(), "https://store.gofile.io/download/direct/id/image.png");
-        f.catbox({ abort: true });
-        await f.provider.selectOption("catbox");
-        const count = f.calls.length;
-        await f.picker.setInputFiles(f.file());
-        await success(f);
-        assert.deepEqual(
-          f.calls.slice(count).map((call) => call.provider),
-          ["catbox", "gofile"]
-        );
-        assert.equal(await f.provider.inputValue(), "gofile");
-        assert.ok(f.calls.at(-1).body.includes(f.file().buffer.toString("latin1")));
-        f.gofile({ status: "error-notPremium" });
-        f.catbox({ status: 503, body: "Unavailable" });
-        await f.provider.selectOption("catbox");
-        const previous = await f.input.inputValue();
-        const failedCount = f.calls.length;
-        await f.picker.setInputFiles(f.file());
-        await failure(f, "Catbox: Catbox returned HTTP 503. GoFile fallback: Direct image links require GoFile Premium.");
-        assert.equal(await f.input.inputValue(), previous);
-        assert.equal(await f.provider.inputValue(), "catbox");
-        assert.deepEqual(
-          f.calls.slice(failedCount).map((call) => call.provider),
-          ["catbox", "gofile"]
-        );
+        assert.equal(await f.provider.locator('option[value="gofile"]').count(), 0);
       } finally {
         await f.page.close();
       }
@@ -1113,10 +1346,10 @@ test("universal image inputs", async (t) => {
         await page.evaluate(() => {
           const native = window.fetch;
           window.releases = [];
-          window.fetch = (url, options) => (url === "https://catbox.moe/user/api.php" ? new Promise((resolve) => window.releases.push((value) => resolve(new Response(value)))) : native(url, options));
+          window.fetch = (url, options) => (url === "https://stream.byuwur.co/upload_image.php" ? new Promise((resolve) => window.releases.push((value) => resolve(new Response(value)))) : native(url, options));
         });
         await f.provider.selectOption("catbox");
-        for (const action of ["manual", "provider", "reset", "replace"]) {
+        for (const action of ["manual", "provider", "restore", "reset", "replace"]) {
           const before = await f.input.inputValue();
           const count = await page.evaluate(() => releases.length);
           await f.provider.selectOption("catbox");
@@ -1126,6 +1359,7 @@ test("universal image inputs", async (t) => {
           assert.equal(await f.input.inputValue(), before);
           if (action === "manual") await f.input.fill("https://example.com/newer.png");
           if (action === "provider") await f.provider.selectOption("base64");
+          if (action === "restore") await page.locator(`[data-restore-field="${await f.input.getAttribute("name")}"]`).click();
           if (action === "reset") await page.locator('[type="reset"][form="overlay-form"]').click();
           if (action === "replace") {
             await drop(f.component, f.file());
@@ -1142,9 +1376,68 @@ test("universal image inputs", async (t) => {
           assert.equal(await f.input.inputValue(), expected);
           assert.equal(await f.status.isVisible(), action === "replace");
         }
+        await page.evaluate(() => {
+          const native = window.fetch;
+          window.fetch = (url, options) => url === "https://stream.byuwur.co/upload_image.php"
+            ? new Promise((resolve, reject) => {
+                window.waitingForUpload = true;
+                options.signal.addEventListener("abort", () => reject(new DOMException("Canceled", "AbortError")), { once: true });
+              }) : native(url, options);
+        });
+        const previous = await f.input.inputValue();
+        await f.provider.selectOption("catbox");
+        await f.picker.setInputFiles(f.file());
+        await page.waitForFunction(() => window.waitingForUpload);
+        await page.clock.fastForward(60000);
+        await failure(f, "Request timed out");
+        assert.equal(await f.input.inputValue(), previous);
       } finally {
         await page.close();
       }
+    });
+
+    await t.test("simultaneous row uploads follow their originating row through reorder and import", async () => {
+      const f = await open("sponsors");
+      try {
+        await f.page.evaluate(() => {
+          const native = window.fetch;
+          window.pendingImages = [];
+          window.fetch = (url, options) => url === "https://stream.byuwur.co/upload_image.php"
+            ? new Promise((resolve) => pendingImages.push((name) => resolve(new Response(`https://files.catbox.moe/${name}.png`)))) : native(url, options);
+        });
+        const rows = f.page.locator(".entry-row");
+        await rows.nth(0).locator('[data-field="name"]').fill("First");
+        await rows.nth(1).locator('[data-field="name"]').fill("Second");
+        for (const index of [0, 1]) {
+          await rows.nth(index).locator('input[type="file"]').setInputFiles(f.file());
+          await f.page.waitForFunction((count) => pendingImages.length === count, index + 1);
+        }
+        await rows.nth(0).locator('[data-action="down"]').click();
+        await f.page.evaluate(() => { pendingImages[1]("second"); pendingImages[0]("first"); });
+        await f.page.waitForFunction(() => document.querySelectorAll(".image-status.text-success").length === 2);
+        const entries = JSON.parse(await f.page.locator('[name="entries"]').inputValue());
+        assert.deepEqual(entries.map(({ name, imageUrl }) => [name, imageUrl]), [["Second", "https://files.catbox.moe/second.png"], ["First", "https://files.catbox.moe/first.png"]]);
+        await rows.nth(0).locator('input[type="file"]').setInputFiles(f.file());
+        await f.page.waitForFunction(() => pendingImages.length === 3);
+        await f.page.locator('[data-settings-view="json"]').click();
+        await f.page.locator("#settings-json").fill(JSON.stringify({ entries: [{ name: "Imported", text: "", imageUrl: "../logo.png" }] }));
+        await f.page.waitForFunction(() => JSON.parse(document.querySelector('[name="entries"]').value)[0]?.name === "Imported");
+        await f.page.evaluate(() => pendingImages[2]("obsolete"));
+        assert.equal(JSON.parse(await f.page.locator('[name="entries"]').inputValue())[0].imageUrl, "../logo.png");
+      } finally { await f.page.close(); }
+    });
+
+    await t.test("downloaded configurator keeps its absolute upload endpoint", async () => {
+      const f = await open();
+      try {
+        await f.page.goto(`${pathToFileURL(path.join(root, "qr/index.html")).href}#configure`);
+        await f.page.waitForFunction(() => document.getElementById("overlay-url")?.value);
+        await f.page.locator('.image-input input[type="file"]').setInputFiles(f.file());
+        await success(f);
+        assert.equal(f.calls.length, 1);
+        assert.equal(await f.page.locator('[name="logoUrl"]').inputValue(), "https://files.catbox.moe/test.png");
+        assert.equal(new URL(await f.page.locator("#overlay-url").inputValue()).protocol, "file:");
+      } finally { await f.page.close(); }
     });
 
     await t.test("row images have independent feedback, serialize once, cancel on removal, and mixed video remains editable", async () => {
@@ -1194,7 +1487,7 @@ test("universal image inputs", async (t) => {
         await f.page.evaluate(() => {
           const native = window.fetch;
           window.fetch = (url, options) =>
-            url === "https://catbox.moe/user/api.php"
+            url === "https://stream.byuwur.co/upload_image.php"
               ? new Promise((resolve) => {
                   window.releaseRemovedImage = () => resolve(new Response("https://files.catbox.moe/removed.png"));
                 })

@@ -5,15 +5,16 @@
  */
 (function initControllerMapping() {
   if (window.byConfigurator)
-    window.byConfigurator.configureResource = function ({ settings, gamepadSupport, buttonValue, copyGamepad }, { generateURL, initSelect2 }) {
+    window.byConfigurator.configureResource = function ({ settings, fields, gamepadSupport, buttonValue, copyGamepad }, { generateURL, initSelect2 }) {
       const $ = window.jQuery;
       if (!$) return;
-      for (const name of ["outlineWidth", "guideScale"]) {
-        const input = $(`[name="${name}"]`).attr("type", "range").removeClass("form-control bg-body-secondary border-secondary-subtle rounded-0").addClass("form-range");
-        const label = input.closest("label").attr("for", input.attr("id"));
-        const output = $("<output class='ms-2 text-body-secondary'></output>").attr("for", input.attr("id")).appendTo(label.find(".field-caption"));
-        input.on("input.controllerSlider change.controllerSlider", () => output.text(`${input.val()}${name === "outlineWidth" ? "×" : "%"}`)).triggerHandler("change.controllerSlider");
-      }
+      $(/* HTML */ `<button type="button" class="btn btn-sm btn-outline-secondary mb-3">Reset image adjustments</button>`)
+        .attr("id", "reset-shell-adjustments")
+        .appendTo($('[name="shellOpacity"]').closest(".conditional-field"))
+        .on("click", () => {
+          for (const name of ["shellFit", "shellPositionX", "shellPositionY", "shellScale", "shellRotation", "shellOpacity", "shellTintColor", "shellTintStrength", "shellBlendMode"])
+            $(`[name="${name}"]`).val(fields[name].default).trigger("input").trigger("change");
+        });
       const initialVariant = settings.variant;
       function updateVariants(value = settings.variant) {
         const variants = byControllerArtwork.skins[$("#skin-input").val()]?.variants || {};

@@ -158,6 +158,20 @@ body {
   transform: rotate(-135deg);
 }
 /* Settings, ordered entries, and live preview. */
+.bywr-configurator .config-field {
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #6666;
+}
+.bywr-configurator .field-value {
+  min-width: 0;
+}
+.bywr-configurator .field-value > :not(.field-restore) {
+  flex: 1;
+  min-width: 0;
+}
+.bywr-configurator .field-restore {
+  padding: 0.375rem 0.6rem;
+}
 .bywr-configurator .settings-editor,
 .bywr-configurator .motion-layer {
   grid-area: 1 / 1;
@@ -410,4 +424,19 @@ body {
 .bywr-configurator .input-group:has(.is-invalid) .select2-selection {
   border-color: #ff6b6b !important;
   color: #ff6b6b;
+}
+.bywr-configurator .number-range .range-value {
+  width: 6rem;
+  min-width: 0;
+}
+.bywr-configurator .number-range .form-range {
+  min-width: 0;
+}
+/* Shared button styles force nowrap; segmented labels must stay within their own cells. */
+.bywr-configurator .choice-buttons .btn {
+  flex: 1;
+  min-width: 0;
+  padding: 0.4rem 0.6rem;
+  white-space: normal !important;
+  overflow-wrap: anywhere;
 }
