@@ -13,7 +13,7 @@
   global.byConfigurator = global.byConfigurator || {};
   const byConfigurator = global.byConfigurator;
   if (byConfigurator.initialized) return;
-  byConfigurator.VERSION = "9.1"; // 2026-11-11
+  byConfigurator.VERSION = "10"; // 2026-11-15
   const root = new URL(document.currentScript.dataset.root || ".", document.currentScript.src || location.href);
 
   const byStream = global.byStream;
@@ -3079,6 +3079,7 @@
           urlGeneration++;
         })
         .on("pageshow", generateURL);
+      byCommon.init();
       generateURL();
       revealFields(jqForm);
     } catch (error) {

@@ -103,6 +103,34 @@ test("shared, renderer-only, and configurator-only imports stay in their modes",
   }
 });
 
+test("Select2 arrows commit grouped controller skins without closing or selecting on hover", async () => {
+  const assets = await loadAssets(editorAssets);
+  const browser = await chromium.launch(launchOptions);
+  const page = await browser.newPage();
+  const errors = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  try {
+    await serve(page, assets);
+    await page.goto("https://stream.test/controller/?skin=ds5&player=9#configure");
+    await page.waitForFunction(() => document.getElementById("overlay-url")?.value);
+    await page.locator("#skin-input + .select2 .select2-selection").click();
+    for (const [key, skin, label] of [["ArrowDown", "xbox", "Duke"], ["ArrowDown", "x360", "360"], ["ArrowUp", "xbox", "Duke"]]) {
+      await page.keyboard.press(key);
+      await page.waitForFunction((skin) => document.getElementById("skin-input").value === skin && new URL(document.getElementById("overlay-url").value).searchParams.get("skin") === skin, skin);
+      await page.frameLocator("#overlay-preview").locator(`svg[data-controller="${skin}"].controller-background`).waitFor();
+      assert.equal(await page.locator("#select2-skin-input-container").textContent(), label);
+      assert.equal(await page.evaluate(() => jQuery("#skin-input").data("select2").isOpen()), true);
+    }
+    await page.locator(".select2-results__option").filter({ hasText: /^DualShock 4$/ }).hover();
+    assert.equal(await page.locator("#skin-input").inputValue(), "xbox", "Hover only highlights a choice");
+    assert.equal(new URL(await page.locator("#overlay-url").inputValue()).searchParams.get("skin"), "xbox");
+    assert.deepEqual(errors, []);
+  } finally {
+    await page.close();
+    await browser.close();
+  }
+});
+
 test("bounded numbers pair sliders with exact inputs and small selects use synchronized choice buttons", async () => {
   const assets = await loadAssets(editorAssets);
   const browser = await chromium.launch(launchOptions);
