@@ -141,8 +141,10 @@ function make_http_request(string $url, array $post): array
     CURLOPT_POSTFIELDS => $post,
     // Avoid the observed Hostinger-to-Catbox HTTP/2 stream failure (cURL error 92).
     CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+    // Catbox closed requests without a User-Agent during live testing.
+    CURLOPT_USERAGENT => 'stream.html (https://stream.byuwur.co/)',
     CURLOPT_CONNECTTIMEOUT => 10,
-    CURLOPT_TIMEOUT => 40,
+    CURLOPT_TIMEOUT => 30,
     CURLOPT_RETURNTRANSFER => true,
     CURLOPT_SSL_VERIFYPEER => true,
     CURLOPT_SSL_VERIFYHOST => 2,
@@ -159,6 +161,13 @@ function make_http_request(string $url, array $post): array
   $completed = curl_exec($request);
   $error = curl_errno($request);
   $status = curl_getinfo($request, CURLINFO_RESPONSE_CODE);
+  // Keep partial responses on transport failure and escape control characters into one log line.
+  error_log('stream image upload: upstream ' . json_encode([
+    'transport' => $error,
+    'upstream' => $status,
+    'error' => curl_error($request),
+    'response' => $response
+  ], JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE));
   return [$completed === false ? false : $response, $error, $status];
 }
 
@@ -174,13 +183,11 @@ function image_upload_forward(string $path, string $mime, string $extension, arr
   [$response, $error, $status] = make_http_request($provider['endpoint'], $fields);
   $diagnostic = 'transport=' . $error . '; upstream=' . $status;
   if ($response === false || $error || $status < 200 || $status >= 300) {
-    error_log('stream image upload: transport=' . $error . ' HTTP=' . $status);
     if ($error === CURLE_OPERATION_TIMEDOUT) return [504, 'Upload timed out. No automatic retry was made.', $diagnostic];
     return [502, 'Image host unavailable. No automatic retry was made.', $diagnostic];
   }
   $value = ($provider['parse'])($response);
   if ($value === null) {
-    error_log('stream image upload: invalid provider response');
     return [502, 'Invalid image host response.', $diagnostic . '; response=invalid'];
   }
   return [200, $value, null];

@@ -2,13 +2,48 @@ name: Stream checks
 
 on:
   push:
+    branches: [main]
   pull_request:
   workflow_dispatch:
+    inputs:
+      extended:
+        description: Run detailed resource, configurator, input, and cross-browser checks
+        type: boolean
+        default: false
 
 permissions:
   contents: read
 
+concurrency:
+  group: checks-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
+  core:
+    name: Core (chromium)
+    runs-on: ubuntu-24.04
+    container:
+      image: mcr.microsoft.com/playwright:v1.63.0-noble
+      options: --ipc=host
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: .github/package-lock.json
+      - name: Install test tools
+        timeout-minutes: 2
+        run: npm --prefix .github ci --ignore-scripts --no-audit --no-fund
+      - name: Check shared source and core behavior
+        env:
+          NODE_PATH: ${{ github.workspace }}/.github/node_modules
+        run: |
+          node --check resource.js
+          node --check configurator.js
+          npm --prefix .github test
+
   uploads:
     name: PHP uploads
     runs-on: ubuntu-latest
@@ -20,15 +55,19 @@ jobs:
           node-version: 22
       - uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.3'
+          php-version: "8.3"
           extensions: curl, fileinfo, gd
           coverage: none
       - run: php -l upload_image.php
       - run: node --test __tests__/upload-php.cjs
 
   browser:
+    if: github.event_name == 'workflow_dispatch' && inputs.extended
     name: ${{ matrix.name }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    container:
+      image: mcr.microsoft.com/playwright:v1.63.0-noble
+      options: --ipc=host
     timeout-minutes: 10
     strategy:
       fail-fast: false
@@ -47,8 +86,7 @@ jobs:
           node-version: 22
       - name: Install browser test tools
         run: |
-          npm install --prefix "$RUNNER_TEMP/stream-tests" --no-package-lock playwright@1.63.0
-          node "$RUNNER_TEMP/stream-tests/node_modules/playwright/cli.js" install --with-deps chromium
+          npm install --prefix "$RUNNER_TEMP/stream-tests" --no-package-lock --no-audit --no-fund playwright@1.63.0
       - name: Check ${{ matrix.name }}
         env:
           NODE_PATH: ${{ runner.temp }}/stream-tests/node_modules
@@ -59,8 +97,12 @@ jobs:
           node --test __tests__/${{ matrix.suite }}.cjs
 
   rendering:
+    if: github.event_name == 'workflow_dispatch' && inputs.extended
     name: Firefox and WebKit rendering
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    container:
+      image: mcr.microsoft.com/playwright:v1.63.0-noble
+      options: --ipc=host
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
@@ -69,10 +111,10 @@ jobs:
           node-version: 22
       - name: Install rendering test tools
         run: |
-          npm install --prefix "$RUNNER_TEMP/stream-tests" --no-package-lock playwright@1.63.0
-          node "$RUNNER_TEMP/stream-tests/node_modules/playwright/cli.js" install --with-deps firefox webkit
+          npm install --prefix "$RUNNER_TEMP/stream-tests" --no-package-lock --no-audit --no-fund playwright@1.63.0
       - name: Check Firefox and WebKit painting
         env:
           NODE_PATH: ${{ runner.temp }}/stream-tests/node_modules
+          HOME: /root
           RENDER_ENGINES: firefox,webkit
         run: node --test --test-name-pattern="controller inversion paints and releases" __tests__/resources.cjs

@@ -116,7 +116,7 @@ Changing provider affects only the next Browse/drop; it never changes the existi
 
 ### Hosted upload deployment
 
-`upload_image.php` is standalone; it does not load SPA.php or require accounts, cookies, or API keys. Its local `make_http_request()` is adapted from `spa.php/_functions.php`, using the URL-validation branch directly and multipart `CURLFile` data in place of URL-encoded POST fields. It needs no framework globals, sessions, JavaScript console helpers, or bundled CA file; TLS uses the host's CA trust store. It accepts multipart POST `fileToUpload` and an optional `provider` ID. The frontend sends `provider=catbox`; PHP owns the upstream endpoint and multipart operation. It validates uploaded-file origin, actual byte size, Fileinfo MIME, dimensions, and a bounded GD decode, then forwards the original file with `CURLFile`. Extensions/client MIME do not establish trust. PNG/JPEG/WebP/GIF (including animated GIFs) are supported; SVG uploads are disabled. Decoder memory is bounded to 16 megapixels and the server's available memory.
+`upload_image.php` is standalone; it does not load SPA.php or require accounts, cookies, or API keys. It accepts multipart POST `fileToUpload` and an optional `provider` ID. The frontend sends `provider=catbox`; PHP owns the upstream endpoint and multipart operation. It validates uploaded-file origin, actual byte size, Fileinfo MIME, dimensions, and a bounded GD decode, then forwards the original file with `CURLFile`. Extensions/client MIME do not establish trust. PNG/JPEG/WebP/GIF (including animated GIFs) are supported; SVG uploads are disabled. Decoder memory is bounded to 16 megapixels and the server's available memory.
 
 Provider selection uses the request's `provider`, then the server environment variable `STREAM_UPLOAD_PROVIDER`, then `IMAGE_UPLOAD_DEFAULT_PROVIDER` (`catbox`). `image_upload_provider()` maps allowed IDs to hardcoded endpoints, file fields, fixed form fields, and response parsers. Add a `match` case and a parser returning an approved HTTPS image URL or `null` for each new host. Unknown/malformed request providers return 400 without contacting an upstream; an unavailable server default returns 503. Client-supplied endpoint URLs and operation names are ignored. Catbox is the only enabled provider; adding another to the UI also requires its selector/upload adapter and response URL validation.
 
@@ -129,7 +129,7 @@ Deploy only the root `upload_image.php` to the Hostinger document root for **htt
 
 The limiter allows **10 POST attempts per client address per 10 minutes**, including invalid attempts. It trusts only `REMOTE_ADDR`; arbitrary forwarded headers cannot evade it. Shared proxies/NAT share a limit. The lock serializes updates, expired entries are removed, and active clients are capped at 4096. A 429 response includes `Retry-After`. Wildcard credential-free CORS supports production, GitHub Pages, localhost, `file://`, and independent copies, including error responses and preflight; CORS is not abuse protection.
 
-The shared upstream transport uses HTTP/1.1 to avoid the observed Hostinger-to-Catbox HTTP/2 stream failure (cURL error 92), verified TLS, a 10-second connection timeout, a 40-second request timeout, no redirects, and no automatic replay. Only HTTPS raster URLs on `files.catbox.moe` are returned; upstream HTML, raw transport diagnostics, and paths never enter public errors. Logs record safe failure categories/status codes. Uploads are public and anonymous; keep private images out of them. For 413, check both server and application limits; for 429 wait; for 503 check extensions/private storage; for 502/504 check outbound connectivity and Catbox availability. A successful upload whose image subsequently cannot load keeps the previous field value, though the public upload may already exist.
+The shared upstream transport uses HTTP/1.1 and an identifying `stream.html` User-Agent, verified TLS, a 10-second connection timeout, a 40-second request timeout, no redirects, and no automatic replay. Only HTTPS raster URLs on `files.catbox.moe` are returned; upstream HTML, raw transport diagnostics, and paths never enter public errors. Each upstream request records one JSON entry in the PHP error log containing the transport error number, upstream HTTP status, cURL error text, and bounded Catbox response body, including a partial response on transport failure. Control characters are escaped; raw responses and cURL error text stay out of browser responses. Uploads are public and anonymous; keep private images out of them. For 413, check both server and application limits; for 429 wait; for 503 check extensions/private storage; for 502/504 check outbound connectivity and Catbox availability. A successful upload whose image subsequently cannot load keeps the previous field value, though the public upload may already exist.
 
 For upstream failures, inspect **DevTools -> Network -> upload_image.php -> Headers -> Response Headers**. `X-Upload-Diagnostic` exposes only the cURL error number and upstream HTTP status, for example `transport=6; upstream=0`; failed URL validation adds `response=invalid`. Share that value when server logs are unavailable. CORS exposes the header to independent configurators; raw provider responses, cURL error text, and server paths remain private.
 
@@ -390,9 +390,76 @@ The catalog owns order, cards/count, navigation, and displayed release status; s
 
 ### Landing and checks
 
-Install Playwright outside the repository and set `NODE_PATH` to its `node_modules` directory. Run `node --test __tests__/inputs.cjs` for keyboard/mouse/history behavior, `node --test __tests__/resources.cjs` for standalone resources or `node --test __tests__/configurators.cjs` for editor forms, previews, URL updates, copy, and reset. The resource suite checks both hosted overlays and copies without optional configurator imports, including missing-editor warnings and fixture path containment. Both suites fetch declared pinned dependencies from the CDN; standalone checks exclude configurator-only libraries and neither suite needs sibling checkouts. `CHROMIUM_EXECUTABLE_PATH` selects a Chromium executable; `BROWSER_CHANNEL=chrome` uses installed Chrome. [GitHub Actions](.github/workflows/tests.yml) reports Resources and Configurators independently, with a separate Firefox/WebKit rendering job. `RENDER_ENGINES=chromium` limits pixel checks to Chromium; `RENDER_ENGINES=firefox,webkit` selects the other engines. CI requires the selected engines to launch.
+Routine [CI](.github/workflows/tests.yml) runs a small offline Chromium suite for the shared resource initializer, URL validation, and settings round trips, plus the PHP upload boundary tests. New controls, appearance options, and per-model variants do not need individual CI tests unless they protect a core contract or a real regression. Browser core tests have a 30-second execution limit; routine jobs have a five-minute limit and superseded runs are canceled.
 
-Search/categories filter ready tools; the responsive gallery supports keyboard focus. Run `node --check` on changed scripts. With PHP 8.2+ and the deployment extensions installed, run `php -l upload_image.php` and `node --test __tests__/upload-php.cjs` (`PHP_BINARY` may select PHP). PHP checks use real multipart HTTP requests, deterministic cURL substitutes, and concurrent limiter processes; they never upload to Catbox. Check HTTP/`file://`, URL round trips, F2/`#configure`, copy/reset, invalid values, lists, fonts, and keyboard mapping. Confirm overlay mode skips editor initialization. Check that hidden fields are disabled, their values do not affect overlays or URLs, and re-enabling them restores valid editor drafts. External Playwright/Chrome checks require no repository dependency. Test OBS and endurance separately.
+```sh
+npm --prefix .github ci --ignore-scripts
+export NODE_PATH="$PWD/.github/node_modules"
+npm --prefix .github test
+php -l upload_image.php
+node --test __tests__/upload-php.cjs
+```
+
+`BROWSER_CHANNEL=chrome` uses installed Chrome; `CHROMIUM_EXECUTABLE_PATH` selects a Chromium executable. On PowerShell set `$env:NODE_PATH = "$PWD/.github/node_modules"`. PHP checks require PHP 8.2+ with the deployment extensions (`PHP_BINARY` may select PHP). They use local multipart requests and deterministic cURL substitutes; they never upload to Catbox.
+
+Detailed resource, configurator, keyboard/mouse/history, and Firefox/WebKit suites remain opt-in: run `npm --prefix .github run test:extended`, individual `__tests__/*.cjs` files, or dispatch the workflow with **extended** enabled. These integration suites fetch the declared pinned CDN assets with a 15-second timeout per fetch; their network/setup errors are separate from the offline core result. `RENDER_ENGINES=chromium` limits pixel checks to Chromium. Release distributions retain artifact integrity, offline startup, URL round trips, and publication checks. OBS and endurance remain manual checks.
+
+## Release distributions
+
+Release tooling lives entirely in `.github/`, with `.github/workflows/release.yml` coordinating checks and publication and `.github/scripts/build.mjs` owning build configuration, bundling, release notes, tag validation, and publishing. It builds the resource pages identified by their `overlay-markup` template and `data-tool` ID. Dependency arrays expand to explicit imports before bundling, so online, bundled, and standalone releases retain their existing offline and lazy-editor contracts. It does not package OBS profiles, service exports, or unrelated folders. The website still runs without Node.js. Generated files stay in ignored `dist/`; source files remain authoritative.
+
+| File | Contents and network requirements |
+| --- | --- |
+| `{tool}.html` | Exact original HTML, including its original imports. Source reference requiring the repository layout. |
+| `{tool}.online.html` | Portable editor and overlay; repository dependencies use the exact release tag on jsDelivr. Requires internet. |
+| `{tool}.bundle.html` | Editor and overlay; application JavaScript, CSS, and CSS assets embedded and minified. |
+| `{tool}.standalone.html` | Overlay only; renderer dependencies embedded and minified. Opens with defaults without a query. F2 or a configurator hash warns in the console without changing the overlay. |
+| `controller.full.zip` / `controller.standalone.zip` | Corresponding bundled HTML at `controller/index.html`, with the original `controller/controllers/*.svg` files. Extract and serve over HTTP/HTTPS; browser `file://` SVG fetches are unsupported. |
+
+Font Awesome always remains on its existing pinned CDN and is never embedded or included in ZIPs. Configurator icons and Main/Popup social icons need internet; missing icons do not stop initialization. Optional Google Fonts and user-configured media can also require internet. Individual Controller online/bundle/standalone HTML files use release-tagged CDN artwork; Controller ZIPs use only their packaged artwork.
+
+### Build and validate locally
+
+Use Node.js 22 or later. The tag is the release version authority; building does not create a Git tag or publish anything. Publish the pinned SPA.js release before refreshing dependency hashes or building distributions.
+
+```sh
+npm --prefix .github ci --ignore-scripts
+node .github/node_modules/playwright/cli.js install chromium
+export NODE_PATH="$PWD/.github/node_modules"
+node .github/scripts/build.mjs --tag v1.0.0
+npm --prefix .github test
+npm --prefix .github run release:test
+```
+
+On PowerShell, replace the `export` command with `$env:NODE_PATH = "$PWD/.github/node_modules"`; use `npm.cmd` if `npm.ps1` is blocked. `BROWSER_CHANNEL=chrome` or `CHROMIUM_EXECUTABLE_PATH` can select an installed Chromium browser. The opt-in source suites retain their existing browser requirements.
+
+Inspect `dist/assets/RELEASE_NOTES.md`, `manifest.json`, `SHA256SUMS`, and the HTML/ZIP files in `dist/assets/`. The manifest records every distribution, source dependency, size, and SHA-256. Browser checks initialize every portable distribution and exercise shared URL/editor behavior once per format. Online browser tests serve the future tag's project files from the checkout; they do not assert that an unpublished tag already exists on jsDelivr. Bundled browser tests block external application libraries, including Font Awesome, and test HTTP and downloaded-file entry points.
+
+Pinned remote application dependencies and CSS assets are integrity-checked against `.github/scripts/release-dependencies.json` and cached outside the repository. After deliberately changing CDN imports, run `node .github/scripts/build.mjs --tag v1.0.0 --update-dependencies`, review the lock changes, and rerun both suites. Do not refresh the lock to conceal an unexpected change to an existing pinned dependency. Required missing dependencies fail the build. New ordinary resources need no release list or download-table edits; register any new dynamically constructed asset paths in the `config.dynamicDependencies` object in `.github/scripts/build.mjs`. Module scripts require explicit import-graph support before distribution; current resources use classic scripts.
+
+### Experimental embedded Controller
+
+```sh
+node .github/scripts/build.mjs --tag v1.0.0 --embedded-controller
+npm --prefix .github run release:experiment
+```
+
+This creates `dist/experimental/controller.standalone.embedded.html` with original SVG artwork embedded as JSON, plus a size/performance report. It tests downloaded `file://` rendering, model artwork, customization, synthetic gamepad input, and keyboard input, comparing startup, DOM parsing, artwork-rendering time, and JavaScript heap with the packaged HTTP version. SVG bytes are preserved rather than minified separately. Browser heap figures exclude native SVG allocations; OBS compatibility remains unverified. The experiment stays outside the normal manifest and release uploads, so a failure cannot block or contaminate standard distributions. Review its correctness and measured performance before separately authorizing publication.
+
+### First release and later releases
+
+1. Run the installation, build, and both test commands above. Stop on any failure.
+2. Inspect all generated formats, Controller ZIP contents, the release notes/download table, and checksums. Review and commit the automation and required compatibility changes. An ordinary commit to `main` runs distribution CI and existing source checks; it cannot publish a release.
+3. Once the tested commit is on `main`, deliberately create and push a version tag:
+
+   ```sh
+   git tag v1.0.0
+   git push origin v1.0.0
+   ```
+
+4. Inspect [GitHub Actions](https://github.com/byuwur/stream.html/actions). Only a pushed `v*` tag starts publication; strict SemVer validation rejects malformed tags. Tags such as `v1.1.0-rc.1` create prereleases. Validation checks the owning repository, exact tagged commit, ancestry from `main`, and existing release state.
+5. Build and core source/distribution tests must succeed before the publishing job receives write access. It uploads only the tested inventory into a draft, verifies uploaded names, sizes, and hashes, then publishes. Failures leave the release private. A rerun resumes an identical automation-owned draft; conflicting drafts and published releases are never overwritten. Same-tag runs are serialized.
+6. Verify the public [GitHub Release](https://github.com/byuwur/stream.html/releases): version, description, download links, every HTML file, both Controller ZIPs, manifest, and checksums. Download representative files and verify their hashes. For example, `gh release view v1.0.0 --repo byuwur/stream.html` lists the published assets. Local tag creation alone publishes nothing.
 
 ## Other configurations and assets
 

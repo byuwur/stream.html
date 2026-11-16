@@ -24,7 +24,7 @@ async function loadAssets(files) {
     await Promise.all(
       dependencies.map(async (file) => {
         const url = `${spaBase}${file}`;
-        const response = await fetch(url);
+        const response = await fetch(url, { signal: AbortSignal.timeout(15000) });
         assert.ok(response.ok, `Unable to load ${url}: ${response.status}`);
         return [url, { body: await response.text(), contentType: file.endsWith(".css") ? "text/css" : "text/javascript" }];
       })

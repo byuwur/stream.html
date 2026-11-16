@@ -21,9 +21,12 @@ test("PHP upload validates multipart, limits abuse, and safely handles fixed Cat
   const temp = await fs.mkdtemp(path.join(os.tmpdir(), "stream-upload-php-"));
   const mode = path.join(temp, "mode.json");
   const capture = path.join(temp, "capture.json");
+  const errorLog = path.join(temp, "error.log");
   const router = path.join(temp, "router.php");
   // Disabled built-ins can be substituted in PHP 8. The production endpoint has no mock URL or bypass.
-  await fs.writeFile(router, `<?php
+  await fs.writeFile(
+    router,
+    `<?php
     function curl_init($url) { $GLOBALS['upstream'] = $url; return new stdClass(); }
     function curl_setopt_array($request, $options) { $GLOBALS['options'] = $options; return true; }
     function curl_exec($request) {
@@ -38,6 +41,7 @@ test("PHP upload validates multipart, limits abuse, and safely handles fixed Cat
         'verifyPeer' => $GLOBALS['options'][CURLOPT_SSL_VERIFYPEER], 'verifyHost' => $GLOBALS['options'][CURLOPT_SSL_VERIFYHOST],
         'redirects' => $GLOBALS['options'][CURLOPT_FOLLOWLOCATION], 'protocols' => $GLOBALS['options'][CURLOPT_PROTOCOLS],
         'http11' => $GLOBALS['options'][CURLOPT_HTTP_VERSION] === CURL_HTTP_VERSION_1_1,
+        'userAgent' => $GLOBALS['options'][CURLOPT_USERAGENT] ?? null,
         'connectTimeout' => $GLOBALS['options'][CURLOPT_CONNECTTIMEOUT], 'timeout' => $GLOBALS['options'][CURLOPT_TIMEOUT]
       ]));
       if (!isset($mode['body'])) return false;
@@ -45,25 +49,56 @@ test("PHP upload validates multipart, limits abuse, and safely handles fixed Cat
       return $GLOBALS['options'][CURLOPT_WRITEFUNCTION]($request, $body) === strlen($body);
     }
     function curl_errno($request) { return json_decode(file_get_contents(getenv('STREAM_TEST_MODE')), true)['errno'] ?? 0; }
+    function curl_error($request) { return json_decode(file_get_contents(getenv('STREAM_TEST_MODE')), true)['error'] ?? ''; }
     function curl_getinfo($request, $option) { return json_decode(file_get_contents(getenv('STREAM_TEST_MODE')), true)['status'] ?? 200; }
     $_SERVER['SCRIPT_FILENAME'] = __FILE__;
     require ${JSON.stringify(path.join(root, "upload_image.php").replaceAll("\\", "/"))};
     $settings = json_decode(file_get_contents(getenv('STREAM_TEST_MODE')), true);
     putenv('STREAM_UPLOAD_PROVIDER=' . ($settings['defaultProvider'] ?? ''));
     upload_image();
-  `);
+  `
+  );
   const socket = net.createServer();
   await new Promise((resolve) => socket.listen(0, "127.0.0.1", resolve));
   const port = socket.address().port;
   await new Promise((resolve) => socket.close(resolve));
   const env = { ...process.env, STREAM_UPLOAD_RATE_DIR: path.join(temp, "rate"), STREAM_TEST_MODE: mode, STREAM_TEST_CAPTURE: capture };
-  const server = spawn(php, ["-d", "xdebug.mode=off", "-d", "display_errors=0", "-d", `upload_tmp_dir=${temp}`, "-d", "upload_max_filesize=9M", "-d", "post_max_size=10M", "-d", "memory_limit=256M", "-d", "disable_functions=curl_init,curl_setopt_array,curl_exec,curl_errno,curl_getinfo", "-S", `127.0.0.1:${port}`, "-t", root, router], { env, stdio: ["ignore", "ignore", "pipe"] });
+  const server = spawn(
+    php,
+    [
+      "-d",
+      "xdebug.mode=off",
+      "-d",
+      "display_errors=0",
+      "-d",
+      `error_log=${errorLog}`,
+      "-d",
+      `upload_tmp_dir=${temp}`,
+      "-d",
+      "upload_max_filesize=9M",
+      "-d",
+      "post_max_size=10M",
+      "-d",
+      "memory_limit=256M",
+      "-d",
+      "disable_functions=curl_init,curl_setopt_array,curl_exec,curl_errno,curl_error,curl_getinfo",
+      "-S",
+      `127.0.0.1:${port}`,
+      "-t",
+      root,
+      router
+    ],
+    { env, stdio: ["ignore", "ignore", "pipe"] }
+  );
   let logs = "";
-  server.stderr.on("data", (data) => { logs += data; });
+  server.stderr.on("data", (data) => {
+    logs += data;
+  });
   const url = `http://127.0.0.1:${port}/upload_image.php`;
   /** Set a deterministic upstream response and clear only this external fixture's limiter. */
   async function reset(value = { body: "https://files.catbox.moe/image.png" }) {
     await fs.writeFile(mode, JSON.stringify(value));
+    await fs.writeFile(errorLog, "");
     await fs.rm(capture, { force: true });
     await fs.mkdir(env.STREAM_UPLOAD_RATE_DIR, { recursive: true });
     await fs.writeFile(path.join(env.STREAM_UPLOAD_RATE_DIR, "clients.json"), "{}");
@@ -74,7 +109,8 @@ test("PHP upload validates multipart, limits abuse, and safely handles fixed Cat
     body.append("fileToUpload", new Blob([buffer], { type }), name);
     for (const [field, value] of Object.entries(fields)) body.append(field, value);
     // Client-controlled destinations and operation types must be ignored.
-    body.append("reqtype", "urlupload"); body.append("url", "http://127.0.0.1/private");
+    body.append("reqtype", "urlupload");
+    body.append("url", "http://127.0.0.1/private");
     const response = await fetch(url, { method: "POST", body, ...extra });
     const text = await response.text();
     assert.equal(response.headers.get("access-control-allow-origin"), "*");
@@ -86,18 +122,25 @@ test("PHP upload validates multipart, limits abuse, and safely handles fixed Cat
   try {
     await reset();
     for (let attempt = 0; ; attempt++) {
-      try { await fetch(url); break; } catch (error) {
+      try {
+        await fetch(url);
+        break;
+      } catch (error) {
         if (attempt >= 40 || server.exitCode !== null) throw new Error(`PHP fixture did not start: ${logs}`, { cause: error });
         await new Promise((resolve) => setTimeout(resolve, 50));
       }
     }
-    const images = JSON.parse(runPHP(`$image=imagecreatetruecolor(2,2); $result=[]; foreach(['png','jpeg','webp','gif'] as $type) { ob_start(); ('image'.$type)($image); $result[$type]=base64_encode(ob_get_clean()); } echo json_encode($result);`));
+    const images = JSON.parse(
+      runPHP(`$image=imagecreatetruecolor(2,2); $result=[]; foreach(['png','jpeg','webp','gif'] as $type) { ob_start(); ('image'.$type)($image); $result[$type]=base64_encode(ob_get_clean()); } echo json_encode($result);`)
+    );
     const png = Buffer.from(images.png, "base64");
     await t.test("methods, preflight, missing uploads, and malformed multipart", async () => {
       const get = await fetch(url);
-      assert.equal(get.status, 405); assert.equal(get.headers.get("allow"), "POST, OPTIONS");
+      assert.equal(get.status, 405);
+      assert.equal(get.headers.get("allow"), "POST, OPTIONS");
       const preflight = await fetch(url, { method: "OPTIONS", headers: { Origin: "null", "Access-Control-Request-Method": "POST" } });
-      assert.equal(preflight.status, 204); assert.equal(preflight.headers.get("access-control-allow-origin"), "*");
+      assert.equal(preflight.status, 204);
+      assert.equal(preflight.headers.get("access-control-allow-origin"), "*");
       assert.equal(preflight.headers.get("access-control-expose-headers"), "Retry-After, X-Upload-Diagnostic");
       assert.equal(preflight.headers.get("access-control-allow-credentials"), null);
       assert.equal((await fetch(url, { method: "POST" })).status, 400);
@@ -117,10 +160,15 @@ test("PHP upload validates multipart, limits abuse, and safely handles fixed Cat
         const forwarded = JSON.parse(await fs.readFile(capture));
         assert.equal(forwarded.attempts, 1, "The local HTTP helper sends each upload once");
         assert.equal(forwarded.hash, require("node:crypto").createHash("sha256").update(buffer).digest("hex"));
-        assert.equal(forwarded.url, "https://catbox.moe/user/api.php"); assert.equal(forwarded.reqtype, "fileupload");
-        assert.equal(forwarded.mime, `image/${type}`); assert.equal(forwarded.name, `image.${type === "jpeg" ? "jpg" : type}`);
-        assert.equal(forwarded.verifyPeer, true); assert.equal(forwarded.verifyHost, 2); assert.equal(forwarded.redirects, false);
+        assert.equal(forwarded.url, "https://catbox.moe/user/api.php");
+        assert.equal(forwarded.reqtype, "fileupload");
+        assert.equal(forwarded.mime, `image/${type}`);
+        assert.equal(forwarded.name, `image.${type === "jpeg" ? "jpg" : type}`);
+        assert.equal(forwarded.verifyPeer, true);
+        assert.equal(forwarded.verifyHost, 2);
+        assert.equal(forwarded.redirects, false);
         assert.equal(forwarded.http11, true, "Upstream uploads avoid the observed HTTP/2 stream failure");
+        assert.equal(forwarded.userAgent, "stream.html (https://stream.byuwur.co/)", "Catbox requests identify the uploader");
         assert.ok(forwarded.connectTimeout > 0 && forwarded.timeout <= 40);
       }
     });
@@ -147,15 +195,23 @@ test("PHP upload validates multipart, limits abuse, and safely handles fixed Cat
       }
     });
     await t.test("empty, unsupported, signature-mismatched, truncated, and oversized files", async () => {
-      for (const [buffer, mime, status] of [[Buffer.alloc(0), "image/png", 400], [Buffer.from("<svg/>"), "image/svg+xml", 415], [Buffer.from("not a PNG"), "image/png", 415], [png.subarray(0, 28), "image/png", 415], [Buffer.alloc(8388609), "image/png", 413]]) {
-        await reset(); assert.equal((await upload(buffer, mime)).response.status, status);
+      for (const [buffer, mime, status] of [
+        [Buffer.alloc(0), "image/png", 400],
+        [Buffer.from("<svg/>"), "image/svg+xml", 415],
+        [Buffer.from("not a PNG"), "image/png", 415],
+        [png.subarray(0, 28), "image/png", 415],
+        [Buffer.alloc(8388609), "image/png", 413]
+      ]) {
+        await reset();
+        assert.equal((await upload(buffer, mime)).response.status, status);
       }
       await reset();
       const boundary = Buffer.concat([png, Buffer.alloc(8388608 - png.length)]);
       assert.equal((await upload(boundary)).response.status, 200, "Exactly 8 MiB is allowed");
       // A valid header with impractical decoded dimensions is rejected before GD allocates pixels.
       const huge = Buffer.from(png);
-      huge.writeUInt32BE(20000, 16); huge.writeUInt32BE(20000, 20);
+      huge.writeUInt32BE(20000, 16);
+      huge.writeUInt32BE(20000, 20);
       await reset();
       const dimensions = await upload(huge);
       assert.equal(dimensions.response.status, 415);
@@ -169,6 +225,7 @@ test("PHP upload validates multipart, limits abuse, and safely handles fixed Cat
         [{ errno: 7, status: 0 }, 502, "transport=7; upstream=0"],
         [{ errno: 28, status: 0 }, 504, "transport=28; upstream=0"],
         [{ errno: 60, status: 0 }, 502, "transport=60; upstream=0"],
+        [{ errno: 56, status: 0, error: "Recv failure: Connection reset by peer\nsecret detail", body: "Partial Catbox reply" }, 502, "transport=56; upstream=0"],
         [{ errno: 92, status: 0 }, 502, "transport=92; upstream=0"],
         [{ status: 302, body: "https://files.catbox.moe/image.png" }, 502, "transport=0; upstream=302"],
         [{ errno: 23, body: "x".repeat(4097) }, 502, "transport=23; upstream=200"],
@@ -188,13 +245,25 @@ test("PHP upload validates multipart, limits abuse, and safely handles fixed Cat
         assert.equal(result.response.status, status);
         assert.equal(result.response.headers.get("x-upload-diagnostic"), diagnostic);
         assert.equal(JSON.parse(await fs.readFile(capture)).attempts, 1, "Transport failures never replay the upload");
+        const prefix = "stream image upload: upstream ";
+        const records = (await fs.readFile(errorLog, "utf8"))
+          .split(/\r?\n/)
+          .filter((line) => line.includes(prefix))
+          .map((line) => JSON.parse(line.slice(line.indexOf(prefix) + prefix.length)));
+        assert.equal(records.length, 1, "Each upstream response is logged once");
+        assert.equal(records[0].transport, value.errno || 0);
+        assert.equal(records[0].upstream, value.status ?? 200);
+        assert.equal(records[0].error, value.error || "");
+        assert.equal(records[0].response, value.body?.length > 4096 ? "" : value.body || "");
+        assert.doesNotMatch(result.text, /Partial Catbox reply|Recv failure|secret detail/);
       }
     });
     await t.test("per-client limiter ignores forwarded IPs, expires, and fails closed on corruption", async () => {
       await reset();
       for (let attempt = 0; attempt < 10; attempt++) assert.equal((await upload(png, "image/png", "image.png", { headers: { "X-Forwarded-For": `192.0.2.${attempt}` } })).response.status, 200);
       const limited = await upload(png);
-      assert.equal(limited.response.status, 429); assert.ok(Number(limited.response.headers.get("retry-after")) > 0);
+      assert.equal(limited.response.status, 429);
+      assert.ok(Number(limited.response.headers.get("retry-after")) > 0);
       await fs.writeFile(path.join(env.STREAM_UPLOAD_RATE_DIR, "clients.json"), JSON.stringify({ expired: { until: 1, count: 10 } }));
       assert.equal((await upload(png)).response.status, 200);
       await fs.writeFile(path.join(env.STREAM_UPLOAD_RATE_DIR, "clients.json"), "corrupted");
@@ -204,11 +273,21 @@ test("PHP upload validates multipart, limits abuse, and safely handles fixed Cat
       await reset();
       const endpoint = JSON.stringify(path.join(root, "upload_image.php").replaceAll("\\", "/"));
       const code = `require ${endpoint}; echo image_upload_rate_limit('parallel-client');`;
-      const results = await Promise.all(Array.from({ length: 20 }, () => new Promise((resolve, reject) => {
-        const child = spawn(php, ["-d", "xdebug.mode=off", "-r", code], { env });
-        let output = ""; child.stdout.on("data", (data) => { output += data; });
-        child.on("error", reject); child.on("exit", (code) => code === 0 ? resolve(Number(output)) : reject(new Error(`PHP exited ${code}`)));
-      })));
+      const results = await Promise.all(
+        Array.from(
+          { length: 20 },
+          () =>
+            new Promise((resolve, reject) => {
+              const child = spawn(php, ["-d", "xdebug.mode=off", "-r", code], { env });
+              let output = "";
+              child.stdout.on("data", (data) => {
+                output += data;
+              });
+              child.on("error", reject);
+              child.on("exit", (code) => (code === 0 ? resolve(Number(output)) : reject(new Error(`PHP exited ${code}`))));
+            })
+        )
+      );
       assert.equal(results.filter((value) => value === 0).length, 10);
       assert.equal(results.filter((value) => value > 0).length, 10);
     });

@@ -114,14 +114,21 @@ test("Select2 arrows commit grouped controller skins without closing or selectin
     await page.goto("https://stream.test/controller/?skin=ds5&player=9#configure");
     await page.waitForFunction(() => document.getElementById("overlay-url")?.value);
     await page.locator("#skin-input + .select2 .select2-selection").click();
-    for (const [key, skin, label] of [["ArrowDown", "xbox", "Duke"], ["ArrowDown", "x360", "360"], ["ArrowUp", "xbox", "Duke"]]) {
+    for (const [key, skin, label] of [
+      ["ArrowDown", "xbox", "Duke"],
+      ["ArrowDown", "x360", "360"],
+      ["ArrowUp", "xbox", "Duke"]
+    ]) {
       await page.keyboard.press(key);
       await page.waitForFunction((skin) => document.getElementById("skin-input").value === skin && new URL(document.getElementById("overlay-url").value).searchParams.get("skin") === skin, skin);
       await page.frameLocator("#overlay-preview").locator(`svg[data-controller="${skin}"].controller-background`).waitFor();
       assert.equal(await page.locator("#select2-skin-input-container").textContent(), label);
       assert.equal(await page.evaluate(() => jQuery("#skin-input").data("select2").isOpen()), true);
     }
-    await page.locator(".select2-results__option").filter({ hasText: /^DualShock 4$/ }).hover();
+    await page
+      .locator(".select2-results__option")
+      .filter({ hasText: /^DualShock 4$/ })
+      .hover();
     assert.equal(await page.locator("#skin-input").inputValue(), "xbox", "Hover only highlights a choice");
     assert.equal(new URL(await page.locator("#overlay-url").inputValue()).searchParams.get("skin"), "xbox");
     assert.deepEqual(errors, []);
@@ -142,11 +149,21 @@ test("bounded numbers pair sliders with exact inputs and small selects use synch
     await page.goto("https://stream.test/keyboard/?mode=both&layout=wasd#configure");
     await page.waitForFunction(() => document.getElementById("overlay-url")?.value);
     await page.locator('[data-expand-sections="true"]').click();
-    assert.equal(await page.evaluate(() => Object.entries(byStreamResource.fields).filter(([, rule]) => rule.type === "number" && Number.isFinite(rule.min) && Number.isFinite(rule.max)).every(([name]) => document.querySelectorAll(`[data-number-field="${name}"]`).length === 1)), true);
+    assert.equal(
+      await page.evaluate(() =>
+        Object.entries(byStreamResource.fields)
+          .filter(([, rule]) => rule.type === "number" && Number.isFinite(rule.min) && Number.isFinite(rule.max))
+          .every(([name]) => document.querySelectorAll(`[data-number-field="${name}"]`).length === 1)
+      ),
+      true
+    );
     const opacity = page.locator('[name="opacity"]');
     const slider = page.locator('[data-number-field="opacity"]');
     assert.equal(await page.locator("[data-number-field]").evaluateAll((sliders) => sliders.every((slider) => slider.step === "1")), true);
-    await slider.evaluate((node) => { node.value = "35"; node.dispatchEvent(new Event("input", { bubbles: true })); });
+    await slider.evaluate((node) => {
+      node.value = "35";
+      node.dispatchEvent(new Event("input", { bubbles: true }));
+    });
     assert.equal(await opacity.inputValue(), "35");
     await page.waitForFunction(() => byStreamResource.settings.opacity === 35);
     await slider.focus();
@@ -188,7 +205,9 @@ test("bounded numbers pair sliders with exact inputs and small selects use synch
     assert.equal(await platforms.getByRole("button", { name: "Windows", exact: true }).getAttribute("aria-pressed"), "true");
     assert.equal(await promptButtons.first().isDisabled(), true);
     assert.deepEqual(errors, []);
-  } finally { await browser.close(); }
+  } finally {
+    await browser.close();
+  }
 });
 
 test("field restore uses resource defaults while Reset retains opening values and history starts at zero", async () => {
@@ -216,10 +235,11 @@ test("field restore uses resource defaults while Reset retains opening values an
       assert.equal(await page.locator('[name="opacity"]').inputValue(), "42", "Other fields retain their values");
       await page.locator('button[type="reset"][form="overlay-form"]').click();
       await page.waitForFunction(() => byStreamResource.settings.historyWidth === 1280 && byStreamResource.settings.historyHeight === 220);
-      if (name === "controller") for (const field of ["guideScale", "outlineWidth"]) {
-        assert.equal(await page.locator(`[name="${field}"]`).getAttribute("type"), "number");
-        assert.equal(await page.locator(`[data-number-field="${field}"]`).count(), 1, "Shared controls create one slider and one exact input");
-      }
+      if (name === "controller")
+        for (const field of ["guideScale", "outlineWidth"]) {
+          assert.equal(await page.locator(`[name="${field}"]`).getAttribute("type"), "number");
+          assert.equal(await page.locator(`[data-number-field="${field}"]`).count(), 1, "Shared controls create one slider and one exact input");
+        }
     }
     await page.goto("https://stream.test/watermark/?text=Custom&fontFamily=Arial&textColor=112233&kind=logo&logoUrl=https%3A%2F%2Fmedia.test%2Fcustom.png#configure");
     await page.waitForFunction(() => document.getElementById("overlay-url")?.value);
@@ -231,7 +251,13 @@ test("field restore uses resource defaults while Reset retains opening values an
     }
     assert.equal(await page.locator('[name="fontFamily"]').locator("..").locator(".select2-container").count(), 1);
     assert.equal(await page.locator('[name="logoUrl"]').locator("..").locator(".image-provider").count(), 1);
-    assert.equal(await page.locator(".config-field").first().evaluate((node) => getComputedStyle(node).borderBottomWidth), "1px");
+    assert.equal(
+      await page
+        .locator(".config-field")
+        .first()
+        .evaluate((node) => getComputedStyle(node).borderBottomWidth),
+      "1px"
+    );
     await page.goto("https://stream.test/clock/?timeZone=UTC&locale=es-CO#configure");
     await page.waitForFunction(() => document.getElementById("overlay-url")?.value);
     await page.locator('[data-expand-sections="true"]').click();
@@ -245,12 +271,17 @@ test("field restore uses resource defaults while Reset retains opening values an
     await page.locator('[data-expand-sections="true"]').click();
     await page.locator('[data-restore-field="endTime"]').click();
     await page.waitForFunction(() => byStreamResource.settings.endTime === byStreamResource.fields.endTime.default);
-    assert.equal(await page.locator('[name="endTime"]').locator("..").locator(".timestamp-picker").inputValue(), await page.evaluate(() => {
-      const date = new Date(byStreamResource.fields.endTime.default);
-      return new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, 19);
-    }));
+    assert.equal(
+      await page.locator('[name="endTime"]').locator("..").locator(".timestamp-picker").inputValue(),
+      await page.evaluate(() => {
+        const date = new Date(byStreamResource.fields.endTime.default);
+        return new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, 19);
+      })
+    );
     assert.deepEqual(errors, []);
-  } finally { await browser.close(); }
+  } finally {
+    await browser.close();
+  }
 });
 
 test("keyboard editor keeps native URL/JSON/reset behavior, inactive drafts, and focused-preview input", async () => {
@@ -287,7 +318,10 @@ test("keyboard editor keeps native URL/JSON/reset behavior, inactive drafts, and
     assert.ok(await choice.locator('option[value="ShiftRight"]').count());
     await choice.selectOption("KeyA");
     await page.waitForFunction(() => document.querySelector('[name="displayedKeys"]').value === '["KeyA"]');
-    const positions = await keys.locator(".entry-row").first().evaluate((row) => ({ select: row.querySelector(".select2-container").getBoundingClientRect().right, controls: row.querySelector(".btn-group").getBoundingClientRect().left }));
+    const positions = await keys
+      .locator(".entry-row")
+      .first()
+      .evaluate((row) => ({ select: row.querySelector(".select2-container").getBoundingClientRect().right, controls: row.querySelector(".btn-group").getBoundingClientRect().left }));
     assert.ok(positions.controls >= positions.select, "Row options sit to the right of the key selector");
     await keys.locator(".add-entry").click();
     await keys.locator('select[aria-label="Physical key"]').nth(1).selectOption("KeyD");
@@ -301,7 +335,7 @@ test("keyboard editor keeps native URL/JSON/reset behavior, inactive drafts, and
     await page.waitForFunction(() => !document.querySelector("#copy-url").disabled);
     assert.equal(await keys.locator("select").evaluateAll((selects) => selects.every((select) => select.validity.valid)), true, "Reordering and correcting duplicates clears stale row validity");
     await page.locator('button[type="reset"][form="overlay-form"]').click();
-    await page.waitForFunction(() => document.querySelector('[name="displayedKeys"]').value === '[]');
+    await page.waitForFunction(() => document.querySelector('[name="displayedKeys"]').value === "[]");
     await change("showHistory", "yes");
     await change("historyStyle", "text");
     await preview.locator(".input-history").waitFor();
@@ -321,7 +355,7 @@ test("keyboard editor keeps native URL/JSON/reset behavior, inactive drafts, and
     assert.equal(await page.locator('[name="layout"]').inputValue(), "wasd");
     await change("historySource", "keyboard");
     await change("mode", "hidden");
-    await preview.locator('.input-history').waitFor();
+    await preview.locator(".input-history").waitFor();
     assert.equal(await preview.locator("#keyboard").isVisible(), false);
     assert.equal(await preview.locator("#mouse").isVisible(), false);
     await page.locator('[data-settings-view="json"]').click();
@@ -345,7 +379,9 @@ test("keyboard editor keeps native URL/JSON/reset behavior, inactive drafts, and
     await page.waitForFunction(() => document.getElementById("overlay-url")?.value);
     assert.equal(new URL(page.url()).hash, "#configure");
     assert.deepEqual(errors, []);
-  } finally { await browser.close(); }
+  } finally {
+    await browser.close();
+  }
 });
 
 // --- CONFIGURATOR INTEGRATION ---
@@ -565,7 +601,8 @@ test("configurator forms and previews initialize for every resource", async (t) 
         /** Apply through the real named form fields, including controls inside collapsed subsections. */
         async function change(name, value) {
           await page.locator(`[name="${name}"]`).evaluate((node, value) => {
-            node.value = value; node.dispatchEvent(new Event("change", { bubbles: true }));
+            node.value = value;
+            node.dispatchEvent(new Event("change", { bubbles: true }));
           }, value);
           await page.waitForFunction(({ name, value }) => String(byStreamResource.settings[name]).replace(/^#/, "") === value.replace(/^#/, ""), { name, value });
         }
@@ -574,10 +611,16 @@ test("configurator forms and previews initialize for every resource", async (t) 
         assert.equal(await page.locator('[name="customGuide"]').isEnabled(), true);
         await change("shellAppearance", "tint");
         assert.equal(await page.locator('[name="shellImage"]').locator("..").locator(".image-provider").isEnabled(), true);
-        const uri = await page.evaluate(() => { const canvas = document.createElement("canvas"); canvas.width = canvas.height = 2; return canvas.toDataURL(); });
+        const uri = await page.evaluate(() => {
+          const canvas = document.createElement("canvas");
+          canvas.width = canvas.height = 2;
+          return canvas.toDataURL();
+        });
         await change("shellImage", uri);
-        await change("shellPositionX", "15"); await change("shellRotation", "30");
-        await change("shellTintColor", "#44bb77"); await change("shellTintStrength", "65");
+        await change("shellPositionX", "15");
+        await change("shellRotation", "30");
+        await change("shellTintColor", "#44bb77");
+        await change("shellTintStrength", "65");
         const shared = new URL(await page.locator("#overlay-url").inputValue());
         assert.equal(shared.searchParams.get("shellImage"), uri);
         assert.equal(shared.searchParams.get("shellTintStrength"), "65");
@@ -601,7 +644,9 @@ test("configurator forms and previews initialize for every resource", async (t) 
         await page.waitForFunction(() => document.getElementById("overlay-url")?.value);
         assert.equal(await page.locator('[name="shellPositionX"]').inputValue(), "15");
         assert.equal(await page.locator('[name="shellTintStrength"]').inputValue(), "65");
-      } finally { await page.close(); }
+      } finally {
+        await page.close();
+      }
     });
 
     await t.test("controller variants reset named palettes, preserve Default and Sequential on Skin edits, and retain imports and Reset", async () => {
@@ -1407,11 +1452,13 @@ test("universal image inputs", async (t) => {
         }
         await page.evaluate(() => {
           const native = window.fetch;
-          window.fetch = (url, options) => url === "https://stream.byuwur.co/upload_image.php"
-            ? new Promise((resolve, reject) => {
-                window.waitingForUpload = true;
-                options.signal.addEventListener("abort", () => reject(new DOMException("Canceled", "AbortError")), { once: true });
-              }) : native(url, options);
+          window.fetch = (url, options) =>
+            url === "https://stream.byuwur.co/upload_image.php"
+              ? new Promise((resolve, reject) => {
+                  window.waitingForUpload = true;
+                  options.signal.addEventListener("abort", () => reject(new DOMException("Canceled", "AbortError")), { once: true });
+                })
+              : native(url, options);
         });
         const previous = await f.input.inputValue();
         await f.provider.selectOption("catbox");
@@ -1431,8 +1478,7 @@ test("universal image inputs", async (t) => {
         await f.page.evaluate(() => {
           const native = window.fetch;
           window.pendingImages = [];
-          window.fetch = (url, options) => url === "https://stream.byuwur.co/upload_image.php"
-            ? new Promise((resolve) => pendingImages.push((name) => resolve(new Response(`https://files.catbox.moe/${name}.png`)))) : native(url, options);
+          window.fetch = (url, options) => (url === "https://stream.byuwur.co/upload_image.php" ? new Promise((resolve) => pendingImages.push((name) => resolve(new Response(`https://files.catbox.moe/${name}.png`)))) : native(url, options));
         });
         const rows = f.page.locator(".entry-row");
         await rows.nth(0).locator('[data-field="name"]').fill("First");
@@ -1442,10 +1488,19 @@ test("universal image inputs", async (t) => {
           await f.page.waitForFunction((count) => pendingImages.length === count, index + 1);
         }
         await rows.nth(0).locator('[data-action="down"]').click();
-        await f.page.evaluate(() => { pendingImages[1]("second"); pendingImages[0]("first"); });
+        await f.page.evaluate(() => {
+          pendingImages[1]("second");
+          pendingImages[0]("first");
+        });
         await f.page.waitForFunction(() => document.querySelectorAll(".image-status.text-success").length === 2);
         const entries = JSON.parse(await f.page.locator('[name="entries"]').inputValue());
-        assert.deepEqual(entries.map(({ name, imageUrl }) => [name, imageUrl]), [["Second", "https://files.catbox.moe/second.png"], ["First", "https://files.catbox.moe/first.png"]]);
+        assert.deepEqual(
+          entries.map(({ name, imageUrl }) => [name, imageUrl]),
+          [
+            ["Second", "https://files.catbox.moe/second.png"],
+            ["First", "https://files.catbox.moe/first.png"]
+          ]
+        );
         await rows.nth(0).locator('input[type="file"]').setInputFiles(f.file());
         await f.page.waitForFunction(() => pendingImages.length === 3);
         await f.page.locator('[data-settings-view="json"]').click();
@@ -1453,7 +1508,9 @@ test("universal image inputs", async (t) => {
         await f.page.waitForFunction(() => JSON.parse(document.querySelector('[name="entries"]').value)[0]?.name === "Imported");
         await f.page.evaluate(() => pendingImages[2]("obsolete"));
         assert.equal(JSON.parse(await f.page.locator('[name="entries"]').inputValue())[0].imageUrl, "../logo.png");
-      } finally { await f.page.close(); }
+      } finally {
+        await f.page.close();
+      }
     });
 
     await t.test("downloaded configurator keeps its absolute upload endpoint", async () => {
@@ -1466,7 +1523,9 @@ test("universal image inputs", async (t) => {
         assert.equal(f.calls.length, 1);
         assert.equal(await f.page.locator('[name="logoUrl"]').inputValue(), "https://files.catbox.moe/test.png");
         assert.equal(new URL(await f.page.locator("#overlay-url").inputValue()).protocol, "file:");
-      } finally { await f.page.close(); }
+      } finally {
+        await f.page.close();
+      }
     });
 
     await t.test("row images have independent feedback, serialize once, cancel on removal, and mixed video remains editable", async () => {
