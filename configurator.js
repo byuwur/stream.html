@@ -1451,7 +1451,7 @@
         /** Upload original bytes once through the fixed, credential-free PHP endpoint. */
         async catbox(file, signal) {
           const body = new FormData();
-          body.append("reqtype", "fileupload");
+          body.append("provider", "catbox");
           body.append("fileToUpload", file);
           const response = await fetch("https://stream.byuwur.co/upload_image.php", { method: "POST", body, signal, credentials: "omit" });
           if (!response.ok) {

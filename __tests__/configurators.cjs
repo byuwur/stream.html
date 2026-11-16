@@ -1210,7 +1210,8 @@ test("universal image inputs", async (t) => {
         await success(f);
         assert.equal(await f.provider.inputValue(), "catbox");
         assert.equal(await f.input.inputValue(), "https://files.catbox.moe/test.png");
-        assert.match(f.calls[0].body, /name="reqtype"\r\n\r\nfileupload/);
+        assert.match(f.calls[0].body, /name="provider"\r\n\r\ncatbox/);
+        assert.doesNotMatch(f.calls[0].body, /name="(?:reqtype|url|endpoint)"/);
         assert.match(f.calls[0].body, /name="fileToUpload"; filename="image.png"/);
         assert.ok(f.calls[0].body.includes(f.file().buffer.toString("latin1")), "Original file is uploaded unchanged");
         assert.equal(f.calls[0].headers.authorization, undefined);

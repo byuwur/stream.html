@@ -2,7 +2,7 @@
 
 /**
  * File: upload_image.php
- * Standalone anonymous image uploads to Catbox. Deploy on the HTTPS PHP host only.
+ * Standalone image uploads through developer-defined providers. Deploy on the HTTPS PHP host only.
  * cURL conventions adapted from spa.php make_http_request() (MIT, byUwUr).
  */
 
@@ -10,6 +10,7 @@ declare(strict_types=1);
 
 ini_set('display_errors', '0');
 
+const IMAGE_UPLOAD_DEFAULT_PROVIDER = 'catbox';
 const IMAGE_UPLOAD_BYTES = 8388608;
 const IMAGE_UPLOAD_PIXELS = 16000000;
 const IMAGE_UPLOAD_WINDOW = 600;
@@ -94,24 +95,45 @@ function image_upload_type(string $path): array
   return [$mime, $formats[$mime]];
 }
 
-/** Accept only canonical HTTPS raster URLs on Catbox's public file host. */
-function image_upload_url(string $value): bool
+/**
+ * Resolve an allowed provider ID to developer-owned endpoints, multipart fields, and parsing.
+ * Add a match case and response parser for each additional provider; request URLs are never used.
+ * @return array|null Endpoint, file field, fixed form fields, and a parser returning a safe URL or null.
+ */
+function image_upload_provider(string $provider): ?array
 {
-  return preg_match('~\Ahttps://files\.catbox\.moe/[a-zA-Z0-9_-]+\.(?:png|jpe?g|webp|gif)\z~i', $value) === 1;
+  return match ($provider) {
+    'catbox' => [
+      'endpoint' => 'https://catbox.moe/user/api.php',
+      'file' => 'fileToUpload',
+      'fields' => ['reqtype' => 'fileupload'],
+      'parse' => 'image_upload_catbox_response'
+    ],
+    default => null
+  };
+}
+
+/** Extract only canonical HTTPS raster URLs from Catbox's plain-text response. */
+function image_upload_catbox_response(string $response): ?string
+{
+  $url = trim($response);
+  return preg_match('~\Ahttps://files\.catbox\.moe/[a-zA-Z0-9_-]+\.(?:png|jpe?g|webp|gif)\z~i', $url) === 1 ? $url : null;
 }
 
 /**
- * Forward original bytes once to the fixed Catbox API using native multipart handling.
+ * Forward original bytes once using a resolved provider and the shared HTTPS transport.
  * @return array [HTTP status, public URL or safe error]. Never returns upstream HTML or cURL details.
  */
-function image_upload_forward(string $path, string $mime, string $extension): array
+function image_upload_forward(string $path, string $mime, string $extension, array $provider): array
 {
-  $request = curl_init('https://catbox.moe/user/api.php');
+  $request = curl_init($provider['endpoint']);
   if (!$request) throw new RuntimeException('curl initialization failed');
   $response = '';
+  $fields = $provider['fields'];
+  $fields[$provider['file']] = new CURLFile($path, $mime, 'image.' . $extension);
   curl_setopt_array($request, [
     CURLOPT_POST => true,
-    CURLOPT_POSTFIELDS => ['reqtype' => 'fileupload', 'fileToUpload' => new CURLFile($path, $mime, 'image.' . $extension)],
+    CURLOPT_POSTFIELDS => $fields,
     CURLOPT_CONNECTTIMEOUT => 10,
     CURLOPT_TIMEOUT => 40,
     CURLOPT_RETURNTRANSFER => true,
@@ -131,13 +153,13 @@ function image_upload_forward(string $path, string $mime, string $extension): ar
   $error = curl_errno($request);
   $status = curl_getinfo($request, CURLINFO_RESPONSE_CODE);
   if ($completed === false || $error || $status < 200 || $status >= 300) {
-    error_log('stream image upload: Catbox transport=' . $error . ' HTTP=' . $status);
+    error_log('stream image upload: transport=' . $error . ' HTTP=' . $status);
     if ($error === CURLE_OPERATION_TIMEDOUT) return [504, 'Upload timed out. No automatic retry was made.'];
     return [502, 'Image host unavailable. No automatic retry was made.'];
   }
-  $value = trim((string) $response);
-  if (!image_upload_url($value)) {
-    error_log('stream image upload: invalid Catbox response');
+  $value = ($provider['parse'])($response);
+  if ($value === null) {
+    error_log('stream image upload: invalid provider response');
     return [502, 'Invalid image host response.'];
   }
   return [200, $value];
@@ -180,6 +202,14 @@ function upload_image(): void
       image_upload_response(400, 'Use multipart/form-data with fileToUpload.');
       return;
     }
+    $default = getenv('STREAM_UPLOAD_PROVIDER');
+    $name = $_POST['provider'] ?? ($default === false || $default === '' ? IMAGE_UPLOAD_DEFAULT_PROVIDER : $default);
+    $provider = is_string($name) ? image_upload_provider($name) : null;
+    if ($provider === null) {
+      if (!array_key_exists('provider', $_POST)) throw new RuntimeException('configured provider unavailable');
+      image_upload_response(400, 'Unsupported image provider.');
+      return;
+    }
     $file = $_FILES['fileToUpload'] ?? null;
     if (!$file || !is_array($file) || !isset($file['error']) || !is_int($file['error'])) {
       image_upload_response(400, 'Missing image file. Check the server upload limits.');
@@ -211,7 +241,7 @@ function upload_image(): void
     if (!extension_loaded('curl') || !extension_loaded('fileinfo') || !function_exists('imagecreatefromstring'))
       throw new RuntimeException('required PHP extension unavailable');
     [$mime, $extension] = image_upload_type($path);
-    [$status, $message] = image_upload_forward($path, $mime, $extension);
+    [$status, $message] = image_upload_forward($path, $mime, $extension, $provider);
     image_upload_response($status, $message);
   } catch (InvalidArgumentException $error) {
     image_upload_response(415, $error->getMessage());

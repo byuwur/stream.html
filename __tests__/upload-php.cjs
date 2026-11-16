@@ -45,6 +45,8 @@ test("PHP upload validates multipart, limits abuse, and safely handles fixed Cat
     function curl_getinfo($request, $option) { return json_decode(file_get_contents(getenv('STREAM_TEST_MODE')), true)['status'] ?? 200; }
     $_SERVER['SCRIPT_FILENAME'] = __FILE__;
     require ${JSON.stringify(path.join(root, "upload_image.php").replaceAll("\\", "/"))};
+    $settings = json_decode(file_get_contents(getenv('STREAM_TEST_MODE')), true);
+    putenv('STREAM_UPLOAD_PROVIDER=' . ($settings['defaultProvider'] ?? ''));
     upload_image();
   `);
   const socket = net.createServer();
@@ -59,13 +61,15 @@ test("PHP upload validates multipart, limits abuse, and safely handles fixed Cat
   /** Set a deterministic upstream response and clear only this external fixture's limiter. */
   async function reset(value = { body: "https://files.catbox.moe/image.png" }) {
     await fs.writeFile(mode, JSON.stringify(value));
+    await fs.rm(capture, { force: true });
     await fs.mkdir(env.STREAM_UPLOAD_RATE_DIR, { recursive: true });
     await fs.writeFile(path.join(env.STREAM_UPLOAD_RATE_DIR, "clients.json"), "{}");
   }
   /** Send real multipart bytes through PHP's upload parser. */
-  async function upload(buffer, type = "image/png", name = "image.png", extra = {}) {
+  async function upload(buffer, type = "image/png", name = "image.png", extra = {}, fields = {}) {
     const body = new FormData();
     body.append("fileToUpload", new Blob([buffer], { type }), name);
+    for (const [field, value] of Object.entries(fields)) body.append(field, value);
     // Client-controlled destinations and operation types must be ignored.
     body.append("reqtype", "urlupload"); body.append("url", "http://127.0.0.1/private");
     const response = await fetch(url, { method: "POST", body, ...extra });
@@ -110,6 +114,28 @@ test("PHP upload validates multipart, limits abuse, and safely handles fixed Cat
         assert.equal(forwarded.mime, `image/${type}`); assert.equal(forwarded.name, `image.${type === "jpeg" ? "jpg" : type}`);
         assert.equal(forwarded.verifyPeer, true); assert.equal(forwarded.verifyHost, 2); assert.equal(forwarded.redirects, false);
         assert.ok(forwarded.connectTimeout > 0 && forwarded.timeout <= 40);
+      }
+    });
+    await t.test("provider IDs use developer endpoints and explicit choices override server defaults", async () => {
+      await reset({ defaultProvider: "catbox", body: "https://files.catbox.moe/image.png" });
+      assert.equal((await upload(png)).response.status, 200);
+      assert.equal(JSON.parse(await fs.readFile(capture)).url, "https://catbox.moe/user/api.php");
+      for (const defaultProvider of ["not-configured", "0"]) {
+        await reset({ defaultProvider, body: "https://files.catbox.moe/image.png" });
+        assert.equal((await upload(png)).response.status, 503, "An unavailable server default fails closed");
+        await assert.rejects(fs.access(capture), { code: "ENOENT" });
+      }
+      const selected = await upload(png, "image/png", "image.png", {}, { provider: "catbox", endpoint: "http://127.0.0.1/private" });
+      assert.equal(selected.response.status, 200, selected.text);
+      const forwarded = JSON.parse(await fs.readFile(capture));
+      assert.equal(forwarded.url, "https://catbox.moe/user/api.php");
+      assert.equal(forwarded.reqtype, "fileupload");
+      for (const fields of [{ provider: "gofile" }, { provider: "https://catbox.moe/user/api.php" }, { provider: "" }, { "provider[]": "catbox" }]) {
+        await reset();
+        const rejected = await upload(png, "image/png", "image.png", {}, fields);
+        assert.equal(rejected.response.status, 400);
+        assert.equal(rejected.text, "Unsupported image provider.");
+        await assert.rejects(fs.access(capture), { code: "ENOENT" });
       }
     });
     await t.test("empty, unsupported, signature-mismatched, truncated, and oversized files", async () => {
