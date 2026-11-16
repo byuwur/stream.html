@@ -1342,18 +1342,19 @@ test("universal image inputs", async (t) => {
         }
         await f.provider.selectOption("catbox");
         for (const [response, reason] of [
-          [{ status: 503, body: "<html>internal path secret</html>" }, "service unavailable"],
-          [{ status: 413, body: "Too large" }, "8 MiB"],
+          [{ status: 503, body: "<html>internal path secret</html>" }, "internal path secret"],
+          [{ status: 413, body: "Too large" }, "Too large"],
           [{ abort: true }, "Network request failed"],
-          [{ status: 200, body: "<html>bad response</html>" }, "Invalid server response"],
-          [{ status: 200, body: "https://gofile.io/d/example" }, "Invalid server response"],
-          [{ status: 200, body: "http://files.catbox.moe/image.png" }, "Invalid server response"]
+          [{ status: 200, body: "<html>bad response</html>" }, "invalid image URL"],
+          [{ status: 200, body: "https://gofile.io/d/example" }, "invalid image URL"],
+          [{ status: 200, body: "http://files.catbox.moe/image.png" }, "invalid image URL"]
         ]) {
           f.catbox(response);
           await f.picker.setInputFiles(f.file());
           await failure(f, reason);
           assert.equal(await f.input.inputValue(), original);
-          assert.doesNotMatch(await f.status.textContent(), /internal path|secret|fallback/);
+          assert.doesNotMatch(await f.status.textContent(), /fallback/);
+          if (response.body) assert.ok((await f.status.textContent()).includes(response.body), "Provider response remains visible as text");
           assert.equal(await f.status.locator("html").count(), 0);
         }
         await f.input.fill(`data:image/png;base64,${Buffer.concat([f.file().buffer, Buffer.alloc(17000)]).toString("base64")}`);
@@ -1386,10 +1387,10 @@ test("universal image inputs", async (t) => {
           f.catbox({ status, body: "<html>private backend details</html>" });
           const before = f.calls.length;
           await f.picker.setInputFiles(f.file());
-          await failure(f, status === 429 ? "limit reached" : status === 502 ? "unavailable" : "timed out");
+          await failure(f, `HTTP ${status}`);
           assert.equal(f.calls.length, before + 1, "No fallback or retry after an ambiguous failure");
           assert.equal(await f.input.inputValue(), original);
-          assert.doesNotMatch(await f.status.textContent(), /private backend/);
+          assert.match(await f.status.textContent(), /private backend/);
         }
         assert.equal(await f.provider.locator('option[value="gofile"]').count(), 0);
       } finally {
@@ -1708,4 +1709,93 @@ test("platform assets and navigation follow both hosting roots", async (t) => {
   } finally {
     await browser.close();
   }
+});
+
+test("image uploads log the endpoint status and full response and preserve the previous value on failure", { timeout: 30000 }, async (t) => {
+  const assets = await loadAssets(editorAssets);
+  const browser = await chromium.launch({ ...launchOptions, timeout: 10000 });
+  t.after(() => browser.close());
+  const page = await browser.newPage();
+  page.setDefaultTimeout(5000);
+  try {
+    await serve(page, assets);
+    await page.addInitScript(() => {
+      window.uploadFailures = [];
+      const report = console.error;
+      console.error = (...args) => {
+        if (args[0] === "Image upload failed:") window.uploadFailures.push({ message: args[1].message, details: args[2] });
+        report(...args);
+      };
+    });
+    await page.goto("https://stream.test/watermark/?kind=logo#configure");
+    const field = page.locator('form[data-configurator] [name="logoUrl"]');
+    const component = field.locator("..");
+    const picker = component.locator('input[type="file"]');
+    await picker.waitFor({ state: "attached" });
+    const previous = await field.inputValue();
+    const buffer = Buffer.from(await page.evaluate(() => {
+      const canvas = document.createElement("canvas");
+      canvas.width = canvas.height = 2;
+      return canvas.toDataURL("image/png").split(",")[1];
+    }), "base64");
+    const endpoint = "https://stream.byuwur.co/upload_image.php";
+    const imageURL = "https://files.catbox.moe/upload.png";
+    let reply;
+    let requests = 0;
+    await page.route(endpoint, (route) => {
+      requests++;
+      assert.equal(route.request().method(), "POST");
+      if (reply.networkError) return route.abort("failed");
+      return route.fulfill({
+        status: reply.status,
+        body: reply.body,
+        contentType: "text/plain; charset=utf-8",
+        headers: { "Access-Control-Allow-Origin": "*", "Access-Control-Expose-Headers": "X-Upload-Diagnostic", "X-Upload-Diagnostic": reply.diagnostic }
+      });
+    });
+    await page.route(imageURL, (route) => route.fulfill({ body: buffer, contentType: "image/png" }));
+    for (const failure of [
+      { status: 412, body: "Invalid uploader.", diagnostic: "transport=0; upstream=412" },
+      { status: 502, body: "Upload transport failed (cURL 56): Recv failure\nPartial Catbox response", diagnostic: "transport=56; upstream=0" },
+      { status: 200, body: "<script>window.providerExecuted=true</script>" + "x".repeat(1000), diagnostic: "transport=0; upstream=200" },
+      { status: 500, body: "", diagnostic: "transport=0; upstream=500" },
+      { networkError: true }
+    ]) {
+      reply = failure;
+      const count = requests + 1;
+      await picker.setInputFiles({ name: "image.png", mimeType: "image/png", buffer });
+      await page.waitForFunction((count) => window.uploadFailures.length === count, count);
+      const logged = await page.evaluate(() => window.uploadFailures.at(-1));
+      if (failure.networkError) {
+        assert.ok(logged.message, "Transport errors include a diagnostic message");
+        assert.equal(logged.details.endpoint, endpoint);
+      } else {
+        assert.equal(logged.details.endpoint, endpoint);
+        assert.equal(logged.details.status, failure.status);
+        assert.equal(logged.details.diagnostic, failure.diagnostic);
+        assert.equal(logged.details.response, failure.body, "Console diagnostics keep the complete response");
+        assert.match(await component.locator(".image-status").textContent(), new RegExp(`HTTP ${failure.status}`));
+      }
+      assert.equal(await field.inputValue(), previous);
+      assert.equal(await page.evaluate(() => window.providerExecuted), undefined);
+      assert.equal(await component.locator("script").count(), 0, "Provider markup is displayed as text");
+      assert.equal(requests, count, "Failed uploads are never automatically replayed");
+    }
+    reply = { status: 200, body: imageURL, diagnostic: "" };
+    await picker.setInputFiles({ name: "image.png", mimeType: "image/png", buffer });
+    await page.waitForFunction((url) => document.querySelector('form[data-configurator] [name="logoUrl"]').value === url, imageURL);
+    assert.equal(await page.evaluate(() => window.uploadFailures.length), 5, "Successful uploads do not emit errors");
+    assert.match(await component.locator(".image-status").textContent(), /Image uploaded/);
+    // Manual edits supersede a pending upload, including its eventual diagnostic logging.
+    await page.unroute(endpoint);
+    let finish;
+    await page.route(endpoint, (route) => { finish = () => route.fulfill({ status: 412, body: "Invalid uploader.", headers: { "Access-Control-Allow-Origin": "*" } }); });
+    const pending = page.waitForRequest(endpoint);
+    await picker.setInputFiles({ name: "image.png", mimeType: "image/png", buffer });
+    await pending;
+    await field.fill("manual.png");
+    await finish();
+    assert.equal(await field.inputValue(), "manual.png");
+    assert.equal(await page.evaluate(() => window.uploadFailures.length), 5, "Superseded uploads do not report errors");
+  } finally { await page.close(); }
 });

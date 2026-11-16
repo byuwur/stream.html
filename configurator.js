@@ -585,6 +585,7 @@
     const jsonInput = $("#settings-json")[0];
     const imageInputs = new Map();
     const imageOptions = { base64MaxBytes: 16384, ...byConfigurator.imageOptions };
+    const imageUploadEndpoint = "https://stream.byuwur.co/upload_image.php";
 
     // ==========
     // ==== GENERATED FORM ====
@@ -1453,21 +1454,22 @@
           const body = new FormData();
           body.append("provider", "catbox");
           body.append("fileToUpload", file);
-          const response = await fetch("https://stream.byuwur.co/upload_image.php", { method: "POST", body, signal, credentials: "omit" });
-          if (!response.ok) {
-            const errors = {
-              400: "The upload was incomplete. Check the file and server upload limits.",
-              413: "Image exceeds the 8 MiB upload limit.",
-              415: "Unsupported or malformed image. Use PNG, JPEG, WebP, or GIF (up to 16 megapixels).",
-              429: "Upload limit reached. Wait a few minutes before trying again.",
-              502: "Catbox is unavailable or returned an invalid response.",
-              503: "Image upload service unavailable. Check the hosted PHP configuration.",
-              504: "Upload timed out. No automatic retry was made."
+          const response = await fetch(imageUploadEndpoint, { method: "POST", body, signal, credentials: "omit" });
+          const responseText = await response.text();
+          const value = responseText.trim();
+          if (!response.ok || !/^https:\/\/files\.catbox\.moe\/[a-z0-9_-]+\.(?:png|jpe?g|webp|gif)$/i.test(value)) {
+            const reason = response.ok ? `Upload endpoint returned an invalid image URL (HTTP ${response.status})` : `Upload endpoint returned HTTP ${response.status}`;
+            const error = new Error(`${reason}: ${value.slice(0, 500) || "Empty response."}`);
+            error.upload = {
+              provider: "catbox",
+              endpoint: imageUploadEndpoint,
+              status: response.status,
+              statusText: response.statusText,
+              diagnostic: response.headers.get("X-Upload-Diagnostic"),
+              response: responseText
             };
-            throw new Error(errors[response.status] || `Upload service returned HTTP ${response.status}.`);
+            throw error;
           }
-          const value = (await response.text()).trim();
-          if (!/^https:\/\/files\.catbox\.moe\/[a-z0-9_-]+\.(?:png|jpe?g|webp|gif)$/i.test(value)) throw new Error("Invalid server response.");
           return value;
         },
         /** Read a deliberately selected small image locally; cancellation aborts the reader. */
@@ -1553,7 +1555,10 @@
           }
           if (current()) setImageStatus(status, "success", selected === "base64" ? "Image embedded as Base64." : "Image uploaded. URL applied.");
         } catch (error) {
-          if (current()) setImageStatus(status, "error", `${selected === "base64" ? "Conversion" : "Upload"} failed: ${signal.aborted ? "Request timed out. Try again." : uploadError(error)}`);
+          if (current()) {
+            console.error(`Image ${selected === "base64" ? "conversion" : "upload"} failed:`, error, error.upload || { provider: selected, endpoint: selected === "catbox" ? imageUploadEndpoint : undefined });
+            setImageStatus(status, "error", `${selected === "base64" ? "Conversion" : "Upload"} failed: ${signal.aborted ? "Request timed out. No automatic retry was made." : uploadError(error)}`);
+          }
         } finally {
           clearTimeout(timeout);
           if (current()) {

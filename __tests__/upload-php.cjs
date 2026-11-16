@@ -23,6 +23,9 @@ test("PHP upload validates multipart, limits abuse, and safely handles fixed Cat
   const capture = path.join(temp, "capture.json");
   const errorLog = path.join(temp, "error.log");
   const router = path.join(temp, "router.php");
+  // Exercise the real HTTP boundary with the operator's explicit flag switched off.
+  const privateProvider = path.join(temp, "private-upload.php");
+  await fs.writeFile(privateProvider, (await fs.readFile(path.join(root, "upload_image.php"), "utf8")).replace("'explicit' => true", "'explicit' => false"));
   // Disabled built-ins can be substituted in PHP 8. The production endpoint has no mock URL or bypass.
   await fs.writeFile(
     router,
@@ -36,6 +39,7 @@ test("PHP upload validates multipart, limits abuse, and safely handles fixed Cat
       file_put_contents(getenv('STREAM_TEST_CAPTURE'), json_encode([
         'attempts' => $GLOBALS['attempts'],
         'url' => $GLOBALS['upstream'], 'reqtype' => $GLOBALS['options'][CURLOPT_POSTFIELDS]['reqtype'],
+        'userhash' => $GLOBALS['options'][CURLOPT_POSTFIELDS]['userhash'] ?? null,
         'mime' => $file->getMimeType(), 'name' => $file->getPostFilename(),
         'hash' => hash_file('sha256', $file->getFilename()),
         'verifyPeer' => $GLOBALS['options'][CURLOPT_SSL_VERIFYPEER], 'verifyHost' => $GLOBALS['options'][CURLOPT_SSL_VERIFYHOST],
@@ -52,9 +56,12 @@ test("PHP upload validates multipart, limits abuse, and safely handles fixed Cat
     function curl_error($request) { return json_decode(file_get_contents(getenv('STREAM_TEST_MODE')), true)['error'] ?? ''; }
     function curl_getinfo($request, $option) { return json_decode(file_get_contents(getenv('STREAM_TEST_MODE')), true)['status'] ?? 200; }
     $_SERVER['SCRIPT_FILENAME'] = __FILE__;
-    require ${JSON.stringify(path.join(root, "upload_image.php").replaceAll("\\", "/"))};
     $settings = json_decode(file_get_contents(getenv('STREAM_TEST_MODE')), true);
+    require (($settings['privateProvider'] ?? false)
+      ? ${JSON.stringify(privateProvider.replaceAll("\\", "/"))}
+      : ${JSON.stringify(path.join(root, "upload_image.php").replaceAll("\\", "/"))});
     putenv('STREAM_UPLOAD_PROVIDER=' . ($settings['defaultProvider'] ?? ''));
+    putenv('STREAM_CATBOX_USERHASH=' . ($settings['serverUserhash'] ?? ''));
     upload_image();
   `
   );
@@ -115,8 +122,9 @@ test("PHP upload validates multipart, limits abuse, and safely handles fixed Cat
     const text = await response.text();
     assert.equal(response.headers.get("access-control-allow-origin"), "*");
     assert.equal(response.headers.get("access-control-expose-headers"), "Retry-After, X-Upload-Diagnostic");
-    if (![502, 504].includes(response.status)) assert.equal(response.headers.get("x-upload-diagnostic"), null);
-    assert.doesNotMatch(text, /Warning:|Fatal error:|router\.php|tmp_name|<html>|secret/i);
+    assert.equal(response.headers.get("content-type"), "text/plain; charset=utf-8");
+    assert.equal(response.headers.get("x-content-type-options"), "nosniff");
+    assert.doesNotMatch(text, /Warning:|Fatal error:|router\.php|tmp_name/i);
     return { response, text };
   }
   try {
@@ -157,11 +165,13 @@ test("PHP upload validates multipart, limits abuse, and safely handles fixed Cat
         const { response, text } = await upload(buffer, `image/${type}`, "untrusted.php");
         assert.equal(response.status, 200, `${type}: ${text}`);
         assert.equal(text, "https://files.catbox.moe/image.png");
+        assert.equal(response.headers.get("x-upload-diagnostic"), null);
         const forwarded = JSON.parse(await fs.readFile(capture));
         assert.equal(forwarded.attempts, 1, "The local HTTP helper sends each upload once");
         assert.equal(forwarded.hash, require("node:crypto").createHash("sha256").update(buffer).digest("hex"));
         assert.equal(forwarded.url, "https://catbox.moe/user/api.php");
         assert.equal(forwarded.reqtype, "fileupload");
+        assert.equal(forwarded.userhash, null, "Uploads are always anonymous");
         assert.equal(forwarded.mime, `image/${type}`);
         assert.equal(forwarded.name, `image.${type === "jpeg" ? "jpg" : type}`);
         assert.equal(forwarded.verifyPeer, true);
@@ -193,6 +203,12 @@ test("PHP upload validates multipart, limits abuse, and safely handles fixed Cat
         assert.equal(rejected.text, "Unsupported image provider.");
         await assert.rejects(fs.access(capture), { code: "ENOENT" });
       }
+      for (const serverUserhash of ["", "server-owned-test-hash"]) {
+        await reset({ serverUserhash, body: "https://files.catbox.moe/image.png" });
+        assert.equal((await upload(png, "image/png", "image.png", {}, { userhash: "client-supplied-hash" })).response.status, 200);
+        assert.equal(JSON.parse(await fs.readFile(capture)).userhash, null, "Neither environment variables nor client fields can associate uploads with an account");
+        assert.doesNotMatch(await fs.readFile(errorLog, "utf8"), /server-owned-test-hash|client-supplied-hash/, "Credentials are not logged");
+      }
     });
     await t.test("empty, unsupported, signature-mismatched, truncated, and oversized files", async () => {
       for (const [buffer, mime, status] of [
@@ -217,20 +233,26 @@ test("PHP upload validates multipart, limits abuse, and safely handles fixed Cat
       assert.equal(dimensions.response.status, 415);
       assert.match(dimensions.text, /16 megapixels/);
     });
-    await t.test("upstream HTTP, transport, timeout, redirects, and suspicious URLs remain safe", async () => {
+    await t.test("provider status and body survive failures without replaying uploads or rendering HTML", async () => {
       for (const [value, status, diagnostic] of [
-        [{ status: 500, body: "<html>secret path</html>" }, 502, "transport=0; upstream=500"],
-        [{ status: 403, body: "<html>secret rejection</html>" }, 502, "transport=0; upstream=403"],
+        [{ status: 412, body: "Invalid uploader." }, 412, "transport=0; upstream=412"],
+        [{ status: 412, body: "No files given." }, 412, "transport=0; upstream=412"],
+        [{ status: 412, body: "" }, 412, "transport=0; upstream=412"],
+        [{ status: 500, body: "<html>Provider failure</html>" }, 500, "transport=0; upstream=500"],
+        [{ status: 500, body: "https://files.catbox.moe/image.png" }, 500, "transport=0; upstream=500"],
+        [{ status: 403, body: "<script>window.providerExecuted = true</script>" }, 403, "transport=0; upstream=403"],
+        [{ status: 429, body: "Slow down." }, 429, "transport=0; upstream=429"],
         [{ errno: 6, status: 0 }, 502, "transport=6; upstream=0"],
         [{ errno: 7, status: 0 }, 502, "transport=7; upstream=0"],
         [{ errno: 28, status: 0 }, 504, "transport=28; upstream=0"],
         [{ errno: 60, status: 0 }, 502, "transport=60; upstream=0"],
-        [{ errno: 56, status: 0, error: "Recv failure: Connection reset by peer\nsecret detail", body: "Partial Catbox reply" }, 502, "transport=56; upstream=0"],
+        [{ errno: 56, status: 0, error: "Recv failure: Connection reset by peer", body: "Partial Catbox reply" }, 502, "transport=56; upstream=0"],
         [{ errno: 92, status: 0 }, 502, "transport=92; upstream=0"],
         [{ status: 302, body: "https://files.catbox.moe/image.png" }, 502, "transport=0; upstream=302"],
-        [{ errno: 23, body: "x".repeat(4097) }, 502, "transport=23; upstream=200"],
+        [{ errno: 23, body: "x".repeat(65537) }, 502, "transport=23; upstream=200"],
         ...[
-          "<html>secret</html>",
+          "<html>Provider error</html>",
+          "",
           "http://files.catbox.moe/image.png",
           "https://files.catbox.moe.evil.test/image.png",
           "https://files.catbox.moe/image.svg",
@@ -254,15 +276,47 @@ test("PHP upload validates multipart, limits abuse, and safely handles fixed Cat
         assert.equal(records[0].transport, value.errno || 0);
         assert.equal(records[0].upstream, value.status ?? 200);
         assert.equal(records[0].error, value.error || "");
-        assert.equal(records[0].response, value.body?.length > 4096 ? "" : value.body || "");
-        assert.doesNotMatch(result.text, /Partial Catbox reply|Recv failure|secret detail/);
+        assert.equal(records[0].response, (value.body || "").slice(0, 65536));
+        if (value.errno) {
+          assert.match(result.text, new RegExp(`cURL ${value.errno}`));
+          if (value.error) assert.ok(result.text.includes(value.error));
+          if (value.body) assert.ok(result.text.includes(value.body.slice(0, 65536)));
+          if (value.errno === 23) assert.match(result.text, /truncated/);
+        } else if (value.body) assert.equal(result.text, value.body, "The provider body is preserved verbatim as plain text");
+        else assert.match(result.text, /empty response/);
       }
+    });
+    await t.test("the provider explicit flag controls public details and cannot be overridden by clients", async () => {
+      await reset({ status: 412, body: "Invalid uploader." });
+      const explicit = await upload(png, "image/png", "image.png", {}, { explicit: "false" });
+      assert.equal(explicit.response.status, 412);
+      assert.equal(explicit.text, "Invalid uploader.", "Client fields cannot disable the operator's provider setting");
+      for (const [value, status] of [
+        [{ status: 412, body: "Invalid uploader. private-provider-detail" }, 412],
+        [{ status: 500, body: "<html>private-provider-detail</html>" }, 500],
+        [{ status: 200, body: "Invalid reply: private-provider-detail" }, 502],
+        [{ errno: 56, status: 0, error: "Private transport detail", body: "Partial private-provider-detail" }, 502],
+        [{ errno: 28, status: 0, error: "Private timeout detail", body: "Partial private-provider-detail" }, 504]
+      ]) {
+        await reset({ ...value, privateProvider: true });
+        const result = await upload(png, "image/png", "image.png", {}, { explicit: "true" });
+        assert.equal(result.response.status, status);
+        assert.equal(result.text, "Catbox.moe upload failed.");
+        assert.equal(result.response.headers.get("x-upload-diagnostic"), null);
+        assert.ok((await fs.readFile(errorLog, "utf8")).includes("private-provider-detail"), "Full responses remain available in server logs");
+        assert.equal(JSON.parse(await fs.readFile(capture)).attempts, 1);
+      }
+      await reset({ privateProvider: true, body: "https://files.catbox.moe/image.png" });
+      const success = await upload(png);
+      assert.equal(success.response.status, 200);
+      assert.equal(success.text, "https://files.catbox.moe/image.png", "The explicit flag does not change successful uploads");
     });
     await t.test("per-client limiter ignores forwarded IPs, expires, and fails closed on corruption", async () => {
       await reset();
       for (let attempt = 0; attempt < 10; attempt++) assert.equal((await upload(png, "image/png", "image.png", { headers: { "X-Forwarded-For": `192.0.2.${attempt}` } })).response.status, 200);
       const limited = await upload(png);
       assert.equal(limited.response.status, 429);
+      assert.equal(limited.response.headers.get("x-upload-diagnostic"), null, "Local rate limiting is distinct from a provider rejection");
       assert.ok(Number(limited.response.headers.get("retry-after")) > 0);
       await fs.writeFile(path.join(env.STREAM_UPLOAD_RATE_DIR, "clients.json"), JSON.stringify({ expired: { until: 1, count: 10 } }));
       assert.equal((await upload(png)).response.status, 200);

@@ -101,13 +101,16 @@ function image_upload_type(string $path): array
 /**
  * Resolve an allowed provider ID to developer-owned endpoints, multipart fields, and parsing.
  * Add a match case and response parser for each additional provider; request URLs are never used.
- * @return array|null Endpoint, file field, fixed form fields, and a parser returning a safe URL or null.
+ * @return array|null Display name, endpoint, explicit-error flag, multipart fields, and safe URL parser.
  */
 function image_upload_provider(string $provider): ?array
 {
   return match ($provider) {
     'catbox' => [
+      'name' => 'Catbox.moe',
       'endpoint' => 'https://catbox.moe/user/api.php',
+      // Expose provider responses in browser diagnostics. Set false for generic public errors.
+      'explicit' => true,
       'file' => 'fileToUpload',
       'fields' => ['reqtype' => 'fileupload'],
       'parse' => 'image_upload_catbox_response'
@@ -126,7 +129,7 @@ function image_upload_catbox_response(string $response): ?string
 /**
  * Standalone multipart adaptation of spa.php/_functions.php make_http_request().
  * Uses validate_value()'s native URL check without framework sessions, globals, or console output.
- * @return array [Response body or false, cURL error number, upstream HTTP status].
+ * @return array [Response body (including partial failures), cURL error number, upstream HTTP status, cURL error text].
  */
 function make_http_request(string $url, array $post): array
 {
@@ -144,7 +147,7 @@ function make_http_request(string $url, array $post): array
     // Catbox closed requests without a User-Agent during live testing.
     CURLOPT_USERAGENT => 'stream.html (https://stream.byuwur.co/)',
     CURLOPT_CONNECTTIMEOUT => 10,
-    CURLOPT_TIMEOUT => 30,
+    CURLOPT_TIMEOUT => 40,
     CURLOPT_RETURNTRANSFER => true,
     CURLOPT_SSL_VERIFYPEER => true,
     CURLOPT_SSL_VERIFYHOST => 2,
@@ -152,45 +155,61 @@ function make_http_request(string $url, array $post): array
     CURLOPT_FOLLOWLOCATION => false,
     // Bound even an unexpected HTML response before it can exhaust shared-host memory.
     CURLOPT_WRITEFUNCTION => static function ($handle, string $chunk) use (&$response): int {
-      if (strlen($response) + strlen($chunk) > 4096) return 0;
+      if (strlen($response) + strlen($chunk) > 65536) {
+        $response .= substr($chunk, 0, 65536 - strlen($response));
+        return 0;
+      }
       $response .= $chunk;
       return strlen($chunk);
     }
   ]);
   // A transport error may follow a completed upload. Never automatically replay this POST.
-  $completed = curl_exec($request);
+  curl_exec($request);
   $error = curl_errno($request);
   $status = curl_getinfo($request, CURLINFO_RESPONSE_CODE);
+  $error_text = curl_error($request);
   // Keep partial responses on transport failure and escape control characters into one log line.
   error_log('stream image upload: upstream ' . json_encode([
     'transport' => $error,
     'upstream' => $status,
-    'error' => curl_error($request),
+    'endpoint' => $url,
+    'error' => $error_text,
     'response' => $response
   ], JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE));
-  return [$completed === false ? false : $response, $error, $status];
+  return [$response, $error, $status, $error_text];
 }
 
 /**
  * Forward original bytes using a resolved provider and the local HTTP helper.
- * @return array [HTTP status, public URL or safe error, optional safe diagnostic header].
- * Never returns upstream HTML, raw cURL errors, or server paths.
+ * @return array [HTTP status, validated URL or provider response, optional diagnostic header].
+ * Explicit providers return errors verbatim as text/plain with nosniff, never rendered as HTML.
+ * Otherwise only a generic error is public; the complete response remains in the server log.
  */
 function image_upload_forward(string $path, string $mime, string $extension, array $provider): array
 {
   $fields = $provider['fields'];
   $fields[$provider['file']] = new CURLFile($path, $mime, 'image.' . $extension);
-  [$response, $error, $status] = make_http_request($provider['endpoint'], $fields);
+  [$response, $error, $status, $error_text] = make_http_request($provider['endpoint'], $fields);
   $diagnostic = 'transport=' . $error . '; upstream=' . $status;
-  if ($response === false || $error || $status < 200 || $status >= 300) {
-    if ($error === CURLE_OPERATION_TIMEDOUT) return [504, 'Upload timed out. No automatic retry was made.', $diagnostic];
-    return [502, 'Image host unavailable. No automatic retry was made.', $diagnostic];
+  if ($error) {
+    // Preserve the provider's partial reply and useful transport details without the local file path.
+    $message = 'Upload transport failed (cURL ' . $error . '): ' . str_replace($path, '[uploaded file]', $error_text ?: curl_strerror($error));
+    if ($response !== '') $message .= "\n" . $response;
+    if ($error === CURLE_WRITE_ERROR) $message .= "\nProvider response exceeded 64 KiB and was truncated.";
+    $status = $error === CURLE_OPERATION_TIMEDOUT ? 504 : 502;
+  } elseif ($status < 200 || $status >= 300) {
+    $message = $response !== '' ? $response : 'Image host returned HTTP ' . $status . ' with an empty response.';
+    $status = $status >= 400 && $status <= 599 ? $status : 502;
+  } else {
+    $value = ($provider['parse'])($response);
+    if ($value !== null) return [200, $value, null];
+    $status = 502;
+    $message = $response !== '' ? $response : 'Image host returned an empty response.';
+    $diagnostic .= '; response=invalid';
   }
-  $value = ($provider['parse'])($response);
-  if ($value === null) {
-    return [502, 'Invalid image host response.', $diagnostic . '; response=invalid'];
-  }
-  return [200, $value, null];
+  if (($provider['explicit'] ?? false) !== true)
+    return [$status, $provider['name'] . ' upload failed.', null];
+  return [$status, $message, $diagnostic];
 }
 
 /** Handle the anonymous HTTP boundary; all responses include credential-free CORS headers. */
