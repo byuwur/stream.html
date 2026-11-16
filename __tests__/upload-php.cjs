@@ -75,6 +75,8 @@ test("PHP upload validates multipart, limits abuse, and safely handles fixed Cat
     const response = await fetch(url, { method: "POST", body, ...extra });
     const text = await response.text();
     assert.equal(response.headers.get("access-control-allow-origin"), "*");
+    assert.equal(response.headers.get("access-control-expose-headers"), "Retry-After, X-Upload-Diagnostic");
+    if (![502, 504].includes(response.status)) assert.equal(response.headers.get("x-upload-diagnostic"), null);
     assert.doesNotMatch(text, /Warning:|Fatal error:|router\.php|tmp_name|<html>|secret/i);
     return { response, text };
   }
@@ -93,6 +95,7 @@ test("PHP upload validates multipart, limits abuse, and safely handles fixed Cat
       assert.equal(get.status, 405); assert.equal(get.headers.get("allow"), "POST, OPTIONS");
       const preflight = await fetch(url, { method: "OPTIONS", headers: { Origin: "null", "Access-Control-Request-Method": "POST" } });
       assert.equal(preflight.status, 204); assert.equal(preflight.headers.get("access-control-allow-origin"), "*");
+      assert.equal(preflight.headers.get("access-control-expose-headers"), "Retry-After, X-Upload-Diagnostic");
       assert.equal(preflight.headers.get("access-control-allow-credentials"), null);
       assert.equal((await fetch(url, { method: "POST" })).status, 400);
       assert.equal((await fetch(url, { method: "POST", body: new FormData() })).status, 400);
@@ -154,12 +157,30 @@ test("PHP upload validates multipart, limits abuse, and safely handles fixed Cat
       assert.match(dimensions.text, /16 megapixels/);
     });
     await t.test("upstream HTTP, transport, timeout, redirects, and suspicious URLs remain safe", async () => {
-      for (const [value, status] of [
-        [{ status: 500, body: "<html>secret path</html>" }, 502], [{ errno: 7 }, 502], [{ errno: 28 }, 504],
-        [{ status: 302, body: "https://files.catbox.moe/image.png" }, 502],
-        ...["<html>secret</html>", "x".repeat(4097), "http://files.catbox.moe/image.png", "https://files.catbox.moe.evil.test/image.png", "https://files.catbox.moe/image.svg", "https://files.catbox.moe/image.png?token=x", "https://user@files.catbox.moe/image.png", "https://files.catbox.moe:8443/image.png", "https://files.catbox.moe/a/../image.png"].map((body) => [{ body }, 502])
+      for (const [value, status, diagnostic] of [
+        [{ status: 500, body: "<html>secret path</html>" }, 502, "transport=0; upstream=500"],
+        [{ status: 403, body: "<html>secret rejection</html>" }, 502, "transport=0; upstream=403"],
+        [{ errno: 6, status: 0 }, 502, "transport=6; upstream=0"],
+        [{ errno: 7, status: 0 }, 502, "transport=7; upstream=0"],
+        [{ errno: 28, status: 0 }, 504, "transport=28; upstream=0"],
+        [{ errno: 60, status: 0 }, 502, "transport=60; upstream=0"],
+        [{ status: 302, body: "https://files.catbox.moe/image.png" }, 502, "transport=0; upstream=302"],
+        [{ errno: 23, body: "x".repeat(4097) }, 502, "transport=23; upstream=200"],
+        ...[
+          "<html>secret</html>",
+          "http://files.catbox.moe/image.png",
+          "https://files.catbox.moe.evil.test/image.png",
+          "https://files.catbox.moe/image.svg",
+          "https://files.catbox.moe/image.png?token=x",
+          "https://user@files.catbox.moe/image.png",
+          "https://files.catbox.moe:8443/image.png",
+          "https://files.catbox.moe/a/../image.png"
+        ].map((body) => [{ body }, 502, "transport=0; upstream=200; response=invalid"])
       ]) {
-        await reset(value); assert.equal((await upload(png)).response.status, status);
+        await reset(value);
+        const result = await upload(png);
+        assert.equal(result.response.status, status);
+        assert.equal(result.response.headers.get("x-upload-diagnostic"), diagnostic);
       }
     });
     await t.test("per-client limiter ignores forwarded IPs, expires, and fails closed on corruption", async () => {

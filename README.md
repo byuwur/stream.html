@@ -131,6 +131,8 @@ The limiter allows **10 POST attempts per client address per 10 minutes**, inclu
 
 The shared upstream transport uses verified TLS, a 10-second connection timeout, a 40-second request timeout, no redirects, and no automatic replay. Only HTTPS raster URLs on `files.catbox.moe` are returned; upstream HTML, raw transport diagnostics, and paths never enter public errors. Logs record safe failure categories/status codes. Uploads are public and anonymous; keep private images out of them. For 413, check both server and application limits; for 429 wait; for 503 check extensions/private storage; for 502/504 check outbound connectivity and Catbox availability. A successful upload whose image subsequently cannot load keeps the previous field value, though the public upload may already exist.
 
+For upstream failures, inspect **DevTools -> Network -> upload_image.php -> Headers -> Response Headers**. `X-Upload-Diagnostic` exposes only the cURL error number and upstream HTTP status, for example `transport=6; upstream=0`; failed URL validation adds `response=invalid`. Share that value when server logs are unavailable. CORS exposes the header to independent configurators; raw provider responses, cURL error text, and server paths remain private.
+
 ### Keyboard shortcuts
 
 About includes the shortcut reference. Focus the configurator to use these:

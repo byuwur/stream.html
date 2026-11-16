@@ -122,7 +122,8 @@ function image_upload_catbox_response(string $response): ?string
 
 /**
  * Forward original bytes once using a resolved provider and the shared HTTPS transport.
- * @return array [HTTP status, public URL or safe error]. Never returns upstream HTML or cURL details.
+ * @return array [HTTP status, public URL or safe error, optional safe diagnostic header].
+ * Never returns upstream HTML, raw cURL errors, or server paths.
  */
 function image_upload_forward(string $path, string $mime, string $extension, array $provider): array
 {
@@ -152,17 +153,18 @@ function image_upload_forward(string $path, string $mime, string $extension, arr
   $completed = curl_exec($request);
   $error = curl_errno($request);
   $status = curl_getinfo($request, CURLINFO_RESPONSE_CODE);
+  $diagnostic = 'transport=' . $error . '; upstream=' . $status;
   if ($completed === false || $error || $status < 200 || $status >= 300) {
     error_log('stream image upload: transport=' . $error . ' HTTP=' . $status);
-    if ($error === CURLE_OPERATION_TIMEDOUT) return [504, 'Upload timed out. No automatic retry was made.'];
-    return [502, 'Image host unavailable. No automatic retry was made.'];
+    if ($error === CURLE_OPERATION_TIMEDOUT) return [504, 'Upload timed out. No automatic retry was made.', $diagnostic];
+    return [502, 'Image host unavailable. No automatic retry was made.', $diagnostic];
   }
   $value = ($provider['parse'])($response);
   if ($value === null) {
     error_log('stream image upload: invalid provider response');
-    return [502, 'Invalid image host response.'];
+    return [502, 'Invalid image host response.', $diagnostic . '; response=invalid'];
   }
-  return [200, $value];
+  return [200, $value, null];
 }
 
 /** Handle the anonymous HTTP boundary; all responses include credential-free CORS headers. */
@@ -171,7 +173,7 @@ function upload_image(): void
   header('Access-Control-Allow-Origin: *');
   header('Access-Control-Allow-Methods: POST, OPTIONS');
   header('Access-Control-Allow-Headers: Content-Type');
-  header('Access-Control-Expose-Headers: Retry-After');
+  header('Access-Control-Expose-Headers: Retry-After, X-Upload-Diagnostic');
   header('Cache-Control: no-store');
   header('X-Content-Type-Options: nosniff');
   $method = $_SERVER['REQUEST_METHOD'] ?? '';
@@ -241,7 +243,8 @@ function upload_image(): void
     if (!extension_loaded('curl') || !extension_loaded('fileinfo') || !function_exists('imagecreatefromstring'))
       throw new RuntimeException('required PHP extension unavailable');
     [$mime, $extension] = image_upload_type($path);
-    [$status, $message] = image_upload_forward($path, $mime, $extension, $provider);
+    [$status, $message, $diagnostic] = image_upload_forward($path, $mime, $extension, $provider);
+    if ($diagnostic !== null) header('X-Upload-Diagnostic: ' . $diagnostic);
     image_upload_response($status, $message);
   } catch (InvalidArgumentException $error) {
     image_upload_response(415, $error->getMessage());
