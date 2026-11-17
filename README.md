@@ -8,6 +8,8 @@ Browser overlays for your stream. Configure a tool and copy its URL into OBS. Fr
 
 [Open stream.html](https://stream.byuwur.co/) · [Configurator demo](https://stream.byuwur.co/configurator.html)
 
+Release assets keep stable filenames, such as `stream.html.controller.standalone.zip`. Use [latest release downloads](https://github.com/byuwur/stream.html/releases/latest); direct asset links use `/releases/latest/download/<filename>`. The manifest records the release version and source commit.
+
 ## Available overlays
 
 All 23 overlays are available as prereleases. **Alpha** means early testing; **Beta** means broader testing. Features may change, and bugs are expected. Try your setup before going live. Status pills appear beside tool titles on the landing page, in the tool picker, and in the configurator heading.

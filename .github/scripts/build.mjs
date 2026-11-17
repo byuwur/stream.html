@@ -57,7 +57,7 @@ export const dist = path.join(root, "dist");
 export const sha256 = (body) => createHash("sha256").update(body).digest("hex");
 
 /**
- * Validate the version used in release filenames and download URLs.
+ * Validate the release version recorded in provenance and history.
  * @param {string} tag One-, two-, or three-part version with a v prefix and optional prerelease/build identifiers.
  * @returns {string} Accepted tag.
  * @throws {Error} Rejects malformed versions and whitespace.
@@ -418,12 +418,11 @@ export async function dependencyReader(updateLock = false) {
 }
 
 /**
- * @param {string} tag Release version.
  * @param {string} filename Asset basename.
- * @returns {string} GitHub Release download URL.
+ * @returns {string} Stable latest-release asset URL.
  */
-export function downloadURL(tag, filename) {
-  return `https://github.com/${config.repository}/releases/download/${encodeURIComponent(tag)}/${filename}`;
+export function downloadURL(filename) {
+  return `https://github.com/${config.repository}/releases/latest/download/${filename}`;
 }
 
 /**
@@ -501,13 +500,13 @@ export function releaseNotes(manifest) {
   for (const resource of manifest.resources) {
     const cells = formats.map((format) => {
       const asset = manifest.assets.find((item) => item.resource === resource.id && item.format === format);
-      return asset ? `[Download](${downloadURL(manifest.tag, asset.file)})` : "-";
+      return asset ? `[Download](${downloadURL(asset.file)})` : "-";
     });
     lines.push(`| ${resource.name.replaceAll("|", "\\|")} | ${cells.join(" | ")} |`);
   }
   lines.push("", "Use a current Chromium-based browser. Paste the configured HTML URL into an OBS Browser Source and use Interact for keyboard controls. OBS and multi-hour endurance require separate manual validation.");
 
-  lines.push("", `Integrity and dependency inventory: [manifest.json](${downloadURL(manifest.tag, "manifest.json")}); verify downloads with [SHA256SUMS](${downloadURL(manifest.tag, "SHA256SUMS")}).`, "");
+  lines.push("", `Integrity and dependency inventory: [manifest.json](${downloadURL("manifest.json")}); verify downloads with [SHA256SUMS](${downloadURL("SHA256SUMS")}).`, "");
   return lines.join("\n");
 }
 
@@ -785,7 +784,7 @@ async function buildRelease(tag, options) {
             const artworkDirectory = path.basename(config.dynamicDependencies[`${resource.id}/${resource.id}.js`].directory);
             for (const image of images) entries[`${resource.id}/${artworkDirectory}/${image.file}`] = image.body;
             const archive = zipSync(Object.fromEntries(Object.entries(entries).map(([name, body]) => [name, [new Uint8Array(body), { mtime: new Date(1980, 0, 1) }]])), { level: 9 });
-            await save(`${config.repository.split("/")[1]}.${tag}.${resource.id}.${format === "bundle" ? "full" : format}.zip`, Buffer.from(archive), resource.id, `${format === "bundle" ? "full" : format}-zip`);
+            await save(`${config.repository.split("/")[1]}.${resource.id}.${format === "bundle" ? "full" : format}.zip`, Buffer.from(archive), resource.id, `${format === "bundle" ? "full" : format}-zip`);
           }
           for (const format of ["standalone", "bundle"]) {
             const candidate = await generate(resource, format, "embedded", images);

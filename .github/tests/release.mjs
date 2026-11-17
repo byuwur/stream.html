@@ -300,7 +300,7 @@ test("online, bundled, and packaged HTML has a complete dependency graph", async
     await t.test(asset.file, async () => validateHTML(await fs.readFile(path.join(assetDir, asset.file), "utf8"), asset.format, asset.file));
   }
   for (const asset of manifest.assets.filter((item) => item.file.endsWith(".zip"))) {
-    assert.equal(asset.file, `${config.repository.split("/")[1]}.${manifest.tag}.${asset.resource}.${asset.format.replace(/-zip$/, "")}.zip`);
+    assert.equal(asset.file, `${config.repository.split("/")[1]}.${asset.resource}.${asset.format.replace(/-zip$/, "")}.zip`);
     const entries = unzipSync(await fs.readFile(path.join(assetDir, asset.file)));
     const registration = config.dynamicDependencies[`${asset.resource}/${asset.resource}.js`];
     const artwork = (await fs.readdir(path.join(root, registration.directory))).filter((file) => file.endsWith(registration.extension)).sort();
@@ -324,9 +324,17 @@ test("online, bundled, and packaged HTML has a complete dependency graph", async
 
 test("release descriptions link to the generated inventory", async () => {
   const notes = await fs.readFile(path.join(assetDir, "RELEASE_NOTES.md"), "utf8");
-  const links = [...notes.matchAll(/\]\((https:\/\/github\.com\/[^)]+\/releases\/download\/[^)]+)\)/g)].map((match) => match[1]);
-  assert.deepEqual(new Set(links), new Set([...manifest.assets.filter((item) => item.resource).map((item) => downloadURL(manifest.tag, item.file)), downloadURL(manifest.tag, "manifest.json"), downloadURL(manifest.tag, "SHA256SUMS")]));
+  const links = [...notes.matchAll(/\]\((https:\/\/github\.com\/[^)]+\/releases\/latest\/download\/[^)]+)\)/g)].map((match) => match[1]);
+  assert.deepEqual(new Set(links), new Set([...manifest.assets.filter((item) => item.resource).map((item) => downloadURL(item.file)), downloadURL("manifest.json"), downloadURL("SHA256SUMS")]));
   assert.equal(notes, releaseNotes(manifest));
+  assert.equal(downloadURL("manifest.json"), `https://github.com/${config.repository}/releases/latest/download/manifest.json`);
+  for (const tag of ["v1.0", "v2.0"]) {
+    const current = releaseNotes({ ...manifest, tag });
+    const downloads = [...current.matchAll(/\]\((https:\/\/github\.com\/[^)]+\/releases\/latest\/download\/[^)]+)\)/g)].map((match) => match[1]);
+    assert.deepEqual(new Set(downloads), new Set(links));
+    assert.doesNotMatch(current, /\/releases\/download\//);
+  }
+
   assert.ok(notes.includes("## Changes"));
   assert.ok(notes.includes("| Standalone embedded [EXPERIMENTAL] | Full embedded [EXPERIMENTAL] |"));
   assert.ok(notes.indexOf("| Standalone |") < notes.indexOf("| Bundle |"));
