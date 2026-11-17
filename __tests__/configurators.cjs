@@ -6,7 +6,24 @@ const assert = require("node:assert/strict");
 const test = require("node:test");
 const { runtimeAssets, launchBrowser, loadAssets, serve } = require("./browser.cjs");
 
-const editorAssets = [...runtimeAssets, "_transitions.css", "_transitions.min.css", "_transitions.min.js", "js/jquery.min.js", "js/select2.full.min.js", "js/popper.min.js", "js/bootstrap.min.js", "js/pickr.min.js", "_common.min.js", "css/bootstrap.min.css", "css/select2.min.css", "css/pickr.min.css", "css/animate.min.css", "_common.min.css", "_fonts.css"];
+const editorAssets = [
+  ...runtimeAssets,
+  "_transitions.css",
+  "_transitions.min.css",
+  "_transitions.min.js",
+  "js/jquery.min.js",
+  "js/select2.full.min.js",
+  "js/popper.min.js",
+  "js/bootstrap.min.js",
+  "js/pickr.min.js",
+  "_common.min.js",
+  "css/bootstrap.min.css",
+  "css/select2.min.css",
+  "css/pickr.min.css",
+  "css/animate.min.css",
+  "_common.min.css",
+  "_fonts.css"
+];
 
 test("configurator smoke", { timeout: 30000 }, async (t) => {
   const assets = await loadAssets(editorAssets);
@@ -30,7 +47,9 @@ test("configurator smoke", { timeout: 30000 }, async (t) => {
       await page.locator("#overlay .primary", { hasText: "HOST_SMOKE" }).waitFor();
       assert.equal(await page.locator("form[data-configurator]").count(), 0);
       assert.deepEqual(errors, []);
-    } finally { await page.close(); }
+    } finally {
+      await page.close();
+    }
   });
 
   await t.test("controller settings produce a working renderer URL", async () => {
@@ -48,7 +67,9 @@ test("configurator smoke", { timeout: 30000 }, async (t) => {
       await page.locator("#gamepads .controller svg").first().waitFor({ state: "attached" });
       assert.equal(await page.evaluate(() => byStreamResource.settings.skin), "ds5");
       assert.deepEqual(errors, []);
-    } finally { await page.close(); }
+    } finally {
+      await page.close();
+    }
   });
 
   await t.test("image uploads log the endpoint status and full response and preserve the previous value on failure", async () => {
@@ -70,11 +91,14 @@ test("configurator smoke", { timeout: 30000 }, async (t) => {
       const picker = component.locator('input[type="file"]');
       await picker.waitFor({ state: "attached" });
       const previous = await field.inputValue();
-      const buffer = Buffer.from(await page.evaluate(() => {
-        const canvas = document.createElement("canvas");
-        canvas.width = canvas.height = 2;
-        return canvas.toDataURL("image/png").split(",")[1];
-      }), "base64");
+      const buffer = Buffer.from(
+        await page.evaluate(() => {
+          const canvas = document.createElement("canvas");
+          canvas.width = canvas.height = 2;
+          return canvas.toDataURL("image/png").split(",")[1];
+        }),
+        "base64"
+      );
       const endpoint = "https://stream.byuwur.co/upload_image.php";
       const imageURL = "https://files.catbox.moe/upload.png";
       let reply;
@@ -126,7 +150,9 @@ test("configurator smoke", { timeout: 30000 }, async (t) => {
       // Manual edits supersede a pending upload, including its eventual diagnostic logging.
       await page.unroute(endpoint);
       let finish;
-      await page.route(endpoint, (route) => { finish = () => route.fulfill({ status: 412, body: "Invalid uploader.", headers: { "Access-Control-Allow-Origin": "*" } }); });
+      await page.route(endpoint, (route) => {
+        finish = () => route.fulfill({ status: 412, body: "Invalid uploader.", headers: { "Access-Control-Allow-Origin": "*" } });
+      });
       const pending = page.waitForRequest(endpoint);
       await picker.setInputFiles({ name: "image.png", mimeType: "image/png", buffer });
       await pending;
@@ -134,6 +160,8 @@ test("configurator smoke", { timeout: 30000 }, async (t) => {
       await finish();
       assert.equal(await field.inputValue(), "manual.png");
       assert.equal(await page.evaluate(() => window.uploadFailures.length), 5, "Superseded uploads do not report errors");
-    } finally { await page.close(); }
+    } finally {
+      await page.close();
+    }
   });
 });

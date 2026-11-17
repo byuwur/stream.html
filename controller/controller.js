@@ -1680,22 +1680,49 @@ async function loadControllerArtwork(requiredSkin) {
       historyGroupWindow: { ...active, type: "number", default: 60, label: "Combination window (ms)", min: 0, max: 250, step: 1 },
       historyAggregate: { ...active, type: "switch", default: "yes", label: "Count consecutive presses", checkedValue: "yes", uncheckedValue: "no", options: { yes: "On", no: "Off" } },
       historyAnimation: { ...active, type: "select", default: "slide", label: "Entry animation", options: { slide: "Slide", fade: "Fade", none: "Off" }, when: (settings) => settings.showHistory === "yes" && settings.animate !== "no" },
-      historyPosition: { ...active, type: "select", default: "bottom-left", label: "Position", subsection: "Size & placement", options: { "top-left": "Top left", "top-right": "Top right", "bottom-left": "Bottom left", "bottom-right": "Bottom right", center: "Center" } }
+      historyPosition: {
+        ...active,
+        type: "select",
+        default: "bottom-left",
+        label: "Position",
+        subsection: "Size & placement",
+        options: { "top-left": "Top left", "top-right": "Top right", "bottom-left": "Bottom left", "bottom-right": "Bottom right", center: "Center" }
+      }
     };
     for (const [name, label, value, min, max] of [
-      ["Width", "Width (px)", 0, 0, 3840], ["Height", "Height (px)", 0, 0, 2160],
-      ["Size", "Prompt / text size (px)", 32, 12, 160], ["Scale", "Scale (%)", 100, -500, 500],
-      ["X", "Horizontal offset (px)", 0, -3840, 3840], ["Y", "Vertical offset (px)", 0, -2160, 2160],
-      ["Gap", "Entry spacing (px)", 6, 0, 100], ["Padding", "Padding (px)", 8, 0, 100], ["Opacity", "Opacity (%)", 100, 0, 100]
+      ["Width", "Width (px)", 0, 0, 3840],
+      ["Height", "Height (px)", 0, 0, 2160],
+      ["Size", "Prompt / text size (px)", 32, 12, 160],
+      ["Scale", "Scale (%)", 100, -500, 500],
+      ["X", "Horizontal offset (px)", 0, -3840, 3840],
+      ["Y", "Vertical offset (px)", 0, -2160, 2160],
+      ["Gap", "Entry spacing (px)", 6, 0, 100],
+      ["Padding", "Padding (px)", 8, 0, 100],
+      ["Opacity", "Opacity (%)", 100, 0, 100]
     ]) {
       const id = `history${name}`;
       result[id] = { ...active, type: "number", default: value, label, min, max, step: "any", subsection: "Size & placement" };
       if (name === "Width" || name === "Height") {
         result[id].description = "0 sizes automatically for the selected orientation.";
-        result[`${id}Mode`] = { ...active, type: "switch", default: "auto", label: "Fill parent", subsection: "Size & placement", when: [id, "0"], checkedValue: "fill", uncheckedValue: "auto", options: { fill: "Fill parent", auto: "Automatic" } };
+        result[`${id}Mode`] = {
+          ...active,
+          type: "switch",
+          default: "auto",
+          label: "Fill parent",
+          subsection: "Size & placement",
+          when: [id, "0"],
+          checkedValue: "fill",
+          uncheckedValue: "auto",
+          options: { fill: "Fill parent", auto: "Automatic" }
+        };
       }
     }
-    for (const [name, label, value] of [["Color", "Text / symbols", "#EEEEEE"], ["Background", "Container background", "#11111166"], ["EntryColor", "Entry surface", "#111111CC"], ["BorderColor", "Entry outline", "#EEEEEE33"]]) {
+    for (const [name, label, value] of [
+      ["Color", "Text / symbols", "#EEEEEE"],
+      ["Background", "Container background", "#11111166"],
+      ["EntryColor", "Entry surface", "#111111CC"],
+      ["BorderColor", "Entry outline", "#EEEEEE33"]
+    ]) {
       result[`history${name}`] = { ...active, type: "color", default: value, label, maxlength: 9, subsection: "Colors" };
     }
     return result;
@@ -1784,7 +1811,16 @@ async function loadControllerArtwork(requiredSkin) {
     root.style.transform = `scale(${scale})`;
     root.style.transformOrigin = settings.historyPosition === "center" ? "center" : settings.historyPosition.replace("-", " ");
     root.style.opacity = settings.historyOpacity / 100;
-    for (const [name, value] of Object.entries({ size: `${settings.historySize}px`, gap: `${settings.historyGap}px`, padding: `${settings.historyPadding}px`, ink: settings.historyColor, background: settings.historyBackground, entry: settings.historyEntryColor, border: settings.historyBorderColor })) root.style.setProperty(`--history-${name}`, value);
+    for (const [name, value] of Object.entries({
+      size: `${settings.historySize}px`,
+      gap: `${settings.historyGap}px`,
+      padding: `${settings.historyPadding}px`,
+      ink: settings.historyColor,
+      background: settings.historyBackground,
+      entry: settings.historyEntryColor,
+      border: settings.historyBorderColor
+    }))
+      root.style.setProperty(`--history-${name}`, value);
     position.append(style, root);
     parent.append(position);
     // Only active controls and mounted rows are retained. The oldest row is always at rows[0].
@@ -1836,7 +1872,7 @@ async function loadControllerArtwork(requiredSkin) {
       const horizontal = settings.historyOrientation === "horizontal";
       const limit = (horizontal ? root.clientWidth : root.clientHeight) - settings.historyPadding * 2;
       if (limit <= 0 || root.clientHeight <= 0 || root.clientWidth <= 0) return clear();
-      const sizes = rows.map((row) => horizontal ? row.node.offsetWidth : row.node.offsetHeight);
+      const sizes = rows.map((row) => (horizontal ? row.node.offsetWidth : row.node.offsetHeight));
       let used = sizes.reduce((sum, size) => sum + size, 0) + Math.max(0, rows.length - 1) * settings.historyGap;
       while (rows.length > 1 && used > limit + 0.5) {
         used -= sizes.shift() + settings.historyGap;
@@ -1880,7 +1916,10 @@ async function loadControllerArtwork(requiredSkin) {
       count.textContent = row.count > 1 ? `×${row.count}` : "";
       content.append(count);
       row.node.replaceChildren(content);
-      row.signature = row.tokens.map((token) => token.id).sort().join("|");
+      row.signature = row.tokens
+        .map((token) => token.id)
+        .sort()
+        .join("|");
       scheduleTrim();
     }
 
@@ -1903,7 +1942,10 @@ async function loadControllerArtwork(requiredSkin) {
         return;
       }
       const tokens = [...modifiers, token];
-      const signature = tokens.map((input) => input.id).sort().join("|");
+      const signature = tokens
+        .map((input) => input.id)
+        .sort()
+        .join("|");
       if (settings.historyAggregate === "yes" && last?.signature === signature) {
         last.count++;
         last.time = now;
@@ -1922,7 +1964,13 @@ async function loadControllerArtwork(requiredSkin) {
       if (settings.animate !== "no" && settings.historyAnimation !== "none") {
         const offset = settings.historyOrder === "first" ? -10 : 10;
         const transform = settings.historyOrientation === "horizontal" ? `translateX(${offset}px)` : `translateY(${offset}px)`;
-        node.animate([{ opacity: 0, transform: settings.historyAnimation === "slide" ? transform : "none" }, { opacity: 1, transform: "none" }], { duration: 140, easing: "ease-out" });
+        node.animate(
+          [
+            { opacity: 0, transform: settings.historyAnimation === "slide" ? transform : "none" },
+            { opacity: 1, transform: "none" }
+          ],
+          { duration: 140, easing: "ease-out" }
+        );
       }
     }
 
@@ -1964,11 +2012,27 @@ async function loadControllerArtwork(requiredSkin) {
       position.remove();
     }
 
-    const observer = new ResizeObserver(() => { scheduleTrim(); layoutChanged?.(); });
+    const observer = new ResizeObserver(() => {
+      scheduleTrim();
+      layoutChanged?.();
+    });
     observer.observe(root);
     window.addEventListener("blur", () => held.clear(), { signal: events.signal });
-    document.addEventListener("visibilitychange", () => { if (document.hidden) held.clear(); }, { signal: events.signal });
-    window.addEventListener("pagehide", (event) => { if (event.persisted) clear(); else destroy(); }, { signal: events.signal });
+    document.addEventListener(
+      "visibilitychange",
+      () => {
+        if (document.hidden) held.clear();
+      },
+      { signal: events.signal }
+    );
+    window.addEventListener(
+      "pagehide",
+      (event) => {
+        if (event.persisted) clear();
+        else destroy();
+      },
+      { signal: events.signal }
+    );
     return { press, release, update, pulse, clear, destroy, available, onResize };
   }
 

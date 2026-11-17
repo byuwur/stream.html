@@ -417,16 +417,16 @@ Release tooling lives entirely in `.github/`, with `.github/workflows/release.ym
 
 Release notes pair each plain commit subject with a linked seven-character hash and include a full changelog comparison from the nearest preceding version tag. First releases include the available history. Local previews link to the checkout's commit. CI checks out complete history for this range, which is also recorded in `manifest.json`.
 
-| Tier | Contents | Requires |
-| --- | --- | --- |
-| Original | Authored HTML. | Repository files and dependencies. |
-| Online | Editor and overlay; CDN assets. | Published tag and internet. |
-| Standalone | Renderer; embedded JS/CSS. | URL settings; CDN artwork for Controller/Keyboard. |
-| Bundle | Editor and overlay; embedded JS/CSS. | CDN artwork for Controller/Keyboard. |
-| Standalone ZIP | Renderer and SVG artwork. | Extract and open index.html. |
-| Full ZIP | Editor, overlay, and SVG artwork. | Extract and open index.html. |
-| Standalone embedded [EXPERIMENTAL] | Renderer and SVG artwork in one HTML. | Open the file directly. |
-| Full embedded [EXPERIMENTAL] | Editor, overlay, and SVG artwork in one HTML. | Open the file directly. |
+| Tier                               | Contents                                      | Requires                                           |
+| ---------------------------------- | --------------------------------------------- | -------------------------------------------------- |
+| Original                           | Authored HTML.                                | Repository files and dependencies.                 |
+| Online                             | Editor and overlay; CDN assets.               | Published tag and internet.                        |
+| Standalone                         | Renderer; embedded JS/CSS.                    | URL settings; CDN artwork for Controller/Keyboard. |
+| Bundle                             | Editor and overlay; embedded JS/CSS.          | CDN artwork for Controller/Keyboard.               |
+| Standalone ZIP                     | Renderer and SVG artwork.                     | Extract and open index.html.                       |
+| Full ZIP                           | Editor, overlay, and SVG artwork.             | Extract and open index.html.                       |
+| Standalone embedded [EXPERIMENTAL] | Renderer and SVG artwork in one HTML.         | Open the file directly.                            |
+| Full embedded [EXPERIMENTAL]       | Editor, overlay, and SVG artwork in one HTML. | Open the file directly.                            |
 
 Original, Online, Bundle, Full ZIP, and Full embedded include the configurator and support F2 switching. Standalone editions contain the renderer only. ZIPs use embedded artwork on file:// and the separate SVG files over HTTP(S). Prettier formats the surrounding HTML, and minified JavaScript and CSS occupy separate `<script>` and `<style>` blocks with `data-source` attributes identifying their original files.
 
