@@ -372,153 +372,51 @@ document.addEventListener("DOMContentLoaded", async () => {
       titleVerticalOffset: { type: "number", default: 0, label: "Title vertical offset (px)", section: "Size & placement", subsection: "Title and subtitle position", min: -1080, max: 1080, step: "any" },
       subtitleVerticalOffset: { type: "number", default: 64, label: "Subtitle vertical offset (px)", section: "Size & placement", subsection: "Title and subtitle position", min: -1080, max: 1080, step: "any" },
       countdownScale: { type: "number", default: 100, label: "Countdown scale (%)", section: "Size & placement", when: ["displayCountdown", "yes"], subsection: "Countdown position", min: -500, max: 500, step: "any" },
-      countdownRight: {
-        type: "number",
-        default: 80,
-        zeroIsDefault: true,
-        optional: true,
-        label: "Countdown right (px)",
-        section: "Size & placement",
-        when: ["displayCountdown", "yes"],
-        subsection: "Countdown position",
-        min: -1000,
-        max: 1000,
-        step: "any",
-        styleSelector: "#countdown",
-        styleProperty: "right",
-        styleUnit: "px"
-      },
-      countdownBottom: {
-        type: "number",
-        default: 80,
-        zeroIsDefault: true,
-        optional: true,
-        label: "Countdown bottom (px)",
-        section: "Size & placement",
-        when: ["displayCountdown", "yes"],
-        subsection: "Countdown position",
-        min: -1000,
-        max: 1000,
-        step: "any",
-        styleSelector: "#countdown",
-        styleProperty: "bottom",
-        styleUnit: "px"
-      },
-      countdownTimeVerticalOffset: {
-        type: "number",
-        default: 0,
-        label: "Countdown vertical offset (px)",
-        section: "Size & placement",
-        when: ["displayCountdown", "yes"],
-        subsection: "Countdown position",
-        min: -1080,
-        max: 1080,
-        step: "any"
-      },
-      countdownMessageVerticalOffset: {
-        type: "number",
-        default: 0,
-        label: "Countdown message vertical offset (px)",
-        section: "Size & placement",
-        when: ["displayCountdown", "yes"],
-        subsection: "Countdown position",
-        min: -1080,
-        max: 1080,
-        step: "any"
-      },
-      countdownEndMessageVerticalOffset: {
-        type: "number",
-        default: 0,
-        label: "Completion message vertical offset (px)",
-        section: "Size & placement",
-        when: ["displayCountdown", "yes"],
-        subsection: "Countdown position",
-        min: -1080,
-        max: 1080,
-        step: "any"
-      },
       socialMediaScale: { type: "number", default: 100, label: "Social scale (%)", section: "Size & placement", when: ["displaySocial", "yes"], subsection: "Social accounts position", min: -500, max: 500, step: "any" },
-      updatesLeft: {
-        type: "number",
-        default: 80,
-        zeroIsDefault: true,
-        optional: true,
-        label: "Updates left (px)",
-        section: "Size & placement",
-        when: ["displaySocial", "yes"],
-        subsection: "Social accounts position",
-        min: -1000,
-        max: 1000,
-        step: "any",
-        styleSelector: "#updates",
-        styleProperty: "left",
-        styleUnit: "px"
-      },
-      updatesTop: {
-        type: "number",
-        default: 80,
-        zeroIsDefault: true,
-        optional: true,
-        label: "Updates top (px)",
-        section: "Size & placement",
-        when: ["displaySocial", "yes"],
-        subsection: "Social accounts position",
-        min: -1000,
-        max: 1000,
-        step: "any",
-        styleSelector: "#updates",
-        styleProperty: "top",
-        styleUnit: "px"
-      },
       scheduleScale: { type: "number", default: 125, label: "Schedule scale (%)", section: "Size & placement", when: ["displaySchedule", "yes"], subsection: "Schedule position", min: -500, max: 500, step: "any" },
       labelsScale: { type: "number", default: 125, label: "Event labels scale (%)", section: "Size & placement", when: ["displayLabels", "yes"], subsection: "Event labels position", min: -500, max: 500, step: "any" },
-      eventsLeft: {
-        type: "number",
-        default: 80,
-        zeroIsDefault: true,
-        optional: true,
-        label: "Event labels left (px)",
-        section: "Size & placement",
-        when: ["displayLabels", "yes"],
-        subsection: "Event labels position",
-        min: -1000,
-        max: 1000,
-        step: "any",
-        styleSelector: "#list",
-        styleProperty: "left",
-        styleUnit: "px"
-      },
-      eventsBottom: {
-        type: "number",
-        default: 80,
-        zeroIsDefault: true,
-        optional: true,
-        label: "Event labels bottom (px)",
-        section: "Size & placement",
-        when: ["displayLabels", "yes"],
-        subsection: "Event labels position",
-        min: -1000,
-        max: 1000,
-        step: "any",
-        styleSelector: "#list",
-        styleProperty: "bottom",
-        styleUnit: "px"
-      },
-      labelNameVerticalOffset: { type: "number", default: 0, label: "Event name vertical offset (px)", section: "Size & placement", when: ["displayLabels", "yes"], subsection: "Event labels position", min: -1080, max: 1080, step: "any" },
-      labelHeaderVerticalOffset: {
-        type: "number",
-        default: 4,
-        label: "Event heading vertical offset (px)",
-        section: "Size & placement",
-        when: ["displayLabels", "yes"],
-        subsection: "Event labels position",
-        min: -1080,
-        max: 1080,
-        step: "any"
-      },
       ...byStream.whenFields(["displaySchedule", "yes"], byStream.layoutFields("#week", {}, "week")),
       ...byStream.whenFields(["displaySocial", "yes"], byStream.layoutFields("#social .network", { socialIcon: ["Social icon", "#social .icon"], socialCopy: ["Account text", "#social .inner"] }, "social")),
       animationSpeed: { type: "number", default: 100, label: "Social animation speed (%)", section: "Animation", when: ["displaySocial", "yes"], min: 0, max: 500, step: "any" },
+      countdownPosition: {
+        type: "select",
+        default: "bottom-right",
+        label: "Corner",
+        section: "Countdown",
+        subsection: "Placement",
+        when: ["displayCountdown", "yes"],
+        options: { "top-left": "Top left", "top-right": "Top right", "bottom-left": "Bottom left", "bottom-right": "Bottom right" }
+      },
+      socialPosition: {
+        type: "select",
+        default: "top-left",
+        label: "Corner",
+        section: "Social accounts",
+        subsection: "Placement",
+        when: ["displaySocial", "yes"],
+        options: { "top-left": "Top left", "top-right": "Top right", "bottom-left": "Bottom left", "bottom-right": "Bottom right" }
+      },
+      schedulePosition: {
+        type: "select",
+        default: "top-left",
+        label: "Corner",
+        section: "Schedule",
+        subsection: "Placement",
+        when: ["displaySchedule", "yes"],
+        options: { "top-left": "Top left", "top-right": "Top right", "bottom-left": "Bottom left", "bottom-right": "Bottom right" }
+      },
+      eventsPosition: {
+        type: "select",
+        default: "bottom-left",
+        label: "Corner",
+        section: "Event labels",
+        subsection: "Placement",
+        when: ["displayLabels", "yes"],
+        options: { "top-left": "Top left", "top-right": "Top right", "bottom-left": "Bottom left", "bottom-right": "Bottom right" }
+      },
+      cornerInset: { type: "number", default: 80, label: "Corner inset (px)", section: "Size & placement", subsection: "Corner groups", min: 0, max: 960, step: "any" },
+      cornerGap: { type: "number", default: 16, label: "Card spacing (px)", section: "Size & placement", subsection: "Corner groups", min: 0, max: 500, step: "any" },
+      cornerLayout: { type: "select", default: "row", label: "Cards sharing a corner", section: "Size & placement", subsection: "Corner groups", options: { row: "Side by side", column: "Stacked" } },
       ...byStream.textFields(
         {
           title: ["Title", "#title", ["color"]],
@@ -569,6 +467,17 @@ document.addEventListener("DOMContentLoaded", async () => {
       countdownEndMessageSize: 48
     }
   };
+
+  // Keep each component's placement, typography, surfaces, and effects under its own section.
+  for (const [name, field] of Object.entries(resource.fields)) {
+    const owner = /^(social|socialMedia|accounts)/.test(name) ? "Social accounts" : /^(schedule|week)/.test(name) ? "Schedule" : /^(event|label)/.test(name) ? "Event labels" : /^countdown/.test(name) ? "Countdown" : null;
+    if (!owner || ["displaySocial", "displaySchedule", "displayLabels", "displayCountdown"].includes(name)) continue;
+    if (field.section !== owner) {
+      const group = field.section === "Size & placement" ? "Placement" : field.section === "Animation" ? "Animation" : field.section;
+      field.subsection = group === "Placement" ? group : field.subsection && field.subsection !== group ? `${group} · ${field.subsection}` : group;
+      field.section = owner;
+    }
+  }
 
   const fieldDefaults = {
     socialCardRadius: 4,
@@ -766,6 +675,48 @@ document.addEventListener("DOMContentLoaded", async () => {
     };
     for (const [id, shown] of Object.entries(sections)) if (!shown) document.getElementById(id).remove();
 
+    const corners = new Map();
+    const cornerItems = [];
+    const scene = document.getElementById("scene");
+    scene.style.setProperty("--corner-inset", `${settings.cornerInset}px`);
+    scene.style.setProperty("--corner-gap", `${settings.cornerGap}px`);
+    /** Reserve scaled card dimensions so cards sharing a corner cannot overlap. */
+    function fitCornerItems() {
+      for (const { element, wrapper, scale } of cornerItems) {
+        wrapper.style.width = `${element.offsetWidth * Math.abs(scale)}px`;
+        wrapper.style.height = `${element.offsetHeight * Math.abs(scale)}px`;
+      }
+    }
+    const cornerObserver = new ResizeObserver(fitCornerItems);
+    for (const [id, position, scale] of [
+      ["countdown", settings.countdownPosition, settings.countdownScale / 100],
+      ["social", settings.socialPosition, settings.socialMediaScale / 100],
+      ["schedule", settings.schedulePosition, settings.scheduleScale / 100],
+      ["list", settings.eventsPosition, settings.labelsScale / 100]
+    ]) {
+      const element = document.getElementById(id);
+      if (!element) continue;
+      if (!corners.has(position)) {
+        const corner = document.createElement("div");
+        corner.className = "scene-corner";
+        corner.dataset.corner = position;
+        corner.dataset.layout = settings.cornerLayout;
+        scene.append(corner);
+        corners.set(position, corner);
+      }
+      const wrapper = document.createElement("div");
+      wrapper.className = "corner-item";
+      element.classList.add("corner-content");
+      element.style.left = element.style.top = scale < 0 ? "100%" : "0";
+      if (id === "countdown") element.style.textAlign = position.endsWith("right") ? "right" : "left";
+      wrapper.append(element);
+      corners.get(position).append(wrapper);
+      cornerItems.push({ element, wrapper, scale });
+      cornerObserver.observe(element);
+    }
+    document.getElementById("updates").remove();
+    fitCornerItems();
+
     const time = document.getElementById("time");
     const deadline = Date.now() + settings.countdownTime * 60000;
     let countdownTimer;
@@ -784,13 +735,19 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
     }
 
-    const items = [...document.querySelectorAll(".item")];
+    const items = [...document.querySelectorAll("#social .item")];
     const animation = items.length ? gsap.timeline({ repeat: -1, paused: true }) : null;
     items.forEach((item) => {
       const border = item.querySelectorAll(".borderTop");
       const icon = item.querySelector(".icon");
       const details = item.querySelectorAll(".socialHead, .socialName, .scheduleHead, .scheduleTime");
       const card = gsap.timeline();
+      if (settings.animate === "no") {
+        // Keep carousel timing without running entrance/exit motion or delaying the first account.
+        card.set(item, { autoAlpha: 1, clipPath: "none" }).set(item, { autoAlpha: 0 }, 10);
+        animation.add(card, animation.duration() ? "+=1" : 0);
+        return;
+      }
       card
         .set(item, { autoAlpha: 1 })
         .fromTo(item, { clipPath: "inset(-2px 100% 0 0)" }, { clipPath: "inset(-2px 0% 0 0)", duration: 0.6 }, 0)
@@ -803,10 +760,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (icon) {
         card.fromTo(icon, { x: "-40px", opacity: 0 }, { x: 0, opacity: 1, duration: 0.6 }, 0.4).to(icon, { x: "-40px", opacity: 0, duration: 0.6 }, 9);
       }
-      animation.add(card, "+=1");
+      animation.add(card, animation.duration() ? "+=1" : 0);
     });
     animation?.timeScale(settings.animationSpeed / 100);
-    if (settings.animate === "no") animation?.getChildren(true, true, false).forEach((tween) => tween.duration(0));
     function start() {
       if (time) {
         if (Date.now() < deadline) countdownTimer = setInterval(updateCountdown, 1000);
@@ -817,9 +773,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     window.addEventListener("pagehide", () => {
       clearInterval(countdownTimer);
       animation?.pause();
+      cornerObserver.disconnect();
     });
     window.addEventListener("pageshow", (event) => {
-      if (event.persisted) start();
+      if (event.persisted) {
+        for (const { element } of cornerItems) cornerObserver.observe(element);
+        fitCornerItems();
+        start();
+      }
     });
     start();
   }

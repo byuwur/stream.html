@@ -188,6 +188,11 @@ test("configurator smoke", { timeout: 60000 }, async (t) => {
       await page.locator("#settings-json").fill('{"mode":"keyboard","imageTarget":"both","shellImage":"../stream.html.png","imageTint":"monochrome"}');
       await page.waitForFunction(() => document.querySelector('[name="imageUrl"]').value === "../stream.html.png" && document.querySelector('[name="imageTarget"]').value === "all");
       assert.equal(await page.locator('[name="imageBlendMode"]').inputValue(), "fill");
+      await page.goto("https://stream.test/main/?displayCountdown=yes&displaySocial=yes&displaySchedule=yes&displayLabels=yes#configure");
+      await page.locator('[name="socialPosition"]').waitFor({ state: "attached" });
+      assert.equal(await page.locator('[name="countdownRight"], [name="updatesLeft"], [name="eventsBottom"]').count(), 0);
+      assert.equal(await page.locator('[name="socialHeadingFontSize"]').evaluate((input) => input.closest("[data-config-section]").dataset.configSection), "Social accounts");
+      assert.equal(await page.locator('[name="countdownFontSize"]').evaluate((input) => input.closest("[data-config-section]").dataset.configSection), "Countdown");
     } finally {
       await page.close();
     }

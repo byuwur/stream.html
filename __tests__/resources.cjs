@@ -362,6 +362,54 @@ test("Main corners reserve scaled card space and background tint supports Fill",
   t.after(() => browser.close());
   const page = await browser.newPage({ viewport: { width: 1920, height: 1080 } });
   await serve(page, assets, true);
+  for (const position of ["top-left", "top-right", "bottom-left", "bottom-right"]) {
+    const query = new URLSearchParams({
+      displayCountdown: "yes",
+      displaySocial: "yes",
+      displaySchedule: "yes",
+      displayLabels: "yes",
+      countdownPosition: position,
+      socialPosition: position,
+      schedulePosition: position,
+      eventsPosition: position,
+      accounts: JSON.stringify([{ platform: "twitch", handle: "test", heading: "Social" }]),
+      scheduleEntries: JSON.stringify({ monday: "18:00" }),
+      animate: "no"
+    });
+    await page.goto(`https://stream.test/main/?${query}`);
+    const corner = page.locator(`.scene-corner[data-corner="${position}"]`);
+    await page.waitForFunction(() => document.querySelectorAll(".corner-item").length === 4 && [...document.querySelectorAll(".corner-item")].every((item) => item.offsetWidth > 0));
+    assert.equal(await corner.locator(".corner-item").count(), 4);
+    assert.equal(
+      await page
+        .locator("#social .item")
+        .first()
+        .evaluate((item) => getComputedStyle(item).visibility),
+      "visible",
+      "Animate Off displays the first account immediately"
+    );
+    const boxes = await corner.locator(".corner-item").evaluateAll((items) =>
+      items.map((item) => {
+        const box = item.getBoundingClientRect();
+        return { x: box.x, y: box.y, right: box.right, bottom: box.bottom };
+      })
+    );
+    for (let i = 0; i < boxes.length; i++) {
+      assert.ok(boxes[i].x >= 79 && boxes[i].right <= 1841 && boxes[i].y >= 79 && boxes[i].bottom <= 1001, `${position}: cards stay inside the inset`);
+      for (let j = i + 1; j < boxes.length; j++)
+        assert.ok(boxes[i].right <= boxes[j].x + 1 || boxes[j].right <= boxes[i].x + 1 || boxes[i].bottom <= boxes[j].y + 1 || boxes[j].bottom <= boxes[i].y + 1, `${position}: shared cards do not overlap`);
+    }
+    query.set("cornerLayout", "column");
+    await page.goto(`https://stream.test/main/?${query}`);
+    await page.waitForFunction(() => document.querySelectorAll(".corner-item").length === 4 && [...document.querySelectorAll(".corner-item")].every((item) => item.offsetHeight > 0));
+    const stacked = await page.locator(".corner-item").evaluateAll((items) =>
+      items.map((item) => {
+        const box = item.getBoundingClientRect();
+        return { top: box.top, bottom: box.bottom };
+      })
+    );
+    for (let i = 1; i < stacked.length; i++) assert.ok(stacked[i].top >= stacked[i - 1].bottom + 15, "Stacked cards retain their spacing");
+  }
   await page.goto("https://stream.test/main/?backgroundTint=yes&backgroundOverlay=ff0000&backgroundOverlayOpacity=50&backgroundBlendMode=fill");
   const tint = page.locator("#overlay");
   await tint.waitFor();

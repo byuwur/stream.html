@@ -326,7 +326,7 @@ Invalid JSON/platforms retain the two byUwUr default accounts; blank handles kee
 
 ## Main scene
 
-Background tint has an independent toggle, color, strength, and Multiply/Overlay/Soft-light/Color/Fill blend mode.
+Countdown, Social accounts, Schedule, and Event labels each select a corner. Cards sharing a corner reserve their scaled dimensions and flow side by side or stacked with shared spacing/inset controls. Each component owns its Placement, typography, surfaces, and effects subsections; redundant fixed-side position fields are removed. Background tint has an independent toggle, color, strength, and Multiply/Overlay/Soft-light/Color/Fill blend mode.
 
 ![Main scene preview](main/prev.jpg)
 
