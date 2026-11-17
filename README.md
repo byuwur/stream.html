@@ -326,6 +326,8 @@ Invalid JSON/platforms retain the two byUwUr default accounts; blank handles kee
 
 ## Main scene
 
+Background tint has an independent toggle, color, strength, and Multiply/Overlay/Soft-light/Color/Fill blend mode.
+
 ![Main scene preview](main/prev.jpg)
 
 <!-- [Example: Starting soon](https://byuwur.github.io/stream.html/main/?sceneTitle=Starting+soon&tagline=Your+channel&countdownTime=5&displayBranding=no&displaySocial=no) -->

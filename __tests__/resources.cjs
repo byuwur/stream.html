@@ -355,3 +355,16 @@ test("keyboard image targets mask real key contours even when keycaps are transp
   assert.equal(await page.evaluate(() => byStreamResource.settings.imageUrl), image);
   assert.equal(await page.evaluate(() => byStreamResource.settings.imageTarget), "all");
 });
+
+test("Main corners reserve scaled card space and background tint supports Fill", { timeout: 30000 }, async (t) => {
+  const assets = await loadAssets(runtimeAssets);
+  const browser = await launchBrowser();
+  t.after(() => browser.close());
+  const page = await browser.newPage({ viewport: { width: 1920, height: 1080 } });
+  await serve(page, assets, true);
+  await page.goto("https://stream.test/main/?backgroundTint=yes&backgroundOverlay=ff0000&backgroundOverlayOpacity=50&backgroundBlendMode=fill");
+  const tint = page.locator("#overlay");
+  await tint.waitFor();
+  assert.equal(await tint.evaluate((element) => getComputedStyle(element).mixBlendMode), "normal");
+  assert.equal(await tint.evaluate((element) => getComputedStyle(element).opacity), "0.5");
+});

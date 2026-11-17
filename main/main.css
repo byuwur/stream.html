@@ -64,6 +64,11 @@ body {
 #scene {
   background: var(--background-color);
 }
+#bg {
+  position: absolute;
+  inset: 0;
+  isolation: isolate;
+}
 #frame {
   position: absolute;
   inset: 24px;
@@ -84,6 +89,7 @@ body {
 #overlay {
   background: var(--background-tint);
   opacity: var(--background-opacity);
+  mix-blend-mode: var(--background-blend, normal);
 }
 /* Logo, title, and subtitle. */
 #branding {

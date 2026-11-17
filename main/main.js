@@ -120,24 +120,38 @@ document.addEventListener("DOMContentLoaded", async () => {
         step: "any",
         icon: "fa-hashtag"
       },
+      backgroundTint: { type: "switch", default: "yes", label: "Background tint", section: "Background", subsection: "Tint", checkedValue: "yes", uncheckedValue: "no", options: { yes: "On", no: "Off" } },
       backgroundOverlay: {
         type: "color",
         default: "#300",
-        label: "Background tint color",
+        label: "Tint color",
         section: "Background",
+        subsection: "Tint",
+        when: ["backgroundTint", "yes"],
         maxlength: 160,
         icon: "fa-palette"
       },
       backgroundOverlayOpacity: {
         type: "number",
         default: 1,
-        label: "Background tint opacity (%)",
+        label: "Tint strength (%)",
         section: "Background",
+        subsection: "Tint",
+        when: ["backgroundTint", "yes"],
         description: "0% transparent; 100% opaque.",
         min: 0,
         max: 100,
         step: "any",
         icon: "fa-hashtag"
+      },
+      backgroundBlendMode: {
+        type: "select",
+        default: "fill",
+        label: "Blend mode",
+        section: "Background",
+        subsection: "Tint",
+        when: ["backgroundTint", "yes"],
+        options: { multiply: "Multiply", overlay: "Overlay", "soft-light": "Soft-light", color: "Color", fill: "Fill" }
       },
       displayBranding: {
         type: "switch",
@@ -682,7 +696,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       "frame-width": `${settings.frameWidth}px`,
       "logo-opacity": settings.logoOpacity / 100,
       "logo-scale": settings.logoScale / 100,
-      "background-opacity": settings.backgroundOverlayOpacity / 100,
+      "background-opacity": settings.backgroundTint === "yes" ? settings.backgroundOverlayOpacity / 100 : 0,
+      "background-blend": settings.backgroundBlendMode === "fill" ? "normal" : settings.backgroundBlendMode,
       "background-blur": `${settings.backgroundBlur}px`,
       "background-scale": settings.backgroundScale / 100
     };
