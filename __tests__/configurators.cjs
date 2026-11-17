@@ -72,12 +72,60 @@ test("configurator smoke", { timeout: 30000 }, async (t) => {
     }
   });
 
-  await t.test("image uploads log the endpoint status and full response and preserve the previous value on failure", async () => {
+  await t.test("Manual and Base64 browse and drop work locally with hosted uploads disabled", async () => {
+    const page = await browser.newPage();
+    page.setDefaultTimeout(5000);
+    try {
+      await serve(page, assets);
+      let requests = 0;
+      await page.route(/https:\/\/(?:stream\.byuwur\.co\/upload_image\.php|(?:[^/]+\.)?catbox\.moe\/)/, (route) => {
+        requests++;
+        return route.abort();
+      });
+      await page.goto("https://stream.test/watermark/?kind=logo#configure");
+      const field = page.locator('form[data-configurator] [name="logoUrl"]');
+      const component = field.locator("..");
+      const provider = component.locator(".image-provider");
+      const picker = component.locator('input[type="file"]');
+      await picker.waitFor({ state: "attached" });
+      assert.deepEqual(await provider.locator("option").evaluateAll((options) => options.map((option) => option.value)), ["manual", "base64"]);
+      const encoded = await page.evaluate(() => {
+        const canvas = document.createElement("canvas");
+        canvas.width = canvas.height = 2;
+        return canvas.toDataURL("image/png").split(",")[1];
+      });
+      const image = { name: "image.png", mimeType: "image/png", buffer: Buffer.from(encoded, "base64") };
+      const value = `data:image/png;base64,${encoded}`;
+      await picker.setInputFiles([]);
+      assert.equal(await provider.inputValue(), "manual");
+      await picker.setInputFiles(image);
+      await page.waitForFunction((value) => document.querySelector('[name="logoUrl"]').value === value, value);
+      assert.equal(await provider.inputValue(), "base64");
+      await field.fill("manual.png");
+      assert.equal(await provider.inputValue(), "manual");
+      await component.evaluate((element, encoded) => {
+        const transfer = new DataTransfer();
+        transfer.items.add(new File([Uint8Array.from(atob(encoded), (character) => character.charCodeAt(0))], "image.png", { type: "image/png" }));
+        element.dispatchEvent(new DragEvent("drop", { bubbles: true, cancelable: true, dataTransfer: transfer }));
+      }, encoded);
+      await page.waitForFunction((value) => document.querySelector('[name="logoUrl"]').value === value, value);
+      await picker.setInputFiles({ ...image, buffer: Buffer.concat([image.buffer, Buffer.alloc(16384)]) });
+      await component.locator(".image-status.text-danger").waitFor();
+      assert.match(await component.locator(".image-status").textContent(), /smaller image or a manual URL/);
+      assert.equal(await field.inputValue(), value);
+      assert.equal(requests, 0, "Browse, drop, and conversion never send an upload request");
+    } finally {
+      await page.close();
+    }
+  });
+
+  await t.test("configured image hosts log the endpoint status and full response and preserve the previous value on failure", async () => {
     const page = await browser.newPage();
     page.setDefaultTimeout(5000);
     try {
       await serve(page, assets);
       await page.addInitScript(() => {
+        window.byConfigurator = { imageOptions: { providers: [{ id: "custom", name: "Custom host" }] } };
         window.uploadFailures = [];
         const report = console.error;
         console.error = (...args) => {
@@ -90,6 +138,7 @@ test("configurator smoke", { timeout: 30000 }, async (t) => {
       const component = field.locator("..");
       const picker = component.locator('input[type="file"]');
       await picker.waitFor({ state: "attached" });
+      await component.locator(".image-provider").selectOption("custom");
       const previous = await field.inputValue();
       const buffer = Buffer.from(
         await page.evaluate(() => {
@@ -100,7 +149,7 @@ test("configurator smoke", { timeout: 30000 }, async (t) => {
         "base64"
       );
       const endpoint = "https://stream.byuwur.co/upload_image.php";
-      const imageURL = "https://files.catbox.moe/upload.png";
+      const imageURL = "https://images.example.test/view?id=upload";
       let reply;
       let requests = 0;
       await page.route(endpoint, (route) => {
@@ -117,7 +166,7 @@ test("configurator smoke", { timeout: 30000 }, async (t) => {
       await page.route(imageURL, (route) => route.fulfill({ body: buffer, contentType: "image/png" }));
       for (const failure of [
         { status: 412, body: "Invalid uploader.", diagnostic: "transport=0; upstream=412" },
-        { status: 502, body: "Upload transport failed (cURL 56): Recv failure\nPartial Catbox response", diagnostic: "transport=56; upstream=0" },
+        { status: 502, body: "Upload transport failed (cURL 56): Recv failure\nPartial provider response", diagnostic: "transport=56; upstream=0" },
         { status: 200, body: "<script>window.providerExecuted=true</script>" + "x".repeat(1000), diagnostic: "transport=0; upstream=200" },
         { status: 500, body: "", diagnostic: "transport=0; upstream=500" },
         { networkError: true }

@@ -584,7 +584,7 @@
     let previewURL = "";
     const jsonInput = $("#settings-json")[0];
     const imageInputs = new Map();
-    const imageOptions = { base64MaxBytes: 16384, ...byConfigurator.imageOptions };
+    const imageOptions = { base64MaxBytes: 16384, providers: [], ...byConfigurator.imageOptions };
     const imageUploadEndpoint = "https://stream.byuwur.co/upload_image.php";
 
     // ==========
@@ -1404,12 +1404,7 @@
       component.attr("aria-label", title);
       const actions = $(/* HTML */ `<div class="image-actions d-flex"></div>`).appendTo(component);
       const provider = $(/* HTML */ `<select class="image-provider form-select bg-body-secondary border-secondary-subtle"></select>`).attr("aria-label", `${title} provider`).appendTo(actions);
-      for (const [value, text] of [
-        ["manual", "Manual"],
-        ["catbox", "Catbox.moe"],
-        ["base64", "Base64"]
-      ])
-        provider.append(new Option(text, value));
+      for (const [value, text] of [["manual", "Manual"], ...imageOptions.providers.map((host) => [host.id, host.name]), ["base64", "Base64"]]) provider.append(new Option(text, value));
       const browse = $(/* HTML */ `<button type="button" class="image-browse btn bg-body-secondary text-body border border-secondary-subtle"><i class="fa-solid fa-folder-open me-1" aria-hidden="true"></i>Browse...</button>`)
         .attr("aria-label", `Browse ${title}`)
         .appendTo(actions);
@@ -1448,20 +1443,20 @@
       imageInputs.set(input, { cancel, sync, destroy });
 
       // Adapters receive the original file and share cancellation, validation, and application.
-      const providers = {
+      const adapters = {
         /** Upload original bytes once through the fixed, credential-free PHP endpoint. */
-        async catbox(file, signal) {
+        async upload(file, signal, selected) {
           const body = new FormData();
-          body.append("provider", "catbox");
+          body.append("provider", selected);
           body.append("fileToUpload", file);
           const response = await fetch(imageUploadEndpoint, { method: "POST", body, signal, credentials: "omit" });
           const responseText = await response.text();
           const value = responseText.trim();
-          if (!response.ok || !/^https:\/\/files\.catbox\.moe\/[a-z0-9_-]+\.(?:png|jpe?g|webp|gif)$/i.test(value)) {
+          if (!response.ok || !/^https:\/\//i.test(value) || !byStream.safeImage(value)) {
             const reason = response.ok ? `Upload endpoint returned an invalid image URL (HTTP ${response.status})` : `Upload endpoint returned HTTP ${response.status}`;
             const error = new Error(`${reason}: ${value.slice(0, 500) || "Empty response."}`);
             error.upload = {
-              provider: "catbox",
+              provider: selected,
               endpoint: imageUploadEndpoint,
               status: response.status,
               statusText: response.statusText,
@@ -1513,7 +1508,7 @@
       async function processFile(file) {
         if (!file || !available()) return;
         cancel();
-        if (provider.val() === "manual") provider.val("catbox");
+        if (provider.val() === "manual") provider.val("base64");
         const selected = provider.val();
         const operation = revision;
         const current = () => operation === revision && available();
@@ -1521,11 +1516,11 @@
         const operationController = controller;
         const { signal } = operationController;
         const timeout = (requestTimer = setTimeout(() => operationController.abort(), 60000));
-        setImageStatus(status, "loading", selected === "base64" ? "Converting image to Base64..." : "Uploading to Catbox...");
+        setImageStatus(status, "loading", selected === "base64" ? "Converting image to Base64..." : `Uploading to ${provider.find(":selected").text()}...`);
         component.attr("aria-busy", "true");
         try {
           if (!file.size) throw new Error("The image file is empty.");
-          if (selected === "base64" && file.size > imageOptions.base64MaxBytes) throw new Error("Image is too large to embed. Try Catbox instead.");
+          if (selected === "base64" && file.size > imageOptions.base64MaxBytes) throw new Error("Image is too large to embed. Use a smaller image or a manual URL.");
           if (selected !== "base64" && file.size > 8388608) throw new Error("Image exceeds the 8 MiB upload limit.");
           const mime = byStream.imageType(new Uint8Array(await file.slice(0, 12).arrayBuffer()));
           if (!current()) return;
@@ -1539,7 +1534,7 @@
             URL.revokeObjectURL(localURL);
           }
           if (!current()) return;
-          const value = await providers[selected](imageFile, signal);
+          const value = selected === "base64" ? await adapters.base64(imageFile, signal) : await adapters.upload(imageFile, signal, selected);
           if (!current()) return;
           if (!byStream.safeImage(value) || !imageValueAllowed(value) || (input.maxLength >= 0 && value.length > input.maxLength)) throw new Error("Invalid or oversized image value.");
           await checkImage(value, signal);
@@ -1556,7 +1551,7 @@
           if (current()) setImageStatus(status, "success", selected === "base64" ? "Image embedded as Base64." : "Image uploaded. URL applied.");
         } catch (error) {
           if (current()) {
-            console.error(`Image ${selected === "base64" ? "conversion" : "upload"} failed:`, error, error.upload || { provider: selected, endpoint: selected === "catbox" ? imageUploadEndpoint : undefined });
+            console.error(`Image ${selected === "base64" ? "conversion" : "upload"} failed:`, error, error.upload || { provider: selected, endpoint: selected === "base64" ? undefined : imageUploadEndpoint });
             setImageStatus(status, "error", `${selected === "base64" ? "Conversion" : "Upload"} failed: ${signal.aborted ? "Request timed out. No automatic retry was made." : uploadError(error)}`);
           }
         } finally {
@@ -1765,7 +1760,7 @@
         const duplicate = map && new Set(values.map(([key]) => key)).size !== values.length;
         jqOutput.val(duplicate ? "" : JSON.stringify(map ? Object.fromEntries(values) : values));
         jqRows.find("[data-field], select").each(function () {
-          this.setCustomValidity(!this.classList.contains("image-url") || imageValueAllowed(this.value) ? "" : "Image is too large to embed. Try Catbox instead.");
+          this.setCustomValidity(!this.classList.contains("image-url") || imageValueAllowed(this.value) ? "" : "Image is too large to embed. Use a smaller image or a manual URL.");
         });
         const validationControl = jqRows.find("[data-field]")[0] || jqRows.find("select")[0];
         validationControl?.setCustomValidity(duplicate ? "Use a different key for each row." : byStream.validParameter(parameterRules, name, jqOutput.val()) ? "" : "Invalid list. Check the entries or remove rows.");

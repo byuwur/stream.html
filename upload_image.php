@@ -12,11 +12,35 @@ declare(strict_types=1);
 
 ini_set('display_errors', '0');
 
-const IMAGE_UPLOAD_DEFAULT_PROVIDER = 'catbox';
+// --- CONFIGURATION ---
+
+const IMAGE_UPLOAD_DEFAULT_PROVIDER = '';
 const IMAGE_UPLOAD_BYTES = 8388608;
 const IMAGE_UPLOAD_PIXELS = 16000000;
 const IMAGE_UPLOAD_WINDOW = 600;
 const IMAGE_UPLOAD_REQUESTS = 10;
+
+/** Resolve a developer-owned provider definition. Disabled hosts cannot receive requests. */
+function image_upload_provider(string $name): ?array
+{
+  $providers = [
+    'catbox' => [
+      'name' => 'Catbox.moe',
+      'enabled' => false,
+      'endpoint' => 'https://catbox.moe/user/api.php',
+      'explicit' => true,
+      'file' => 'fileToUpload',
+      'fields' => ['reqtype' => 'fileupload'],
+      'parse' => 'image_upload_catbox_response'
+    ]
+  ];
+  $provider = $providers[$name] ?? null;
+  if (!$provider || ($provider['enabled'] ?? false) !== true)
+    return null;
+  return $provider;
+}
+
+// --- RESPONSE AND VALIDATION ---
 
 /** Finish with a public plain-text response, following Academyapp's endpoint guard clauses. */
 function image_upload_response(int $status, string $message): never
@@ -98,26 +122,7 @@ function image_upload_type(string $path): array
   return [$mime, $formats[$mime]];
 }
 
-/**
- * Resolve an allowed provider ID to developer-owned endpoints, multipart fields, and parsing.
- * Add a match case and response parser for each additional provider; request URLs are never used.
- * @return array|null Display name, endpoint, explicit-error flag, multipart fields, and safe URL parser.
- */
-function image_upload_provider(string $provider): ?array
-{
-  return match ($provider) {
-    'catbox' => [
-      'name' => 'Catbox.moe',
-      'endpoint' => 'https://catbox.moe/user/api.php',
-      // Expose provider responses in browser diagnostics. Set false for generic public errors.
-      'explicit' => true,
-      'file' => 'fileToUpload',
-      'fields' => ['reqtype' => 'fileupload'],
-      'parse' => 'image_upload_catbox_response'
-    ],
-    default => null
-  };
-}
+// --- PROVIDER RESPONSE PARSERS ---
 
 /** Extract only canonical HTTPS raster URLs from Catbox's plain-text response. */
 function image_upload_catbox_response(string $response): ?string
@@ -126,14 +131,16 @@ function image_upload_catbox_response(string $response): ?string
   return preg_match('~\Ahttps://files\.catbox\.moe/[a-zA-Z0-9_-]+\.(?:png|jpe?g|webp|gif)\z~i', $url) === 1 ? $url : null;
 }
 
+// --- UPSTREAM REQUEST ---
+
 /**
  * Standalone multipart adaptation of spa.php/_functions.php make_http_request().
- * Uses validate_value()'s native URL check without framework sessions, globals, or console output.
+ * Validates HTTPS endpoints and preserves the provider's multipart CURLFile fields.
  * @return array [Response body (including partial failures), cURL error number, upstream HTTP status, cURL error text].
  */
 function make_http_request(string $url, array $post): array
 {
-  if (!filter_var($url, FILTER_VALIDATE_URL) || parse_url($url, PHP_URL_SCHEME) !== 'https')
+  if (!filter_var($url, FILTER_VALIDATE_URL) || strtolower((string) parse_url($url, PHP_URL_SCHEME)) !== 'https')
     throw new RuntimeException('invalid upload endpoint');
   $request = curl_init($url);
   if (!$request) throw new RuntimeException('curl initialization failed');
@@ -142,9 +149,9 @@ function make_http_request(string $url, array $post): array
     CURLOPT_POST => true,
     // Passing the array directly preserves CURLFile multipart data instead of URL-encoding it.
     CURLOPT_POSTFIELDS => $post,
-    // Avoid the observed Hostinger-to-Catbox HTTP/2 stream failure (cURL error 92).
+    // Keep multipart uploads on the existing HTTP/1.1 transport.
     CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-    // Catbox closed requests without a User-Agent during live testing.
+    // Identify the application to the configured host.
     CURLOPT_USERAGENT => 'stream.html (https://stream.byuwur.co/)',
     CURLOPT_CONNECTTIMEOUT => 10,
     CURLOPT_TIMEOUT => 40,
@@ -202,7 +209,13 @@ function image_upload_forward(string $path, string $mime, string $extension, arr
     $status = $status >= 400 && $status <= 599 ? $status : 502;
   } else {
     $value = ($provider['parse'])($response);
-    if ($value !== null) return [200, $value, null];
+    $url = is_string($value) ? parse_url($value) : false;
+    if (
+      $url && filter_var($value, FILTER_VALIDATE_URL)
+      && strtolower($url['scheme'] ?? '') === 'https'
+      && !isset($url['user']) && !isset($url['pass'])
+    )
+      return [200, $value, null];
     $status = 502;
     $message = $response !== '' ? $response : 'Image host returned an empty response.';
     $diagnostic .= '; response=invalid';
@@ -211,6 +224,8 @@ function image_upload_forward(string $path, string $mime, string $extension, arr
     return [$status, $provider['name'] . ' upload failed.', null];
   return [$status, $message, $diagnostic];
 }
+
+// --- HTTP ENTRY POINT ---
 
 /** Handle the anonymous HTTP boundary; all responses include credential-free CORS headers. */
 function upload_image(): void
@@ -245,10 +260,12 @@ function upload_image(): void
       image_upload_response(400, 'Use multipart/form-data with fileToUpload.');
     $default = getenv('STREAM_UPLOAD_PROVIDER');
     $name = $_POST['provider'] ?? ($default === false || $default === '' ? IMAGE_UPLOAD_DEFAULT_PROVIDER : $default);
+    if ($name === '' && !array_key_exists('provider', $_POST))
+      image_upload_response(503, 'Image uploads are disabled. Use a manual URL or Base64.');
     $provider = is_string($name) ? image_upload_provider($name) : null;
     if ($provider === null) {
       if (!array_key_exists('provider', $_POST)) throw new RuntimeException('configured provider unavailable');
-      image_upload_response(400, 'Unsupported image provider.');
+      image_upload_response(400, 'Unsupported or disabled image provider.');
     }
     $file = $_FILES['fileToUpload'] ?? null;
     if (!$file || !is_array($file) || !isset($file['error']) || !is_int($file['error']))

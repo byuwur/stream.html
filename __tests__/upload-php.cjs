@@ -1,6 +1,6 @@
 /*
  * File: __tests__/upload-php.cjs
- * Desc: Real PHP multipart requests with deterministic cURL substitutes; never contacts Catbox.
+ * Desc: Real PHP multipart requests with deterministic cURL substitutes and external provider fixtures.
  */
 const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
@@ -11,21 +11,38 @@ const { spawn, execFileSync } = require("node:child_process");
 const test = require("node:test");
 const root = path.join(__dirname, "..");
 const php = process.env.PHP_BINARY || "php";
+const hostedURL = "https://images.example.test/view?id=sample";
+const successBody = JSON.stringify({ url: hostedURL });
 
 /** Run PHP without Xdebug logging, preserving the owning installation's extensions. */
 function runPHP(code, env = process.env) {
   return execFileSync(php, ["-d", "xdebug.mode=off", "-r", code], { env, encoding: "utf8" });
 }
 
-test("PHP upload validates multipart, limits abuse, and safely handles fixed Catbox forwarding", async (t) => {
+test("PHP upload disables Catbox and supports developer-configured image hosts", async (t) => {
   const temp = await fs.mkdtemp(path.join(os.tmpdir(), "stream-upload-php-"));
   const mode = path.join(temp, "mode.json");
   const capture = path.join(temp, "capture.json");
   const errorLog = path.join(temp, "error.log");
   const router = path.join(temp, "router.php");
-  // Exercise the real HTTP boundary with the operator's explicit flag switched off.
+  const configuredProvider = path.join(temp, "configured-upload.php");
+  // A future host has its own endpoint, multipart file field, fixed fields, and JSON response.
+  const source = (await fs.readFile(path.join(root, "upload_image.php"), "utf8")).replace(
+    "$providers = [",
+    `$providers = [
+    'custom' => [
+      'name' => 'Test host', 'enabled' => true, 'explicit' => true,
+      'endpoint' => 'https://uploads.example.test/api.php', 'file' => 'asset',
+      'fields' => ['operation' => 'store'],
+      'parse' => static function (string $response): ?string {
+        $data = json_decode($response, true);
+        return is_string($data['url'] ?? null) ? $data['url'] : null;
+      }
+    ],`
+  );
+  await fs.writeFile(configuredProvider, source);
   const privateProvider = path.join(temp, "private-upload.php");
-  await fs.writeFile(privateProvider, (await fs.readFile(path.join(root, "upload_image.php"), "utf8")).replace("'explicit' => true", "'explicit' => false"));
+  await fs.writeFile(privateProvider, source.replaceAll("'explicit' => true", "'explicit' => false"));
   // Disabled built-ins can be substituted in PHP 8. The production endpoint has no mock URL or bypass.
   await fs.writeFile(
     router,
@@ -34,11 +51,11 @@ test("PHP upload validates multipart, limits abuse, and safely handles fixed Cat
     function curl_setopt_array($request, $options) { $GLOBALS['options'] = $options; return true; }
     function curl_exec($request) {
       $mode = json_decode(file_get_contents(getenv('STREAM_TEST_MODE')), true);
-      $file = $GLOBALS['options'][CURLOPT_POSTFIELDS]['fileToUpload'];
+      $file = $GLOBALS['options'][CURLOPT_POSTFIELDS]['asset'];
       $GLOBALS['attempts'] = ($GLOBALS['attempts'] ?? 0) + 1;
       file_put_contents(getenv('STREAM_TEST_CAPTURE'), json_encode([
         'attempts' => $GLOBALS['attempts'],
-        'url' => $GLOBALS['upstream'], 'reqtype' => $GLOBALS['options'][CURLOPT_POSTFIELDS]['reqtype'],
+        'url' => $GLOBALS['upstream'], 'operation' => $GLOBALS['options'][CURLOPT_POSTFIELDS]['operation'],
         'userhash' => $GLOBALS['options'][CURLOPT_POSTFIELDS]['userhash'] ?? null,
         'mime' => $file->getMimeType(), 'name' => $file->getPostFilename(),
         'hash' => hash_file('sha256', $file->getFilename()),
@@ -57,9 +74,11 @@ test("PHP upload validates multipart, limits abuse, and safely handles fixed Cat
     function curl_getinfo($request, $option) { return json_decode(file_get_contents(getenv('STREAM_TEST_MODE')), true)['status'] ?? 200; }
     $_SERVER['SCRIPT_FILENAME'] = __FILE__;
     $settings = json_decode(file_get_contents(getenv('STREAM_TEST_MODE')), true);
-    require (($settings['privateProvider'] ?? false)
-      ? ${JSON.stringify(privateProvider.replaceAll("\\", "/"))}
-      : ${JSON.stringify(path.join(root, "upload_image.php").replaceAll("\\", "/"))});
+    require (($settings['production'] ?? false)
+      ? ${JSON.stringify(path.join(root, "upload_image.php").replaceAll("\\", "/"))}
+      : (($settings['privateProvider'] ?? false)
+        ? ${JSON.stringify(privateProvider.replaceAll("\\", "/"))}
+        : ${JSON.stringify(configuredProvider.replaceAll("\\", "/"))}));
     putenv('STREAM_UPLOAD_PROVIDER=' . ($settings['defaultProvider'] ?? ''));
     putenv('STREAM_CATBOX_USERHASH=' . ($settings['serverUserhash'] ?? ''));
     upload_image();
@@ -103,8 +122,8 @@ test("PHP upload validates multipart, limits abuse, and safely handles fixed Cat
   });
   const url = `http://127.0.0.1:${port}/upload_image.php`;
   /** Set a deterministic upstream response and clear only this external fixture's limiter. */
-  async function reset(value = { body: "https://files.catbox.moe/image.png" }) {
-    await fs.writeFile(mode, JSON.stringify(value));
+  async function reset(value = { body: successBody }) {
+    await fs.writeFile(mode, JSON.stringify({ defaultProvider: "custom", ...value }));
     await fs.writeFile(errorLog, "");
     await fs.rm(capture, { force: true });
     await fs.mkdir(env.STREAM_UPLOAD_RATE_DIR, { recursive: true });
@@ -142,7 +161,21 @@ test("PHP upload validates multipart, limits abuse, and safely handles fixed Cat
       runPHP(`$image=imagecreatetruecolor(2,2); $result=[]; foreach(['png','jpeg','webp','gif'] as $type) { ob_start(); ('image'.$type)($image); $result[$type]=base64_encode(ob_get_clean()); } echo json_encode($result);`)
     );
     const png = Buffer.from(images.png, "base64");
+    await t.test("the shipped endpoint disables every upload host, including direct Catbox requests", async () => {
+      for (const [defaultProvider, fields, status] of [
+        ["", {}, 503],
+        ["catbox", {}, 503],
+        ["", { provider: "catbox", enabled: "true", explicit: "true" }, 400],
+        ["", { provider: "custom" }, 400]
+      ]) {
+        await reset({ production: true, defaultProvider });
+        const result = await upload(png, "image/png", "image.png", {}, fields);
+        assert.equal(result.response.status, status);
+        await assert.rejects(fs.access(capture), { code: "ENOENT" });
+      }
+    });
     await t.test("methods, preflight, missing uploads, and malformed multipart", async () => {
+      await reset();
       const get = await fetch(url);
       assert.equal(get.status, 405);
       assert.equal(get.headers.get("allow"), "POST, OPTIONS");
@@ -164,13 +197,13 @@ test("PHP upload validates multipart, limits abuse, and safely handles fixed Cat
         await reset();
         const { response, text } = await upload(buffer, `image/${type}`, "untrusted.php");
         assert.equal(response.status, 200, `${type}: ${text}`);
-        assert.equal(text, "https://files.catbox.moe/image.png");
+        assert.equal(text, hostedURL);
         assert.equal(response.headers.get("x-upload-diagnostic"), null);
         const forwarded = JSON.parse(await fs.readFile(capture));
         assert.equal(forwarded.attempts, 1, "The local HTTP helper sends each upload once");
         assert.equal(forwarded.hash, require("node:crypto").createHash("sha256").update(buffer).digest("hex"));
-        assert.equal(forwarded.url, "https://catbox.moe/user/api.php");
-        assert.equal(forwarded.reqtype, "fileupload");
+        assert.equal(forwarded.url, "https://uploads.example.test/api.php");
+        assert.equal(forwarded.operation, "store");
         assert.equal(forwarded.userhash, null, "Uploads are always anonymous");
         assert.equal(forwarded.mime, `image/${type}`);
         assert.equal(forwarded.name, `image.${type === "jpeg" ? "jpg" : type}`);
@@ -178,33 +211,33 @@ test("PHP upload validates multipart, limits abuse, and safely handles fixed Cat
         assert.equal(forwarded.verifyHost, 2);
         assert.equal(forwarded.redirects, false);
         assert.equal(forwarded.http11, true, "Upstream uploads avoid the observed HTTP/2 stream failure");
-        assert.equal(forwarded.userAgent, "stream.html (https://stream.byuwur.co/)", "Catbox requests identify the uploader");
+        assert.equal(forwarded.userAgent, "stream.html (https://stream.byuwur.co/)", "Requests identify the uploader");
         assert.ok(forwarded.connectTimeout > 0 && forwarded.timeout <= 40);
       }
     });
     await t.test("provider IDs use developer endpoints and explicit choices override server defaults", async () => {
-      await reset({ defaultProvider: "catbox", body: "https://files.catbox.moe/image.png" });
+      await reset({ defaultProvider: "custom", body: successBody });
       assert.equal((await upload(png)).response.status, 200);
-      assert.equal(JSON.parse(await fs.readFile(capture)).url, "https://catbox.moe/user/api.php");
+      assert.equal(JSON.parse(await fs.readFile(capture)).url, "https://uploads.example.test/api.php");
       for (const defaultProvider of ["not-configured", "0"]) {
-        await reset({ defaultProvider, body: "https://files.catbox.moe/image.png" });
+        await reset({ defaultProvider, body: successBody });
         assert.equal((await upload(png)).response.status, 503, "An unavailable server default fails closed");
         await assert.rejects(fs.access(capture), { code: "ENOENT" });
       }
-      const selected = await upload(png, "image/png", "image.png", {}, { provider: "catbox", endpoint: "http://127.0.0.1/private" });
+      const selected = await upload(png, "image/png", "image.png", {}, { provider: "custom", endpoint: "http://127.0.0.1/private" });
       assert.equal(selected.response.status, 200, selected.text);
       const forwarded = JSON.parse(await fs.readFile(capture));
-      assert.equal(forwarded.url, "https://catbox.moe/user/api.php");
-      assert.equal(forwarded.reqtype, "fileupload");
+      assert.equal(forwarded.url, "https://uploads.example.test/api.php");
+      assert.equal(forwarded.operation, "store");
       for (const fields of [{ provider: "gofile" }, { provider: "https://catbox.moe/user/api.php" }, { provider: "" }, { "provider[]": "catbox" }]) {
         await reset();
         const rejected = await upload(png, "image/png", "image.png", {}, fields);
         assert.equal(rejected.response.status, 400);
-        assert.equal(rejected.text, "Unsupported image provider.");
+        assert.equal(rejected.text, "Unsupported or disabled image provider.");
         await assert.rejects(fs.access(capture), { code: "ENOENT" });
       }
       for (const serverUserhash of ["", "server-owned-test-hash"]) {
-        await reset({ serverUserhash, body: "https://files.catbox.moe/image.png" });
+        await reset({ serverUserhash, body: successBody });
         assert.equal((await upload(png, "image/png", "image.png", {}, { userhash: "client-supplied-hash" })).response.status, 200);
         assert.equal(JSON.parse(await fs.readFile(capture)).userhash, null, "Neither environment variables nor client fields can associate uploads with an account");
         assert.doesNotMatch(await fs.readFile(errorLog, "utf8"), /server-owned-test-hash|client-supplied-hash/, "Credentials are not logged");
@@ -239,27 +272,21 @@ test("PHP upload validates multipart, limits abuse, and safely handles fixed Cat
         [{ status: 412, body: "No files given." }, 412, "transport=0; upstream=412"],
         [{ status: 412, body: "" }, 412, "transport=0; upstream=412"],
         [{ status: 500, body: "<html>Provider failure</html>" }, 500, "transport=0; upstream=500"],
-        [{ status: 500, body: "https://files.catbox.moe/image.png" }, 500, "transport=0; upstream=500"],
+        [{ status: 500, body: successBody }, 500, "transport=0; upstream=500"],
         [{ status: 403, body: "<script>window.providerExecuted = true</script>" }, 403, "transport=0; upstream=403"],
         [{ status: 429, body: "Slow down." }, 429, "transport=0; upstream=429"],
         [{ errno: 6, status: 0 }, 502, "transport=6; upstream=0"],
         [{ errno: 7, status: 0 }, 502, "transport=7; upstream=0"],
         [{ errno: 28, status: 0 }, 504, "transport=28; upstream=0"],
         [{ errno: 60, status: 0 }, 502, "transport=60; upstream=0"],
-        [{ errno: 56, status: 0, error: "Recv failure: Connection reset by peer", body: "Partial Catbox reply" }, 502, "transport=56; upstream=0"],
+        [{ errno: 56, status: 0, error: "Recv failure: Connection reset by peer", body: "Partial provider reply" }, 502, "transport=56; upstream=0"],
         [{ errno: 92, status: 0 }, 502, "transport=92; upstream=0"],
-        [{ status: 302, body: "https://files.catbox.moe/image.png" }, 502, "transport=0; upstream=302"],
+        [{ status: 302, body: hostedURL }, 502, "transport=0; upstream=302"],
         [{ errno: 23, body: "x".repeat(65537) }, 502, "transport=23; upstream=200"],
         ...[
           "<html>Provider error</html>",
           "",
-          "http://files.catbox.moe/image.png",
-          "https://files.catbox.moe.evil.test/image.png",
-          "https://files.catbox.moe/image.svg",
-          "https://files.catbox.moe/image.png?token=x",
-          "https://user@files.catbox.moe/image.png",
-          "https://files.catbox.moe:8443/image.png",
-          "https://files.catbox.moe/a/../image.png"
+          ...["http://images.example.test/image.png", "https://user@images.example.test/image.png", "https://user:password@images.example.test/image.png", "javascript:alert(1)", "/relative/image.png"].map((url) => JSON.stringify({ url }))
         ].map((body) => [{ body }, 502, "transport=0; upstream=200; response=invalid"])
       ]) {
         await reset(value);
@@ -301,15 +328,15 @@ test("PHP upload validates multipart, limits abuse, and safely handles fixed Cat
         await reset({ ...value, privateProvider: true });
         const result = await upload(png, "image/png", "image.png", {}, { explicit: "true" });
         assert.equal(result.response.status, status);
-        assert.equal(result.text, "Catbox.moe upload failed.");
+        assert.equal(result.text, "Test host upload failed.");
         assert.equal(result.response.headers.get("x-upload-diagnostic"), null);
         assert.ok((await fs.readFile(errorLog, "utf8")).includes("private-provider-detail"), "Full responses remain available in server logs");
         assert.equal(JSON.parse(await fs.readFile(capture)).attempts, 1);
       }
-      await reset({ privateProvider: true, body: "https://files.catbox.moe/image.png" });
+      await reset({ privateProvider: true, body: successBody });
       const success = await upload(png);
       assert.equal(success.response.status, 200);
-      assert.equal(success.text, "https://files.catbox.moe/image.png", "The explicit flag does not change successful uploads");
+      assert.equal(success.text, hostedURL, "The explicit flag does not change successful uploads");
     });
     await t.test("per-client limiter ignores forwarded IPs, expires, and fails closed on corruption", async () => {
       await reset();
