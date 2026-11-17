@@ -7,7 +7,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Defaults, URL constraints, and the field metadata consumed by the optional editor.
   const resource = {
-    version: "1.2",
+    version: "1.3",
     title: "Randomizer",
     description: "Repeatable seeded draws for games, challenges, and choices.",
     preview: [960, 540],

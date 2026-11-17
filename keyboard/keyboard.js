@@ -19,7 +19,7 @@ async function initKeyboardResource() {
   const labelFields = { section: "Input", when: (settings) => keyboardFields.when(settings) || (settings.showHistory === "yes" && settings.historySource !== "mouse"), retainInactive: true };
   const appearance = { section: "Appearance", retainInactive: true };
   const resource = {
-    version: "1.0", // 2026-11-15
+    version: "1.1", // 2026-11-15
     title: "Keyboard & Mouse",
     description: "Live browser-focused keyboard, mouse, and optional ephemeral Input History. Use OBS Interact to receive input; this cannot capture other applications.",
     preview: [1280, 720],

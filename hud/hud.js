@@ -7,7 +7,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Defaults, URL constraints, and the field metadata consumed by the optional editor.
   const resource = {
-    version: "1.2",
+    version: "1.3",
     title: "Camera HUD",
     description: "Camera overlay with a recording indicator and timecode.",
     preview: [1280, 720],
