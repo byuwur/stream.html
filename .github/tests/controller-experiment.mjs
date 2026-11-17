@@ -15,7 +15,9 @@ import { chromium } from "playwright";
 import { dist } from "../scripts/build.mjs";
 
 const candidate = path.join(dist, "assets", "controller.standalone.embedded.html");
-const entries = unzipSync(await fs.readFile(path.join(dist, "assets", "controller.standalone.zip")));
+const manifest = JSON.parse(await fs.readFile(path.join(dist, "assets", "manifest.json"), "utf8"));
+const archive = manifest.assets.find((asset) => asset.resource === "controller" && asset.format === "standalone-zip");
+const entries = unzipSync(await fs.readFile(path.join(dist, "assets", archive.file)));
 const artwork = Object.entries(entries).filter(([file]) => file.endsWith(".svg"));
 const sizes = { htmlBytes: (await fs.stat(candidate)).size, artworkBytes: artwork.reduce((sum, [, bytes]) => sum + bytes.length, 0), artworkCount: artwork.length };
 const server = http.createServer((request, response) => {

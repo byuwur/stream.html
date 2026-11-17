@@ -301,6 +301,7 @@ test("online, bundled, and packaged HTML has a complete dependency graph", async
     await t.test(asset.file, async () => validateHTML(await fs.readFile(path.join(assetDir, asset.file), "utf8"), asset.format, asset.file));
   }
   for (const asset of manifest.assets.filter((item) => item.file.endsWith(".zip"))) {
+    assert.equal(asset.file, `${config.repository.split("/")[1]}.${manifest.tag}.${asset.resource}.${asset.format.replace(/-zip$/, "")}.zip`);
     const entries = unzipSync(await fs.readFile(path.join(assetDir, asset.file)));
     const registration = config.dynamicDependencies[`${asset.resource}/${asset.resource}.js`];
     const artwork = (await fs.readdir(path.join(root, registration.directory))).filter((file) => file.endsWith(registration.extension)).sort();

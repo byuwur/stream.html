@@ -17,7 +17,7 @@ const options = { channel: process.env.BROWSER_CHANNEL || undefined, executableP
 
 test("generated distributions initialize with application networks blocked", { timeout: 300000 }, async (t) => {
   const packages = new Map();
-  for (const name of ["controller.full.zip", "controller.standalone.zip"]) packages.set(name, unzipSync(await fs.readFile(path.join(assetDir, name))));
+  for (const asset of manifest.assets.filter((item) => item.resource === "controller" && item.file.endsWith(".zip"))) packages.set(asset.file, unzipSync(await fs.readFile(path.join(assetDir, asset.file))));
   const server = http.createServer(async (request, response) => {
     try {
       let pathname = decodeURIComponent(new URL(request.url, "http://localhost").pathname);

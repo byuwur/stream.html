@@ -780,7 +780,7 @@ async function buildRelease(tag, options) {
             const artworkDirectory = path.basename(config.dynamicDependencies[`${resource.id}/${resource.id}.js`].directory);
             for (const image of images) entries[`${resource.id}/${artworkDirectory}/${image.file}`] = image.body;
             const archive = zipSync(Object.fromEntries(Object.entries(entries).map(([name, body]) => [name, [new Uint8Array(body), { mtime: new Date(1980, 0, 1) }]])), { level: 9 });
-            await save(`${resource.id}.${format === "bundle" ? "full" : format}.zip`, Buffer.from(archive), resource.id, `${format === "bundle" ? "full" : format}-zip`);
+            await save(`${config.repository.split("/")[1]}.${tag}.${resource.id}.${format === "bundle" ? "full" : format}.zip`, Buffer.from(archive), resource.id, `${format === "bundle" ? "full" : format}-zip`);
           }
           if (resource.id === "controller") {
             const candidate = await generate(resource, "standalone", "embedded", images);
