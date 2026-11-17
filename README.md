@@ -411,19 +411,21 @@ Check out SPA.js at `v20.12` beside this repository, or set `SPA_ASSETS_ROOT` to
 
 ## Release distributions
 
+Source/browser checks and every distribution build must succeed before a tagged release can publish. Main runs validate without publishing. Failed builds clean their private staging directory and retain completed output.
+
 Release tooling lives entirely in `.github/`, with `.github/workflows/release.yml` coordinating checks and publication and `.github/scripts/build.mjs` owning build configuration, bundling, release notes, tag validation, and publishing. It builds the resource pages identified by their `overlay-markup` template and `data-tool` ID. Dependency arrays expand to explicit imports before bundling, so online, bundled, and standalone releases retain their existing offline and lazy-editor contracts. It does not package OBS profiles, service exports, or unrelated folders. The website still runs without Node.js. Generated files stay in ignored `dist/`; source files remain authoritative.
 
 Release notes pair each plain commit subject with a linked seven-character hash and include a full changelog comparison from the nearest preceding version tag. First releases include the available history. Local previews link to the checkout's commit. CI checks out complete history for this range, which is also recorded in `manifest.json`.
 
-| Tier | File | Contents | Use and requirements |
-| --- | --- | --- | --- |
-| Original | `{tool}.html` | Authored HTML with editor and renderer import references. | Source/development reference. Requires the original repository folder layout and its declared dependencies. |
-| Online | `{tool}.online.html` | Editor and overlay in a portable HTML file. | Loads scripts, styles, and artwork from release-pinned CDN URLs. Requires a published release tag and internet. |
-| Bundle | `{tool}.bundle.html` | Editor and overlay with application JavaScript, CSS, and CSS assets embedded. | Edit settings and run the overlay from one file. Controller and Keyboard artwork loads from the CDN. |
-| Standalone | `{tool}.standalone.html` | Overlay renderer with embedded application dependencies. | Opens with defaults and accepts settings through URL parameters. Controller and Keyboard artwork loads from the CDN. |
-| Full ZIP | `{tool}.full.zip` | Bundle HTML with editor, overlay, and original SVG artwork for Controller or Keyboard. | Extract the archive and serve its folder over HTTP/HTTPS. Code and artwork are packaged together. |
-| Standalone ZIP | `{tool}.standalone.zip` | Overlay renderer and original SVG artwork for Controller or Keyboard. | Extract and serve over HTTP/HTTPS. Configure the overlay through URL parameters. |
-| Embedded [EXPERIMENTAL] | `controller.standalone.embedded.html` | Controller overlay renderer and all original SVG artwork in one HTML file. | Opens directly through `file://` and accepts settings through URL parameters. |
+| Tier | Contents | Requires |
+| --- | --- | --- |
+| Original | Authored HTML. | Repository files and dependencies. |
+| Online | Editor and overlay; CDN assets. | Published tag and internet. |
+| Bundle | Editor and overlay; embedded JS/CSS. | CDN artwork for Controller/Keyboard. |
+| Standalone | Renderer; embedded JS/CSS. | URL settings; CDN artwork for Controller/Keyboard. |
+| Full ZIP | Editor, overlay, and SVG artwork. | Extract and serve over HTTP(S). |
+| Standalone ZIP | Renderer and SVG artwork. | URL settings; serve over HTTP(S). |
+| Embedded [EXPERIMENTAL] | Controller renderer and all SVG artwork. | URL settings; supports file://. |
 
 Original, Online, Bundle, and Full ZIP include the configurator and support F2 switching between the editor and overlay. Standalone, Standalone ZIP, and Embedded contain the renderer only. Use the configurator's generated query string to apply settings to an overlay file. Prettier formats the surrounding HTML, and minified JavaScript and CSS occupy separate `<script>` and `<style>` blocks with `data-source` attributes identifying their original files.
 

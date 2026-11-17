@@ -332,7 +332,7 @@ test("release descriptions link to the generated inventory", async () => {
   for (const commit of manifest.changelog.commits) assert.ok(notes.includes(`https://github.com/${config.repository}/commit/${commit.sha}`));
   assert.match(notes, /file:\/\//);
   assert.match(notes, /Font Awesome/);
-  assert.match(notes, /HTTP\/HTTPS/);
+  assert.match(notes, /HTTP\(S\)/);
 });
 
 test("publication is restricted to tags and gated by successful mandatory checks", async () => {
@@ -348,8 +348,11 @@ test("publication is restricted to tags and gated by successful mandatory checks
   assert.equal(release.permissions.contents, "read");
   assert.equal(release.concurrency["cancel-in-progress"], false);
   assert.equal(release.jobs.publish.permissions.contents, "write");
-  assert.deepEqual(release.jobs.publish.needs, ["validate", "build"]);
+  assert.deepEqual(release.jobs.publish.needs, ["validate", "source_checks", "build"]);
   assert.ok(release.jobs.build.needs.includes("validate"));
+  assert.ok(release.jobs.build.needs.includes("source_checks"));
+  assert.equal(release.jobs.source_checks.uses, "./.github/workflows/tests.yml");
+  assert.equal(ci.needs, "source_checks");
   assert.equal(release.jobs.distributions.steps[0].with["fetch-depth"], 0);
   assert.equal(release.jobs.build.steps[0].with["fetch-depth"], 0);
   for (const job of [release.jobs.distributions, release.jobs.build]) {
@@ -366,7 +369,7 @@ test("publication is restricted to tags and gated by successful mandatory checks
   assert.ok(!JSON.stringify(ci).includes("--publish"));
   assert.ok(!JSON.stringify(ci).includes('contents":"write'));
   for (const job of Object.values(release.jobs)) {
-    for (const step of job.steps) {
+    for (const step of job.steps || []) {
       if (step.with?.cache === "npm") {
         assert.equal(step.with["cache-dependency-path"], ".github/package-lock.json");
         await fs.access(path.join(root, step.with["cache-dependency-path"]));

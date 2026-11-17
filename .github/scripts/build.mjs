@@ -474,15 +474,15 @@ export function releaseNotes(manifest) {
     "",
     "## Download tiers",
     "",
-    "| Tier | File | Contents | Use and requirements |",
-    "| --- | --- | --- | --- |",
-    "| Original | `{tool}.html` | Authored HTML with editor and renderer import references. | Source/development reference. Requires the original repository folder layout and its declared dependencies. |",
-    "| Online | `{tool}.online.html` | Editor and overlay in a portable HTML file. | Loads scripts, styles, and artwork from release-pinned CDN URLs. Requires a published release tag and internet. |",
-    "| Bundle | `{tool}.bundle.html` | Editor and overlay with application JavaScript, CSS, and CSS assets embedded. | Edit settings and run the overlay from one file. Controller and Keyboard artwork loads from the CDN. |",
-    "| Standalone | `{tool}.standalone.html` | Overlay renderer with embedded application dependencies. | Opens with defaults and accepts settings through URL parameters. Controller and Keyboard artwork loads from the CDN. |",
-    "| Full ZIP | `{tool}.full.zip` | Bundle HTML with editor, overlay, and original SVG artwork for Controller or Keyboard. | Extract the archive and serve its folder over HTTP/HTTPS. Code and artwork are packaged together. |",
-    "| Standalone ZIP | `{tool}.standalone.zip` | Overlay renderer and original SVG artwork for Controller or Keyboard. | Extract and serve over HTTP/HTTPS. Configure the overlay through URL parameters. |",
-    "| Embedded [EXPERIMENTAL] | `controller.standalone.embedded.html` | Controller overlay renderer and all original SVG artwork in one HTML file. | Opens directly through file:// and accepts settings through URL parameters. |",
+    "| Tier | Contents | Requires |",
+    "| --- | --- | --- |",
+    "| Original | Authored HTML. | Repository files and dependencies. |",
+    "| Online | Editor and overlay; CDN assets. | Published tag and internet. |",
+    "| Bundle | Editor and overlay; embedded JS/CSS. | CDN artwork for Controller/Keyboard. |",
+    "| Standalone | Renderer; embedded JS/CSS. | URL settings; CDN artwork for Controller/Keyboard. |",
+    "| Full ZIP | Editor, overlay, and SVG artwork. | Extract and serve over HTTP(S). |",
+    "| Standalone ZIP | Renderer and SVG artwork. | URL settings; serve over HTTP(S). |",
+    "| Embedded [EXPERIMENTAL] | Controller renderer and all SVG artwork. | URL settings; supports file://. |",
     "",
     "Original, Online, Bundle, and Full ZIP include the configurator and support F2 switching between the editor and overlay. Standalone, Standalone ZIP, and Embedded contain the renderer only. Use the configurator's generated query string to apply settings to an overlay file.",
     "",
@@ -545,275 +545,279 @@ async function buildRelease(tag, options) {
     }
   }
   const assetDir = await fs.mkdtemp(path.join(dist, ".release-"));
-
-  /**
-   * @param {URL} url Source asset URL.
-   * @returns {string} Tag-pinned CDN URL for local files, or the remote URL.
-   */
-  function publicURL(url) {
-    return url.protocol === "file:" ? `${cdn}${path.relative(root, fileURLToPath(url)).split(path.sep).join("/")}${url.search}${url.hash}` : url.href;
-  }
-
-  /**
-   * Bundle a stylesheet, embed its URL assets, and escape closing-style sequences for HTML.
-   * @param {URL} url Stylesheet location.
-   * @returns {Promise<string>} Cached minified CSS.
-   * @throws {Error} Rejects missing imports, required assets, and invalid CSS builds.
-   */
-  async function stylesheet(url) {
-    if (cssCache.has(url.href)) return cssCache.get(url.href);
-    const result = build({
-      entryPoints: [url.href],
-      bundle: true,
-      write: false,
-      minify: true,
-      legalComments: "inline",
-      logLevel: "silent",
-      plugins: [
-        {
-          name: "release-css-dependencies",
-          /**
-           * @param {Object} builder esbuild plugin API.
-           * @returns {void} Register source and CSS asset loaders.
-           */
-          setup(builder) {
-            builder.onResolve({ filter: /.*/ }, (args) => {
-              if (args.path.startsWith("data:") || args.path.startsWith("#")) return { path: args.path, external: true };
-              return { path: new URL(args.path, args.importer || url).href, namespace: "release-asset" };
-            });
-            builder.onLoad({ filter: /.*/, namespace: "release-asset" }, async (args) => {
-              const location = new URL(args.path);
-              let bytes = await dependencies.read(location);
-              if (location.pathname.endsWith(".css")) bytes = (await dependencies.minified(location, bytes, manifest.changelog.commit)) || bytes;
-              return { contents: bytes, loader: location.pathname.endsWith(".css") ? "css" : "dataurl" };
-            });
-          }
-        }
-      ]
-    }).then((output) => output.outputFiles[0].text.replace(/<\/style/gi, "\\3c /style"));
-    cssCache.set(url.href, result);
-    return result;
-  }
-
-  /**
-   * Prepare one classic script with CDN-first minification and the selected artwork base/fetch transform.
-   * @param {URL} url JavaScript source location.
-   * @param {string} artworkMode remote, packaged, or embedded artwork resolution.
-   * @returns {Promise<string>} Cached minified JavaScript safe to place inside an HTML script element.
-   * @throws {Error} Rejects missing dependencies and authored artwork expressions that no longer match.
-   */
-  async function javascript(url, artworkMode) {
-    const key = `${url.href}:${artworkMode}`;
-    if (jsCache.has(key)) return jsCache.get(key);
-    const result = (async () => {
-      const bytes = await dependencies.read(url);
-      // The embedded-artwork experiment rewrites an authored fetch expression before minification.
-      let preferred = artworkMode === "embedded" ? null : await dependencies.minified(url, bytes, manifest.changelog.commit);
-      let source = (preferred || bytes).toString();
-      const relative = url.protocol === "file:" ? path.relative(root, fileURLToPath(url)).split(path.sep).join("/") : "";
-      const dynamic = config.dynamicDependencies[relative];
-      if (dynamic) {
-        if (!source.includes(dynamic.baseExpression)) {
-          source = bytes.toString();
-          preferred = null;
-        }
-        assert.ok(source.includes(dynamic.baseExpression), `Asset base changed in ${relative}; review the build transform`);
-        const base = artworkMode === "packaged" ? "document.baseURI" : JSON.stringify(`${cdn}${relative}`);
-        source = source.replace(dynamic.baseExpression, base);
-        if (artworkMode === "embedded") {
-          const request = "await fetch(new URL(`./controllers/${id}.svg`, controllerResourceURL))";
-          assert.equal(source.split(request).length, 2, "Controller artwork request changed; review the embedded experiment");
-          source = `const controllerEmbeddedArtwork = JSON.parse(document.getElementById("controller-artwork").textContent);\n${source.replace(request, "new Response(controllerEmbeddedArtwork[id])")}`;
-        }
-      }
-      if (preferred || /\.min\.js$/.test(url.pathname)) {
-        return source.replace(/\r?\n\/\/[#@]\s*sourceMappingURL=[^\r\n]*\s*$/, "").replace(/<\/script/gi, "<\\/script");
-      }
-      // Transform each fallback classic script independently: global names and execution boundaries survive.
-      const output = await transform(source, { loader: "js", minify: true, target: "es2022", legalComments: "inline", sourcefile: relative || url.href });
-      return output.code.replace(/<\/script/gi, "<\\/script");
-    })();
-    jsCache.set(key, result);
-    return result;
-  }
-
-  /**
-   * Read original artwork for resources registered in config.dynamicDependencies.
-   * @param {Object} resource Resource identity from resources().
-   * @returns {Promise<Array<{file: string, body: Buffer}>>} Original SVG files, or an empty list for other resources.
-   */
-  async function artwork(resource) {
-    const registration = config.dynamicDependencies[`${resource.id}/${resource.id}.js`];
-    if (!registration) return [];
-    const files = (await fs.readdir(path.join(root, registration.directory))).filter((file) => file.endsWith(registration.extension)).sort();
-    assert.ok(files.length, `No artwork for ${resource.id}`);
-    return Promise.all(files.map(async (file) => ({ file, body: await dependencies.read(localURL(`${registration.directory}/${file}`)) })));
-  }
-
-  /**
-   * Generate portable HTML while retaining source markup, script ordering, and lazy editor ownership.
-   * @param {Object} resource Authored resource entry and source bytes.
-   * @param {string} format online, bundle, or standalone output.
-   * @param {string} [artworkMode="remote"] remote, packaged, or embedded artwork resolution.
-   * @param {Array<{file: string, body: Buffer}>} [images=[]] Original SVG files for embedded artwork.
-   * @returns {Promise<Buffer>} Formatted HTML with the configured favicon and preserved minified payloads.
-   */
-  async function generate(resource, format, artworkMode = "remote", images = []) {
-    const tree = expandAssets(parse(resource.source.toString()), resource.entry, format !== "standalone");
-    const all = nodes(tree);
-    const entryURL = localURL(resource.entry);
-    const body = all.find((node) => node.tagName === "body");
-    const editor = all.find((node) => attr(node, "id") === "configurator-assets");
-    const editorNodes = new Set(editor ? nodes(editor) : []);
-    if (format !== "online") {
-      const head = all.find((node) => node.tagName === "head");
-      head.childNodes.push({ nodeName: "#comment", data: `\n${projectLicense}\nThird-party notices remain in their embedded assets.\n`, parentNode: head });
-    }
-    if (format === "standalone") {
-      for (const node of all.filter((node) => ["configurator-assets", "configurator"].includes(attr(node, "id")))) remove(node);
-    }
-    if (artworkMode === "embedded") {
-      const script = nodes(parse('<script type="application/json" id="controller-artwork"></script>')).find((node) => node.tagName === "script");
-      textContent(script, `\n${JSON.stringify(Object.fromEntries(images.map((image) => [path.basename(image.file, ".svg"), image.body.toString()]))).replaceAll("<", "\\u003c")}\n`);
-      script.parentNode = body;
-      body.childNodes.unshift(script);
-    }
-    for (const node of nodes(tree)) {
-      if (node.tagName === "script" && attr(node, "src") !== undefined) {
-        const url = new URL(attr(node, "src"), entryURL);
-        assert.ok(!attr(node, "type") || attr(node, "type") === "text/javascript", `Unsupported module/script type in ${resource.entry}; register its import graph before bundling`);
-        if (url.pathname.endsWith("/configurator.js")) {
-          setAttr(node, "data-root", hosted);
-          setAttr(node, "data-preference-resource", resource.id);
-        }
-        if (format === "online") setAttr(node, "src", publicURL(url));
-        else {
-          setAttr(node, "data-source", attr(node, "src"));
-          for (const name of ["src", "defer", "integrity", "crossorigin"]) setAttr(node, name, null);
-          textContent(node, `\n${(await javascript(url, artworkMode)).trimEnd()}\n`);
-          // Inline classic scripts run immediately. Put runtime imports after the page markup,
-          // retaining dependency order and the editor template's lazy execution boundary.
-          if (!editorNodes.has(node)) {
-            remove(node);
-            node.parentNode = body;
-            body.childNodes.push(node);
-          }
-        }
-      } else if (node.tagName === "script" && format !== "online" && (!attr(node, "type") || attr(node, "type") === "text/javascript")) {
-        const source = node.childNodes.map((child) => child.value || "").join("");
-        const output = await transform(source, { loader: "js", minify: true, target: "es2022", legalComments: "inline" });
-        setAttr(node, "data-source", resource.entry);
-        textContent(node, `\n${output.code.replace(/<\/script/gi, "<\\/script").trimEnd()}\n`);
-      } else if (node.tagName === "link" && attr(node, "rel") === "icon") {
-        setAttr(node, "href", config.favicon);
-        setAttr(node, "type", "image/png");
-        setAttr(node, "sizes", "32x32");
-      } else if (node.tagName === "link" && attr(node, "rel") === "stylesheet") {
-        const url = new URL(attr(node, "href"), entryURL);
-        if (format === "online" || config.externalStyles.includes(url.href)) setAttr(node, "href", publicURL(url));
-        else {
-          const css = await stylesheet(url);
-          setAttr(node, "data-source", attr(node, "href"));
-          node.nodeName = node.tagName = "style";
-          for (const key of ["href", "rel", "integrity", "crossorigin"]) setAttr(node, key, null);
-          textContent(node, `\n${css.trimEnd()}\n`);
-        }
-      } else if (node.attrs) {
-        for (const key of ["src", "poster", "href"]) {
-          const value = attr(node, key);
-          if (!value || /^(?:[a-z]+:|#|\/\/)/i.test(value)) continue;
-          const url = new URL(value, entryURL);
-          // Metadata is not an application dependency. Required static images are embedded in bundles.
-          if (format === "online" || node.tagName === "a") setAttr(node, key, publicURL(url));
-          else if (["img", "source", "video", "image"].includes(node.tagName)) {
-            const bytes = await dependencies.read(url);
-            const mime = { ".png": "image/png", ".jpg": "image/jpeg", ".svg": "image/svg+xml", ".webp": "image/webp" }[path.extname(url.pathname)];
-            assert.ok(mime, `Unsupported embedded asset: ${url}`);
-            setAttr(node, key, `data:${mime};base64,${bytes.toString("base64")}`);
-          }
-        }
-      }
-    }
-    // Keep separate script elements so each dependency retains its own classic-script directives.
-    return Buffer.from(await formatHTML(tree));
-  }
-
-  const manifest = {
-    generator: "stream.html release builder",
-    repository: config.repository,
-    tag,
-    changelog: releaseChangelog(tag),
-    resources: [],
-    assets: [],
-    optionalContent: config.optionalContent,
-    externalStyles: config.externalStyles
-  };
-  /**
-   * Write a staged release asset and register its size and checksum for testing and publication.
-   * @param {string} file Generated asset basename.
-   * @param {Buffer} body Artifact bytes.
-   * @param {string|null} resource Resource ID, or null for shared release documentation.
-   * @param {string} format Distribution format stored in the manifest.
-   * @returns {Promise<void>}
-   */
-  async function save(file, body, resource, format) {
-    await fs.writeFile(path.join(assetDir, file), body);
-    manifest.assets.push({ file, resource, format, bytes: body.length, sha256: sha256(body) });
-  }
-
-  for (const resource of await resources()) {
-    try {
-      const imports = nodes(expandAssets(parse(resource.source.toString()), resource.entry)).filter((node) => (node.tagName === "script" && attr(node, "src")) || (node.tagName === "link" && attr(node, "rel") === "stylesheet"));
-      manifest.resources.push({
-        id: resource.id,
-        name: resource.name,
-        entry: resource.entry,
-        imports: imports.map((node) => attr(node, "src") || attr(node, "href")),
-        dynamicDependencies: config.dynamicDependencies[`${resource.id}/${resource.id}.js`] || null
-      });
-      const images = await artwork(resource);
-      await save(`${resource.id}.html`, resource.source, resource.id, "original");
-      for (const format of ["online", "bundle", "standalone"]) await save(`${resource.id}.${format}.html`, await generate(resource, format), resource.id, format);
-      if (images.length) {
-        for (const format of ["bundle", "standalone"]) {
-          const entries = { [`${resource.id}/index.html`]: await generate(resource, format, "packaged") };
-          const artworkDirectory = path.basename(config.dynamicDependencies[`${resource.id}/${resource.id}.js`].directory);
-          for (const image of images) entries[`${resource.id}/${artworkDirectory}/${image.file}`] = image.body;
-          const archive = zipSync(Object.fromEntries(Object.entries(entries).map(([name, body]) => [name, [new Uint8Array(body), { mtime: new Date(1980, 0, 1) }]])), { level: 9 });
-          await save(`${resource.id}.${format === "bundle" ? "full" : format}.zip`, Buffer.from(archive), resource.id, `${format === "bundle" ? "full" : format}-zip`);
-        }
-        if (resource.id === "controller") {
-          const candidate = await generate(resource, "standalone", "embedded", images);
-          await save(`${resource.id}.standalone.embedded.html`, candidate, resource.id, "embedded");
-          await fs.mkdir(path.join(dist, "experimental"), { recursive: true });
-          await fs.writeFile(
-            path.join(dist, "experimental", "sizes.json"),
-            `${JSON.stringify({ htmlBytes: candidate.length, artworkBytes: images.reduce((sum, image) => sum + image.body.length, 0), artworkCount: images.length }, null, 2)}\n`
-          );
-        }
-      }
-      console.log(`Built ${resource.id}`);
-    } catch (error) {
-      throw new Error(`Unable to build ${resource.id}: ${error.message}`, { cause: error });
-    }
-  }
-  manifest.dependencies = [...dependencies.used.values()].sort((a, b) => a.source.localeCompare(b.source, "en"));
-  await dependencies.saveLock();
-  await save("RELEASE_NOTES.md", Buffer.from(releaseNotes(manifest)), null, "documentation");
-  await fs.writeFile(path.join(assetDir, "manifest.json"), `${JSON.stringify(manifest, null, 2)}\n`);
-  const checksums = [...manifest.assets, { file: "manifest.json", sha256: sha256(await fs.readFile(path.join(assetDir, "manifest.json"))) }].sort((a, b) => a.file.localeCompare(b.file, "en"));
-  await fs.writeFile(path.join(assetDir, "SHA256SUMS"), `${checksums.map((asset) => `${asset.sha256}  ${asset.file}`).join("\n")}\n`);
-  for (const file of previousFiles) await fs.unlink(path.join(finalAssets, file));
   try {
-    await fs.rmdir(finalAssets);
-  } catch (error) {
-    if (error.code !== "ENOENT") throw error;
+    /**
+     * @param {URL} url Source asset URL.
+     * @returns {string} Tag-pinned CDN URL for local files, or the remote URL.
+     */
+    function publicURL(url) {
+      return url.protocol === "file:" ? `${cdn}${path.relative(root, fileURLToPath(url)).split(path.sep).join("/")}${url.search}${url.hash}` : url.href;
+    }
+
+    /**
+     * Bundle a stylesheet, embed its URL assets, and escape closing-style sequences for HTML.
+     * @param {URL} url Stylesheet location.
+     * @returns {Promise<string>} Cached minified CSS.
+     * @throws {Error} Rejects missing imports, required assets, and invalid CSS builds.
+     */
+    async function stylesheet(url) {
+      if (cssCache.has(url.href)) return cssCache.get(url.href);
+      const result = build({
+        entryPoints: [url.href],
+        bundle: true,
+        write: false,
+        minify: true,
+        legalComments: "inline",
+        logLevel: "silent",
+        plugins: [
+          {
+            name: "release-css-dependencies",
+            /**
+             * @param {Object} builder esbuild plugin API.
+             * @returns {void} Register source and CSS asset loaders.
+             */
+            setup(builder) {
+              builder.onResolve({ filter: /.*/ }, (args) => {
+                if (args.path.startsWith("data:") || args.path.startsWith("#")) return { path: args.path, external: true };
+                return { path: new URL(args.path, args.importer || url).href, namespace: "release-asset" };
+              });
+              builder.onLoad({ filter: /.*/, namespace: "release-asset" }, async (args) => {
+                const location = new URL(args.path);
+                let bytes = await dependencies.read(location);
+                if (location.pathname.endsWith(".css")) bytes = (await dependencies.minified(location, bytes, manifest.changelog.commit)) || bytes;
+                return { contents: bytes, loader: location.pathname.endsWith(".css") ? "css" : "dataurl" };
+              });
+            }
+          }
+        ]
+      }).then((output) => output.outputFiles[0].text.replace(/<\/style/gi, "\\3c /style"));
+      cssCache.set(url.href, result);
+      return result;
+    }
+
+    /**
+     * Prepare one classic script with CDN-first minification and the selected artwork base/fetch transform.
+     * @param {URL} url JavaScript source location.
+     * @param {string} artworkMode remote, packaged, or embedded artwork resolution.
+     * @returns {Promise<string>} Cached minified JavaScript safe to place inside an HTML script element.
+     * @throws {Error} Rejects missing dependencies and authored artwork expressions that no longer match.
+     */
+    async function javascript(url, artworkMode) {
+      const key = `${url.href}:${artworkMode}`;
+      if (jsCache.has(key)) return jsCache.get(key);
+      const result = (async () => {
+        const bytes = await dependencies.read(url);
+        // The embedded-artwork experiment rewrites an authored fetch expression before minification.
+        let preferred = artworkMode === "embedded" ? null : await dependencies.minified(url, bytes, manifest.changelog.commit);
+        let source = (preferred || bytes).toString();
+        const relative = url.protocol === "file:" ? path.relative(root, fileURLToPath(url)).split(path.sep).join("/") : "";
+        const dynamic = config.dynamicDependencies[relative];
+        if (dynamic) {
+          if (!source.includes(dynamic.baseExpression)) {
+            source = bytes.toString();
+            preferred = null;
+          }
+          assert.ok(source.includes(dynamic.baseExpression), `Asset base changed in ${relative}; review the build transform`);
+          const base = artworkMode === "packaged" ? "document.baseURI" : JSON.stringify(`${cdn}${relative}`);
+          source = source.replace(dynamic.baseExpression, base);
+          if (artworkMode === "embedded") {
+            const request = "await fetch(new URL(`./controllers/${id}.svg`, controllerResourceURL))";
+            assert.equal(source.split(request).length, 2, "Controller artwork request changed; review the embedded experiment");
+            source = `const controllerEmbeddedArtwork = JSON.parse(document.getElementById("controller-artwork").textContent);\n${source.replace(request, "new Response(controllerEmbeddedArtwork[id])")}`;
+          }
+        }
+        if (preferred || /\.min\.js$/.test(url.pathname)) {
+          return source.replace(/\r?\n\/\/[#@]\s*sourceMappingURL=[^\r\n]*\s*$/, "").replace(/<\/script/gi, "<\\/script");
+        }
+        // Transform each fallback classic script independently: global names and execution boundaries survive.
+        const output = await transform(source, { loader: "js", minify: true, target: "es2022", legalComments: "inline", sourcefile: relative || url.href });
+        return output.code.replace(/<\/script/gi, "<\\/script");
+      })();
+      jsCache.set(key, result);
+      return result;
+    }
+
+    /**
+     * Read original artwork for resources registered in config.dynamicDependencies.
+     * @param {Object} resource Resource identity from resources().
+     * @returns {Promise<Array<{file: string, body: Buffer}>>} Original SVG files, or an empty list for other resources.
+     */
+    async function artwork(resource) {
+      const registration = config.dynamicDependencies[`${resource.id}/${resource.id}.js`];
+      if (!registration) return [];
+      const files = (await fs.readdir(path.join(root, registration.directory))).filter((file) => file.endsWith(registration.extension)).sort();
+      assert.ok(files.length, `No artwork for ${resource.id}`);
+      return Promise.all(files.map(async (file) => ({ file, body: await dependencies.read(localURL(`${registration.directory}/${file}`)) })));
+    }
+
+    /**
+     * Generate portable HTML while retaining source markup, script ordering, and lazy editor ownership.
+     * @param {Object} resource Authored resource entry and source bytes.
+     * @param {string} format online, bundle, or standalone output.
+     * @param {string} [artworkMode="remote"] remote, packaged, or embedded artwork resolution.
+     * @param {Array<{file: string, body: Buffer}>} [images=[]] Original SVG files for embedded artwork.
+     * @returns {Promise<Buffer>} Formatted HTML with the configured favicon and preserved minified payloads.
+     */
+    async function generate(resource, format, artworkMode = "remote", images = []) {
+      const tree = expandAssets(parse(resource.source.toString()), resource.entry, format !== "standalone");
+      const all = nodes(tree);
+      const entryURL = localURL(resource.entry);
+      const body = all.find((node) => node.tagName === "body");
+      const editor = all.find((node) => attr(node, "id") === "configurator-assets");
+      const editorNodes = new Set(editor ? nodes(editor) : []);
+      if (format !== "online") {
+        const head = all.find((node) => node.tagName === "head");
+        head.childNodes.push({ nodeName: "#comment", data: `\n${projectLicense}\nThird-party notices remain in their embedded assets.\n`, parentNode: head });
+      }
+      if (format === "standalone") {
+        for (const node of all.filter((node) => ["configurator-assets", "configurator"].includes(attr(node, "id")))) remove(node);
+      }
+      if (artworkMode === "embedded") {
+        const script = nodes(parse('<script type="application/json" id="controller-artwork"></script>')).find((node) => node.tagName === "script");
+        textContent(script, `\n${JSON.stringify(Object.fromEntries(images.map((image) => [path.basename(image.file, ".svg"), image.body.toString()]))).replaceAll("<", "\\u003c")}\n`);
+        script.parentNode = body;
+        body.childNodes.unshift(script);
+      }
+      for (const node of nodes(tree)) {
+        if (node.tagName === "script" && attr(node, "src") !== undefined) {
+          const url = new URL(attr(node, "src"), entryURL);
+          assert.ok(!attr(node, "type") || attr(node, "type") === "text/javascript", `Unsupported module/script type in ${resource.entry}; register its import graph before bundling`);
+          if (url.pathname.endsWith("/configurator.js")) {
+            setAttr(node, "data-root", hosted);
+            setAttr(node, "data-preference-resource", resource.id);
+          }
+          if (format === "online") setAttr(node, "src", publicURL(url));
+          else {
+            setAttr(node, "data-source", attr(node, "src"));
+            for (const name of ["src", "defer", "integrity", "crossorigin"]) setAttr(node, name, null);
+            textContent(node, `\n${(await javascript(url, artworkMode)).trimEnd()}\n`);
+            // Inline classic scripts run immediately. Put runtime imports after the page markup,
+            // retaining dependency order and the editor template's lazy execution boundary.
+            if (!editorNodes.has(node)) {
+              remove(node);
+              node.parentNode = body;
+              body.childNodes.push(node);
+            }
+          }
+        } else if (node.tagName === "script" && format !== "online" && (!attr(node, "type") || attr(node, "type") === "text/javascript")) {
+          const source = node.childNodes.map((child) => child.value || "").join("");
+          const output = await transform(source, { loader: "js", minify: true, target: "es2022", legalComments: "inline" });
+          setAttr(node, "data-source", resource.entry);
+          textContent(node, `\n${output.code.replace(/<\/script/gi, "<\\/script").trimEnd()}\n`);
+        } else if (node.tagName === "link" && attr(node, "rel") === "icon") {
+          setAttr(node, "href", config.favicon);
+          setAttr(node, "type", "image/png");
+          setAttr(node, "sizes", "32x32");
+        } else if (node.tagName === "link" && attr(node, "rel") === "stylesheet") {
+          const url = new URL(attr(node, "href"), entryURL);
+          if (format === "online" || config.externalStyles.includes(url.href)) setAttr(node, "href", publicURL(url));
+          else {
+            const css = await stylesheet(url);
+            setAttr(node, "data-source", attr(node, "href"));
+            node.nodeName = node.tagName = "style";
+            for (const key of ["href", "rel", "integrity", "crossorigin"]) setAttr(node, key, null);
+            textContent(node, `\n${css.trimEnd()}\n`);
+          }
+        } else if (node.attrs) {
+          for (const key of ["src", "poster", "href"]) {
+            const value = attr(node, key);
+            if (!value || /^(?:[a-z]+:|#|\/\/)/i.test(value)) continue;
+            const url = new URL(value, entryURL);
+            // Metadata is not an application dependency. Required static images are embedded in bundles.
+            if (format === "online" || node.tagName === "a") setAttr(node, key, publicURL(url));
+            else if (["img", "source", "video", "image"].includes(node.tagName)) {
+              const bytes = await dependencies.read(url);
+              const mime = { ".png": "image/png", ".jpg": "image/jpeg", ".svg": "image/svg+xml", ".webp": "image/webp" }[path.extname(url.pathname)];
+              assert.ok(mime, `Unsupported embedded asset: ${url}`);
+              setAttr(node, key, `data:${mime};base64,${bytes.toString("base64")}`);
+            }
+          }
+        }
+      }
+      // Keep separate script elements so each dependency retains its own classic-script directives.
+      return Buffer.from(await formatHTML(tree));
+    }
+
+    const manifest = {
+      generator: "stream.html release builder",
+      repository: config.repository,
+      tag,
+      changelog: releaseChangelog(tag),
+      resources: [],
+      assets: [],
+      optionalContent: config.optionalContent,
+      externalStyles: config.externalStyles
+    };
+    /**
+     * Write a staged release asset and register its size and checksum for testing and publication.
+     * @param {string} file Generated asset basename.
+     * @param {Buffer} body Artifact bytes.
+     * @param {string|null} resource Resource ID, or null for shared release documentation.
+     * @param {string} format Distribution format stored in the manifest.
+     * @returns {Promise<void>}
+     */
+    async function save(file, body, resource, format) {
+      await fs.writeFile(path.join(assetDir, file), body);
+      manifest.assets.push({ file, resource, format, bytes: body.length, sha256: sha256(body) });
+    }
+
+    for (const resource of await resources()) {
+      try {
+        const imports = nodes(expandAssets(parse(resource.source.toString()), resource.entry)).filter((node) => (node.tagName === "script" && attr(node, "src")) || (node.tagName === "link" && attr(node, "rel") === "stylesheet"));
+        manifest.resources.push({
+          id: resource.id,
+          name: resource.name,
+          entry: resource.entry,
+          imports: imports.map((node) => attr(node, "src") || attr(node, "href")),
+          dynamicDependencies: config.dynamicDependencies[`${resource.id}/${resource.id}.js`] || null
+        });
+        const images = await artwork(resource);
+        await save(`${resource.id}.html`, resource.source, resource.id, "original");
+        for (const format of ["online", "bundle", "standalone"]) await save(`${resource.id}.${format}.html`, await generate(resource, format), resource.id, format);
+        if (images.length) {
+          for (const format of ["bundle", "standalone"]) {
+            const entries = { [`${resource.id}/index.html`]: await generate(resource, format, "packaged") };
+            const artworkDirectory = path.basename(config.dynamicDependencies[`${resource.id}/${resource.id}.js`].directory);
+            for (const image of images) entries[`${resource.id}/${artworkDirectory}/${image.file}`] = image.body;
+            const archive = zipSync(Object.fromEntries(Object.entries(entries).map(([name, body]) => [name, [new Uint8Array(body), { mtime: new Date(1980, 0, 1) }]])), { level: 9 });
+            await save(`${resource.id}.${format === "bundle" ? "full" : format}.zip`, Buffer.from(archive), resource.id, `${format === "bundle" ? "full" : format}-zip`);
+          }
+          if (resource.id === "controller") {
+            const candidate = await generate(resource, "standalone", "embedded", images);
+            await save(`${resource.id}.standalone.embedded.html`, candidate, resource.id, "embedded");
+            await fs.mkdir(path.join(dist, "experimental"), { recursive: true });
+            await fs.writeFile(
+              path.join(dist, "experimental", "sizes.json"),
+              `${JSON.stringify({ htmlBytes: candidate.length, artworkBytes: images.reduce((sum, image) => sum + image.body.length, 0), artworkCount: images.length }, null, 2)}\n`
+            );
+          }
+        }
+        console.log(`Built ${resource.id}`);
+      } catch (error) {
+        throw new Error(`Unable to build ${resource.id}: ${error.message}`, { cause: error });
+      }
+    }
+    manifest.dependencies = [...dependencies.used.values()].sort((a, b) => a.source.localeCompare(b.source, "en"));
+    await dependencies.saveLock();
+    await save("RELEASE_NOTES.md", Buffer.from(releaseNotes(manifest)), null, "documentation");
+    await fs.writeFile(path.join(assetDir, "manifest.json"), `${JSON.stringify(manifest, null, 2)}\n`);
+    const checksums = [...manifest.assets, { file: "manifest.json", sha256: sha256(await fs.readFile(path.join(assetDir, "manifest.json"))) }].sort((a, b) => a.file.localeCompare(b.file, "en"));
+    await fs.writeFile(path.join(assetDir, "SHA256SUMS"), `${checksums.map((asset) => `${asset.sha256}  ${asset.file}`).join("\n")}\n`);
+    for (const file of previousFiles) await fs.unlink(path.join(finalAssets, file));
+    try {
+      await fs.rmdir(finalAssets);
+    } catch (error) {
+      if (error.code !== "ENOENT") throw error;
+    }
+    await fs.rename(assetDir, finalAssets);
+    await fs.copyFile(path.join(finalAssets, "manifest.json"), path.join(dist, "manifest.json"));
+    // The embedded HTML now has one release-owned location beside the other distributions.
+    await fs.rm(path.join(dist, "experimental", "controller.standalone.embedded.html"), { force: true });
+    console.log(`Generated ${manifest.assets.length - 1} distributions for ${manifest.resources.length} resources in dist/assets`);
+  } finally {
+    assert.equal(path.dirname(assetDir), dist);
+    await fs.rm(assetDir, { recursive: true, force: true });
   }
-  await fs.rename(assetDir, finalAssets);
-  await fs.copyFile(path.join(finalAssets, "manifest.json"), path.join(dist, "manifest.json"));
-  // The embedded HTML now has one release-owned location beside the other distributions.
-  await fs.rm(path.join(dist, "experimental", "controller.standalone.embedded.html"), { force: true });
-  console.log(`Generated ${manifest.assets.length - 1} distributions for ${manifest.resources.length} resources in dist/assets`);
 }
 
 /**

@@ -1,6 +1,7 @@
 name: Stream checks
 
 on:
+  workflow_call:
   push:
     branches: [main]
   pull_request:

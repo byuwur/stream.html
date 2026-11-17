@@ -6,7 +6,7 @@
   },
   "scripts": {
     "release:build": "node scripts/build.mjs",
-    "release:test": "node --test tests/release.mjs tests/release-browser.mjs tests/publish-release.mjs",
+    "release:test": "node --test tests/release.mjs tests/release-browser.mjs tests/publish-release.mjs tests/cleanup.mjs",
     "release:experiment": "node tests/controller-experiment.mjs",
     "test": "node --test ../__tests__/resources.cjs ../__tests__/inputs.cjs",
     "test:configurator": "node --test ../__tests__/configurators.cjs"
