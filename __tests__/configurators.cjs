@@ -59,13 +59,37 @@ test("configurator smoke", { timeout: 30000 }, async (t) => {
     page.on("pageerror", (error) => errors.push(error.message));
     try {
       await serve(page, assets);
-      await page.goto("https://stream.test/controller/?skin=ds5&player=9#configure");
+      const parameters = new URLSearchParams({
+        skin: "ds5",
+        player: "9",
+        customGuide: "yes",
+        guideSource: "image",
+        guideImage: "../stream.html.png",
+        guideColorMode: "tint",
+        guideTintColor: "#70dd52",
+        guideTintStrength: "65",
+        guideBlendMode: "soft-light"
+      });
+      await page.goto(`https://stream.test/controller/?${parameters}#configure`);
       await page.waitForFunction(() => !!document.getElementById("overlay-url")?.value);
+      const mode = page.locator('form[data-configurator] [name="guideColorMode"]');
+      const strength = page.locator('form[data-configurator] [name="guideTintStrength"]');
+      assert.equal(await strength.isDisabled(), false, "Guide tint is independent of Custom colors");
+      await mode.selectOption("original", { force: true });
+      await page.waitForFunction(() => !new URL(document.getElementById("overlay-url").value).searchParams.has("guideTintStrength"));
+      assert.equal(await strength.isDisabled(), true);
+      await mode.selectOption("tint", { force: true });
+      await page.waitForFunction(() => new URL(document.getElementById("overlay-url").value).searchParams.get("guideTintStrength") === "65");
       const url = await page.locator("#overlay-url").inputValue();
       assert.equal(new URL(url).searchParams.get("skin"), "ds5");
+      assert.equal(new URL(url).searchParams.get("guideTintColor"), "70dd52");
+      assert.equal(new URL(url).searchParams.get("guideBlendMode"), "soft-light");
+      await page.frameLocator("#overlay-preview").locator('filter[id$="-logo-tint"]').waitFor({ state: "attached" });
       await page.goto(url);
       await page.locator("#gamepads .controller svg").first().waitFor({ state: "attached" });
       assert.equal(await page.evaluate(() => byStreamResource.settings.skin), "ds5");
+      await page.locator(".guide-logo-custom").waitFor();
+      assert.equal(await page.locator('filter[id$="-logo-tint"] feBlend').getAttribute("mode"), "soft-light");
       assert.deepEqual(errors, []);
     } finally {
       await page.close();

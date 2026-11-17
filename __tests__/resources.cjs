@@ -101,3 +101,143 @@ test("standalone resources initialize without their configurators", { timeout: 6
     });
   }
 });
+
+test("controller guide tint and subtle control colors", { timeout: 60000 }, async (t) => {
+  const assets = await loadAssets(runtimeAssets);
+  const browser = await launchBrowser();
+  t.after(() => browser.close());
+  const page = await browser.newPage();
+  page.setDefaultTimeout(5000);
+  const errors = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  await serve(page, assets, true);
+
+  /** Open the actual standalone renderer with optional appearance parameters. */
+  async function open(parameters = {}) {
+    const query = new URLSearchParams({ player: "9", skin: "ds5", disconnectedTint: "#00000000", disconnectedOpacity: "100", ...parameters });
+    await page.goto(`https://stream.test/controller/?${query}`);
+    await page.evaluate(() => byStream.ready);
+    await page.locator("#gamepads .controller svg").first().waitFor({ state: "attached" });
+  }
+
+  /** Read actual surface and marking colors, including hidden compact/pressure geometry. */
+  async function controlColors() {
+    return page.locator(".control-layer").evaluateAll((controls) =>
+      controls.map((control) => ({
+        name: control.dataset.name,
+        faces: [...control.querySelectorAll(".button-face, .button-detail.stock-plastic")].filter((node) => !node.closest("defs, .guide-logo-original")).map((node) => getComputedStyle(node).fill),
+        markings: [...control.querySelectorAll(".marking, .marking [fill], .marking [stroke], .direction-marking")]
+          .filter((node) => !node.closest("defs"))
+          .map((node) => {
+            const style = getComputedStyle(node);
+            return [style.fill, style.stroke, style.fillOpacity];
+          })
+      }))
+    );
+  }
+
+  await t.test("all control surfaces receive a light tint while markings and input remain independent", async () => {
+    for (const [skin, layout] of [
+      ["ds5", "full"],
+      ["ds5", "minimal"],
+      ["xseries", "full"],
+      ["gcn", "full"]
+    ]) {
+      const parameters = { skin, layout, customColors: "yes", controllerColor: "#ab31e3" };
+      await open(parameters);
+      const original = await controlColors();
+      await open({ ...parameters, tintControls: "yes" });
+      const tinted = await controlColors();
+      for (let i = 0; i < original.length; i++) {
+        assert.deepEqual(tinted[i].markings, original[i].markings, `${skin}/${layout}/${original[i].name}: retain marking colors`);
+        for (let j = 0; j < original[i].faces.length; j++) {
+          const before = original[i].faces[j].match(/[\d.]+/g)?.map(Number);
+          if (!before || before.length !== 3) continue;
+          const after = tinted[i].faces[j].match(/[\d.]+/g).map(Number);
+          assert.notDeepEqual(after, before, `${skin}/${layout}/${original[i].name}: surface is tinted`);
+          const tint = [171, 49, 227];
+          for (let channel = 0; channel < 3; channel++) {
+            assert.ok(Math.abs(after[channel] - before[channel]) <= Math.abs(tint[channel] - before[channel]) * 0.25 + 1, "Tint preserves most of each hardware color");
+          }
+        }
+      }
+      if (skin === "ds5" && layout === "full") {
+        await page.keyboard.down("KeyJ");
+        await page.locator('.control-layer[data-input="button:0"].pressed').waitFor();
+        await page.keyboard.up("KeyJ");
+        await page.locator('.control-layer[data-input="button:0"].pressed').waitFor({ state: "detached" });
+        await page.keyboard.down("KeyE");
+        await page.waitForFunction(() => Number(document.querySelector('.analog-trigger[data-input="button:6"] .trigger-fill-rect').getAttribute("height")) > 0);
+        assert.ok(await page.locator('.analog-trigger[data-input="button:6"] .trigger-active .button-face').count());
+        await page.keyboard.up("KeyE");
+        await page.waitForFunction(() => Number(document.querySelector('.analog-trigger[data-input="button:6"] .trigger-fill-rect').getAttribute("height")) === 0);
+      }
+    }
+  });
+
+  await open();
+  const image = await page.evaluate(() => {
+    const canvas = document.createElement("canvas");
+    canvas.width = canvas.height = 32;
+    const context = canvas.getContext("2d");
+    context.fillStyle = "#dcb47880";
+    context.fillRect(0, 0, 16, 32);
+    context.fillStyle = "#4696dc";
+    context.fillRect(16, 0, 16, 32);
+    return canvas.toDataURL();
+  });
+  const guide = { customGuide: "yes", guideSource: "image", guideImage: image };
+
+  /** Sample the real rendered logo against transparency, excluding the controller underneath. */
+  async function logoPixels(parameters) {
+    await open({ ...guide, ...parameters });
+    await page.locator(".guide-logo-custom").waitFor();
+    await page.addStyleTag({ content: ".controller-background, .guide-custom-housing { visibility: hidden !important; }" });
+    const png = await page.locator(".guide-logo-custom").screenshot({ omitBackground: true });
+    return page.evaluate(async (base64) => {
+      const image = new Image();
+      image.src = `data:image/png;base64,${base64}`;
+      await image.decode();
+      const canvas = document.createElement("canvas");
+      canvas.width = image.width;
+      canvas.height = image.height;
+      const context = canvas.getContext("2d");
+      context.drawImage(image, 0, 0);
+      return [0.25, 0.75].map((x) => [...context.getImageData(Math.floor(image.width * x), Math.floor(image.height / 2), 1, 1).data]);
+    }, png.toString("base64"));
+  }
+
+  await t.test("guide blend modes preserve translucent and opaque image pixels", async () => {
+    const original = await logoPixels({ guideColorMode: "original" });
+    assert.ok(Math.abs(original[0][3] - 128) <= 2, "Fixture contains translucent pixels");
+    assert.equal(original[1][3], 255);
+    assert.deepEqual(await logoPixels({ guideColorMode: "tint", guideTintStrength: "0" }), original, "Zero strength preserves original pixels");
+    for (const guideBlendMode of ["multiply", "overlay", "soft-light", "color"]) {
+      const tinted = await logoPixels({ guideColorMode: "tint", guideTintColor: "#70dd52", guideTintStrength: "65", guideBlendMode });
+      for (let i = 0; i < original.length; i++) {
+        assert.ok(Math.abs(tinted[i][3] - original[i][3]) <= 2, `${guideBlendMode}: source alpha is preserved`);
+        assert.notDeepEqual(tinted[i].slice(0, 3), original[i].slice(0, 3), `${guideBlendMode}: colors are blended`);
+      }
+    }
+    const monochrome = await logoPixels({ guideColorMode: "custom", guideColor: "#6699cc" });
+    for (const [channel, expected] of [102, 153, 204, 255].entries()) {
+      assert.ok(Math.abs(monochrome[1][channel] - expected) <= 2, "Existing monochrome links retain their behavior");
+    }
+  });
+
+  await t.test("tinted guide symbols survive layout changes and failed images retain the stock emblem", async () => {
+    await open({ customGuide: "yes", guideSymbol: "playstation", guideColorMode: "tint", guideTintColor: "#70dd52", guideTintStrength: "65" });
+    const logo = page.locator(".guide-logo-custom");
+    await logo.waitFor();
+    const filter = await logo.getAttribute("filter");
+    await page.evaluate(() => byControllerArtwork.setLayout(document.querySelector(".controller"), "minimal"));
+    assert.equal(await logo.getAttribute("filter"), filter);
+    await page.evaluate(() => byControllerArtwork.setLayout(document.querySelector(".controller"), "full"));
+    assert.equal(await logo.getAttribute("filter"), filter);
+    await open({ ...guide, guideImage: "missing-image.png", guideColorMode: "tint", guideTintStrength: "65" });
+    await page.waitForFunction(() => !document.querySelector(".guide-logo-custom"));
+    assert.notEqual(await page.locator(".guide-logo-original").evaluate((node) => getComputedStyle(node).display), "none");
+  });
+
+  assert.deepEqual(errors, [], "No uncaught controller errors");
+});

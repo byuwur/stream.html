@@ -191,7 +191,7 @@ async function initControllerResource() {
         default: "no",
         label: "Tint controls",
         section: "Appearance",
-        description: "Tints button plastics; rubber, shoulders, and mechanical parts keep their colors.",
+        description: "Subtly tints buttons, D-pad, sticks, shoulders, and triggers while preserving their original colors and markings.",
         checkedValue: "yes",
         uncheckedValue: "no",
         options: { yes: "Yes", no: "No" },
@@ -298,11 +298,23 @@ async function initControllerResource() {
         label: "Logo color",
         section: "Appearance",
         subsection: "Guide button",
-        options: { original: "Original colors", custom: "Custom / monochrome" },
+        options: { original: "Original colors", tint: "Tint", custom: "Custom / monochrome" },
         when: ["customGuide", "yes"],
         retainInactive: true
       },
       guideColor: { type: "color", default: "#ffffff", label: "Custom logo color", section: "Appearance", subsection: "Guide button", maxlength: 9, when: ["guideColorMode", "custom"], retainInactive: true },
+      guideTintColor: { type: "color", default: "#ffffff", label: "Tint color", section: "Appearance", subsection: "Guide button", maxlength: 9, when: ["guideColorMode", "tint"], retainInactive: true },
+      guideTintStrength: { type: "number", default: 0, label: "Tint strength (%)", section: "Appearance", subsection: "Guide button", min: 0, max: 100, when: ["guideColorMode", "tint"], retainInactive: true },
+      guideBlendMode: {
+        type: "select",
+        default: "multiply",
+        label: "Blend mode",
+        section: "Appearance",
+        subsection: "Guide button",
+        options: { multiply: "Multiply", overlay: "Overlay", "soft-light": "Soft-light", color: "Color" },
+        when: ["guideColorMode", "tint"],
+        retainInactive: true
+      },
       guideScale: { type: "number", default: 100, label: "Logo scale (%)", section: "Appearance", subsection: "Guide button", min: 50, max: 150, step: 1, when: ["customGuide", "yes"], retainInactive: true },
       guideOffsetX: { type: "number", default: 0, label: "Logo position X (%)", section: "Appearance", subsection: "Guide button", min: -25, max: 25, step: 1, when: ["customGuide", "yes"], retainInactive: true },
       guideOffsetY: { type: "number", default: 0, label: "Logo position Y (%)", section: "Appearance", subsection: "Guide button", min: -25, max: 25, step: 1, when: ["customGuide", "yes"], retainInactive: true },
@@ -1083,7 +1095,7 @@ async function initControllerResource() {
  * @file Mount editable SVG documents. Geometry and per-model bindings belong to controllers/<id>.svg.
  */
 /**
- * Tint plastic surfaces without changing their geometry, lighting, or independent input filters.
+ * Subtly tint control surfaces without changing their markings, lighting, or input filters.
  * @param {HTMLElement} controller Mounted controller.
  * @param {string} color Validated shell color in hexadecimal.
  * @returns {void}
@@ -1092,39 +1104,63 @@ function tintControllerControls(controller, color) {
   let hex = color.replace("#", "");
   if (hex.length <= 4) hex = [...hex].map((digit) => digit + digit).join("");
   const shell = [0, 2, 4].map((offset) => parseInt(hex.slice(offset, offset + 2), 16));
-  const surfaces = [...controller.querySelectorAll(".controller-background .control-tint-face"), ...controller.querySelectorAll('.control-layer:not(.stick):not([data-name*="-shoulder-"])')];
+  const surfaces = controller.querySelectorAll(".controller-background .control-tint-face, .control-layer");
   for (const control of surfaces) {
-    let surface;
-    const faces = control.matches(".control-tint-face") ? [control] : control.querySelectorAll(".button-face, .gcn-face");
+    const faces = control.matches(".control-tint-face") ? [control] : control.querySelectorAll(".button-face, .gcn-face, .button-detail.stock-plastic");
     for (const face of faces) {
-      if (face.closest(".guide-logo-original")) continue;
+      if (face.closest("defs, .guide-logo-original")) continue;
       const original = getComputedStyle(face)
         .fill.match(/[\d.]+/g)
         ?.slice(0, 3)
         .map(Number);
       if (!original || original.length !== 3) continue;
-      const tinted = original.map((channel, index) => Math.round((channel + shell[index]) / 2));
+      // Retain most of each hardware color, including the contrasting trigger-pressure fill.
+      const tinted = original.map((channel, index) => Math.round(channel * 0.8 + shell[index] * 0.2));
       face.style.fill = `rgb(${tinted.join(", ")})`;
-      surface ||= tinted;
-    }
-    if (!surface) continue;
-    const darken = Math.max(...surface) > 150;
-    const ink = `#${surface
-      .map((channel) =>
-        Math.round(darken ? channel * 0.62 : channel + (255 - channel) * 0.4)
-          .toString(16)
-          .padStart(2, "0")
-      )
-      .join("")}`;
-    for (const marking of control.querySelectorAll(".marking")) {
-      for (const node of [marking, ...marking.querySelectorAll("[fill], [stroke]")]) {
-        const style = getComputedStyle(node);
-        if (style.fill !== "none") node.style.fill = ink;
-        if (style.stroke !== "none") node.style.stroke = ink;
-        if (node.hasAttribute("fill-opacity")) node.style.fillOpacity = "1";
-      }
     }
   }
+}
+
+/**
+ * Build an isolated image/logo tint filter shared by shell and guide customization.
+ * @param {string} id Unique filter ID within this controller instance.
+ * @param {string} color Validated hexadecimal tint color, including optional alpha.
+ * @param {number} strength Tint strength from 0 to 100 percent.
+ * @param {string} mode Requested blend mode; unsupported modes use multiply.
+ * @returns {SVGFilterElement} Unmounted definition; the caller owns its SVG and lifetime.
+ */
+function controllerTintFilter(id, color, strength, mode) {
+  const ns = "http://www.w3.org/2000/svg";
+  const filter = document.createElementNS(ns, "filter");
+  filter.id = id;
+  filter.setAttribute("x", "0");
+  filter.setAttribute("y", "0");
+  filter.setAttribute("width", "1");
+  filter.setAttribute("height", "1");
+  filter.setAttribute("color-interpolation-filters", "sRGB");
+  // Blend against an opaque copy, then restore source alpha once so partial tint
+  // preserves translucent pixels without including the shell or page background.
+  const opaque = document.createElementNS(ns, "feComponentTransfer");
+  opaque.setAttribute("in", "SourceGraphic");
+  opaque.setAttribute("result", "opaque-image");
+  const opacity = document.createElementNS(ns, "feFuncA");
+  opacity.setAttribute("type", "linear");
+  opacity.setAttribute("slope", "0");
+  opacity.setAttribute("intercept", "1");
+  opaque.append(opacity);
+  const flood = document.createElementNS(ns, "feFlood");
+  flood.setAttribute("flood-color", color);
+  flood.setAttribute("flood-opacity", strength / 100);
+  flood.setAttribute("result", "tint");
+  const blend = document.createElementNS(ns, "feBlend");
+  blend.setAttribute("in", "tint");
+  blend.setAttribute("in2", "opaque-image");
+  blend.setAttribute("mode", CSS.supports("mix-blend-mode", mode) ? mode : "multiply");
+  const alpha = document.createElementNS(ns, "feComposite");
+  alpha.setAttribute("in2", "SourceAlpha");
+  alpha.setAttribute("operator", "in");
+  filter.append(opaque, flood, blend, alpha);
+  return filter;
 }
 
 /** Apply independent shell colors, vector details, and guide customization to a fresh mount. */
@@ -1186,6 +1222,11 @@ function customizeControllerAppearance(controller, settings) {
   const content = document.createElementNS(ns, "g");
   content.classList.add("guide-logo-custom");
   content.setAttribute("clip-path", `url(${slot.dataset.guideClip})`);
+  if (settings.guideColorMode === "tint" && settings.guideTintStrength > 0) {
+    const filter = controllerTintFilter(`${slot.id}-logo-tint`, settings.guideTintColor, settings.guideTintStrength, settings.guideBlendMode);
+    slot.closest("svg").querySelector("defs").append(filter);
+    content.setAttribute("filter", `url(#${filter.id})`);
+  }
   const reveal = () => {
     original.style.display = "none";
     if (housing) housing.style.display = "inline";
@@ -1291,36 +1332,7 @@ function customizeControllerShell(controller, settings, signal) {
     cy = y + height / 2;
   image.setAttribute("transform", `translate(${cx + (width * settings.shellPositionX) / 100} ${cy + (height * settings.shellPositionY) / 100}) rotate(${settings.shellRotation}) scale(${settings.shellScale / 100}) translate(${-cx} ${-cy})`);
   if (settings.shellAppearance === "tint" && settings.shellTintStrength > 0) {
-    // SourceGraphic + flood are a closed composition: no page background or other SVG layers enter.
-    const filter = document.createElementNS(ns, "filter");
-    filter.id = `${prefix}-tint`;
-    filter.setAttribute("x", "0");
-    filter.setAttribute("y", "0");
-    filter.setAttribute("width", "1");
-    filter.setAttribute("height", "1");
-    filter.setAttribute("color-interpolation-filters", "sRGB");
-    // Blend against an opaque copy, then restore source alpha once. Otherwise partial tint
-    // would multiply translucent image alpha by itself and change its transparency.
-    const opaque = document.createElementNS(ns, "feComponentTransfer");
-    opaque.setAttribute("in", "SourceGraphic");
-    opaque.setAttribute("result", "opaque-image");
-    const opacity = document.createElementNS(ns, "feFuncA");
-    opacity.setAttribute("type", "linear");
-    opacity.setAttribute("slope", "0");
-    opacity.setAttribute("intercept", "1");
-    opaque.append(opacity);
-    const flood = document.createElementNS(ns, "feFlood");
-    flood.setAttribute("flood-color", settings.shellTintColor);
-    flood.setAttribute("flood-opacity", settings.shellTintStrength / 100);
-    flood.setAttribute("result", "tint");
-    const blend = document.createElementNS(ns, "feBlend");
-    blend.setAttribute("in", "tint");
-    blend.setAttribute("in2", "opaque-image");
-    blend.setAttribute("mode", CSS.supports("mix-blend-mode", settings.shellBlendMode) ? settings.shellBlendMode : "multiply");
-    const alpha = document.createElementNS(ns, "feComposite");
-    alpha.setAttribute("in2", "SourceAlpha");
-    alpha.setAttribute("operator", "in");
-    filter.append(opaque, flood, blend, alpha);
+    const filter = controllerTintFilter(`${prefix}-tint`, settings.shellTintColor, settings.shellTintStrength, settings.shellBlendMode);
     definitions.append(filter);
     image.setAttribute("filter", `url(#${filter.id})`);
   }
