@@ -28,6 +28,6 @@ test("keyboard and mouse reflect presses, releases, and interrupted holds", { ti
   await page.keyboard.down("KeyW");
   await page.evaluate(() => window.dispatchEvent(new Event("blur")));
   assert.equal(await page.locator("#keyboard .pressed, #mouse .pressed").count(), 0);
-  assert.ok(await page.locator(".history-entry").count() > 0);
+  assert.ok((await page.locator(".history-entry").count()) > 0);
   assert.deepEqual(errors, []);
 });
