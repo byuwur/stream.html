@@ -882,8 +882,6 @@ function createImageTint(defs, settings, svg) {
 .history-prompt svg { display: block; width: 1.5em; height: 1.5em; overflow: hidden; }
 .history-count { font: inherit; font-size: 0.65em; }
 .history-count:empty { display: none; }
-.input-history[data-compact="true"] .history-entry { flex-direction: column; align-items: center; width: 100%; }
-.input-history[data-compact="true"] .history-prompt { max-width: 100%; white-space: normal; overflow-wrap: anywhere; text-align: center; }
 `;
     const position = document.createElement("div");
     position.className = "input-history-position";
@@ -899,8 +897,7 @@ function createImageTint(defs, settings, svg) {
     const keyHeight = settings.historySize * (settings.historyStyle === "svg" ? 1.5 : 1.2);
     const entryHeight = Math.max(settings.historySize * 1.5, keyHeight + settings.historySize * 0.24 + 2);
     const narrow = !horizontal && settings.historyWidth === 0 && settings.historyWidthMode !== "fill";
-    root.dataset.compact = String(narrow);
-    root.style.width = settings.historyWidth ? `${settings.historyWidth}px` : !narrow ? "100%" : `${Math.ceil(settings.historySize * 2 + 2 + settings.historyPadding * 2)}px`;
+    root.style.width = settings.historyWidth ? `${settings.historyWidth}px` : !narrow ? "100%" : "max-content";
     root.style.height = settings.historyHeight ? `${settings.historyHeight}px` : !horizontal || settings.historyHeightMode === "fill" ? "100%" : `${Math.ceil(entryHeight + settings.historyPadding * 2)}px`;
     const scale = settings.historyScale / 100;
     const maximumHeight = `calc((100vh - 32px) / ${Math.abs(scale) || 1})`;

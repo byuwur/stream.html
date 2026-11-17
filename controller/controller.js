@@ -654,7 +654,7 @@ async function initControllerResource() {
           const threshold = id === 6 || id === 7 ? tester.DIGITAL_THRESHOLD : settings.skin === "n64" && id >= 18 && id <= 21 ? tester.ANALOGUE_STICK_THRESHOLD : tester.ANALOGUE_BUTTON_THRESHOLD;
           if (buttonValue(digitalValue(pad, id)) <= threshold) return;
           const label = control.node.dataset.label || control.node.getAttribute("aria-label") || name;
-          tokens.push({ id: `${source}:${name}`, source, sourceLabel: player === 9 ? "KB" : `P${player}`, label, prompt: () => controllerHistoryPrompt(control.node) });
+          tokens.push({ id: `${source}:${name}`, source, label, prompt: () => controllerHistoryPrompt(control.node) });
         });
         for (const [index, name] of [
           [0, "stick-1"],
@@ -671,7 +671,6 @@ async function initControllerResource() {
           tokens.push({
             id: `${source}:${name}:${label}`,
             source,
-            sourceLabel: player === 9 ? "KB" : `P${player}`,
             label: digital ? label : `${index ? "RS" : "LS"} ${label}`,
             prompt: () => controllerHistoryPrompt(control.node, direction)
           });
@@ -977,6 +976,9 @@ async function initControllerResource() {
     } else {
       players = [Number(settings.player)];
     }
+    // Connection changes replace the history too, so multiple mounted players never record inputs.
+    history?.destroy();
+    history = players.length === 1 ? byStream.inputHistory.create(settings) : null;
     container.replaceChildren();
     container.dataset.gamepadCount = gamepadSupport.connectedCount;
     tester.controls.clear();
@@ -1086,7 +1088,7 @@ async function initControllerResource() {
   }
 
   const settings = await byStream.initResource(resource, { gamepadSupport, buttonValue, copyGamepad });
-  const history = byStreamOverlay ? byStream.inputHistory.create(settings) : null;
+  let history = null;
   gamepadSupport.init();
   if (byStreamOverlay) initController();
 }
@@ -1687,7 +1689,18 @@ async function loadControllerArtwork(requiredSkin) {
     const section = "Input History";
     const active = { section, when: ["showHistory", "yes"], retainInactive: true };
     const result = {
-      showHistory: { type: "switch", default: "no", label: "Show Input History", section, checkedValue: "yes", uncheckedValue: "no", options: { yes: "On", no: "Off" } },
+      showHistory: {
+        type: "switch",
+        default: "no",
+        label: "Show Input History",
+        section,
+        description: "Available while exactly one controller is displayed.",
+        checkedValue: "yes",
+        uncheckedValue: "no",
+        options: { yes: "On", no: "Off" },
+        when: (settings) => !["all-gamepads", "all-inputs"].includes(settings.player),
+        retainInactive: true
+      },
       historyStyle: { ...active, type: "select", default: "svg", label: "Prompts", options: { svg: "SVG artwork", text: "Plain text" } },
       historyOrientation: { ...active, type: "select", default: "vertical", label: "Orientation", options: { vertical: "Vertical", horizontal: "Horizontal" } },
       historyOrder: { ...active, type: "select", default: "first", label: "Newest entry", options: { first: "First (top / left)", last: "Last (bottom / right)" } },
@@ -1793,13 +1806,10 @@ async function loadControllerArtwork(requiredSkin) {
   background: var(--history-entry);
   white-space: nowrap;
 }
-.history-entry small { font-size: 0.45em; }
 .history-prompt { display: inline-flex; min-width: 0; flex-shrink: 1; }
 .history-prompt svg { display: block; width: 1.5em; height: 1.5em; overflow: hidden; }
 .history-count { font: inherit; font-size: 0.65em; }
 .history-count:empty { display: none; }
-.input-history[data-compact="true"] .history-entry { flex-direction: column; align-items: center; width: 100%; }
-.input-history[data-compact="true"] .history-prompt { max-width: 100%; white-space: normal; overflow-wrap: anywhere; text-align: center; }
 `;
     const position = document.createElement("div");
     position.className = "input-history-position";
@@ -1815,8 +1825,7 @@ async function loadControllerArtwork(requiredSkin) {
     const keyHeight = settings.historySize * (settings.historyStyle === "svg" ? 1.5 : 1.2);
     const entryHeight = Math.max(settings.historySize * 1.5, keyHeight + settings.historySize * 0.24 + 2);
     const narrow = !horizontal && settings.historyWidth === 0 && settings.historyWidthMode !== "fill";
-    root.dataset.compact = String(narrow);
-    root.style.width = settings.historyWidth ? `${settings.historyWidth}px` : !narrow ? "100%" : `${Math.ceil(settings.historySize * 2 + 2 + settings.historyPadding * 2)}px`;
+    root.style.width = settings.historyWidth ? `${settings.historyWidth}px` : !narrow ? "100%" : "max-content";
     root.style.height = settings.historyHeight ? `${settings.historyHeight}px` : !horizontal || settings.historyHeightMode === "fill" ? "100%" : `${Math.ceil(entryHeight + settings.historyPadding * 2)}px`;
     const scale = settings.historyScale / 100;
     const maximumHeight = `calc((100vh - 32px) / ${Math.abs(scale) || 1})`;
@@ -1904,11 +1913,6 @@ async function loadControllerArtwork(requiredSkin) {
     /** Paint a row's current combination using safe labels and source-owned SVG clones. */
     function paint(row) {
       const content = document.createDocumentFragment();
-      if (row.sourceLabel) {
-        const source = document.createElement("small");
-        source.textContent = row.sourceLabel;
-        content.append(source);
-      }
       row.tokens.forEach((token, index) => {
         if (index) {
           const plus = document.createElement("span");
@@ -1939,7 +1943,7 @@ async function loadControllerArtwork(requiredSkin) {
 
     /**
      * Record a new physical press; repeat events and still-held inputs are ignored.
-     * @param {Object} token Stable id, label, source, optional modifier/sourceLabel and SVG prompt factory.
+     * @param {Object} token Stable id, label, source, optional modifier and SVG prompt factory.
      */
     function press(token) {
       if (disposed || document.hidden || held.has(token.id)) return;
@@ -1970,7 +1974,7 @@ async function loadControllerArtwork(requiredSkin) {
       }
       const node = document.createElement("div");
       node.className = "history-entry";
-      last = { node, tokens, source: token.source, sourceLabel: token.sourceLabel, count: 1, time: now };
+      last = { node, tokens, source: token.source, count: 1, time: now };
       rows.push(last);
       if (settings.historyOrder === "first") root.prepend(node);
       else root.append(node);
