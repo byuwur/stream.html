@@ -48,13 +48,17 @@ test("shared resource core", { timeout: 30000 }, async (t) => {
     assert.equal(await page.locator("html[data-overlay] #overlay").count(), 1);
   });
 
-  await t.test("invalid and unknown URL values cannot replace defaults", async () => {
+  await t.test("finite numbers clamp to their limits while invalid choices and unknown keys retain defaults", async () => {
     await page.goto("http://stream.test/core/?size=-1&layout=unknown&extra=untrusted");
     const result = await page.evaluate(async () => {
       const settings = await initialized;
       return { text: settings.text, size: settings.size, layout: settings.layout, extra: Object.hasOwn(settings, "extra") };
     });
-    assert.deepEqual(result, { text: "default", size: 16, layout: "plain", extra: false });
+    assert.deepEqual(result, { text: "default", size: 1, layout: "plain", extra: false });
+    await page.goto("http://stream.test/core/?size=1000000");
+    assert.equal(await page.evaluate(async () => (await initialized).size), 100);
+    await page.goto("http://stream.test/core/?size=not-a-number");
+    assert.equal(await page.evaluate(async () => (await initialized).size), 16);
   });
 
   await t.test("generated URLs preserve reserved text and nondefault settings", async () => {

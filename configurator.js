@@ -857,7 +857,7 @@
           }
           container = subsections.get(key);
         }
-        const widget = !["switch", "select", "entries", "mapping"].includes(field.type) || (field.type === "select" && Object.keys(field.options).length <= 3);
+        const widget = !["switch", "select", "entries", "mapping"].includes(field.type) || (field.type === "select" && (field.choiceButtons || Object.keys(field.options).length <= 3));
         const label = $(
           field.image || widget ? /* HTML */ `<div class="config-field form-label d-flex flex-column gap-1 w-100 mb-3"></div>` : /* HTML */ `<label class="config-field form-label d-flex flex-column gap-1 w-100 mb-3"></label>`
         ).appendTo(container);
@@ -1027,10 +1027,18 @@
         if (!data || typeof data !== "object" || Array.isArray(data)) throw new Error("Enter a JSON object with setting IDs as keys.");
         values = new URLSearchParams();
         for (const [name, value] of Object.entries(data)) {
-          if (!Object.hasOwn(parameterRules, name)) throw new Error(`Unknown setting: ${name}.`);
+          const rule = Object.hasOwn(parameterRules, name) ? parameterRules[name] : null;
+          if (!rule && !resource.legacyFields?.includes(name)) throw new Error(`Unknown setting: ${name}.`);
+          if (value === null || (rule && typeof value === "object" && typeof rule.default !== "object")) throw new Error(`Invalid value for ${rule?.label || name} (${name}).`);
+          values.set(name, typeof value === "object" ? JSON.stringify(value) : String(value));
+        }
+        resource.normalizeParameters?.(values);
+        for (const [name, value] of values) {
+          if (!Object.hasOwn(parameterRules, name)) continue;
           const rule = parameterRules[name];
-          const text = typeof value === "object" ? JSON.stringify(value) : String(value);
-          if (value === null || (typeof value === "object" && typeof rule.default !== "object") || !byStream.validParameter(parameterRules, name, text)) {
+          let text = value;
+          if (rule.type === "number" && text.trim() && Number.isFinite(Number(text))) text = String(Math.max(rule.min ?? -Infinity, Math.min(rule.max ?? Infinity, Number(text))));
+          if (!byStream.validParameter(parameterRules, name, text)) {
             throw new Error(`Invalid value for ${rule.label || name} (${name}).`);
           }
           values.set(name, text);
@@ -1135,7 +1143,7 @@
         return;
       }
       const generation = ++urlGeneration;
-      const parameters = await readURLParameters(parameterRules, url.search);
+      const parameters = await readURLParameters(parameterRules, url.search, resource.legacyFields);
       if (generation !== urlGeneration) return;
       // Omitted parameters reset to defaults instead of inheriting values from the previous form.
       jsonEdited = false;
@@ -1190,19 +1198,23 @@
     // ==== SELECT2 CONTROLS ====
     // ==========
 
-    /** Pair a bounded number's canonical text box with an unnamed, synchronized slider. */
+    /** Pair the canonical number box with an unnamed slider whose travel has practical bounds. */
     function initNumberRange(input, rule) {
-      if (!Number.isFinite(rule.min) || !Number.isFinite(rule.max)) return;
+      // Slider travel stays practical; the canonical number box retains the resource's full limits.
+      const seconds = /seconds|\(s\)/i.test(rule.label);
+      const degrees = /degrees?|\(deg\)/i.test(rule.label) || rule.styleUnit === "deg";
+      const min = Math.max(rule.min ?? -Infinity, rule.sliderMin ?? (degrees ? 0 : -100));
+      const max = Math.min(rule.max ?? Infinity, rule.sliderMax ?? (seconds ? 60 : degrees ? 360 : Math.max(100, Math.abs(Number(rule.default) || 0) * 2)));
       const jqInput = $(input);
       const row = $(/* HTML */ `<div class="number-range d-flex align-items-center gap-2"></div>`).insertBefore(jqInput);
       const slider = $(/* HTML */ `<input type="range" class="form-range m-0 flex-grow-1" />`)
-        .attr({ min: rule.min, max: rule.max, step: 1, "aria-label": `${rule.label} slider`, "aria-controls": input.id, "data-number-field": input.name })
+        .attr({ min, max: Math.max(min, max), step: rule.step === "any" ? 0.1 : rule.step || 1, "aria-label": `${rule.label} slider`, "aria-controls": input.id, "data-number-field": input.name })
         .appendTo(row);
       jqInput.addClass("range-value flex-shrink-0").appendTo(row);
       /** Reflect accepted source values/availability without replacing an incomplete numeric draft. */
       function sync() {
         const value = Number(input.value);
-        if (input.value !== "" && Number.isFinite(value) && value >= rule.min && value <= rule.max) slider.val(value);
+        if (input.value !== "" && Number.isFinite(value) && value >= (rule.min ?? -Infinity) && value <= (rule.max ?? Infinity)) slider.val(value);
         slider.prop("disabled", input.disabled);
       }
       slider.on("input change", function (event) {
@@ -1247,7 +1259,7 @@
 
     /** Enhance a small native select with keyboard-accessible segmented buttons; the select stays authoritative. */
     function initChoiceButtons(select, rule) {
-      if (select.options.length > 3 || !select.options.length) return;
+      if ((!rule.choiceButtons && select.options.length > 3) || !select.options.length) return;
       const jqSelect = $(select).addClass("visually-hidden").attr({ tabindex: -1, "aria-hidden": "true", "data-choice-buttons": "" });
       const group = $(/* HTML */ `<div class="choice-buttons btn-group w-100" role="group"></div>`).attr("aria-label", rule.label).insertAfter(jqSelect);
       for (const option of select.options) $(/* HTML */ `<button type="button" class="btn btn-outline-primary"></button>`).text(option.text).attr("data-value", option.value).appendTo(group);
@@ -2097,6 +2109,9 @@
             if (optional) jqInput.val("").trigger("input");
           });
         jqInput.on("input change", syncPicker);
+        jqInput.on("click", () => {
+          if (!input.disabled) picker.show();
+        });
         jqForm.on("reset", () =>
           setTimeout(() => {
             syncPicker();
@@ -2771,6 +2786,11 @@
       if (field.type === "checkbox" || field.validity.badInput) return;
       const rule = parameterRules[field.name];
       if (["entries", "mapping"].includes(rule.type)) return;
+      if (rule.type === "number" && field.value !== "" && Number.isFinite(Number(field.value))) {
+        const value = Number(field.value);
+        const clamped = Math.max(rule.min ?? -Infinity, Math.min(rule.max ?? Infinity, value));
+        if (value !== clamped) $(field).val(clamped).triggerHandler("sync.controls");
+      }
       if (["text", "textarea"].includes(rule.type) && !rule.styleProperty && !rule.validate) {
         if (!field.value.trim()) field.value = "";
         return;

@@ -31,6 +31,9 @@
  * @property {number} [min] Minimum accepted numeric value.
  * @property {number} [max] Maximum accepted numeric value.
  * @property {number|string} [step] Numeric increment or "any".
+ * @property {number} [sliderMin] Optional slider travel minimum; numeric validation still uses min.
+ * @property {number} [sliderMax] Optional slider travel maximum; numeric validation still uses max.
+ * @property {boolean} [choiceButtons] Display all select options as one row of choice buttons.
  * @property {number} [maxlength] Maximum accepted text or serialized-content length.
  * @property {string} [checkedValue] Serialized value when a switch is on.
  * @property {string} [uncheckedValue] Serialized value when a switch is off.
@@ -60,6 +63,7 @@
  * @property {ResourceFields} fields Parameter definitions in display order.
  * @property {Array<string>} urlRequired Active parameters retained even at defaults to enable overlay mode and preserve anchors/content.
  * @property {function(URLSearchParams): void} [normalizeParameters] Migrate decoded legacy parameters before validation, including editor imports.
+ * @property {string[]} [legacyFields] Retired URL keys accepted only for normalizeParameters().
  * @property {Object<string, ResourceValue>} [constants] Renderer-only defaults excluded from URL fields.
  * @property {Object<string, string>} [sectionIcons] Explicit icons for top-level sections.
  * @property {boolean|Object} [presets] Whether the editor exposes shared or resource-specific appearance presets.
@@ -201,9 +205,10 @@
    * This only decodes transport. applyParameters() validates and assigns resource values later.
    * @param {ResourceFields} fields Declared resource fields and their validation metadata.
    * @param {string} [search=location.search] Encoded query string to decode.
+   * @param {string[]} [legacyFields=[]] Retired keys to decode for the resource's migration hook.
    * @returns {Promise<{values: URLSearchParams, compressedFields: Set<string>, error: string}>} Decoded values, compressed field names, and a warning (empty on success).
    */
-  async function readURLParameters(fields, search = location.search) {
+  async function readURLParameters(fields, search = location.search, legacyFields = []) {
     const explicit = new URLSearchParams(search);
     const selectedFields = new Set();
     let errorMessage = "";
@@ -222,12 +227,12 @@
     const decoded = new URLSearchParams();
     // Decode fields independently so one broken compressed value does not discard valid neighbors.
     for (const [name, value] of values) {
-      if (!Object.hasOwn(fields, name)) continue;
+      if (!Object.hasOwn(fields, name) && !legacyFields.includes(name)) continue;
       if (value.startsWith("raw:")) decoded.append(name, value.slice(4));
       else if (value.startsWith("dr:")) {
         try {
           // Decompression limits use UTF-8 bytes: allow up to four per declared character, capped at 1 MiB.
-          const maxBytes = fields[name].maxlength ? Math.min(1048576, Number(fields[name].maxlength) * 4) : 1048576;
+          const maxBytes = fields[name]?.maxlength ? Math.min(1048576, Number(fields[name].maxlength) * 4) : 1048576;
           decoded.append(name, await global.decompress_url_data(value.slice(3), maxBytes));
           selectedFields.add(name);
         } catch (error) {
@@ -424,8 +429,9 @@
       // Custom validators also parse; calling validParameter() first would run them twice.
       if (rule.validate) parsed = rule.validate(value);
       else {
-        if (!validParameter(fields, name, value)) continue;
-        parsed = rule.type === "number" ? Number(value) : value;
+        const normalized = rule.type === "number" && value.trim() && Number.isFinite(Number(value)) ? String(Math.max(rule.min ?? -Infinity, Math.min(rule.max ?? Infinity, Number(value)))) : value;
+        if (!validParameter(fields, name, normalized)) continue;
+        parsed = rule.type === "number" ? Number(normalized) : normalized;
         if (["text", "textarea"].includes(rule.type) && !rule.styleProperty && !value.trim()) parsed = "";
       }
       if (parsed === null) continue;
@@ -1276,7 +1282,7 @@
     byStream.ready = editorReady
       .then(() => {
         const search = overlay ? location.search : (byStream.prepareResource?.(resource) ?? location.search);
-        return readURLParameters(resource.fields, search);
+        return readURLParameters(resource.fields, search, resource.legacyFields);
       })
       .then((parameters) => {
         resource.normalizeParameters?.(parameters.values);

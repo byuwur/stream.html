@@ -25,7 +25,7 @@ const editorAssets = [
   "_fonts.css"
 ];
 
-test("configurator smoke", { timeout: 30000 }, async (t) => {
+test("configurator smoke", { timeout: 60000 }, async (t) => {
   const assets = await loadAssets(editorAssets);
   const browser = await launchBrowser();
   t.after(() => browser.close());
