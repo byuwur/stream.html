@@ -421,13 +421,14 @@ Release notes pair each plain commit subject with a linked seven-character hash 
 | --- | --- | --- |
 | Original | Authored HTML. | Repository files and dependencies. |
 | Online | Editor and overlay; CDN assets. | Published tag and internet. |
-| Bundle | Editor and overlay; embedded JS/CSS. | CDN artwork for Controller/Keyboard. |
 | Standalone | Renderer; embedded JS/CSS. | URL settings; CDN artwork for Controller/Keyboard. |
-| Full ZIP | Editor, overlay, and SVG artwork. | Extract and serve over HTTP(S). |
-| Standalone ZIP | Renderer and SVG artwork. | URL settings; serve over HTTP(S). |
-| Embedded [EXPERIMENTAL] | Controller renderer and all SVG artwork. | URL settings; supports file://. |
+| Bundle | Editor and overlay; embedded JS/CSS. | CDN artwork for Controller/Keyboard. |
+| Standalone ZIP | Renderer and SVG artwork. | Extract and open index.html. |
+| Full ZIP | Editor, overlay, and SVG artwork. | Extract and open index.html. |
+| Standalone embedded [EXPERIMENTAL] | Renderer and SVG artwork in one HTML. | Open the file directly. |
+| Full embedded [EXPERIMENTAL] | Editor, overlay, and SVG artwork in one HTML. | Open the file directly. |
 
-Original, Online, Bundle, and Full ZIP include the configurator and support F2 switching between the editor and overlay. Standalone, Standalone ZIP, and Embedded contain the renderer only. Use the configurator's generated query string to apply settings to an overlay file. Prettier formats the surrounding HTML, and minified JavaScript and CSS occupy separate `<script>` and `<style>` blocks with `data-source` attributes identifying their original files.
+Original, Online, Bundle, Full ZIP, and Full embedded include the configurator and support F2 switching. Standalone editions contain the renderer only. ZIPs use embedded artwork on file:// and the separate SVG files over HTTP(S). Prettier formats the surrounding HTML, and minified JavaScript and CSS occupy separate `<script>` and `<style>` blocks with `data-source` attributes identifying their original files.
 
 Portable HTML embeds a 32px PNG favicon. Font Awesome icons, optional Google Fonts, and remote media load from their original hosts and require internet. Editor and renderer initialization tolerates missing icons. Configurator icons and Main/Popup social icons use Font Awesome. Controller and Keyboard ZIPs include their artwork at `{tool}/controllers/*.svg` or `{tool}/keys/*.svg` beside `{tool}/index.html`.
 
@@ -439,7 +440,7 @@ Use Node.js 22 or later. The tag is the release version authority; building does
 npm --prefix .github ci --ignore-scripts
 node .github/node_modules/playwright/cli.js install chromium
 export NODE_PATH="$PWD/.github/node_modules"
-node .github/scripts/build.mjs --tag v1.0.0
+node .github/scripts/build.mjs --tag v10
 npm --prefix .github test
 npm --prefix .github run release:test
 ```
@@ -450,25 +451,25 @@ Build, validation, and publishing contracts are documented in [build.mjs](.githu
 
 | Command | Purpose and outputs |
 | --- | --- |
-| `npm --prefix .github run release:build -- --tag v1.0.0` | Build all resource formats, ZIPs, the [EXPERIMENTAL] embedded Controller, release notes, manifest, and checksums in `dist/assets/`. |
+| `npm --prefix .github run release:build -- --tag v10` | Build all resource formats, ZIPs, the [EXPERIMENTAL] embedded Controller, release notes, manifest, and checksums in `dist/assets/`. |
 | `npm --prefix .github run release:test` | Check the generated inventory, artwork, browser startup, and publication safeguards with a mocked GitHub API. |
 | `npm --prefix .github run release:experiment` | Run `.github/tests/controller-experiment.mjs` against the generated embedded HTML and Controller ZIP, then write local performance diagnostics to `dist/experimental/report.json`. |
-| `node .github/scripts/build.mjs --tag v1.0.0 --update-dependencies` | Refresh pinned dependency hashes for review during an intentional dependency update. |
+| `node .github/scripts/build.mjs --tag v10 --update-dependencies` | Refresh pinned dependency hashes for review during an intentional dependency update. |
 | `node .github/scripts/build.mjs --check` | Validate the pushed tag and commit in the Actions release environment. |
 | `node .github/scripts/build.mjs --publish` | Upload and publish the tested `dist/assets/` inventory using the Actions release context and token. |
 
 Inspect `dist/assets/RELEASE_NOTES.md`, `manifest.json`, `SHA256SUMS`, and the HTML/ZIP files in `dist/assets/`. The manifest records every distribution, source dependency, size, and SHA-256. Browser checks initialize every portable distribution and exercise shared URL/editor behavior once per format. Online browser tests serve the future tag's project files from the checkout; they do not assert that an unpublished tag already exists on jsDelivr. Bundled browser tests block external application libraries, including Font Awesome, and test HTTP and downloaded-file entry points.
 
-Pinned remote application dependencies and CSS assets are integrity-checked against `.github/scripts/release-dependencies.json` and cached outside the repository. After deliberately changing CDN imports, run `node .github/scripts/build.mjs --tag v1.0.0 --update-dependencies`, review the lock changes, and rerun both suites. Do not refresh the lock to conceal an unexpected change to an existing pinned dependency. Required missing dependencies fail the build. New ordinary resources need no release list or download-table edits; register any new dynamically constructed asset paths in the `config.dynamicDependencies` object in `.github/scripts/build.mjs`. Module scripts require explicit import-graph support before distribution; current resources use classic scripts.
+Pinned remote application dependencies and CSS assets are integrity-checked against `.github/scripts/release-dependencies.json` and cached outside the repository. After deliberately changing CDN imports, run `node .github/scripts/build.mjs --tag v10 --update-dependencies`, review the lock changes, and rerun both suites. Do not refresh the lock to conceal an unexpected change to an existing pinned dependency. Required missing dependencies fail the build. New ordinary resources need no release list or download-table edits; register any new dynamically constructed asset paths in the `config.dynamicDependencies` object in `.github/scripts/build.mjs`. Module scripts require explicit import-graph support before distribution; current resources use classic scripts.
 
-For embedded project JavaScript and CSS, the builder prefers jsDelivr's generated `.min` files pinned to the exact source commit. Edited files and unavailable CDN copies use the current local esbuild pipeline. Generated CDN bytes are cached with checksums and recorded in the manifest. CSS bundling embeds its required assets. The embedded Controller experiment transforms authored source before local minification. Pinned SPA.js downloads can fall back to `SPA_ASSETS_ROOT` or the sibling `spa.js` checkout when local bytes match the dependency lock.
+For embedded project JavaScript and CSS, the builder prefers jsDelivr's generated `.min` files pinned to the exact source commit. Edited files and unavailable CDN copies use the current local esbuild pipeline. Generated CDN bytes are cached with checksums and recorded in the manifest. CSS bundling embeds its required assets. Controller and Keyboard artwork loaders are rewritten before minification for embedded files and ZIP file-mode fallback. Pinned SPA.js downloads can fall back to `SPA_ASSETS_ROOT` or the sibling `spa.js` checkout when local bytes match the dependency lock.
 
-### [EXPERIMENTAL] Embedded Controller
+### [EXPERIMENTAL] Embedded Controller and Keyboard
 
-Every build generates `dist/assets/controller.standalone.embedded.html`, includes it in the manifest and checksums, and lists it under **Embedded [EXPERIMENTAL]** in the release download table. Tag releases upload it with the other tested distributions. The normal release suite validates its embedded artwork and browser startup over HTTP and downloaded `file://` entry points.
+Every build generates `controller.standalone.embedded.html`, `controller.full.embedded.html`, `keyboard.standalone.embedded.html`, and `keyboard.full.embedded.html` in `dist/assets/`. Full editions include the configurator; standalone editions contain the renderer only. All four embed their original SVG artwork and work directly from disk. The release suite checks HTTP, downloaded HTML, extracted ZIPs, and full-edition configurator switching on `file://`.
 
 ```sh
-node .github/scripts/build.mjs --tag v1.0.0
+node .github/scripts/build.mjs --tag v10
 npm --prefix .github run release:experiment
 ```
 
@@ -481,13 +482,13 @@ The build writes diagnostic sizes to `dist/experimental/sizes.json`. `release:ex
 3. Once the tested commit is on `main`, deliberately create and push a version tag:
 
    ```sh
-   git tag v1.0.0
-   git push origin v1.0.0
+   git tag v10
+   git push origin v10
    ```
 
-4. Inspect [GitHub Actions](https://github.com/byuwur/stream.html/actions). Only a pushed `v*` tag starts publication; strict SemVer validation rejects malformed tags. Tags such as `v1.1.0-rc.1` create prereleases. Validation checks the owning repository, exact tagged commit, ancestry from `main`, and existing release state.
+4. Inspect [GitHub Actions](https://github.com/byuwur/stream.html/actions). Only a pushed `v*` tag starts publication; version validation accepts one-, two-, or three-part versions and rejects malformed tags. Tags such as `v1.1.0-rc.1` create prereleases. Validation checks the owning repository, exact tagged commit, ancestry from `main`, and existing release state.
 5. Build and core source/distribution tests must succeed before the publishing job receives write access. It uploads only the tested inventory into a draft, verifies uploaded names, sizes, and hashes, then publishes. Failures leave the release private. A rerun resumes an identical automation-owned draft; conflicting drafts and published releases are never overwritten. Same-tag runs are serialized.
-6. Verify the public [GitHub Release](https://github.com/byuwur/stream.html/releases): version, description, download links, every HTML file including the [EXPERIMENTAL] embedded Controller, Controller and Keyboard ZIPs, manifest, and checksums. Download representative files and verify their hashes. For example, `gh release view v1.0.0 --repo byuwur/stream.html` lists the published assets. Local tag creation alone publishes nothing.
+6. Verify the public [GitHub Release](https://github.com/byuwur/stream.html/releases): version, description, download links, every HTML file including the [EXPERIMENTAL] embedded Controller, Controller and Keyboard ZIPs, manifest, and checksums. Download representative files and verify their hashes. For example, `gh release view v10 --repo byuwur/stream.html` lists the published assets. Local tag creation alone publishes nothing.
 
 ## Other configurations and assets
 

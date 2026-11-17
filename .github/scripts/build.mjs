@@ -1,7 +1,7 @@
 /**
  * @file Build portable resource HTML, Controller/Keyboard ZIPs, manifests, checksums, and release notes.
  * Run from the repository root with node .github/scripts/build.mjs --tag <version>.
- * Every build includes the embedded Controller marked [EXPERIMENTAL].
+ * Every build includes full and standalone embedded Controller and Keyboard editions marked [EXPERIMENTAL].
  * --update-dependencies refreshes pinned dependency hashes for review.
  * --check validates a pushed tag. --publish uploads the tested inventory and publishes its verified draft.
  * Build outputs live in dist/assets. Size and performance diagnostics live in dist/experimental.
@@ -33,12 +33,16 @@ export const config = {
     "controller/controller.js": {
       directory: "controller/controllers",
       extension: ".svg",
-      baseExpression: "document.currentScript.src"
+      baseExpression: "document.currentScript.src",
+      requestExpression: "await fetch(new URL(`./controllers/${id}.svg`, controllerResourceURL))",
+      artworkKey: "id"
     },
     "keyboard/keyboard.js": {
       directory: "keyboard/keys",
       extension: ".svg",
-      baseExpression: "document.currentScript.src"
+      baseExpression: "document.currentScript.src",
+      requestExpression: "await fetch(new URL(`./keys/${asset}.svg`, keyboardResourceURL), { signal: requests.signal })",
+      artworkKey: "asset"
     }
   },
   optionalContent: ["Google Fonts selected through SPA.js _fonts.min.js", "User-configured images, logos, video, and QR link destinations"]
@@ -54,7 +58,7 @@ export const sha256 = (body) => createHash("sha256").update(body).digest("hex");
 
 /**
  * Validate the version used in release filenames and download URLs.
- * @param {string} tag SemVer version with a v prefix, including optional prerelease/build identifiers.
+ * @param {string} tag One-, two-, or three-part version with a v prefix and optional prerelease/build identifiers.
  * @returns {string} Accepted tag.
  * @throws {Error} Rejects malformed versions and whitespace.
  */
@@ -62,7 +66,7 @@ export function validateTag(tag) {
   // SemVer numeric prerelease identifiers cannot have leading zeroes.
   const number = "(?:0|[1-9][0-9]*)";
   const identifier = `(?:${number}|[0-9]*[A-Za-z-][0-9A-Za-z-]*)`;
-  assert.ok(!/\s/.test(tag) && new RegExp(`^v${number}\\.${number}\\.${number}(?:-${identifier}(?:\\.${identifier})*)?(?:\\+[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?$`).test(tag), `Invalid release tag: ${tag}`);
+  assert.ok(!/\s/.test(tag) && new RegExp(`^v${number}(?:\\.${number}){0,2}(?:-${identifier}(?:\\.${identifier})*)?(?:\\+[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?$`).test(tag), `Invalid release tag: ${tag}`);
   return tag;
 }
 
@@ -280,7 +284,7 @@ export function assertPinned(url) {
   assert.ok(!/@(?:latest|main|master)(?:[/?#]|$)/i.test(url.href), `Floating dependency: ${url}`);
   assert.ok(url.hostname === "cdn.jsdelivr.net" && /^\/gh\/[^/]+\/[^/@]+@[^/]+\//.test(url.pathname), `Unregistered or unversioned dependency: ${url}`);
   const ref = decodeURIComponent(url.pathname.match(/@([^/]+)\//)[1]);
-  assert.match(ref, /^(?:v?\d+\.\d+(?:\.\d+)?(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?|[0-9a-f]{40})$/, `Dependency must name a version or full commit: ${url}`);
+  assert.match(ref, /^(?:v?\d+(?:\.\d+){0,2}(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?|[0-9a-f]{40})$/, `Dependency must name a version or full commit: ${url}`);
 }
 
 /**
@@ -455,7 +459,7 @@ export function releaseChangelog(tag, directory = root) {
  * @returns {string} Markdown used by RELEASE_NOTES.md and the GitHub Release description.
  */
 export function releaseNotes(manifest) {
-  const formats = ["original", "online", "bundle", "standalone", "full-zip", "standalone-zip", "embedded"];
+  const formats = ["original", "online", "standalone", "bundle", "standalone-zip", "full-zip", "embedded", "full-embedded"];
   const lines = [`# stream.html ${manifest.tag}`, "", "Configurable browser overlays for OBS, generated from the tagged source."];
   if (manifest.changelog) {
     const { previousTag, ref, commits } = manifest.changelog;
@@ -478,20 +482,21 @@ export function releaseNotes(manifest) {
     "| --- | --- | --- |",
     "| Original | Authored HTML. | Repository files and dependencies. |",
     "| Online | Editor and overlay; CDN assets. | Published tag and internet. |",
-    "| Bundle | Editor and overlay; embedded JS/CSS. | CDN artwork for Controller/Keyboard. |",
     "| Standalone | Renderer; embedded JS/CSS. | URL settings; CDN artwork for Controller/Keyboard. |",
-    "| Full ZIP | Editor, overlay, and SVG artwork. | Extract and serve over HTTP(S). |",
-    "| Standalone ZIP | Renderer and SVG artwork. | URL settings; serve over HTTP(S). |",
-    "| Embedded [EXPERIMENTAL] | Controller renderer and all SVG artwork. | URL settings; supports file://. |",
+    "| Bundle | Editor and overlay; embedded JS/CSS. | CDN artwork for Controller/Keyboard. |",
+    "| Standalone ZIP | Renderer and SVG artwork. | Extract and open index.html. |",
+    "| Full ZIP | Editor, overlay, and SVG artwork. | Extract and open index.html. |",
+    "| Standalone embedded [EXPERIMENTAL] | Renderer and SVG artwork in one HTML. | Open the file directly. |",
+    "| Full embedded [EXPERIMENTAL] | Editor, overlay, and SVG artwork in one HTML. | Open the file directly. |",
     "",
-    "Original, Online, Bundle, and Full ZIP include the configurator and support F2 switching between the editor and overlay. Standalone, Standalone ZIP, and Embedded contain the renderer only. Use the configurator's generated query string to apply settings to an overlay file.",
+    "Original, Online, Bundle, Full ZIP, and Full embedded include the configurator and support F2 switching. Standalone editions contain the renderer only. ZIPs use embedded artwork on file:// and the separate SVG files over HTTP(S).",
     "",
     "Font Awesome icons, optional Google Fonts, and remote media load from their original hosts and require internet. Editor and renderer initialization tolerates missing icons.",
     "",
     "## Downloads",
     "",
-    "| Resource | Original | Online | Bundle | Standalone | Full ZIP | Standalone ZIP | Embedded [EXPERIMENTAL] |",
-    "| --- | --- | --- | --- | --- | --- | --- | --- |"
+    "| Resource | Original | Online | Standalone | Bundle | Standalone ZIP | Full ZIP | Standalone embedded [EXPERIMENTAL] | Full embedded [EXPERIMENTAL] |",
+    "| --- | --- | --- | --- | --- | --- | --- | --- | --- |"
   );
   for (const resource of manifest.resources) {
     const cells = formats.map((format) => {
@@ -501,8 +506,7 @@ export function releaseNotes(manifest) {
     lines.push(`| ${resource.name.replaceAll("|", "\\|")} | ${cells.join(" | ")} |`);
   }
   lines.push("", "Use a current Chromium-based browser. Paste the configured HTML URL into an OBS Browser Source and use Interact for keyboard controls. OBS and multi-hour endurance require separate manual validation.");
-  const experiment = manifest.assets.find((item) => item.format === "embedded");
-  if (experiment) lines.push("", "## [EXPERIMENTAL] Embedded Controller", "", `Single-file Controller overlay with original SVG artwork embedded for downloaded file:// use. [Download](${downloadURL(manifest.tag, experiment.file)})`);
+
   lines.push("", `Integrity and dependency inventory: [manifest.json](${downloadURL(manifest.tag, "manifest.json")}); verify downloads with [SHA256SUMS](${downloadURL(manifest.tag, "SHA256SUMS")}).`, "");
   return lines.join("\n");
 }
@@ -607,11 +611,10 @@ async function buildRelease(tag, options) {
       if (jsCache.has(key)) return jsCache.get(key);
       const result = (async () => {
         const bytes = await dependencies.read(url);
-        // The embedded-artwork experiment rewrites an authored fetch expression before minification.
-        let preferred = artworkMode === "embedded" ? null : await dependencies.minified(url, bytes, manifest.changelog.commit);
-        let source = (preferred || bytes).toString();
         const relative = url.protocol === "file:" ? path.relative(root, fileURLToPath(url)).split(path.sep).join("/") : "";
         const dynamic = config.dynamicDependencies[relative];
+        let preferred = dynamic && artworkMode !== "remote" ? null : await dependencies.minified(url, bytes, manifest.changelog.commit);
+        let source = (preferred || bytes).toString();
         if (dynamic) {
           if (!source.includes(dynamic.baseExpression)) {
             source = bytes.toString();
@@ -620,10 +623,12 @@ async function buildRelease(tag, options) {
           assert.ok(source.includes(dynamic.baseExpression), `Asset base changed in ${relative}; review the build transform`);
           const base = artworkMode === "packaged" ? "document.baseURI" : JSON.stringify(`${cdn}${relative}`);
           source = source.replace(dynamic.baseExpression, base);
-          if (artworkMode === "embedded") {
-            const request = "await fetch(new URL(`./controllers/${id}.svg`, controllerResourceURL))";
-            assert.equal(source.split(request).length, 2, "Controller artwork request changed; review the embedded experiment");
-            source = `const controllerEmbeddedArtwork = JSON.parse(document.getElementById("controller-artwork").textContent);\n${source.replace(request, "new Response(controllerEmbeddedArtwork[id])")}`;
+          if (artworkMode === "embedded" || artworkMode === "packaged") {
+            assert.equal(source.split(dynamic.requestExpression).length, 2, `Artwork request changed in ${relative}; review the build transform`);
+            const response = `new Response(streamEmbeddedArtwork[${dynamic.artworkKey}])`;
+            const request = artworkMode === "embedded" ? response : `(location.protocol === "file:" ? ${response} : ${dynamic.requestExpression})`;
+            const artworkId = `${path.dirname(dynamic.directory)}-artwork`;
+            source = `const streamEmbeddedArtwork = JSON.parse(document.getElementById(${JSON.stringify(artworkId)}).textContent);\n${source.replace(dynamic.requestExpression, request)}`;
           }
         }
         if (preferred || /\.min\.js$/.test(url.pathname)) {
@@ -672,8 +677,8 @@ async function buildRelease(tag, options) {
       if (format === "standalone") {
         for (const node of all.filter((node) => ["configurator-assets", "configurator"].includes(attr(node, "id")))) remove(node);
       }
-      if (artworkMode === "embedded") {
-        const script = nodes(parse('<script type="application/json" id="controller-artwork"></script>')).find((node) => node.tagName === "script");
+      if (artworkMode === "embedded" || artworkMode === "packaged") {
+        const script = nodes(parse(`<script type="application/json" id="${resource.id}-artwork"></script>`)).find((node) => node.tagName === "script");
         textContent(script, `\n${JSON.stringify(Object.fromEntries(images.map((image) => [path.basename(image.file, ".svg"), image.body.toString()]))).replaceAll("<", "\\u003c")}\n`);
         script.parentNode = body;
         body.childNodes.unshift(script);
@@ -773,23 +778,25 @@ async function buildRelease(tag, options) {
         });
         const images = await artwork(resource);
         await save(`${resource.id}.html`, resource.source, resource.id, "original");
-        for (const format of ["online", "bundle", "standalone"]) await save(`${resource.id}.${format}.html`, await generate(resource, format), resource.id, format);
+        for (const format of ["online", "standalone", "bundle"]) await save(`${resource.id}.${format}.html`, await generate(resource, format), resource.id, format);
         if (images.length) {
-          for (const format of ["bundle", "standalone"]) {
-            const entries = { [`${resource.id}/index.html`]: await generate(resource, format, "packaged") };
+          for (const format of ["standalone", "bundle"]) {
+            const entries = { [`${resource.id}/index.html`]: await generate(resource, format, "packaged", images) };
             const artworkDirectory = path.basename(config.dynamicDependencies[`${resource.id}/${resource.id}.js`].directory);
             for (const image of images) entries[`${resource.id}/${artworkDirectory}/${image.file}`] = image.body;
             const archive = zipSync(Object.fromEntries(Object.entries(entries).map(([name, body]) => [name, [new Uint8Array(body), { mtime: new Date(1980, 0, 1) }]])), { level: 9 });
             await save(`${config.repository.split("/")[1]}.${tag}.${resource.id}.${format === "bundle" ? "full" : format}.zip`, Buffer.from(archive), resource.id, `${format === "bundle" ? "full" : format}-zip`);
           }
-          if (resource.id === "controller") {
-            const candidate = await generate(resource, "standalone", "embedded", images);
-            await save(`${resource.id}.standalone.embedded.html`, candidate, resource.id, "embedded");
-            await fs.mkdir(path.join(dist, "experimental"), { recursive: true });
-            await fs.writeFile(
-              path.join(dist, "experimental", "sizes.json"),
-              `${JSON.stringify({ htmlBytes: candidate.length, artworkBytes: images.reduce((sum, image) => sum + image.body.length, 0), artworkCount: images.length }, null, 2)}\n`
-            );
+          for (const format of ["standalone", "bundle"]) {
+            const candidate = await generate(resource, format, "embedded", images);
+            await save(`${resource.id}.${format === "bundle" ? "full" : format}.embedded.html`, candidate, resource.id, format === "bundle" ? "full-embedded" : "embedded");
+            if (resource.id === "controller" && format === "standalone") {
+              await fs.mkdir(path.join(dist, "experimental"), { recursive: true });
+              await fs.writeFile(
+                path.join(dist, "experimental", "sizes.json"),
+                `${JSON.stringify({ htmlBytes: candidate.length, artworkBytes: images.reduce((sum, image) => sum + image.body.length, 0), artworkCount: images.length }, null, 2)}\n`
+              );
+            }
           }
         }
         console.log(`Built ${resource.id}`);

@@ -85,7 +85,7 @@ test("generated distributions initialize with application networks blocked", { t
     }
 
     for (const resource of manifest.resources) {
-      for (const asset of manifest.assets.filter((item) => item.resource === resource.id && ["online", "bundle", "standalone", "embedded"].includes(item.format))) {
+      for (const asset of manifest.assets.filter((item) => item.resource === resource.id && ["online", "standalone", "bundle", "embedded", "full-embedded"].includes(item.format))) {
         const format = asset.format;
         await t.test(`${resource.id}.${format}`, async () => {
           const { page, errors, unexpected, warnings, svgRequests } = await pageFor(format, resource.id);
@@ -120,7 +120,7 @@ test("generated distributions initialize with application networks blocked", { t
             }
             assert.deepEqual(unexpected, [], "Unexpected application library requests");
             assert.deepEqual(errors, []);
-            if (format === "embedded") assert.deepEqual(svgRequests, [], "Embedded Controller must use its packaged artwork");
+            if (["embedded", "full-embedded"].includes(format)) assert.deepEqual(svgRequests, [], "Embedded resources must use inline artwork");
           } finally {
             await page.close();
           }
@@ -180,9 +180,50 @@ test("generated distributions initialize with application networks blocked", { t
       });
     }
 
+    for (const asset of manifest.assets.filter((item) => item.file.endsWith(".zip"))) {
+      await t.test(`extracted ${asset.file} opens directly from disk`, async () => {
+        const directory = await fs.mkdtemp(path.join(os.tmpdir(), "stream-release-zip-file-"));
+        const entries = unzipSync(await fs.readFile(path.join(assetDir, asset.file)));
+        for (const [file, bytes] of Object.entries(entries)) {
+          assert.ok(!path.isAbsolute(file) && !file.split("/").includes(".."));
+          const target = path.join(directory, file);
+          await fs.mkdir(path.dirname(target), { recursive: true });
+          await fs.writeFile(target, bytes);
+        }
+        const { page, errors, unexpected } = await pageFor("packaged", asset.resource);
+        const requests = [];
+        page.on("request", (request) => {
+          if (new URL(request.url()).pathname.endsWith(".svg")) requests.push(request.url());
+        });
+        try {
+          const entry = pathToFileURL(path.join(directory, asset.resource, "index.html")).href;
+          await page.goto(entry);
+          await ready(page, asset.format === "standalone-zip");
+          const url = await page.evaluate(() => byStream.settingsURL(byStreamResource, byStreamResource.settings).href);
+          assert.equal(new URL(url).protocol, "file:");
+          await page.goto(url);
+          await ready(page, true);
+          await page
+            .locator(asset.resource === "controller" ? "#gamepads .controller svg" : "#keyboard svg path")
+            .first()
+            .waitFor({ state: "attached" });
+          if (asset.format === "full-zip") {
+            await page.keyboard.press("F2");
+            await ready(page, false);
+          }
+          assert.deepEqual(requests, [], "Opening a ZIP locally must not fetch SVG files");
+          assert.deepEqual(errors, []);
+          assert.deepEqual(unexpected, []);
+        } finally {
+          await page.close();
+          await fs.rm(directory, { recursive: true, force: true });
+        }
+      });
+    }
+
     await t.test("downloaded full and standalone HTML retain file URLs and render offline", async () => {
       const directory = await fs.mkdtemp(path.join(os.tmpdir(), "stream-release-file-"));
-      for (const asset of manifest.assets.filter((item) => (item.resource === "clock" && ["bundle", "standalone"].includes(item.format)) || item.format === "embedded")) {
+      for (const asset of manifest.assets.filter((item) => (item.resource === "clock" && ["bundle", "standalone"].includes(item.format)) || ["embedded", "full-embedded"].includes(item.format))) {
         const target = path.join(directory, asset.file);
         await fs.copyFile(path.join(assetDir, asset.file), target);
         const { page, errors, unexpected, svgRequests } = await pageFor(asset.format, asset.resource);
@@ -195,9 +236,16 @@ test("generated distributions initialize with application networks blocked", { t
           await ready(page, true);
           assert.deepEqual(errors, []);
           assert.deepEqual(unexpected, []);
-          if (asset.format === "embedded") {
-            await page.locator("#gamepads .controller svg").first().waitFor({ state: "attached" });
-            assert.deepEqual(svgRequests, [], "Downloaded embedded Controller must use its packaged artwork");
+          if (["embedded", "full-embedded"].includes(asset.format)) {
+            await page
+              .locator(asset.resource === "controller" ? "#gamepads .controller svg" : "#keyboard svg path")
+              .first()
+              .waitFor({ state: "attached" });
+            assert.deepEqual(svgRequests, [], "Downloaded embedded resources must use inline artwork");
+            if (asset.format === "full-embedded") {
+              await page.keyboard.press("F2");
+              await ready(page, false);
+            }
           }
         } finally {
           await page.close();

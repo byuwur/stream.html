@@ -132,9 +132,9 @@ test("pinned SPA dependencies can fall back to matching local minified files", a
   await assert.rejects(mismatched.read(url), /Offline dependency request/);
 });
 
-test("release tags follow SemVer and reject malformed or unsafe input", () => {
-  for (const tag of ["v0.0.0", "v1.2.3", "v1.2.3-alpha.1", "v2.0.0-rc.1+build.4"]) assert.equal(validateTag(tag), tag);
-  for (const tag of ["", "1.2.3", "v01.2.3", "v1.02.3", "v1.2", "v1.2.3-01", "v1.2.3-", "v1.2.3/../../", "v1.2.3\n", "v1.2.3;exit"]) assert.throws(() => validateTag(tag));
+test("release tags accept established version forms and reject malformed or unsafe input", () => {
+  for (const tag of ["v10", "v9.1", "v0.0.0", "v1.2.3", "v1.2.3-alpha.1", "v2.0.0-rc.1+build.4"]) assert.equal(validateTag(tag), tag);
+  for (const tag of ["", "1.2.3", "v01.2.3", "v1.02.3", "v01", "v10.01", "v1.2.3.4", "v1.2.3-01", "v1.2.3-", "v1.2.3/../../", "v1.2.3\n", "v1.2.3;exit"]) assert.throws(() => validateTag(tag));
 });
 
 test("HTML formatting preserves embedded minified source and multiline string whitespace", async () => {
@@ -223,8 +223,7 @@ test("every resource and only the intended release files appear in the inventory
       .map((item) => item.format)
       .sort();
     const expected = ["original", "online", "bundle", "standalone"];
-    if (config.dynamicDependencies[`${resource.id}/${resource.id}.js`]) expected.push("full-zip", "standalone-zip");
-    if (resource.id === "controller") expected.push("embedded");
+    if (config.dynamicDependencies[`${resource.id}/${resource.id}.js`]) expected.push("full-zip", "standalone-zip", "embedded", "full-embedded");
     assert.deepEqual(formats, expected.sort(), resource.id);
     assert.deepEqual(await fs.readFile(path.join(assetDir, `${resource.id}.html`)), resource.source, "Original HTML must be byte-identical");
   }
@@ -297,7 +296,7 @@ function validateHTML(html, format, id) {
 }
 
 test("online, bundled, and packaged HTML has a complete dependency graph", async (t) => {
-  for (const asset of manifest.assets.filter((item) => ["online", "bundle", "standalone", "embedded"].includes(item.format))) {
+  for (const asset of manifest.assets.filter((item) => ["online", "standalone", "bundle", "embedded", "full-embedded"].includes(item.format))) {
     await t.test(asset.file, async () => validateHTML(await fs.readFile(path.join(assetDir, asset.file), "utf8"), asset.format, asset.file));
   }
   for (const asset of manifest.assets.filter((item) => item.file.endsWith(".zip"))) {
@@ -310,16 +309,17 @@ test("online, bundled, and packaged HTML has a complete dependency graph", async
     for (const file of artwork) assert.deepEqual(Buffer.from(entries[`${registration.directory}/${file}`]), await fs.readFile(path.join(root, registration.directory, file)));
     validateHTML(Buffer.from(entries[entry]).toString(), asset.format === "full-zip" ? "bundle" : "standalone", asset.file);
   }
-  const embedded = manifest.assets.find((item) => item.format === "embedded");
-  const all = nodes(parse(await fs.readFile(path.join(assetDir, embedded.file), "utf8")));
-  const artwork = JSON.parse(all.find((node) => attr(node, "id") === "controller-artwork").childNodes[0].value);
-  const artworkDirectory = path.join(root, config.dynamicDependencies["controller/controller.js"].directory);
-  const files = (await fs.readdir(artworkDirectory)).filter((file) => file.endsWith(".svg")).sort();
-  assert.deepEqual(
-    Object.keys(artwork).sort(),
-    files.map((file) => path.basename(file, ".svg"))
-  );
-  for (const file of files) assert.equal(artwork[path.basename(file, ".svg")], await fs.readFile(path.join(artworkDirectory, file), "utf8"));
+  for (const embedded of manifest.assets.filter((item) => ["embedded", "full-embedded"].includes(item.format))) {
+    const all = nodes(parse(await fs.readFile(path.join(assetDir, embedded.file), "utf8")));
+    const artwork = JSON.parse(all.find((node) => attr(node, "id") === `${embedded.resource}-artwork`).childNodes[0].value);
+    const artworkDirectory = path.join(root, config.dynamicDependencies[`${embedded.resource}/${embedded.resource}.js`].directory);
+    const files = (await fs.readdir(artworkDirectory)).filter((file) => file.endsWith(".svg")).sort();
+    assert.deepEqual(
+      Object.keys(artwork).sort(),
+      files.map((file) => path.basename(file, ".svg")).sort()
+    );
+    for (const file of files) assert.equal(artwork[path.basename(file, ".svg")], await fs.readFile(path.join(artworkDirectory, file), "utf8"));
+  }
 });
 
 test("release descriptions link to the generated inventory", async () => {
@@ -328,8 +328,8 @@ test("release descriptions link to the generated inventory", async () => {
   assert.deepEqual(new Set(links), new Set([...manifest.assets.filter((item) => item.resource).map((item) => downloadURL(manifest.tag, item.file)), downloadURL(manifest.tag, "manifest.json"), downloadURL(manifest.tag, "SHA256SUMS")]));
   assert.equal(notes, releaseNotes(manifest));
   assert.ok(notes.includes("## Changes"));
-  assert.ok(notes.includes("| Embedded [EXPERIMENTAL] |"));
-  assert.ok(notes.includes("## [EXPERIMENTAL] Embedded Controller"));
+  assert.ok(notes.includes("| Standalone embedded [EXPERIMENTAL] | Full embedded [EXPERIMENTAL] |"));
+  assert.ok(notes.indexOf("| Standalone |") < notes.indexOf("| Bundle |"));
   for (const commit of manifest.changelog.commits) assert.ok(notes.includes(`https://github.com/${config.repository}/commit/${commit.sha}`));
   assert.match(notes, /file:\/\//);
   assert.match(notes, /Font Awesome/);
