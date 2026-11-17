@@ -38,6 +38,8 @@ jobs:
           ref: v20.13
           path: spa.js
           persist-credentials: false
+      - name: Trust the project checkout in the build container
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -92,6 +94,8 @@ jobs:
           ref: v20.13
           path: spa.js
           persist-credentials: false
+      - name: Trust the project checkout in the build container
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
       - uses: actions/setup-node@v4
         with:
           node-version: 22
