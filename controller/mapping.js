@@ -12,7 +12,7 @@
         .attr("id", "reset-shell-adjustments")
         .appendTo($('[name="shellOpacity"]').closest(".conditional-field"))
         .on("click", () => {
-          for (const name of ["shellFit", "shellPositionX", "shellPositionY", "shellScale", "shellRotation", "shellOpacity", "shellTintColor", "shellTintStrength", "shellBlendMode"])
+          for (const name of ["shellFit", "shellPositionX", "shellPositionY", "shellScale", "shellRotation", "shellOpacity", "controllerColor", "shellTintStrength", "shellBlendMode"])
             $(`[name="${name}"]`).val(fields[name].default).trigger("input").trigger("change");
         });
       const initialVariant = settings.variant;

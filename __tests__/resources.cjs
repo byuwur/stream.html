@@ -140,6 +140,18 @@ test("controller guide tint and subtle control colors", { timeout: 60000 }, asyn
     );
   }
 
+  await t.test("GameCube shadows change rendered shell pixels independently of highlights", async () => {
+    await open({ skin: "gcn", highlightIntensity: "10", shadowIntensity: "0" });
+    const shadow = page.locator(".controller-background .shell-shadow");
+    assert.equal(await shadow.evaluate((element) => getComputedStyle(element).opacity), "0");
+    const unshaded = await page.locator(".controller-background").screenshot({ omitBackground: true });
+    await open({ skin: "gcn", highlightIntensity: "10", shadowIntensity: "100" });
+    assert.equal(await shadow.evaluate((element) => getComputedStyle(element).opacity), "1");
+    assert.equal(await page.locator(".controller-background .shell-highlight").evaluate((element) => getComputedStyle(element).opacity), "0.1");
+    const shaded = await page.locator(".controller-background").screenshot({ omitBackground: true });
+    assert.notDeepEqual(shaded, unshaded, "Shadow intensity affects the rendered shell");
+  });
+
   await t.test("all control surfaces receive a light tint while markings and input remain independent", async () => {
     for (const [skin, layout] of [
       ["ds5", "full"],
@@ -192,6 +204,27 @@ test("controller guide tint and subtle control colors", { timeout: 60000 }, asyn
   });
   const guide = { customGuide: "yes", guideSource: "image", guideImage: image };
 
+  await t.test("shell appearance owns solid tint and migrates retired color and image settings", async () => {
+    await open({ customColors: "no", controllerColor: "#ab31e3" });
+    assert.equal(await page.evaluate(() => byStreamResource.settings.shellAppearance), "off");
+    await open({ shellAppearance: "solid", controllerColor: "#ab31e3", shellTintStrength: "60", shellBlendMode: "fill" });
+    assert.equal(await page.locator('.shell-texture-definitions feBlend[mode="normal"]').count(), 1);
+    assert.equal(await page.locator(".custom-colors").count(), 0, "Solid tint preserves authored surface colors instead of the former flat replacement class");
+    await open({ shellAppearance: "tint", shellImage: image, shellTintColor: "#123456", shellTintStrength: "35" });
+    await page.locator('[data-shell-texture="ready"]').waitFor();
+    const settings = await page.evaluate(() => ({
+      mode: byStreamResource.settings.shellAppearance,
+      color: byStreamResource.settings.controllerColor,
+      tint: byStreamResource.settings.tintControls,
+      url: byStream.settingsURL(byStreamResource, byStreamResource.settings).href
+    }));
+    assert.equal(settings.mode, "image");
+    assert.equal(settings.color, "#123456");
+    assert.equal(settings.tint, "yes");
+    assert.equal(new URL(settings.url).searchParams.has("customColors"), false);
+    assert.equal(new URL(settings.url).searchParams.has("shellTintColor"), false);
+  });
+
   /** Sample the real rendered logo against transparency, excluding the controller underneath. */
   async function logoPixels(parameters) {
     await open({ ...guide, ...parameters });
@@ -216,12 +249,17 @@ test("controller guide tint and subtle control colors", { timeout: 60000 }, asyn
     assert.ok(Math.abs(original[0][3] - 128) <= 2, "Fixture contains translucent pixels");
     assert.equal(original[1][3], 255);
     assert.deepEqual(await logoPixels({ guideColorMode: "tint", guideTintStrength: "0" }), original, "Zero strength preserves original pixels");
-    for (const guideBlendMode of ["multiply", "overlay", "soft-light", "color"]) {
+    for (const guideBlendMode of ["multiply", "overlay", "soft-light", "color", "fill"]) {
       const tinted = await logoPixels({ guideColorMode: "tint", guideTintColor: "#70dd52", guideTintStrength: "65", guideBlendMode });
       for (let i = 0; i < original.length; i++) {
         assert.ok(Math.abs(tinted[i][3] - original[i][3]) <= 2, `${guideBlendMode}: source alpha is preserved`);
         assert.notDeepEqual(tinted[i].slice(0, 3), original[i].slice(0, 3), `${guideBlendMode}: colors are blended`);
       }
+    }
+    const fill = await logoPixels({ guideColorMode: "tint", guideTintColor: "#6699cc", guideTintStrength: "100", guideBlendMode: "fill" });
+    for (let i = 0; i < fill.length; i++) {
+      for (const [channel, expected] of [102, 153, 204].entries()) assert.ok(Math.abs(fill[i][channel] - expected) <= 2, "Fill replaces RGB while retaining source alpha");
+      assert.ok(Math.abs(fill[i][3] - original[i][3]) <= 2);
     }
     const monochrome = await logoPixels({ guideColorMode: "custom", guideColor: "#6699cc" });
     for (const [channel, expected] of [102, 153, 204, 255].entries()) {

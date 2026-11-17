@@ -74,7 +74,7 @@ test("configurator smoke", { timeout: 60000 }, async (t) => {
       await page.waitForFunction(() => !!document.getElementById("overlay-url")?.value);
       const mode = page.locator('form[data-configurator] [name="guideColorMode"]');
       const strength = page.locator('form[data-configurator] [name="guideTintStrength"]');
-      assert.equal(await strength.isDisabled(), false, "Guide tint is independent of Custom colors");
+      assert.equal(await strength.isDisabled(), false, "Guide tint is independent of shell appearance");
       await mode.selectOption("original", { force: true });
       await page.waitForFunction(() => !new URL(document.getElementById("overlay-url").value).searchParams.has("guideTintStrength"));
       assert.equal(await strength.isDisabled(), true);
@@ -91,6 +91,83 @@ test("configurator smoke", { timeout: 60000 }, async (t) => {
       await page.locator(".guide-logo-custom").waitFor();
       assert.equal(await page.locator('filter[id$="-logo-tint"] feBlend').getAttribute("mode"), "soft-light");
       assert.deepEqual(errors, []);
+    } finally {
+      await page.close();
+    }
+  });
+
+  await t.test("decimal controls, rotation limits, color-field clicks, and short sliders share the canonical fields", async () => {
+    const page = await browser.newPage();
+    page.setDefaultTimeout(5000);
+    try {
+      await serve(page, assets);
+      await page.goto("https://stream.test/controller/?player=9&shellAppearance=image&shellImage=../stream.html.png#configure");
+      await page.waitForFunction(() => !!document.getElementById("overlay-url")?.value);
+      const outline = page.locator('[name="outlineWidth"]');
+      assert.equal(await page.locator('[name="customColors"]').count(), 0);
+      assert.deepEqual(await page.locator('[name="shellAppearance"] option').allTextContents(), ["Off", "Solid color", "Image"]);
+      const slider = page.locator('[data-number-field="outlineWidth"]');
+      assert.equal(await outline.getAttribute("step"), "0.1");
+      assert.equal(await slider.getAttribute("step"), "0.1");
+      await outline.evaluate((input) => {
+        for (const group of input.closest("form").querySelectorAll(".collapse")) group.classList.add("show");
+      });
+      await outline.fill("1");
+      await outline.press("ArrowUp");
+      assert.equal(await outline.inputValue(), "1.1");
+      await slider.press("ArrowRight");
+      assert.equal(await outline.inputValue(), "1.2");
+      for (const name of ["rotation", "shellRotation"]) {
+        const range = page.locator(`[data-number-field="${name}"]`);
+        assert.equal(await range.getAttribute("min"), "0");
+        assert.equal(await range.getAttribute("max"), "360");
+      }
+      const color = page.locator('[name="backgroundColor"]');
+      await color.click();
+      await page.locator(".pcr-app.visible").waitFor();
+      await color.fill("#12345678");
+      await page.waitForFunction(() => new URL(document.getElementById("overlay-url").value).searchParams.get("backgroundColor") === "12345678");
+
+      await page.goto("https://stream.test/controller/?player=9&skin=gcn&highlightIntensity=10#configure");
+      const shadows = page.locator('[data-number-field="shadowIntensity"]');
+      await shadows.waitFor({ state: "attached" });
+      await shadows.evaluate((input) => {
+        for (const group of input.closest("form").querySelectorAll(".collapse")) group.classList.add("show");
+      });
+      assert.equal(await shadows.isVisible(), true);
+      assert.equal(await shadows.isEnabled(), true);
+      await shadows.press("End");
+      await page.waitForFunction(() => new URL(document.getElementById("overlay-url").value).searchParams.get("shadowIntensity") === "100");
+      const previewShadow = page.frameLocator("#overlay-preview").locator(".controller-background .shell-shadow");
+      await previewShadow.waitFor({ state: "attached" });
+      assert.equal(await previewShadow.evaluate((element) => getComputedStyle(element).opacity), "1");
+
+      await page.goto("https://stream.test/popup/?pauseTime=3#configure");
+      const seconds = page.locator('[name="pauseTime"]');
+      const secondsRange = page.locator('[data-number-field="pauseTime"]');
+      await seconds.waitFor({ state: "attached" });
+      await seconds.evaluate((input) => {
+        for (const group of input.closest("form").querySelectorAll(".collapse")) group.classList.add("show");
+      });
+      assert.equal(await secondsRange.getAttribute("max"), "60");
+      assert.equal(await seconds.getAttribute("max"), "3600");
+      await seconds.fill("240");
+      await seconds.dispatchEvent("change");
+      await page.waitForFunction(() => new URL(document.getElementById("overlay-url").value).searchParams.get("pauseTime") === "240");
+      assert.equal(await seconds.inputValue(), "240");
+      assert.equal(await secondsRange.inputValue(), "60");
+      await seconds.fill("999999");
+      await seconds.dispatchEvent("change");
+      await page.waitForFunction(() => document.querySelector('[name="pauseTime"]').value === "3600");
+      await seconds.fill("-1");
+      await seconds.dispatchEvent("change");
+      await page.waitForFunction(() => document.querySelector('[name="pauseTime"]').value === "0");
+      await page.locator('[data-settings-view="json"]').click();
+      const json = page.locator("#settings-json");
+      await json.fill('{"pauseTime":999999}');
+      await page.waitForFunction(() => new URL(document.getElementById("overlay-url").value).searchParams.get("pauseTime") === "3600");
+      await json.fill('{"toString":1}');
+      await page.locator("#json-error", { hasText: "Unknown setting: toString" }).waitFor();
     } finally {
       await page.close();
     }

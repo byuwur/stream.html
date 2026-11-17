@@ -49,6 +49,11 @@
       <use href="#housing-shape" fill="#ffffff" />
       <use href="#housing-shape" fill="#000000" transform="translate(4 5)" />
     </mask>
+    <mask id="shadow-rim" maskUnits="userSpaceOnUse" x="-1000" y="-1000" width="4000"
+      height="4000">
+      <use href="#housing-shape" fill="#ffffff" />
+      <use href="#housing-shape" fill="#000000" transform="translate(-4 -5)" />
+    </mask>
 
     <clipPath id="dpad-12">
       <polygon points="148.48,258.24 214.39,258.24 181.435,291.195" />
@@ -183,6 +188,9 @@
           class="vector-outline" stroke-width="3" />
       </g>
       <g mask="url(#highlight-rim)" class="shell-highlight">
+        <use href="#housing-shape" />
+      </g>
+      <g mask="url(#shadow-rim)" class="shell-shadow">
         <use href="#housing-shape" />
       </g>
 

@@ -7,13 +7,6 @@
 const controllerResourceURL = document.currentScript.src;
 // These authored plastic surfaces exclude independent sockets, controls, and screen openings.
 const controllerShellSelector = '[id$="shell-surfaces"] :is(.shell-base, .shell-panel, .stock-center):not(.socket-base):not(.analog-socket)';
-const controllerInk = (channels) => {
-  const luminance = channels.map((channel) => {
-    const value = channel / 255;
-    return value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;
-  });
-  return luminance[0] * 0.2126 + luminance[1] * 0.7152 + luminance[2] * 0.0722 > 0.179 ? "#111111" : "#EEEEEE";
-};
 
 document.addEventListener("DOMContentLoaded", () => {
   byStream.ready = initControllerResource();
@@ -45,18 +38,25 @@ async function initControllerResource() {
     urlRequired: ["player", "skin"],
     sectionIcons: { Input: "fa-solid fa-gamepad" },
     previewAllow: "autoplay; gamepad *",
+    legacyFields: ["customColors", "shellTintColor"],
+    /** Migrate retired appearance controls and signed image angles before validating current fields. */
     normalizeParameters(values) {
-      const color = values.has("controllerColor") && byStream.validParameter(resource.fields, "controllerColor", values.get("controllerColor"));
-      const outline = values.has("outlineColor") && byStream.validParameter(resource.fields, "outlineColor", values.get("outlineColor"));
-      const width = values.get("outlineWidth");
-      const oldWidth = width !== null && width.trim() !== "" && Number.isFinite(Number(width)) && Number(width) >= 0 && Number(width) <= 6;
-      if (values.has("customColors") || !(color || outline || oldWidth || values.get("tintControls") === "yes")) return;
-      values.set("customColors", "yes");
-      if (outline) values.set("customOutlineColor", "yes");
-      if (oldWidth) {
-        // Older links stored absolute widths against a 1.2-unit default.
-        values.set("outlineWidth", String(Math.round(Math.max(0.5, Math.min(2, Number(width) / 1.2)) * 20) / 20));
+      const appearance = values.get("shellAppearance");
+      const legacyColors = values.get("customColors");
+      // Old color switches and Image + tint links resolve to the new appearance controls.
+      if (!appearance && legacyColors !== "no" && (legacyColors === "yes" || (values.has("controllerColor") && !values.has("tintOutlines")))) values.set("shellAppearance", "solid");
+      if (appearance === "solid" && legacyColors === "no") values.set("shellAppearance", "off");
+      if (appearance === "tint") {
+        values.set("shellAppearance", "image");
+        values.set("tintControls", "yes");
+        if (!values.has("shellTintStrength")) values.set("shellTintStrength", "0");
       }
+      if (values.has("shellTintColor")) values.set("controllerColor", values.get("shellTintColor"));
+      if (legacyColors !== null && appearance === "image" && !values.has("shellTintStrength")) values.set("shellTintStrength", "0");
+      const rotation = Number(values.get("shellRotation"));
+      if (rotation < 0 && rotation >= -180) values.set("shellRotation", String(rotation + 360));
+      values.delete("customColors");
+      values.delete("shellTintColor");
     },
     fields: {
       player: {
@@ -113,16 +113,16 @@ async function initControllerResource() {
         label: "Color variant",
         section: "Appearance",
         options: { original: "Default", ...Object.assign({}, ...Object.values(byControllerArtwork.skins).map((skin) => skin.variants)), sequential: "Sequential (all)" },
-        when: (values) => values.customColors !== "yes" && Object.keys(byControllerArtwork.skins[values.skin]?.variants || {}).length > 0,
+        when: (values) => Object.keys(byControllerArtwork.skins[values.skin]?.variants || {}).length > 0,
         retainInactive: true
       },
       shellAppearance: {
         type: "select",
-        default: "solid",
+        default: "off",
         label: "Shell appearance",
         section: "Appearance",
         subsection: "Shell texture",
-        options: { solid: "Solid color", image: "Image", tint: "Image + tint" },
+        options: { off: "Off", solid: "Solid color", image: "Image" },
         when: (values) => values.layout !== "minimal" && byControllerArtwork.skins[values.skin]?.shell,
         retainInactive: true
       },
@@ -136,7 +136,7 @@ async function initControllerResource() {
         description: "Fits the existing shell surfaces; failed loads keep the solid shell.",
         maxlength: 65536,
         validate: (value) => (value.length <= 65536 && byStream.safeImage(value) ? value : null),
-        when: ["shellAppearance", "image", "tint"],
+        when: ["shellAppearance", "image"],
         retainInactive: true
       },
       shellFit: {
@@ -146,44 +146,22 @@ async function initControllerResource() {
         section: "Appearance",
         subsection: "Shell texture",
         options: { cover: "Cover", contain: "Contain", stretch: "Stretch" },
-        when: ["shellAppearance", "image", "tint"],
+        when: ["shellAppearance", "image"],
         retainInactive: true
       },
-      shellPositionX: { type: "number", default: 0, label: "Image position X (%)", section: "Appearance", subsection: "Shell texture", min: -100, max: 100, when: ["shellAppearance", "image", "tint"], retainInactive: true },
-      shellPositionY: { type: "number", default: 0, label: "Image position Y (%)", section: "Appearance", subsection: "Shell texture", min: -100, max: 100, when: ["shellAppearance", "image", "tint"], retainInactive: true },
-      shellScale: { type: "number", default: 100, label: "Image scale (%)", section: "Appearance", subsection: "Shell texture", min: 10, max: 500, when: ["shellAppearance", "image", "tint"], retainInactive: true },
-      shellRotation: { type: "number", default: 0, label: "Image rotation (deg)", section: "Appearance", subsection: "Shell texture", min: -180, max: 180, when: ["shellAppearance", "image", "tint"], retainInactive: true },
-      shellOpacity: { type: "number", default: 100, label: "Image opacity (%)", section: "Appearance", subsection: "Shell texture", min: 0, max: 100, when: ["shellAppearance", "image", "tint"], retainInactive: true },
-      shellTintColor: { type: "color", default: "#ffffff", label: "Tint color", section: "Appearance", subsection: "Shell texture", maxlength: 9, when: ["shellAppearance", "tint"], retainInactive: true },
-      shellTintStrength: { type: "number", default: 0, label: "Tint strength (%)", section: "Appearance", subsection: "Shell texture", min: 0, max: 100, when: ["shellAppearance", "tint"], retainInactive: true },
-      shellBlendMode: {
-        type: "select",
-        default: "multiply",
-        label: "Blend mode",
-        section: "Appearance",
-        subsection: "Shell texture",
-        options: { multiply: "Multiply", overlay: "Overlay", "soft-light": "Soft-light", color: "Color" },
-        when: ["shellAppearance", "tint"],
-        retainInactive: true
-      },
-      customColors: {
-        type: "switch",
-        default: "no",
-        label: "Custom colors",
-        section: "Appearance",
-        description: "Off keeps the original shell and control colors.",
-        checkedValue: "yes",
-        uncheckedValue: "no",
-        options: { yes: "On", no: "Off" }
-      },
+      shellPositionX: { type: "number", default: 0, label: "Image position X (%)", section: "Appearance", subsection: "Shell texture", min: -100, max: 100, when: ["shellAppearance", "image"], retainInactive: true },
+      shellPositionY: { type: "number", default: 0, label: "Image position Y (%)", section: "Appearance", subsection: "Shell texture", min: -100, max: 100, when: ["shellAppearance", "image"], retainInactive: true },
+      shellScale: { type: "number", default: 100, label: "Image scale (%)", section: "Appearance", subsection: "Shell texture", min: 10, max: 500, when: ["shellAppearance", "image"], retainInactive: true },
+      shellRotation: { type: "number", default: 0, label: "Image rotation (deg)", section: "Appearance", subsection: "Shell texture", min: 0, max: 360, sliderMax: 360, when: ["shellAppearance", "image"], retainInactive: true },
+      shellOpacity: { type: "number", default: 100, label: "Image opacity (%)", section: "Appearance", subsection: "Shell texture", min: 0, max: 100, when: ["shellAppearance", "image"], retainInactive: true },
       controllerColor: {
         type: "color",
-        default: "#000000",
-        label: "Controller color",
+        default: "#ffffff",
+        label: "Tint color",
         section: "Appearance",
-        description: "Body color, including optional control and outline tints.",
+        subsection: "Shell texture",
         maxlength: 9,
-        when: (values) => (values.customColors === "yes" && (byControllerArtwork.skins[values.skin]?.shell || values.tintControls === "yes")) || values.tintOutlines === "yes",
+        when: (values) => values.shellAppearance === "solid" || (values.shellAppearance === "image" && values.tintControls === "yes") || values.tintOutlines === "yes",
         retainInactive: true
       },
       tintControls: {
@@ -191,11 +169,33 @@ async function initControllerResource() {
         default: "no",
         label: "Tint controls",
         section: "Appearance",
-        description: "Subtly tints buttons, D-pad, sticks, shoulders, and triggers while preserving their original colors and markings.",
+        subsection: "Shell texture",
+        description: "Subtly tints controls while preserving their colors and markings; also enables image tint.",
         checkedValue: "yes",
         uncheckedValue: "no",
         options: { yes: "Yes", no: "No" },
-        when: ["customColors", "yes"],
+        when: ["shellAppearance", "solid", "image"],
+        retainInactive: true
+      },
+      shellTintStrength: {
+        type: "number",
+        default: 100,
+        label: "Tint strength (%)",
+        section: "Appearance",
+        subsection: "Shell texture",
+        min: 0,
+        max: 100,
+        when: (values) => values.shellAppearance === "solid" || (values.shellAppearance === "image" && values.tintControls === "yes"),
+        retainInactive: true
+      },
+      shellBlendMode: {
+        type: "select",
+        default: "multiply",
+        label: "Blend mode",
+        section: "Appearance",
+        subsection: "Shell texture",
+        options: { multiply: "Multiply", overlay: "Overlay", "soft-light": "Soft-light", color: "Color", fill: "Fill" },
+        when: (values) => values.shellAppearance === "solid" || (values.shellAppearance === "image" && values.tintControls === "yes"),
         retainInactive: true
       },
       tintOutlines: {
@@ -230,7 +230,7 @@ async function initControllerResource() {
         subsection: "Vector details",
         min: 0.5,
         max: 2,
-        step: 0.05,
+        step: 0.1,
         description: "Scales outlines; hardware symbols and filled borders stay unchanged.",
         retainInactive: true
       },
@@ -311,7 +311,7 @@ async function initControllerResource() {
         label: "Blend mode",
         section: "Appearance",
         subsection: "Guide button",
-        options: { multiply: "Multiply", overlay: "Overlay", "soft-light": "Soft-light", color: "Color" },
+        options: { multiply: "Multiply", overlay: "Overlay", "soft-light": "Soft-light", color: "Color", fill: "Fill" },
         when: ["guideColorMode", "tint"],
         retainInactive: true
       },
@@ -393,7 +393,8 @@ async function initControllerResource() {
         subsection: "Stick response",
         description: "Maximum wheel rotation.",
         min: 0,
-        max: Infinity,
+        max: 360,
+        sliderMax: 360,
         id: "rotation-input",
         icon: "fa-rotate",
         placeholder: "0"
@@ -989,7 +990,7 @@ async function initControllerResource() {
       active.setAttribute("aria-label", player === 9 ? "Keyboard" : `Player ${player}`);
       container.append(active);
       const variant = settings.variant === "sequential" ? variants[index % variants.length] : settings.variant;
-      const artwork = byControllerArtwork.render(settings.skin, settings.layout, settings.buttonLabels, settings.customColors === "yes" ? "original" : variant, `p${player}`);
+      const artwork = byControllerArtwork.render(settings.skin, settings.layout, settings.buttonLabels, variant, `p${player}`);
       active.innerHTML = `<div class="controller-layers">${artwork.markup}</div>`;
       active.style.width = `${artwork.width}px`;
       active.style.height = `${artwork.height}px`;
@@ -1155,7 +1156,7 @@ function controllerTintFilter(id, color, strength, mode) {
   const blend = document.createElementNS(ns, "feBlend");
   blend.setAttribute("in", "tint");
   blend.setAttribute("in2", "opaque-image");
-  blend.setAttribute("mode", CSS.supports("mix-blend-mode", mode) ? mode : "multiply");
+  blend.setAttribute("mode", mode === "fill" ? "normal" : CSS.supports("mix-blend-mode", mode) ? mode : "multiply");
   const alpha = document.createElementNS(ns, "feComposite");
   alpha.setAttribute("in2", "SourceAlpha");
   alpha.setAttribute("operator", "in");
@@ -1165,28 +1166,9 @@ function controllerTintFilter(id, color, strength, mode) {
 
 /** Apply independent shell colors, vector details, and guide customization to a fresh mount. */
 function customizeControllerAppearance(controller, settings) {
-  controller.classList.toggle("custom-colors", settings.customColors === "yes");
-  for (const name of ["--controller-color", "--controller-panel", "--controller-socket", "--controller-ink", "--highlight-intensity", "--shadow-intensity"]) controller.style.removeProperty(name);
   let hex = settings.controllerColor.replace("#", "");
   if (hex.length <= 4) hex = [...hex].map((digit) => digit + digit).join("");
   const channels = [0, 2, 4].map((i) => parseInt(hex.slice(i, i + 2), 16));
-  const light = channels.reduce((sum, channel) => sum + channel, 0) > 384;
-  const panel = channels.map((channel) => Math.round(light ? channel * 0.86 : channel + (255 - channel) * 0.1));
-  if (settings.customColors === "yes") {
-    controller.style.setProperty("--controller-color", settings.controllerColor);
-    controller.style.setProperty("--controller-panel", `#${panel.map((channel) => channel.toString(16).padStart(2, "0")).join("")}`);
-    controller.style.setProperty(
-      "--controller-socket",
-      `#${channels
-        .map((channel) =>
-          Math.round(channel * 0.4)
-            .toString(16)
-            .padStart(2, "0")
-        )
-        .join("")}`
-    );
-    controller.style.setProperty("--controller-ink", controllerInk(channels));
-  }
   controller.style.setProperty("--highlight-intensity", settings.highlightIntensity / 100);
   controller.style.setProperty("--shadow-intensity", settings.shadowIntensity / 100);
   const outline =
@@ -1208,7 +1190,7 @@ function customizeControllerAppearance(controller, settings) {
     node.style.strokeWidth = `${parseFloat(style.strokeWidth) * settings.outlineWidth}px`;
     if (outline && !node.matches(".control-detail, .button-detail")) node.style.stroke = outline;
   }
-  if (settings.customColors === "yes" && settings.tintControls === "yes") tintControllerControls(controller, settings.controllerColor);
+  if (settings.shellAppearance !== "off" && settings.tintControls === "yes") tintControllerControls(controller, settings.controllerColor);
   if (settings.customGuide !== "yes") return;
   const slot = controller.querySelector(".guide-logo-slot");
   if (!slot) return;
@@ -1288,12 +1270,14 @@ function customizeControllerAppearance(controller, settings) {
  * Each surface maps the same root-space composition back through its own transform; decoding and
  * tint filters are shared within this instance and never recreated during input frames.
  * @param {HTMLElement} controller Freshly mounted controller instance.
- * @param {Object} settings Validated resource settings; solid/minimal/unsupported models do no work.
+ * @param {Object} settings Validated appearance settings; Off/minimal/unsupported models do no work.
  * @param {AbortSignal} signal Aborted when these controller instances are replaced.
  * @returns {void} Keeps original fills until load; failure or timeout retains the solid artwork.
  */
 function customizeControllerShell(controller, settings, signal) {
-  if (settings.shellAppearance === "solid" || !settings.shellImage || !byStream.safeImage(settings.shellImage)) return;
+  if (settings.shellAppearance === "off") return;
+  const solid = settings.shellAppearance === "solid";
+  if (!solid && (!settings.shellImage || !byStream.safeImage(settings.shellImage))) return;
   const svg = controller.querySelector(".controller-background");
   if (svg.dataset.layout === "minimal" || svg.querySelector(".shell-texture-definitions")) return;
   const surfaces = [...svg.querySelectorAll(controllerShellSelector)];
@@ -1318,26 +1302,33 @@ function customizeControllerShell(controller, settings, signal) {
     height = Math.max(...boxes.map((point) => point.y)) - y;
   if (width <= 0 || height <= 0) return;
   const prefix = `${controller.id}-shell-texture`;
-  const composition = document.createElementNS(ns, "g");
-  composition.id = prefix;
-  const image = document.createElementNS(ns, "image");
-  image.classList.add("shell-texture-image");
-  image.setAttribute("x", x);
-  image.setAttribute("y", y);
-  image.setAttribute("width", width);
-  image.setAttribute("height", height);
-  image.setAttribute("preserveAspectRatio", settings.shellFit === "stretch" ? "none" : `xMidYMid ${settings.shellFit === "contain" ? "meet" : "slice"}`);
-  image.setAttribute("opacity", settings.shellOpacity / 100);
-  const cx = x + width / 2,
-    cy = y + height / 2;
-  image.setAttribute("transform", `translate(${cx + (width * settings.shellPositionX) / 100} ${cy + (height * settings.shellPositionY) / 100}) rotate(${settings.shellRotation}) scale(${settings.shellScale / 100}) translate(${-cx} ${-cy})`);
-  if (settings.shellAppearance === "tint" && settings.shellTintStrength > 0) {
-    const filter = controllerTintFilter(`${prefix}-tint`, settings.shellTintColor, settings.shellTintStrength, settings.shellBlendMode);
+  let filter;
+  if ((solid || settings.tintControls === "yes") && settings.shellTintStrength > 0) {
+    filter = controllerTintFilter(`${prefix}-tint`, settings.controllerColor, settings.shellTintStrength, settings.shellBlendMode);
     definitions.append(filter);
-    image.setAttribute("filter", `url(#${filter.id})`);
   }
-  composition.append(image);
-  definitions.append(composition);
+  let image;
+  if (!solid) {
+    const composition = document.createElementNS(ns, "g");
+    composition.id = prefix;
+    image = document.createElementNS(ns, "image");
+    image.classList.add("shell-texture-image");
+    image.setAttribute("x", x);
+    image.setAttribute("y", y);
+    image.setAttribute("width", width);
+    image.setAttribute("height", height);
+    image.setAttribute("preserveAspectRatio", settings.shellFit === "stretch" ? "none" : `xMidYMid ${settings.shellFit === "contain" ? "meet" : "slice"}`);
+    image.setAttribute("opacity", settings.shellOpacity / 100);
+    const cx = x + width / 2,
+      cy = y + height / 2;
+    image.setAttribute(
+      "transform",
+      `translate(${cx + (width * settings.shellPositionX) / 100} ${cy + (height * settings.shellPositionY) / 100}) rotate(${settings.shellRotation}) scale(${settings.shellScale / 100}) translate(${-cx} ${-cy})`
+    );
+    if (filter) image.setAttribute("filter", `url(#${filter.id})`);
+    composition.append(image);
+    definitions.append(composition);
+  }
   const fills = surfaces.map((surface, index) => {
     const pattern = document.createElementNS(ns, "pattern");
     pattern.id = `${prefix}-${index}`;
@@ -1356,12 +1347,23 @@ function customizeControllerShell(controller, settings, signal) {
     base.setAttribute("width", width);
     base.setAttribute("height", height);
     base.setAttribute("fill", getComputedStyle(surface).fill);
-    const texture = document.createElementNS(ns, "use");
-    texture.setAttribute("href", `#${prefix}`);
-    pattern.append(base, texture);
+    if (solid && filter) base.setAttribute("filter", `url(#${filter.id})`);
+    pattern.append(base);
+    if (!solid) {
+      const texture = document.createElementNS(ns, "use");
+      texture.setAttribute("href", `#${prefix}`);
+      pattern.append(texture);
+    }
     definitions.append(pattern);
     return `url(#${pattern.id})`;
   });
+  if (solid) {
+    svg.prepend(definitions);
+    surfaces.forEach((surface, index) => {
+      surface.style.fill = fills[index];
+    });
+    return;
+  }
   let timer;
   /** Release loading callbacks; a failed load leaves every original surface unchanged. */
   function finish(loaded) {
