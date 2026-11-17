@@ -13,7 +13,7 @@
   global.byConfigurator = global.byConfigurator || {};
   const byConfigurator = global.byConfigurator;
   if (byConfigurator.initialized) return;
-  byConfigurator.VERSION = "10"; // 2026-11-17
+  byConfigurator.VERSION = "10.1"; // 2026-11-17
   const root = new URL(document.currentScript.dataset.root || ".", document.currentScript.src || location.href);
 
   const byStream = global.byStream;
