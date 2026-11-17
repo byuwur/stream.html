@@ -211,7 +211,7 @@ Hollow Kenney SVG contours supply surfaces, outlines, and recognizable vector le
 
 Artwork uses short names such as `a.svg`, `ctrl.svg`, and `scrollup.svg`. Primary files contain the hollow artwork; `-fill.svg` retains the corresponding filled originals. Renaming preserves the original SVG bytes.
 
-**Image backgrounds** accepts shell and keycap images independently through the shared image URL/upload controls. Images are clipped to the vector surfaces; Cover, Contain, Stretch, scale, opacity, texture tint, monochrome tint, and green-region replacement are available. Original vector colors remain underneath failed images. Outlines and labels stay readable and pressed fills stay visible. Safe image formats follow the shared image contract; animated images remain mounted during input updates.
+**Image backgrounds** uses one `imageUrl` and an Off/Shell/Keys/All choice row (`imageTarget=none|shell|keys|all`). The image spans the keyboard continuously. Shell masks subtract the actual key contours, including transparent keycaps; Keys shows the image only through those contours. Cover, Contain, Stretch, scale, and opacity remain independent. Optional tint provides color, strength, and Multiply/Overlay/Soft-light/Color/Fill blending. Fill strength acts as ordinary color opacity; source transparency is preserved. Failed images retain vector surfaces. Outlines, labels, and press feedback remain independent. Legacy shell/key image fields migrate to the shared URL.
 
 The mouse uses one Kenney composition with separate left/right/middle and side buttons, brief wheel direction highlights, and a movement indicator. Ordinary movement never creates history entries.
 

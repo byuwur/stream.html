@@ -173,6 +173,26 @@ test("configurator smoke", { timeout: 60000 }, async (t) => {
     }
   });
 
+  await t.test("keyboard image choices and Main component fields stay in their owning groups", async () => {
+    const page = await browser.newPage();
+    page.setDefaultTimeout(5000);
+    try {
+      await serve(page, assets);
+      await page.goto("https://stream.test/keyboard/?mode=keyboard&imageTarget=all#configure");
+      const image = page.locator('[name="imageUrl"]');
+      await image.waitFor({ state: "attached" });
+      assert.equal(await page.locator('[name="shellImage"], [name="keyImage"]').count(), 0);
+      const choices = page.locator('[name="imageTarget"] + .choice-buttons button');
+      assert.deepEqual(await choices.allTextContents(), ["Off", "Shell", "Keys", "All"]);
+      await page.locator('[data-settings-view="json"]').click();
+      await page.locator("#settings-json").fill('{"mode":"keyboard","imageTarget":"both","shellImage":"../stream.html.png","imageTint":"monochrome"}');
+      await page.waitForFunction(() => document.querySelector('[name="imageUrl"]').value === "../stream.html.png" && document.querySelector('[name="imageTarget"]').value === "all");
+      assert.equal(await page.locator('[name="imageBlendMode"]').inputValue(), "fill");
+    } finally {
+      await page.close();
+    }
+  });
+
   await t.test("Manual and Base64 browse and drop work locally with hosted uploads disabled", async () => {
     const page = await browser.newPage();
     page.setDefaultTimeout(5000);

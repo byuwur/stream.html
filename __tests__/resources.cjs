@@ -283,3 +283,75 @@ test("controller guide tint and subtle control colors", { timeout: 60000 }, asyn
 
   assert.deepEqual(errors, [], "No uncaught controller errors");
 });
+
+test("keyboard image targets mask real key contours even when keycaps are transparent", { timeout: 30000 }, async (t) => {
+  const assets = await loadAssets(runtimeAssets);
+  const browser = await launchBrowser();
+  t.after(() => browser.close());
+  const page = await browser.newPage();
+  await serve(page, assets, true);
+  const image = await page.evaluate(() => {
+    const canvas = document.createElement("canvas");
+    canvas.width = canvas.height = 32;
+    const context = canvas.getContext("2d");
+    context.fillStyle = "#12c45b";
+    context.fillRect(0, 0, 32, 32);
+    return canvas.toDataURL();
+  });
+  for (const [imageTarget, shell, shellAlpha, keyAlpha] of [
+    ["none", "full", 0, 0],
+    ["shell", "full", 255, 0],
+    ["keys", "full", 0, 255],
+    ["all", "full", 255, 255],
+    ["shell", "none", 0, 0],
+    ["all", "none", 0, 255],
+    ["keys", "outline", 0, 255],
+    ["all", "minimal", 128, 255]
+  ]) {
+    const query = new URLSearchParams({
+      mode: "keyboard",
+      layout: "wasd",
+      shell,
+      customColors: "yes",
+      shellColor: "#00000000",
+      keyColor: "#00000000",
+      outlineColor: "#00000000",
+      legendColor: "#00000000",
+      highlightIntensity: "0",
+      shadowIntensity: "0",
+      imageTarget,
+      imageUrl: image,
+      imageFit: "stretch"
+    });
+    await page.goto(`https://stream.test/keyboard/?${query}`);
+    await page.locator('#keyboard-overlay[data-ready="yes"]').waitFor();
+    if (imageTarget !== "none") await page.locator('#keyboard-overlay[data-image-ready="yes"]').waitFor();
+    const board = page.locator("#keyboard > svg");
+    const box = await board.boundingBox();
+    const key = await page.locator('#keyboard [data-code="KeyW"]').boundingBox();
+    const png = await board.screenshot({ omitBackground: true });
+    const pixels = await page.evaluate(
+      async ({ base64, x, y }) => {
+        const image = new Image();
+        image.src = `data:image/png;base64,${base64}`;
+        await image.decode();
+        const canvas = document.createElement("canvas");
+        canvas.width = image.width;
+        canvas.height = image.height;
+        const context = canvas.getContext("2d");
+        context.drawImage(image, 0, 0);
+        return [
+          [image.width / 2, 3],
+          [x, y]
+        ].map(([x, y]) => [...context.getImageData(Math.floor(x), Math.floor(y), 1, 1).data]);
+      },
+      { base64: png.toString("base64"), x: key.x - box.x + key.width * 0.3, y: key.y - box.y + key.height * 0.3 }
+    );
+    assert.ok(Math.abs(pixels[0][3] - shellAlpha) <= 2, `${imageTarget}/${shell}: shell image mask`);
+    assert.ok(Math.abs(pixels[1][3] - keyAlpha) <= 2, `${imageTarget}/${shell}: transparent keycap image mask`);
+  }
+  await page.goto(`https://stream.test/keyboard/?${new URLSearchParams({ mode: "keyboard", layout: "wasd", imageTarget: "both", shellImage: image })}`);
+  await page.locator('#keyboard-overlay[data-ready="yes"][data-image-ready="yes"]').waitFor();
+  assert.equal(await page.evaluate(() => byStreamResource.settings.imageUrl), image);
+  assert.equal(await page.evaluate(() => byStreamResource.settings.imageTarget), "all");
+});

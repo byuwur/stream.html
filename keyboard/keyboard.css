@@ -45,14 +45,11 @@ body {
 [data-shell="minimal"] .keyboard-shell {
   fill-opacity: 0.5;
 }
-[data-shell="none"] :is(.keyboard-shell, .shell-texture, .shell-highlight) {
+[data-shell="none"] :is(.keyboard-shell, .shell-highlight) {
   display: none;
 }
-[data-shell="outline"] :is(.keyboard-shell, .shell-texture) {
+[data-shell="outline"] .keyboard-shell {
   fill: none;
-}
-[data-shell="outline"] .shell-texture {
-  display: none;
 }
 [data-shell="gaming"] .keyboard-shell {
   stroke: var(--pressed);
@@ -67,6 +64,9 @@ body {
 .key-surface,
 .mouse-button {
   fill: var(--key);
+}
+#keyboard-overlay[data-image-ready="yes"] [data-image-keys="true"] .key-surface {
+  fill: transparent;
 }
 .key-outline,
 .mouse-outline {

@@ -25,6 +25,24 @@ async function initKeyboardResource() {
     preview: [1280, 720],
     urlRequired: ["mode"],
     sectionIcons: { Input: "fa-solid fa-keyboard", "Input History": "fa-solid fa-clock-rotate-left" },
+    legacyFields: ["shellImage", "keyImage"],
+    /** Resolve the former surface-specific URLs and tint choices into the shared image controls. */
+    normalizeParameters(values) {
+      if (!values.has("imageUrl")) {
+        const image = values.get(values.get("imageTarget") === "keys" ? "keyImage" : "shellImage") || values.get("keyImage");
+        if (image) values.set("imageUrl", image);
+      }
+      if (values.get("imageTarget") === "both") values.set("imageTarget", "all");
+      const tint = values.get("imageTint");
+      if (tint === "none") values.set("imageTint", "no");
+      if (["texture", "monochrome", "chroma"].includes(tint)) {
+        values.set("imageTint", "yes");
+        if (!values.has("imageTintStrength")) values.set("imageTintStrength", "100");
+        if (!values.has("imageBlendMode")) values.set("imageBlendMode", tint === "texture" ? "multiply" : "fill");
+      }
+      values.delete("shellImage");
+      values.delete("keyImage");
+    },
     fields: {
       mode: {
         type: "select",
@@ -123,42 +141,49 @@ async function initKeyboardResource() {
       shadowIntensity: { ...appearance, type: "number", default: 16, label: "Shadows (%)", subsection: "Vector details", min: 0, max: 100 },
       pressEffect: { ...appearance, type: "select", default: "fill", label: "Pressed effect", subsection: "Input feedback", options: { fill: "Fill", invert: "Invert", depth: "Fill + depth", glow: "Fill + glow" } },
       releaseDuration: { ...appearance, type: "number", default: 100, label: "Smooth release (ms)", subsection: "Input feedback", min: 0, max: 500, when: (settings) => settings.animate !== "no" },
-      imageTarget: { ...appearance, type: "select", default: "none", label: "Image surfaces", subsection: "Image backgrounds", when: keyboardFields.when, options: { none: "Off", shell: "Shell", keys: "Keycaps", both: "Shell + keycaps" } },
-      shellImage: {
-        ...appearance,
-        type: "text",
-        default: "",
-        label: "Shell image URL",
-        subsection: "Image backgrounds",
-        image: true,
-        maxlength: 65536,
-        validate: imageValue,
-        when: (settings) => keyboardFields.when(settings) && ["shell", "both"].includes(settings.imageTarget)
-      },
-      keyImage: {
-        ...appearance,
-        type: "text",
-        default: "",
-        label: "Keycap image URL",
-        subsection: "Image backgrounds",
-        image: true,
-        maxlength: 65536,
-        validate: imageValue,
-        when: (settings) => keyboardFields.when(settings) && ["keys", "both"].includes(settings.imageTarget)
-      },
-      imageFit: { ...appearance, type: "select", default: "cover", label: "Image fit", subsection: "Image backgrounds", when: ["imageTarget", "shell", "keys", "both"], options: { cover: "Cover", contain: "Contain", stretch: "Stretch" } },
-      imageScale: { ...appearance, type: "number", default: 100, label: "Image scale (%)", subsection: "Image backgrounds", when: ["imageTarget", "shell", "keys", "both"], min: 25, max: 300 },
-      imageOpacity: { ...appearance, type: "number", default: 100, label: "Image opacity (%)", subsection: "Image backgrounds", when: ["imageTarget", "shell", "keys", "both"], min: 0, max: 100 },
-      imageTint: {
+      imageTarget: {
         ...appearance,
         type: "select",
         default: "none",
+        label: "Image surfaces",
+        subsection: "Image backgrounds",
+        when: keyboardFields.when,
+        choiceButtons: true,
+        options: { none: "Off", shell: "Shell", keys: "Keys", all: "All" }
+      },
+      imageUrl: {
+        ...appearance,
+        type: "text",
+        default: "",
+        label: "Image URL",
+        subsection: "Image backgrounds",
+        image: true,
+        maxlength: 65536,
+        validate: imageValue,
+        when: ["imageTarget", "shell", "keys", "all"]
+      },
+      imageFit: { ...appearance, type: "select", default: "cover", label: "Image fit", subsection: "Image backgrounds", when: ["imageTarget", "shell", "keys", "all"], options: { cover: "Cover", contain: "Contain", stretch: "Stretch" } },
+      imageScale: { ...appearance, type: "number", default: 100, label: "Image scale (%)", subsection: "Image backgrounds", when: ["imageTarget", "shell", "keys", "all"], min: 25, max: 300 },
+      imageOpacity: { ...appearance, type: "number", default: 100, label: "Image opacity (%)", subsection: "Image backgrounds", when: ["imageTarget", "shell", "keys", "all"], min: 0, max: 100 },
+      imageTint: {
+        ...appearance,
+        ...toggle,
+        default: "no",
         label: "Image tint",
         subsection: "Image backgrounds",
-        when: ["imageTarget", "shell", "keys", "both"],
-        options: { none: "Original colors", texture: "Tint with texture", monochrome: "Monochrome", chroma: "Replace green regions" }
+        when: ["imageTarget", "shell", "keys", "all"]
       },
-      imageTintColor: { ...appearance, type: "color", default: "#990000", label: "Tint color", subsection: "Image backgrounds", maxlength: 9, when: ["imageTint", "texture", "monochrome", "chroma"] },
+      imageTintColor: { ...appearance, type: "color", default: "#ffffff", label: "Tint color", subsection: "Image backgrounds", maxlength: 9, when: ["imageTint", "yes"] },
+      imageTintStrength: { ...appearance, type: "number", default: 0, label: "Tint strength (%)", subsection: "Image backgrounds", min: 0, max: 100, when: ["imageTint", "yes"] },
+      imageBlendMode: {
+        ...appearance,
+        type: "select",
+        default: "multiply",
+        label: "Blend mode",
+        subsection: "Image backgrounds",
+        options: { multiply: "Multiply", overlay: "Overlay", "soft-light": "Soft-light", color: "Color", fill: "Fill" },
+        when: ["imageTint", "yes"]
+      },
       mouseIndependent: { ...appearance, ...toggle, default: "no", label: "Independent mouse colors", subsection: "Mouse", when: (settings) => ["mouse", "both"].includes(settings.mode) },
       mouseColor: { ...appearance, type: "color", default: "#111111", label: "Mouse surface", subsection: "Mouse", maxlength: 9, when: ["mouseIndependent", "yes"] },
       mouseButtonColor: { ...appearance, type: "color", default: "#282828", label: "Mouse buttons", subsection: "Mouse", maxlength: 9, when: ["mouseIndependent", "yes"] },
@@ -342,8 +367,6 @@ async function initKeyboardResource() {
         },
         defs
       );
-      const clip = svg("clipPath", { id: `${id}-clip`, clipPathUnits: "userSpaceOnUse" }, defs);
-      svg("use", { href: `#${id}-surface` }, clip);
       return { id, box: outer.box, parts, source };
     })();
     assets.set(asset, pending);
@@ -367,11 +390,6 @@ async function initKeyboardResource() {
     const transform = `scale(${width / box.width} ${height / box.height}) translate(${-box.x} ${-box.y})`;
     const cap = svg("g", { transform, class: "key-cap" }, node);
     svg("use", { href: `#${assetId}-surface`, class: "key-surface" }, cap);
-    if (["keys", "both"].includes(settings.imageTarget) && settings.keyImage && settings.keycapStyle !== "outline") {
-      const clip = svg("g", { "clip-path": `url(#${assetId}-clip)` }, cap);
-      const size = settings.imageScale / 100;
-      svg("use", { href: "#keycap-image", x: box.x + (box.width * (1 - size)) / 2, y: box.y + (box.height * (1 - size)) / 2, width: box.width * size, height: box.height * size, class: "surface-image" }, clip);
-    }
     svg("use", { href: `#${assetId}-surface`, class: "key-light" }, cap);
     svg("use", { href: `#${assetId}-surface`, class: "key-pressed-fill" }, cap);
     svg("use", { href: `#${assetId}-outline`, class: "key-outline" }, cap);
@@ -394,7 +412,7 @@ async function initKeyboardResource() {
     if (!value) return;
     const symbol = svg("svg", { id, viewBox: "0 0 100 100", preserveAspectRatio: { cover: "xMidYMid slice", contain: "xMidYMid meet", stretch: "none" }[settings.imageFit] }, defs);
     const image = svg("image", { width: 100, height: 100, preserveAspectRatio: "none" }, symbol);
-    if (settings.imageTint !== "none") image.setAttribute("filter", "url(#keyboard-image-tint)");
+    if (settings.imageTint === "yes" && settings.imageTintStrength > 0) image.setAttribute("filter", "url(#keyboard-image-tint)");
     const loader = new Image();
     imageLoaders.add(loader);
     loader.onload = () => {
@@ -406,6 +424,7 @@ async function initKeyboardResource() {
       image.setAttribute("width", width);
       image.setAttribute("height", height);
       image.setAttribute("href", loader.src);
+      root.dataset.imageReady = "yes";
     };
     loader.onerror = () => {
       imageLoaders.delete(loader);
@@ -416,8 +435,7 @@ async function initKeyboardResource() {
   }
 
   createImageTint(defs, settings, svg);
-  if (!keyboard.hidden && ["keys", "both"].includes(settings.imageTarget)) imageDefinition("keycap-image", settings.keyImage);
-  if (!keyboard.hidden && ["shell", "both"].includes(settings.imageTarget)) imageDefinition("shell-image", settings.shellImage);
+  if (!keyboard.hidden && settings.imageTarget !== "none") imageDefinition("keyboard-image", settings.imageUrl);
   const slots = keyboard.hidden ? [] : layouts.slots(settings);
   const required = new Set(slots.map((slot) => layouts.key(slot.code, settings).asset));
   // History's all-inputs mode also needs prompts for controls absent from a compact display.
@@ -437,10 +455,17 @@ async function initKeyboardResource() {
     const clip = svg("clipPath", { id: "keyboard-shell-clip" }, defs);
     svg("rect", { width: width - 2, height: height - 2, x: 1, y: 1, rx: settings.shell === "full" ? 10 : 5 }, clip);
     svg("rect", { x: 1, y: 1, width: width - 2, height: height - 2, rx: settings.shell === "full" ? 10 : 5, class: "keyboard-shell", "stroke-width": settings.outlineWidth * 1.5 }, board);
-    if (["shell", "both"].includes(settings.imageTarget) && settings.shellImage) {
-      const clipped = svg("g", { "clip-path": "url(#keyboard-shell-clip)", class: "shell-texture" }, board);
+    const imageKeys = ["keys", "all"].includes(settings.imageTarget);
+    const hasShell = !["none", "outline"].includes(settings.shell);
+    board.dataset.imageKeys = String(imageKeys);
+    let imageMask;
+    if (settings.imageTarget !== "none" && settings.imageUrl) {
+      // Mounted key contours form the mask, including holes beneath transparent keycaps.
+      imageMask = svg("mask", { id: "keyboard-image-mask", maskUnits: "userSpaceOnUse", x: 0, y: 0, width, height, "mask-type": "luminance" }, defs);
+      svg("rect", { width, height, fill: hasShell && settings.imageTarget !== "keys" ? "white" : "black", "fill-opacity": settings.shell === "minimal" ? 0.5 : 1 }, imageMask);
+      const clipped = svg("g", { ...(hasShell ? { "clip-path": "url(#keyboard-shell-clip)" } : {}), mask: "url(#keyboard-image-mask)", class: "keyboard-texture" }, board);
       const scale = settings.imageScale / 100;
-      svg("use", { href: "#shell-image", width: width * scale, height: height * scale, x: (width * (1 - scale)) / 2, y: (height * (1 - scale)) / 2, class: "surface-image" }, clipped);
+      svg("use", { href: "#keyboard-image", width: width * scale, height: height * scale, x: (width * (1 - scale)) / 2, y: (height * (1 - scale)) / 2, class: "surface-image" }, clipped);
     }
     if (settings.shell === "full") svg("path", { d: `M12 4 H${Math.max(12, width - 12)}`, class: "shell-highlight" }, board);
     for (const slot of slots) {
@@ -450,6 +475,24 @@ async function initKeyboardResource() {
       node.setAttribute("y", slot.y * unitY + padding);
       board.append(node);
       keyNodes.set(slot.code, node);
+      if (imageMask) {
+        const stencil = node.cloneNode(false);
+        stencil.removeAttribute("class");
+        stencil.removeAttribute("data-code");
+        stencil.removeAttribute("role");
+        stencil.removeAttribute("aria-label");
+        const cap = node.querySelector(".key-cap");
+        const shape = node.querySelector(".key-surface").cloneNode(false);
+        shape.removeAttribute("class");
+        shape.setAttribute("fill", imageKeys ? "white" : "black");
+        if (cap) {
+          const geometry = cap.cloneNode(false);
+          geometry.removeAttribute("class");
+          geometry.append(shape);
+          stencil.append(geometry);
+        } else stencil.append(shape);
+        imageMask.append(stencil);
+      }
     }
   }
   if (!mouse.hidden) mountMouse();
@@ -742,26 +785,15 @@ function applyPalette(root, settings) {
     root.style.setProperty(`--${name}`, value);
 }
 
-/** Build one reusable image filter; texture and green-region tinting preserve source alpha. */
+/** Tint the shared image against an opaque copy, then restore its original alpha exactly once. */
 function createImageTint(defs, settings, svg) {
-  if (settings.imageTint === "none") return;
+  if (settings.imageTint !== "yes" || settings.imageTintStrength === 0) return;
   const filter = svg("filter", { id: "keyboard-image-tint", "color-interpolation-filters": "sRGB", x: 0, y: 0, width: "100%", height: "100%" }, defs);
-  let hex = settings.imageTintColor.slice(1);
-  if (hex.length <= 4) hex = [...hex].map((digit) => digit + digit).join("");
-  const rgb = [0, 2, 4].map((index) => parseInt(hex.slice(index, index + 2), 16) / 255);
-  if (settings.imageTint === "texture") {
-    const alpha = hex.length === 8 ? parseInt(hex.slice(6), 16) / 255 : 1;
-    svg("feColorMatrix", { type: "matrix", values: `${rgb.map((channel) => [0.2126 * channel, 0.7152 * channel, 0.0722 * channel, 0, 0].join(" ")).join(" ")} 0 0 0 ${alpha} 0` }, filter);
-  } else if (settings.imageTint === "monochrome") {
-    svg("feFlood", { "flood-color": settings.imageTintColor }, filter);
-    svg("feComposite", { in2: "SourceGraphic", operator: "in" }, filter);
-  } else {
-    svg("feColorMatrix", { in: "SourceGraphic", type: "matrix", values: "0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -1 2 -1 0 0", result: "green" }, filter);
-    svg("feComposite", { in: "green", in2: "SourceAlpha", operator: "in", result: "mask" }, filter);
-    svg("feFlood", { "flood-color": settings.imageTintColor }, filter);
-    svg("feComposite", { in2: "mask", operator: "in" }, filter);
-    svg("feComposite", { in2: "SourceGraphic", operator: "over" }, filter);
-  }
+  const opaque = svg("feComponentTransfer", { in: "SourceGraphic", result: "opaque-image" }, filter);
+  svg("feFuncA", { type: "linear", slope: 0, intercept: 1 }, opaque);
+  svg("feFlood", { "flood-color": settings.imageTintColor, "flood-opacity": settings.imageTintStrength / 100, result: "tint" }, filter);
+  svg("feBlend", { in: "tint", in2: "opaque-image", mode: settings.imageBlendMode === "fill" ? "normal" : settings.imageBlendMode }, filter);
+  svg("feComposite", { in2: "SourceAlpha", operator: "in" }, filter);
 }
 
 /** Embedded ephemeral input history; capture and teardown belong to this resource. */
