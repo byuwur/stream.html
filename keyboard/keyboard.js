@@ -1255,7 +1255,7 @@ function createImageTint(defs, settings, svg) {
     speedrun: "Speedrunning",
     custom: "Custom compact"
   };
-  // Gaming presets select physical slots; they never pack or resize keys into fictional rows.
+  // Gaming presets select physical keys from the same ANSI/ISO layouts.
   const gamingKeys = {
     wasd: ["KeyW", "KeyA", "KeyS", "KeyD"],
     modifiers: ["Tab", "KeyQ", "KeyW", "KeyE", "KeyR", "CapsLock", "KeyA", "KeyS", "KeyD", "KeyF", "ShiftLeft", "KeyZ", "KeyX", "KeyC", "ControlLeft", "AltLeft", "Space"],
@@ -1389,8 +1389,95 @@ function createImageTint(defs, settings, svg) {
     return result;
   }
 
+  /** Align the right-hand fighting keys by column, including when only some keys are visible. */
+  function alignFightingKeys(slots, gap) {
+    const byCode = new Map(slots.map((slot) => [slot.code, slot]));
+    const columns = [
+      ["KeyU", "KeyJ"],
+      ["KeyI", "KeyK"],
+      ["KeyO", "KeyL"]
+    ]
+      .map((pair) => pair.map((code) => byCode.get(code)).filter(Boolean))
+      .filter((column) => column.length);
+    if (!columns.length) return;
+
+    const left = ["KeyW", "KeyA", "KeyS", "KeyD"].map((code) => byCode.get(code)).filter(Boolean);
+    let x = left.length ? Math.max(...left.map((slot) => slot.x + slot.width)) + gap : 0;
+    for (const column of columns) {
+      for (const slot of column) slot.x = x;
+      x += column[0].width;
+    }
+    const enter = byCode.get("Enter");
+    if (enter) enter.x = x + gap;
+  }
+
+  /** Close gaps in gaming layouts while keeping typing rows and the inverted-T arrow cluster. */
+  function compactGamingSlots(slots, preset) {
+    const arrows = slots.filter((slot) => keys[slot.code].group === "arrows");
+    const typing = slots.filter((slot) => keys[slot.code].group !== "arrows");
+    if (!typing.length) return arrows;
+
+    const left = Math.min(...typing.map((slot) => slot.x));
+    // Keep both rows of tall keys such as ISO Enter when dropping unoccupied rows.
+    const rowPositions = new Set();
+    for (const slot of typing) for (let row = 0; row < slot.height; row++) rowPositions.add(slot.y + row);
+    const rows = [...rowPositions].sort((a, b) => a - b).map((y) => typing.filter((slot) => slot.y === y).sort((a, b) => a.x - b.x));
+    if (rows.length > 1 && rows[0].length === 1 && rows[0][0].code === "Escape") {
+      const [escape] = rows.shift();
+      rows[0].unshift(escape);
+    }
+    const bottom = rows.at(-1);
+    const aboveBottom = rows.at(-2);
+    if (aboveBottom?.length === 1 && aboveBottom[0].code === "ShiftLeft" && bottom.some((slot) => ["ControlLeft", "AltLeft", "Space"].includes(slot.code))) {
+      const [shift] = rows.splice(-2, 1)[0];
+      bottom.unshift(shift);
+    }
+
+    const gap = 0.25;
+    const result = [];
+    const tall = [];
+    let loneSpacebar;
+    for (const [y, row] of rows.entries()) {
+      let sourceRight = row[0]?.x ?? left;
+      let x = Math.min(1.75, sourceRight - left);
+      for (const slot of row) {
+        if (slot.height > 1) {
+          tall.push({ ...slot, y });
+          continue;
+        }
+        x += Math.max(0, Math.min(gap, slot.x - sourceRight));
+        const width = slot.code === "Space" ? 3.25 : slot.width;
+        const placed = { ...slot, x, y, width };
+        result.push(placed);
+        if (slot.code === "Space" && row.length === 1) loneSpacebar = placed;
+        sourceRight = slot.x + slot.width;
+        x += width;
+      }
+    }
+    if (preset === "fighting") alignFightingKeys(result, gap);
+    // Place ISO Enter to the right of both rows so its tall cap cannot overlap a shorter row.
+    for (const slot of tall) {
+      const right = Math.max(0, ...result.filter((key) => key.y >= slot.y && key.y < slot.y + slot.height).map((key) => key.x + key.width));
+      result.push({ ...slot, x: right ? right + gap : 0 });
+    }
+    if (loneSpacebar) {
+      const right = Math.max(0, ...result.filter((slot) => slot !== loneSpacebar).map((slot) => slot.x + slot.width));
+      loneSpacebar.x = Math.max(0, (right - loneSpacebar.width) / 2);
+    }
+
+    if (arrows.length) {
+      const arrowLeft = Math.min(...arrows.map((slot) => slot.x));
+      const arrowTop = Math.min(...arrows.map((slot) => slot.y));
+      const arrowHeight = Math.max(...arrows.map((slot) => slot.y + slot.height)) - arrowTop;
+      const y = Math.max(0, rows.length - arrowHeight);
+      const x = Math.max(...result.filter((slot) => slot.y + slot.height > y).map((slot) => slot.x + slot.width)) + gap;
+      for (const slot of arrows) result.push({ ...slot, x: x + slot.x - arrowLeft, y: y + slot.y - arrowTop });
+    }
+    return result;
+  }
+
   /**
-   * Compose preset slots in key units; hidden controls keep the selected preset's geometry.
+   * Compose preset slots in key units; hardware layouts keep their physical geometry.
    * @param {Object} settings Validated resource settings.
    * @returns {Array<Object>} code/x/y/width/height slots, without live input state.
    */
@@ -1482,10 +1569,10 @@ function createImageTint(defs, settings, svg) {
       if (preset === "compact" && slot.y === top) return false;
       return settings[`group${keys[slot.code].group}`] !== "no" && (!selected || selected.has(slot.code));
     });
-    // Crop empty outer rows/columns without changing the relative physical positions or key widths.
-    const left = Math.min(...visible.map((slot) => slot.x));
-    const topEdge = Math.min(...visible.map((slot) => slot.y));
-    return visible.map((slot) => ({ ...slot, x: slot.x - left, y: slot.y - topEdge }));
+    const placed = gaming ? compactGamingSlots(visible, preset) : visible;
+    const left = Math.min(...placed.map((slot) => slot.x));
+    const topEdge = Math.min(...placed.map((slot) => slot.y));
+    return placed.map((slot) => ({ ...slot, x: slot.x - left, y: slot.y - topEdge }));
   }
 
   window.byKeyboardLayouts = { keys, presets, key, slots };
