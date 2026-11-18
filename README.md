@@ -269,6 +269,8 @@ Input History is ephemeral. Recorded inputs are never stored in browser storage,
 | `mirror`, `fitMargin` | Mirror artwork horizontally; viewport fit margin in pixels (default `16`). |
 | `horizontalPosition`, `verticalPosition` | Signed pixel offsets from the viewport center; both default to `0`. |
 
+A fixed-skin overlay loads its chosen model and any additional SVG needed for a custom guide symbol. The configurator and bare Controller page load the full catalog.
+
 The selector groups 34 skin choices by platform from 32 front-facing SVG models. Existing named skin IDs remain valid. Fight Stick offers 8-, 6-, and 4-button choices (`fgc`, `fgc6`, `fgc4`) from source-authored views in one `fgc.svg`; the reduced layouts retain their original button positions and bindings.
 
 - Nintendo: `nes`, `famicom`, `snes`, `superfamicom`, `n64`, `gcn`, `wii`, `wiinunchuk`, `wiiclassic`, `wiiupro`, `wiiu`, `joycon`, `switchpro`.

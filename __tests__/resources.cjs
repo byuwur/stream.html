@@ -173,6 +173,25 @@ test("controller guide tint and subtle control colors", { timeout: 60000 }, asyn
     );
   }
 
+  await t.test("fixed skins request only their model and the selected guide symbol's source", async () => {
+    const requests = [];
+    const record = (request) => {
+      const match = new URL(request.url()).pathname.match(/\/controllers\/([^/]+\.svg)$/);
+      if (match) requests.push(match[1]);
+    };
+    page.on("request", record);
+    try {
+      await open({ skin: "fgc6" });
+      assert.deepEqual(requests, ["fgc.svg"]);
+      requests.length = 0;
+      await open({ skin: "ds5", customGuide: "yes", guideSymbol: "playstation", guideScale: "90" });
+      assert.deepEqual(requests, ["ds5.svg", "ds3.svg"]);
+      assert.ok(await page.locator(".guide-logo-custom").count());
+    } finally {
+      page.off("request", record);
+    }
+  });
+
   await t.test("GameCube shadows change rendered shell pixels independently of highlights", async () => {
     await open({ skin: "gcn", highlightIntensity: "10", shadowIntensity: "0" });
     const shadow = page.locator(".controller-background .shell-shadow");
