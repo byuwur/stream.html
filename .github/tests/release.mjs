@@ -314,10 +314,7 @@ test("online, bundled, and packaged HTML has a complete dependency graph", async
     const artwork = JSON.parse(all.find((node) => attr(node, "id") === `${embedded.resource}-artwork`).childNodes[0].value);
     const artworkDirectory = path.join(root, config.dynamicDependencies[`${embedded.resource}/${embedded.resource}.js`].directory);
     const files = (await fs.readdir(artworkDirectory)).filter((file) => file.endsWith(".svg")).sort();
-    assert.deepEqual(
-      Object.keys(artwork).sort(),
-      files.map((file) => path.basename(file, ".svg")).sort()
-    );
+    assert.deepEqual(Object.keys(artwork).sort(), files.map((file) => path.basename(file, ".svg")).sort());
     for (const file of files) assert.equal(artwork[path.basename(file, ".svg")], await fs.readFile(path.join(artworkDirectory, file), "utf8"));
   }
 });
