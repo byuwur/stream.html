@@ -1,6 +1,6 @@
 # Stream.html · Privacy & Cookies
 
-**Unpublished draft.** Before publication, confirm who hosts the site, who can access its server logs and how long those logs are kept. Record the effective date when the notice is first published.
+**Unpublished draft.** The operator’s contact details are under review. The effective date will be recorded at first publication.
 
 ## Who operates this site
 
@@ -10,7 +10,7 @@ Andrés Trujillo Mateus operates this site as byUwUr, an individual creator in C
 
 The catalog opens individual overlay configurators. The browser encodes settings in the generated URL and may save the query as a functional preference. Anyone who receives the URL can read its settings. Opening an overlay can send that query to its web host. Images, fonts, and other remote assets contact their respective hosts. The configurator uses jsDelivr and may request Google Fonts. OBS sources, preview frames and downloaded overlays do not initialize website analytics.
 
-Manual image URLs are fetched from the specified host. Base64 mode reads the selected file locally. The shipped upload provider list is empty and the PHP adapter disables Catbox. A deployment that enables a provider can receive and forward original image bytes. Direct requests to the adapter can reach the server even with forwarding disabled. The endpoint rate-limits requests using a hash of the network address and prunes expired counters on later requests. The web host receives browser requests and network addresses to deliver the site. The privacy page loads MD.view through jsDelivr.
+Manual image URLs are fetched from the specified host. Base64 mode reads the selected file locally. The shipped upload provider list is empty and the PHP adapter disables Catbox. A deployment that enables a provider can receive and forward original image bytes. Direct requests to the adapter can reach the server even with forwarding disabled. The endpoint rate-limits requests using a hash of the network address and prunes expired counters on later requests. The web host receives browser requests and network addresses to deliver the site. I can’t view visitor access logs in the hosting dashboard, and I don’t know how long the host keeps them. The privacy page loads MD.view through jsDelivr.
 
 ## Optional Google Analytics
 
