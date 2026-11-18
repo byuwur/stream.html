@@ -78,10 +78,10 @@ test("configurator smoke", { timeout: 60000 }, async (t) => {
       const release = page.locator('[name="releaseDuration"]');
       assert.deepEqual(await effect.locator("option").allTextContents(), ["Fill", "Invert", "Fill + depth", "Fill + glow"]);
       assert.equal(await effect.inputValue(), "depth");
-      await page.locator('[name="animate"]').uncheck({ force: true });
+      await page.locator('[name="animate"]').uncheck();
       await page.waitForFunction(() => document.querySelector('[name="releaseDuration"]').disabled);
       assert.equal(await release.inputValue(), "180");
-      await page.locator('[name="animate"]').check({ force: true });
+      await page.locator('[name="animate"]').check();
       await page.waitForFunction(() => !document.querySelector('[name="releaseDuration"]').disabled);
       const mode = page.locator('form[data-configurator] [name="guideColorMode"]');
       const strength = page.locator('form[data-configurator] [name="guideTintStrength"]');
