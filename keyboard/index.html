@@ -74,6 +74,13 @@
       </script>
       <link rel="stylesheet" href="../configurator.css" data-editor-style media="not all" />
       <script src="../configurator.js" defer></script>
+      <script>
+        byConfigurator.configureResource = () => ({
+          initResourceHelp(help) {
+            $(help).find('[data-panel="info"]').append(/* HTML */ `<p class="small mt-3">Keyboard and mouse artwork by <a href="https://kenney.nl/assets/input-prompts" target="_blank" rel="noopener">Kenney</a> (Input Prompts).</p>`);
+          }
+        });
+      </script>
     </template>
     <div id="configurator"></div>
   </body>
