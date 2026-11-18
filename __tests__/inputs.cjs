@@ -15,6 +15,52 @@ function feedbackStyle(control) {
   };
 }
 
+test("focused input overlays cancel browser defaults while preserving controls and F2", { timeout: 30000 }, async (t) => {
+  const assets = await loadAssets(runtimeAssets);
+  const browser = await launchBrowser();
+  t.after(() => browser.close());
+  const page = await browser.newPage();
+  await serve(page, assets);
+
+  for (const path of ["keyboard/?mode=hidden", "controller/?player=1"]) {
+    await page.goto(`https://stream.test/${path}`);
+    await page.locator('#keyboard-overlay[data-ready="yes"], #gamepads .controller').waitFor();
+    const defaults = await page.evaluate(() => {
+      const options = { bubbles: true, cancelable: true };
+      const events = () => [
+        new KeyboardEvent("keydown", { ...options, key: "F5", code: "F5" }),
+        new KeyboardEvent("keydown", { ...options, key: "r", code: "KeyR", ctrlKey: true }),
+        new KeyboardEvent("keydown", { ...options, key: "ArrowLeft", code: "ArrowLeft", altKey: true }),
+        new KeyboardEvent("keyup", { ...options, key: "F5", code: "F5" }),
+        ...["mousedown", "mouseup", "auxclick"].map((type) => new MouseEvent(type, { ...options, button: 3 })),
+        new MouseEvent("contextmenu", { ...options, button: 2 }),
+        new WheelEvent("wheel", { ...options, deltaY: 100 })
+      ];
+      const allowed = () =>
+        events()
+          .filter((event) => document.body.dispatchEvent(event))
+          .map((event) => event.key || event.type);
+      const focused = allowed();
+      Object.defineProperty(document, "hasFocus", { configurable: true, value: () => false });
+      const unfocused = allowed();
+      delete document.hasFocus;
+      return { focused, unfocused };
+    });
+    assert.deepEqual(defaults.focused, [], path);
+    assert.deepEqual(defaults.unfocused, ["F5", "r", "ArrowLeft", "F5", "mousedown", "mouseup", "auxclick", "contextmenu", "wheel"], path);
+
+    await page.evaluate(() => document.body.append(document.createElement("input")));
+    const input = page.locator("body > input");
+    await input.focus();
+    await input.press("x");
+    assert.equal(await input.inputValue(), "x");
+    await input.evaluate((node) => node.remove());
+
+    await page.keyboard.press("F2");
+    await page.waitForURL((url) => url.hash === "#configure");
+  }
+});
+
 test("keyboard and mouse reflect presses, releases, and interrupted holds", { timeout: 30000 }, async (t) => {
   const assets = await loadAssets(runtimeAssets);
   const browser = await launchBrowser();
@@ -34,6 +80,22 @@ test("keyboard and mouse reflect presses, releases, and interrupted holds", { ti
   assert.equal(await page.locator('#mouse [data-code="Mouse0"].pressed').count(), 1);
   await page.mouse.up({ button: "left" });
   assert.equal(await page.locator("#mouse .pressed").count(), 0);
+  // A host may deliver input to the window even when the document reports no focus.
+  for (const focused of [true, false]) {
+    const forwarded = await page.evaluate((focused) => {
+      Object.defineProperty(document, "hasFocus", { configurable: true, value: () => focused });
+      const key = (type) => new KeyboardEvent(type, { code: "KeyW", key: "w", cancelable: true });
+      const mouse = (type) => new MouseEvent(type, { button: 0, cancelable: true });
+      const allowed = [window.dispatchEvent(key("keydown")), window.dispatchEvent(mouse("mousedown"))];
+      const pressed = document.querySelectorAll("#keyboard .pressed, #mouse .pressed").length;
+      window.dispatchEvent(key("keyup"));
+      window.dispatchEvent(mouse("mouseup"));
+      const released = document.querySelectorAll("#keyboard .pressed, #mouse .pressed").length;
+      delete document.hasFocus;
+      return { allowed, pressed, released };
+    }, focused);
+    assert.deepEqual(forwarded, { allowed: [!focused, !focused], pressed: 2, released: 0 });
+  }
   await page.keyboard.down("KeyW");
   await page.evaluate(() => window.dispatchEvent(new Event("blur")));
   assert.equal(await page.locator("#keyboard .pressed, #mouse .pressed").count(), 0);

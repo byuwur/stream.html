@@ -164,7 +164,9 @@ About includes the shortcut reference. Focus the configurator to use these:
 | `Esc`               | Close the current dialog, popover, or dropdown. |
 | `Tab` / `Shift+Tab` | Move between controls.                          |
 
-`F2` switches modes when the editor is included and is ignored inside previews. Renderer-only copies show a warning with links to the official hosted editor and repository for F2 or `#configure`; they never load editor dependencies. F3/F4 retain browser actions. Modified or repeated function keys, repeated shortcuts, and IME composition are ignored.
+`F2` switches modes when the editor is included and is ignored inside previews. Renderer-only copies show a warning with links to the official hosted editor and repository for F2 or `#configure`; they never load editor dependencies. Modified or repeated function keys, repeated shortcuts, and IME composition are ignored by the configurator shortcuts.
+
+Focused Controller and Keyboard & Mouse overlays cancel browser actions for keyboard and mouse events the page can cancel, including wheel scrolling and mouse shortcuts. Interactive controls keep their normal behavior, and F2 still opens the configurator. In other overlays, F3/F4 retain browser actions.
 
 ### Shorter URLs
 

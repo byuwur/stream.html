@@ -628,7 +628,6 @@ async function initKeyboardResource() {
   function keyboardInput(event) {
     if (event.type === "keyup") return setPressed(event.code, false);
     if (!eligible(event) || !Object.hasOwn(layouts.keys, event.code)) return;
-    event.preventDefault();
     // A later event's modifier flags recover releases swallowed by a browser/OS shortcut.
     for (const [flag, prefix] of [
       ["ctrlKey", "Control"],
@@ -734,14 +733,8 @@ async function initKeyboardResource() {
     window.addEventListener("mouseup", mouseInput, { signal: events.signal });
     window.addEventListener("wheel", wheelInput, { signal: events.signal, passive: true });
     window.addEventListener("mousemove", mouseMove, { signal: events.signal });
-    window.addEventListener(
-      "contextmenu",
-      (event) => {
-        if (eligible(event)) event.preventDefault();
-      },
-      { signal: events.signal }
-    );
   }
+  byStream.preventOverlayInputDefaults(events.signal);
   window.addEventListener("blur", clearInput, { signal: events.signal });
   document.addEventListener(
     "visibilitychange",

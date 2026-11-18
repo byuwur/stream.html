@@ -548,8 +548,9 @@ async function initControllerResource() {
     connectKeyboard() {
       if (this.kb) return;
       this.kb = true;
-      document.addEventListener("keydown", tester.updateInputKB);
-      document.addEventListener("keyup", tester.updateInputKB);
+      const target = byStreamOverlay ? window : document;
+      target.addEventListener("keydown", tester.updateInputKB);
+      target.addEventListener("keyup", tester.updateInputKB);
       this.pollGamepads();
     },
     startPolling() {
@@ -767,7 +768,7 @@ async function initControllerResource() {
     },
     updateInputKB(event) {
       if (event.type === "keydown" && (event.isComposing || event.target?.closest?.("input, textarea, select, [contenteditable]:not([contenteditable='false'])")) && !gamepadSupport.captureKeyboard) return;
-      if ((gamepadSupport.captureKeyboard || byStreamOverlay) && (bySettingsKB.btns.includes(event.keyCode) || bySettingsKB.axesBtns.includes(event.keyCode))) event.preventDefault();
+      if (gamepadSupport.captureKeyboard && (bySettingsKB.btns.includes(event.keyCode) || bySettingsKB.axesBtns.includes(event.keyCode))) event.preventDefault();
       if (event.type === "keydown") {
         tester.keys.add(event.keyCode);
         if (event.code) tester.keyCodes.add(event.code);
@@ -1098,7 +1099,10 @@ async function initControllerResource() {
   const settings = await byStream.initResource(resource, { gamepadSupport, buttonValue, copyGamepad });
   let history = null;
   gamepadSupport.init();
-  if (byStreamOverlay) initController();
+  if (byStreamOverlay) {
+    byStream.preventOverlayInputDefaults();
+    initController();
+  }
 }
 
 /**

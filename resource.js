@@ -198,6 +198,17 @@
     else warnMissingConfigurator();
   });
 
+  /** Install after window input handlers that skip canceled events. */
+  function preventOverlayInputDefaults(signal) {
+    function preventDefault(event) {
+      if (!document.hasFocus() || event.isComposing || event.target?.isContentEditable || event.target?.closest?.("input, textarea, select, button, a")) return;
+      event.preventDefault();
+    }
+    for (const type of ["keydown", "keyup", "mousedown", "mouseup", "click", "auxclick", "contextmenu", "wheel"]) {
+      global.addEventListener(type, preventDefault, { signal, passive: false });
+    }
+  }
+
   /**
    * Decode URL transport markers; readable parameters override packed values.
    * Failed compressed values are omitted so resource defaults and valid neighbors survive.
@@ -1535,6 +1546,7 @@
     durationFormats,
     formatDuration,
     initResource,
+    preventOverlayInputDefaults,
     parseAccounts,
     parseZone,
     parseLocale,
