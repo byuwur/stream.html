@@ -31,7 +31,7 @@ async function initControllerResource() {
 
   // Defaults, URL constraints, and the field metadata consumed by the optional editor.
   const resource = {
-    version: "1.7", // 2026-11-17
+    version: "1.8", // 2026-11-17
     title: "Controller",
     description: "Gamepad or keyboard input with 32 controller models.",
     preview: [1280, 720],
