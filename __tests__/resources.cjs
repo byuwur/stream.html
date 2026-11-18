@@ -7,6 +7,39 @@ const path = require("node:path");
 const test = require("node:test");
 const { runtimeAssets, launchBrowser, loadAssets, resourceNames, serve } = require("./browser.cjs");
 
+/** Sample premultiplied RGB and alpha at fractional positions in the element. */
+async function renderedPixels(page, locator, points) {
+  const screenshots = [];
+  // Firefox cannot omit the screenshot background. Black gives premultiplied RGB;
+  // the increase over white reveals how much of the background shows through.
+  for (const background of ["#000", "#fff"]) {
+    const png = await locator.screenshot({ style: `html { background: ${background} !important; }` });
+    screenshots.push(png.toString("base64"));
+  }
+  return page.evaluate(
+    async ({ screenshots, points }) => {
+      const [black, white] = await Promise.all(
+        screenshots.map(async (base64) => {
+          const image = new Image();
+          image.src = `data:image/png;base64,${base64}`;
+          await image.decode();
+          const canvas = document.createElement("canvas");
+          canvas.width = image.width;
+          canvas.height = image.height;
+          const context = canvas.getContext("2d");
+          context.drawImage(image, 0, 0);
+          return points.map(([x, y]) => context.getImageData(Math.floor(image.width * x), Math.floor(image.height * y), 1, 1).data);
+        })
+      );
+      return black.map(([r, g, b], i) => {
+        const [wr, wg, wb] = white[i];
+        return [r, g, b, 255 - Math.round((wr - r + wg - g + wb - b) / 3)];
+      });
+    },
+    { screenshots, points }
+  );
+}
+
 test("shared resource core", { timeout: 30000 }, async (t) => {
   const browser = await launchBrowser();
   t.after(() => browser.close());
@@ -144,11 +177,11 @@ test("controller guide tint and subtle control colors", { timeout: 60000 }, asyn
     await open({ skin: "gcn", highlightIntensity: "10", shadowIntensity: "0" });
     const shadow = page.locator(".controller-background .shell-shadow");
     assert.equal(await shadow.evaluate((element) => getComputedStyle(element).opacity), "0");
-    const unshaded = await page.locator(".controller-background").screenshot({ omitBackground: true });
+    const unshaded = await page.locator(".controller-background").screenshot();
     await open({ skin: "gcn", highlightIntensity: "10", shadowIntensity: "100" });
     assert.equal(await shadow.evaluate((element) => getComputedStyle(element).opacity), "1");
     assert.equal(await page.locator(".controller-background .shell-highlight").evaluate((element) => getComputedStyle(element).opacity), "0.1");
-    const shaded = await page.locator(".controller-background").screenshot({ omitBackground: true });
+    const shaded = await page.locator(".controller-background").screenshot();
     assert.notDeepEqual(shaded, unshaded, "Shadow intensity affects the rendered shell");
   });
 
@@ -225,23 +258,16 @@ test("controller guide tint and subtle control colors", { timeout: 60000 }, asyn
     assert.equal(new URL(settings.url).searchParams.has("shellTintColor"), false);
   });
 
-  /** Sample the real rendered logo against transparency, excluding the controller underneath. */
+  /** Sample the real rendered logo, excluding the controller underneath. */
   async function logoPixels(parameters) {
     await open({ ...guide, ...parameters });
-    await page.locator(".guide-logo-custom").waitFor();
+    const logo = page.locator(".guide-logo-custom");
+    await logo.waitFor();
     await page.addStyleTag({ content: ".controller-background, .guide-custom-housing { visibility: hidden !important; }" });
-    const png = await page.locator(".guide-logo-custom").screenshot({ omitBackground: true });
-    return page.evaluate(async (base64) => {
-      const image = new Image();
-      image.src = `data:image/png;base64,${base64}`;
-      await image.decode();
-      const canvas = document.createElement("canvas");
-      canvas.width = image.width;
-      canvas.height = image.height;
-      const context = canvas.getContext("2d");
-      context.drawImage(image, 0, 0);
-      return [0.25, 0.75].map((x) => [...context.getImageData(Math.floor(image.width * x), Math.floor(image.height / 2), 1, 1).data]);
-    }, png.toString("base64"));
+    return renderedPixels(page, logo, [
+      [0.25, 0.5],
+      [0.75, 0.5]
+    ]);
   }
 
   await t.test("guide blend modes preserve translucent and opaque image pixels", async () => {
@@ -257,9 +283,12 @@ test("controller guide tint and subtle control colors", { timeout: 60000 }, asyn
       }
     }
     const fill = await logoPixels({ guideColorMode: "tint", guideTintColor: "#6699cc", guideTintStrength: "100", guideBlendMode: "fill" });
-    for (let i = 0; i < fill.length; i++) {
-      for (const [channel, expected] of [102, 153, 204].entries()) assert.ok(Math.abs(fill[i][channel] - expected) <= 2, "Fill replaces RGB while retaining source alpha");
-      assert.ok(Math.abs(fill[i][3] - original[i][3]) <= 2);
+    for (const [i, [r, g, b, alpha]] of fill.entries()) {
+      assert.ok(Math.abs(alpha - original[i][3]) <= 2, "Fill retains source alpha");
+      const expected = [102, 153, 204].map((channel) => Math.round((channel * alpha) / 255));
+      for (const [channel, actual] of [r, g, b].entries()) {
+        assert.ok(Math.abs(actual - expected[channel]) <= 1, `Fill replaces RGB: got ${[r, g, b]} at alpha ${alpha}, expected ${expected}`);
+      }
     }
     const monochrome = await logoPixels({ guideColorMode: "custom", guideColor: "#6699cc" });
     for (const [channel, expected] of [102, 153, 204, 255].entries()) {
@@ -328,25 +357,12 @@ test("keyboard image targets mask real key contours even when keycaps are transp
     if (imageTarget !== "none") await page.locator('#keyboard-overlay[data-image-ready="yes"]').waitFor();
     const board = page.locator("#keyboard > svg");
     const box = await board.boundingBox();
-    const key = await page.locator('#keyboard [data-code="KeyW"]').boundingBox();
-    const png = await board.screenshot({ omitBackground: true });
-    const pixels = await page.evaluate(
-      async ({ base64, x, y }) => {
-        const image = new Image();
-        image.src = `data:image/png;base64,${base64}`;
-        await image.decode();
-        const canvas = document.createElement("canvas");
-        canvas.width = image.width;
-        canvas.height = image.height;
-        const context = canvas.getContext("2d");
-        context.drawImage(image, 0, 0);
-        return [
-          [image.width / 2, 3],
-          [x, y]
-        ].map(([x, y]) => [...context.getImageData(Math.floor(x), Math.floor(y), 1, 1).data]);
-      },
-      { base64: png.toString("base64"), x: key.x - box.x + key.width * 0.3, y: key.y - box.y + key.height * 0.3 }
-    );
+    // Nested SVG bounding boxes can include the board origin in Firefox.
+    const key = await page.locator('#keyboard [data-code="KeyW"]').evaluate((svg) => {
+      const board = svg.ownerSVGElement.viewBox.baseVal;
+      return [(svg.x.baseVal.value + svg.width.baseVal.value * 0.3) / board.width, (svg.y.baseVal.value + svg.height.baseVal.value * 0.3) / board.height];
+    });
+    const pixels = await renderedPixels(page, board, [[0.5, 3 / box.height], key]);
     assert.ok(Math.abs(pixels[0][3] - shellAlpha) <= 2, `${imageTarget}/${shell}: shell image mask`);
     assert.ok(Math.abs(pixels[1][3] - keyAlpha) <= 2, `${imageTarget}/${shell}: transparent keycap image mask`);
   }

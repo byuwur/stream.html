@@ -1003,9 +1003,6 @@ async function initControllerResource() {
       active.style.setProperty("--screen-opacity", settings.screenOpacity / 100);
       customizeControllerAppearance(active, settings);
       customizeControllerShell(active, settings, controllerEvents.signal);
-      // Install feedback after appearance so mounting a custom tint never animates it.
-      active.dataset.effect = settings.pressEffect;
-      active.style.setProperty("--release", `${settings.releaseDuration}ms`);
       function updatePlayerIndicators() {
         const litLeds = [[], [1], [2], [3], [4], [1, 4], [2, 4], [3, 4], [1, 3, 4], [1, 2, 3, 4]][player];
         for (const indicator of active.querySelectorAll("[data-player]")) {
@@ -1078,6 +1075,11 @@ async function initControllerResource() {
     }
     history?.onResize(fitController);
     fitController();
+    // Fitting resolves the initial artwork styles before enabling release transitions.
+    for (const active of controllers) {
+      active.dataset.effect = settings.pressEffect;
+      active.style.setProperty("--release", `${settings.releaseDuration}ms`);
+    }
     window.addEventListener("resize", fitController, { signal: controllerEvents.signal });
     tester.updateGamepads(gamepadSupport.gamepads);
   }
