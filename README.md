@@ -1,155 +1,267 @@
-# byuwur/stream.html
+# Stream.html
 
-![stream.html preview](prev.jpg)
+Browser overlays for OBS. Configure a resource, copy its URL, and add it to your scene.
 
-Browser overlays for your stream. Configure a tool and copy its URL into OBS. Free. Forever. No account, install, or build step.
+![Stream.html preview](prev.jpg)
 
-<!-- [Open stream.html](https://byuwur.github.io/stream.html/) · [Configurator demo](https://byuwur.github.io/stream.html/configurator.html) -->
+## Index
 
-[Open stream.html](https://stream.byuwur.co/) · [Configurator demo](https://stream.byuwur.co/configurator.html)
+1. [Quick start](#quick-start)
+2. [Try it](#try-it)
+3. [Downloads](#downloads)
+4. [Resources](#resources)
+5. [Shortcuts](#shortcuts)
+6. [Options](#options)
+7. [Development](#development)
+8. [Checks and releases](#checks-and-releases)
+9. [Other assets](#other-assets)
+10. [Contributing](#contributing)
+11. [License](#license)
 
-Release assets keep stable filenames, such as `stream.html.controller.standalone.zip`. Use [latest release downloads](https://github.com/byuwur/stream.html/releases/latest); direct asset links use `/releases/latest/download/<filename>`. The manifest records the release version and source commit.
+## Quick start
 
-## Available overlays
+1. [Choose an overlay](https://stream.byuwur.co/) and configure it in the live preview.
+2. Copy the generated overlay URL. In OBS, add a **Browser Source** and paste the URL.
+3. To edit it again, open the URL with `#configure`, or choose **Interact** in OBS and press **F2**. **F1** opens About in the configurator.
 
-All 23 overlays are available as prereleases. **Alpha** means early testing; **Beta** means broader testing. Features may change, and bugs are expected. Try your setup before going live. Status pills appear beside tool titles on the landing page, in the tool picker, and in the configurator heading.
+## Try it
 
-<!--
-| Tool                                                                       | Status | Purpose                                                                                | Local entry point         |
-| -------------------------------------------------------------------------- | ------ | -------------------------------------------------------------------------------------- | ------------------------- |
-| [Controller](https://byuwur.github.io/stream.html/controller/)             | Beta   | Gamepad/keyboard input with 32 controller models, compact layouts, and editable color. | `controller/index.html`   |
-| [Social popup](https://byuwur.github.io/stream.html/popup/)                | Beta   | Animated accounts with 90+ platforms, fonts, colors, and timing.                       | `popup/index.html`        |
-| [Main scene](https://byuwur.github.io/stream.html/main/)                   | Beta   | Starting/BRB/ending scenes with branding, countdown, accounts, and schedule.           | `main/index.html`         |
-| [Clock](https://byuwur.github.io/stream.html/clock/)                       | Alpha  | Digital, analog, split-flap, and minimal clocks.                                       | `clock/index.html`        |
-| [Timer / Countdown](https://byuwur.github.io/stream.html/timer/)           | Alpha  | Countdown or elapsed timer with an optional fixed start.                               | `timer/index.html`        |
-| [Webcam Frame](https://byuwur.github.io/stream.html/webcam/)               | Alpha  | Transparent frame for your camera.                                                     | `webcam/index.html`       |
-| [Ticker](https://byuwur.github.io/stream.html/ticker/)                     | Alpha  | Scrolling news, commands, and reminders.                                               | `ticker/index.html`       |
-| [Watermark](https://byuwur.github.io/stream.html/watermark/)               | Alpha  | Text, monogram, or logo branding.                                                      | `watermark/index.html`    |
-| [Lower Thirds](https://byuwur.github.io/stream.html/lower-thirds/)         | Alpha  | Broadcast cards for guests, games, and moments.                                        | `lower-thirds/index.html` |
-| [QR / Link Card](https://byuwur.github.io/stream.html/qr/)                 | Alpha  | Locally generated QR code and link card.                                               | `qr/index.html`           |
-| [Periodic Reminder](https://byuwur.github.io/stream.html/reminder/)        | Alpha  | Automatic reminders on your schedule.                                                  | `reminder/index.html`     |
-| [Stream Badge](https://byuwur.github.io/stream.html/badge/)                | Alpha  | LIVE, AFK, recording, and custom labels.                                               | `badge/index.html`        |
-| [Credits Roll](https://byuwur.github.io/stream.html/credits/)              | Alpha  | Closing credits for your community.                                                    | `credits/index.html`      |
-| [Schedule](https://byuwur.github.io/stream.html/schedule/)                 | Alpha  | Dated run of show with current-segment highlighting.                                   | `schedule/index.html`     |
-| [Sponsor Carousel](https://byuwur.github.io/stream.html/sponsors/)         | Alpha  | Rotating public logos and messages.                                                    | `sponsors/index.html`     |
-| [Info Board](https://byuwur.github.io/stream.html/info/)                   | Alpha  | Rules, game settings, commands, and other stream details.                              | `info/index.html`         |
-| [Screen Effects](https://byuwur.github.io/stream.html/effects/)            | Alpha  | Rain, snow, confetti, and floating symbols.                                            | `effects/index.html`      |
-| [Camera HUD](https://byuwur.github.io/stream.html/hud/)                    | Alpha  | Recording indicator, timecode, and camera styling.                                     | `hud/index.html`          |
-| [Progress Timeline](https://byuwur.github.io/stream.html/timeline/)        | Alpha  | Progress from a starting time to an ending time.                                       | `timeline/index.html`     |
-| [Randomizer](https://byuwur.github.io/stream.html/randomizer/)             | Alpha  | Seeded draws for challenges, games, and choices.                                       | `randomizer/index.html`   |
-| [Quote Display](https://byuwur.github.io/stream.html/quotes/)              | Alpha  | Rotating quotes, tips, and trivia.                                                     | `quotes/index.html`       |
-| [Keyboard Shortcut Sheet](https://byuwur.github.io/stream.html/shortcuts/) | Alpha  | Editable shortcut guide without keyboard monitoring.                                   | `shortcuts/index.html`    |
--->
+[Open Stream.html](https://stream.byuwur.co/) · [Try the configurator demo](https://stream.byuwur.co/configurator.html)
 
-| Tool                                                           | Status | Purpose                                                                                | Local entry point         |
-| -------------------------------------------------------------- | ------ | -------------------------------------------------------------------------------------- | ------------------------- |
-| [Keyboard & Mouse](https://stream.byuwur.co/keyboard/)         | Alpha  | Live keyboard/mouse SVG input and optional ephemeral Input History.                    | `keyboard/index.html`     |
-| [Controller](https://stream.byuwur.co/controller/)             | Beta   | Gamepad/keyboard input with 32 controller models, compact layouts, and editable color. | `controller/index.html`   |
-| [Social popup](https://stream.byuwur.co/popup/)                | Beta   | Animated accounts with 90+ platforms, fonts, colors, and timing.                       | `popup/index.html`        |
-| [Main scene](https://stream.byuwur.co/main/)                   | Beta   | Starting/BRB/ending scenes with branding, countdown, accounts, and schedule.           | `main/index.html`         |
-| [Clock](https://stream.byuwur.co/clock/)                       | Alpha  | Digital, analog, split-flap, and minimal clocks.                                       | `clock/index.html`        |
-| [Timer / Countdown](https://stream.byuwur.co/timer/)           | Alpha  | Countdown or elapsed timer with an optional fixed start.                               | `timer/index.html`        |
-| [Webcam Frame](https://stream.byuwur.co/webcam/)               | Alpha  | Transparent frame for your camera.                                                     | `webcam/index.html`       |
-| [Ticker](https://stream.byuwur.co/ticker/)                     | Alpha  | Scrolling news, commands, and reminders.                                               | `ticker/index.html`       |
-| [Watermark](https://stream.byuwur.co/watermark/)               | Alpha  | Text, monogram, or logo branding.                                                      | `watermark/index.html`    |
-| [Lower Thirds](https://stream.byuwur.co/lower-thirds/)         | Alpha  | Broadcast cards for guests, games, and moments.                                        | `lower-thirds/index.html` |
-| [QR / Link Card](https://stream.byuwur.co/qr/)                 | Alpha  | Locally generated QR code and link card.                                               | `qr/index.html`           |
-| [Periodic Reminder](https://stream.byuwur.co/reminder/)        | Alpha  | Automatic reminders on your schedule.                                                  | `reminder/index.html`     |
-| [Stream Badge](https://stream.byuwur.co/badge/)                | Alpha  | LIVE, AFK, recording, and custom labels.                                               | `badge/index.html`        |
-| [Credits Roll](https://stream.byuwur.co/credits/)              | Alpha  | Closing credits for your community.                                                    | `credits/index.html`      |
-| [Schedule](https://stream.byuwur.co/schedule/)                 | Alpha  | Dated run of show with current-segment highlighting.                                   | `schedule/index.html`     |
-| [Sponsor Carousel](https://stream.byuwur.co/sponsors/)         | Alpha  | Rotating public logos and messages.                                                    | `sponsors/index.html`     |
-| [Info Board](https://stream.byuwur.co/info/)                   | Alpha  | Rules, game settings, commands, and other stream details.                              | `info/index.html`         |
-| [Screen Effects](https://stream.byuwur.co/effects/)            | Alpha  | Rain, snow, confetti, and floating symbols.                                            | `effects/index.html`      |
-| [Camera HUD](https://stream.byuwur.co/hud/)                    | Alpha  | Recording indicator, timecode, and camera styling.                                     | `hud/index.html`          |
-| [Progress Timeline](https://stream.byuwur.co/timeline/)        | Alpha  | Progress from a starting time to an ending time.                                       | `timeline/index.html`     |
-| [Randomizer](https://stream.byuwur.co/randomizer/)             | Alpha  | Seeded draws for challenges, games, and choices.                                       | `randomizer/index.html`   |
-| [Quote Display](https://stream.byuwur.co/quotes/)              | Alpha  | Rotating quotes, tips, and trivia.                                                     | `quotes/index.html`       |
-| [Keyboard Shortcut Sheet](https://stream.byuwur.co/shortcuts/) | Alpha  | Editable shortcut guide without keyboard monitoring.                                   | `shortcuts/index.html`    |
+Open any resource to edit its fields and preview it. Use 1920 × 1080 for Main and size Controller or Social popup to your OBS layout.
 
-Open a tool, adjust its fields, check the preview, then **Copy URL** into an OBS **Browser** source with **Local file** unchecked. Use **1920 × 1080** for Main; size Controller/Popup to your layout.
+## Downloads
 
-Help improve stream.html on GitHub: [contribute a pull request](https://github.com/byuwur/stream.html/pulls) or [report an issue](https://github.com/byuwur/stream.html/issues). Bug reports, ideas, and fixes are welcome; see [Contributing](CONTRIBUTING.md).
+[Latest downloads](https://github.com/byuwur/stream.html/releases/latest) use stable filenames, including `stream.html.controller.standalone.zip`. Choose the format that matches how you run the overlay.
 
-## Settings stay in the URL
+| Tier                               | Contents                                      | Requires                                           |
+| ---------------------------------- | --------------------------------------------- | -------------------------------------------------- |
+| Original                           | Authored HTML.                                | Repository files and dependencies.                 |
+| Online                             | Editor and overlay; CDN assets.               | Published tag and internet.                        |
+| Standalone                         | Renderer; embedded JS/CSS.                    | URL settings; CDN artwork for Controller/Keyboard. |
+| Bundle                             | Editor and overlay; embedded JS/CSS.          | CDN artwork for Controller/Keyboard.               |
+| Standalone ZIP                     | Renderer and SVG artwork.                     | Extract and open index.html.                       |
+| Full ZIP                           | Editor, overlay, and SVG artwork.             | Extract and open index.html.                       |
+| Standalone embedded [EXPERIMENTAL] | Renderer and SVG artwork in one HTML.         | Open the file directly.                            |
+| Full embedded [EXPERIMENTAL]       | Editor, overlay, and SVG artwork in one HTML. | Open the file directly.                            |
 
-- Bare folder/`index.html` URLs open the editor; query settings without a hash render the overlay.
-- Press **F2** to switch between the configurator and its current overlay, or append `#configure` to edit a link. In OBS, use **Interact** first. F2 is ignored in preview frames, with modifiers/repeats, and while typing in overlay controls.
-- In the configurator, press **F1** to open **About**.
-- Form edits and same-tool URL edits apply after a 250 ms pause via SPA.js's shared `debounce()`, updating the form and preview in place without adding browser history entries. **Enter** or leaving the changed URL field applies immediately; links to another tool navigate then.
-- The sticky settings toolbar switches between **Form** and editable **JSON**. JSON uses field IDs and native values, showing mandatory overlay fields plus non-default settings; **Show all fields** includes every editable field, including defaults and conditional fields. Missing keys restore resource defaults; invalid JSON, unknown keys, and invalid values keep the last valid preview. JSON edits use the same 250 ms debounce. Both JSON views are prepared with accepted URL updates; switching views reuses that content. The JSON editor fills the remaining settings-panel space and adapts to viewport changes. **Copy** copies the displayed JSON. Form's **Expand All** / **Collapse All** icons control sections and subsections; their tooltips appear below the buttons. Accessibility tooltips open to the left.
-- Editing keeps the browser address unchanged. **Copy URL** shares the current overlay settings. Bare tool URLs resume the saved configuration; explicit query settings take priority, including on reload.
-- **Reset** restores the settings, list order, and compression choices from when the page opened, including after direct URL edits.
-- **Advanced → Restore resource defaults** clears this resource's saved configuration and reloads the defaults declared in its JavaScript.
-- Invalid form values keep the last valid preview and stop URL generation. Invalid/unknown URL values retain defaults. Clearing display text leaves it empty and hides its container; whitespace-only text also becomes empty. Clearing other resource fields restores their defaults. List editors retain their row editing and validation behavior.
+For Controller and Keyboard on disk, extract the ZIP with its SVG artwork or use the experimental embedded HTML. Source folders that fetch artwork need HTTP(S). When pasting a generated `file://` URL into OBS, leave **Local file** unchecked. Remote media and optional fonts still need internet access.
 
-Numeric fields pair an exact number box with a practical slider. Sliders honor declared decimal increments; unrestricted decimal sliders step by 0.1. Seconds use a 0-60 slider and degree controls use 0-360, while number boxes retain each resource's full supported range. Values outside the actual resource limits clamp to the nearest limit in forms, JSON, and URLs. Imported values beyond slider travel remain unchanged in the number box. Small selects use keyboard-accessible choice buttons; resources can request the same row for larger option sets. Imports, conditional controls, JSON, and Reset keep the widgets synchronized. Clicking a color text field opens its picker while retaining direct HEX editing and alpha.
+## Resources
 
-Generated links include only values that differ from the declared defaults, plus each resource's explicit `urlRequired` fields. Off/default appearance values are omitted, and missing parameters use resource defaults. Controller always includes `player` and `skin`; `shellAppearance=off` preserves the original SVG palette and is omitted from URLs and compact JSON. Popup includes `accounts`; Main includes `sceneTitle`. Imports use defaults for missing values; empty text stays empty and its text container is hidden. Cleared numbers and invalid zero values restore their field defaults when editing finishes; opening a bare editor still resumes saved preferences. Explicit empty arrays/maps such as `accounts=[]` remain valid ways to remove list content.
+1. [Keyboard & Mouse](#keyboard--mouse)
+2. [Controller](#controller)
+3. [Social popup](#social-popup)
+4. [Main scene](#main-scene)
+5. [Clock](#clock)
+6. [Timer / Countdown](#timer--countdown)
+7. [Webcam Frame](#webcam-frame)
+8. [Ticker](#ticker)
+9. [Watermark](#watermark)
+10. [Lower Thirds](#lower-thirds)
+11. [QR / Link Card](#qr--link-card)
+12. [Periodic Reminder](#periodic-reminder)
+13. [Stream Badge](#stream-badge)
+14. [Credits Roll](#credits-roll)
+15. [Schedule](#schedule)
+16. [Sponsor Carousel](#sponsor-carousel)
+17. [Info Board](#info-board)
+18. [Screen Effects](#screen-effects)
+19. [Camera HUD](#camera-hud)
+20. [Progress Timeline](#progress-timeline)
+21. [Randomizer](#randomizer)
+22. [Quote Display](#quote-display)
+23. [Keyboard Shortcut Sheet](#keyboard-shortcut-sheet)
 
-The form handles encoding and list add/edit/reorder/remove. Colors use 3/4/6/8 hex digits without `#`, including alpha: `fontColor=fff`, `backgroundColor=00000000`. Runtime restores `#`; older encoded hashes work. Invalid colors retain defaults; RGB/HSL/named colors are outside the contract.
+Alpha resources are in early testing. Beta resources are in broader testing.
 
-Fonts include 350 Google families, system fonts, and installed families/CSS stacks. Fonts and visible samples load on demand; OBS needs access to the chosen font or uses the tool's fallback. Theme preference is local. Every resource has an **Animate** switch, On by default and independent of the system reduced-motion preference. Off disables resource motion while preserving content updates, timing, and gamepad input. The configurator keeps its own animations. Timer and Timeline bars and rings interpolate from the clock between text updates; this pauses while hidden and becomes immediate clock ticks with Animate Off.
+### Keyboard & Mouse
 
-All 23 resources keep transparent canvases. Resource defaults use the BONYUR palette: off-white `#eee`, charcoal `#111`, dark crimson `#600`/`#300`. Compact cards favor 40% charcoal surfaces, 12 px backdrop blur, 8-12 px padding, 6 px corners, and faint borders/shadows. Main retains its 6 px dark-crimson frame, inset 24 px, with transparent space inside and blur on its cards. Popup uses 40% charcoal and crimson surfaces and blurs its text box; Webcam blurs only its label so camera content stays clear. Text sizes keep labels and supporting copy close to their main value; Clock defaults to 32 px digits with 20 px labels/date. Clock starts as a single horizontal line; Timer, Timeline, QR, Schedule, and shortcut layouts favor compact rows. Main and Popup use the same palette, with ready-to-edit byUwUr content. Camera and effects canvases retain transparent content areas. Text uses `"Courier New", Courier, monospace`; the configurator uses Archivo. Explicit URL settings override the defaults, and the BONYUR appearance preset restores the card palette without replacing content or layout.
+Live keyboard/mouse SVG input and optional ephemeral Input History. **Alpha.**
 
-Backdrop blur samples content within the same browser page; it cannot blur other OBS sources underneath the Browser Source. Use background alpha for translucent surfaces; overall opacity below 100% can isolate the backdrop and suppress the blur.
+![Keyboard & Mouse overlay preview](keyboard/prev.jpg)
 
-Shadow and glow switches remain independent. Card shadows start On with 8% black and soft edges; glows remain Off. Turn either layer off or adjust its color, softness, and spread. Generated URLs omit whichever values match that resource's defaults.
+[Configure Keyboard & Mouse](https://stream.byuwur.co/keyboard/) · [Local entry point](keyboard/index.html) · [Keyboard and input history](#keyboard-and-input-history)
 
-Main offers countdown formats for hours/minutes/seconds, total minutes, total seconds, or unit labels. Formats change the display, not the countdown duration.
+### Controller
 
-Timer, Timeline, Reminder, and timed Randomizer start when the overlay page loads. **Use fixed start time** (`useStartTime=yes`) is Off by default and reveals the start timestamp when enabled. Fixed anchors survive copied URLs and reloads; inactive timestamps are omitted. Timeline uses `duration` (seconds, default `3600`) on load, or its start/end timestamps with the switch On. Timer deadline mode still uses an absolute end time; Restart always starts on load. Existing links with a start timestamp need `useStartTime=yes` to retain their fixed schedule. Schedule activities keep their explicit calendar dates.
+Gamepad/keyboard input with 32 controller models, compact layouts, and editable color. **Beta.**
 
-Media fields accept public HTTP(S) URLs or paths relative to the tool HTML. Local file URLs need downloaded use. Image fields also accept PNG, JPEG, WebP, and GIF Base64 data URIs. Keep private information out of shared URLs.
+Thanks to [MimicryMedia](https://mimicrymedia.itch.io/controller-pack) for the controller SVGs.
 
-### Image inputs
+![Controller overlay preview](controller/prev.jpg)
 
-Every image field, including card rows, has a URL input, provider selector, and **Browse** button. Drop an image anywhere on that component or browse for a file. PNG, JPEG/JPG, WebP, and GIF are supported. Animated GIF bytes are preserved. SVG and video files are rejected. Main's background image controls appear only in Image mode.
+[Configure Controller](https://stream.byuwur.co/controller/) · [Local entry point](controller/index.html) · [Controller settings](#controller-settings)
 
-- **Manual** accepts an existing URL, relative image path, or supported image data URI. Editing the text selects Manual, dismisses feedback, and cancels pending work. Browse/drop from Manual selects **Base64** after a file is chosen. Canceling the picker changes nothing.
-- **Base64** converts locally. The default limit is **16 KiB of original data**, including pasted data URIs. Larger files show `Image is too large to embed. Use a smaller image or a manual URL.` Compression may help, but embedded images still produce long URLs. Test the copied URL in your OBS build. Raw Base64, SVG, and video data URIs are unsupported.
+### Social popup
 
-Manual and Base64 are the only default options. Catbox and GoFile are disabled. Browse, drop, and conversion send no upload requests.
+Animated accounts with 90+ platforms, fonts, colors, and timing. **Beta.**
 
-Changing provider affects only the next Browse/drop; it never changes the existing image. Pending operations keep the current value. Feedback appears below its own field: progress lasts until completion, success dismisses after 5 seconds, and errors after 10 seconds. Manual edits, Reset, imports, and removed rows cancel stale operations and feedback. The provider never enters JSON, saved settings, or overlay URLs.
+![Social popup overlay preview](popup/prev.jpg)
 
-`byConfigurator.imageOptions.base64MaxBytes` may customize the local embedding limit before editor initialization (default `16384`). Image values have a 65,536-character safety bound and lists a 1 MiB bound. Ordinary remote image loading does not require CORS-enabled pixel access.
+[Configure Social popup](https://stream.byuwur.co/popup/) · [Local entry point](popup/index.html) · [Account settings](#social-account-settings)
 
-### Hosted upload adapter
+### Main scene
 
-`upload_image.php` keeps the standalone upload adapter available for future hosts. All shipped providers are disabled, and the default provider ID is empty. A direct Catbox request is rejected before contacting Catbox. The endpoint accepts multipart POST `fileToUpload` and a provider ID. It validates uploaded-file origin, actual byte size, Fileinfo MIME, dimensions, and a bounded GD decode, then forwards the original file with `CURLFile` to an enabled provider. Upload limits are **8 MiB** and **16 megapixels**. Decoder memory is also bounded by the server's available memory.
+Starting/BRB/ending scenes with branding, countdown, accounts, and schedule. **Beta.**
 
-Add a future host to the `$providers` array in `image_upload_provider()`. Each definition declares `name`, `enabled`, `endpoint`, `explicit`, the multipart `file` field, fixed `fields`, and a `parse` callback. Set `enabled` to `true` for that host. Its parser extracts an approved HTTPS image URL from the provider's plain-text or JSON response and returns `null` on failure. Successful URLs may use any host, opaque paths, or query parameters. HTTPS and credential-free URLs are checked after parsing. Catbox's disabled definition and parser serve as a reference.
+![Main scene overlay preview](main/prev.jpg)
 
-Register the matching ID and display name in the configurator before initialization. The shared browser adapter sends the original file through `https://stream.byuwur.co/upload_image.php` and accepts the HTTPS image URL returned by PHP.
+[Configure Main scene](https://stream.byuwur.co/main/) · [Local entry point](main/index.html) · [Scene settings](#main-scene-settings)
 
-```js
-byConfigurator.imageOptions = {
-  providers: [{ id: "my-host", name: "My image host" }]
-};
-```
+### Clock
 
-Provider selection uses the request's `provider`, then `STREAM_UPLOAD_PROVIDER`, then `IMAGE_UPLOAD_DEFAULT_PROVIDER`. Requests cannot enable a disabled host or supply its endpoint, operation, or explicit-error policy. Unknown or disabled request providers return 400. An empty or unavailable server default returns 503. Manual and Base64 continue to work independently of this endpoint.
+Digital, analog, split-flap, and minimal clocks. **Alpha.**
 
-A provider's `explicit` flag controls public diagnostics. When true, its response body, transport details, and diagnostic header reach the browser's `console.error`. When false or absent, failures return `<provider name> upload failed.` without `X-Upload-Diagnostic`, keeping the HTTP failure status. PHP also records the complete bounded upstream response in its server log.
+![Clock overlay preview](clock/prev.jpg)
 
-Deploy only the root `upload_image.php` to the Hostinger document root for **https://stream.byuwur.co/upload_image.php**. GitHub Pages and downloaded configurators use that same absolute HTTPS endpoint. PHP is excluded from the HTML/Controller ZIP distributions; it is never needed for normal overlay rendering.
+[Configure Clock](https://stream.byuwur.co/clock/) · [Local entry point](clock/index.html)
 
-1. Enable **PHP 8.2+**, **cURL**, **Fileinfo**, and **GD with PNG/JPEG/WebP/GIF support**. Use the system CA trust store, keep TLS verification enabled, and allow outbound HTTPS to the configured host.
-2. In Hostinger's PHP settings use `file_uploads=On`, `upload_max_filesize=8M`, `post_max_size=10M` or higher, `max_execution_time=60` or higher, `memory_limit=256M`, `display_errors=Off`, and `log_errors=On`. Disable displayed startup errors too; PHP can reject a request before this script executes. Ensure `upload_tmp_dir` exists and is writable by PHP. The application cannot raise PHP/web-server/proxy request limits; configure those separately to admit an 8 MiB file plus multipart overhead.
-3. The limiter defaults to a private `stream-image-<installation hash>` directory under PHP's system temporary directory. It creates the directory with mode `0700` and its locked file with `0600`. If Hostinger's `open_basedir` restricts temporary storage, precreate a private directory **outside the public document root**, owned/writable only by the PHP user, and set the server environment variable `STREAM_UPLOAD_RATE_DIR` to its absolute path. Allow this path in `open_basedir`. Never place it in a downloadable folder. Storage failure/corruption rejects uploads with 503; it never disables limiting.
-4. After enabling a host, verify HTTPS and `OPTIONS` (204), a small supported image POST, invalid-file errors, and browser diagnostics. Frontend tests mock the service. Local success does not establish a live provider upload.
+### Timer / Countdown
 
-The limiter allows **10 POST attempts per client address per 10 minutes**, including invalid attempts. It trusts only `REMOTE_ADDR`; arbitrary forwarded headers cannot evade it. Shared proxies/NAT share a limit. The lock serializes updates, expired entries are removed, and active clients are capped at 4096. A 429 response includes `Retry-After`. Wildcard credential-free CORS supports production, GitHub Pages, localhost, `file://`, and independent copies, including error responses and preflight; CORS is not abuse protection.
+Countdown or elapsed timer with an optional fixed start. **Alpha.**
 
-The shared upstream transport uses HTTP/1.1, an identifying `stream.html` User-Agent, verified TLS, a 10-second connection timeout, and a 40-second request timeout. It follows no redirects and makes no automatic retry. Provider HTTP errors retain their original 400-599 status. Explicit error bodies are served as `text/plain` with `nosniff` and displayed as text. Responses are bounded to 64 KiB, with larger responses retaining the prefix and reporting truncation. Transport failures return 502 (504 for timeouts). Redirects and invalid successful responses return 502. A failed upload or subsequent image load preserves the previous field value. A public upload may already exist after a transport or image-loading failure.
+![Timer / Countdown overlay preview](timer/prev.jpg)
 
-For upload failures, inspect **DevTools -> Console**: `console.error` includes the error plus the endpoint, HTTP status, `X-Upload-Diagnostic`, and full response text. Field feedback shows a bounded excerpt; the console retains the complete body received. **Network -> upload_image.php -> Response** also shows the provider's response. `X-Upload-Diagnostic` exposes the cURL error number and upstream HTTP status, for example `transport=0; upstream=412`; failed URL validation adds `response=invalid`. CORS exposes the diagnostic header to independent configurators. Canceled or superseded operations do not log errors or replace the current field value. For local 413 errors check server/application limits; for local 429 wait; for local 503 check extensions/private storage. Provider errors carry their own response text; transport failures need outbound connectivity/TLS checks.
+[Configure Timer / Countdown](https://stream.byuwur.co/timer/) · [Local entry point](timer/index.html)
 
-### Keyboard shortcuts
+### Webcam Frame
 
-About includes the shortcut reference. Focus the configurator to use these:
+Transparent frame for your camera. **Alpha.**
+
+![Webcam Frame overlay preview](webcam/prev.jpg)
+
+[Configure Webcam Frame](https://stream.byuwur.co/webcam/) · [Local entry point](webcam/index.html)
+
+### Ticker
+
+Scrolling news, commands, and reminders. **Alpha.**
+
+![Ticker overlay preview](ticker/prev.jpg)
+
+[Configure Ticker](https://stream.byuwur.co/ticker/) · [Local entry point](ticker/index.html)
+
+### Watermark
+
+Text, monogram, or logo branding. **Alpha.**
+
+![Watermark overlay preview](watermark/prev.jpg)
+
+[Configure Watermark](https://stream.byuwur.co/watermark/) · [Local entry point](watermark/index.html)
+
+### Lower Thirds
+
+Broadcast cards for guests, games, and moments. **Alpha.**
+
+![Lower Thirds overlay preview](lower-thirds/prev.jpg)
+
+[Configure Lower Thirds](https://stream.byuwur.co/lower-thirds/) · [Local entry point](lower-thirds/index.html)
+
+### QR / Link Card
+
+Locally generated QR code and link card. **Alpha.**
+
+![QR / Link Card overlay preview](qr/prev.jpg)
+
+[Configure QR / Link Card](https://stream.byuwur.co/qr/) · [Local entry point](qr/index.html)
+
+### Periodic Reminder
+
+Automatic reminders on your schedule. **Alpha.**
+
+![Periodic Reminder overlay preview](reminder/prev.jpg)
+
+[Configure Periodic Reminder](https://stream.byuwur.co/reminder/) · [Local entry point](reminder/index.html)
+
+### Stream Badge
+
+LIVE, AFK, recording, and custom labels. **Alpha.**
+
+![Stream Badge overlay preview](badge/prev.jpg)
+
+[Configure Stream Badge](https://stream.byuwur.co/badge/) · [Local entry point](badge/index.html)
+
+### Credits Roll
+
+Closing credits for your community. **Alpha.**
+
+![Credits Roll overlay preview](credits/prev.jpg)
+
+[Configure Credits Roll](https://stream.byuwur.co/credits/) · [Local entry point](credits/index.html)
+
+### Schedule
+
+Dated run of show with current-segment highlighting. **Alpha.**
+
+![Schedule overlay preview](schedule/prev.jpg)
+
+[Configure Schedule](https://stream.byuwur.co/schedule/) · [Local entry point](schedule/index.html)
+
+### Sponsor Carousel
+
+Rotating public logos and messages. **Alpha.**
+
+![Sponsor Carousel overlay preview](sponsors/prev.jpg)
+
+[Configure Sponsor Carousel](https://stream.byuwur.co/sponsors/) · [Local entry point](sponsors/index.html)
+
+### Info Board
+
+Rules, game settings, commands, and other stream details. **Alpha.**
+
+![Info Board overlay preview](info/prev.jpg)
+
+[Configure Info Board](https://stream.byuwur.co/info/) · [Local entry point](info/index.html)
+
+### Screen Effects
+
+Rain, snow, confetti, and floating symbols. **Alpha.**
+
+![Screen Effects overlay preview](effects/prev.jpg)
+
+[Configure Screen Effects](https://stream.byuwur.co/effects/) · [Local entry point](effects/index.html)
+
+### Camera HUD
+
+Recording indicator, timecode, and camera styling. **Alpha.**
+
+![Camera HUD overlay preview](hud/prev.jpg)
+
+[Configure Camera HUD](https://stream.byuwur.co/hud/) · [Local entry point](hud/index.html)
+
+### Progress Timeline
+
+Progress from a starting time to an ending time. **Alpha.**
+
+![Progress Timeline overlay preview](timeline/prev.jpg)
+
+[Configure Progress Timeline](https://stream.byuwur.co/timeline/) · [Local entry point](timeline/index.html)
+
+### Randomizer
+
+Seeded draws for challenges, games, and choices. **Alpha.**
+
+![Randomizer overlay preview](randomizer/prev.jpg)
+
+[Configure Randomizer](https://stream.byuwur.co/randomizer/) · [Local entry point](randomizer/index.html)
+
+### Quote Display
+
+Rotating quotes, tips, and trivia. **Alpha.**
+
+![Quote Display overlay preview](quotes/prev.jpg)
+
+[Configure Quote Display](https://stream.byuwur.co/quotes/) · [Local entry point](quotes/index.html)
+
+### Keyboard Shortcut Sheet
+
+Editable shortcut guide without keyboard monitoring. **Alpha.**
+
+![Keyboard Shortcut Sheet overlay preview](shortcuts/prev.jpg)
+
+[Configure Keyboard Shortcut Sheet](https://stream.byuwur.co/shortcuts/) · [Local entry point](shortcuts/index.html)
+
+## Shortcuts
 
 | Shortcut            | Action                                          |
 | ------------------- | ----------------------------------------------- |
@@ -168,11 +280,32 @@ About includes the shortcut reference. Focus the configurator to use these:
 
 Focused Controller and Keyboard & Mouse overlays cancel browser actions for keyboard and mouse events the page can cancel, including wheel scrolling and mouse shortcuts. Interactive controls keep their normal behavior, and F2 still opens the configurator. In other overlays, F3/F4 retain browser actions.
 
-### Shorter URLs
+## Options
+
+1. [URL settings](#url-settings)
+2. [Images and upload providers](#images-and-upload-providers)
+3. [Keyboard and input history](#keyboard-and-input-history)
+4. [Controller settings](#controller-settings)
+5. [Social account settings](#social-account-settings)
+6. [Main scene settings](#main-scene-settings)
+
+### URL settings
+
+Bare URLs open the configurator with saved preferences. Explicit query values take priority. Form, JSON and URL edits update the preview after 250 ms. Press Enter in the URL field to apply it immediately. **Copy URL** shares the current settings.
+
+Compact JSON includes required and changed fields. **Show all fields** includes defaults and conditional fields. Missing keys restore defaults. Invalid edits keep the last valid preview. **Reset** restores the opening configuration. **Advanced → Restore resource defaults** clears saved preferences.
+
+Generated URLs contain changed settings and active `urlRequired` fields. Controller includes `player` and `skin`, Popup includes `accounts`, and Main includes `sceneTitle`. Empty text hides its container. An empty list such as `accounts=[]` removes its items. Clearing a number restores its default. Controller omits the default `shellAppearance=off` and displays the original artwork.
+
+The form handles encoding and list add/edit/reorder/remove. Colors use 3/4/6/8 hex digits without `#`, including alpha: `fontColor=fff`, `backgroundColor=00000000`. Runtime restores `#`; older encoded hashes work. Invalid colors retain defaults; RGB/HSL/named colors are outside the contract.
+
+Timer, Timeline, Reminder and timed Randomizer start on page load. Enable **Use fixed start time** (`useStartTime=yes`) to keep the same timestamp across reloads and shared links, including older links. Timeline otherwise uses `duration` (default 3600 seconds). Timer deadline mode uses its absolute end time and Restart starts on load. Schedule uses calendar dates.
+
+Numbers clamp to their field limits. Use the number box for values outside slider travel. Colors accept HEX and alpha. Fonts can use Google, system or installed families. Every overlay has a transparent canvas. The BONYUR preset restores its card palette. Backdrop blur samples the browser page only. Animate, shadow and glow are independent controls.
+
+#### Shorter URLs
 
 Open **Advanced** from the toolbar gear or footer. Compression is raw DEFLATE plus unpadded Base64url; the panel shows length/savings and keeps the readable URL when shorter.
-
-Form values, expanded sections, and Advanced options are remembered per resource. Only valid form values are saved, using the generated query's chosen compression format and readable fallback. Small configurations use a one-year cookie scoped to the resource folder; larger configurations, blocked cookies, and `file://` copies use local storage. Explicit URL settings and compression formats take priority. Overlays use their URL only; invalid or unavailable storage leaves editing usable.
 
 | Mode            | URL representation                                                                                                  |
 | --------------- | ------------------------------------------------------------------------------------------------------------------- |
@@ -183,61 +316,58 @@ Plain values need no marker. Escape literal text starting with `dr:` or `raw:` a
 
 Whole-query decoding is capped at one MiB. Individual values use the field's UTF-8 text limit, allowing up to four bytes per character, capped at one MiB. Images may also use the bounded Base64 data URIs described above.
 
-Each tool declares [SPA.js `_functions.min.js`](https://cdn.jsdelivr.net/gh/byuwur/spa.js@latest/_functions.min.js) in its shared asset group before `resource.js`. For offline use, save the helper and update its import path. These helpers need no jQuery/SPA initialization. Browsers without native raw-DEFLATE support can use readable links.
-
-### Downloaded use
-
-Keep the tool folder plus parent `resource.js` and its renderer dependencies. Keep `configurator.js`/`configurator.css` when editing is needed; overlays still work when the configurator script or the whole configurator markup/dependency section is removed. A single HTML file is not a bundle. Controller requires HTTP/HTTPS to load its editable SVG resources; the local-file instructions below apply to the other overlays. Open `{tool}/index.html` and paste its generated `file:///.../index.html?...` URL into OBS with **Local file** unchecked. Keep those paths stable. Hosted links use tool directories.
-
-The landing page starts its CSS batch with `defer: false` during head parsing and declares JavaScript with ordered `<script src defer>` tags. `resource.js` owns `byStream.SPA_VERSION = "v20.13"`, overriding each asset group's `data-spa-version` fallback. External JSON asset groups declare their repository URL in `data-source`. Resource pages declare shared helpers/fonts in `#shared-assets`, renderer-only libraries in `#resource-assets`, and editor groups in `script[data-load]` inside `#configurator-assets`. Local editor styles and scripts use explicit `<link>` and `<script src defer>` tags together after the external import group, so local overrides follow SPA assets. SPA.js `_load.min.js` loads these CSS/JS arrays into the head in dependency order; `byStream.assetsReady` resolves before resource initialization. Renderer-only libraries load only in overlay mode; configurators and renderers both load the shared imports. Editor setup runs only in configure mode; renderer application code uses vanilla JavaScript. Main/Popup also use GSAP and Popup uses MorphSVG. Font-enabled pages use native `byFont`. Offline use requires saved CDN dependencies and updated `src`/`href` paths.
-
-### Older URLs
+#### Older URLs
 
 Replace `controller.html`, `popup.html`, or `main.html` with its tool folder. Rebuild retired settings in the form: Controller `scale`; Popup `fontSizeRem`/`textYOffsetRem` (now `fontSize`/`textYOffset` in pixels), per-platform handles/account counts; Main scene `mode`, `showBG`, `hideCountdown`, and weekday fields.
 
 Current URLs use percentages for opacity, deadzone, and scale: `100` means 100%, and `25` means 25%. Replace older fractional values explicitly; they are not converted. Social accounts use ordered rows so platforms may repeat; Main schedule entries use weekday maps. Unsupported list shapes retain defaults rather than being migrated. The form and Parameters dialog show the current fields and accepted values.
 
-## Keyboard & Mouse
+### Images and upload providers
+
+Use **Browse** or drop a PNG, JPEG, WebP or GIF on an image field. GIF animation is preserved. **Manual** accepts a URL, relative path or supported image data URI. **Base64** embeds up to 16 KiB of original data locally. Larger images need a URL. Set `byConfigurator.imageOptions.base64MaxBytes` to change the local limit.
+
+Catbox and GoFile are disabled by default. Choosing a provider applies to the next file. Editing, resetting or removing a field cancels its pending operation. Provider choices stay out of saved settings and links.
+
+#### Hosted upload adapter
+
+`upload_image.php` keeps the standalone upload adapter available for future hosts. All shipped providers are disabled, and the default provider ID is empty. A direct Catbox request is rejected before contacting Catbox. The endpoint accepts multipart POST `fileToUpload` and a provider ID. It validates uploaded-file origin, actual byte size, Fileinfo MIME, dimensions, and a bounded GD decode, then forwards the original file with `CURLFile` to an enabled provider. Upload limits are **8 MiB** and **16 megapixels**. Decoder memory is also bounded by the server's available memory.
+
+Add a future host to the `$providers` array in `image_upload_provider()`. Each definition declares `name`, `enabled`, `endpoint`, `explicit`, the multipart `file` field, fixed `fields`, and a `parse` callback. Set `enabled` to `true` for that host. Its parser extracts an approved HTTPS image URL from the provider's plain-text or JSON response and returns `null` on failure. Successful URLs may use any host, opaque paths, or query parameters. HTTPS and credential-free URLs are checked after parsing. Catbox's disabled definition and parser serve as a reference.
+
+```js
+byConfigurator.imageOptions = {
+  providers: [{ id: "my-host", name: "My image host" }]
+};
+```
+
+Provider selection uses the request's `provider`, then `STREAM_UPLOAD_PROVIDER`, then `IMAGE_UPLOAD_DEFAULT_PROVIDER`. Requests cannot enable a disabled host or supply its endpoint, operation, or explicit-error policy. Unknown or disabled request providers return 400. An empty or unavailable server default returns 503. Manual and Base64 continue to work independently of this endpoint.
+
+A provider's `explicit` flag controls public diagnostics. When true, its response body, transport details, and diagnostic header reach the browser's `console.error`. When false or absent, failures return `<provider name> upload failed.` without `X-Upload-Diagnostic`, keeping the HTTP failure status. PHP also records the complete bounded upstream response in its server log.
+
+1. Enable **PHP 8.2+**, **cURL**, **Fileinfo**, and **GD with PNG/JPEG/WebP/GIF support**. Use the system CA trust store, keep TLS verification enabled, and allow outbound HTTPS to the configured host.
+2. In Hostinger's PHP settings use `file_uploads=On`, `upload_max_filesize=8M`, `post_max_size=10M` or higher, `max_execution_time=60` or higher, `memory_limit=256M`, `display_errors=Off`, and `log_errors=On`. Disable displayed startup errors too; PHP can reject a request before this script executes. Ensure `upload_tmp_dir` exists and is writable by PHP. The application cannot raise PHP/web-server/proxy request limits; configure those separately to admit an 8 MiB file plus multipart overhead.
+3. The limiter defaults to a private `stream-image-<installation hash>` directory under PHP's system temporary directory. It creates the directory with mode `0700` and its locked file with `0600`. If Hostinger's `open_basedir` restricts temporary storage, precreate a private directory **outside the public document root**, owned/writable only by the PHP user, and set the server environment variable `STREAM_UPLOAD_RATE_DIR` to its absolute path. Allow this path in `open_basedir`. Never place it in a downloadable folder. Storage failure/corruption rejects uploads with 503; it never disables limiting.
+4. After enabling a host, verify HTTPS and `OPTIONS` (204), a small supported image POST, invalid-file errors, and browser diagnostics. Frontend tests mock the service. Local success does not establish a live provider upload.
+
+The limiter allows **10 POST attempts per client address per 10 minutes**, including invalid attempts. It trusts only `REMOTE_ADDR`; arbitrary forwarded headers cannot evade it. Shared proxies/NAT share a limit. The lock serializes updates, expired entries are removed, and active clients are capped at 4096. A 429 response includes `Retry-After`. Wildcard credential-free CORS supports production, GitHub Pages, localhost, `file://`, and independent copies, including error responses and preflight; CORS is not abuse protection.
+
+For upload failures, inspect **DevTools -> Console**: `console.error` includes the error plus the endpoint, HTTP status, `X-Upload-Diagnostic`, and full response text. Field feedback shows a bounded excerpt; the console retains the complete body received. **Network -> upload_image.php -> Response** also shows the provider's response. `X-Upload-Diagnostic` exposes the cURL error number and upstream HTTP status, for example `transport=0; upstream=412`; failed URL validation adds `response=invalid`. CORS exposes the diagnostic header to independent configurators. Canceled or superseded operations do not log errors or replace the current field value. For local 413 errors check server/application limits; for local 429 wait; for local 503 check extensions/private storage. Provider errors carry their own response text; transport failures need outbound connectivity/TLS checks.
+
+### Keyboard and input history
 
 [Configure Keyboard & Mouse](https://stream.byuwur.co/keyboard/) · [WASD overlay](https://stream.byuwur.co/keyboard/?mode=both&layout=fps)
 
-The interactive `keyboard/` resource shows real physical key and mouse transitions. The existing **Keyboard Shortcut Sheet** remains a static, editable guide without input monitoring. Both use the ordinary shared configurator, URL/JSON editors, Copy URL, Reset, resource defaults, F2, Animate, and transparent canvas.
+Choose keyboard, mouse, both or history only. Select a full, compact or gaming layout, filter physical keys by code or group, and assign key labels or action descriptions. **Compact** closes empty rows and columns. Mouse feedback includes buttons, wheel and direction. Input requires focus. An OBS browser source cannot see keys pressed in another application.
 
-Choose **Keyboard only**, **Mouse only**, **Keyboard + Mouse**, or **Hidden** for history-only configurations. Keyboard and mouse have independent offsets/scales; choose a side-by-side or stacked composition, viewport fit, overall placement, and opacity. Mouse colors follow the keyboard palette unless independent mouse colors are enabled.
+Use `imageUrl` with `imageTarget=none|shell|keys|all` to mask a background to the shell, key contours or both. Fit, scale, opacity and tint are independent. Outlines and input feedback stay visible. A failed image falls back to vector artwork.
 
-Layouts include full-size, TKL, 75%, 65%, 60%, compact letter rows, numpad, function row, arrows, WASD, WASD + modifiers, and All physical keys. Windows/macOS labels, ANSI/ISO geometry, and QWERTY/QWERTZ/AZERTY legends have separate selectors. Gaming examples include FPS, MOBA, League of Legends, Dota 2, MMO/RPG, racing, fighting, platformer, rhythm, speedrunning, and custom compact. Gaming presets close empty rows and gaps between visible keys by default, with staggered typing rows, wide modifiers, a shorter spacebar, and the usual arrow cluster. All physical keys preserves the full-size geometry and adds extension rows for international slots and F13-F24. Gaming bindings are configurable examples, not official game bindings. There is no OS/layout autodetection. Some international/Fn/system keys depend on browser and hardware exposure. Physical slots use keyboard units, including the [documented ISO Enter bounds](https://docs.qmk.fm/reference_info_json).
+#### Input history
 
-Use **Selected physical keys** to choose predefined physical codes such as `KeyW`, `Space`, `ShiftLeft`, or `ArrowUp` from dropdowns, with row actions on the right; an empty list shows every preset slot. Group switches hide letters, modifiers, navigation, and other groups. **Key labels** and **Action descriptions** customize existing slots, with optional visible actions. Geometry stays preset-based; there is no per-key drag editor.
+Keyboard and Controller can show recent presses as icons or text. History is off by default. Choose orientation, order, dimensions, animation and input scope. A zero dimension sizes automatically or can fill the parent. Entries stay until displaced. Simultaneous presses form combinations (60 ms by default), held modifiers join the next action, and repeated presses share a counter.
 
-**Appearance → Layout** switches between **Regular** (default) and **Compact** (`layoutDensity=compact`). Compact closes empty rows and columns, halves the configured key spacing, trims shell padding, and uses a shorter spacebar in gaming presets. The Fighting preset aligns U, I, and O above J, K, and L in both modes.
+Keyboard history can include every received input or just displayed controls. Controller history requires one displayed player and clears when multiple controllers mount. Focus loss clears held inputs. History stays in memory and records physical controls rather than typed text.
 
-Hollow Kenney SVG contours supply surfaces, outlines, and recognizable vector legends. Nine coordinated palettes and custom shell, keycap, outline, legend, press, highlight, and shadow colors are available. Shell choices include complete, minimal, floating, outline, and gaming; keycaps can be filled or outlined. Presses update mounted SVG controls immediately, with inversion, fill, depth, or glow and a smooth release. Animate Off removes motion while retaining input feedback.
-
-Artwork uses short names such as `a.svg`, `ctrl.svg`, and `scrollup.svg`. Primary files contain the hollow artwork; `-fill.svg` retains the corresponding filled originals. Renaming preserves the original SVG bytes.
-
-**Image backgrounds** uses one `imageUrl` and an Off/Shell/Keys/All choice row (`imageTarget=none|shell|keys|all`). The image spans the keyboard continuously. Shell masks subtract the actual key contours, including transparent keycaps; Keys shows the image only through those contours. Cover, Contain, Stretch, scale, and opacity remain independent. Optional tint provides color, strength, and Multiply/Overlay/Soft-light/Color/Fill blending. Fill strength acts as ordinary color opacity; source transparency is preserved. Failed images retain vector surfaces. Outlines, labels, and press feedback remain independent. Legacy shell/key image fields migrate to the shared URL.
-
-The mouse uses one Kenney composition with separate left/right/middle and side buttons, brief wheel direction highlights, and a movement indicator. Ordinary movement never creates history entries.
-
-**Browser input limitation:** keyboard/mouse events arrive only while this browser context can receive them. A Browser Source cannot monitor a game or another unfocused application. In OBS, add the configured URL as a Browser Source with Local file unchecked, set its dimensions (for example 1280 × 720), open **Interact**, and focus the overlay to receive events. Preview capture likewise needs focus inside the preview. Editor fields, password fields, and editable content are excluded; F2 keeps its normal navigation behavior. No native OBS Helper, global hooks, or background-capture workaround is included. Keyboard SVG loading requires HTTP/HTTPS, including local development; direct `file://` cannot fetch the artwork.
-
-## Input History
-
-Keyboard & Mouse and Controller share optional **Input History**, Off by default. Controller's existing URLs and default appearance are unchanged. Choose SVG prompts or plain text, vertical/horizontal flow, newest first/last, independent position/scale/dimensions, spacing, padding, opacity, colors, and slide/fade/no animation.
-
-Width and height default to `0` (automatic). Horizontal history uses the available parent width; vertical history fits the widest entry and available parent height. Combinations and repeat counts remain horizontal inside each entry. Positive dimensions override automatic sizing. Each zero dimension exposes **Fill parent** below it. The visualization fits into the space outside history, including after viewport changes.
-
-Nearby simultaneous presses form combinations (default 60 ms). Held modifiers join subsequent actions, keyboard auto-repeat is ignored, and consecutive discrete repetitions aggregate as `E ×3`. A different input starts a new sequence. Held controls produce one transition. Entries remain until displaced; capacity comes from the actual container dimensions, with old DOM nodes and row data removed on overflow or resizing. There is no fixed maximum-entry setting or expiry timer.
-
-Keyboard history can include keyboard, mouse, or both independently of the visible mode. **All received inputs** includes eligible physical keys outside compact presets; **Displayed controls only** includes only mounted controls. Controller history records exactly one displayed controller, including keyboard-as-controller, without player labels. It disables and clears itself when multiple controllers mount and resumes with an empty history when one remains. Buttons, triggers, model-specific digital inputs, and optional discrete stick directions use the existing mapped polling pipeline without another polling loop or keyboard listener.
-
-Input History is ephemeral. Recorded inputs are never stored in browser storage, cookies, files, configuration URLs, or requests. Only configuration choices use the configurator's existing persistence. Labels come from physical IDs and predefined/configured labels, never recorded typed text. Focus loss clears live held state; teardown releases listeners, timers, observers, and displayed history.
-
-## Controller
-
-![Controller preview](controller/prev.jpg)
-
-<!-- [Example: Player 1, Xbox One](https://byuwur.github.io/stream.html/controller/?player=1&skin=xone) -->
+### Controller settings
 
 [Example: Player 1, Xbox One](https://stream.byuwur.co/controller/?player=1&skin=xone)
 
@@ -269,10 +399,6 @@ Input History is ephemeral. Recorded inputs are never stored in browser storage,
 | `mirror`, `fitMargin` | Mirror artwork horizontally; viewport fit margin in pixels (default `16`). |
 | `horizontalPosition`, `verticalPosition` | Signed pixel offsets from the viewport center; both default to `0`. |
 
-A fixed-skin overlay loads its chosen model and any additional SVG needed for a custom guide symbol. The configurator and bare Controller page load the full catalog.
-
-The selector groups 34 skin choices by platform from 32 front-facing SVG models. Existing named skin IDs remain valid. Fight Stick offers 8-, 6-, and 4-button choices (`fgc`, `fgc6`, `fgc4`) from source-authored views in one `fgc.svg`; the reduced layouts retain their original button positions and bindings.
-
 - Nintendo: `nes`, `famicom`, `snes`, `superfamicom`, `n64`, `gcn`, `wii`, `wiinunchuk`, `wiiclassic`, `wiiupro`, `wiiu`, `joycon`, `switchpro`.
 - PlayStation: `ps`, `ds2`, `ds3`, `ds4`, `ds5`.
 - Xbox: `xbox`, `x360`, `xone`, `xseries`.
@@ -282,15 +408,7 @@ The selector groups 34 skin choices by platform from 32 front-facing SVG models.
 
 Up to eight gamepads have independent player slots P1-P8; keyboard remains P9 and is excluded from the gamepad count. Existing browser indices 0-7 keep their corresponding player when available; other indices take a free slot. Connected players keep their assignments when another device disconnects. `player=all-gamepads` (All) always shows P1-P8; `player=all-inputs` (All + Keyboard) adds P9. Disconnected slots retain their configured tint and opacity. `player=gamepads` (All connected) shows connected gamepads only; `player=all` (All connected + Keyboard) includes keyboard. All multi-player modes use a responsive grid. Native player lamps keep their geometry and positions. Full layouts use smaller, closely spaced dark squares with a thin black outline and a green glow, placed clear of logos; Joy-Con lamps run vertically between the controllers. Minimal rows retain their existing size and position. Xbox 360 uses its guide ring in full mode and adds the shared row in minimal mode. In full and minimal layouts: P1-P4 light their corresponding lamp, P5 `X--X`, P6 `-X-X`, P7 `--XX`, P8 `X-XX`, and keyboard `XXXX`.
 
-Each model owns one `controller/controllers/<id>.svg`; Fight Stick variants share `fgc.svg`. SVG attributes declare its name, platform, logical inputs, analog behavior, native bounds, and compact transforms. `data-player-leds` stores the full-layout x, y, scale, and optional rotation; minimal rows keep the shared renderer position. Shared JavaScript moves the same control nodes between layouts. Each compact layout has fitted bounds and a controller-specific composition; shoulders and triggers occupy aligned sections with long horizontal pill bars where requested. Full mode retains each model's hardware shapes, with mirrored shoulders and matching trigger contours. Stick housings and recessed sockets stay stationary around the moving caps. Minimal controls retain their native proportions; alternate wide bars are authored in the SVG rather than stretched from full-mode artwork. Dark stick caps use a lighter gray to make their movement clear against the recessed sockets. The renderer retains separate SVG roots per control for WebKit filter painting. Each SVG embeds its default appearance and renders independently. Its geometry and painting order remain authoritative; `controller.css` handles the application layers and pressed states. Native SVG groups provide the compact shoulder bars; no controller metadata files or duplicate SVG drawings are used.
-
-All 39 purchased originals are preserved in [`_art/controller-illustrations/`](_art/controller-illustrations/). Nine perspective illustrations are reference-only: `360-A`, `ONEX-A`, `PS4-A`, `PS5-A`, `STEAM2-A`, `SWITCH-A`, `SWITCH-B`, `SWITCHPRO-A`, and `SX-A`. Steam Deck and Wii U artwork is rotated into its normal horizontal orientation. The Nunchuk front is reconstructed from the supplied angled reference; rear controls use visible indicators.
-
 The integration SVGs contain their stock colors and model-specific palette variants. The coordinated palettes are BONYUR (`bonyur`), Arctic (`arctic`), Sakura (`sakura`), Lagoon (`lagoon`), Forest (`forest`), Sunset (`sunset`), Royal (`royal`), Sandstone (`sandstone`), and Cyberpunk (`cyberpunk`). These style shells, panels, and buttons. Fight Stick's three layouts already use BONYUR as Default and offer the other eight palettes on their controls. Every skin has at least nine palettes including Default; existing stock variants remain available. PlayStation, Xbox, Dreamcast, Steam, and Fight Stick themes use matching face-button fills; Genesis and Saturn keep A/B/C together. Xbox theme labels use contrasting light colors. Shell appearance starts Off, preserving the SVG palette. Disabled drafts remain in editor preferences while shared URLs omit inactive controls. Legacy Custom colors and Image + tint settings migrate to the new appearance and tint controls.
-
-`controllerColor`, tint strength, and blend mode tint only the authored shell plastics, retaining the palette's differences, sockets, controls, and markings. `tintControls=yes` still blends 20% of the tint color into buttons, D-pad, sticks, shoulders, and triggers. `buttonLabels=icons|letters|none` selects hardware markings, letters, or hidden markings; digital presses and analog trigger fills remain independent. `strength=0` displays a digital trigger press. Steam Deck, Wii U, Dreamcast VMU, and Playdate screens retain true alpha with `screenOpacity=0`.
-
-Shell appearance uses **Off** (default), **Solid color**, or **Image**. Solid color reveals proper tint color, strength, and blend controls. Image uses the shared Manual/Base64 field; **Tint controls** reveals tint controls and keeps its existing subtle control tint. Textures fill only the authored shell plastics. Outlines, controls, touchpads, markings, highlights, shadows, transparency, and input animation remain independent. Fight Stick layouts have no shell artwork; minimal layouts hide the shell. Each player has independent SVG definitions.
 
 | Shell parameter                               | Meaning                                                                                                                                                                            |
 | --------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -301,19 +419,19 @@ Shell appearance uses **Off** (default), **Solid color**, or **Image**. Solid co
 | `controllerColor`, `shellTintStrength`        | Tint color and strength `0`-`100`% (default `100`). Available for Solid color or Image with Tint controls enabled. The retired `shellTintColor` key migrates to `controllerColor`. |
 | `shellBlendMode`                              | `multiply` (default), `overlay`, `soft-light`, `color`, or `fill`. Fill applies ordinary color opacity; all modes preserve source alpha.                                           |
 
+The [controller artwork](controller/controllers/) contains the SVGs used by the overlay. Nine angled illustrations serve as references only (`360-A`, `ONEX-A`, `PS4-A`, `PS5-A`, `STEAM2-A`, `SWITCH-A`, `SWITCH-B`, `SWITCHPRO-A`, `SX-A`). Steam Deck and Wii U use horizontal artwork. The Nunchuk front is reconstructed from its angled reference, with indicators for rear controls.
+
+The [Steam hardware specifications](https://www.steamdeck.com/en/tech), [Nintendo Nunchuk controls](https://www.nintendo.co.jp/hardware/wiiu/accessories/nunchuk/index.html), and [GamePad Viewer](https://gamepadviewer.com/) were used as hardware/interaction references. Trackpad clicks can be assigned through Custom Mapping. Rear grips, final-click indicators, rails, volume, and crank activation are omitted from the visual controls; existing saved mappings retain their logical output indices. Browser Gamepad API exposure depends on the device/adapter; touch coordinates, motion, and native crank-angle tracking are not implemented.
+
 **Reset image adjustments** restores fit, placement, opacity, and tint defaults while retaining the image and appearance mode. The ordinary Reset restores the opening configuration. Hidden image controls retain their drafts and are omitted from URLs. Uploaded bytes are never changed for tinting. Ordinary overlay rendering uses the final image URL directly and never calls PHP. Chromium pixel tests cover clipping, transforms, tint, transparency, and multiple instances; actual OBS Browser Source rendering and endurance still require verification in your OBS build.
 
 Guide customization replaces the emblem inside an existing SVG slot without changing its binding or housing. `guideColorMode=original|tint|custom` keeps original colors, blends a tint, or applies the existing monochrome color. Tint uses independent `guideTintColor` (default white), `guideTintStrength` (0-100%, default 0), and `guideBlendMode` (`multiply`, `overlay`, `soft-light`, `color`, or `fill`), preserving the logo's transparency. Guide tint works independently of shell tint. Fill uses tint strength as ordinary color opacity. SVG image URLs load as images rather than injected markup. Animated GIFs stay mounted through input frames and direct layout switching; Chromium tests verify changing rendered frames. Verify playback in your OBS build separately.
-
-The [Steam hardware specifications](https://www.steamdeck.com/en/tech), [Nintendo Nunchuk controls](https://www.nintendo.co.jp/hardware/wiiu/accessories/nunchuk/index.html), and [GamePad Viewer](https://gamepadviewer.com/) were used as hardware/interaction references. Trackpad clicks can be assigned through Custom Mapping. Rear grips, final-click indicators, rails, volume, and crank activation are omitted from the visual controls; existing saved mappings retain their logical output indices. Browser Gamepad API exposure depends on the device/adapter; touch coordinates, motion, and native crank-angle tracking are not implemented.
 
 Controller requires HTTP/HTTPS because browsers block fetching editable SVG resources from `file://`. No build step is needed. Tests in `__tests__/resources.cjs` cover control isolation, palettes, trigger pressure, alpha openings, layout reuse, and rendered-pixel inversion in Chromium, Firefox, and WebKit. Unavailable engines are explicitly skipped locally and fail in CI; WebKit testing does not establish OBS or Safari behavior on Apple hardware.
 
 Choose **Keyboard** for automatic keyboard input; **F** also connects the keyboard for input detection. **Custom Mapping** shows connected devices, model-specific outputs, and recording controls. Add a binding, choose the output, select **Record input**, press the input, then **Apply mapping**. Keyboard capture accepts any identified key (`choiceType: "keys"` with its physical `KeyboardEvent.code`); older button/axis keyboard bindings still work. Escape or **Cancel recording** cancels the capture. Incomplete or duplicate bindings keep the applied mapping unchanged. Clear the binding draft and apply to restore standard input; Reset restores the opening configuration. Axis ranges and packed D-pad hats remain available for unusual adapters. DualSense microphone mute has its own output (`22`); bind it through Custom Mapping when an adapter exposes that input at a different raw index. N64 C buttons use the right stick on standard pads, with custom mapping targets 18-21 for dedicated C buttons. Skins fit the viewport automatically. Appearance controls retain background, opacity, scale, tilt, offsets, and artwork filters.
 
-## Social popup
-
-![Social popup preview](popup/prev.jpg)
+### Social account settings
 
 Choose platforms, handles, and order. Repeated platforms are allowed. Brand icons use a globe fallback.
 
@@ -331,13 +449,9 @@ Choose platforms, handles, and order. Repeated platforms are allowed. Brand icon
 
 Invalid JSON/platforms retain the two byUwUr default accounts; blank handles keep their slots. Font readiness and remeasurement keep animation aligned. Separate account-name and icon typography, text-box borders/shadows, placement, and filters are available in the form.
 
-## Main scene
+### Main scene settings
 
 Countdown, Social accounts, Schedule, and Event labels each select a corner. Cards sharing a corner reserve their scaled dimensions and flow side by side or stacked with shared spacing/inset controls. Each component owns its Placement, typography, surfaces, and effects subsections; redundant fixed-side position fields are removed. Background tint has an independent toggle, color, strength, and Multiply/Overlay/Soft-light/Color/Fill blend mode.
-
-![Main scene preview](main/prev.jpg)
-
-<!-- [Example: Starting soon](https://byuwur.github.io/stream.html/main/?sceneTitle=Starting+soon&tagline=Your+channel&countdownTime=5&displayBranding=no&displaySocial=no) -->
 
 [Example: Starting soon](https://stream.byuwur.co/main/?sceneTitle=Starting+soon&tagline=Your+channel&countdownTime=5&displayBranding=no&displaySocial=no)
 
@@ -361,9 +475,11 @@ Invalid lists retain defaults. Individual controls cover title/subtitle, countdo
 
 ## Development
 
-Native overlay setup and shared helpers belong in `resource.js`, exposed as `byStream`. Its JSDoc defines `ResourceField`, `ResourceFields`, `ResourceSettings`, and `ResourceDefinition`, with detailed contracts for reusable utilities and non-obvious behavior. Resources declare their fields and defaults, then use those helpers. Tool definitions/rendering and CSS live in `{tool}/{tool}.js` and `.css`. The optional `configurator.js` owns the editor, preferences, help, preview, and tool catalog; `configurator.css` owns editor styling. Resources declare Animate.css alongside their editor stylesheet imports; those styles activate only in configure mode. Editor motion timing is controlled by `--settings-motion-duration` and `--settings-collapse-duration` in `configurator.css`. Rotating cards use `contentTransition()` for exit, container resizing, and entry; incoming content stays hidden until it fits, and newer updates cancel stale transitions. Sections and subsections reuse Bootstrap Collapse; subsections use full borders, accented left edges, shaded headers, and compact header padding. Revealed fields combine an Animate.css fade with an 8 px horizontal entry. Panels, fields, lists, feedback, accessibility menus, and Select2 dropdowns share a short slide/fade from the left. Departing content is immediately inert and hidden after their exit; rapid switches supersede earlier effects. Help tabs exit before the next page enters, and open containers interpolate height changes. Bootstrap retains height ownership during collapse transitions. Tooltips retain the shared instant behavior; controls transition their hover, focus, and toggle colors. Switches use the same thicker Bootstrap size. Select2 highlights enter from the left and leave to the right for pointer and keyboard navigation on the landing and in the configurator. These finite effects remain enabled with reduced motion; shared controls retain their own transition rules. Keep custom CSS for theme and widget/layout integration. `configurator.html` is the starter, and the root `index.html` renders the catalog.
+1. [Resource contract](#resource-contract)
+2. [Add a tool](#add-a-tool)
+3. [Dependencies and local files](#dependencies-and-local-files)
 
-Host interfaces can reuse the SPA-provided jQuery, Select2, `byCommon` (`_common.min.js`), and `byTransition` (`_transitions.min.js`) APIs. Keep editor-only helpers in the configurator imports. Controller and Keyboard embed their Input History logic and styles in their resource scripts; each history owns and removes its styles with its DOM.
+Define overlay fields and rendering in `resource.js` and each tool’s resource script. Use `configurator.html` as the editor template. The catalog and settings UI live in `configurator.js`. Keep jQuery, Select2 and other editor-only dependencies in the host.
 
 ### Resource contract
 
@@ -379,25 +495,9 @@ HTML needs `<template id="overlay-markup">...</template>`. The optional editor u
 
 The runtime exposes `byStream.ready`, the same promise returned by `initResource()`. Before initialization, the optional configurator attaches `byStream.prepareResource(resource)` to read editor preferences and choose its input query. The runtime calls that hook only in configure mode; overlays always read their URL alone. The editor awaits `ready` and reads transport warnings/compression choices from `byStreamResource.urlParameters`. Neither preferences nor editor startup changes the native initializer.
 
-Declare sections, subsections, and fields in display order: primary content and behavior first, then common appearance, size and placement, composition, and detailed styling or effects. Keep related fields together; appearance presets belong in Appearance.
+Define valid defaults in `resource.fields`. Resource dimensions and offsets use pixels. Maximum width or height of zero means automatic sizing. Mark fields with `zeroIsDefault` when clearing them or entering zero should restore their declared default. Keep optional text empty. Use explicit Off values for optional features.
 
-Resource size and offset controls use pixels, including the configurator demo. The configurator interface keeps its rem-based styling. Opacity, deadzone, fades, grayscale, sepia, and invert use `0`-`100`%. Animation speed, brightness, contrast, and saturation accept `0`-`500`%, with `100` as normal. Scale uses `-500`-`500`%, where `100` preserves size and negative values flip both axes. URL values use these same units.
-
-Field `options` maps stored IDs to displayed labels. Selects show named defaults or Off where an override can be disabled, including the scale/tilt origin. Binary settings use `type: "switch"` with explicit checked/unchecked values. Every field has an icon, with explicit `icon` metadata taking priority over the shared property/purpose choices. `textFields()`, `surfaceFields()`, `placementFields()`, and `layoutFields()` return ordinary fields with concrete defaults. Missing/empty scalar defaults receive neutral values: `0` for offsets/tilt/spacing, `100` for scale/opacity, Courier New for fonts, white or transparent colors, and valid select choices. Numeric fallbacks respect the field's bounds. Resources can replace a generated field's `.default` before `initResource()`; supplied values, including `0` and `false`, take precedence. Neutral generated values preserve base CSS through `styleDefault`; resource-specific defaults that differ from that value apply normally. Text sizes, line heights, and other fields marked `zeroIsDefault` expose their concrete resource defaults; entering `0` or clearing them restores that displayed value. Legacy zero URL/JSON values normalize through the same rules. Maximum width `0` fits content; the Fill width toggle appears directly below Width only at `0` and switches it to available-width sizing. Camera frames, Info Board, and Schedule default to filling the available width. Clearing a field restores its resource default; the Reset button restores the opening configuration. Lower order values appear first; changing order enables a flex layout.
-
-Sliders and editable scalar fields have a restore button on the right that applies the resource's declared default, including `0` for both Input History dimensions. It updates the existing widgets, validation, URL, and preview and cancels any pending upload for that image field. The page's Reset continues to restore the opening configuration.
-
-Maximum widths and heights accept `0` for Auto: no fixed maximum. Positive values set a pixel cap; zero never collapses the element. This includes panel widths, list/board heights, and logo limits. Use 0 for Sponsor image width or Lower Thirds image size to let the image size itself proportionally. Other numeric controls, such as opacity, retain their literal zero behavior. Schedule, Info Board, and Shortcuts default to `0` columns, fitting their existing items to the available width. Credits viewport height `0` fills the available height. Credits enter from below when scrolling up and from above when scrolling down. Looping credits repeat continuously after entering. Viewport edge padding and the corresponding frame/corner/fit insets default to 16 px.
-
-Optional display text may have an empty default; do not use a space as a placeholder. Optional non-text features use explicit switches. Main background media starts Off while retaining a valid image URL. Regional controls show the current computer's time zone and browser locale. Generated URLs still omit default values.
-
-Declare image paths in resource field defaults; renderers read the resolved settings instead of embedding fallback image paths in CSS or markup. Mark image fields with `image: true`, or an `image(settings)` predicate for mixed media. Entry-row image controls use `[key, label, "image"]` in `entries.textFields`. The optional configurator owns uploads and conversion; standalone renderers only receive the image value.
-
-Shadows, glows, filters, offsets, element edges, and fades use numeric inputs, color pickers, and choices in dedicated subsections. Position and offset controls accept positive and negative values. Inactive effect controls are hidden and disabled; selecting a custom effect reveals its settings. Raw CSS-string parameters are no longer fields and fall back to defaults. The `shadowFields()`, `filterFields()`, `offsetFields()`, `insetFields()`, and `fadeFields()` helpers declare these ordinary URL fields.
-
-They use `styleSelector`, `styleProperty`, and either `styleUnit` or a `styleValue(settings)` function to build the CSS after validation, including for rotating content and downloaded overlays.
-
-Field `subsection` groups related controls. `when: [fieldName, ...values]` shows a field only for those parent values; omitting values requires nonempty parent text. A trusted `when(settings)` predicate supports combined conditions. Hidden parents also hide their descendants. Inactive controls are disabled and do not block validation. Their drafts return when re-enabled in the current editor, but overlays treat inactive switches as Off, reset other inactive settings to their declared defaults, and skip their style overrides. Fields with `retainInactive: true` preserve accepted inactive values in settings and existing editor preferences. Inactive fields are omitted from generated overlay URLs; mandatory fields are always retained while active. Conditions reference existing fields and must not form cycles. A resource can migrate decoded legacy values with `normalizeParameters(values)` before validation, including editor imports. Empty subsections and sections are hidden. `whenFields(condition, fields)` applies one condition to a group. `textFields(elements, conditions)` and `surfaceFields(elements, conditions)` accept conditions keyed by element name.
+Use `subsection` and `when` for conditional fields. Inactive fields keep editor drafts and stay out of generated URLs. Use `retainInactive` for accepted values that need to survive. Declare styles with `styleSelector`, `styleProperty` and `styleUnit` or `styleValue(settings)`. Use `normalizeParameters(values)` for legacy inputs before validation.
 
 Shared `dateTimeFields()` and `dateTimeFormatter()` helpers support presets such as `yyyy/MM/dd`, `dd/MM/yyyy`, `HH:mm`, and `hh:mm:ss a`. Numeric dates use the Gregorian calendar; month names follow the locale. `timezone`, `timezones`, and `locale` field types use searchable Select2 controls with UTC offsets or language/region labels; extra-zone selection preserves order and allows up to three zones. `durationFormats` and `formatDuration()` format elapsed seconds without wrapping total-minute/second modes at midnight. `transitionFields()` declares transition timing, easing, and signed slide distance. These helpers remain in the shared framework for resources to opt into.
 
@@ -411,12 +511,20 @@ Each list uses its declared format directly: simple messages are string arrays, 
 
 The catalog owns order, cards/count, navigation, and displayed release status; static hosting does not discover folders. Keep the status table above in sync with the catalog. IDs determine folder URLs and `prev.jpg`. Update preview images and Open Graph/Twitter metadata together.
 
-### Landing and checks
+### Dependencies and local files
 
-The resource library owns the main automated contract: shared settings/URL validation, startup of every standalone resource, and keyboard/mouse press/release cleanup. Configurators get small smoke checks for editing a preview, opening the generated renderer URL, and reporting upload responses. Option catalogs, palettes, per-model permutations, and pixel sweeps are not separate automated gates.
+For a local overlay, keep the tool folder, parent `resource.js` and renderer dependencies. Include `configurator.js` and `configurator.css` for editing. Serve Controller over HTTP(S) so it can fetch its SVGs. For file-compatible tools, open `{tool}/index.html` and paste its generated `file://` URL into OBS with **Local file** unchecked. Keep the directory structure intact. See [download formats](#downloads) for packaged alternatives.
+
+The landing page starts its CSS batch with `defer: false` during head parsing and declares JavaScript with ordered `<script src defer>` tags. `resource.js` owns `byStream.SPA_VERSION = "v20.13"`, overriding each asset group's `data-spa-version` fallback. External JSON asset groups declare their repository URL in `data-source`. Resource pages declare shared helpers/fonts in `#shared-assets`, renderer-only libraries in `#resource-assets`, and editor groups in `script[data-load]` inside `#configurator-assets`. Local editor styles and scripts use explicit `<link>` and `<script src defer>` tags together after the external import group, so local overrides follow SPA assets. SPA.js `_load.min.js` loads these CSS/JS arrays into the head in dependency order; `byStream.assetsReady` resolves before resource initialization. Renderer-only libraries load only in overlay mode; configurators and renderers both load the shared imports. Editor setup runs only in configure mode; renderer application code uses vanilla JavaScript. Main/Popup also use GSAP and Popup uses MorphSVG. Font-enabled pages use native `byFont`. Offline use requires saved CDN dependencies and updated `src`/`href` paths.
+
+## Checks and releases
+
+Check out SPA.js `v20.13` beside this repository or set `SPA_ASSETS_ROOT` to that checkout. Use Node.js 22+ for the browser checks. The upload checks use PHP with cURL, Fileinfo and GD.
 
 ```sh
 npm --prefix .github ci --ignore-scripts
+node .github/node_modules/playwright/cli.js install chromium
+export STREAM_CORE_ONLY=1
 export NODE_PATH="$PWD/.github/node_modules"
 npm --prefix .github test
 npm --prefix .github run test:configurator
@@ -424,49 +532,18 @@ php -l upload_image.php
 node --test __tests__/upload-php.cjs
 ```
 
-Check out SPA.js at `v20.13` beside this repository, or set `SPA_ASSETS_ROOT` to that checkout. The suites serve real local dependency files behind the declared URLs and do not fetch the CDN. `BROWSER_CHANNEL=chrome` or `CHROMIUM_EXECUTABLE_PATH` can select installed Chrome. On PowerShell set `$env:NODE_PATH = "$PWD/.github/node_modules"`.
+Omit `STREAM_CORE_ONLY` to include appearance checks. [CI](.github/workflows/tests.yml) checks resource startup, URL settings, input, configurators and uploads. Manual runs can select Firefox, WebKit or extended appearance checks.
 
-[CI](.github/workflows/tests.yml) keeps resource and configurator jobs separate: resources run in Chromium, Firefox, then WebKit, followed by configurators in the same order. Explicit job dependencies guarantee the order; failures remain visible and later passes continue unless the workflow is canceled. Browser tests are bounded to 30/60 seconds, test steps to two minutes, and jobs to three minutes. The matching browser image supplies preinstalled engines. `BROWSER_ENGINE` selects an engine locally. PHP boundary checks stay separate. PHP checks need PHP 8.2+ with the deployment extensions (`PHP_BINARY` may select PHP); local cURL substitutes never contact an upstream host. Release artifact integrity/startup and publication safeguards remain mandatory. OBS, appearance review, real devices, and endurance remain manual checks.
-
-## Release distributions
-
-Source/browser checks and every distribution build must succeed before a tagged release can publish. Main runs validate without publishing. Failed builds clean their private staging directory and retain completed output.
-
-Release tooling lives entirely in `.github/`, with `.github/workflows/release.yml` coordinating checks and publication and `.github/scripts/build.mjs` owning build configuration, bundling, release notes, tag validation, and publishing. It builds the resource pages identified by their `overlay-markup` template and `data-tool` ID. Dependency arrays expand to explicit imports before bundling, so online, bundled, and standalone releases retain their existing offline and lazy-editor contracts. It does not package OBS profiles, service exports, or unrelated folders. The website still runs without Node.js. Generated files stay in ignored `dist/`; source files remain authoritative.
-
-Release notes pair each plain commit subject with a linked seven-character hash and include a full changelog comparison from the nearest preceding version tag. First releases include the available history. Local previews link to the checkout's commit. CI checks out complete history for this range, which is also recorded in `manifest.json`.
-
-| Tier                               | Contents                                      | Requires                                           |
-| ---------------------------------- | --------------------------------------------- | -------------------------------------------------- |
-| Original                           | Authored HTML.                                | Repository files and dependencies.                 |
-| Online                             | Editor and overlay; CDN assets.               | Published tag and internet.                        |
-| Standalone                         | Renderer; embedded JS/CSS.                    | URL settings; CDN artwork for Controller/Keyboard. |
-| Bundle                             | Editor and overlay; embedded JS/CSS.          | CDN artwork for Controller/Keyboard.               |
-| Standalone ZIP                     | Renderer and SVG artwork.                     | Extract and open index.html.                       |
-| Full ZIP                           | Editor, overlay, and SVG artwork.             | Extract and open index.html.                       |
-| Standalone embedded [EXPERIMENTAL] | Renderer and SVG artwork in one HTML.         | Open the file directly.                            |
-| Full embedded [EXPERIMENTAL]       | Editor, overlay, and SVG artwork in one HTML. | Open the file directly.                            |
-
-Original, Online, Bundle, Full ZIP, and Full embedded include the configurator and support F2 switching. Standalone editions contain the renderer only. ZIPs use embedded artwork on file:// and the separate SVG files over HTTP(S). Prettier formats the surrounding HTML, and minified JavaScript and CSS occupy separate `<script>` and `<style>` blocks with `data-source` attributes identifying their original files.
-
-Portable HTML embeds a 32px PNG favicon. Font Awesome icons, optional Google Fonts, and remote media load from their original hosts and require internet. Editor and renderer initialization tolerates missing icons. Configurator icons and Main/Popup social icons use Font Awesome. Controller and Keyboard ZIPs include their artwork at `{tool}/controllers/*.svg` or `{tool}/keys/*.svg` beside `{tool}/index.html`.
-
-### Build and validate locally
-
-Use Node.js 22 or later. The tag is the release version authority; building does not create a Git tag or publish anything. Publish the pinned SPA.js release before refreshing dependency hashes or building distributions.
+Build and test a local release preview:
 
 ```sh
-npm --prefix .github ci --ignore-scripts
-node .github/node_modules/playwright/cli.js install chromium
-export NODE_PATH="$PWD/.github/node_modules"
-node .github/scripts/build.mjs --tag v10
-npm --prefix .github test
+node .github/scripts/build.mjs --tag v0.0.0-ci
 npm --prefix .github run release:test
 ```
 
-On PowerShell, replace the `export` command with `$env:NODE_PATH = "$PWD/.github/node_modules"`; use `npm.cmd` if `npm.ps1` is blocked. `BROWSER_CHANNEL=chrome` or `CHROMIUM_EXECUTABLE_PATH` can select an installed Chromium browser. The opt-in source suites retain their existing browser requirements.
+Review the HTML, ZIPs, manifest and checksums in `dist/assets/`. Only a pushed version tag publishes. The pinned SPA.js dependency must be published before refreshing release hashes. [Release workflow](.github/workflows/release.yml)
 
-Build, validation, and publishing contracts are documented in [build.mjs](.github/scripts/build.mjs).
+### Release tooling
 
 | Command | Purpose and outputs |
 | --- | --- |
@@ -483,7 +560,7 @@ Pinned remote application dependencies and CSS assets are integrity-checked agai
 
 For embedded project JavaScript and CSS, the builder prefers jsDelivr's generated `.min` files pinned to the exact source commit. Edited files and unavailable CDN copies use the current local esbuild pipeline. Generated CDN bytes are cached with checksums and recorded in the manifest. CSS bundling embeds its required assets. Controller and Keyboard artwork loaders are rewritten before minification for embedded files and ZIP file-mode fallback. Pinned SPA.js downloads can fall back to `SPA_ASSETS_ROOT` or the sibling `spa.js` checkout when local bytes match the dependency lock.
 
-### [EXPERIMENTAL] Embedded Controller and Keyboard
+#### Experimental embedded editions
 
 Every build generates `controller.standalone.embedded.html`, `controller.full.embedded.html`, `keyboard.standalone.embedded.html`, and `keyboard.full.embedded.html` in `dist/assets/`. Full editions include the configurator; standalone editions contain the renderer only. All four embed their original SVG artwork and work directly from disk. The release suite checks HTTP, downloaded HTML, extracted ZIPs, and full-edition configurator switching on `file://`.
 
@@ -494,22 +571,7 @@ npm --prefix .github run release:experiment
 
 The build writes diagnostic sizes to `dist/experimental/sizes.json`. `release:experiment` derives sizes from the release HTML and ZIP and writes fresh `sizes.json` and `report.json` diagnostics in `dist/experimental/`. It checks downloaded `file://` rendering, model artwork, customization, synthetic gamepad input, and keyboard input, comparing startup, DOM parsing, artwork-rendering time, and JavaScript heap with the packaged HTTP version. SVG bytes are preserved rather than minified separately. Browser heap figures exclude native SVG allocations; OBS compatibility remains unverified.
 
-### First release and later releases
-
-1. Run the installation, build, and both test commands above. Stop on any failure.
-2. Inspect all generated formats, Controller ZIP contents, the release notes/download table, and checksums. Review and commit the automation and required compatibility changes. An ordinary commit to `main` runs distribution CI and existing source checks; it cannot publish a release.
-3. Once the tested commit is on `main`, deliberately create and push a version tag:
-
-   ```sh
-   git tag v10
-   git push origin v10
-   ```
-
-4. Inspect [GitHub Actions](https://github.com/byuwur/stream.html/actions). Only a pushed `v*` tag starts publication; version validation accepts one-, two-, or three-part versions and rejects malformed tags. Tags such as `v1.1.0-rc.1` create prereleases. Validation checks the owning repository, exact tagged commit, ancestry from `main`, and existing release state.
-5. Build and core source/distribution tests must succeed before the publishing job receives write access. It uploads only the tested inventory into a draft, verifies uploaded names, sizes, and hashes, then publishes. Failures leave the release private. A rerun resumes an identical automation-owned draft; conflicting drafts and published releases are never overwritten. Same-tag runs are serialized.
-6. Verify the public [GitHub Release](https://github.com/byuwur/stream.html/releases): version, description, download links, every HTML file including the [EXPERIMENTAL] embedded Controller, Controller and Keyboard ZIPs, manifest, and checksums. Download representative files and verify their hashes. For example, `gh release view v10 --repo byuwur/stream.html` lists the published assets. Local tag creation alone publishes nothing.
-
-## Other configurations and assets
+## Other assets
 
 | Folder / file                                              | Use                                                                 |
 | ---------------------------------------------------------- | ------------------------------------------------------------------- |
@@ -521,10 +583,12 @@ The build writes diagnostic sizes to `dist/experimental/sizes.json`. `release:ex
 
 Back up before importing. Replace devices, paths, and account settings; keep stream keys, WebSocket passwords, and private widget URLs out of shared exports.
 
+## Contributing
+
+[Contributing guide](CONTRIBUTING.md) · [Report an issue](https://github.com/byuwur/stream.html/issues) · [DeepWiki](https://deepwiki.com/byuwur/stream.html)
+
 ## License
 
-Project code: [MIT](LICENSE.md), copyright Andrés Trujillo [Mateus] byUwUr. Bundled libraries, applications, and media retain their licenses.
+[MIT](LICENSE.md), copyright Andrés Trujillo [Mateus] byUwUr. Bundled libraries, applications, and media retain their licenses.
 
 Keyboard/mouse artwork in `keyboard/keys/`: [Input Prompts by Kenney](https://kenney.nl/assets/input-prompts), [Creative Commons CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/). Original SVG assets are preserved; layout composition and dynamic colors are applied at runtime.
-
-[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/byuwur/stream.html)
