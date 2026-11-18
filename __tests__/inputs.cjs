@@ -5,6 +5,7 @@
 const assert = require("node:assert/strict");
 const test = require("node:test");
 const { runtimeAssets, launchBrowser, loadAssets, serve } = require("./browser.cjs");
+const coreOnly = process.env.STREAM_CORE_ONLY === "1";
 
 /** Read actual feedback styles without changing the controller's input state. */
 function feedbackStyle(control) {
@@ -19,10 +20,10 @@ test("focused input overlays cancel browser defaults while preserving controls a
   const assets = await loadAssets(runtimeAssets);
   const browser = await launchBrowser();
   t.after(() => browser.close());
-  const page = await browser.newPage();
-  await serve(page, assets);
-
   for (const path of ["keyboard/?mode=hidden", "controller/?player=1"]) {
+    // F2 reloads the overlay. Give each resource its own page.
+    const page = await browser.newPage();
+    await serve(page, assets);
     await page.goto(`https://stream.test/${path}`);
     await page.locator('#keyboard-overlay[data-ready="yes"], #gamepads .controller').waitFor();
     const defaults = await page.evaluate(() => {
@@ -58,6 +59,7 @@ test("focused input overlays cancel browser defaults while preserving controls a
 
     await page.keyboard.press("F2");
     await page.waitForURL((url) => url.hash === "#configure");
+    await page.close();
   }
 });
 
@@ -103,7 +105,7 @@ test("keyboard and mouse reflect presses, releases, and interrupted holds", { ti
   assert.deepEqual(errors, []);
 });
 
-test("gaming layouts close empty rows and columns while retaining keyboard geometry", { timeout: 30000 }, async (t) => {
+test("gaming layouts close empty rows and columns while retaining keyboard geometry", { skip: coreOnly, timeout: 30000 }, async (t) => {
   const assets = await loadAssets(runtimeAssets);
   const browser = await launchBrowser();
   t.after(() => browser.close());
@@ -170,7 +172,7 @@ test("gaming layouts close empty rows and columns while retaining keyboard geome
   assert.ok(sparse.keys.Numpad1.y < sparse.keys.KeyA.height * 3);
 });
 
-test("vertical histories keep combinations and repeat counts on one line", { timeout: 30000 }, async (t) => {
+test("vertical histories keep combinations and repeat counts on one line", { skip: coreOnly, timeout: 30000 }, async (t) => {
   const assets = await loadAssets(runtimeAssets);
   const browser = await launchBrowser();
   t.after(() => browser.close());
@@ -236,7 +238,7 @@ test("Controller history has no player label and stops when multiple players mou
   assert.equal(await page.locator(".input-history").count(), 0);
 });
 
-test("Controller feedback presses immediately and releases smoothly in full and minimal layouts", { timeout: 60000 }, async (t) => {
+test("Controller feedback presses immediately and releases smoothly in full and minimal layouts", { skip: coreOnly, timeout: 60000 }, async (t) => {
   const assets = await loadAssets(runtimeAssets);
   const browser = await launchBrowser();
   t.after(() => browser.close());

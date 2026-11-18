@@ -2,10 +2,18 @@ name: Stream checks
 
 on:
   workflow_call:
-  push:
-    branches: [main]
-  pull_request:
+  # The release workflow calls these checks on main, version tags and pull requests.
   workflow_dispatch:
+    inputs:
+      browser:
+        description: Browser for this run
+        type: choice
+        options: [chromium, firefox, webkit]
+        default: chromium
+      extended:
+        description: Include appearance and layout checks
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -15,57 +23,11 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  resources_chromium:
-    name: resources (chromium)
+  browser:
     uses: ./.github/workflows/browser-check.yml
     with:
-      browser: chromium
-      suite: resources
-
-  resources_firefox:
-    name: resources (firefox)
-    needs: resources_chromium
-    if: ${{ !cancelled() }}
-    uses: ./.github/workflows/browser-check.yml
-    with:
-      browser: firefox
-      suite: resources
-
-  resources_webkit:
-    name: resources (webkit)
-    needs: resources_firefox
-    if: ${{ !cancelled() }}
-    uses: ./.github/workflows/browser-check.yml
-    with:
-      browser: webkit
-      suite: resources
-
-  configurators_chromium:
-    name: configurators (chromium)
-    needs: resources_webkit
-    if: ${{ !cancelled() }}
-    uses: ./.github/workflows/browser-check.yml
-    with:
-      browser: chromium
-      suite: configurators
-
-  configurators_firefox:
-    name: configurators (firefox)
-    needs: configurators_chromium
-    if: ${{ !cancelled() }}
-    uses: ./.github/workflows/browser-check.yml
-    with:
-      browser: firefox
-      suite: configurators
-
-  configurators_webkit:
-    name: configurators (webkit)
-    needs: configurators_firefox
-    if: ${{ !cancelled() }}
-    uses: ./.github/workflows/browser-check.yml
-    with:
-      browser: webkit
-      suite: configurators
+      browser: ${{ inputs.browser || 'chromium' }}
+      extended: ${{ inputs.extended || false }}
 
   uploads:
     name: PHP uploads

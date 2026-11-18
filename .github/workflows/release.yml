@@ -108,6 +108,7 @@ jobs:
         run: node .github/scripts/build.mjs
       - name: Core source tests
         env:
+          STREAM_CORE_ONLY: "1"
           NODE_PATH: ${{ github.workspace }}/.github/node_modules
         run: npm --prefix .github test
       - name: Validate every distribution

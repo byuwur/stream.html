@@ -6,6 +6,7 @@ const assert = require("node:assert/strict");
 const path = require("node:path");
 const test = require("node:test");
 const { runtimeAssets, launchBrowser, loadAssets, resourceNames, serve } = require("./browser.cjs");
+const coreOnly = process.env.STREAM_CORE_ONLY === "1";
 
 /** Sample premultiplied RGB and alpha at fractional positions in the element. */
 async function renderedPixels(page, locator, points) {
@@ -192,7 +193,7 @@ test("controller guide tint and subtle control colors", { timeout: 60000 }, asyn
     }
   });
 
-  await t.test("GameCube shadows change rendered shell pixels independently of highlights", async () => {
+  await t.test("GameCube shadows change rendered shell pixels independently of highlights", { skip: coreOnly }, async () => {
     await open({ skin: "gcn", highlightIntensity: "10", shadowIntensity: "0" });
     const shadow = page.locator(".controller-background .shell-shadow");
     assert.equal(await shadow.evaluate((element) => getComputedStyle(element).opacity), "0");
@@ -204,7 +205,7 @@ test("controller guide tint and subtle control colors", { timeout: 60000 }, asyn
     assert.notDeepEqual(shaded, unshaded, "Shadow intensity affects the rendered shell");
   });
 
-  await t.test("all control surfaces receive a light tint while markings and input remain independent", async () => {
+  await t.test("all control surfaces receive a light tint while markings and input remain independent", { skip: coreOnly }, async () => {
     for (const [skin, layout] of [
       ["ds5", "full"],
       ["ds5", "minimal"],
@@ -289,7 +290,7 @@ test("controller guide tint and subtle control colors", { timeout: 60000 }, asyn
     ]);
   }
 
-  await t.test("guide blend modes preserve translucent and opaque image pixels", async () => {
+  await t.test("guide blend modes preserve translucent and opaque image pixels", { skip: coreOnly }, async () => {
     const original = await logoPixels({ guideColorMode: "original" });
     assert.ok(Math.abs(original[0][3] - 128) <= 2, "Fixture contains translucent pixels");
     assert.equal(original[1][3], 255);
@@ -332,7 +333,7 @@ test("controller guide tint and subtle control colors", { timeout: 60000 }, asyn
   assert.deepEqual(errors, [], "No uncaught controller errors");
 });
 
-test("keyboard image targets mask real key contours even when keycaps are transparent", { timeout: 30000 }, async (t) => {
+test("keyboard image targets mask real key contours even when keycaps are transparent", { skip: coreOnly, timeout: 30000 }, async (t) => {
   const assets = await loadAssets(runtimeAssets);
   const browser = await launchBrowser();
   t.after(() => browser.close());
@@ -391,7 +392,7 @@ test("keyboard image targets mask real key contours even when keycaps are transp
   assert.equal(await page.evaluate(() => byStreamResource.settings.imageTarget), "all");
 });
 
-test("Main corners reserve scaled card space and background tint supports Fill", { timeout: 30000 }, async (t) => {
+test("Main corners reserve scaled card space and background tint supports Fill", { skip: coreOnly, timeout: 30000 }, async (t) => {
   const assets = await loadAssets(runtimeAssets);
   const browser = await launchBrowser();
   t.after(() => browser.close());

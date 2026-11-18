@@ -374,7 +374,7 @@ test("publication is restricted to tags and gated by successful mandatory checks
   assert.equal(sourceCheck.env.NODE_PATH, "${{ github.workspace }}/.github/node_modules");
   assert.ok(release.jobs.build.steps.some((step) => step.run === "npm --prefix .github run release:test"));
   assert.ok(!release.jobs.build.steps.some((step) => step["continue-on-error"]));
-  assert.deepEqual(source.on.push.branches, [config.branch], "Tag releases run source checks in the release workflow");
+  assert.deepEqual(Object.keys(source.on).sort(), ["workflow_call", "workflow_dispatch"], "Automatic source checks run once through the release workflow");
   assert.ok(!JSON.stringify(ci).includes("--publish"));
   assert.ok(!JSON.stringify(ci).includes('contents":"write'));
   for (const job of Object.values(release.jobs)) {

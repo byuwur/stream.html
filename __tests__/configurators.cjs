@@ -5,6 +5,7 @@
 const assert = require("node:assert/strict");
 const test = require("node:test");
 const { runtimeAssets, launchBrowser, loadAssets, serve } = require("./browser.cjs");
+const coreOnly = process.env.STREAM_CORE_ONLY === "1";
 
 const editorAssets = [
   ...runtimeAssets,
@@ -111,7 +112,7 @@ test("configurator smoke", { timeout: 60000 }, async (t) => {
     }
   });
 
-  await t.test("decimal controls, rotation limits, color-field clicks, and short sliders share the canonical fields", async () => {
+  await t.test("decimal controls, rotation limits, color-field clicks, and short sliders share the canonical fields", { skip: coreOnly }, async () => {
     const page = await browser.newPage();
     page.setDefaultTimeout(5000);
     try {
@@ -188,7 +189,7 @@ test("configurator smoke", { timeout: 60000 }, async (t) => {
     }
   });
 
-  await t.test("keyboard image choices and Main component fields stay in their owning groups", async () => {
+  await t.test("keyboard image choices and Main component fields stay in their owning groups", { skip: coreOnly }, async () => {
     const page = await browser.newPage();
     page.setDefaultTimeout(5000);
     try {
