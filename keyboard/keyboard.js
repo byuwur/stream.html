@@ -106,6 +106,7 @@ async function initKeyboardResource() {
           international: "International keys"
         }).map(([group, label]) => [`group${group}`, { ...keyboardFields, ...toggle, default: "yes", label, subsection: "Key groups" }])
       ),
+      layoutDensity: { ...appearance, type: "select", default: "regular", label: "Layout", when: keyboardFields.when, options: { regular: "Regular", compact: "Compact" } },
       shell: {
         ...appearance,
         type: "select",
@@ -211,7 +212,7 @@ async function initKeyboardResource() {
         description: "All means physical gameplay inputs received by this browser. Editable fields and the configurator are excluded."
       },
       keySize: { type: "number", default: 44, label: "Key size (px)", section: "Size & placement", when: keyboardFields.when, retainInactive: true, min: 16, max: 160 },
-      keySpacing: { type: "number", default: 5, label: "Key spacing (px)", section: "Size & placement", when: keyboardFields.when, retainInactive: true, min: 0, max: 40 },
+      keySpacing: { type: "number", default: 5, label: "Key spacing (px)", description: "Compact layout uses half this spacing.", section: "Size & placement", when: keyboardFields.when, retainInactive: true, min: 0, max: 40 },
       keyProportion: { type: "number", default: 100, label: "Key height (%)", section: "Size & placement", when: keyboardFields.when, retainInactive: true, min: 50, max: 150 },
       componentGap: { type: "number", default: 24, label: "Keyboard / mouse gap (px)", section: "Size & placement", min: 0, max: 500, when: ["mode", "both"] },
       composition: { type: "select", default: "row", label: "Combined arrangement", section: "Size & placement", options: { row: "Side by side", column: "Stacked" }, when: ["mode", "both"] },
@@ -445,12 +446,15 @@ async function initKeyboardResource() {
   if (disposed) return;
   const loaded = new Map();
   for (const [name, result] of assets) loaded.set(name, await result);
-  const unitX = settings.keySize + settings.keySpacing;
-  const unitY = (settings.keySize * settings.keyProportion) / 100 + settings.keySpacing;
-  const padding = settings.shell === "full" ? 16 : settings.shell === "gaming" ? 10 : 6;
+  const compactLayout = settings.layoutDensity === "compact";
+  const keySpacing = compactLayout ? settings.keySpacing / 2 : settings.keySpacing;
+  const unitX = settings.keySize + keySpacing;
+  const unitY = (settings.keySize * settings.keyProportion) / 100 + keySpacing;
+  const shellPadding = settings.shell === "full" ? 16 : settings.shell === "gaming" ? 10 : 6;
+  const padding = compactLayout ? Math.min(shellPadding, 8) : shellPadding;
   if (!keyboard.hidden) {
-    const width = Math.max(1, ...slots.map((slot) => (slot.x + slot.width) * unitX - settings.keySpacing)) + padding * 2;
-    const height = Math.max(1, ...slots.map((slot) => (slot.y + slot.height) * unitY - settings.keySpacing)) + padding * 2;
+    const width = Math.max(1, ...slots.map((slot) => (slot.x + slot.width) * unitX - keySpacing)) + padding * 2;
+    const height = Math.max(1, ...slots.map((slot) => (slot.y + slot.height) * unitY - keySpacing)) + padding * 2;
     const board = svg("svg", { viewBox: `0 0 ${width} ${height}`, width, height, role: "img", "aria-label": layouts.presets[settings.layout], "data-shell": settings.shell }, keyboard);
     const clip = svg("clipPath", { id: "keyboard-shell-clip" }, defs);
     svg("rect", { width: width - 2, height: height - 2, x: 1, y: 1, rx: settings.shell === "full" ? 10 : 5 }, clip);
@@ -470,7 +474,7 @@ async function initKeyboardResource() {
     if (settings.shell === "full") svg("path", { d: `M12 4 H${Math.max(12, width - 12)}`, class: "shell-highlight" }, board);
     for (const slot of slots) {
       const info = layouts.key(slot.code, settings);
-      const node = keyArtwork(info, loaded.get(info.asset), slot.width * unitX - settings.keySpacing, slot.height * unitY - settings.keySpacing, slot.code);
+      const node = keyArtwork(info, loaded.get(info.asset), slot.width * unitX - keySpacing, slot.height * unitY - keySpacing, slot.code);
       node.setAttribute("x", slot.x * unitX + padding);
       node.setAttribute("y", slot.y * unitY + padding);
       board.append(node);
@@ -1411,8 +1415,21 @@ function createImageTint(defs, settings, svg) {
     if (enter) enter.x = x + gap;
   }
 
+  /** Remove empty bands without splitting multi-unit keys or shifting aligned columns apart. */
+  function closeGaps(slots, axis, span) {
+    const ordered = [...slots].sort((a, b) => a[axis] - b[axis]);
+    let edge = 0;
+    let removed = 0;
+    for (const slot of ordered) {
+      const start = slot[axis];
+      removed += Math.max(0, start - edge);
+      edge = Math.max(edge, start + slot[span]);
+      slot[axis] = start - removed;
+    }
+  }
+
   /** Close gaps in gaming layouts while keeping typing rows and the inverted-T arrow cluster. */
-  function compactGamingSlots(slots, preset) {
+  function compactGamingSlots(slots, preset, tight) {
     const arrows = slots.filter((slot) => keys[slot.code].group === "arrows");
     const typing = slots.filter((slot) => keys[slot.code].group !== "arrows");
     if (!typing.length) return arrows;
@@ -1433,7 +1450,8 @@ function createImageTint(defs, settings, svg) {
       bottom.unshift(shift);
     }
 
-    const gap = 0.25;
+    const gap = tight ? 0 : 0.25;
+    const spaceWidth = tight ? 2.5 : 3.25;
     const result = [];
     const tall = [];
     let loneSpacebar;
@@ -1446,7 +1464,7 @@ function createImageTint(defs, settings, svg) {
           continue;
         }
         x += Math.max(0, Math.min(gap, slot.x - sourceRight));
-        const width = slot.code === "Space" ? 3.25 : slot.width;
+        const width = slot.code === "Space" ? spaceWidth : slot.width;
         const placed = { ...slot, x, y, width };
         result.push(placed);
         if (slot.code === "Space" && row.length === 1) loneSpacebar = placed;
@@ -1477,7 +1495,7 @@ function createImageTint(defs, settings, svg) {
   }
 
   /**
-   * Compose preset slots in key units; hardware layouts keep their physical geometry.
+   * Compose visible preset slots in key units, then apply the selected layout density.
    * @param {Object} settings Validated resource settings.
    * @returns {Array<Object>} code/x/y/width/height slots, without live input state.
    */
@@ -1569,7 +1587,12 @@ function createImageTint(defs, settings, svg) {
       if (preset === "compact" && slot.y === top) return false;
       return settings[`group${keys[slot.code].group}`] !== "no" && (!selected || selected.has(slot.code));
     });
-    const placed = gaming ? compactGamingSlots(visible, preset) : visible;
+    const tight = settings.layoutDensity === "compact";
+    const placed = gaming ? compactGamingSlots(visible, preset, tight) : visible;
+    if (tight) {
+      closeGaps(placed, "x", "width");
+      closeGaps(placed, "y", "height");
+    }
     const left = Math.min(...placed.map((slot) => slot.x));
     const topEdge = Math.min(...placed.map((slot) => slot.y));
     return placed.map((slot) => ({ ...slot, x: slot.x - left, y: slot.y - topEdge }));

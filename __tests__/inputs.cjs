@@ -141,19 +141,33 @@ test("gaming layouts close empty rows and columns while retaining keyboard geome
   assert.ok(fighting.width < fighting.keys.KeyA.width * 10);
   assert.ok(fighting.keys.Enter.height > fighting.keys.KeyA.height * 2);
   assert.ok(fighting.keys.Enter.x >= fighting.keys.KeyL.x + fighting.keys.KeyL.width);
-  const { keys } = fighting;
-  for (const [upper, lower] of [
-    ["KeyU", "KeyJ"],
-    ["KeyI", "KeyK"],
-    ["KeyO", "KeyL"]
-  ]) {
-    assert.equal(keys[upper].x, keys[lower].x);
-    assert.ok(keys[upper].y < keys[lower].y);
+  const denseFighting = await layout("layout=fighting&standard=iso&layoutDensity=compact");
+  assert.ok(denseFighting.width < fighting.width);
+  assert.ok(denseFighting.keys.Space.width < fighting.keys.Space.width);
+  for (const { keys } of [fighting, denseFighting]) {
+    for (const [upper, lower] of [
+      ["KeyU", "KeyJ"],
+      ["KeyI", "KeyK"],
+      ["KeyO", "KeyL"]
+    ]) {
+      assert.equal(keys[upper].x, keys[lower].x);
+      assert.ok(keys[upper].y < keys[lower].y);
+    }
   }
 
   const full = await layout("layout=full");
   assert.ok(full.keys.Space.width > Space.width);
   assert.ok(full.keys.Numpad1.x > full.keys.ArrowRight.x);
+  const denseFull = await layout("layout=full&layoutDensity=compact");
+  assert.ok(denseFull.width < full.width);
+  assert.deepEqual(Object.keys(denseFull.keys), Object.keys(full.keys));
+  const letterGap = ({ keys }) => keys.KeyW.x - (keys.KeyQ.x + keys.KeyQ.width);
+  assert.equal(letterGap(denseFull), letterGap(full) / 2);
+  assert.equal(denseFull.keys.NumpadAdd.x, denseFull.keys.NumpadEnter.x);
+  assert.equal(denseFull.keys.ArrowDown.x, denseFull.keys.ArrowUp.x);
+  const sparse = await layout(`layout=full&layoutDensity=compact&displayedKeys=${encodeURIComponent('["Escape","KeyA","Numpad1"]')}`);
+  assert.ok(sparse.width < sparse.keys.KeyA.width * 4);
+  assert.ok(sparse.keys.Numpad1.y < sparse.keys.KeyA.height * 3);
 });
 
 test("vertical histories keep combinations and repeat counts on one line", { timeout: 30000 }, async (t) => {

@@ -199,9 +199,17 @@ test("configurator smoke", { timeout: 60000 }, async (t) => {
       assert.equal(await page.locator('[name="shellImage"], [name="keyImage"]').count(), 0);
       const choices = page.locator('[name="imageTarget"] + .choice-buttons button');
       assert.deepEqual(await choices.allTextContents(), ["Off", "Shell", "Keys", "All"]);
+      const density = page.locator('[name="layoutDensity"]');
+      assert.equal(await density.inputValue(), "regular");
+      assert.equal(await density.evaluate((input) => input.closest("[data-config-section]").dataset.configSection), "Appearance");
+      const densityChoices = page.locator('[name="layoutDensity"] + .choice-buttons button');
+      assert.deepEqual(await densityChoices.allTextContents(), ["Regular", "Compact"]);
+      await densityChoices.filter({ hasText: "Compact" }).click();
+      await page.waitForFunction(() => new URL(document.getElementById("overlay-url").value).searchParams.get("layoutDensity") === "compact");
       await page.locator('[data-settings-view="json"]').click();
       await page.locator("#settings-json").fill('{"mode":"keyboard","imageTarget":"both","shellImage":"../stream.html.png","imageTint":"monochrome"}');
       await page.waitForFunction(() => document.querySelector('[name="imageUrl"]').value === "../stream.html.png" && document.querySelector('[name="imageTarget"]').value === "all");
+      assert.equal(await density.inputValue(), "regular");
       assert.equal(await page.locator('[name="imageBlendMode"]').inputValue(), "fill");
       await page.goto("https://stream.test/main/?displayCountdown=yes&displaySocial=yes&displaySchedule=yes&displayLabels=yes#configure");
       await page.locator('[name="socialPosition"]').waitFor({ state: "attached" });

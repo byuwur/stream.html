@@ -209,6 +209,8 @@ Layouts include full-size, TKL, 75%, 65%, 60%, compact letter rows, numpad, func
 
 Use **Selected physical keys** to choose predefined physical codes such as `KeyW`, `Space`, `ShiftLeft`, or `ArrowUp` from dropdowns, with row actions on the right; an empty list shows every preset slot. Group switches hide letters, modifiers, navigation, and other groups. **Key labels** and **Action descriptions** customize existing slots, with optional visible actions. Geometry stays preset-based; there is no per-key drag editor.
 
+**Appearance → Layout** switches between **Regular** (default) and **Compact** (`layoutDensity=compact`). Compact closes empty rows and columns, halves the configured key spacing, trims shell padding, and uses a shorter spacebar in gaming presets. The Fighting preset aligns U, I, and O above J, K, and L in both modes.
+
 Hollow Kenney SVG contours supply surfaces, outlines, and recognizable vector legends. Nine coordinated palettes and custom shell, keycap, outline, legend, press, highlight, and shadow colors are available. Shell choices include complete, minimal, floating, outline, and gaming; keycaps can be filled or outlined. Presses update mounted SVG controls immediately, with inversion, fill, depth, or glow and a smooth release. Animate Off removes motion while retaining input feedback.
 
 Artwork uses short names such as `a.svg`, `ctrl.svg`, and `scrollup.svg`. Primary files contain the hollow artwork; `-fill.svg` retains the corresponding filled originals. Renaming preserves the original SVG bytes.
