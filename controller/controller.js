@@ -256,6 +256,8 @@ async function initControllerResource() {
         when: (values) => byControllerArtwork.skins[values.skin]?.shadows,
         retainInactive: true
       },
+      pressEffect: { type: "select", default: "invert", label: "Pressed effect", section: "Appearance", subsection: "Input feedback", options: { fill: "Fill", invert: "Invert", depth: "Fill + depth", glow: "Fill + glow" } },
+      releaseDuration: { type: "number", default: 100, label: "Smooth release (ms)", section: "Appearance", subsection: "Input feedback", min: 0, max: 500, when: (values) => values.animate !== "no", retainInactive: true },
       customGuide: {
         type: "switch",
         default: "no",
@@ -792,6 +794,7 @@ async function initControllerResource() {
       const pressure = this.TRIGGER_DISPLAY_TYPE ? value01 : Number(value01 > this.DIGITAL_THRESHOLD);
       if (control.pressure === pressure) return;
       control.pressure = pressure;
+      control.node.classList.toggle("pressed", pressure > 0);
       const horizontal = control.node.dataset.layout === "minimal";
       const box = control.fillBounds;
       control.fill.setAttribute("x", String(box.x));
@@ -1000,6 +1003,9 @@ async function initControllerResource() {
       active.style.setProperty("--screen-opacity", settings.screenOpacity / 100);
       customizeControllerAppearance(active, settings);
       customizeControllerShell(active, settings, controllerEvents.signal);
+      // Install feedback after appearance so mounting a custom tint never animates it.
+      active.dataset.effect = settings.pressEffect;
+      active.style.setProperty("--release", `${settings.releaseDuration}ms`);
       function updatePlayerIndicators() {
         const litLeds = [[], [1], [2], [3], [4], [1, 4], [2, 4], [3, 4], [1, 3, 4], [1, 2, 3, 4]][player];
         for (const indicator of active.querySelectorAll("[data-player]")) {

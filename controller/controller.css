@@ -57,10 +57,48 @@ body {
   fill: #65e374;
   filter: drop-shadow(0 0 0.6px #65e374);
 }
-/* Independent SVG roots keep pressed inversion working in WebKit. */
-.control.pressed {
+/* Independent SVG roots keep pressed filters working in WebKit. */
+.controller .control {
+  transition: filter var(--release) ease-out;
+}
+.controller[data-effect="invert"] .control.pressed:not(.analog-trigger) {
   filter: invert(1);
 }
-.control.analog-trigger.pressed {
-  filter: none;
+.controller .control.pressed {
+  transition: none;
+}
+.controller[data-effect]:not([data-effect="invert"]) .control :is(.button-face, .gcn-face, .button-detail.stock-plastic) {
+  transition: fill var(--release) ease-out;
+}
+/* Keep the trigger's base untouched; its existing clip still owns pressure. */
+.controller[data-effect]:not([data-effect="invert"]) .control.pressed:not(.analog-trigger) :is(.button-face, .gcn-face, .button-detail.stock-plastic),
+.controller[data-effect]:not([data-effect="invert"]) .trigger-active :is(.button-face, .gcn-face) {
+  fill: #990000 !important;
+  transition: none;
+}
+.controller[data-effect]:not([data-effect="invert"]) .control.pressed {
+  --button-label-color: #ffffff;
+  --face-label-color: #ffffff;
+}
+.controller .trigger-fill-rect {
+  transition:
+    y var(--release) ease-out,
+    width var(--release) ease-out,
+    height var(--release) ease-out;
+}
+.controller .control.pressed .trigger-fill-rect {
+  transition: none;
+}
+/* Animate inside the control so stick travel and curving keep their own transforms. */
+.controller[data-effect="depth"] .control:not(.analog-trigger) .press-visual {
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: transform var(--release) ease-out;
+}
+html:not([data-animate="no"]) .controller[data-effect="depth"] .control.pressed:not(.analog-trigger) .press-visual {
+  transform: translateY(1px) scale(0.95);
+  transition: none;
+}
+html:not([data-animate="no"]) .controller[data-effect="glow"] .control.pressed {
+  filter: drop-shadow(0 0 3px #990000);
 }

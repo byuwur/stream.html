@@ -68,10 +68,21 @@ test("configurator smoke", { timeout: 60000 }, async (t) => {
         guideColorMode: "tint",
         guideTintColor: "#70dd52",
         guideTintStrength: "65",
-        guideBlendMode: "soft-light"
+        guideBlendMode: "soft-light",
+        pressEffect: "depth",
+        releaseDuration: "180"
       });
       await page.goto(`https://stream.test/controller/?${parameters}#configure`);
       await page.waitForFunction(() => !!document.getElementById("overlay-url")?.value);
+      const effect = page.locator('[name="pressEffect"]');
+      const release = page.locator('[name="releaseDuration"]');
+      assert.deepEqual(await effect.locator("option").allTextContents(), ["Fill", "Invert", "Fill + depth", "Fill + glow"]);
+      assert.equal(await effect.inputValue(), "depth");
+      await page.locator('[name="animate"]').uncheck({ force: true });
+      await page.waitForFunction(() => document.querySelector('[name="releaseDuration"]').disabled);
+      assert.equal(await release.inputValue(), "180");
+      await page.locator('[name="animate"]').check({ force: true });
+      await page.waitForFunction(() => !document.querySelector('[name="releaseDuration"]').disabled);
       const mode = page.locator('form[data-configurator] [name="guideColorMode"]');
       const strength = page.locator('form[data-configurator] [name="guideTintStrength"]');
       assert.equal(await strength.isDisabled(), false, "Guide tint is independent of shell appearance");
@@ -84,10 +95,14 @@ test("configurator smoke", { timeout: 60000 }, async (t) => {
       assert.equal(new URL(url).searchParams.get("skin"), "ds5");
       assert.equal(new URL(url).searchParams.get("guideTintColor"), "70dd52");
       assert.equal(new URL(url).searchParams.get("guideBlendMode"), "soft-light");
+      assert.equal(new URL(url).searchParams.get("pressEffect"), "depth");
+      assert.equal(new URL(url).searchParams.get("releaseDuration"), "180");
       await page.frameLocator("#overlay-preview").locator('filter[id$="-logo-tint"]').waitFor({ state: "attached" });
       await page.goto(url);
       await page.locator("#gamepads .controller svg").first().waitFor({ state: "attached" });
       assert.equal(await page.evaluate(() => byStreamResource.settings.skin), "ds5");
+      assert.equal(await page.locator(".controller").getAttribute("data-effect"), "depth");
+      assert.equal(await page.locator(".controller").evaluate((element) => element.style.getPropertyValue("--release")), "180ms");
       await page.locator(".guide-logo-custom").waitFor();
       assert.equal(await page.locator('filter[id$="-logo-tint"] feBlend').getAttribute("mode"), "soft-light");
       assert.deepEqual(errors, []);
