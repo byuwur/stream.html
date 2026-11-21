@@ -5,7 +5,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Defaults, URL constraints, and the field metadata consumed by the optional editor.
   const resource = {
-    version: "1.3",
+    version: "1.4",
     title: "Periodic Reminder",
     description: "Automatic reminders at set intervals.",
     preview: [960, 540],

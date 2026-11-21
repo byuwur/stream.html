@@ -652,16 +652,16 @@ Review the HTML, ZIPs, manifest and checksums in `dist/assets/`. Only a pushed v
 
 | Command | Purpose and outputs |
 | --- | --- |
-| `npm --prefix .github run release:build -- --tag v10` | Build all resource formats, ZIPs, the [EXPERIMENTAL] embedded Controller, release notes, manifest, and checksums in `dist/assets/`. |
+| `npm --prefix .github run release:build -- --tag v11` | Build all resource formats, ZIPs, the [EXPERIMENTAL] embedded Controller, release notes, manifest, and checksums in `dist/assets/`. |
 | `npm --prefix .github run release:test` | Check the generated inventory, artwork, browser startup, and publication safeguards with a mocked GitHub API. |
 | `npm --prefix .github run release:experiment` | Run `.github/tests/controller-experiment.mjs` against the generated embedded HTML and Controller ZIP, then write local performance diagnostics to `dist/experimental/report.json`. |
-| `node .github/scripts/build.mjs --tag v10 --update-dependencies` | Refresh pinned dependency hashes for review during an intentional dependency update. |
+| `node .github/scripts/build.mjs --tag v11 --update-dependencies` | Refresh pinned dependency hashes for review during an intentional dependency update. |
 | `node .github/scripts/build.mjs --check` | Validate the pushed tag and commit in the Actions release environment. |
 | `node .github/scripts/build.mjs --publish` | Upload and publish the tested `dist/assets/` inventory using the Actions release context and token. |
 
 Inspect `dist/assets/RELEASE_NOTES.md`, `manifest.json`, `SHA256SUMS`, and the HTML/ZIP files in `dist/assets/`. The manifest records every distribution, source dependency, size, and SHA-256. Browser checks initialize every portable distribution and exercise shared URL/editor behavior once per format. Online browser tests serve the future tag's project files from the checkout; they do not assert that an unpublished tag already exists on jsDelivr. Bundled browser tests block external application libraries, including Font Awesome, and test HTTP and downloaded-file entry points.
 
-Pinned remote application dependencies and CSS assets are integrity-checked against `.github/scripts/release-dependencies.json` and cached outside the repository. After deliberately changing CDN imports, run `node .github/scripts/build.mjs --tag v10 --update-dependencies`, review the lock changes, and rerun both suites. Do not refresh the lock to conceal an unexpected change to an existing pinned dependency. Required missing dependencies fail the build. New ordinary resources need no release list or download-table edits; register any new dynamically constructed asset paths in the `config.dynamicDependencies` object in `.github/scripts/build.mjs`. Module scripts require explicit import-graph support before distribution; current resources use classic scripts.
+Pinned remote application dependencies and CSS assets are integrity-checked against `.github/scripts/release-dependencies.json` and cached outside the repository. After deliberately changing CDN imports, run `node .github/scripts/build.mjs --tag v11 --update-dependencies`, review the lock changes, and rerun both suites. Do not refresh the lock to conceal an unexpected change to an existing pinned dependency. Required missing dependencies fail the build. New ordinary resources need no release list or download-table edits; register any new dynamically constructed asset paths in the `config.dynamicDependencies` object in `.github/scripts/build.mjs`. Module scripts require explicit import-graph support before distribution; current resources use classic scripts.
 
 For embedded project JavaScript and CSS, the builder prefers jsDelivr's generated `.min` files pinned to the exact source commit. Edited files and unavailable CDN copies use the current local esbuild pipeline. Generated CDN bytes are cached with checksums and recorded in the manifest. CSS bundling embeds its required assets. Controller and Keyboard artwork loaders are rewritten before minification for embedded files and ZIP file-mode fallback. Pinned SPA.js downloads can fall back to `SPA_ASSETS_ROOT` or the sibling `spa.js` checkout when local bytes match the dependency lock.
 
@@ -670,7 +670,7 @@ For embedded project JavaScript and CSS, the builder prefers jsDelivr's generate
 Every build generates `controller.standalone.embedded.html`, `controller.full.embedded.html`, `keyboard.standalone.embedded.html`, and `keyboard.full.embedded.html` in `dist/assets/`. Full editions include the configurator; standalone editions contain the renderer only. All four embed their original SVG artwork and work directly from disk. The release suite checks HTTP, downloaded HTML, extracted ZIPs, and full-edition configurator switching on `file://`.
 
 ```sh
-node .github/scripts/build.mjs --tag v10
+node .github/scripts/build.mjs --tag v11
 npm --prefix .github run release:experiment
 ```
 

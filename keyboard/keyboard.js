@@ -34,7 +34,7 @@ async function initKeyboardResource() {
   const appearance = { section: "Appearance", retainInactive: true };
   // ===== RESOURCE CONFIGURATION =====
   const resource = {
-    version: "1.1", // 2026-11-15
+    version: "1.2", // 2026-11-20
     title: "Keyboard & Mouse",
     description: "Live browser-focused keyboard, mouse, and optional ephemeral Input History. Use OBS Interact to receive input; this cannot capture other applications.",
     preview: [1280, 720],

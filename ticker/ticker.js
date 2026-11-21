@@ -6,7 +6,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Defaults, URL constraints, and the field metadata consumed by the optional editor.
   const formerMotion = byStream.cycleParameters("message", "transition", 500);
   const resource = {
-    version: "1.3",
+    version: "1.4",
     title: "Ticker",
     description: "Scrolling news, commands, and reminders.",
     preview: [960, 540],
