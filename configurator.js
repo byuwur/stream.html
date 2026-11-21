@@ -2400,8 +2400,10 @@
                   </p>
                   <p>
                     You can <a href="https://streamlabs.com/byuwur" target="_blank" rel="noopener"><i class="fa-solid fa-hand-holding-heart" aria-hidden="true"></i>tip</a>,
-                    <a href="https://twitch.tv/byuwur" target="_blank" rel="noopener"><i class="fa-brands fa-twitch" aria-hidden="true"></i>subscribe</a> or
-                    <a href="https://paypal.me/byuwur" target="_blank" rel="noopener"><i class="fa-brands fa-paypal" aria-hidden="true"></i>donate</a>.
+                    <a href="https://github.com/sponsors/byuwur" target="_blank" rel="noopener"><i class="fa-brands fa-github" aria-hidden="true"></i>sponsor</a>,
+                    <a href="https://twitch.tv/byuwur" target="_blank" rel="noopener"><i class="fa-brands fa-twitch" aria-hidden="true"></i>subscribe</a>,
+                    <a href="https://paypal.me/byuwur" target="_blank" rel="noopener"><i class="fa-brands fa-paypal" aria-hidden="true"></i>donate</a> or
+                    <a href="https://ko-fi.com/byuwur" target="_blank" rel="noopener"><i class="fa-brands fa-ko-fi" aria-hidden="true"></i>buy me a pandebono</a>.
                   </p>
                   <p>
                     Download the
