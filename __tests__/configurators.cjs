@@ -26,6 +26,7 @@ const editorAssets = [
   "_fonts.css"
 ];
 
+// ===== CATALOG PRIVACY AND RESOURCE COUNTS =====
 test("catalog links and filters work while deferred enhancements are still downloading", async (t) => {
   const browser = await launchBrowser();
   t.after(() => browser.close());
@@ -104,6 +105,7 @@ test("catalog activates privacy controls and counts each selected resource until
   assert.deepEqual(visits, ["page_view|landing|catalog", "resource_selected|landing|timer", "page_view|landing|catalog"]);
 });
 
+// ===== DEMO EXPORTS AND CONFIGURATION ROUND TRIPS =====
 test("a dropdown label focuses its visible control without opening a picker", async (t) => {
   const browser = await launchBrowser();
   t.after(() => browser.close());
@@ -561,6 +563,7 @@ test("color dependencies and dotted spacing round-trip through the editor", asyn
   await page.waitForFunction(() => getComputedStyle(document.querySelector(".album")).textOverflow === "ellipsis");
 });
 
+// ===== CONFIGURATOR CONTROLS AND PREVIEW =====
 test("configurator smoke", { timeout: 60000 }, async (t) => {
   const assets = await loadAssets(editorAssets);
   const browser = await launchBrowser();
@@ -697,6 +700,7 @@ test("configurator smoke", { timeout: 60000 }, async (t) => {
       const seconds = page.locator('[name="pauseTime"]');
       const secondsRange = page.locator('[data-number-field="pauseTime"]');
       await seconds.waitFor({ state: "attached" });
+      assert.deepEqual((await page.locator("form > section > h2").allTextContents()).slice(0, 3), ["Social accounts", "General", "Appearance"]);
       await seconds.evaluate((input) => {
         for (const group of input.closest("form").querySelectorAll(".collapse")) group.classList.add("show");
       });
@@ -732,26 +736,66 @@ test("configurator smoke", { timeout: 60000 }, async (t) => {
       await page.goto("https://stream.test/keyboard/?mode=keyboard&imageTarget=all#configure");
       const image = page.locator('[name="imageUrl"]');
       await image.waitFor({ state: "attached" });
+      assert.deepEqual(await page.locator("form > section > h2").allTextContents(), ["General", "Keyboard", "Mouse", "Appearance", "Input History", "Whole overlay"]);
+      assert.equal(await page.locator('[name="historyAnimation"], [name="historyEntry.entrance"], [name="historyEntry.exit"]').count(), 0);
       assert.equal(await page.locator('[name="shellImage"], [name="keyImage"]').count(), 0);
       const choices = page.locator('[name="imageTarget"] + .choice-buttons button');
       assert.deepEqual(await choices.allTextContents(), ["Off", "Shell", "Keys", "All"]);
+      assert.deepEqual(
+        await image.evaluate((input) => {
+          const section = input.closest(".field-subsection");
+          return [section.previousElementSibling, section].map((group) => group.querySelector("[data-config-subsection]").dataset.configSubsection);
+        }),
+        ["Shell", "Image background"]
+      );
       const density = page.locator('[name="layoutDensity"]');
-      assert.equal(await density.inputValue(), "regular");
-      assert.equal(await density.evaluate((input) => input.closest("[data-config-section]").dataset.configSection), "Appearance");
+      assert.equal(await density.inputValue(), "compact");
+      assert.equal(await density.evaluate((input) => input.closest("[data-config-section]").dataset.configSection), "Keyboard");
       const densityChoices = page.locator('[name="layoutDensity"] + .choice-buttons button');
       assert.deepEqual(await densityChoices.allTextContents(), ["Regular", "Compact"]);
-      await densityChoices.filter({ hasText: "Compact" }).click();
-      await page.waitForFunction(() => new URL(document.getElementById("overlay-url").value).searchParams.get("layoutDensity") === "compact");
+      await densityChoices.filter({ hasText: "Regular" }).click();
+      await page.waitForFunction(() => new URL(document.getElementById("overlay-url").value).searchParams.get("layoutDensity") === "regular");
       await page.locator('[data-settings-view="json"]').click();
-      await page.locator("#settings-json").fill('{"mode":"keyboard","imageTarget":"both","shellImage":"../stream.html.png","imageTint":"monochrome"}');
+      await page
+        .locator("#settings-json")
+        .fill(
+          '{"mode":"keyboard","imageTarget":"both","shellImage":"../stream.html.png","imageTint":"monochrome","showHistory":"yes","history.entrance":"none","history.entranceDuration":300,"historyEntry.entrance":"zoomIn","historyEntry.entranceDuration":550}'
+        );
       await page.waitForFunction(() => document.querySelector('[name="imageUrl"]').value === "../stream.html.png" && document.querySelector('[name="imageTarget"]').value === "all");
-      assert.equal(await density.inputValue(), "regular");
+      assert.equal(await density.inputValue(), "compact");
       assert.equal(await page.locator('[name="imageBlendMode"]').inputValue(), "fill");
-      await page.goto("https://stream.test/main/?displayCountdown=yes&displaySocial=yes&displaySchedule=yes&displayLabels=yes#configure");
-      await page.locator('[name="socialPosition"]').waitFor({ state: "attached" });
+      await page.waitForFunction(() => new URL(document.getElementById("overlay-url").value).searchParams.get("history.entranceDuration") === "550");
+      assert.equal(await page.locator('[name="history.entrance"]').inputValue(), "zoomIn");
+      await page.goto("https://stream.test/main/?displayCountdown=yes&displaySocial=yes&displaySchedule=yes&displayLabels=yes#configure", { waitUntil: "commit" });
+      await page.locator('[name="socialPosition"]').waitFor({ state: "attached", timeout: 15000 });
       assert.equal(await page.locator('[name="countdownRight"], [name="updatesLeft"], [name="eventsBottom"]').count(), 0);
       assert.equal(await page.locator('[name="socialHeadingFontSize"]').evaluate((input) => input.closest("[data-config-section]").dataset.configSection), "Social accounts");
       assert.equal(await page.locator('[name="countdownFontSize"]').evaluate((input) => input.closest("[data-config-section]").dataset.configSection), "Countdown");
+      assert.deepEqual((await page.locator("[data-config-section]").evaluateAll((groups) => groups.map((group) => group.dataset.configSection))).slice(0, 2), ["General", "Appearance"]);
+      const social = page.locator('[data-config-section="Social accounts"]');
+      const heading = social.locator('[data-config-subsection="Heading"]');
+      const typography = heading.locator('[data-config-subsection="Typography"]');
+      assert.equal(await typography.locator('[name="socialHeadingFontSize"]').inputValue(), "16");
+      assert.equal(await heading.locator('[data-config-subsection="Transforms"] [name="socialHeading.rotateY"]').count(), 1);
+      assert.equal(await heading.locator('[data-config-subsection="Animation in"] [name="socialHeading.entrance"]').inputValue(), "none");
+      const appearance = social.locator('[name="social.entrance"]');
+      assert.equal(await social.locator('[name="socialCard.entrance"], [name="socialCard.exit"]').count(), 0);
+      assert.equal(await appearance.getAttribute("data-title"), "Effect for each account card");
+      assert.deepEqual((await appearance.locator("option").allTextContents()).slice(0, 2), ["Default", "Off"]);
+      assert.equal(await appearance.inputValue(), "default");
+      await appearance.selectOption("slideInLeft", { force: true });
+      assert.equal(await social.locator('[name="social.entranceDuration"]').inputValue(), "300");
+      assert.equal(await social.locator('[name="social.entranceEasing"]').inputValue(), "ease");
+      const match = social.locator('[name="social.matchExit"]');
+      const exit = social.locator('[name="social.exit"]');
+      assert.equal(await match.isChecked(), true);
+      assert.equal(await exit.isDisabled(), true);
+      await match.evaluate((input) => input.click());
+      await exit.selectOption("zoomOut", { force: true });
+      await page.waitForFunction(() => {
+        const query = new URL(document.getElementById("overlay-url").value).searchParams;
+        return query.get("social.entrance") === "slideInLeft" && query.get("social.matchExit") === "no" && query.get("social.exit") === "zoomOut";
+      });
     } finally {
       await page.close();
     }
@@ -885,7 +929,12 @@ test("configurator smoke", { timeout: 60000 }, async (t) => {
       await page.unroute(endpoint);
       let finish;
       await page.route(endpoint, (route) => {
-        finish = () => route.fulfill({ status: 412, body: "Invalid uploader.", headers: { "Access-Control-Allow-Origin": "*" } });
+        finish = () =>
+          route.fulfill({
+            status: 412,
+            body: "Invalid uploader.",
+            headers: { "Access-Control-Allow-Origin": "*" }
+          });
       });
       const pending = page.waitForRequest(endpoint);
       await picker.setInputFiles({ name: "image.png", mimeType: "image/png", buffer });

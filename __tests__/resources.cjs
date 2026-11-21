@@ -1168,6 +1168,7 @@ test("automatic foreground follows solid surfaces and light or dark replacement 
   }
 });
 
+// ===== RESOURCE LAYOUTS AND LIVE DATA =====
 test("Now Playing auto cover stays square and follows the track details height", async (t) => {
   const browser = await launchBrowser();
   t.after(() => browser.close());
@@ -1680,6 +1681,7 @@ async function renderedPixels(page, locator, points) {
   );
 }
 
+// ===== SHARED RUNTIME AND STANDALONE STARTUP =====
 test("shared resource core", { timeout: 30000 }, async (t) => {
   const browser = await launchBrowser();
   t.after(() => browser.close());
@@ -1691,7 +1693,11 @@ test("shared resource core", { timeout: 30000 }, async (t) => {
   await page.route("**/*", (route) => {
     const url = new URL(route.request().url());
     if (url.origin !== "http://stream.test") return route.abort();
-    if (url.pathname === "/resource.js") return route.fulfill({ path: path.join(__dirname, "../resource.js"), contentType: "text/javascript" });
+    if (url.pathname === "/resource.js")
+      return route.fulfill({
+        path: path.join(__dirname, "../resource.js"),
+        contentType: "text/javascript"
+      });
     return route.fulfill({
       contentType: "text/html",
       body: `<!doctype html><meta charset="UTF-8"><body>
@@ -1715,9 +1721,23 @@ test("shared resource core", { timeout: 30000 }, async (t) => {
     await page.goto("http://stream.test/core/?text=hello&size=24&layout=compact");
     const result = await page.evaluate(async () => {
       const settings = await initialized;
-      return { text: settings.text, size: settings.size, layout: settings.layout, overlay: byStreamOverlay, same: settings === byStreamResource.settings, editor: typeof byConfigurator };
+      return {
+        text: settings.text,
+        size: settings.size,
+        layout: settings.layout,
+        overlay: byStreamOverlay,
+        same: settings === byStreamResource.settings,
+        editor: typeof byConfigurator
+      };
     });
-    assert.deepEqual(result, { text: "hello", size: 24, layout: "compact", overlay: true, same: true, editor: "undefined" });
+    assert.deepEqual(result, {
+      text: "hello",
+      size: 24,
+      layout: "compact",
+      overlay: true,
+      same: true,
+      editor: "undefined"
+    });
     assert.equal(await page.locator("html[data-overlay] #overlay").count(), 1);
   });
 
@@ -1725,7 +1745,12 @@ test("shared resource core", { timeout: 30000 }, async (t) => {
     await page.goto("http://stream.test/core/?size=-1&layout=unknown&extra=untrusted");
     const result = await page.evaluate(async () => {
       const settings = await initialized;
-      return { text: settings.text, size: settings.size, layout: settings.layout, extra: Object.hasOwn(settings, "extra") };
+      return {
+        text: settings.text,
+        size: settings.size,
+        layout: settings.layout,
+        extra: Object.hasOwn(settings, "extra")
+      };
     });
     assert.deepEqual(result, { text: "default", size: 1, layout: "plain", extra: false });
     await page.goto("http://stream.test/core/?size=1000000");
@@ -1770,6 +1795,21 @@ test("standalone resources initialize without their configurators", { timeout: 6
         await page.evaluate(() => byStream.ready);
         assert.equal(await page.locator("html[data-overlay]").count(), 1);
         assert.equal(await page.evaluate(() => typeof window.byConfigurator), "undefined");
+        const missing = await page.evaluate(() => {
+          const { elements, fields, fieldDefaults } = byStreamResource;
+          return Object.entries(elements)
+            .filter(([id, part]) => {
+              if (!part.selector) return false;
+              const owner = elements[part.parent]?.motionItem === id ? part.parent : id;
+              const physical = part.motionItem || part.motionLabel ? id + ".container" : owner;
+              return ["entrance", "exit"].some((phase) => {
+                const key = physical + "." + phase;
+                return fields[key]?.default !== (fieldDefaults?.[key] ?? "none");
+              });
+            })
+            .map(([id]) => id);
+        });
+        assert.deepEqual(missing, [], name + " has both animation controls for every rendered part");
         if (name === "controller") await page.locator("#gamepads .controller svg").first().waitFor({ state: "attached" });
         assert.deepEqual(errors, [], `${name}: no startup errors`);
       } finally {
@@ -1779,6 +1819,7 @@ test("standalone resources initialize without their configurators", { timeout: 6
   }
 });
 
+// ===== CONTROLLER, KEYBOARD AND LAYOUT APPEARANCE =====
 test("controller guide tint and subtle control colors", { timeout: 60000 }, async (t) => {
   const assets = await loadAssets(runtimeAssets);
   const browser = await launchBrowser();
@@ -1791,7 +1832,13 @@ test("controller guide tint and subtle control colors", { timeout: 60000 }, asyn
 
   /** Open the actual standalone renderer with optional appearance parameters. */
   async function open(parameters = {}) {
-    const query = new URLSearchParams({ player: "9", skin: "ds5", disconnectedTint: "#00000000", disconnectedOpacity: "100", ...parameters });
+    const query = new URLSearchParams({
+      player: "9",
+      skin: "ds5",
+      disconnectedTint: "#00000000",
+      disconnectedOpacity: "100",
+      ...parameters
+    });
     await page.goto(`https://stream.test/controller/?${query}`);
     await page.evaluate(() => byStream.ready);
     await page.locator("#gamepads .controller svg").first().waitFor({ state: "attached" });
@@ -1899,10 +1946,20 @@ test("controller guide tint and subtle control colors", { timeout: 60000 }, asyn
   await t.test("shell appearance owns solid tint and migrates retired color and image settings", async () => {
     await open({ customColors: "no", controllerColor: "#ab31e3" });
     assert.equal(await page.evaluate(() => byStreamResource.settings.shellAppearance), "off");
-    await open({ shellAppearance: "solid", controllerColor: "#ab31e3", shellTintStrength: "60", shellBlendMode: "fill" });
+    await open({
+      shellAppearance: "solid",
+      controllerColor: "#ab31e3",
+      shellTintStrength: "60",
+      shellBlendMode: "fill"
+    });
     assert.equal(await page.locator('.shell-texture-definitions feBlend[mode="normal"]').count(), 1);
     assert.equal(await page.locator(".custom-colors").count(), 0, "Solid tint preserves authored surface colors instead of the former flat replacement class");
-    await open({ shellAppearance: "tint", shellImage: image, shellTintColor: "#123456", shellTintStrength: "35" });
+    await open({
+      shellAppearance: "tint",
+      shellImage: image,
+      shellTintColor: "#123456",
+      shellTintStrength: "35"
+    });
     await page.locator('[data-shell-texture="ready"]').waitFor();
     const settings = await page.evaluate(() => ({
       mode: byStreamResource.settings.shellAppearance,
@@ -1917,17 +1974,101 @@ test("controller guide tint and subtle control colors", { timeout: 60000 }, asyn
     assert.equal(new URL(settings.url).searchParams.has("shellTintColor"), false);
   });
 
+  await t.test("a translated Wii U shell shows one continuous fitted image", async () => {
+    const quarters = await page.evaluate(() => {
+      const canvas = document.createElement("canvas");
+      canvas.width = 64;
+      canvas.height = 32;
+      const ctx = canvas.getContext("2d");
+      ["#ff0000", "#00ff00", "#0000ff", "#ffff00"].forEach((color, i) => {
+        ctx.fillStyle = color;
+        ctx.fillRect((i % 2) * 32, Math.floor(i / 2) * 16, 32, 16);
+      });
+      return canvas.toDataURL();
+    });
+    await open({ skin: "wiiu", shellAppearance: "image", shellFit: "stretch", shellImage: quarters, animate: "no" });
+    await page.locator('[data-shell-texture="ready"]').waitFor();
+    await page.addStyleTag({ content: ".controller-layers > svg:not(.controller-background), .shell-highlight, .shell-shadow { visibility: hidden !important; }" });
+    const shell = page.locator(".controller-background .shell-base").first();
+    const pixels = await renderedPixels(page, shell, [
+      [0.25, 0.08],
+      [0.75, 0.08],
+      [0.09, 0.82],
+      [0.9, 0.82]
+    ]);
+    const expected = [
+      [255, 0, 0, 255],
+      [0, 255, 0, 255],
+      [0, 0, 255, 255],
+      [255, 255, 0, 255]
+    ];
+    pixels.forEach((pixel, i) =>
+      assert.ok(
+        pixel.every((value, channel) => Math.abs(value - expected[i][channel]) <= 3),
+        JSON.stringify(pixels)
+      )
+    );
+  });
+
   /** Sample the real rendered logo, excluding the controller underneath. */
   async function logoPixels(parameters) {
-    await open({ ...guide, ...parameters });
+    await open({ ...guide, ...parameters, animate: "no" });
     const logo = page.locator(".guide-logo-custom");
     await logo.waitFor();
-    await page.addStyleTag({ content: ".controller-background, .guide-custom-housing { visibility: hidden !important; }" });
+    await page.addStyleTag({
+      content: ".controller-background, .guide-custom-housing { visibility: hidden !important; }"
+    });
     return renderedPixels(page, logo, [
       [0.25, 0.5],
       [0.75, 0.5]
     ]);
   }
+
+  await t.test("the custom guide image retains its pixels during a smooth inverted release", async () => {
+    await open({ ...guide, player: "1", source: "helper", pressEffect: "invert", releaseDuration: 500 });
+    const input = (seq, down) =>
+      page.evaluate(
+        ([seq, down]) =>
+          byStream.receiveNative({
+            version: 1,
+            channel: "controller",
+            seq,
+            state: { pads: [{ index: 0, id: "DualSense", axes: [], buttons: [...Array(16).fill(0), Number(down)] }] }
+          }),
+        [seq, down]
+      );
+    await input(0, false);
+    const logo = page.locator(".guide-logo-custom");
+    await logo.waitFor();
+    const face = page.locator(".guide-custom-housing").first();
+    const fill = () => face.evaluate((node) => getComputedStyle(node).fill);
+    const base = await fill();
+    await page.addStyleTag({ content: ".controller-background, .guide-custom-housing { visibility: hidden !important; }" });
+    const pixels = () =>
+      renderedPixels(page, logo, [
+        [0.25, 0.5],
+        [0.48, 0.5],
+        [0.52, 0.5],
+        [0.75, 0.5]
+      ]);
+    const before = await pixels();
+    await input(1, true);
+    const pressed = await fill();
+    assert.notEqual(pressed, base);
+    assert.deepEqual(await pixels(), before);
+    await input(2, false);
+    const mid = await face.evaluate((node) => {
+      const fade = node.getAnimations().find((animation) => animation.transitionProperty === "fill");
+      fade.pause();
+      fade.currentTime = fade.effect.getTiming().duration / 2;
+      return getComputedStyle(node).fill;
+    });
+    assert.notEqual(mid, base);
+    assert.notEqual(mid, pressed);
+    assert.deepEqual(await pixels(), before);
+    await face.evaluate((node) => node.getAnimations().forEach((animation) => animation.finish()));
+    assert.equal(await fill(), base);
+  });
 
   await t.test("guide blend modes preserve translucent and opaque image pixels", { skip: coreOnly }, async () => {
     const original = await logoPixels({ guideColorMode: "original" });
@@ -1935,13 +2076,23 @@ test("controller guide tint and subtle control colors", { timeout: 60000 }, asyn
     assert.equal(original[1][3], 255);
     assert.deepEqual(await logoPixels({ guideColorMode: "tint", guideTintStrength: "0" }), original, "Zero strength preserves original pixels");
     for (const guideBlendMode of ["multiply", "overlay", "soft-light", "color", "fill"]) {
-      const tinted = await logoPixels({ guideColorMode: "tint", guideTintColor: "#70dd52", guideTintStrength: "65", guideBlendMode });
+      const tinted = await logoPixels({
+        guideColorMode: "tint",
+        guideTintColor: "#70dd52",
+        guideTintStrength: "65",
+        guideBlendMode
+      });
       for (let i = 0; i < original.length; i++) {
         assert.ok(Math.abs(tinted[i][3] - original[i][3]) <= 2, `${guideBlendMode}: source alpha is preserved`);
         assert.notDeepEqual(tinted[i].slice(0, 3), original[i].slice(0, 3), `${guideBlendMode}: colors are blended`);
       }
     }
-    const fill = await logoPixels({ guideColorMode: "tint", guideTintColor: "#6699cc", guideTintStrength: "100", guideBlendMode: "fill" });
+    const fill = await logoPixels({
+      guideColorMode: "tint",
+      guideTintColor: "#6699cc",
+      guideTintStrength: "100",
+      guideBlendMode: "fill"
+    });
     for (const [i, [r, g, b, alpha]] of fill.entries()) {
       assert.ok(Math.abs(alpha - original[i][3]) <= 2, "Fill retains source alpha");
       const expected = [102, 153, 204].map((channel) => Math.round((channel * alpha) / 255));
@@ -1956,7 +2107,13 @@ test("controller guide tint and subtle control colors", { timeout: 60000 }, asyn
   });
 
   await t.test("tinted guide symbols survive layout changes and failed images retain the stock emblem", async () => {
-    await open({ customGuide: "yes", guideSymbol: "playstation", guideColorMode: "tint", guideTintColor: "#70dd52", guideTintStrength: "65" });
+    await open({
+      customGuide: "yes",
+      guideSymbol: "playstation",
+      guideColorMode: "tint",
+      guideTintColor: "#70dd52",
+      guideTintStrength: "65"
+    });
     const logo = page.locator(".guide-logo-custom");
     await logo.waitFor();
     const filter = await logo.getAttribute("filter");
@@ -1964,7 +2121,12 @@ test("controller guide tint and subtle control colors", { timeout: 60000 }, asyn
     assert.equal(await logo.getAttribute("filter"), filter);
     await page.evaluate(() => byControllerArtwork.setLayout(document.querySelector(".controller"), "full"));
     assert.equal(await logo.getAttribute("filter"), filter);
-    await open({ ...guide, guideImage: "missing-image.png", guideColorMode: "tint", guideTintStrength: "65" });
+    await open({
+      ...guide,
+      guideImage: "missing-image.png",
+      guideColorMode: "tint",
+      guideTintStrength: "65"
+    });
     await page.waitForFunction(() => !document.querySelector(".guide-logo-custom"));
     assert.notEqual(await page.locator(".guide-logo-original").evaluate((node) => getComputedStyle(node).display), "none");
   });
@@ -1999,6 +2161,7 @@ test("keyboard image targets mask real key contours even when keycaps are transp
     const query = new URLSearchParams({
       mode: "keyboard",
       layout: "wasd",
+      animate: "no",
       shell,
       customColors: "yes",
       shellColor: "#00000000",
@@ -2029,6 +2192,35 @@ test("keyboard image targets mask real key contours even when keycaps are transp
   await page.locator('#keyboard-overlay[data-ready="yes"][data-image-ready="yes"]').waitFor();
   assert.equal(await page.evaluate(() => byStreamResource.settings.imageUrl), image);
   assert.equal(await page.evaluate(() => byStreamResource.settings.imageTarget), "all");
+});
+
+test("Main centers each title line and the subtitle when the scene resizes", async (t) => {
+  const browser = await launchBrowser();
+  t.after(() => browser.close());
+  const page = await browser.newPage();
+  await serve(page, await loadAssets(runtimeAssets), true);
+  await page.goto("https://stream.test/main/?sceneTitle=Starting%0Asoon&tagline=Back%20shortly");
+  await page.locator("#subtitle", { hasText: "Back shortly" }).waitFor();
+  for (const width of [1920, 640]) {
+    await page.setViewportSize({ width, height: Math.round((width * 9) / 16) });
+    await page.waitForFunction((width) => document.getElementById("scene").getBoundingClientRect().width === width, width);
+    for (const [id, lines] of [
+      ["title", 2],
+      ["subtitle", 1]
+    ]) {
+      const offsets = await page.locator("#" + id).evaluate((node) => {
+        const scene = document.getElementById("scene").getBoundingClientRect();
+        const range = document.createRange();
+        range.selectNodeContents(node);
+        return [...range.getClientRects()].filter((line) => line.width > 0).map((line) => (line.left + line.right - scene.left - scene.right) / 2);
+      });
+      assert.equal(offsets.length, lines, id);
+      assert.ok(
+        offsets.every((offset) => Math.abs(offset) < 1),
+        `${id} at ${width}px: ${offsets}`
+      );
+    }
+  }
 });
 
 test("Main corners reserve scaled card space and background tint supports Fill", { skip: coreOnly, timeout: 30000 }, async (t) => {
