@@ -492,6 +492,34 @@ test("scrolling credits and ticker replay child effects on each pass in either d
   }
 });
 
+test("Schedule fits wrapped activity rows when auto columns and content width are selected", async (t) => {
+  const browser = await launchBrowser();
+  t.after(() => browser.close());
+  const page = await browser.newPage();
+  await serve(page, await loadAssets(runtimeAssets), true);
+  await page.goto("https://stream.test/schedule/?widthMode=content");
+  for (const [width, columns] of [
+    [960, 2],
+    [400, 1],
+    [1500, 3],
+    [960, 2]
+  ]) {
+    await page.setViewportSize({ width, height: 540 });
+    await page.waitForFunction(
+      (columns) => {
+        const node = document.querySelector(".schedule-list");
+        if (!node?.childElementCount || document.getAnimations().some((motion) => motion.id === "stream-resize")) return false;
+        const cards = [...node.children].map((card) => card.getBoundingClientRect());
+        const board = node.closest(".panel").getBoundingClientRect();
+        const unused = node.getBoundingClientRect().right - Math.max(...cards.map((card) => card.right));
+        return cards.filter((card) => card.top === cards[0].top).length === columns && Math.abs(unused) <= 2 && Math.abs((board.left + board.right) / 2 - innerWidth / 2) <= 1;
+      },
+      columns,
+      { timeout: 5000 }
+    );
+  }
+});
+
 test("particle effects replay on successive flights in both directions", async (t) => {
   const browser = await launchBrowser();
   t.after(() => browser.close());

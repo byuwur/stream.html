@@ -1,9 +1,7 @@
 // Schedule: validated URL settings and an native renderer with shared URL setup.
 document.addEventListener("DOMContentLoaded", async () => {
   await byStream.assetsReady;
-  // ==========
-  // ==== RESOURCE DEFINITION ====
-  // ==========
+  // ===== RESOURCE DEFINITION =====
 
   // Defaults, URL constraints, and the field metadata consumed by the optional editor.
   const resource = {
@@ -13,6 +11,17 @@ document.addEventListener("DOMContentLoaded", async () => {
     preview: [960, 540],
     urlRequired: ["entries"],
     presets: true,
+    sectionOrder: ["General", "Schedule list", "Appearance"],
+    elements: {
+      overlay: { label: "Appearance", selector: "#overlay .panel" },
+      heading: { label: "Heading", selector: "#overlay .eyebrow", fields: ["title"] },
+      list: { label: "Schedule list", motionItem: "entry", selector: "#overlay .schedule-list", gap: true, fields: ["entries", "showEnded", "columns"] },
+      entry: { label: "Activity card", selector: "#overlay .schedule-entry", parent: "list", fields: ["currentBackground", "currentBorderColor", "endedOpacity"] },
+      activity: { label: "Title", selector: "#overlay .schedule-entry .primary", parent: "entry" },
+      time: { label: "Time", selector: "#overlay .schedule-entry .secondary", parent: "entry", fields: ["showDate", "dateFormat", "timeFormat"] },
+      status: { label: "Status", selector: "#overlay .schedule-state", parent: "entry", fields: ["nowLabel", "doneLabel", "nextLabel"] },
+      emptyMessage: { label: "Empty schedule message", selector: "#overlay .schedule-empty", fields: ["emptyLabel"] }
+    },
     fields: {
       entries: {
         type: "entries",
@@ -162,7 +171,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       width: {
         type: "number",
         default: 0,
-        contentSized: false,
         label: "Maximum width (px)",
         description: "0 removes the limit.",
         section: "Size & placement",
@@ -172,7 +180,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       horizontalPlacement: {
         type: "select",
-        default: "flex-end",
+        default: "center",
         label: "Horizontal placement",
         section: "Size & placement",
         options: { "flex-start": "Left", center: "Center", "flex-end": "Right" },
@@ -273,16 +281,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   };
 
+  // ===== FIELD DEFAULTS =====
   const fieldDefaults = {
     statusFontSize: 16,
     timeFontSize: 18,
     panelBorderWidth: 1,
     panelBorderStyle: "solid",
     panelBorderColor: "#EEEEEE11",
-    panelShadow: "yes",
-    panelShadowColor: "#00000066",
-    panelShadowBlur: 16,
-    panelShadowY: 4,
     backdropFilterMode: "none",
     backdropFilterBlur: 12,
     headingFontSize: 24,
@@ -330,6 +335,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
+  // ===== OVERLAY INITIALIZATION =====
   const settings = await byStream.initResource(resource);
   if (!byStreamOverlay) return;
   const root = document.getElementById("overlay");
@@ -373,8 +379,16 @@ document.addEventListener("DOMContentLoaded", async () => {
     ...(settings.showDate === "yes" ? { month: "short", day: "numeric" } : {})
   });
   const zone = settings.timeZone ? { timeZone: settings.timeZone } : {};
-  const date = byStream.dateTimeFormatter(settings.dateFormat, settings.locale, { ...zone, month: "short", day: "numeric" });
-  const time = byStream.dateTimeFormatter(settings.timeFormat, settings.locale, { ...zone, hour: "2-digit", minute: "2-digit" });
+  const date = byStream.dateTimeFormatter(settings.dateFormat, settings.locale, {
+    ...zone,
+    month: "short",
+    day: "numeric"
+  });
+  const time = byStream.dateTimeFormatter(settings.timeFormat, settings.locale, {
+    ...zone,
+    hour: "2-digit",
+    minute: "2-digit"
+  });
   /**
    * Preserve the locale formatter when both patterns are default; otherwise compose the chosen date/time.
    * @param {Date} value Scheduled instant.
@@ -385,15 +399,43 @@ document.addEventListener("DOMContentLoaded", async () => {
     return [settings.showDate === "yes" ? date.format(value) : "", time.format(value)].filter(Boolean).join(" ");
   }
   const list = element("div", "schedule-list");
+  list.classList.toggle("content-grid", settings.widthMode === "content" && settings.columns === 0);
   list.style.gridTemplateColumns = settings.columns === 0 ? "repeat(auto-fit, minmax(min(100%, 240px), 1fr))" : `repeat(${settings.columns}, minmax(0, 1fr))`;
   const rows = settings.entries.map((entry) => {
     const row = element("section", "schedule-entry", undefined, list);
     element("p", "primary", entry.title, row);
     element("p", "secondary", `${format(new Date(entry.startTime))} - ${format(new Date(entry.endTime))}`, row);
     const status = element("span", "schedule-state", "", row);
-    return { row, status, start: Date.parse(entry.startTime), end: Date.parse(entry.endTime) };
+    return { row, showStatus: byStream.changingText(status, settings, "status"), start: Date.parse(entry.startTime), end: Date.parse(entry.endTime) };
   });
   if (!rows.length) element("p", "secondary schedule-empty", settings.emptyLabel);
+  if (list.classList.contains("content-grid") && rows.length) {
+    // A wrapping flex list otherwise keeps the unused space at the end of its longest line.
+    let pendingResize;
+    function fitRows() {
+      // The resize animation holds children at their destination inside a temporary layout slot.
+      const resize = root.getAnimations({ subtree: true }).find((motion) => motion.id === "stream-resize");
+      if (resize) {
+        if (resize !== pendingResize) {
+          pendingResize = resize;
+          resize.finished.then(fitRows, fitRows);
+        }
+        return;
+      }
+      pendingResize = null;
+      list.style.maxWidth = "";
+      const style = getComputedStyle(list);
+      const rightInset = parseFloat(style.paddingRight) + list.offsetWidth - list.clientWidth;
+      let right = 0;
+      for (const { row } of rows) {
+        if (row.offsetWidth) right = Math.max(right, row.offsetLeft + row.offsetWidth + parseFloat(getComputedStyle(row).marginRight));
+      }
+      if (right) list.style.maxWidth = Math.ceil(right + rightInset + 1) + "px";
+    }
+    const fit = new ResizeObserver(fitRows);
+    fit.observe(root);
+    for (const { row } of rows) fit.observe(row);
+  }
   /**
    * Mark current and completed entries from their absolute start/end times.
    * @returns {void}
@@ -405,8 +447,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         ended = now >= entry.end;
       entry.row.classList.toggle("current", current);
       entry.row.classList.toggle("ended", ended);
-      entry.row.hidden = ended && settings.showEnded === "no";
-      entry.status.textContent = current ? settings.nowLabel : ended ? settings.doneLabel : settings.nextLabel;
+      byStream.setElementVisible(entry.row, !ended || settings.showEnded !== "no");
+      if (!ended || settings.showEnded !== "no") entry.showStatus(current ? settings.nowLabel : ended ? settings.doneLabel : settings.nextLabel);
     }
   }
   byStream.watch(update);
