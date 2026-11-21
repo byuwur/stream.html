@@ -586,6 +586,15 @@
         ready: true
       },
       {
+        id: "chat",
+        name: "Chat",
+        description: "Style a four-platform chat demo. Platform connections are TBD.",
+        icon: "fa-comments",
+        category: "interaction",
+        status: "TBD",
+        ready: true
+      },
+      {
         id: "counter",
         name: "Counter",
         description: "Count focused key presses with configurable steps and bounds. Native OBS input is TBD.",

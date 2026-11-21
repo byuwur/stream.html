@@ -430,6 +430,109 @@ test("the sponsor heading follows the panel edge as the logo disappears and retu
   }
 });
 
+test("chat interpolates existing rows through consecutive prepends inside a full panel", async (t) => {
+  const browser = await launchBrowser();
+  t.after(() => browser.close());
+  const page = await browser.newPage();
+  await serve(page, await loadAssets(runtimeAssets), true);
+  for (const duration of [3000, 0]) {
+    const query = new URLSearchParams({ source: "integration", limit: 4, flow: "latest-first", resizeDuration: duration, resizeEasing: "linear" });
+    await page.goto("https://stream.test/chat/?" + query);
+    await page.waitForFunction(() => window.byStreamChat);
+    const result = await page.evaluate(async (duration) => {
+      const frames = async () => {
+        await new Promise(requestAnimationFrame);
+        await new Promise(requestAnimationFrame);
+      };
+      const send = (id) => byStreamChat.receive({ id, platform: "twitch", name: "Host", text: id, timestamp: 1 });
+      for (const id of ["A", "B", "C", "D"]) send(id);
+      await frames();
+      const row = document.querySelector(".row"),
+        body = row.querySelector(".body");
+      const y = () => body.getBoundingClientRect().y;
+      const move = () => row.getAnimations().find((a) => a.id === "stream-position");
+      const start = y();
+      send("E");
+      await frames();
+      if (!duration) return { instant: !move() && y() > start };
+      const first = move();
+      first.pause();
+      first.currentTime = 0;
+      const atZero = y();
+      first.currentTime = duration / 2;
+      const halfway = y();
+      send("F");
+      await frames();
+      const second = move();
+      second.pause();
+      second.currentTime = 0;
+      const resumed = y();
+      second.currentTime = duration / 2;
+      const turning = y();
+      row.parentElement.prepend(row);
+      await frames();
+      const reverse = move();
+      reverse.pause();
+      reverse.currentTime = 0;
+      const reversed = y();
+      reverse.finish();
+      const end = y();
+      return { start, atZero, halfway, resumed, turning, reversed, end, childMotions: body.getAnimations().length };
+    }, duration);
+    if (!duration) assert.ok(result.instant);
+    else {
+      assert.ok(Math.abs(result.atZero - result.start) <= 1 && Math.abs(result.resumed - result.halfway) <= 1, JSON.stringify(result));
+      assert.ok(result.start < result.halfway && result.halfway < result.turning);
+      assert.ok(Math.abs(result.reversed - result.turning) <= 1 && Math.abs(result.end - result.start) <= 1);
+      assert.equal(result.childMotions, 0);
+    }
+  }
+});
+
+test("inline chat text stays on its line when a neighboring icon moves it", async (t) => {
+  const browser = await launchBrowser();
+  t.after(() => browser.close());
+  const page = await browser.newPage();
+  await serve(page, await loadAssets(runtimeAssets), true);
+  await page.goto("https://stream.test/chat/?source=integration&resizeDuration=3000&resizeEasing=linear");
+  await page.waitForFunction(() => window.byStreamChat);
+  const points = await page.evaluate(async () => {
+    const frames = async () => {
+      await new Promise(requestAnimationFrame);
+      await new Promise(requestAnimationFrame);
+    };
+    byStreamChat.receive({ id: "one", name: "Host", text: "Hello", platform: "twitch", timestamp: 1 });
+    await frames();
+    const name = document.querySelector(".name"),
+      icon = document.querySelector(".platform"),
+      row = name.closest(".row");
+    function point() {
+      const box = name.getBoundingClientRect(),
+        parent = row.getBoundingClientRect();
+      return { x: box.x - parent.x, y: box.y - parent.y };
+    }
+    const points = [point()];
+    for (const hidden of [true, false]) {
+      icon.hidden = hidden;
+      await frames();
+      const move = name.getAnimations().find((a) => a.id === "stream-position");
+      move.pause();
+      move.currentTime = 0;
+      points.push(point());
+      if (hidden) move.currentTime = 1500;
+      else move.finish();
+      points.push(point());
+    }
+    return points;
+  });
+  const [before, start, mid, resumed, after] = points;
+  assert.ok(Math.abs(start.x - before.x) <= 1 && mid.x < start.x && Math.abs(resumed.x - mid.x) <= 1 && Math.abs(after.x - before.x) <= 1, JSON.stringify(points));
+  assert.ok(
+    points.every(({ y }) => Math.abs(y - before.y) <= 1),
+    JSON.stringify(points)
+  );
+});
+
 test("whole player and child effects finish independently, then the panel resizes to the latest track", async (t) => {
   const browser = await launchBrowser();
   t.after(() => browser.close());
@@ -674,6 +777,89 @@ test("the progress ring fits its panel and paints elapsed time at automatic and 
   }
 });
 
+test("live values keep the old child through its exit and present the latest update", async (t) => {
+  const browser = await launchBrowser();
+  t.after(() => browser.close());
+  const page = await browser.newPage();
+  await serve(page, await loadAssets(runtimeAssets), true);
+  await page.addInitScript(() => {
+    window.slotTime = 0;
+    const OriginalDate = Date;
+    window.Date = class extends OriginalDate {
+      constructor(...args) {
+        super(...(args.length ? args : [window.slotTime]));
+      }
+      static now() {
+        return window.slotTime;
+      }
+    };
+  });
+  await page.goto("https://stream.test/counter/?layout=flip&overlay.children.entrance=none&value.entrance=default&value.entranceDuration=5000");
+  const count = await page.locator("output").evaluate(async (node) => {
+    const press = () => {
+      const code = byStreamResource.settings.increase;
+      window.dispatchEvent(new KeyboardEvent("keydown", { code }));
+      window.dispatchEvent(new KeyboardEvent("keyup", { code }));
+    };
+    press();
+    press();
+    press();
+    const leaving = node.getAnimations().find((motion) => motion.id === "stream-exit");
+    const before = node.textContent;
+    leaving.finish();
+    await new Promise(requestAnimationFrame);
+    return [before, node.textContent, node.getAnimations().some((motion) => motion.id === "stream-entrance"), node.parentElement.getAnimations().length];
+  });
+  assert.deepEqual(count, ["0", "3", true, 0]);
+  await page.goto("https://stream.test/clock/?layout=flip&timeZone=UTC&timeFormat=HH:mm:ss&time.entrance=default&time.entranceDuration=5000");
+  const digits = await page.locator(".clock .time").evaluate(async (time) => {
+    for (const animation of time.getAnimations({ subtree: true })) animation.finish();
+    window.slotTime = 1000;
+    document.dispatchEvent(new Event("visibilitychange"));
+    const cards = [...time.querySelectorAll(".flap")];
+    const exits = cards.map((card) => card.getAnimations().find((motion) => motion.id === "stream-exit"));
+    exits.filter(Boolean).forEach((animation) => animation.finish());
+    await new Promise(requestAnimationFrame);
+    return [exits.map(Boolean), cards.at(-1).textContent, time.getAnimations().length];
+  });
+  assert.deepEqual(digits, [[false, false, true], "01", 0]);
+  await page.goto("https://stream.test/timer/?duration=5&overlay.children.entrance=none&digits.entrance=fadeIn&digits.entranceDuration=5000&completion=Done");
+  const timer = await page.locator(".timer-digits").evaluate(async (node) => {
+    const tick = (ms) => {
+      window.slotTime = ms;
+      document.dispatchEvent(new Event("visibilitychange"));
+    };
+    tick(2000);
+    const ticking = node.textContent;
+    tick(5000);
+    const before = node.textContent;
+    node
+      .getAnimations()
+      .find((motion) => motion.id === "stream-exit")
+      .finish();
+    await new Promise(requestAnimationFrame);
+    return [ticking, before, node.textContent];
+  });
+  assert.match(timer[0], /03/);
+  assert.deepEqual(timer.slice(1), [timer[0], "Done"]);
+  await page.goto("https://stream.test/now-playing/?source=helper&title.entrance=zoomIn&title.entranceDuration=5000");
+  await page.locator(".panel[data-layout]").waitFor({ state: "attached" });
+  const media = await page.locator(".track").evaluate(async (node) => {
+    const send = (seq, title) => byStream.receiveNative({ version: 1, channel: "media", seq, state: { available: true, title, artist: "Artist", album: "", cover: "", duration: 60, position: seq, playback: "playing" } });
+    send(0, "First");
+    send(1, "First");
+    const afterSeek = node.getAnimations().map((motion) => motion.id);
+    send(2, "Second");
+    send(3, "Latest");
+    const before = node.textContent;
+    const panel = node.closest(".panel");
+    for (const motion of panel.getAnimations({ subtree: true })) if (motion.id === "stream-exit") motion.finish();
+    await new Promise(requestAnimationFrame);
+    return [afterSeek, before, node.textContent, panel.getAnimations().length];
+  });
+  assert.deepEqual(media, [["stream-entrance"], "First", "Latest", 0]);
+});
+
 test("custom social account effects wait for the container to resize before their entrance", async (t) => {
   const browser = await launchBrowser();
   t.after(() => browser.close());
@@ -907,6 +1093,50 @@ test("the default popup keeps the handle against the tile and displays one padde
       if (index) assert.ok(state.joined, mode + " tile and handle at sample " + index);
     }
   }
+});
+
+test("chat rows finish independently configured exits before removal", async (t) => {
+  const browser = await launchBrowser();
+  t.after(() => browser.close());
+  const page = await browser.newPage();
+  await serve(page, await loadAssets(runtimeAssets), true);
+  const query = new URLSearchParams({
+    source: "integration",
+    limit: "1",
+    "bubble.matchExit": "no",
+    "bubble.exit": "zoomOut",
+    "bubble.exitDuration": "1500",
+    "bubble.exitDelay": "50",
+    "bubble.exitEasing": "custom",
+    "bubble.exitEasingBezier": "cubic-bezier(0.1, 0.5, 0.9, 1)"
+  });
+  await page.goto("https://stream.test/chat/?" + query);
+  await page.waitForFunction(() => !!window.byStreamChat);
+  const result = await page.evaluate(async () => {
+    const message = { platform: "twitch", name: "Host", text: "First", timestamp: Date.now() };
+    byStreamChat.receive({ ...message, id: "first" });
+    const first = document.querySelector(".row");
+    const arriving = first.getAnimations().length;
+    const height = first.parentElement.offsetHeight;
+    byStreamChat.receive({ ...message, id: "next", text: "Second" });
+    const held = getComputedStyle(document.querySelector(".row:not([data-stream-exiting])")).display === "none" && first.parentElement.offsetHeight === height;
+    const leaving = first.getAnimations().find((animation) => animation.id === "stream-exit");
+    const { duration, delay, easing } = leaving.effect.getTiming();
+    const during = first.isConnected;
+    leaving.finish();
+    await new Promise(requestAnimationFrame);
+    return [arriving, duration, delay, easing, during, held, first.isConnected, document.querySelector(".row .body").textContent];
+  });
+  assert.deepEqual(result, [0, 1500, 50, "cubic-bezier(0.1, 0.5, 0.9, 1)", true, true, false, "Second"]);
+  await page.locator(".row").waitFor();
+  const rowsAfterBurst = await page.evaluate(() => {
+    for (let i = 0; i < 30; i++) byStreamChat.receive({ platform: "twitch", name: "Host", text: String(i), id: String(i), timestamp: Date.now() });
+    return [...document.querySelectorAll(".row .body")].map((node) => node.textContent).sort();
+  });
+  assert.deepEqual(rowsAfterBurst, ["29", "Second"]);
+  await page.locator(".row[data-stream-exiting]").evaluate((row) => row.getAnimations().forEach((motion) => motion.finish()));
+  await page.locator(".row:not([data-stream-exiting])").waitFor();
+  assert.deepEqual(await page.locator(".row .body").allTextContents(), ["29"]);
 });
 
 test("automatic foreground follows solid surfaces and light or dark replacement covers", async (t) => {
@@ -1167,6 +1397,254 @@ test("shortcut sheet fits a 60% keyboard and highlights the keys named in a shor
         "left-aligned action labels"
       );
   }
+});
+
+test("text fields independently wrap, clip, show ellipsis, or scroll within their available width", async (t) => {
+  const browser = await launchBrowser();
+  t.after(() => browser.close());
+  const page = await browser.newPage({ viewport: { width: 320, height: 540 } });
+  await serve(page, await loadAssets(runtimeAssets), true);
+  const text = "A very long name that takes more than one full line";
+  const query = new URLSearchParams({ title: text, artist: text, album: text, showArtwork: "no", width: 200, "title.overflow": "wrap", "artist.overflow": "nowrap", "album.overflow": "ellipsis" });
+  await page.goto("https://stream.test/now-playing/?" + query);
+  await page.locator(".album[data-stream-overflow]").waitFor();
+  const modes = await page.locator(":is(.track, .artist, .album) > .stream-text-window").evaluateAll((nodes) =>
+    nodes.map((node) => {
+      const range = document.createRange();
+      range.selectNodeContents(node);
+      return [new Set([...range.getClientRects()].map((rect) => rect.top)).size > 1, node.scrollWidth > node.clientWidth, getComputedStyle(node).textOverflow];
+    })
+  );
+  assert.deepEqual(modes, [
+    [true, false, "clip"],
+    [false, true, "clip"],
+    [false, true, "ellipsis"]
+  ]);
+
+  const quotes = new URLSearchParams({ width: 225, entries: JSON.stringify({ [text]: "A" }), "quote.overflow": "ticker" });
+  await page.goto("https://stream.test/quotes/?" + quotes);
+  await page.locator(".quote-text [data-repeat]").waitFor();
+  assert.equal(await page.locator(".quote-text").textContent(), text);
+
+  const keys = new URLSearchParams({
+    mode: "keyboard",
+    keyLabels: JSON.stringify({ KeyE: text }),
+    keyActions: JSON.stringify({ KeyE: text }),
+    showActions: "yes",
+    "legend.overflow": "ticker",
+    "action.overflow": "ellipsis",
+    showHistory: "yes",
+    historyStyle: "text",
+    historyWidth: 90,
+    historyHeight: 120,
+    "historyPrompt.overflow": "ticker"
+  });
+  await page.goto("https://stream.test/keyboard/?" + keys);
+  const key = page.locator('#keyboard [data-code="KeyE"]');
+  await key.locator(".key-label-text [data-repeat]").waitFor();
+  assert.equal(await key.locator(".key-action-text").evaluate((el) => getComputedStyle(el).textOverflow), "ellipsis");
+  await page.keyboard.press("KeyE");
+  await page.locator(".history-prompt [data-repeat]").waitFor();
+
+  await page.goto("https://stream.test/chat/?source=integration&width=200&message.overflow=ticker&name.overflow=ellipsis");
+  await page.waitForFunction(() => window.byStreamChat);
+  await page.evaluate((text) => byStreamChat.receive({ id: "one", platform: "kick", name: text, text, timestamp: 1 }), text);
+  await page.locator(".body [data-repeat]").waitFor();
+  assert.equal(await page.locator(".name").evaluate((el) => getComputedStyle(el).textOverflow), "ellipsis");
+});
+
+test("TBD layouts and live-data boundaries", { timeout: 60000 }, async (t) => {
+  const browser = await launchBrowser();
+  t.after(() => browser.close());
+  const page = await browser.newPage();
+  page.setDefaultTimeout(5000);
+  await serve(page, await loadAssets(runtimeAssets), true);
+  const errors = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+
+  await t.test("all layouts fit narrow and normal transparent canvases", async () => {
+    for (const [id, layouts] of Object.entries({ "now-playing": ["classic", "compact", "simple", "card", "vinyl"], chat: ["stacked", "inline", "bubble"], counter: ["digital", "minimal", "flip"] })) {
+      for (const layout of layouts) {
+        const query = new URLSearchParams({
+          layout,
+          animate: "no",
+          title: "Long".repeat(28),
+          album: "",
+          artist: "",
+          heading: "",
+          prefix: "Long".repeat(12)
+        });
+        await page.goto("https://stream.test/" + id + "/?" + query);
+        const panel = page.locator("#overlay .panel");
+        await panel.waitFor();
+        for (const width of [960, 210]) {
+          await page.setViewportSize({ width, height: 540 });
+          const bounds = await panel.boundingBox();
+          assert.ok(bounds.width > 0 && bounds.x >= 0 && bounds.x + bounds.width <= width, id + " " + layout);
+          assert.equal(await page.locator("body").evaluate((body) => getComputedStyle(body).backgroundColor), "rgba(0, 0, 0, 0)");
+        }
+      }
+    }
+  });
+
+  await t.test("media seeks, pauses, expires and keeps artwork when CORS sampling fails", async () => {
+    await page.goto("https://stream.test/now-playing/?layout=vinyl&source=helper&waiting=yes&accentColor=e84467&coverBackground=yes&animate=no");
+    await page.locator(".waiting").waitFor();
+    await page.clock.install();
+    const send = (seq, changes) =>
+      page.evaluate(
+        ({ seq, changes }) =>
+          byStream.receiveNative({
+            version: 1,
+            channel: "media",
+            seq,
+            state: { available: true, title: "First", artist: "A", album: "", cover: "", duration: 90, position: 20, playback: "playing", ...changes }
+          }),
+        { seq, changes }
+      );
+    assert.equal(await send(0, {}), true);
+    await page.clock.fastForward(2000);
+    assert.equal(await page.locator(".elapsed").textContent(), "0:22");
+    await send(1, { position: 6, playback: "paused", title: "<next>" });
+    await page.clock.fastForward(1000);
+    assert.equal(await page.locator(".elapsed").textContent(), "0:06");
+    assert.equal(await page.locator(".track").textContent(), "<next>");
+    assert.equal(await page.locator(".panel").getAttribute("data-spinning"), "false");
+    await send(2, { duration: 0 });
+    assert.equal(await page.locator(".times").isVisible(), false);
+    assert.equal(await send(3, { duration: -1 }), false);
+    const image = await page.evaluate(() => {
+      const canvas = document.createElement("canvas");
+      canvas.width = canvas.height = 32;
+      const ctx = canvas.getContext("2d");
+      ctx.fillStyle = "#ee3333";
+      ctx.fillRect(0, 0, 32, 32);
+      ctx.fillStyle = "#3377ee";
+      ctx.fillRect(0, 0, 10, 32);
+      return canvas.toDataURL();
+    });
+    await send(3, { cover: image });
+    await page.waitForFunction(() => document.querySelector(".panel").style.getPropertyValue("--accent") === "rgb(238 51 51)");
+    const accent = () => page.locator(".panel").evaluate((node) => node.style.getPropertyValue("--accent"));
+    const bytes = Buffer.from(image.split(",")[1], "base64");
+    await page.route("https://cover.test/image.png", (route) =>
+      route.fulfill({
+        body: bytes,
+        contentType: "image/png",
+        headers: { "access-control-allow-origin": "https://cover.test" }
+      })
+    );
+    await send(4, { cover: "https://cover.test/image.png" });
+    await page.locator("img.cover").waitFor();
+    await page.locator('.background-cover[src="https://cover.test/image.png"]').waitFor();
+    assert.equal(await page.locator("img.cover").evaluate((node) => getComputedStyle(node).filter), "none");
+    assert.equal(await accent(), "#e84467");
+    let resume;
+    const delayed = new Promise((resolve) => {
+      resume = resolve;
+    });
+    let requested;
+    const started = new Promise((resolve) => {
+      requested = resolve;
+    });
+    await page.route("**/slow-cover.png", async (route) => {
+      requested();
+      await delayed;
+      await route.fulfill({ body: bytes, contentType: "image/png" }).catch(() => {});
+    });
+    await send(5, { cover: "/slow-cover.png" });
+    await started;
+    await send(6, { title: "No cover" });
+    resume();
+    await page.waitForLoadState("networkidle");
+    assert.equal(await accent(), "#e84467");
+    assert.equal(await page.locator("img.cover").isVisible(), false);
+    assert.equal(await page.locator(".background-cover").count(), 0);
+    await send(7, { playback: "stopped" });
+    assert.equal(await page.locator(".waiting").isVisible(), true);
+    await send(8, { position: 999 });
+    assert.equal(await page.locator(".elapsed").textContent(), "1:30");
+    await page.clock.fastForward(5100);
+    assert.equal(await page.locator(".waiting").isVisible(), true);
+    await page.goto("https://stream.test/now-playing/?layout=classic&autoAccent=no&accentColor=ee5522");
+    await page.locator(".cover").waitFor();
+    assert.equal(await accent(), "#ee5522");
+    assert.equal(await page.evaluate(() => byStream.receiveNative({ version: 1, channel: "reset" })), false);
+  });
+
+  await t.test("chat dock background colors only the document body", async () => {
+    const cases = [
+      ["off", "rgba(0, 0, 0, 0)"],
+      ["invalid", "rgba(0, 0, 0, 0)"],
+      ["black", "rgb(0, 0, 0)"],
+      ["dark", "rgb(34, 34, 34)"],
+      ["white", "rgb(255, 255, 255)"],
+      ["light", "rgb(221, 221, 221)"],
+      ["slate", "rgb(51, 65, 85)"],
+      ["navy", "rgb(15, 23, 42)"],
+      ["custom", "rgb(18, 52, 86)"]
+    ];
+    for (const [preset, expected] of cases) {
+      await page.goto(`https://stream.test/chat/?dockBg=${preset}&dockColor=123456&backgroundColor=224466`);
+      await page.locator("#overlay .row").first().waitFor();
+      const colors = await page.evaluate(() => ["body", "html", "#overlay", ".panel", ".row"].map((selector) => getComputedStyle(document.querySelector(selector)).backgroundColor));
+      assert.deepEqual(colors, [expected, "rgba(0, 0, 0, 0)", "rgba(0, 0, 0, 0)", "rgb(34, 68, 102)", "rgba(0, 0, 0, 0.2)"], preset);
+    }
+  });
+
+  await t.test("chat integration isolates demos, bounds IDs and rows, and expires received text", async () => {
+    await page.goto("https://stream.test/chat/?layout=bubble");
+    await page.locator(".row").first().waitFor();
+    assert.equal(await page.locator(".row").count(), 4);
+    const logos = page.locator(".identity img.platform");
+    assert.deepEqual((await logos.evaluateAll((images) => images.map((image) => image.alt))).sort(), ["Kick", "TikTok", "Twitch", "YouTube"]);
+    assert.ok(
+      await logos.evaluateAll(async (images) => {
+        await Promise.all(images.map((image) => image.decode()));
+        return images.every((image) => image.src.startsWith("data:image/png;base64,") && image.naturalWidth === 64 && image.naturalHeight === 64);
+      })
+    );
+    assert.equal(await page.evaluate(() => typeof window.byStreamChat), "undefined");
+    await page.goto("https://stream.test/chat/?source=integration&waiting=yes&limit=2&expires=1&showAvatars=no&showBadges=no");
+    await page.locator(".waiting").waitFor();
+    const results = await page.evaluate(() => {
+      const msg = {
+        id: "one",
+        platform: "kick",
+        name: "界🌙",
+        text: "<b>hello</b> 🌙",
+        timestamp: 1,
+        badges: ["mod"]
+      };
+      const api = window.byStreamChat;
+      return [api.receive(msg), api.receive(msg), api.receive({ ...msg, id: "bad", avatar: "javascript:bad" }), api.receive({ ...msg, id: "bad", platform: "other" })];
+    });
+    assert.deepEqual(results, [true, false, false, false]);
+    assert.equal(await page.locator(".body").textContent(), "<b>hello</b> 🌙");
+    assert.equal(await page.locator(".body b, .avatar, .badge").count(), 0);
+    assert.equal(
+      await page.evaluate(() => {
+        const send = (i) =>
+          byStreamChat.receive({
+            id: String(i),
+            platform: "twitch",
+            name: "",
+            text: "💬",
+            timestamp: i
+          });
+        for (let i = 0; i <= 256; i++) send(i);
+        return send(0);
+      }),
+      true
+    );
+    assert.equal(await page.locator(".row").count(), 2);
+    await page.clock.fastForward(1100);
+    assert.equal(await page.locator(".waiting").isVisible(), true);
+    await page.evaluate(() => byStreamChat.clear());
+    await page.evaluate(() => window.dispatchEvent(new PageTransitionEvent("pagehide")));
+    assert.equal(await page.evaluate(() => typeof window.byStreamChat), "undefined");
+  });
+  assert.deepEqual(errors, []);
 });
 
 /** Sample premultiplied RGB and alpha at fractional positions in the element. */

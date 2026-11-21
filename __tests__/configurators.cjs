@@ -133,6 +133,138 @@ test("selected ticker scrolls a fractionally clipped title in the live preview",
   await moving.waitFor({ state: "detached" });
 });
 
+test("unit sliders step by one and number fields preserve typed fractions", { timeout: 30000 }, async (t) => {
+  const browser = await launchBrowser();
+  t.after(() => browser.close());
+  const page = await browser.newPage();
+  await serve(page, await loadAssets(editorAssets));
+  await page.goto("https://stream.test/now-playing/?layout=classic#configure");
+  for (const name of ["coverSize", "duration", "opacity", "tilt", "visualScale"]) {
+    const number = page.locator(`form [name="${name}"]`);
+    for (const toggle of await number.evaluate((field) => {
+      const toggles = [];
+      for (let parent = field.parentElement; parent; parent = parent.parentElement) {
+        if (parent.matches(".collapse:not(.show)")) toggles.unshift(parent.getAttribute("aria-labelledby"));
+      }
+      return toggles;
+    }))
+      await page.locator("#" + toggle).click();
+    const slider = page.locator(`[data-number-field="${name}"]`);
+    assert.equal(await slider.getAttribute("step"), "1", name);
+    await number.fill("32.25");
+    await number.press("ArrowUp");
+    assert.equal(await number.inputValue(), "33.25", name);
+    await page.waitForFunction((key) => new URL(document.getElementById("overlay-url").value).searchParams.get(byStreamResource.fields[key].parameter || key) === "33.25", name);
+    const previous = Number(await slider.inputValue());
+    await slider.press("ArrowRight");
+    assert.equal(Number(await number.inputValue()), previous + 1, name);
+  }
+  // A clamped slider thumb must not overwrite the number box's wider range.
+  for (const [name, value, thumb] of [
+    ["duration", "123.75", "60"],
+    ["tilt", "-12.5", "0"]
+  ]) {
+    const input = page.locator(`form [name="${name}"]`);
+    await input.fill(value);
+    await input.press("Tab");
+    await page.waitForFunction(([key, expected]) => new URL(document.getElementById("overlay-url").value).searchParams.get(byStreamResource.fields[key].parameter || key) === expected, [name, value]);
+    assert.equal(await input.inputValue(), value);
+    assert.equal(await page.locator(`[data-number-field="${name}"]`).inputValue(), thumb);
+  }
+});
+
+test("TBD configurators export demos, restore conditional drafts and round-trip compressed edits", { timeout: 60000 }, async (t) => {
+  const browser = await launchBrowser();
+  t.after(() => browser.close());
+  const assets = await loadAssets(editorAssets);
+  const page = await browser.newPage();
+  page.setDefaultTimeout(8000);
+  await serve(page, assets);
+  const errors = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  const url = page.locator("#overlay-url");
+  for (const [id, layout] of [
+    ["counter", "digital"],
+    ["chat", "bubble"],
+    ["now-playing", "classic"]
+  ]) {
+    await page.goto("https://stream.test/" + id + "/");
+    await page.waitForFunction(() => !!document.getElementById("overlay-url")?.value);
+    assert.equal(new URL(await url.inputValue()).searchParams.get("layout"), layout);
+    assert.equal(await page.locator("h1 .resource-status").textContent(), "TBD");
+    await page.frameLocator("#overlay-preview").locator("#overlay .panel").waitFor();
+    if (id === "chat") {
+      for (const name of ["Twitch", "YouTube", "Kick", "TikTok"]) assert.equal(await page.getByRole("button", { name: "Connect to " + name, exact: true }).isDisabled(), true);
+      const rows = await page.locator("form [data-platform]").evaluateAll((nodes) =>
+        nodes.map((node) => {
+          const box = node.getBoundingClientRect();
+          return { top: box.top, bottom: box.bottom, width: box.width, available: node.parentElement.getBoundingClientRect().width };
+        })
+      );
+      assert.equal(rows.length, 4);
+      assert.ok(rows.every((row, i) => row.width > 0 && Math.abs(row.width - row.available) < 1 && (!i || row.top >= rows[i - 1].bottom)));
+      const first = page.locator('[data-field="text"]').first();
+      await first.fill("Hello from the editor");
+      await first.dispatchEvent("change");
+      await page.frameLocator("#overlay-preview").getByText("Hello from the editor").waitFor();
+      await page.locator('form [name="dockBg"]').selectOption("dark", { force: true });
+      await page.waitForFunction(() => new URL(document.getElementById("overlay-url").value).searchParams.get("dockBg") === "dark");
+      await page.waitForFunction(() => {
+        const preview = document.getElementById("overlay-preview").contentWindow;
+        return preview.document.body && preview.getComputedStyle(preview.document.body).backgroundColor === "rgb(34, 34, 34)";
+      });
+    } else if (id === "counter") {
+      await page.locator('[name="start"]').fill("-7");
+      await page.locator('[name="start"]').dispatchEvent("change");
+      await page.frameLocator("#overlay-preview").locator("output", { hasText: "-7" }).waitFor();
+      await page.goto(await url.inputValue());
+      assert.equal(await page.locator("output").textContent(), "-7");
+    }
+  }
+
+  const title = page.locator('form [name="title"]');
+  const blurred = page.locator('form [name="coverBackground"]');
+  assert.equal(await blurred.isChecked(), true);
+  await blurred.uncheck();
+  await page.waitForFunction(() => new URL(document.getElementById("overlay-url").value).searchParams.get("coverBackground") === "no");
+  await blurred.check();
+  await page.frameLocator("#overlay-preview").locator(".details .background-cover").waitFor();
+  assert.equal(new URL(await url.inputValue()).searchParams.has("coverBackground"), false);
+  await title.fill("Evening edit");
+  await title.dispatchEvent("change");
+  await page.frameLocator("#overlay-preview").getByText("Evening edit").waitFor();
+  const source = page.locator('form [name="source"]');
+  await source.selectOption("helper", { force: true });
+  await page.waitForFunction(() => document.querySelector('form [name="title"]').disabled);
+  await source.selectOption("demo", { force: true });
+  assert.equal(await title.inputValue(), "Evening edit");
+  await page.getByRole("button", { name: "Cover image", exact: true }).click();
+  const cover = page.locator('form [name="cover"]');
+  await cover.fill("../stream.html.png");
+  await cover.dispatchEvent("change");
+  await page.frameLocator("#overlay-preview").locator('img[src="../stream.html.png"]').waitFor();
+  await page.getByRole("button", { name: "Reset", exact: true }).first().click();
+  await page.frameLocator("#overlay-preview").getByText("Girl Like Me").waitFor();
+  assert.equal(await cover.inputValue(), "https://upload.wikimedia.org/wikipedia/en/5/5b/PinkPantheress_-_Fancy_That.png");
+
+  await page.locator('[data-settings-view="json"]').click();
+  const long = "Echo ".repeat(60).trim();
+  await page.locator("#settings-json").fill(JSON.stringify({ layout: "card", title: long }));
+  await page.frameLocator("#overlay-preview").getByText(long).waitFor();
+  await page.locator("#advanced-options").click();
+  await page.locator("#short-url").check();
+  await page.waitForFunction(() => new URL(document.getElementById("overlay-url").value).searchParams.has("data"));
+  const compressed = await url.inputValue();
+  await page.goto(compressed);
+  await page.locator('[data-layout="card"] .track', { hasText: long }).waitFor();
+  await page.goto(compressed + "#configure");
+  assert.equal(await title.inputValue(), long);
+  await url.fill("https://stream.test/now-playing/?layout=vinyl&title=FromURL");
+  await url.press("Enter");
+  await page.frameLocator("#overlay-preview").locator('[data-layout="vinyl"] .track', { hasText: "FromURL" }).waitFor();
+  assert.deepEqual(errors, []);
+});
+
 test("Now Playing demo buttons cycle three tracks through the preview and optional standalone controls", async (t) => {
   const browser = await launchBrowser();
   t.after(() => browser.close());
@@ -248,6 +380,68 @@ test("shrinking Now Playing clears the previous card edge in the scaled preview"
     await page.getByRole("button", { name: "Previous track" }).click();
     await settled("Girl Like Me");
     assert.ok((await page.screenshot({ clip })).equals(empty), "every pixel returns to the checkerboard");
+  }
+});
+
+test("preview visibility fades the whole overlay and replays configured entrances on show", async (t) => {
+  const browser = await launchBrowser();
+  t.after(() => browser.close());
+  const page = await browser.newPage();
+  await serve(page, await loadAssets(editorAssets));
+  for (const [url, selector] of [
+    ["badge/?label=Live&overlay.entrance=slideInRight&overlay.entranceDuration=6000&overlay.children.entrance=zoomIn&overlay.children.entranceDuration=4000", ".panel"],
+    ["counter/?animate=no", "output"]
+  ]) {
+    await page.goto("https://stream.test/" + url + "#configure");
+    const preview = page.frameLocator("#overlay-preview");
+    const content = preview.locator(selector);
+    await content.waitFor();
+    const frame = await (await page.locator("#overlay-preview").elementHandle()).contentFrame();
+    for (const interrupt of [false, true]) {
+      await page.getByRole("button", { name: "Hide overlay" }).click();
+      const fade = await frame.waitForFunction(() => document.body.getAnimations().find((motion) => motion.id === "stream-overlay-hide"), null, { timeout: 3000 });
+      const opacity = await fade.evaluate((motion) => {
+        motion.pause();
+        motion.currentTime = motion.effect.getTiming().duration / 2;
+        return Number(getComputedStyle(document.body).opacity);
+      });
+      assert.ok(opacity > 0 && opacity < 1);
+      assert.equal(await content.evaluate((node) => node.getAnimations({ subtree: true }).some((motion) => motion.id === "stream-exit")), false);
+      if (!interrupt) {
+        await fade.evaluate((motion) => motion.finish());
+        await content.waitFor({ state: "hidden" });
+      }
+      await page.getByRole("button", { name: "Show overlay" }).click();
+      const show = await frame.waitForFunction(() => document.body.getAnimations().find((motion) => motion.id === "stream-overlay-show"));
+      const rising = await show.evaluate((motion) => {
+        motion.pause();
+        const duration = motion.effect.getTiming().duration;
+        motion.currentTime = duration / 2;
+        return [Number(motion.effect.getKeyframes()[0].opacity), Number(getComputedStyle(document.body).opacity), duration];
+      });
+      assert.ok(Math.abs(rising[0] - (interrupt ? opacity : 0)) < 0.01);
+      assert.ok(rising[0] < rising[1] && rising[1] < 1);
+      assert.equal(rising[2], 300);
+      if (interrupt) {
+        await page.getByRole("button", { name: "Hide overlay" }).click();
+        const hideAgain = await frame.waitForFunction(() => document.body.getAnimations().find((motion) => motion.id === "stream-overlay-hide"));
+        assert.ok(Math.abs((await hideAgain.evaluate((motion) => Number(motion.effect.getKeyframes()[0].opacity))) - rising[1]) < 0.01);
+        await hideAgain.evaluate((motion) => motion.finish());
+        await content.waitFor({ state: "hidden" });
+        await page.getByRole("button", { name: "Show overlay" }).click();
+      } else await show.evaluate((motion) => motion.finish());
+      await frame.waitForFunction(() => !document.body.hidden && getComputedStyle(document.body).opacity === "1");
+      await content.waitFor();
+      if (selector === ".panel") {
+        const durations = await content.evaluate((node) =>
+          node
+            .getAnimations({ subtree: true })
+            .filter((motion) => motion.id === "stream-entrance")
+            .map((motion) => motion.effect.getTiming().duration)
+        );
+        assert.deepEqual([...new Set(durations)].sort(), [4000, 6000]);
+      }
+    }
   }
 });
 

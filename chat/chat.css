@@ -1,0 +1,67 @@
+/* ===== CHAT PANEL ===== */
+#overlay .panel {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+/* ===== MESSAGES AND IDENTITY ===== */
+#overlay .row {
+  flex: none;
+  min-width: 0;
+  line-height: 1.375;
+}
+#overlay .identity {
+  font-size: 13px;
+}
+#overlay .identity > * {
+  margin-inline-end: 6px;
+  vertical-align: middle;
+}
+#overlay .name {
+  font-size: 16px;
+  font-weight: 700;
+}
+#overlay .body {
+  display: block;
+  white-space: pre-wrap;
+  font-size: 16px;
+}
+#overlay .avatar {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--platform);
+  color: #112;
+  font-weight: bold;
+}
+#overlay .avatar img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+#overlay .stamp,
+#overlay .badge {
+  font-size: 14px;
+  padding: 2px 6px;
+  border-radius: 16px;
+  background: #fff2;
+}
+#overlay .platform {
+  display: inline-block;
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+}
+/* ===== LAYOUTS AND ANIMATION ===== */
+#overlay [data-layout="inline"] .body {
+  display: inline;
+}
+#overlay [data-layout="bubble"] .row {
+  padding: 10px 13px;
+}

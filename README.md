@@ -73,6 +73,7 @@ For Controller and Keyboard on disk, extract the ZIP with its SVG artwork or use
 22. [Quote Display](#quote-display)
 23. [Keyboard Shortcut Sheet](#keyboard-shortcut-sheet)
 24. [Now Playing](#now-playing)
+25. [Chat](#chat)
 26. [Counter](#counter)
 
 TBD resources have usable demos while their live integrations are being defined. Alpha resources are in early testing. Beta resources are in broader testing.
@@ -273,6 +274,16 @@ Use **Previous** and **Next** in the Now Playing preview to cycle through your c
 
 [Configure Now Playing](https://stream.byuwur.co/now-playing/) · [Local entry point](now-playing/index.html)
 
+### Chat
+
+**TBD.** Edit local Twitch, YouTube, Kick and TikTok sample messages in stacked, inline or bubble layouts. The intended connection flow uses your platform account directly, without a separate stream.HTML account. Platform authorization and delivery are still to be designed. The four Connect buttons are disabled. Integration mode starts empty. Chat is independent of the native OBS input receiver.
+
+For an OBS custom browser dock, choose **Appearance → OBS dock background** and paste the generated URL into the dock. For example, `/chat/?dockBg=dark` sets the body to `#222`. The default `off` keeps it transparent. Other choices are `black`, `white`, `light`, `slate`, `navy`, and `custom` with a `dockColor` hex value. Panel and message backgrounds have their own controls.
+
+![Chat demo preview](chat/prev.jpg)
+
+[Configure Chat](https://stream.byuwur.co/chat/) · [Local entry point](chat/index.html)
+
 ### Counter
 
 **TBD.** Focus the overlay or use OBS Interact. F9 increases and F10 decreases by the configured positive step. Reset defaults to Off. Bind physical codes such as `KeyW` or `F11`. F1 and F2 stay reserved. A held key counts once. Opposing bindings on one press or native snapshot cancel, and a reset press takes priority. Optional bounds clamp the starting value and every change. Reload restores the configured start. Losing focus or native input preserves the number.
@@ -308,6 +319,8 @@ Focused Controller and Keyboard & Mouse overlays cancel browser actions for keyb
 4. [Controller settings](#controller-settings)
 5. [Social account settings](#social-account-settings)
 6. [Main scene settings](#main-scene-settings)
+7. [Future input interfaces](#future-input-interfaces)
+
 ### Element controls
 
 The form opens with **General** and **Appearance**, followed by the elements in the overlay. Open a text element for its typography, or open **Spacing**, **Transforms**, **Animation in**, or **Animation out** to change how it fits, appears, and disappears. A blank spacing field keeps the resource layout. Zero removes spacing on that side. Negative margins and separate row and column gaps are supported where the element layout allows them.
@@ -326,6 +339,56 @@ Content panels grow and shrink with their visible content. Maximum dimensions ca
 
 For text, choose **Automatic contrast** in Appearance or for an individual element. The renderer compares black and white against a sample of the background behind the text. Main and Now Playing also sample readable background artwork and its tint. When artwork pixels are unavailable, contrast uses the known surface colors. Transparent areas use the usual text color because the browser source cannot sample other OBS sources.
 
+### Future input interfaces
+
+In Now Playing, Counter, Keyboard & Mouse or Controller, explicitly select the **OBS helper (TBD)** source. Browser input remains the default for the input overlays. Controller's custom-mapping editor still captures from browser devices. There is no plugin or network transport in this release.
+
+Deliver packets in the **overlay document** using `byStream.receiveNative(packet)`. It returns `true` after a mounted subscriber accepts a packet, or `false` for an unhandled channel, invalid packet or duplicate/out-of-order sequence. No input is queued or persisted. Start each channel with its full current snapshot after mount or recovery. Retry initial delivery if the renderer is still loading its artwork. Increase the nonnegative safe-integer `seq` on every subsequent packet within that channel. Send a fresh snapshot at least every two seconds, including during silence or pause. Five seconds without valid input releases that channel. Send reset on disconnect or before restarting sequence numbers.
+
+```js
+const send = (channel, seq, state) => byStream.receiveNative({ version: 1, channel, seq, state });
+send("keyboard", 0, { keys: ["F9"] }); // Baseline only for Counter
+send("keyboard", 1, { keys: [] });
+send("keyboard", 2, { keys: ["F9"] }); // One increase
+send("mouse", 0, { buttons: [0], dx: 0, dy: 0, wheel: 0 });
+send("controller", 0, { pads: [{ index: 0, id: "Pad A", buttons: [0, 0.75], axes: [-0.25, 0] }] });
+send("media", 0, {
+  available: true,
+  title: "After the Equinox",
+  artist: "Lumen Coast",
+  album: "Night Atlas",
+  cover: "",
+  duration: 214,
+  position: 43,
+  playback: "playing"
+});
+send("media", 1, { available: false });
+byStream.receiveNative({ version: 1, channel: "reset" });
+```
+
+- Keyboard supplies up to 256 unique case-sensitive physical codes (1–40 ASCII alphanumerics starting with a letter). Counter uses rising edges after the first snapshot, including after reset or expiry.
+- Mouse supplies unique held DOM button indices 0–4. Movement is in pixels and signed vertical wheel units indicate direction. Each delta is finite and within ±4096. Start with zero deltas and send zeros in heartbeats. A new movement or scroll belongs to exactly one sequence number.
+- Controller supplies up to eight distinct indices 0–7, a nonempty device ID of up to 128 characters, up to 64 button pressures from 0 to 1, and up to 32 axes from −1 to 1. Omitting a device disconnects it. Keyboard snapshots can drive Controller's keyboard player.
+- Media accepts title, artist and album strings up to 512 characters each. Use an empty string for missing art or text. Cover URLs use the resource image rules and a 65,536-character limit. Duration and position are finite seconds from 0 to 604800. Position clamps to known duration. A duration of zero hides the timeline and times. Each snapshot replaces the track, position and state (`playing`, `paused` or `stopped`). Only playing advances. Stopped, unavailable and expired media use the configured idle display.
+- Reset releases all subscribed native channels in that document. It preserves the Counter value. Subscriptions end with their renderer.
+
+Chat's separate same-document interface exists only in **Platform integration (TBD)** mode after mount. `receive` returns true for an accepted message. Invalid messages and duplicate IDs return false. The renderer remembers the latest 256 accepted IDs, keeps at most the configured 1–100 visible rows and measures optional expiration from receipt. `clear()` removes messages, expiry work and remembered IDs.
+
+```js
+window.byStreamChat.receive({
+  id: "demo-17",
+  platform: "twitch",
+  name: "MossCircuit",
+  text: "Good evening 🌙",
+  timestamp: Date.now(),
+  color: "#73d1a9",
+  avatar: "",
+  badges: ["sub"]
+});
+window.byStreamChat.clear();
+```
+
+Use `twitch`, `youtube`, `kick` or `tiktok`. Supply a nonempty ID (128 characters maximum), name (80), nonblank message (1000) and a nonnegative Unix timestamp in integer milliseconds within the JavaScript Date range. Optional fields are a six-digit hex color with leading hash, a validated image URL (up to 65,536 characters) and up to three badges from `mod`, `sub` and `vip`. Text is displayed literally.
 
 ### URL settings
 

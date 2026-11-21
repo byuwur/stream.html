@@ -1,0 +1,83 @@
+<!doctype html>
+<html class="widget-resource" lang="en" data-tool="chat">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="referrer" content="origin" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Chat for OBS | stream.HTML</title>
+    <meta name="description" content="Style a four-platform chat demo. Platform connections are TBD." />
+    <meta name="author" content="Andrés Trujillo [Mateus] byUwUr" />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <meta name="theme-color" content="#600" />
+    <!-- <link rel="canonical" href="https://byuwur.github.io/stream.html/chat/" /> -->
+    <link rel="canonical" href="https://stream.byuwur.co/chat/" />
+    <!-- <link rel="icon" href="https://byuwur.github.io/stream.html/stream.html.png" /> -->
+    <link rel="icon" href="../stream.html.png" />
+    <!-- SEO -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="stream.HTML" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:title" content="Chat for OBS | stream.HTML" />
+    <meta property="og:description" content="Style a four-platform chat demo. Platform connections are TBD." />
+    <!-- <meta property="og:url" content="https://byuwur.github.io/stream.html/chat/" /> -->
+    <meta property="og:url" content="https://stream.byuwur.co/chat/" />
+    <!-- <meta property="og:image" content="https://byuwur.github.io/stream.html/chat/prev.jpg" /> -->
+    <meta property="og:image" content="https://stream.byuwur.co/chat/prev.jpg" />
+    <meta property="og:image:type" content="image/jpeg" />
+    <meta property="og:image:width" content="1920" />
+    <meta property="og:image:height" content="1080" />
+    <meta property="og:image:alt" content="Chat by BONYUR: OBS overlay configurator and live preview." />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:creator" content="@byUwUr" />
+    <meta name="twitter:title" content="Chat for OBS | stream.HTML" />
+    <meta name="twitter:description" content="Style a four-platform chat demo. Platform connections are TBD." />
+    <!-- <meta name="twitter:image" content="https://byuwur.github.io/stream.html/chat/prev.jpg" /> -->
+    <meta name="twitter:image" content="https://stream.byuwur.co/chat/prev.jpg" />
+    <meta name="twitter:image:alt" content="Chat by BONYUR: OBS overlay configurator and live preview." />
+  </head>
+
+  <body>
+    <!-- ===== SHARED IMPORTS: resource and configurator ===== -->
+    <script type="application/json" id="shared-assets" data-source="https://cdn.jsdelivr.net/gh/byuwur/spa.js" data-spa-version="v20.17">
+      [
+        { "path": "/css/animate.min.css", "optional": true },
+        { "path": "/_fonts.min.js", "optional": false },
+        { "path": "/_functions.min.js", "optional": false }
+      ]
+    </script>
+
+    <!-- ===== RESOURCE ===== -->
+    <link rel="stylesheet" href="../resources.css" data-renderer-style />
+    <link rel="stylesheet" href="./chat.css" data-renderer-style />
+    <script src="../resource.js" defer></script>
+    <script src="./chat.js" defer></script>
+    <template id="overlay-markup">
+      <main id="overlay">
+        <section class="panel" aria-label="Chat"></section>
+        <span class="waiting" hidden>Waiting for chat</span>
+      </main>
+    </template>
+    <!-- ===== CONFIGURATOR ===== -->
+    <template id="configurator-assets">
+      <script type="application/json" data-load data-source="https://cdn.jsdelivr.net/gh/byuwur/spa.js" data-spa-version="v20.17">
+        [
+          { "path": "/css/fontawesome.min.css", "optional": true },
+          { "path": "/css/bootstrap.min.css", "optional": false },
+          { "path": "/css/pickr.min.css", "optional": false },
+          { "path": "/_common.min.css", "optional": false },
+          { "path": "/css/select2.min.css", "optional": false },
+          { "path": "/js/jquery.min.js", "optional": false },
+          { "path": "/js/select2.full.min.js", "optional": false },
+          { "path": "/js/popper.min.js", "optional": false },
+          { "path": "/js/bootstrap.min.js", "optional": false },
+          { "path": "/js/pickr.min.js", "optional": false },
+          { "path": "/_common.min.js", "optional": false },
+          { "path": "/_transitions.min.js", "optional": true }
+        ]
+      </script>
+      <link rel="stylesheet" href="../configurator.css" data-editor-style media="not all" />
+      <script src="../configurator.js" defer></script>
+    </template>
+    <div id="configurator"></div>
+  </body>
+</html>
