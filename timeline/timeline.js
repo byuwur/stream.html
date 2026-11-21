@@ -1,9 +1,7 @@
 // Progress Timeline: validated URL settings and an native renderer with shared URL setup.
 document.addEventListener("DOMContentLoaded", async () => {
   await byStream.assetsReady;
-  // ==========
-  // ==== RESOURCE DEFINITION ====
-  // ==========
+  // ===== RESOURCE DEFINITION =====
 
   // Defaults, URL constraints, and the field metadata consumed by the optional editor.
   const resource = {
@@ -13,6 +11,17 @@ document.addEventListener("DOMContentLoaded", async () => {
     preview: [960, 540],
     urlRequired: ["style", "startTime", "endTime"],
     presets: true,
+    fieldDefaults: { "overlay.children.entrance": "fadeInDown" },
+    elements: {
+      overlay: { label: "Appearance", selector: "#overlay .panel" },
+      heading: { label: "Heading", selector: "#overlay .eyebrow", fields: ["label"] },
+      progress: { label: "Progress text", selector: "#overlay .primary", fields: ["showPercent"], when: ["showPercent", "yes"] },
+      remaining: { label: "Remaining time", selector: "#overlay .secondary", fields: ["showRemaining", "remainingFormat", "completion"], when: ["showRemaining", "yes"] },
+      bar: { label: "Progress bar", selector: "#overlay progress", fields: ["trackColor"], when: ["style", "bar"] },
+      ring: { label: "Progress ring", selector: "#overlay .timeline-ring", fields: ["ringThickness", "ringCap"], when: ["style", "ring"] },
+      stepsGroup: { label: "Progress steps", selector: "#overlay .timeline-steps", fields: ["steps"], when: ["style", "steps"] },
+      step: { label: "Step", selector: "#overlay .step", parent: "stepsGroup" }
+    },
     fields: {
       useStartTime: {
         type: "switch",
@@ -285,6 +294,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         default: 0,
         optional: true,
         label: "Progress ring diameter (px)",
+        description: "0 uses the automatic diameter.",
         section: "Details",
         when: ["style", "ring"],
         subsection: "Progress ring",
@@ -293,11 +303,11 @@ document.addEventListener("DOMContentLoaded", async () => {
         step: "any",
         styleSelector: "#overlay .timeline-ring",
         styleProperty: "width",
-        styleUnit: "px"
+        styleValue: (settings) => (settings.ringSize ? `${settings.ringSize}px` : "")
       },
       ringThickness: {
         type: "number",
-        default: 0.1,
+        default: 6,
         optional: true,
         label: "Progress ring thickness (px)",
         section: "Details",
@@ -365,15 +375,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   };
 
+  // ===== FIELD DEFAULTS =====
   const fieldDefaults = {
     remainingFontSize: 24,
     panelBorderWidth: 1,
     panelBorderStyle: "solid",
     panelBorderColor: "#EEEEEE11",
-    panelShadow: "yes",
-    panelShadowColor: "#00000066",
-    panelShadowBlur: 16,
-    panelShadowY: 4,
     backdropFilterMode: "none",
     backdropFilterBlur: 12,
     headingFontSize: 16,
@@ -389,6 +396,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     delete field.styleDefault;
   }
 
+  // ===== OVERLAY INITIALIZATION =====
   const settings = await byStream.initResource(resource);
   if (!byStreamOverlay) return;
   const root = document.getElementById("overlay");
@@ -438,7 +446,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     panel.append(svg);
     for (const className of ["ring-track", "ring-value"]) {
       const circle = document.createElementNS(svg.namespaceURI, "circle");
-      for (const [name, value] of Object.entries({ cx: 60, cy: 60, r: 52, fill: "none", "stroke-width": 6 })) circle.setAttribute(name, value);
+      for (const [name, value] of Object.entries({
+        cx: 60,
+        cy: 60,
+        r: 52,
+        fill: "none",
+        "stroke-width": 6
+      }))
+        circle.setAttribute(name, value);
       circle.setAttribute("class", className);
       svg.append(circle);
       if (className === "ring-value") ring = circle;
@@ -451,8 +466,20 @@ document.addEventListener("DOMContentLoaded", async () => {
   const start = settings.useStartTime === "yes" ? Date.parse(settings.startTime) : Date.now(),
     end = settings.useStartTime === "yes" ? Date.parse(settings.endTime) : start + settings.duration * 1000;
   const zone = settings.timeZone ? { timeZone: settings.timeZone } : {};
-  const startDate = byStream.dateTimeFormatter(settings.dateFormat, settings.locale, { ...zone, year: "numeric", month: "numeric", day: "numeric" });
-  const startTime = byStream.dateTimeFormatter(settings.timeFormat, settings.locale, { ...zone, hour: "numeric", minute: "2-digit", second: "2-digit" });
+  const startDate = byStream.dateTimeFormatter(settings.dateFormat, settings.locale, {
+    ...zone,
+    year: "numeric",
+    month: "numeric",
+    day: "numeric"
+  });
+  const startTime = byStream.dateTimeFormatter(settings.timeFormat, settings.locale, {
+    ...zone,
+    hour: "numeric",
+    minute: "2-digit",
+    second: "2-digit"
+  });
+  const showProgress = byStream.changingText(percent, settings, "progress");
+  const showRemaining = byStream.changingText(remaining, settings, "remaining");
   // Bars and rings share continuous progress; text and discrete milestones retain their clock ticks.
   function paintProgress(now = Date.now()) {
     const progress = Math.max(0, Math.min(1, (now - start) / (end - start)));
@@ -471,7 +498,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (end <= start) {
       percent.textContent = "Check your time range";
       remaining.textContent = "End must follow start.";
-      bar.hidden = true;
+      byStream.setElementVisible(bar, false);
       return false;
     }
     const now = Date.now(),
@@ -479,11 +506,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       done = now >= end;
     root.dataset.complete = String(done);
     root.dataset.progress = String(progress);
-    percent.hidden = settings.showPercent === "no" && !done;
-    percent.textContent = done ? settings.completion : `${Math.floor(progress * 100)}%`;
-    remaining.hidden = settings.showRemaining === "no" || done;
+    showProgress(done ? settings.completion : settings.showPercent === "yes" ? `${Math.floor(progress * 100)}%` : "", done);
     const seconds = Math.max(0, Math.ceil((end - now) / 1000));
-    remaining.textContent = now < start ? `Starts ${startDate.format(new Date(start))} ${startTime.format(new Date(start))}` : `${byStream.formatDuration(seconds, settings.remainingFormat, false)} remaining`;
+    const label = now < start ? `Starts ${startDate.format(new Date(start))} ${startTime.format(new Date(start))}` : `${byStream.formatDuration(seconds, settings.remainingFormat, false)} remaining`;
+    showRemaining(settings.showRemaining === "yes" && !done ? label : "", done ? "done" : now < start ? "before" : "running");
     if (steps) Array.from(steps.children).forEach((node, i) => node.classList.toggle("reached", progress >= (i + 1) / settings.steps));
     return !done;
   }

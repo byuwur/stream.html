@@ -520,6 +520,46 @@ test("Schedule fits wrapped activity rows when auto columns and content width ar
   }
 });
 
+test("the progress ring fits its panel and paints elapsed time at automatic and custom sizes", async (t) => {
+  const browser = await launchBrowser();
+  t.after(() => browser.close());
+  const page = await browser.newPage({ viewport: { width: 960, height: 540 } });
+  await serve(page, await loadAssets(runtimeAssets), true);
+  await page.addInitScript(() => {
+    window.slotTime = 0;
+    Date.now = () => window.slotTime;
+  });
+  for (const [size, thickness] of [
+    [0, 6],
+    [100, 3]
+  ]) {
+    const query = new URLSearchParams({ style: "ring", duration: 10, animate: "no" });
+    if (size) {
+      query.set("ringSize", size);
+      query.set("ringThickness", thickness);
+    }
+    await page.goto("https://stream.test/timeline/?" + query);
+    const ring = await page.locator(".timeline-ring").evaluate((svg) => {
+      window.slotTime = 5000;
+      document.dispatchEvent(new Event("visibilitychange"));
+      const value = svg.querySelector(".ring-value"),
+        bounds = svg.getBoundingClientRect();
+      const offset = (bounds.width * 52) / 120 / Math.sqrt(2);
+      const x = bounds.left + bounds.width / 2,
+        y = bounds.top + bounds.height / 2 - offset;
+      return {
+        width: bounds.width,
+        height: bounds.height,
+        stroke: getComputedStyle(value).strokeWidth,
+        right: document.elementsFromPoint(x + offset, y).includes(value),
+        left: document.elementsFromPoint(x - offset, y).includes(svg.querySelector(".ring-track")),
+        progress: Math.round(100 * (1 - parseFloat(value.style.strokeDashoffset) / value.getTotalLength()))
+      };
+    });
+    assert.deepEqual(ring, { width: size || 240, height: size || 240, stroke: thickness + "px", right: true, left: true, progress: 50 });
+  }
+});
+
 test("particle effects replay on successive flights in both directions", async (t) => {
   const browser = await launchBrowser();
   t.after(() => browser.close());

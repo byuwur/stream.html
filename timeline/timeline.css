@@ -1,38 +1,6 @@
-html,
-body {
-  margin: 0;
-  width: 100%;
-  height: 100%;
-  background: transparent;
-  overflow: hidden;
-}
-* {
-  box-sizing: border-box;
-}
-[hidden] {
-  display: none !important;
-}
+/* ===== RESOURCE DEFAULTS ===== */
 #overlay {
   --font-size: 32px;
-  --base-size: min(var(--font-size), 12vw);
-  --heading-size: max(12px, var(--base-size) * 0.67);
-  --secondary-size: calc(var(--base-size) * 0.75);
-  --text: #eee;
-  --accent: #600;
-  --background: #11111166;
-  --radius: 6px;
-  --padding: 12px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-  height: 100%;
-  padding: 16px;
-  font-family: "Courier New", Courier, monospace;
-  color: var(--text);
-  font-weight: 400;
-  font-size: var(--base-size);
-  text-align: center;
 }
 .panel {
   display: grid;
@@ -40,83 +8,28 @@ body {
   align-items: center;
   column-gap: 24px;
   row-gap: 6px;
-  width: 100%;
-  max-width: 800px;
-  min-width: 0;
-  padding: var(--padding);
-  border-radius: var(--radius);
-  background: var(--background);
-  overflow-wrap: anywhere;
-}
-h1,
-h2,
-h3,
-p {
-  margin: 0;
-  font: inherit;
-}
-.eyebrow {
-  font-weight: 600;
-  color: var(--accent);
-  font-size: var(--heading-size);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  margin-bottom: calc(var(--heading-size) * 0.8);
-}
-.secondary {
-  opacity: 0.72;
-  font-size: var(--secondary-size);
-  margin-top: calc(var(--secondary-size) * 0.65);
-  white-space: pre-wrap;
-}
-.primary {
-  white-space: pre-wrap;
-  line-height: 1.2;
 }
 progress {
-  display: block;
-  width: 100%;
   height: var(--bar-height, 6px);
-  border: 0;
-  margin-top: 20px;
-  border-radius: 10px;
-  overflow: hidden;
-  background: var(--track-color, #ffffff20);
+  background: var(--track-color, #fff2);
   accent-color: var(--progress-color, var(--accent));
 }
 progress::-webkit-progress-bar {
-  background: var(--track-color, #ffffff20);
+  background: var(--track-color, #fff2);
 }
 progress::-webkit-progress-value {
   background: var(--progress-color, var(--accent));
 }
-img {
-  max-width: 100%;
-  object-fit: contain;
-}
-@keyframes reveal {
-  from {
-    opacity: 0;
-    transform: translateY(12px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-@keyframes pulse {
-  50% {
-    opacity: 0.45;
-  }
-}
+/* ===== TIMELINE LAYOUT ===== */
 .timeline-ring {
   width: min(240px, 65vw);
+  max-width: 100%;
   display: block;
   margin: 20px auto 0;
   transform: rotate(-90deg);
 }
 .ring-track {
-  stroke: var(--track-color, #ffffff15);
+  stroke: var(--track-color, #fff1);
 }
 .ring-value {
   stroke: var(--progress-color, var(--accent));
@@ -131,7 +44,7 @@ img {
   flex: 1;
   height: var(--bar-height, 8px);
   border-radius: 4px;
-  background: var(--track-color, #ffffff20);
+  background: var(--track-color, #fff2);
 }
 .step.reached {
   background: var(--progress-color, var(--accent));
@@ -155,7 +68,7 @@ img {
 .panel > :is(progress, .timeline-ring, .timeline-steps) {
   grid-column: 1 / -1;
 }
-@media (max-width: 28rem) {
+@media (max-width: 512px) {
   .panel {
     column-gap: 16px;
   }
