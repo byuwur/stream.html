@@ -1,0 +1,265 @@
+/* ===== DEMO TRACK CONTROLS ===== */
+#overlay .demo-controls {
+  position: fixed;
+  right: 12px;
+  bottom: 12px;
+  z-index: 1;
+  display: flex;
+  gap: 4px;
+}
+#overlay .demo-controls button {
+  padding: 6px 12px;
+  border: 1px solid #888;
+  border-radius: 4px;
+  background: #242424;
+  color: white;
+  font:
+    600 14px/1.4 Arial,
+    sans-serif;
+  cursor: pointer;
+}
+#overlay .demo-controls button:hover,
+#overlay .demo-controls button:focus-visible {
+  background: #600;
+}
+/* ===== PLAYER PANEL ===== */
+/* Fit artwork against the canvas when the panel itself is sized by its contents. */
+#overlay,
+#overlay .panel:is([data-width-mode="fixed"], [data-width-mode="fill"]) {
+  container-type: inline-size;
+}
+#overlay .panel {
+  --tint: color-mix(in srgb, var(--accent) 19%, #112);
+  --fill: color-mix(in srgb, var(--accent) 72%, white);
+  --rail: color-mix(in srgb, var(--accent) 30%, #445);
+  display: flex;
+  align-items: center;
+  gap: var(--gap);
+  font-size: 16px;
+}
+#overlay .sleeve {
+  width: min(var(--cover), 32cqw);
+  flex: none;
+  aspect-ratio: 1;
+  position: relative;
+}
+#overlay .disc,
+#overlay .cover {
+  width: 100%;
+  height: 100%;
+  border-radius: var(--radius);
+}
+/* ===== DISC AND COVER ART ===== */
+#overlay .disc {
+  background: linear-gradient(145deg, var(--rail), var(--tint));
+  overflow: hidden;
+}
+#overlay .cover {
+  object-fit: cover;
+  display: block;
+}
+#overlay .details {
+  min-width: 0;
+  flex: 1;
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  background-color: var(--tint);
+}
+#overlay .track,
+#overlay .artist,
+#overlay .album {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  white-space: pre-wrap;
+}
+#overlay [data-layout="compact"] :is(.track, .artist, .album) {
+  -webkit-line-clamp: 1;
+}
+#overlay .track {
+  font-size: 19px;
+  font-weight: 700;
+  line-height: 1.125;
+}
+#overlay .artist,
+#overlay .album {
+  margin-top: 2px;
+  font-size: 14px;
+  color: #dee;
+}
+#overlay :is(.artist, .album, .track):empty {
+  display: none;
+}
+#overlay :is(.track, .artist, .album)[data-stream-overflow]:not(:empty):not([hidden]) {
+  display: block;
+}
+/* ===== PLAYBACK PROGRESS ===== */
+#overlay .timeline {
+  margin-block: 10px 4px;
+  height: 5px;
+  border-radius: 16px;
+  background: var(--rail);
+  overflow: hidden;
+}
+#overlay .timeline i {
+  display: block;
+  height: 100%;
+  width: var(--progress);
+  background: var(--fill);
+}
+#overlay .times {
+  display: flex;
+  justify-content: space-between;
+  gap: 6px;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+#overlay .waiting {
+  align-self: center;
+}
+/* ===== PLAYER LAYOUTS ===== */
+#overlay [data-layout="simple"] .details,
+#overlay [data-layout="vinyl"] .details {
+  background: transparent;
+  padding: 0;
+}
+#overlay [data-layout="simple"] .times {
+  justify-content: inherit;
+  display: inline-flex;
+}
+#overlay [data-layout="simple"] .total::before {
+  content: "/ ";
+}
+#overlay [data-layout="simple"] .timeline {
+  height: 2px;
+}
+#overlay [data-layout="compact"] .details {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: inherit;
+  align-items: baseline;
+  gap: 8px;
+  padding: 7px 14px;
+  border-radius: var(--radius);
+}
+#overlay [data-layout="compact"] .times {
+  margin-inline-start: auto;
+}
+#overlay [data-layout="compact"] .timeline,
+#overlay [data-layout="vinyl"] .timeline {
+  display: none;
+}
+#overlay [data-layout="compact"][data-timeline="true"] .details {
+  --played: color-mix(in srgb, var(--accent) 46%, #112);
+  background: linear-gradient(90deg, var(--played) var(--progress), var(--tint) var(--progress));
+}
+#overlay [data-layout="compact"][data-invert="yes"][data-timeline="true"] .details {
+  background: linear-gradient(90deg, var(--tint) var(--progress), var(--played) var(--progress));
+}
+#overlay [data-layout="card"] {
+  --card-cover-width: min(100cqw, var(--cover) * 3.5, 62vh);
+  flex-direction: column;
+  width: fit-content;
+  padding: min(5%, 18px);
+  border-radius: var(--radius);
+  background: var(--tint);
+}
+#overlay [data-layout="card"] .sleeve {
+  width: var(--card-cover-width);
+  max-width: 100%;
+}
+#overlay [data-layout="vinyl"]:has(.details[hidden]) .sleeve {
+  width: min(100cqw, var(--cover) * 2, 90vh);
+  margin: auto;
+}
+#overlay [data-layout="compact"] .total::before {
+  content: "/ ";
+}
+#overlay [data-layout="card"] .details {
+  width: 100%;
+  padding: 0;
+  background: transparent;
+}
+#overlay [data-layout="vinyl"] .sleeve {
+  width: min(55cqw, var(--cover) * 2);
+  padding: 4px;
+  border-radius: 50%;
+}
+#overlay .panel[data-auto-cover] .sleeve {
+  width: min(var(--cover), 50cqw);
+}
+#overlay [data-layout="card"][data-auto-cover] .sleeve {
+  width: min(var(--cover), 100cqw);
+}
+#overlay [data-layout="vinyl"][data-timeline="true"] .sleeve {
+  background: conic-gradient(var(--fill) var(--progress), transparent var(--progress));
+}
+#overlay [data-layout="vinyl"] .disc {
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: repeating-radial-gradient(circle, transparent 0 2px, #fff1 3px, transparent 4px), conic-gradient(#111, #444, #111, #222, #445, #111);
+}
+#overlay [data-layout="vinyl"] .cover {
+  width: 40%;
+  height: 40%;
+  border-radius: 50%;
+}
+#overlay [data-artwork="no"] .cover {
+  display: none;
+}
+#overlay .cover-surface {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+#overlay :is([data-layout="simple"], [data-layout="vinyl"]) .details.cover-surface {
+  padding: 8px 12px;
+  background-color: var(--tint);
+}
+/* The first grid column measures the details. The second adds 15% to their usable width. */
+#overlay .details-size {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.15fr);
+  flex: 1;
+  min-width: 0;
+}
+/* Content-sized details keep their natural width while the adjacent cover resizes. */
+#overlay .panel[data-auto-cover]:not([data-layout="card"]) > .details-size {
+  flex: none;
+  max-width: calc(100cqw - min(var(--cover), 50cqw) - var(--gap));
+}
+#overlay [data-layout="card"] > .details-size {
+  align-self: stretch;
+}
+/* Stacked details also take their natural width from the cover above them. */
+#overlay [data-layout="card"]:not([data-auto-cover]):has(> .sleeve:not([hidden])) > .details-size::before {
+  content: "";
+  grid-area: 1 / 1;
+  width: var(--card-cover-width);
+  max-width: 100%;
+}
+#overlay .details-size > .details {
+  grid-area: 1 / 1;
+  width: 115%;
+}
+#overlay .background-cover {
+  position: absolute;
+  inset: -12px;
+  width: calc(100% + 24px);
+  height: calc(100% + 24px);
+  object-fit: cover;
+  filter: blur(10px);
+  opacity: 0.4;
+  z-index: -1;
+  pointer-events: none;
+}
+#overlay [data-layout="vinyl"][data-spinning="true"] .disc {
+  animation: record-turn 9s linear infinite;
+}
+@keyframes record-turn {
+  to {
+    transform: rotate(1turn);
+  }
+}

@@ -26,6 +26,38 @@ const editorAssets = [
   "_fonts.css"
 ];
 
+test("a dropdown label focuses its visible control without opening a picker", async (t) => {
+  const browser = await launchBrowser();
+  t.after(() => browser.close());
+  const page = await browser.newPage();
+  page.setDefaultTimeout(6000);
+  await serve(page, await loadAssets(editorAssets));
+  await page.goto("https://stream.test/now-playing/?layout=classic#configure");
+  const caption = page.getByText("Appearance preset", { exact: true });
+  const preset = page.locator("label").filter({ has: caption });
+  const control = preset.getByRole("combobox");
+  await preset.locator(".select2-selection").waitFor({ state: "attached" });
+  assert.deepEqual(await preset.locator("option").allTextContents(), ["BONYUR", "Studio", "Minimal", "Light ink", "Custom..."]);
+  assert.equal(await preset.locator("select").inputValue(), "bonyur");
+  if (!(await caption.isVisible())) await page.getByRole("button", { name: "Appearance", exact: true }).click();
+  await preset.locator("select").evaluate((node) => {
+    node.addEventListener("click", () => {
+      node.dataset.clicked = "yes";
+    });
+  });
+  await caption.click();
+  assert.equal(await preset.locator("select").getAttribute("data-clicked"), null);
+  assert.equal(await control.evaluate((node) => node === document.activeElement), true);
+  assert.equal(await control.getAttribute("aria-expanded"), "false");
+  await page.keyboard.press("Enter");
+  await page.getByRole("option", { name: "Studio", exact: true }).waitFor();
+  await page.keyboard.press("Escape");
+  await page.locator(".select2-dropdown").waitFor({ state: "detached" });
+  await control.click();
+  await page.getByRole("option", { name: "Studio", exact: true }).click();
+  assert.equal(await preset.locator("select").inputValue(), "studio");
+});
+
 test("appearance presets follow saved fields, imports and resets without a preset parameter", async (t) => {
   const browser = await launchBrowser();
   t.after(() => browser.close());
@@ -68,6 +100,193 @@ test("appearance presets follow saved fields, imports and resets without a prese
     await page.waitForFunction(() => !new URL(document.getElementById("overlay-url").value).searchParams.has("backgroundColor"));
     assert.equal((await field.inputValue()).toLowerCase(), background);
   }
+});
+
+test("selected ticker scrolls a fractionally clipped title in the live preview", async (t) => {
+  const browser = await launchBrowser();
+  t.after(() => browser.close());
+  const page = await browser.newPage({ reducedMotion: "reduce" });
+  page.setDefaultTimeout(15000);
+  await serve(page, await loadAssets(editorAssets));
+  await page.goto("https://stream.test/now-playing/?layout=classic&animate=no#configure");
+  const track = page.frameLocator("#overlay-preview").locator(".track");
+  await track.filter({ hasText: "Girl Like Me" }).waitFor();
+  await page.locator('form [name="titleOverflow"]').selectOption("ticker", { force: true });
+  await page.waitForFunction(() => document.getElementById("overlay-url").value.includes("title.overflow=ticker"));
+  const line = track.locator(".stream-ticker-text:not(.stream-ticker-auto)");
+  await line.waitFor();
+  assert.equal(await line.textContent(), "Girl Like Me");
+  const widths = await line.evaluate((node) => {
+    const width = parseFloat(getComputedStyle(node).width);
+    node.closest(".track").style.width = width - 1 / 64 + "px";
+    return [node.offsetWidth, node.parentElement.clientWidth];
+  });
+  assert.equal(widths[0], widths[1]);
+  const moving = track.locator("[data-repeat]");
+  await moving.waitFor();
+  const frame = await (await page.locator("#overlay-preview").elementHandle()).contentFrame();
+  const start = await moving.evaluate((node) => node.getBoundingClientRect().left);
+  await frame.waitForFunction((start) => document.querySelector(".track [data-repeat]").getBoundingClientRect().left < start - 1, start);
+  await track.evaluate((node) => {
+    node.style.width = "300px";
+  });
+  await moving.waitFor({ state: "detached" });
+});
+
+test("Now Playing demo buttons cycle three tracks through the preview and optional standalone controls", async (t) => {
+  const browser = await launchBrowser();
+  t.after(() => browser.close());
+  const page = await browser.newPage();
+  await serve(page, await loadAssets(editorAssets));
+  const heavenCover = "https://upload.wikimedia.org/wikipedia/en/2/20/PinkPantheress_-_Heaven_Knows.png";
+  const hellCover = "https://upload.wikimedia.org/wikipedia/en/6/6c/PinkPantheress_-_To_Hell_with_It.png";
+  for (const url of [heavenCover, hellCover]) {
+    await page.route(url, (route) => route.fulfill({ path: require.resolve("../stream.html.png"), contentType: "image/png", headers: { "Access-Control-Allow-Origin": "*" } }));
+  }
+  await page.goto("https://stream.test/now-playing/?title=My%20song&overlay.entrance=fadeIn&overlay.entranceDuration=8000#configure");
+  const preview = page.frameLocator("#overlay-preview");
+  const next = page.getByRole("button", { name: "Next track" });
+  const previous = page.getByRole("button", { name: "Previous track" });
+  const title = preview.locator(".track");
+  await preview.getByText("My song", { exact: true }).waitFor();
+  const finishExit = () =>
+    title.evaluate(async (node) => {
+      const panel = node.closest(".panel");
+      for (const motion of panel.getAnimations({ subtree: true })) if (motion.id === "stream-exit") motion.finish();
+      await new Promise(requestAnimationFrame);
+    });
+  await next.click();
+  assert.equal(await title.textContent(), "My song");
+  assert.equal(await title.evaluate((node) => node.getAnimations()[0].id), "stream-exit");
+  await next.click();
+  await finishExit();
+  assert.equal(await title.textContent(), "Break it off (Bonus)");
+  assert.equal(await preview.locator(".artist").textContent(), "PinkPantheress");
+  assert.equal(await preview.locator(".album").textContent(), "to hell with it");
+  assert.equal(await preview.locator(".total").textContent(), "1:37");
+  await preview.locator(`img.cover[src="${hellCover}"]`).waitFor();
+  await previous.click();
+  await finishExit();
+  assert.equal(await title.textContent(), "Bury me (feat. Kelela)");
+  assert.equal(await preview.locator(".artist").textContent(), "PinkPantheress");
+  assert.equal(await preview.locator(".album").textContent(), "Heaven knows");
+  assert.equal(await preview.locator(".total").textContent(), "2:05");
+  await preview.locator(`img.cover[src="${heavenCover}"]`).waitFor();
+  await previous.click();
+  await finishExit();
+  assert.equal(await title.textContent(), "My song");
+  await previous.click();
+  await finishExit();
+  assert.equal(await title.textContent(), "Break it off (Bonus)");
+  const url = new URL(await page.locator("#overlay-url").inputValue());
+  assert.equal(url.searchParams.get("title"), "My song");
+  await page.goto(url.href);
+  await page.locator(".track").waitFor();
+  assert.equal(await page.getByRole("button", { name: "Next track" }).count(), 0);
+  url.searchParams.set("demoControls", "yes");
+  url.searchParams.delete("overlay.entrance");
+  url.searchParams.set("coverImage.entrance", "fadeIn");
+  url.searchParams.set("coverImage.entranceDuration", "5000");
+  await page.goto(url.href);
+  const originalCover = page.locator("img.cover");
+  await originalCover.waitFor();
+  const original = await originalCover.getAttribute("src");
+  await page.getByRole("button", { name: "Previous track" }).click();
+  await page.locator(".track").filter({ hasText: "Break it off (Bonus)" }).waitFor();
+  await page.waitForFunction(() =>
+    document
+      .querySelector("img.cover")
+      .getAnimations()
+      .some((motion) => motion.id === "stream-exit")
+  );
+  assert.equal(await originalCover.getAttribute("src"), original);
+  await originalCover.evaluate((node) =>
+    node
+      .getAnimations()
+      .find((motion) => motion.id === "stream-exit")
+      .finish()
+  );
+  await page.waitForFunction((old) => document.querySelector("img.cover").getAttribute("src") !== old, original);
+  url.searchParams.set("source", "helper");
+  await page.goto(url.href);
+  await page.locator(".panel[data-layout]").waitFor({ state: "attached" });
+  assert.equal(await page.getByRole("button", { name: "Next track" }).count(), 0);
+});
+
+test("shrinking Now Playing clears the previous card edge in the scaled preview", { timeout: 45000 }, async (t) => {
+  const browser = await launchBrowser();
+  t.after(() => browser.close());
+  const page = await browser.newPage({ viewport: { width: 1693, height: 900 } });
+  await serve(page, await loadAssets(editorAssets));
+  await page.goto("https://stream.test/now-playing/?layout=classic&coverSize=70&resizeDuration=250&playback=paused#configure");
+  const preview = page.frameLocator("#overlay-preview");
+  await preview.locator(".background-cover").waitFor();
+  const settled = async (title) => {
+    const text = preview.getByText(title, { exact: true });
+    await text.waitFor();
+    await text.evaluate(async () => {
+      // ResizeObserver schedules the animation on the following frame.
+      do {
+        await new Promise(requestAnimationFrame);
+        await new Promise(requestAnimationFrame);
+      } while (document.querySelector("[data-stream-resizing], [data-stream-await-size]"));
+    });
+  };
+  await settled("Girl Like Me");
+  // This strip is transparent beside the short title and inside the longer card.
+  const clip = await page.locator("#overlay-preview").evaluate((frame) => {
+    const card = frame.contentDocument.querySelector(".panel").getBoundingClientRect();
+    const bounds = frame.getBoundingClientRect();
+    const scale = bounds.width / frame.contentWindow.innerWidth;
+    return { x: Math.ceil(bounds.left + card.right * scale) + 2, y: Math.ceil(bounds.top + card.top * scale) + 20, width: 32, height: 64 };
+  });
+  const empty = await page.screenshot({ clip });
+  for (let i = 0; i < 3; i++) {
+    await page.getByRole("button", { name: "Next track" }).click();
+    await settled("Bury me (feat. Kelela)");
+    assert.ok(!(await page.screenshot({ clip })).equals(empty), "the longer card covers the strip");
+    await page.getByRole("button", { name: "Previous track" }).click();
+    await settled("Girl Like Me");
+    assert.ok((await page.screenshot({ clip })).equals(empty), "every pixel returns to the checkerboard");
+  }
+});
+
+test("color dependencies and dotted spacing round-trip through the editor", async (t) => {
+  const browser = await launchBrowser();
+  t.after(() => browser.close());
+  const page = await browser.newPage();
+  await serve(page, await loadAssets(editorAssets));
+  await page.goto("https://stream.test/now-playing/?layout=classic&autoAccent=no&accentColor=abc123#configure");
+  const auto = page.locator('form [name="autoAccent"]'),
+    color = page.locator('form [name="accentColor"]');
+  const layout = page.locator('form [name="layout"]'),
+    discTilt = page.locator('form [name="disc.rotateY"]');
+  await discTilt.waitFor({ state: "attached" });
+  assert.equal(await discTilt.isDisabled(), true);
+  await layout.selectOption("vinyl", { force: true });
+  await page.waitForFunction(() => !document.querySelector('[name="disc.rotateY"]').disabled);
+  await layout.selectOption("classic", { force: true });
+  await page.waitForFunction(() => document.querySelector('[name="disc.rotateY"]').disabled);
+  const margin = page.locator('form [name="coverImage.marginRight"]');
+  assert.equal(await margin.evaluate((input) => !!input.closest(".spacing-grid") && !!input.closest(".config-field").querySelector(".fa-arrow-right")), true);
+  await auto.check();
+  await page.waitForFunction(() => document.querySelector('form [name="accentColor"]').disabled && !new URL(document.getElementById("overlay-url").value).searchParams.has("accentColor"));
+  await color.waitFor({ state: "hidden" });
+  await auto.uncheck();
+  assert.equal((await color.inputValue()).toLowerCase(), "#abc123");
+  assert.equal(await auto.evaluate((input) => !!(input.compareDocumentPosition(document.querySelector('form [name="accentColor"]')) & Node.DOCUMENT_POSITION_FOLLOWING)), true);
+  await page.locator('[data-settings-view="json"]').click();
+  await page.locator("#settings-json").fill(JSON.stringify({ layout: "classic", titleFontSize: 28, "album.overflow": "ellipsis", "coverImage.marginRight": -3, "title.paddingLeft": 0, "coverImage.rotateY": 15 }));
+  await page.waitForFunction(() => new URL(document.getElementById("overlay-url").value).searchParams.get("coverImage.marginRight") === "-3");
+  const url = new URL(await page.locator("#overlay-url").inputValue());
+  assert.equal(url.searchParams.get("title.fontSize"), "28");
+  assert.equal(url.searchParams.has("titleFontSize"), false);
+  assert.equal(url.searchParams.get("title.paddingLeft"), "0");
+  assert.equal(url.searchParams.get("album.overflow"), "ellipsis");
+  await page.goto(url.href);
+  await page.locator(".cover").waitFor({ state: "attached" });
+  await page.waitForFunction(() => getComputedStyle(document.querySelector(".cover")).marginRight === "-3px");
+  await page.waitForFunction(() => getComputedStyle(document.querySelector(".album")).textOverflow === "ellipsis");
 });
 
 test("configurator smoke", { timeout: 60000 }, async (t) => {

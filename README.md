@@ -72,6 +72,7 @@ For Controller and Keyboard on disk, extract the ZIP with its SVG artwork or use
 21. [Randomizer](#randomizer)
 22. [Quote Display](#quote-display)
 23. [Keyboard Shortcut Sheet](#keyboard-shortcut-sheet)
+24. [Now Playing](#now-playing)
 26. [Counter](#counter)
 
 TBD resources have usable demos while their live integrations are being defined. Alpha resources are in early testing. Beta resources are in broader testing.
@@ -261,6 +262,16 @@ Editable shortcut guide without keyboard monitoring. **Alpha.**
 ![Keyboard Shortcut Sheet overlay preview](shortcuts/prev.jpg)
 
 [Configure Keyboard Shortcut Sheet](https://stream.byuwur.co/shortcuts/) · [Local entry point](shortcuts/index.html)
+
+### Now Playing
+
+**TBD.** Configure a local track, cover, playback state and timeline. Classic, Compact, Simple, Card and Vinyl share the same settings. Auto accent samples the dominant artwork color and falls back to the manual accent when pixels are unavailable. The demo plays no audio. Windows media sessions require a future OBS helper.
+
+Use **Previous** and **Next** in the Now Playing preview to cycle through your configured track and two sample songs. Enable **Show track buttons on the overlay** to use them in a standalone demo. The Classic demo opens with “Girl Like Me” by PinkPantheress from _Fancy That_, at 0:23 of 2:26. **Cover background → Blurred cover background** is on by default. It tints the artwork behind the track details or across the Card. The demo uses its built-in illustration if the default album cover is unavailable.
+
+![Now Playing demo preview](now-playing/prev.jpg)
+
+[Configure Now Playing](https://stream.byuwur.co/now-playing/) · [Local entry point](now-playing/index.html)
 
 ### Counter
 

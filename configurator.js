@@ -577,6 +577,15 @@
         ready: true
       },
       {
+        id: "now-playing",
+        name: "Now Playing",
+        description: "Display cover art, track details, and progress from an editable demo. Windows media integration is TBD.",
+        icon: "fa-record-vinyl",
+        category: "information",
+        status: "TBD",
+        ready: true
+      },
+      {
         id: "counter",
         name: "Counter",
         description: "Count focused key presses with configurable steps and bounds. Native OBS input is TBD.",

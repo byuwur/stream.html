@@ -430,6 +430,66 @@ test("the sponsor heading follows the panel edge as the logo disappears and retu
   }
 });
 
+test("whole player and child effects finish independently, then the panel resizes to the latest track", async (t) => {
+  const browser = await launchBrowser();
+  t.after(() => browser.close());
+  const page = await browser.newPage();
+  await serve(page, await loadAssets(runtimeAssets), true);
+  const params = new URLSearchParams({
+    source: "helper",
+    showArtwork: "no",
+    showTime: "no",
+    showTimeline: "no",
+    resizeDuration: 3000,
+    "overlay.container.entrance": "fadeIn",
+    "overlay.container.entranceDuration": 7000,
+    "title.entrance": "zoomIn",
+    "title.entranceDuration": 5000
+  });
+  await page.goto("https://stream.test/now-playing/?" + params);
+  const result = await page.locator(".panel").evaluate(async (panel) => {
+    const title = panel.querySelector(".track");
+    const frame = () => new Promise(requestAnimationFrame);
+    const send = (seq, title) => byStream.receiveNative({ version: 1, channel: "media", seq, state: { available: true, title, artist: "", album: "", cover: "", duration: 75, position: 0, playback: "playing" } });
+    const effect = (node, id) => node.getAnimations().find((animation) => animation.id === "stream-" + id);
+    send(1, "A");
+    await frame();
+    await frame();
+    const first = panel.offsetWidth;
+    send(2, "Skipped");
+    send(3, "A considerably longer song title");
+    const timings = [effect(panel, "exit"), effect(title, "exit")].map((motion) => motion.effect.getTiming().duration);
+    effect(title, "exit").finish();
+    await frame();
+    const before = title.textContent;
+    effect(panel, "exit").finish();
+    await frame();
+    await frame();
+    const resize = effect(panel, "resize");
+    const held = getComputedStyle(title).visibility === "hidden" && !effect(title, "entrance");
+    resize.pause();
+    resize.currentTime = 1500;
+    const midway = panel.getBoundingClientRect().width;
+    for (const motion of panel.getAnimations({ subtree: true })) if (motion.id === "stream-resize") motion.finish();
+    while (title.hasAttribute("data-stream-await-size")) await frame();
+    const wide = panel.offsetWidth;
+    const after = [title.textContent, resize.effect.getTiming().duration, held, effect(title, "entrance").effect.getTiming().duration];
+    send(4, "B");
+    for (const motion of panel.getAnimations({ subtree: true })) if (motion.id === "stream-exit") motion.finish();
+    await frame();
+    await frame();
+    const shrink = !!effect(panel, "resize");
+    for (const motion of panel.getAnimations({ subtree: true })) if (motion.id === "stream-resize") motion.finish();
+    await frame();
+    return { timings, before, after, first, wide, midway, last: panel.offsetWidth, shrink };
+  });
+  assert.deepEqual(result.timings, [7000, 5000]);
+  assert.equal(result.before, "A");
+  assert.deepEqual(result.after, ["A considerably longer song title", 3000, true, 5000]);
+  assert.ok(result.first < result.midway && result.midway < result.wide, JSON.stringify(result));
+  assert.ok(result.last < result.wide && result.shrink);
+});
+
 test("automatic panels wrap and animate both dimensions under a maximum width", async (t) => {
   const browser = await launchBrowser();
   t.after(() => browser.close());
@@ -847,6 +907,212 @@ test("the default popup keeps the handle against the tile and displays one padde
       if (index) assert.ok(state.joined, mode + " tile and handle at sample " + index);
     }
   }
+});
+
+test("automatic foreground follows solid surfaces and light or dark replacement covers", async (t) => {
+  const browser = await launchBrowser();
+  t.after(() => browser.close());
+  const page = await browser.newPage();
+  await serve(page, await loadAssets(runtimeAssets), true);
+  for (const [background, ink] of [
+    ["ffffff", "rgb(0, 0, 0)"],
+    ["000000", "rgb(255, 255, 255)"]
+  ]) {
+    await page.goto("https://stream.test/badge/?label=Test&animate=no&textContrast=auto&backgroundColor=" + background);
+    await page.waitForFunction((color) => getComputedStyle(document.querySelector(".primary")).color === color && document.querySelector(".primary").hasAttribute("data-contrast"), ink);
+  }
+  await page.goto("https://stream.test/now-playing/?layout=classic&source=helper&textContrast=auto&animate=no");
+  for (const [index, fill] of ["#ffffff", "#000000"].entries()) {
+    await page.evaluate(
+      ([seq, color]) => {
+        const canvas = document.createElement("canvas");
+        canvas.width = canvas.height = 16;
+        const ctx = canvas.getContext("2d");
+        ctx.fillStyle = color;
+        ctx.fillRect(0, 0, 16, 16);
+        byStream.receiveNative({ version: 1, channel: "media", seq, state: { available: true, title: "Contrast", artist: "Artist", album: "", duration: 60, position: 0, playback: "paused", cover: canvas.toDataURL() } });
+      },
+      [index + 1, fill]
+    );
+    await page.waitForFunction((color) => [".track", ".artist", ".times"].every((selector) => getComputedStyle(document.querySelector(selector)).color === color), index ? "rgb(255, 255, 255)" : "rgb(0, 0, 0)");
+  }
+});
+
+test("Now Playing auto cover stays square and follows the track details height", async (t) => {
+  const browser = await launchBrowser();
+  t.after(() => browser.close());
+  const page = await browser.newPage({ viewport: { width: 960, height: 540 } });
+  page.setDefaultTimeout(5000);
+  await serve(page, await loadAssets(runtimeAssets), true);
+  const waitForSize = async (fixed = 0, shorterThan = Infinity) => {
+    const match = await page.waitForFunction(
+      async ([fixed, shorterThan]) => {
+        const panel = document.querySelector(".panel");
+        for (let i = 0; i < 3; i++) {
+          await new Promise(requestAnimationFrame);
+          const sleeve = panel.querySelector(".sleeve").getBoundingClientRect();
+          const target = fixed || panel.querySelector(".details").getBoundingClientRect().height;
+          if (panel.matches("[data-stream-resizing]") || panel.querySelector("[data-stream-resizing]") || !target || target >= shorterThan || Math.abs(sleeve.width - target) >= 1 || Math.abs(sleeve.height - target) >= 1) return false;
+          if (i === 2) return sleeve.height;
+        }
+      },
+      [fixed, shorterThan]
+    );
+    return match.jsonValue();
+  };
+  for (const layout of ["classic", "simple", "card", "vinyl"]) {
+    await page.goto("https://stream.test/now-playing/?source=helper&layout=" + layout);
+    await page.waitForFunction(() => !!window.byStreamResource?.settings);
+    let fullHeight;
+    for (const [i, artist] of ["Artist", "", "Another artist"].entries()) {
+      await page.evaluate(
+        ([i, artist]) => byStream.receiveNative({ version: 1, channel: "media", seq: i + 1, state: { available: true, title: "Song " + i, artist, album: artist, cover: "", duration: 60, position: 0, playback: "paused" } }),
+        [i, artist]
+      );
+      await page.locator(".track", { hasText: "Song " + i }).waitFor();
+      const height = await waitForSize(i === 2 ? fullHeight : 0, i === 1 ? fullHeight - 10 : Infinity);
+      if (i === 0) fullHeight = height;
+    }
+  }
+  for (const [settings, pixels] of [
+    ["layout=classic&coverSize=16", 16],
+    ["layout=card&coverSize=32", 112],
+    ["layout=vinyl&coverSize=32", 64],
+    ["layout=vinyl&vinylDetails=no&coverSize=0", 256]
+  ]) {
+    await page.goto("https://stream.test/now-playing/?" + settings);
+    await page.locator(".sleeve").waitFor();
+    await waitForSize(pixels);
+  }
+});
+
+test("Now Playing gives auto-width track details 15 percent more usable width", async (t) => {
+  const browser = await launchBrowser();
+  t.after(() => browser.close());
+  const page = await browser.newPage({ viewport: { width: 960, height: 540 } });
+  await serve(page, await loadAssets(runtimeAssets), true);
+  const params = new URLSearchParams({ layout: "classic", coverSize: 128, width: 0, resizeDuration: 0, demoControls: "yes" });
+  await page.goto("https://stream.test/now-playing/?" + params);
+  await page.locator(".background-cover").waitFor();
+  const measure = () =>
+    page.locator(".details").evaluate((details) => {
+      const range = document.createRange();
+      const widths = [...details.querySelectorAll(".track, .artist, .album")].map((line) => {
+        range.selectNodeContents(line.querySelector(".stream-text-window") || line);
+        return range.getBoundingClientRect().width;
+      });
+      const style = getComputedStyle(details);
+      const box = details.getBoundingClientRect();
+      const left = parseFloat(style.paddingLeft),
+        right = parseFloat(style.paddingRight);
+      const title = details.querySelector(".track .stream-ticker-text");
+      return {
+        width: box.width,
+        right,
+        natural: Math.max(...widths) + left + right,
+        railInset: box.right - details.querySelector(".timeline").getBoundingClientRect().right,
+        timeInset: box.right - details.querySelector(".total").getBoundingClientRect().right,
+        titleFits: parseFloat(getComputedStyle(title).width) <= parseFloat(getComputedStyle(title.parentElement).width),
+        scrolling: title.hasAttribute("data-repeat")
+      };
+    });
+  for (const title of ["Girl Like Me", "Bury me (feat. Kelela)", "Break it off (Bonus)"]) {
+    await page.locator(".track", { hasText: title }).waitFor();
+    const sizes = await measure();
+    assert.ok(Math.abs(sizes.width - sizes.natural * 1.15) < 1, title);
+    assert.equal(sizes.right, 16, title);
+    assert.ok(Math.abs(sizes.railInset - sizes.right) < 1 && Math.abs(sizes.timeInset - sizes.right) < 1, title);
+    assert.ok(sizes.titleFits && !sizes.scrolling, title);
+    await page.getByRole("button", { name: "Next track" }).click();
+  }
+  for (const [override, padding] of [
+    ["details.paddingRight=5", 5],
+    ["details.widthMode=fill", 16]
+  ]) {
+    await page.goto("https://stream.test/now-playing/?" + params + "&" + override);
+    await page.locator(".track .stream-ticker-text").waitFor();
+    assert.equal((await measure()).right, padding);
+  }
+  params.set("layout", "card");
+  await page.goto("https://stream.test/now-playing/?" + params);
+  await page.locator(".sleeve .cover").waitFor();
+  const cover = await page.locator(".sleeve").boundingBox();
+  assert.ok(Math.abs((await measure()).width - cover.width * 1.15) < 1);
+  params.set("layout", "classic");
+  for (const [setting, mode, width] of [
+    [640, "content", 640],
+    [0, "fill", 928]
+  ]) {
+    params.set("width", setting);
+    params.set("widthMode", mode);
+    await page.goto("https://stream.test/now-playing/?" + params);
+    const panel = page.locator(".panel");
+    await panel.waitFor();
+    assert.equal(await panel.evaluate((node) => node.offsetWidth), width);
+    assert.equal((await measure()).right, 16);
+  }
+});
+
+test("Now Playing scrolls only overflowing titles and resets on track and width changes", async (t) => {
+  const browser = await launchBrowser();
+  t.after(() => browser.close());
+  const page = await browser.newPage();
+  page.setDefaultTimeout(5000);
+  await serve(page, await loadAssets(runtimeAssets), true);
+  await page.setViewportSize({ width: 320, height: 540 });
+  const long = "A long track title with every word visible on the next pass";
+  const query = new URLSearchParams({ title: long, width: "960", coverBackground: "no", showArtwork: "no", align: "right", demoControls: "yes" });
+  const label = page.locator(".track .stream-ticker-text");
+  const scrolling = page.locator(".track [data-repeat]");
+
+  for (const layout of ["classic", "compact", "simple", "card", "vinyl"]) {
+    query.set("layout", layout);
+    await page.goto("https://stream.test/now-playing/?" + query);
+    await scrolling.waitFor();
+    const result = await label.evaluate((node) => {
+      const motion = node.getAnimations().find((item) => item.animationName === "stream-text-scroll");
+      motion.pause();
+      motion.currentTime = 0;
+      const start = node.getBoundingClientRect().left;
+      motion.currentTime = motion.effect.getTiming().duration / 2;
+      return {
+        aligned: Math.abs(start - node.parentElement.getBoundingClientRect().left) < 1,
+        travelled: start - node.getBoundingClientRect().left,
+        width: node.offsetWidth,
+        available: node.parentElement.clientWidth,
+        copy: getComputedStyle(node, "::after").content,
+        text: node.closest(".track").textContent
+      };
+    });
+    assert.ok(result.aligned && result.width > result.available, layout);
+    assert.ok(Math.abs(result.travelled - (result.width + 32) / 2) < 1, layout);
+    assert.ok(result.copy.includes(long), layout);
+    assert.equal(result.text, long);
+  }
+
+  await page.setViewportSize({ width: 1280, height: 540 });
+  await scrolling.waitFor({ state: "detached" });
+  assert.equal(await label.evaluate((node) => node.getAnimations().length), 0);
+  await page.setViewportSize({ width: 320, height: 540 });
+  await scrolling.waitFor();
+  await page.getByRole("button", { name: "Next track" }).click();
+  await label.filter({ hasText: "Bury me (feat. Kelela)" }).waitFor();
+  await page.setViewportSize({ width: 1280, height: 540 });
+  await scrolling.waitFor({ state: "detached" });
+  await page.getByRole("button", { name: "Previous track" }).click();
+  await label.filter({ hasText: long }).waitFor();
+  await page.setViewportSize({ width: 320, height: 540 });
+  await scrolling.waitFor();
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.waitForFunction(() => !document.querySelector(".track .stream-ticker-text").getAnimations().length);
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await scrolling.waitFor();
+  query.set("animate", "no");
+  await page.goto("https://stream.test/now-playing/?" + query);
+  const track = page.locator(".track");
+  await track.filter({ hasText: long }).waitFor();
+  assert.equal(await track.evaluate((node) => getComputedStyle(node).textOverflow), "ellipsis");
+  assert.equal(await track.evaluate((node) => node.getAnimations({ subtree: true }).length), 0);
 });
 
 test("shortcut sheet fits a 60% keyboard and highlights the keys named in a shortcut", async (t) => {
