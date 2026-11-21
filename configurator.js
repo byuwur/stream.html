@@ -575,6 +575,15 @@
         category: "interaction",
         status: "Alpha",
         ready: true
+      },
+      {
+        id: "counter",
+        name: "Counter",
+        description: "Count focused key presses with configurable steps and bounds. Native OBS input is TBD.",
+        icon: "fa-hashtag",
+        category: "interaction",
+        status: "TBD",
+        ready: true
       }
     ],
     get availableTools() {

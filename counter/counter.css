@@ -1,0 +1,38 @@
+/* ===== COUNTER DISPLAY ===== */
+#overlay .panel {
+  padding: 8px;
+  border-radius: 16px;
+  background: #0003;
+}
+#overlay .heading {
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 1.375;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+#overlay .reading {
+  font-weight: 600;
+  --reading-size: clamp(22px, 8vw, 60px);
+  font-size: var(--reading-size);
+  line-height: 1.125;
+  font-variant-numeric: tabular-nums;
+}
+#overlay output {
+  display: inline-block;
+  max-width: 100%;
+}
+#overlay .prefix,
+#overlay .suffix {
+  font-size: calc(var(--reading-size) * 0.625);
+}
+/* ===== COUNTER LAYOUTS ===== */
+#overlay[data-layout="minimal"] .panel {
+  background: transparent;
+}
+#overlay[data-layout="flip"] output {
+  padding: calc(var(--reading-size) * 0.0625) calc(var(--reading-size) * 0.25);
+  margin-block: calc(var(--reading-size) * 0.125);
+  border-radius: calc(var(--reading-size) * 0.125);
+  background: linear-gradient(transparent 49%, #0007 49% 51%, transparent 51%), #345;
+}

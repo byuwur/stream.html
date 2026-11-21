@@ -3150,6 +3150,125 @@
     resume();
   }
 
+  // ===== NATIVE OBS INPUT (DRAFT, SAME DOCUMENT ONLY) =====
+  // Each renderer subscribes after mounting. Nothing buffers input before that point.
+  const nativeChannels = new Map();
+  const finite = (value, low, high) => Number.isFinite(value) && value >= low && value <= high;
+  const boundedText = (value, limit) => typeof value === "string" && value.length <= limit;
+  const list = (value, limit, valid) => Array.isArray(value) && value.length <= limit && Array.from(value).every(valid);
+  const unique = (values) => new Set(values).size === values.length;
+
+  /** Copy only the bounded fields consumed by this channel. Null rejects the entire packet. */
+  function nativeSnapshot(channel, state) {
+    if (!state || typeof state !== "object" || Array.isArray(state)) return null;
+    if (channel === "keyboard" && list(state.keys, 256, (key) => typeof key === "string" && /^[A-Za-z][A-Za-z0-9]{0,39}$/.test(key)) && unique(state.keys)) {
+      return { keys: [...state.keys] };
+    }
+    if (channel === "mouse" && list(state.buttons, 5, (button) => Number.isInteger(button) && finite(button, 0, 4)) && unique(state.buttons) && [state.dx, state.dy, state.wheel].every((n) => finite(n, -4096, 4096))) {
+      return { buttons: [...state.buttons], dx: state.dx, dy: state.dy, wheel: state.wheel };
+    }
+    if (channel === "controller") {
+      const validPad = (pad) => pad && Number.isInteger(pad.index) && finite(pad.index, 0, 7) && boundedText(pad.id, 128) && pad.id.length > 0 && list(pad.buttons, 64, (n) => finite(n, 0, 1)) && list(pad.axes, 32, (n) => finite(n, -1, 1));
+      if (!list(state.pads, 8, validPad) || !unique(state.pads.map((pad) => pad.index))) return null;
+      return {
+        pads: state.pads.map(({ index, id, buttons, axes }) => ({
+          index,
+          id,
+          buttons: [...buttons],
+          axes: [...axes]
+        }))
+      };
+    }
+    if (channel === "media") {
+      if (state.available === false) return { available: false };
+      const { available, title, artist, album, cover, duration, position, playback } = state;
+      if (
+        available !== true ||
+        ![title, artist, album].every((s) => boundedText(s, 512)) ||
+        !boundedText(cover, 65536) ||
+        !safeImage(cover) ||
+        !finite(duration, 0, 604800) ||
+        !finite(position, 0, 604800) ||
+        !["playing", "paused", "stopped"].includes(playback)
+      )
+        return null;
+      return {
+        available,
+        title,
+        artist,
+        album,
+        cover,
+        duration,
+        position: duration ? Math.min(duration, position) : position,
+        playback
+      };
+    }
+    return null;
+  }
+
+  /**
+   * Register the overlay's sole consumer of a native channel. Abort on renderer teardown.
+   * @param {string} channel Keyboard, mouse, controller or media channel ID.
+   * @param {Function} render Receives (snapshot, first), or null to release held input.
+   * @param {AbortSignal} signal Lifetime of the mounted renderer.
+   */
+  function subscribeNative(channel, render, signal) {
+    if (signal.aborted) return;
+    if (nativeChannels.has(channel)) throw new Error("Native channel already subscribed: " + channel);
+    const staleAfter = 5000;
+    let timer,
+      deadline = 0,
+      sequence = -1;
+    function release() {
+      clearTimeout(timer);
+      deadline = 0;
+      sequence = -1;
+      render(null);
+    }
+    function receive(packet) {
+      if (packet.channel === "reset") {
+        release();
+        return true;
+      }
+      if (!Number.isSafeInteger(packet.seq) || packet.seq < 0) return false;
+      const state = nativeSnapshot(channel, packet.state);
+      if (!state) return false;
+      if (deadline && performance.now() >= deadline) release();
+      if (packet.seq <= sequence) return false;
+      const first = sequence === -1;
+      sequence = packet.seq;
+      clearTimeout(timer);
+      deadline = performance.now() + staleAfter;
+      timer = setTimeout(release, staleAfter);
+      render(state, first);
+      return true;
+    }
+    nativeChannels.set(channel, receive);
+    global.addEventListener("pagehide", release, { signal });
+    signal.addEventListener(
+      "abort",
+      () => {
+        clearTimeout(timer);
+        nativeChannels.delete(channel);
+      },
+      { once: true }
+    );
+  }
+
+  /**
+   * Deliver a version 1 packet in the renderer's own document.
+   * @param {Object} packet A reset or a sequenced complete channel snapshot.
+   * @returns {boolean} Whether a mounted renderer accepted the packet.
+   */
+  function receiveNative(packet) {
+    if (!packet || packet.version !== 1) return false;
+    if (packet.channel === "reset") {
+      for (const receive of nativeChannels.values()) receive(packet);
+      return nativeChannels.size > 0;
+    }
+    return nativeChannels.get(packet.channel)?.(packet) ?? false;
+  }
+
   // ===== PUBLIC RESOURCE HELPERS =====
 
   // Publish these before DOMContentLoaded so resource handlers can declare fields in either mode.
@@ -3188,6 +3307,8 @@
     formatDuration,
     initResource,
     preventOverlayInputDefaults,
+    subscribeNative,
+    receiveNative,
     parseAccounts,
     parseZone,
     parseLocale,

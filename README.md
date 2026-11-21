@@ -72,8 +72,9 @@ For Controller and Keyboard on disk, extract the ZIP with its SVG artwork or use
 21. [Randomizer](#randomizer)
 22. [Quote Display](#quote-display)
 23. [Keyboard Shortcut Sheet](#keyboard-shortcut-sheet)
+26. [Counter](#counter)
 
-Alpha resources are in early testing. Beta resources are in broader testing.
+TBD resources have usable demos while their live integrations are being defined. Alpha resources are in early testing. Beta resources are in broader testing.
 
 ### Keyboard & Mouse
 
@@ -260,6 +261,14 @@ Editable shortcut guide without keyboard monitoring. **Alpha.**
 ![Keyboard Shortcut Sheet overlay preview](shortcuts/prev.jpg)
 
 [Configure Keyboard Shortcut Sheet](https://stream.byuwur.co/shortcuts/) · [Local entry point](shortcuts/index.html)
+
+### Counter
+
+**TBD.** Focus the overlay or use OBS Interact. F9 increases and F10 decreases by the configured positive step. Reset defaults to Off. Bind physical codes such as `KeyW` or `F11`. F1 and F2 stay reserved. A held key counts once. Opposing bindings on one press or native snapshot cancel, and a reset press takes priority. Optional bounds clamp the starting value and every change. Reload restores the configured start. Losing focus or native input preserves the number.
+
+![Counter demo preview](counter/prev.jpg)
+
+[Configure Counter](https://stream.byuwur.co/counter/) · [Local entry point](counter/index.html)
 
 ## Shortcuts
 

@@ -26,6 +26,50 @@ const editorAssets = [
   "_fonts.css"
 ];
 
+test("appearance presets follow saved fields, imports and resets without a preset parameter", async (t) => {
+  const browser = await launchBrowser();
+  t.after(() => browser.close());
+  const page = await browser.newPage();
+  page.setDefaultTimeout(10000);
+  await serve(page, await loadAssets(editorAssets));
+  const preset = page.locator("label").filter({ hasText: "Appearance preset" }).locator("select");
+  const value = (expected) => preset.locator(`option:checked[value="${expected}"]`).waitFor({ state: "attached" });
+  await page.goto("https://stream.test/badge/?label=LIVE#configure");
+  await value("bonyur");
+  await preset.selectOption("studio", { force: true });
+  await page.waitForFunction(() => new URL(document.getElementById("overlay-url").value).searchParams.has("backgroundColor"));
+  const url = await page.locator("#overlay-url").inputValue();
+  assert.deepEqual([...new URL(url).searchParams.keys()].sort(), ["accentColor", "backgroundColor", "label", "textColor"]);
+  await page.goto(url + "#configure");
+  await value("studio");
+  await page.goto(url.replace("label=LIVE", "label=AWAY") + "#configure");
+  await value("");
+  await page.locator('[data-settings-view="json"]').click();
+  await page.locator("#settings-json").fill('{"label":"LIVE"}');
+  await value("bonyur");
+  await page.locator("#settings-json").fill('{"label":"LIVE","textColor":"#f05"}');
+  await value("");
+  await page.locator('[data-settings-view="form"]').click();
+  await page.getByRole("button", { name: "Reset", exact: true }).first().click();
+  await page.waitForFunction((url) => document.getElementById("overlay-url").value === url, url.replace("label=LIVE", "label=AWAY"));
+  await value("");
+
+  for (const [resource, background] of [
+    ["counter", "#0003"],
+    ["hud", "#00000000"]
+  ]) {
+    await page.goto(`https://stream.test/${resource}/#configure`);
+    await value("bonyur");
+    const field = page.locator('form [name="backgroundColor"]');
+    assert.equal((await field.inputValue()).toLowerCase(), background);
+    await preset.selectOption("studio", { force: true });
+    await page.waitForFunction(() => new URL(document.getElementById("overlay-url").value).searchParams.has("backgroundColor"));
+    await preset.selectOption("bonyur", { force: true });
+    await page.waitForFunction(() => !new URL(document.getElementById("overlay-url").value).searchParams.has("backgroundColor"));
+    assert.equal((await field.inputValue()).toLowerCase(), background);
+  }
+});
+
 test("configurator smoke", { timeout: 60000 }, async (t) => {
   const assets = await loadAssets(editorAssets);
   const browser = await launchBrowser();
