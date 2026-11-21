@@ -1,9 +1,7 @@
 // Lower Thirds: validated URL settings and an native renderer with shared URL setup.
 document.addEventListener("DOMContentLoaded", async () => {
   await byStream.assetsReady;
-  // ==========
-  // ==== RESOURCE DEFINITION ====
-  // ==========
+  // ===== RESOURCE DEFINITION =====
 
   // Defaults, URL constraints, and the field metadata consumed by the optional editor.
   const resource = {
@@ -13,6 +11,18 @@ document.addEventListener("DOMContentLoaded", async () => {
     preview: [960, 540],
     urlRequired: ["entries"],
     presets: true,
+    fieldDefaults: { "overlay.entrance": "fadeInDown", "icon.entrance": "fadeInUp", "copy.entrance": "fadeInLeft" },
+    ...byStream.cycleParameters("overlay", "transition", 300),
+    sectionOrder: ["General", "Lower third", "Appearance"],
+    elements: {
+      overlay: { label: "Appearance", premade: "slide", slideDistance: 32, motionLabel: "lower third", selector: "#overlay .panel" },
+      card: { label: "Lower third", selector: "#overlay .lower-card", fields: ["entries", "accentWidth", "lineColor"] },
+      image: { label: "Image", selector: "#overlay .lower-image", parent: "card", fields: ["imageSize", "imageFit"] },
+      icon: { label: "Icon", selector: "#overlay .lower-icon", parent: "card" },
+      copy: { label: "Text block", selector: "#overlay .lower-copy", parent: "card" },
+      name: { label: "Name", selector: "#overlay .lower-copy .primary", parent: "copy" },
+      subtitle: { label: "Subtitle", selector: "#overlay .lower-copy .secondary", parent: "copy" }
+    },
     fields: {
       entries: {
         type: "entries",
@@ -63,13 +73,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         min: 0,
         max: 3600,
         step: "any"
-      },
-      transition: {
-        type: "select",
-        default: "slide",
-        label: "Transition",
-        section: "Content & behavior",
-        options: { fade: "fade", slide: "slide", none: "none" }
       },
       fontFamily: {
         type: "font",
@@ -217,8 +220,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         styleProperty: "border-left-width",
         styleUnit: "px"
       },
-      lineColor: { type: "color", default: "#FFFFFF", optional: true, label: "Accent line color", section: "Details", subsection: "Accent line", maxlength: 80, styleSelector: "#overlay .lower-card", styleProperty: "border-left-color" },
-      ...byStream.transitionFields("transition"),
+      lineColor: { type: "color", default: "#900", optional: true, label: "Accent line color", section: "Details", subsection: "Accent line", maxlength: 80, styleSelector: "#overlay .lower-card", styleProperty: "border-left-color" },
       ...byStream.textFields({
         name: ["Name", "#overlay .lower-copy .primary"],
         subtitle: ["Subtitle", "#overlay .lower-copy .secondary"],
@@ -231,21 +233,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   };
 
+  // ===== FIELD DEFAULTS =====
   const fieldDefaults = {
     panelBorderWidth: 1,
     panelBorderStyle: "solid",
     panelBorderColor: "#EEEEEE66",
-    panelShadow: "yes",
-    panelShadowColor: "#00000066",
-    panelShadowBlur: 16,
-    panelShadowY: 4,
     backdropFilterMode: "none",
     backdropFilterBlur: 12,
     subtitleFontSize: 24,
     contentGap: 16,
-    transitionDuration: 300,
-    transitionEasing: "ease",
-    slideDistance: 32,
     iconFontSize: 64,
     imageRadius: 16,
     nameFontSize: 32,
@@ -276,6 +272,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
+  // ===== OVERLAY INITIALIZATION =====
   const settings = await byStream.initResource(resource);
   if (!byStreamOverlay) return;
   const root = document.getElementById("overlay");
@@ -315,7 +312,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     panel.hidden = true;
     return;
   }
-  const changeContent = byStream.contentTransition(panel, settings);
+  const changeContent = byStream.changeItems(panel, settings, "overlay");
   let previous = -1;
   /**
    * Display the next entry and apply the configured transition to the resource-owned elements.

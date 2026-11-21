@@ -1,9 +1,7 @@
 // Periodic Reminder: validated URL settings and an native renderer with shared URL setup.
 document.addEventListener("DOMContentLoaded", async () => {
   await byStream.assetsReady;
-  // ==========
-  // ==== RESOURCE DEFINITION ====
-  // ==========
+  // ===== RESOURCE DEFINITION =====
 
   // Defaults, URL constraints, and the field metadata consumed by the optional editor.
   const resource = {
@@ -13,6 +11,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     preview: [960, 540],
     urlRequired: ["entries", "startTime"],
     presets: true,
+    fieldDefaults: { "overlay.entrance": "fadeInDown", "overlay.container.entrance": "fadeInDown", "message.entrance": "fadeInUp" },
+    ...byStream.cycleParameters(),
+    sectionOrder: ["General", "Heading", "Message", "Appearance"],
+    elements: {
+      overlay: { label: "Appearance", premade: "slide", slideDistance: 32, motionLabel: "reminder", selector: "#overlay .panel" },
+      heading: { label: "Heading", selector: "#overlay .eyebrow", fields: ["label"] },
+      message: { label: "Message", selector: "#overlay .primary", fields: ["entries"] }
+    },
     fields: {
       entries: {
         type: "entries",
@@ -36,20 +42,13 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       duration: {
         type: "number",
-        default: 30,
+        default: 10,
         label: "Visible duration (seconds)",
         section: "Content & behavior",
         description: "Clamped to the repeat interval.",
         min: 1,
         max: 3600,
         step: "any"
-      },
-      transition: {
-        type: "select",
-        default: "slide",
-        label: "Animation",
-        section: "Content & behavior",
-        options: { fade: "fade", slide: "slide", none: "none" }
       },
       delay: {
         type: "number",
@@ -221,7 +220,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       edgePadding: { type: "number", default: 16, optional: true, label: "Viewport edge padding (px)", section: "Size & placement", min: 0, max: 1000, step: "any", styleSelector: "#overlay", styleProperty: "padding", styleUnit: "px" },
       ...byStream.placementFields("#overlay .panel"),
       ...byStream.layoutFields("#overlay .panel", { heading: ["Heading", "#overlay .eyebrow"], message: ["Message", "#overlay .primary"] }),
-      ...byStream.transitionFields("transition"),
       ...byStream.textFields({
         heading: ["Heading", "#overlay .eyebrow"],
         message: ["Message", "#overlay .primary"]
@@ -232,22 +230,16 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   };
 
+  // ===== FIELD DEFAULTS =====
   const fieldDefaults = {
     panelBorderWidth: 1,
     panelBorderStyle: "solid",
     panelBorderColor: "#EEEEEE11",
-    panelShadow: "yes",
-    panelShadowColor: "#00000066",
-    panelShadowBlur: 16,
-    panelShadowY: 4,
     backdropFilterMode: "none",
     backdropFilterBlur: 12,
     headingFontSize: 16,
     headingTracking: 1.8,
     messageFontSize: 12,
-    transitionDuration: 500,
-    transitionEasing: "ease",
-    slideDistance: 32,
     headingLineHeight: 18,
     messageLineHeight: 14.4
   };
@@ -275,6 +267,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     return value === "" || /^([01]\d|2[0-3]):[0-5]\d$/.test(value) ? value : null;
   }
 
+  // ===== OVERLAY INITIALIZATION =====
   const settings = await byStream.initResource(resource);
   if (!byStreamOverlay) return;
   const root = document.getElementById("overlay");
@@ -314,7 +307,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     panel.hidden = true;
     return;
   }
-  const changeContent = byStream.contentTransition(panel, settings);
+  element("p", "eyebrow", settings.label);
+  const items = () => panel.querySelectorAll(".primary");
+  const changeContent = byStream.changeItems(panel, settings, "overlay", items);
   let previous = -1;
   /**
    * Display the next entry and apply the configured transition to the resource-owned elements.
@@ -326,7 +321,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (index === previous) return;
     previous = index;
     changeContent(() => {
-      panel.replaceChildren();
+      for (const node of items()) node.remove();
       render(settings.entries[index]);
     });
   }
@@ -357,7 +352,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
     if (visible)
       change(Math.floor(elapsed / interval) % settings.entries.length, (e) => {
-        element("p", "eyebrow", settings.label);
         element("p", "primary", e);
       });
   }

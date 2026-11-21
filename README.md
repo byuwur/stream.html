@@ -288,6 +288,24 @@ Focused Controller and Keyboard & Mouse overlays cancel browser actions for keyb
 4. [Controller settings](#controller-settings)
 5. [Social account settings](#social-account-settings)
 6. [Main scene settings](#main-scene-settings)
+### Element controls
+
+The form opens with **General** and **Appearance**, followed by the elements in the overlay. Open a text element for its typography, or open **Spacing**, **Transforms**, **Animation in**, or **Animation out** to change how it fits, appears, and disappears. A blank spacing field keeps the resource layout. Zero removes spacing on that side. Negative margins and separate row and column gaps are supported where the element layout allows them.
+
+Generated settings use dotted keys in URLs and JSON, such as `socialHeading.fontSize`, `coverImage.rotateY`, and `coverImage.marginRight`. Older URLs and JSON still load. The parameter reference in each configurator lists its available keys and defaults.
+
+Each text field has a **Text overflow** choice under **Typography**. **Wrap** uses additional lines, **No wrap (clip)** cuts off the line at its edge, and **Ellipsis** marks the cutoff with an ellipsis. Choose **Ticker scroll** to scroll overflowing text independently of other animations. Short text stays still. **Layout default** uses the resource’s formatting. The Now Playing title scrolls by default and uses an ellipsis when Animate is off or the system requests reduced motion. Its title, artist, and album can each use a different mode.
+
+**Animation in** and **Animation out** start **Off**. In Input History they affect each entry. In Main Scene Socials they affect each account card as it rotates through. Quotes, sponsor cards, lower thirds, reminders, ticker messages, and draws animate when their content changes. Headings and controls stay in place. Scroll effects replay as each ticker item or credit line enters and leaves view. Individual parts can also have their own effect. Choose **Default** for built-in motion. [Animate.css effects](https://animate.style/) start at **300 ms** with the **Ease** curve. You can choose another curve, enter a custom cubic Bézier, or adjust the **Travel distance**, which defaults to **10%** of the moving effect's original distance.
+
+Use **Container** to animate a whole collection alongside its items, or **Child elements** to give the direct children of a container a shared effect. An individual child can override that effect. **Hide overlay** and **Show overlay** fade the whole preview out and in over 300 ms, even when animations are off. Showing the overlay also replays its configured entrance effects.
+
+Content panels grow and shrink with their visible content. Maximum dimensions cap the panel, and **Fill width** stretches it within that limit. Under **Appearance → Container resizing**, the duration and curve control both panel resizing and the movement of visible elements when content changes. The defaults are **300 ms** and **Ease**. Set the duration to zero for instant layout changes. When an animated item changes, its outgoing effect finishes first. The container animates its width and height while text, icons, and artwork keep their proportions and spacing. The incoming content enters after the resize finishes. Slide effects default to 10% travel. The playback canvas and artwork keep their source geometry.
+
+**Match animation in and out** starts on. For example, `slideInLeft` pairs with `slideOutLeft` and shares its duration, delay, curve and distance. Turn matching off to choose the exit independently. Exits play when the overlay hides or replaces an element. The **Animate** switch controls motion across the overlay.
+
+For text, choose **Automatic contrast** in Appearance or for an individual element. The renderer compares black and white against a sample of the background behind the text. Main and Now Playing also sample readable background artwork and its tint. When artwork pixels are unavailable, contrast uses the known surface colors. Transparent areas use the usual text color because the browser source cannot sample other OBS sources.
+
 
 ### URL settings
 

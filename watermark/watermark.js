@@ -1,9 +1,7 @@
 // Watermark: validated URL settings and an native renderer with shared URL setup.
 document.addEventListener("DOMContentLoaded", async () => {
   await byStream.assetsReady;
-  // ==========
-  // ==== RESOURCE DEFINITION ====
-  // ==========
+  // ===== RESOURCE DEFINITION =====
 
   // Defaults, URL constraints, and the field metadata consumed by the optional editor.
   const resource = {
@@ -13,6 +11,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     preview: [960, 540],
     urlRequired: ["text"],
     presets: true,
+    elements: {
+      overlay: { label: "Appearance", premade: "fade", motionLabel: "watermark", selector: "#overlay .panel" },
+      watermarkText: { label: "Watermark text", selector: "#overlay .primary", fields: ["text", "underlineColor", "underlineWidth", "underlineGap"] },
+      logo: { label: "Logo", selector: "#overlay .brand-logo", fields: ["logoUrl", "logoFit", "imageHeight"] }
+    },
     fields: {
       kind: {
         type: "select",
@@ -257,14 +260,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   };
 
+  // ===== FIELD DEFAULTS =====
   const fieldDefaults = {
     panelBorderWidth: 1,
     panelBorderStyle: "solid",
     panelBorderColor: "#EEEEEE1A",
-    panelShadow: "yes",
-    panelShadowColor: "#00000066",
-    panelShadowBlur: 16,
-    panelShadowY: 4,
     backdropFilterMode: "none",
     backdropFilterBlur: 12,
     watermarkTextFontSize: 16,
@@ -276,6 +276,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     delete field.styleDefault;
   }
 
+  // ===== OVERLAY INITIALIZATION =====
   const settings = await byStream.initResource(resource);
   if (!byStreamOverlay) return;
   const root = document.getElementById("overlay");
@@ -313,14 +314,17 @@ document.addEventListener("DOMContentLoaded", async () => {
   // One scheduler owns updates, stops while hidden, and restores correctly from the back/forward cache.
   root.style.justifyContent = { left: "flex-start", center: "center", right: "flex-end" }[settings.placement];
   panel.classList.toggle("floating", settings.motion === "float");
+  panel.hidden = true;
+  const changeVisibility = byStream.changeItems(panel, settings, "overlay", () => panel.children);
+  let failedLogo;
   if (settings.kind === "logo" && settings.logoUrl) {
     const img = element("img", "brand-logo");
     img.src = settings.logoUrl;
     img.alt = settings.text;
     img.style.maxHeight = settings.imageHeight === 0 ? "none" : `${settings.imageHeight}px`;
     img.addEventListener("error", () => {
-      img.remove();
-      element("p", "primary", settings.text);
+      failedLogo = img;
+      update();
     });
   } else {
     const content =
@@ -334,10 +338,15 @@ document.addEventListener("DOMContentLoaded", async () => {
         : settings.text;
     element("p", "primary brand-text", content);
   }
-  const changeVisibility = byStream.contentTransition(panel, { ...settings, transition: "fade", transitionDuration: 450, transitionEasing: "ease" });
-  if (settings.fadeInterval > 0)
-    byStream.watch(() => {
-      // Returning hidden=false would pause the scheduler while the watermark is visible.
-      changeVisibility(null, Date.now() % (settings.fadeInterval * 1000) < Math.min(settings.visibleDuration, settings.fadeInterval) * 1000);
-    });
+  function update() {
+    const visible = !settings.fadeInterval || Date.now() % (settings.fadeInterval * 1000) < Math.min(settings.visibleDuration, settings.fadeInterval) * 1000;
+    changeVisibility(failedLogo ? showText : null, visible);
+  }
+  function showText() {
+    failedLogo.remove();
+    failedLogo = null;
+    element("p", "primary brand-text", settings.text);
+  }
+  if (settings.fadeInterval > 0) byStream.watch(update);
+  else update();
 });

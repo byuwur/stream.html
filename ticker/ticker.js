@@ -1,11 +1,10 @@
 // Ticker: validated URL settings and an native renderer with shared URL setup.
 document.addEventListener("DOMContentLoaded", async () => {
   await byStream.assetsReady;
-  // ==========
-  // ==== RESOURCE DEFINITION ====
-  // ==========
+  // ===== RESOURCE DEFINITION =====
 
   // Defaults, URL constraints, and the field metadata consumed by the optional editor.
+  const formerMotion = byStream.cycleParameters("message", "transition", 500);
   const resource = {
     version: "1.3",
     title: "Ticker",
@@ -13,6 +12,30 @@ document.addEventListener("DOMContentLoaded", async () => {
     preview: [960, 540],
     urlRequired: ["entries"],
     presets: true,
+    fieldDefaults: { "overlay.children.entrance": "slideInUp" },
+    legacyFields: formerMotion.legacyFields,
+    normalizeParameters(values) {
+      const mode = values.get("mode");
+      if (["vertical", "fade", "static"].includes(mode)) {
+        values.set("mode", "rotate");
+        values.set("transition", { vertical: "slide", fade: "fade", static: "none" }[mode]);
+      }
+      if (values.get("mode") !== "scroll" && formerMotion.legacyFields.some((key) => values.has(key))) {
+        if (!values.has("slideDistance")) values.set("slideDistance", values.get("fontSize") || "32");
+        formerMotion.normalizeParameters(values);
+      }
+    },
+    sectionOrder: ["General", "Ticker track", "Appearance"],
+    elements: {
+      overlay: { label: "Appearance", selector: "#overlay .panel" },
+      viewport: { label: "Message window", selector: "#overlay .ticker-viewport", container: true },
+      track: { label: "Ticker track", motionLabel: "scrolling item", selector: "#overlay .ticker-track", fields: ["speed", "scrollDirection", "gap"] },
+      message: { label: "Entry styling", premade: "vertical", slideDistance: 32, selector: "#overlay .ticker-message", parent: "track", textOverflow: false },
+      text: { label: "Message text", selector: "#overlay .ticker-text", parent: "message", textOverflow: true },
+      icon: { label: "Icon", selector: "#overlay .ticker-icon", parent: "message" },
+      prefix: { label: "Prefix", selector: "#overlay .ticker-prefix", parent: "message" },
+      separator: { label: "Separator", selector: "#overlay .ticker-separator", parent: "track", fields: ["separator"] }
+    },
     fields: {
       entries: {
         type: "entries",
@@ -45,17 +68,17 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       mode: {
         type: "select",
-        default: "vertical",
-        label: "Motion",
+        default: "rotate",
+        label: "Playback",
         section: "Content & behavior",
-        options: { scroll: "scroll", vertical: "vertical", fade: "fade", static: "static" }
+        options: { rotate: "One message at a time", scroll: "Continuous scroll" }
       },
       duration: {
         type: "number",
         default: 3,
         label: "Seconds per message",
         section: "Content & behavior",
-        when: ["mode", "vertical", "fade"],
+        when: ["mode", "rotate"],
         min: 1,
         max: 3600,
         step: "any"
@@ -221,15 +244,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       ...byStream.layoutFields("#overlay .ticker-message", { icon: ["Icon", "#overlay .ticker-icon"], prefix: ["Prefix", "#overlay .ticker-prefix"], text: ["Message", "#overlay .ticker-text"] }),
       ...byStream.whenFields(["mode", "scroll"], byStream.fadeFields("edgeFade", "Ticker edge fade", "#overlay .ticker-viewport", "horizontal")),
-      transitionDuration: { type: "number", default: 500, label: "Transition duration (ms)", section: "Animation", when: ["mode", "vertical", "fade"], min: 0, max: 10000, step: "any" },
-      transitionEasing: {
-        type: "select",
-        default: "ease",
-        label: "Transition easing",
-        section: "Animation",
-        when: ["mode", "vertical", "fade"],
-        options: { linear: "Linear", ease: "Ease", "ease-in": "Ease in", "ease-out": "Ease out", "ease-in-out": "Ease in and out" }
-      },
       ...byStream.textFields(
         {
           message: ["Message", "#overlay .ticker-message"],
@@ -245,15 +259,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   };
 
+  // ===== FIELD DEFAULTS =====
   const fieldDefaults = {
     separatorFontSize: 18,
     panelBorderWidth: 0,
     panelBorderStyle: "solid",
     panelBorderColor: "#EEEEEE66",
-    panelShadow: "yes",
-    panelShadowColor: "#00000033",
-    panelShadowBlur: 16,
-    panelShadowY: 4,
     backdropFilterMode: "none",
     backdropFilterBlur: 12,
     messageFontSize: 16,
@@ -287,6 +298,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
+  // ===== OVERLAY INITIALIZATION =====
   const settings = await byStream.initResource(resource);
   if (!byStreamOverlay) return;
   const root = document.getElementById("overlay");
@@ -347,13 +359,14 @@ document.addEventListener("DOMContentLoaded", async () => {
       content(entry, element("span", "ticker-message", undefined, group));
       element("span", "ticker-separator", settings.separator, group);
     }
+    const measureItems = byStream.scrollItems(viewport, track, settings, "track", true, settings.scrollDirection === "reverse");
     group.style.gap = `${settings.gap}px`;
     /**
      * Recalculate the resource layout from its current viewport and measured content.
      * @returns {void}
      */
     const resize = () => {
-      const width = group.getBoundingClientRect().width;
+      const width = group.offsetWidth;
       if (!width) return;
       // A wider viewport needs more copies even when the message width stays the same.
       track.querySelectorAll(".ticker-group:not(:first-child)").forEach((x) => x.remove());
@@ -361,10 +374,12 @@ document.addEventListener("DOMContentLoaded", async () => {
       for (let i = 0; i < copies; i++) {
         const copy = group.cloneNode(true);
         copy.setAttribute("aria-hidden", "true");
+        copy.style.setProperty("--copy", i + 1);
         track.append(copy);
       }
       track.style.setProperty("--distance", `${-width}px`);
       track.style.animationDuration = `${width / settings.speed}s`;
+      measureItems();
     };
     const observer = new ResizeObserver(resize);
     observer.observe(group);
@@ -376,17 +391,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
     document.fonts.ready.then(resize);
   } else {
-    const display = element("div", "ticker-message", undefined, viewport);
-    const changeContent = byStream.contentTransition(
-      display,
-      {
-        ...settings,
-        transition: settings.mode === "static" ? "none" : settings.mode === "vertical" ? "slide" : "fade",
-        transitionAxis: "Y",
-        slideDistance: settings.fontSize
-      },
-      panel
-    );
+    const changeContent = byStream.changeItems(panel, settings, "message", () => viewport.children);
     let previous = -1;
     /**
      * Render a changed message slot and restart its configured entry transition.
@@ -397,9 +402,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (index === previous) return;
       previous = index;
       changeContent(() => {
-        display.replaceChildren();
-        content(settings.entries[index], display);
-        display.className = `ticker-message ${settings.mode}`;
+        viewport.replaceChildren();
+        content(settings.entries[index], element("div", "ticker-message", undefined, viewport));
       });
     }
     byStream.watch(update);

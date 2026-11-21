@@ -1,9 +1,7 @@
 // Quote Display: validated URL settings and an native renderer with shared URL setup.
 document.addEventListener("DOMContentLoaded", async () => {
   await byStream.assetsReady;
-  // ==========
-  // ==== RESOURCE DEFINITION ====
-  // ==========
+  // ===== RESOURCE DEFINITION =====
 
   // Defaults, URL constraints, and the field metadata consumed by the optional editor.
   const resource = {
@@ -13,6 +11,16 @@ document.addEventListener("DOMContentLoaded", async () => {
     preview: [960, 540],
     urlRequired: ["entries"],
     presets: true,
+    ...byStream.cycleParameters(),
+    fieldDefaults: { "quote.entrance": "fadeInDown", "author.entrance": "fadeInUp" },
+    sectionOrder: ["General", "Quotation", "Appearance"],
+    elements: {
+      overlay: { label: "Appearance", premade: "slide", slideDistance: 32, motionLabel: "quote", selector: "#overlay .panel" },
+      heading: { label: "Heading", selector: "#overlay .eyebrow", fields: ["heading"] },
+      quote: { label: "Quotation", selector: "#overlay .quote-text", fields: ["entries"] },
+      quoteMark: { label: "Quotation mark", selector: "#overlay .quote-text::before", parent: "quote", fields: ["marks"], when: ["marks", "yes"] },
+      author: { label: "Author", selector: "#overlay .secondary" }
+    },
     fields: {
       entries: {
         type: "entries",
@@ -49,13 +57,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         min: 1,
         max: 3600,
         step: "any"
-      },
-      transition: {
-        type: "select",
-        default: "slide",
-        label: "Transition",
-        section: "Content & behavior",
-        options: { fade: "fade", slide: "slide", none: "none" }
       },
       marks: {
         type: "switch",
@@ -190,7 +191,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         styleUnit: "px"
       },
       ...byStream.layoutFields("#overlay .panel", { heading: ["Heading", "#overlay .eyebrow"], quote: ["Quote", "#overlay .quote-text"], author: ["Author", "#overlay .secondary"] }),
-      ...byStream.transitionFields("transition"),
       ...byStream.textFields(
         {
           heading: ["Heading", "#overlay .eyebrow"],
@@ -206,14 +206,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   };
 
+  // ===== FIELD DEFAULTS =====
   const fieldDefaults = {
     panelBorderWidth: 1,
     panelBorderStyle: "solid",
     panelBorderColor: "#EEEEEE1A",
-    panelShadow: "yes",
-    panelShadowColor: "#00000066",
-    panelShadowBlur: 16,
-    panelShadowY: 4,
     backdropFilterMode: "none",
     backdropFilterBlur: 12,
     headingFontSize: 16,
@@ -221,9 +218,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     authorFontSize: 16,
     quoteMarkInsetTop: -24,
     quoteMarkInsetLeft: -4,
-    transitionDuration: 500,
-    transitionEasing: "ease",
-    slideDistance: 32,
     quoteMarkFontSize: 64,
     headingLineHeight: 18,
     quoteFontSize: 32,
@@ -254,6 +248,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
+  // ===== OVERLAY INITIALIZATION =====
   const settings = await byStream.initResource(resource);
   if (!byStreamOverlay) return;
   const root = document.getElementById("overlay");
@@ -294,30 +289,22 @@ document.addEventListener("DOMContentLoaded", async () => {
     panel.hidden = true;
     return;
   }
-  const changeContent = byStream.contentTransition(panel, settings);
+  element("p", "eyebrow", settings.heading);
+  const quoteParts = () => panel.querySelectorAll(".quote-text, .secondary");
+  const changeContent = byStream.changeItems(panel, settings, "overlay", quoteParts);
   let previous = -1;
-  /**
-   * Display the next entry and apply the configured transition to the resource-owned elements.
-   * @param {number} index Zero-based item index.
-   * @param {unknown} render Render.
-   * @returns {void}
-   */
-  function change(index, render) {
-    if (index === previous) return;
-    previous = index;
-    changeContent(() => {
-      panel.replaceChildren();
-      render(entries[index]);
-    });
-  }
   root.dataset.marks = settings.marks;
   /**
    * Select the wall-clock quote slot; unchanged entries keep their existing DOM and animation.
    * @returns {void}
    */
   function update() {
-    change(Math.floor(Date.now() / (settings.duration * 1000)) % entries.length, ([quote, author]) => {
-      element("p", "eyebrow", settings.heading);
+    const index = Math.floor(Date.now() / (settings.duration * 1000)) % entries.length;
+    if (index === previous) return;
+    previous = index;
+    changeContent(() => {
+      for (const node of quoteParts()) node.remove();
+      const [quote, author] = entries[index];
       element("blockquote", "quote-text", quote);
       element("p", "secondary", author);
     });

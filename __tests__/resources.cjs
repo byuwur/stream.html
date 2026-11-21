@@ -8,6 +8,375 @@ const test = require("node:test");
 const { runtimeAssets, launchBrowser, loadAssets, resourceNames, serve } = require("./browser.cjs");
 const coreOnly = process.env.STREAM_CORE_ONLY === "1";
 
+test("quote changes animate the quote and author while preserving the heading and panel", async (t) => {
+  const browser = await launchBrowser();
+  t.after(() => browser.close());
+  const page = await browser.newPage();
+  await serve(page, await loadAssets(runtimeAssets), true);
+  await page.addInitScript(() => {
+    window.slotTime = 0;
+    Date.now = () => window.slotTime;
+  });
+  const query = new URLSearchParams({
+    heading: "Quotes",
+    entries: JSON.stringify({ First: "A", Second: "B", Third: "C" }),
+    duration: "5",
+    "overlay.entrance": "slideInRight",
+    "overlay.matchExit": "no",
+    "overlay.exit": "fadeOut",
+    "overlay.exitDuration": "3000",
+    "author.entrance": "zoomIn",
+    "author.entranceDuration": "900"
+  });
+  await page.goto("https://stream.test/quotes/?" + query);
+  await page.locator(".quote-text").waitFor();
+  const result = await page.evaluate(async () => {
+    const panel = document.querySelector(".panel"),
+      heading = panel.querySelector(".eyebrow");
+    const quote = panel.querySelector("blockquote"),
+      author = panel.querySelector(".secondary");
+    const timing = (node) =>
+      node
+        .getAnimations()
+        .find((animation) => animation.id === "stream-entrance")
+        ?.effect.getTiming().duration;
+    const initial = [timing(quote), timing(author)];
+    const tick = (time) => {
+      window.slotTime = time;
+      document.dispatchEvent(new Event("visibilitychange"));
+    };
+    tick(5000);
+    const exits = [quote, author].map((node) => node.getAnimations().find((animation) => animation.id === "stream-exit"));
+    tick(10000);
+    const during = [quote.textContent, panel.getAnimations().length, heading.getAnimations().length];
+    exits.forEach((animation) => animation.finish());
+    await new Promise(requestAnimationFrame);
+    return { initial, during, next: panel.querySelector("blockquote").textContent, sameHeading: heading === panel.querySelector(".eyebrow"), removed: !quote.isConnected };
+  });
+  assert.deepEqual(result, { initial: [300, 900], during: ["First", 0, 0], next: "Third", sameHeading: true, removed: true });
+  await page.goto("https://stream.test/quotes/?transition=slide&playback.transitionDuration=800&playback.slideDistance=-35");
+  await page.locator(".quote-text").waitFor();
+  const saved = await page.evaluate(() => byStream.settingsURL(byStreamResource, byStreamResource.settings).search);
+  const migrated = new URLSearchParams(saved);
+  assert.equal(migrated.get("overlay.entrance"), "default");
+  assert.equal(migrated.get("overlay.entranceDuration"), "400");
+  assert.equal(migrated.get("overlay.entranceDistance"), "-35");
+  assert.equal(migrated.has("transition"), false);
+});
+
+test("rotating overlays play both phases on the current item", { timeout: 30000 }, async (t) => {
+  const browser = await launchBrowser();
+  t.after(() => browser.close());
+  const page = await browser.newPage();
+  await serve(page, await loadAssets(runtimeAssets), true);
+  await page.addInitScript(() => {
+    window.slotTime = 0;
+    Date.now = () => window.slotTime;
+  });
+  for (const [name, owner, selector, seconds, settings] of [
+    ["sponsors", "overlay", ".primary,.secondary", 3, { duration: 3 }],
+    ["reminder", "overlay", ".primary", 10, { interval: 10, duration: 10, "overlay.container.entrance": "none" }],
+    ["randomizer", "result", ".primary,.secondary", 3, { mode: "automatic", duration: 3, showNumber: "yes" }],
+    ["ticker", "message", ".ticker-message", 3, { mode: "rotate", duration: 3, "overlay.children.entrance": "none" }],
+    ["watermark", "overlay", ".brand-text", 3, { fadeInterval: 10, visibleDuration: 3 }]
+  ]) {
+    await t.test(name, async () => {
+      const params = new URLSearchParams({ ...settings, [owner + ".entrance"]: "fadeIn", [owner + ".entranceDuration"]: 5000 });
+      await page.goto("https://stream.test/" + name + "/?" + params);
+      await page.locator(selector).first().waitFor();
+      const result = await page.evaluate(
+        async ({ selector, seconds, hide }) => {
+          const panel = document.querySelector(".panel"),
+            heading = panel.querySelector(".eyebrow");
+          const tick = (time) => {
+            window.slotTime = time;
+            document.dispatchEvent(new Event("visibilitychange"));
+          };
+          const nodes = [...panel.querySelectorAll(selector)],
+            text = nodes.map((node) => node.textContent);
+          const has = (node, phase) => node.getAnimations().some((animation) => animation.id === "stream-" + phase);
+          const initial = nodes.every((node) => has(node, "entrance"));
+          tick(seconds * 1000);
+          const leaving = nodes.every((node) => has(node, "exit"));
+          const stable = ![panel, heading].some((node) => node && (has(node, "entrance") || has(node, "exit"))) && !panel.hidden;
+          for (const node of nodes) for (const motion of node.getAnimations()) if (motion.id === "stream-exit") motion.finish();
+          await new Promise(requestAnimationFrame);
+          const changed = hide ? panel.hidden : JSON.stringify([...panel.querySelectorAll(selector)].map((node) => node.textContent)) !== JSON.stringify(text);
+          if (hide) tick(10000);
+          while (panel.querySelector("[data-stream-await-size]")) await new Promise(requestAnimationFrame);
+          return { initial, leaving, stable, changed, sameHeading: panel.querySelector(".eyebrow") === heading, next: [...panel.querySelectorAll(selector)].every((node) => has(node, "entrance")) };
+        },
+        { selector, seconds, hide: name === "watermark" }
+      );
+      assert.deepEqual(result, { initial: true, leaving: true, stable: true, changed: true, sameHeading: true, next: true });
+    });
+  }
+  await page.goto("https://stream.test/ticker/?mode=fade&transitionDuration=1400");
+  await page.locator(".ticker-message").waitFor();
+  const saved = await page.evaluate(() => byStream.settingsURL(byStreamResource, byStreamResource.settings).search);
+  assert.equal(new URLSearchParams(saved).get("message.entrance"), "fadeIn");
+  assert.equal(new URLSearchParams(saved).get("message.entranceDuration"), "700");
+});
+
+test("lower thirds animate the painted panel and its configured children across swaps and gaps", async (t) => {
+  const browser = await launchBrowser();
+  t.after(() => browser.close());
+  const page = await browser.newPage();
+  await serve(page, await loadAssets(runtimeAssets), true);
+  await page.addInitScript(() => {
+    window.slotTime = 0;
+    Date.now = () => window.slotTime;
+  });
+  for (const gap of [0, 1]) {
+    const query = new URLSearchParams({ duration: 3, gap, resizeDuration: 0, "overlay.entrance": "fadeInUp", "overlay.entranceDuration": 3000, "name.entrance": "fadeIn", "name.entranceDuration": 5000 });
+    await page.goto("https://stream.test/lower-thirds/?" + query);
+    const result = await page.locator(".panel:has(.primary)").evaluate(async (panel, gap) => {
+      const tick = (time) => {
+        window.slotTime = time;
+        document.dispatchEvent(new Event("visibilitychange"));
+      };
+      const motion = (node, phase) => node.getAnimations().find((animation) => animation.id === "stream-" + phase);
+      const first = panel.querySelector(".primary");
+      const entrance = motion(panel, "entrance");
+      const panelFrames = entrance.effect.getKeyframes();
+      const timings = [entrance, motion(first, "entrance")].map((entry) => entry.effect.getTiming().duration);
+      tick(3000);
+      motion(panel, "exit").finish();
+      await new Promise(requestAnimationFrame);
+      const waiting = !panel.hidden && first.isConnected && !!motion(first, "exit");
+      for (const animation of panel.getAnimations({ subtree: true })) if (animation.id === "stream-exit") animation.finish();
+      await new Promise(requestAnimationFrame);
+      const hidden = panel.hidden;
+      if (gap) tick(4000);
+      await new Promise(requestAnimationFrame);
+      return { timings, moves: panelFrames.some((frame) => frame.transform?.includes("10%")), waiting, hidden, replaced: panel.querySelector(".primary") !== first, next: !!motion(panel, "entrance") };
+    }, gap);
+    assert.deepEqual(result, { timings: [3000, 5000], moves: true, waiting: true, hidden: !!gap, replaced: true, next: true });
+  }
+});
+
+test("Randomizer finishes the old draw, resizes with the new text hidden, then enters with a short slide", async (t) => {
+  const browser = await launchBrowser();
+  t.after(() => browser.close());
+  const page = await browser.newPage();
+  page.setDefaultTimeout(5000);
+  await serve(page, await loadAssets(runtimeAssets), true);
+  const params = new URLSearchParams({ mode: "manual", entries: JSON.stringify(["Try a new character!", "One more round?"]), seed: 1, round: 0, resizeDuration: 3000, "result.entrance": "slideInRight", "result.entranceDuration": 4000 });
+  await page.goto("https://stream.test/randomizer/?" + params);
+  const result = page.locator(".primary");
+  const button = page.locator(".draw-button");
+  await result.waitFor();
+  const heading = page.locator(".panel .eyebrow");
+  function glyphs(node) {
+    const range = document.createRange();
+    range.selectNodeContents(node);
+    const word = range.getBoundingClientRect();
+    range.setEnd(node.firstChild, 1);
+    const first = range.getBoundingClientRect();
+    range.setStart(node.firstChild, 1);
+    range.setEnd(node.firstChild, 2);
+    return [word.width, word.height, first.width, range.getBoundingClientRect().x - first.x, word.x + word.width / 2, word.y];
+  }
+  const before = await heading.evaluate(glyphs);
+  await button.click();
+  assert.equal(await result.textContent(), "Try a new character!");
+  const outgoing = await result.evaluate((node) => {
+    const motion = node.getAnimations().find((item) => item.id === "stream-exit");
+    const last = motion.effect.getKeyframes().at(-1);
+    motion.finish();
+    return [last.transform, last.filter, getComputedStyle(node.closest(".panel")).overflowX];
+  });
+  assert.match(outgoing[0], /10%/);
+  assert.match(outgoing[1], /opacity\(0\)/);
+  assert.equal(outgoing[2], "clip");
+  await page.waitForFunction(() =>
+    document
+      .querySelector(".panel")
+      .getAnimations()
+      .some((animation) => animation.id === "stream-resize")
+  );
+  assert.equal(await result.textContent(), "One more round?");
+  assert.ok(await result.isHidden());
+  const panel = page.locator(".panel");
+  const widths = [];
+  for (const time of [0, 750, 1500, 2250]) {
+    widths.push(
+      await panel.evaluate((node, time) => {
+        const resize = node.getAnimations().find((motion) => motion.id === "stream-resize");
+        resize.pause();
+        resize.currentTime = time;
+        return node.getBoundingClientRect().width;
+      }, time)
+    );
+    const sample = await heading.evaluate(glyphs);
+    // Some engines snap individual glyph ranges to whole pixels even at the same text width.
+    assert.ok(
+      sample.every((size, i) => Math.abs(size - before[i]) <= (i < 2 ? 0.1 : 1)),
+      JSON.stringify({ time, before, sample })
+    );
+  }
+  assert.ok(
+    widths.every((width, i) => !i || width < widths[i - 1]),
+    JSON.stringify(widths)
+  );
+  await panel.evaluate((node) =>
+    node
+      .getAnimations()
+      .find((motion) => motion.id === "stream-resize")
+      .finish()
+  );
+  await result.waitFor();
+  const incoming = await result.evaluate((node) => {
+    const frame = node
+      .getAnimations()
+      .find((motion) => motion.id === "stream-entrance")
+      .effect.getKeyframes()[0];
+    return [frame.transform, frame.filter];
+  });
+  assert.match(incoming[0], /10%/);
+  assert.match(incoming[1], /opacity\(0\)/);
+  await button.click();
+  await result.evaluate((node) =>
+    node
+      .getAnimations()
+      .find((item) => item.id === "stream-exit")
+      .finish()
+  );
+  await result.waitFor({ state: "hidden" });
+  await button.evaluate((node) => {
+    node.click();
+    node.click();
+  });
+  await result.waitFor();
+  assert.equal(await result.textContent(), "One more round?");
+});
+
+test("the sponsor heading follows the panel edge as the logo disappears and returns", async (t) => {
+  const browser = await launchBrowser();
+  t.after(() => browser.close());
+  const page = await browser.newPage();
+  await serve(page, await loadAssets(runtimeAssets), true);
+  await page.route("https://byuwur.github.io/img/logo.png", (route) =>
+    route.fulfill({
+      contentType: "image/svg+xml",
+      body: '<svg xmlns="http://www.w3.org/2000/svg" width="100" height="120"></svg>'
+    })
+  );
+  await page.addInitScript(() => {
+    window.slotTime = 0;
+    Date.now = () => window.slotTime;
+  });
+  await page.goto("https://stream.test/sponsors/?resizeDuration=3000&resizeEasing=linear");
+  await page.locator(".sponsor-image").waitFor();
+  await page.locator(".sponsor-image").evaluate((image) => image.decode());
+  const swaps = await page.locator(".eyebrow").evaluate(async (heading) => {
+    const panel = heading.parentElement,
+      range = new Range();
+    range.selectNodeContents(heading);
+    const frames = async () => {
+      await new Promise(requestAnimationFrame);
+      await new Promise(requestAnimationFrame);
+    };
+    function sample() {
+      const box = panel.getBoundingClientRect(),
+        text = range.getBoundingClientRect();
+      return { y: text.y, inset: text.y - box.y, width: text.width };
+    }
+    await frames();
+    for (const motion of document.getAnimations()) if (motion.id === "stream-resize") motion.finish();
+    await frames();
+    const swaps = [];
+    for (const time of [3000, 6000]) {
+      const samples = [sample()];
+      window.slotTime = time;
+      document.dispatchEvent(new Event("visibilitychange"));
+      for (const motion of document.getAnimations()) if (motion.id === "stream-exit") motion.finish();
+      await new Promise(requestAnimationFrame);
+      await panel.querySelector("img")?.decode();
+      await frames();
+      const motions = document.getAnimations().filter((a) => a.id === "stream-resize" || a.id === "stream-position");
+      for (const time of [0, 1500, 2999]) {
+        for (const motion of motions) {
+          motion.pause();
+          motion.currentTime = time;
+        }
+        samples.push(sample());
+      }
+      for (const motion of motions) motion.finish();
+      await frames();
+      samples.push(sample());
+      swaps.push(samples);
+    }
+    return swaps;
+  });
+  for (const [i, [before, start, mid, end, after]] of swaps.entries()) {
+    assert.ok(Math.abs(start.y - before.y) <= 1 && Math.abs(end.y - after.y) <= 1, JSON.stringify(swaps[i]));
+    assert.ok(i ? start.y > mid.y && mid.y > end.y : start.y < mid.y && mid.y < end.y);
+    assert.ok([start, mid, end, after].every((s) => Math.abs(s.inset - before.inset) <= 1 && Math.abs(s.width - before.width) < 0.1));
+  }
+});
+
+test("automatic panels wrap and animate both dimensions under a maximum width", async (t) => {
+  const browser = await launchBrowser();
+  t.after(() => browser.close());
+  const page = await browser.newPage();
+  await serve(page, await loadAssets(runtimeAssets), true);
+  await page.addInitScript(() => {
+    window.slotTime = 0;
+    Date.now = () => window.slotTime;
+  });
+  const params = new URLSearchParams({ entries: JSON.stringify({ Short: "A", ["Long quotation ".repeat(8)]: "B" }), width: 320, duration: 5, heading: "", resizeDuration: 3000, "quote.entrance": "none", "author.entrance": "none" });
+  for (const mode of ["content", "fill"]) {
+    params.set("widthMode", mode);
+    await page.goto("https://stream.test/quotes/?" + params);
+    const result = await page.locator(".quote-text").evaluate(async (quote) => {
+      const panel = quote.parentElement;
+      const frames = async () => {
+        await new Promise(requestAnimationFrame);
+        await new Promise(requestAnimationFrame);
+      };
+      const box = () => [panel.offsetWidth, panel.offsetHeight];
+      const tick = (time) => {
+        window.slotTime = time;
+        document.dispatchEvent(new Event("visibilitychange"));
+      };
+      await frames();
+      const short = box();
+      tick(5000);
+      await frames();
+      const grow = panel.getAnimations().find((item) => item.id === "stream-resize");
+      const text = panel.querySelector(".quote-text");
+      const lines = () => {
+        const range = document.createRange();
+        range.selectNodeContents(text);
+        return [...range.getClientRects()].map(({ width, height }) => [width, height]);
+      };
+      grow.pause();
+      grow.currentTime = 300;
+      const early = lines();
+      grow.currentTime = 1500;
+      const middle = lines();
+      grow.finish();
+      await frames();
+      const long = box(),
+        finalLines = lines();
+      tick(10000);
+      await frames();
+      const shrink = panel.getAnimations().filter((item) => item.id === "stream-resize");
+      shrink.forEach((motion) => motion.finish());
+      await frames();
+      return { short, long, early, middle, finalLines, final: box(), grow: grow.effect.getTiming().easing, shrink: shrink.length };
+    });
+    assert.deepEqual(result.early, result.finalLines);
+    assert.deepEqual(result.middle, result.finalLines);
+    assert.equal(result.long[0], 320);
+    assert.ok(mode === "content" ? result.short[0] < 320 : result.short[0] === 320);
+    assert.ok(result.long[1] > result.short[1]);
+    assert.deepEqual(result.final, result.short);
+    assert.deepEqual([result.grow, result.shrink], ["ease", 1]);
+  }
+});
+
 /** Sample premultiplied RGB and alpha at fractional positions in the element. */
 async function renderedPixels(page, locator, points) {
   const screenshots = [];

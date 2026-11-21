@@ -1,9 +1,7 @@
 // Sponsor Carousel: validated URL settings and an native renderer with shared URL setup.
 document.addEventListener("DOMContentLoaded", async () => {
   await byStream.assetsReady;
-  // ==========
-  // ==== RESOURCE DEFINITION ====
-  // ==========
+  // ===== RESOURCE DEFINITION =====
 
   // Defaults, URL constraints, and the field metadata consumed by the optional editor.
   const resource = {
@@ -13,6 +11,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     preview: [960, 540],
     urlRequired: ["entries"],
     presets: true,
+    fieldDefaults: { "image.entrance": "fadeInUp", "name.entrance": "fadeInDown", "message.entrance": "fadeInUp" },
+    ...byStream.cycleParameters(),
+    elements: {
+      overlay: { label: "Appearance", premade: "slide", slideDistance: 32, motionLabel: "sponsor", selector: "#overlay .panel" },
+      heading: { label: "Heading", selector: "#overlay .eyebrow", fields: ["heading"] },
+      image: { label: "Sponsor image", selector: "#overlay .sponsor-image", fields: ["imageHeight", "fit"] },
+      name: { label: "Sponsor name", selector: "#overlay .primary" },
+      message: { label: "Message", selector: "#overlay .secondary" }
+    },
     fields: {
       entries: {
         type: "entries",
@@ -59,13 +66,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         max: 3600,
         step: "any"
       },
-      transition: {
-        type: "select",
-        default: "slide",
-        label: "Transition",
-        section: "Content & behavior",
-        options: { fade: "fade", slide: "slide", none: "none" }
-      },
       fontFamily: {
         type: "font",
         default: "Courier New",
@@ -99,7 +99,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       accentColor: {
         type: "color",
-        default: "#660000",
+        default: "#990000",
         label: "Accent color",
         section: "Appearance",
         maxlength: 80
@@ -235,7 +235,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         styleProperty: "opacity",
         styleUnit: "%"
       },
-      ...byStream.transitionFields("transition"),
       ...byStream.textFields({
         heading: ["Heading", "#overlay .eyebrow"],
         name: ["Sponsor name", "#overlay .primary"],
@@ -248,22 +247,16 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   };
 
+  // ===== FIELD DEFAULTS =====
   const fieldDefaults = {
     panelBorderWidth: 1,
     panelBorderStyle: "solid",
     panelBorderColor: "#EEEEEE1A",
-    panelShadow: "yes",
-    panelShadowColor: "#00000066",
-    panelShadowBlur: 16,
-    panelShadowY: 4,
     backdropFilterMode: "none",
     backdropFilterBlur: 12,
     headingFontSize: 16,
     headingTracking: 1.8,
     messageFontSize: 24,
-    transitionDuration: 500,
-    transitionEasing: "ease",
-    slideDistance: 32,
     nameFontSize: 32,
     headingLineHeight: 18,
     nameLineHeight: 38.4,
@@ -292,6 +285,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
+  // ===== OVERLAY INITIALIZATION =====
   const settings = await byStream.initResource(resource);
   if (!byStreamOverlay) return;
   const root = document.getElementById("overlay");
@@ -331,7 +325,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     panel.hidden = true;
     return;
   }
-  const changeContent = byStream.contentTransition(panel, settings);
+  element("p", "eyebrow", settings.heading);
+  const items = () => panel.querySelectorAll(".sponsor-image,.primary,.secondary");
+  const changeContent = byStream.changeItems(panel, settings, "overlay", items);
   let previous = -1;
   /**
    * Display the next entry and apply the configured transition to the resource-owned elements.
@@ -343,7 +339,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (index === previous) return;
     previous = index;
     changeContent(() => {
-      panel.replaceChildren();
+      for (const node of items()) node.remove();
       render(settings.entries[index]);
     });
   }
@@ -353,7 +349,6 @@ document.addEventListener("DOMContentLoaded", async () => {
    */
   function update() {
     change(Math.floor(Date.now() / (settings.duration * 1000)) % settings.entries.length, (e) => {
-      element("p", "eyebrow", settings.heading);
       if (e.imageUrl) {
         const image = element("img", "sponsor-image");
         image.src = e.imageUrl;

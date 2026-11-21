@@ -1,9 +1,7 @@
 // Randomizer: validated URL settings and an native renderer with shared URL setup.
 document.addEventListener("DOMContentLoaded", async () => {
   await byStream.assetsReady;
-  // ==========
-  // ==== RESOURCE DEFINITION ====
-  // ==========
+  // ===== RESOURCE DEFINITION =====
 
   // Defaults, URL constraints, and the field metadata consumed by the optional editor.
   const resource = {
@@ -13,6 +11,16 @@ document.addEventListener("DOMContentLoaded", async () => {
     preview: [960, 540],
     urlRequired: ["entries", "startTime"],
     presets: true,
+    ...byStream.cycleParameters("result", "resultMotion", 500, 24),
+    sectionOrder: ["General", "Result", "Appearance"],
+    fieldDefaults: { "result.entrance": "fadeInLeft" },
+    elements: {
+      overlay: { label: "Appearance", selector: "#overlay .panel" },
+      heading: { label: "Heading", selector: "#overlay .eyebrow", fields: ["label"] },
+      result: { label: "Result", premade: "slide", selector: "#overlay .primary", fields: ["entries"] },
+      counter: { label: "Draw counter", selector: "#overlay .secondary", fields: ["showNumber", "counterLabel"], when: ["showNumber", "yes"] },
+      button: { label: "Draw button", selector: "#overlay .draw-button", fields: ["buttonLabel"], when: ["mode", "manual"] }
+    },
     fields: {
       entries: {
         type: "entries",
@@ -213,8 +221,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         counter: ["showNumber", "yes"],
         button: ["mode", "manual"]
       }),
-      resultMotion: { type: "select", default: "slide", label: "Result transition", section: "Animation", options: { none: "None", fade: "Fade", slide: "Slide" } },
-      ...byStream.transitionFields("resultMotion"),
       ...byStream.textFields(
         {
           heading: ["Heading", "#overlay .eyebrow"],
@@ -231,20 +237,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   };
 
+  // ===== FIELD DEFAULTS =====
   const fieldDefaults = {
     panelBorderWidth: 1,
     panelBorderStyle: "solid",
     panelBorderColor: "#EEEEEE11",
-    panelShadow: "yes",
-    panelShadowColor: "#00000066",
-    panelShadowBlur: 16,
-    panelShadowY: 4,
     backdropFilterMode: "none",
     backdropFilterBlur: 12,
     headingFontSize: 16,
     headingTracking: 1.8,
-    transitionDuration: 500,
-    transitionEasing: "ease",
     headingLineHeight: 18,
     resultFontSize: 32,
     resultLineHeight: 38.4,
@@ -278,6 +279,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
+  // ===== OVERLAY INITIALIZATION =====
   const settings = await byStream.initResource(resource);
   if (!byStreamOverlay) return;
   const root = document.getElementById("overlay");
@@ -320,7 +322,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   element("p", "eyebrow", settings.label);
   const display = element("p", "primary");
   const number = element("p", "secondary");
-  const changeContent = byStream.contentTransition(display, { ...settings, transition: settings.resultMotion }, panel);
+  const changeContent = byStream.changeItems(panel, settings, "result", () => [display, number]);
   number.hidden = settings.showNumber === "no";
   const start = settings.useStartTime === "yes" ? Date.parse(settings.startTime) : Date.now();
   let round = settings.round,
