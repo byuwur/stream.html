@@ -11,7 +11,7 @@
     <meta name="description" content="Build your own OBS browser overlay with the stream.HTML configurator demo. Try URL-driven settings, form controls, and a live preview." />
     <meta name="author" content="Andrés Trujillo [Mateus] byUwUr" />
     <meta name="robots" content="index, follow, max-image-preview:large" />
-    <meta name="theme-color" content="#660000" />
+    <meta name="theme-color" content="#600" />
     <!-- <link rel="canonical" href="https://byuwur.github.io/stream.html/configurator.html" /> -->
     <link rel="canonical" href="https://stream.byuwur.co/configurator.html" />
     <!-- <link rel="icon" href="https://byuwur.github.io/stream.html/stream.html.png" /> -->
@@ -43,6 +43,7 @@
     <!-- ===== SHARED IMPORTS: resource and configurator ===== -->
     <script type="application/json" id="shared-assets" data-source="https://cdn.jsdelivr.net/gh/byuwur/spa.js" data-spa-version="v20.17">
       [
+        { "path": "/css/animate.min.css", "optional": true },
         { "path": "/_fonts.min.js", "optional": false },
         { "path": "/_functions.min.js", "optional": false }
       ]
@@ -71,7 +72,6 @@
           { "path": "/css/pickr.min.css", "optional": false },
           { "path": "/_common.min.css", "optional": false },
           { "path": "/css/select2.min.css", "optional": false },
-          { "path": "/css/animate.min.css", "optional": false },
           { "path": "/js/jquery.min.js", "optional": false },
           { "path": "/js/select2.full.min.js", "optional": false },
           { "path": "/js/popper.min.js", "optional": false },
@@ -85,6 +85,7 @@
       <script src="./configurator.js" defer></script>
     </template>
     <div id="configurator"></div>
+    <link rel="stylesheet" href="./resources.css" data-renderer-style />
     <style data-renderer-style>
       /* Demo-only CSS; keep each real resource's styles in its own file. */
       html,
@@ -95,21 +96,21 @@
         font-size: 16px;
       }
       #demo-preview {
-        --demo-size: 48px;
-        --demo-color: #ffffff;
+        --demo-size: 3rem;
+        --demo-color: #fff;
         display: grid;
         place-items: center;
         box-sizing: border-box;
         min-height: 100%;
-        padding: 32px;
+        padding: 2rem;
         font-family: "Courier New", Courier, monospace;
         text-align: center;
         color: var(--demo-color);
       }
       .demo-label,
       .demo-note {
-        margin: 16px 0;
-        font-size: 16px;
+        margin: 1rem 0;
+        font-size: 1rem;
         line-height: 1.5;
         opacity: 0.65;
       }
@@ -117,7 +118,7 @@
         margin: 0;
         font-size: var(--demo-size);
         font-weight: 700;
-        line-height: 1.2;
+        line-height: 1.25;
         white-space: pre-wrap;
         overflow-wrap: anywhere;
       }
@@ -126,17 +127,21 @@
       // Demo-only JavaScript; keep each real resource's renderer in its own file.
       document.addEventListener("DOMContentLoaded", async () => {
         await byStream.assetsReady;
-        // ==========
-        // ==== RESOURCE DEFINITION ====
-        // ==========
+        // ===== RESOURCE DEFINITION =====
 
         // Defaults, URL constraints, and the field metadata consumed by the optional editor.
         const resource = {
-          version: "1.0",
+          version: "1.1",
           title: "This is the form.",
           description: "Live preview of overlay settings.",
           preview: [1280, 720],
           urlRequired: ["message"],
+          elements: {
+            overlay: { label: "Appearance", selector: ".demo-card" },
+            message: { label: "Message", selector: "#demo-message", fields: ["message", "fontSize", "textColor"] },
+            heading: { label: "Heading", selector: ".demo-label" },
+            note: { label: "Note", selector: ".demo-note" }
+          },
           fields: {
             message: {
               type: "textarea",

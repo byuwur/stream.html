@@ -1,5 +1,6 @@
+/* ===== EDITOR LAYOUT ===== */
 html {
-  font-size: 1rem;
+  font-size: 16px;
 }
 body {
   font-size: 1rem;
@@ -16,34 +17,54 @@ body {
   --bs-border-radius-lg: 0;
   --preview-grid-a: #ddd;
   --preview-grid-b: #eee;
-  --about-link-color: #5e5b78;
+  --about-link-color: #657;
   --settings-motion-duration: 0.25s;
   --settings-collapse-duration: 0.2s;
 }
 .bywr-configurator[data-bs-theme="dark"] {
   --bs-body-bg: #111;
   --bs-body-bg-rgb: 17, 17, 17;
-  --bs-secondary-bg: #242424;
+  --bs-secondary-bg: #222;
   --bs-secondary-bg-rgb: 36, 36, 36;
-  --bs-tertiary-bg: #181818;
+  --bs-tertiary-bg: #111;
   --bs-tertiary-bg-rgb: 24, 24, 24;
   --bs-border-color: #555;
-  --preview-grid-a: #202020;
-  --preview-grid-b: #292929;
-  --about-link-color: #aaa6bf;
+  --preview-grid-a: #222;
+  --preview-grid-b: #333;
+  --about-link-color: #aab;
 }
 .bywr-configurator :is(.preview-panel, .config-footer) a:hover,
 .bywr-configurator :is(.preview-panel, .config-footer) a:hover * {
   color: var(--primary-foreground) !important;
 }
-.bywr-configurator .theme-toggle::after {
-  border-radius: 0;
+.bywr-configurator #theme-toggle {
+  padding: 0.125rem;
+  color: var(--light-color);
+}
+.bywr-configurator #theme-toggle > [aria-hidden] {
+  display: grid;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  font:
+    1.125rem/1 "Segoe UI Symbol",
+    sans-serif;
+}
+.bywr-configurator #theme-toggle[aria-pressed="false"] .theme-light,
+.bywr-configurator #theme-toggle[aria-pressed="true"] .theme-dark {
+  background-color: var(--light-color);
+  color: var(--primary-color);
+}
+.bywr-configurator #theme-toggle:focus-visible {
+  outline: 0.125rem solid currentColor;
+  outline-offset: 0.125rem;
 }
 .bywr-configurator .pickr .pcr-button {
   width: 2rem;
   height: 2rem;
   border-radius: 0;
 }
+/* ===== COLOR PICKER ===== */
 .bywr-configurator .pcr-app {
   color: var(--bs-body-color);
   background: var(--bs-body-bg);
@@ -69,7 +90,7 @@ body {
 .bywr-configurator .config-help [data-panel="info"] a,
 .bywr-configurator .config-help [data-panel="info"] a:hover * {
   color: var(--about-link-color) !important;
-  text-underline-offset: 0.2em;
+  text-underline-offset: 0.25rem;
 }
 .bywr-configurator .config-help ol {
   list-style: decimal;
@@ -92,6 +113,7 @@ body {
 .bywr-configurator .animate__animated.animate__fadeIn {
   animation: fadeIn var(--settings-motion-duration) ease-out 1 both !important;
 }
+/* ===== MOTION ===== */
 .bywr-configurator .animate__animated.animate__fadeOut {
   animation: fadeOut var(--settings-motion-duration) ease-out 1 both !important;
 }
@@ -107,14 +129,29 @@ body {
   transition: height var(--settings-motion-duration) ease-out !important;
 }
 .bywr-configurator .settings-panel .accordion {
-  --bs-accordion-btn-focus-box-shadow: 0 0 0 0.2rem color-mix(in srgb, var(--primary-foreground) 25%, transparent);
+  --bs-accordion-btn-focus-box-shadow: 0 0 0 0.25rem color-mix(in srgb, var(--primary-foreground) 25%, transparent);
 }
 .bywr-configurator .field-subsection {
   border: 0.0625rem solid var(--bs-border-color);
-  border-inline-start: 0.1875rem solid var(--primary-foreground);
+  border-inline-start: 0.25rem solid var(--primary-foreground);
 }
+/* ===== FIELD SECTIONS ===== */
 .bywr-configurator .field-subsection > .accordion-header {
   background: var(--bs-tertiary-bg);
+}
+.bywr-configurator .field-subsection .field-subsection {
+  border-inline-start-width: 0.125rem;
+}
+.bywr-configurator .field-subsection .subsection-collapse > div {
+  padding-inline: 0.5rem !important;
+}
+.bywr-configurator .spacing-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 0.5rem;
+}
+.bywr-configurator .spacing-grid .config-field {
+  min-width: 0;
 }
 /* Apply the entry offset immediately; only the return to rest should transition. */
 .bywr-configurator .motion-enter {
@@ -160,7 +197,7 @@ body {
 /* Settings, ordered entries, and live preview. */
 .bywr-configurator .config-field {
   padding-bottom: 0.5rem;
-  border-bottom: 1px solid #6666;
+  border-bottom: 0.0625rem solid #6666;
 }
 .bywr-configurator .field-value {
   min-width: 0;
@@ -170,7 +207,7 @@ body {
   min-width: 0;
 }
 .bywr-configurator .field-restore {
-  padding: 0.375rem 0.6rem;
+  padding: 0.375rem 0.625rem;
 }
 .bywr-configurator .settings-editor,
 .bywr-configurator .motion-layer {
@@ -187,6 +224,7 @@ body {
   height: 100% !important;
   overflow-y: hidden !important;
 }
+/* ===== JSON EDITOR ===== */
 .bywr-configurator .json-view :is(.settings-content, .settings-editors) {
   min-height: 0;
 }
@@ -231,6 +269,7 @@ body {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+/* ===== IMAGE CONTROLS ===== */
 .bywr-configurator .image-actions > .image-provider {
   padding-right: 2rem;
   border-right: 0;
@@ -244,7 +283,7 @@ body {
   z-index: 1;
 }
 .bywr-configurator .image-input :is(select, button):focus-visible {
-  box-shadow: 0 0 0 0.2rem color-mix(in srgb, var(--primary-foreground) 25%, transparent);
+  box-shadow: 0 0 0 0.25rem color-mix(in srgb, var(--primary-foreground) 25%, transparent);
 }
 .bywr-configurator .image-dragging {
   outline: 0.125rem solid var(--primary-foreground);
@@ -283,6 +322,7 @@ body {
   border-color: var(--bs-border-color);
   border-radius: 0;
 }
+/* ===== SELECT MENUS ===== */
 .bywr-configurator .stream-select2 .select2-selection__choice__remove {
   color: var(--bs-body-color);
   border-color: var(--bs-border-color);
@@ -296,7 +336,7 @@ body {
 }
 .bywr-configurator .stream-select2:is(.select2-container--focus, .select2-container--open) .select2-selection {
   border-color: var(--primary-foreground);
-  box-shadow: 0 0 0 0.2rem color-mix(in srgb, var(--primary-foreground) 25%, transparent);
+  box-shadow: 0 0 0 0.25rem color-mix(in srgb, var(--primary-foreground) 25%, transparent);
 }
 .bywr-configurator .stream-select2-dropdown .select2-search__field {
   border: 0.0625rem solid var(--bs-border-color);
@@ -330,6 +370,10 @@ body {
 .bywr-configurator #preview-stage {
   background-image: conic-gradient(from 90deg, var(--preview-grid-b) 25%, var(--preview-grid-a) 0 50%, var(--preview-grid-b) 0 75%, var(--preview-grid-a) 0);
   background-size: 2rem 2rem;
+}
+.bywr-configurator #preview-viewport {
+  /* Composite the scaled frame as a unit so shrinking overlays clear their old edges. */
+  will-change: transform;
 }
 .bywr-configurator #overlay-preview {
   color-scheme: light;
@@ -380,11 +424,12 @@ body {
   }
 }
 .bywr-configurator .resource-status {
-  font-size: 0.65rem;
+  font-size: 0.625rem;
   color: inherit;
   background: color-mix(in srgb, currentColor 8%, transparent);
   border-color: color-mix(in srgb, currentColor 40%, transparent) !important;
 }
+/* ===== TOOL SWITCHER ===== */
 /* Toolbar tool navigation. */
 .bywr-configurator .tool-switcher {
   width: 18rem;
@@ -393,7 +438,7 @@ body {
 .bywr-configurator .tool-switcher :is(.form-select, .select2-selection--single) {
   background: transparent;
   color: #fff;
-  border-color: #ffffff80;
+  border-color: #fff8;
 }
 .bywr-configurator .tool-switcher .select2-selection--single :is(.select2-selection__rendered, .select2-selection__placeholder) {
   color: #fff;
@@ -416,14 +461,14 @@ body {
   opacity: 0.75;
 }
 .bywr-configurator :is(input, textarea, select).is-invalid {
-  border: 2px solid #ff6b6b !important;
-  background-color: #ff000014 !important;
-  box-shadow: 0 0 0 0.15rem #ff6b6b40;
+  border: 0.125rem solid #f66 !important;
+  background-color: #f001 !important;
+  box-shadow: 0 0 0 0.125rem #f664;
 }
 .bywr-configurator .input-group:has(.is-invalid) > .input-group-text,
 .bywr-configurator .input-group:has(.is-invalid) .select2-selection {
-  border-color: #ff6b6b !important;
-  color: #ff6b6b;
+  border-color: #f66 !important;
+  color: #f66;
 }
 .bywr-configurator .number-range .range-value {
   width: 6rem;
@@ -436,7 +481,7 @@ body {
 .bywr-configurator .choice-buttons .btn {
   flex: 1;
   min-width: 0;
-  padding: 0.4rem 0.6rem;
+  padding: 0.375rem 0.625rem;
   white-space: normal !important;
   overflow-wrap: anywhere;
 }

@@ -20,6 +20,17 @@
   const { readURLParameters, settingsURL, fieldEnabled, parseLocale, parseZone } = byStream;
   let parameterError = "";
   let compressedFields = new Set();
+  // ===== SAVED PREFERENCES =====
+
+  function savedEditorTheme() {
+    try {
+      if (localStorage.getItem("stream.html.theme") === "light") return "light";
+    } catch {
+      // Storage can be unavailable for local files.
+    }
+    return "dark";
+  }
+
   const preferencePath = new URL(".", location.href).pathname;
   // Portable distributions share a folder; source pages retain their existing preference keys.
   const preferenceResource = document.currentScript.dataset.preferenceResource;
@@ -74,13 +85,15 @@
     return location.search || savedPreferences.query;
   };
 
-  if (typeof global.jQuery !== "function") {
+  const landing = document.documentElement.classList.contains("stream-home");
+  let $ = global.jQuery;
+  if (!landing && typeof $ !== "function") {
     console.error("Unable to load configurator dependencies: jQuery is unavailable.");
     document.body.textContent = "Unable to load the configurator. Check your internet connection, then reload.";
     return;
   }
-  const $ = global.jQuery;
 
+  // ===== EDITOR LAYOUT AND VISIBILITY =====
   /**
    * Measure changed containers together, interpolate their heights, then restore natural sizing.
    * Bootstrap retains height ownership during collapse transitions; newer measurements supersede old ones.
@@ -139,7 +152,13 @@
       }
       const container = target.parent().closest(".subsection-collapse.show, .accordion-collapse.show, .modal-content, .entry-list")[0];
       if (visible && container && !containers.has(container)) containers.set(container, container.getBoundingClientRect().height);
-      targets.push({ target, visible, container, finished: false, height: visible ? 0 : target[0].getBoundingClientRect().height });
+      targets.push({
+        target,
+        visible,
+        container,
+        finished: false,
+        height: visible ? 0 : target[0].getBoundingClientRect().height
+      });
     }
     if (!targets.length) return Promise.all(pending).then((results) => results.every(Boolean));
     targets.forEach(({ target, visible, height }) => {
@@ -218,6 +237,7 @@
       });
   };
 
+  // ===== FIELD ICONS =====
   /**
    * Explicit resource icons take priority; shared controls use their property or purpose.
    * @param {string} name Field or item identifier.
@@ -265,7 +285,16 @@
       "animation-iteration-count": "fa-repeat"
     };
     if (properties[field.styleProperty]) return properties[field.styleProperty];
-    const types = { color: "fa-palette", font: "fa-font", datetime: "fa-calendar-days", timezone: "fa-earth-americas", timezones: "fa-earth-americas", locale: "fa-language", entries: "fa-list", mapping: "fa-gamepad" };
+    const types = {
+      color: "fa-palette",
+      font: "fa-font",
+      datetime: "fa-calendar-days",
+      timezone: "fa-earth-americas",
+      timezones: "fa-earth-americas",
+      locale: "fa-language",
+      entries: "fa-list",
+      mapping: "fa-gamepad"
+    };
     if (types[field.type]) return types[field.type];
     for (const [pattern, icon] of [
       [/url|image|logo/i, "fa-image"],
@@ -295,12 +324,18 @@
       [/name|player/i, "fa-user"]
     ])
       if (pattern.test(name)) return icon;
-    return { switch: "fa-toggle-on", select: "fa-list", number: "fa-sliders", text: "fa-font", textarea: "fa-align-left" }[field.type] || "fa-sliders";
+    return (
+      {
+        switch: "fa-toggle-on",
+        select: "fa-list",
+        number: "fa-sliders",
+        text: "fa-font",
+        textarea: "fa-align-left"
+      }[field.type] || "fa-sliders"
+    );
   }
 
-  // ==========
-  // ==== SHARED TOOL CATALOG ====
-  // ==========
+  // ===== SHARED TOOL CATALOG =====
 
   // Shared card, navigation, and release status metadata; only ready: true tools are published.
   byConfigurator.catalog = {
@@ -547,9 +582,7 @@
     }
   };
 
-  // ==========
-  // ==== RESOURCE EDITOR LIFECYCLE ====
-  // ==========
+  // ===== RESOURCE EDITOR LIFECYCLE =====
 
   /**
    * Build the active resource editor once after initResource() publishes validated settings.
@@ -570,6 +603,33 @@
     const jqForm = jqHost.find("form[data-configurator]");
     if (!jqForm.length) return;
     const form = jqForm[0];
+    // A label's default click activates the hidden native picker underneath Select2.
+    jqHost.on("click", "label", function (event) {
+      const select = this.control;
+      if (!select?.classList.contains("select2-hidden-accessible") || event.target.closest("a, button, input, select, textarea, .select2-container")) return;
+      event.preventDefault();
+      if (select.disabled) return;
+      const widget = $(select).data("select2");
+      const focusTarget = widget.$selection.find(".select2-search__field")[0] || widget.$selection[0];
+      focusTarget.focus();
+    });
+    // The local editor previews the controls. Portable editors and overlay frames skip them.
+    const localEditor = ["localhost", "127.0.0.1", "[::1]"].includes(location.hostname);
+    const siteEditor = !preferenceResource && window.top === window && (localEditor || (location.protocol === "https:" && ["stream.byuwur.co", "controller.byuwur.co"].includes(location.host)));
+    if (siteEditor) {
+      document.body.insertAdjacentHTML(
+        "beforeend",
+        `
+        <template id="site-analytics-frame">
+          <meta name="referrer" content="no-referrer">
+          <script>
+            window.dataLayer = [];
+            function gtag() { window.dataLayer.push(arguments); }
+          <\/script>
+        </template>`
+      );
+      initSiteAnalytics();
+    }
     const fields = jqForm.find("[name]").get();
     // Servers resolve directory URLs to the landing page; downloaded files need its filename.
     const homeURL = new URL(location.protocol === "file:" ? "index.html" : ".", byConfigurator.catalog.root).href;
@@ -577,6 +637,18 @@
     // One revision invalidates queued edits and in-flight compression or URL decoding.
     let urlGeneration = 0;
     let acceptedGeneration = -1;
+    let syncAppearancePreset;
+    // Batch canonical field changes until a valid URL is accepted. Imports and presets are one operation.
+    const edits = new Map();
+    let operation;
+    function groupEdit(action, field) {
+      edits.clear();
+      operation = {
+        finish: global.bySiteAnalytics?.begin(action, field),
+        previous: savedPreferences.query,
+        action
+      };
+    }
     let preparedJSON = { overrides: "{}", all: "{}" };
     // Keep typed URL drafts authoritative for Copy, Open, and F2.
     let urlEdited = false;
@@ -587,9 +659,7 @@
     const imageOptions = { base64MaxBytes: 16384, providers: [], ...byConfigurator.imageOptions };
     const imageUploadEndpoint = "https://stream.byuwur.co/upload_image.php";
 
-    // ==========
-    // ==== GENERATED FORM ====
-    // ==========
+    // ===== GENERATED FORM =====
 
     /**
      * Build the shell and native controls directly from resource.fields insertion order.
@@ -607,7 +677,7 @@
             <div class="overlay-vertical-inverted pe-none" aria-hidden="true"></div>
             <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
               <div class="d-flex align-items-center gap-2">
-                <a class="home-link flex-shrink-0" href="./" aria-label="stream.html home">
+                <a class="home-link flex-shrink-0" href="./" aria-label="stream.HTML home">
                   <!-- <img src="https://byuwur.github.io/stream.html/stream.html.png" alt="" /> -->
                   <img src="${new URL("stream.html.png", root).href}" alt="" />
                 </a>
@@ -622,8 +692,10 @@
                 <a href="https://byuwur.co" target="_blank" rel="noopener" class="text-white link-body-emphasis"> BONYUR @byUwUr </a>
               </p>
               <nav class="config-menu d-flex align-items-center gap-2 flex-shrink-0 ms-auto ms-lg-0" aria-label="Configurator menu">
-                <button id="theme-toggle" class="theme-toggle rounded-0 border border-light text-white" type="button" disabled="" title="Loading theme controls" aria-label="Toggle theme" aria-pressed="true">
-                  <span aria-hidden="true">☾︎ ☀︎</span>
+                <button id="theme-toggle" class="d-inline-flex rounded-0 border border-light bg-transparent" type="button" disabled title="Loading theme controls" aria-labelledby="theme-toggle-label" aria-pressed="true">
+                  <span id="theme-toggle-label" class="visually-hidden">Dark theme</span>
+                  <span class="theme-light" aria-hidden="true">☀︎</span>
+                  <span class="theme-dark" aria-hidden="true">☾︎</span>
                 </button>
                 <a class="btn btn-sm btn-outline-light text-nowrap" href="https://github.com/byuwur/stream.html" target="_blank" rel="noopener" title="Source code">
                   <i class="fa-brands fa-github me-1" aria-hidden="true"></i>
@@ -716,6 +788,7 @@
             <section class="preview-panel h-100 order-first order-md-last col-12 col-md bg-body p-3 d-flex flex-column gap-2" aria-label="Overlay preview">
               <header class="preview-toolbar d-flex justify-content-between align-items-center small">
                 <strong><i class="fa-solid fa-eye me-2" aria-hidden="true"></i>Live preview</strong>
+                <button id="preview-visibility" type="button" class="btn btn-sm btn-outline-secondary" aria-controls="overlay-preview">Hide overlay</button>
                 <a id="preview-url" target="_blank" rel="noopener" class="link-body-emphasis" aria-keyshortcuts="Alt+Shift+O">
                   <i class="fa-solid fa-arrow-up-right-from-square me-2" aria-hidden="true"></i>
                   Open overlay
@@ -785,7 +858,7 @@
           <!-- Help navigation. -->
           <footer class="config-footer d-flex flex-column flex-lg-row align-items-center gap-2 border-top p-2 text-body-secondary flex-shrink-0">
             <small class="config-info text-nowrap opacity-75">
-              <!-- <a href="https://github.com/byuwur/stream.html" target="_blank" rel="noopener noreferrer">stream.html</a> · -->configurator v${byConfigurator.VERSION} · resource v${resource.version}
+              <!-- <a href="https://github.com/byuwur/stream.html" target="_blank" rel="noopener noreferrer">stream.HTML</a> · -->configurator v${byConfigurator.VERSION} · resource v${resource.version}
               <!-- · <a href="https://byuwur.co" target="_blank" rel="noopener noreferrer">@byUwUr</a> -->
             </small>
             <nav class="footer-links flex-grow-1 px-5 text-center" aria-label="Page navigation"></nav>
@@ -808,15 +881,31 @@
       jqHost.find(".setup-intro").text(resource.description);
       jqHost.find("#preview-viewport").attr("viewBox", `0 0 ${resource.preview.join(" ")}`);
       jqHost.find("#overlay-preview").attr({ title: `${resource.title} preview`, allow: resource.previewAllow || "" });
-      // Create groups on first use instead of sorting; resource declaration order is the display order.
+      const visibility = jqHost.find("#preview-visibility");
+      const preview = jqHost.find("#overlay-preview")[0];
+      let visible = true;
+      visibility.on("click", () => {
+        visible = !visible;
+        preview.contentWindow.postMessage({ type: "stream-preview-visibility", visible }, location.protocol === "file:" ? "*" : location.origin);
+        visibility.text(visible ? "Hide overlay" : "Show overlay");
+      });
+      preview.addEventListener("load", () => {
+        visible = true;
+        visibility.text("Hide overlay");
+      });
+      // Honor resource section order while keeping controls and their nested groups in declaration order.
       const groups = new Map();
       const subsections = new Map();
       const jqForm = jqHost.find("form");
-      for (const [name, field] of Object.entries(resource.fields)) {
+      const ordered = Object.entries(resource.fields);
+      if (resource.sectionOrder)
+        ordered.sort(([, a], [, b]) => resource.sectionOrder.indexOf(a.section) - resource.sectionOrder.indexOf(b.section) || a.subsection.length - b.subsection.length || Number(!!b.controlsElement) - Number(!!a.controlsElement));
+      for (const [name, field] of ordered) {
         const section = field.section || "Settings";
         if (!groups.has(section)) {
           const id = `section-${groups.size}`;
           const collapsed = savedPreferences.collapsed.includes(section);
+          const icon = section === "Appearance" && tool ? tool.icon : fieldIcon(section);
           const group = $(/* HTML */ `<section class="accordion-item mb-3 border border-secondary-subtle bg-body"></section>`).attr("aria-labelledby", `${id}-toggle`).appendTo(jqForm);
           const heading = $(/* HTML */ `<button class="accordion-button p-3 fs-6 fw-semibold text-primary bg-transparent" type="button" data-bs-toggle="collapse" aria-expanded="true"></button>`)
             .attr({ id: `${id}-toggle`, "data-bs-target": `#${id}`, "aria-controls": id, "aria-expanded": String(!collapsed) })
@@ -824,7 +913,7 @@
             .text(section);
           heading.prepend(
             $(/* HTML */ `<i></i>`)
-              .addClass(`${resource.sectionIcons?.[section] || `fa-solid ${fieldIcon(section)}`} me-2`)
+              .addClass(`${resource.sectionIcons?.[section] || `fa-solid ${icon}`} me-2`)
               .attr("aria-hidden", "true")
           );
           $(/* HTML */ `<h2 class="accordion-header fs-6 m-0"></h2>`).append(heading).appendTo(group);
@@ -836,26 +925,36 @@
           groups.set(section, $(/* HTML */ `<div class="accordion-body p-3"></div>`).appendTo(content));
         }
         let container = groups.get(section);
-        if (field.subsection) {
-          const key = `${section}:${field.subsection}`;
+        const path = [section];
+        for (const title of [field.subsection || []].flat()) {
+          path.push(title);
+          const key = JSON.stringify(path);
           if (!subsections.has(key)) {
             const id = `subsection-${subsections.size}`;
             const subsection = $(/* HTML */ `<section class="field-subsection my-3"></section>`).attr("aria-labelledby", `${id}-toggle`).appendTo(container);
             const heading = $(/* HTML */ `<button class="accordion-button collapsed px-3 py-2 fs-6 fw-semibold text-primary bg-transparent" type="button" data-bs-toggle="collapse" aria-expanded="false"></button>`)
               .attr({ id: `${id}-toggle`, "data-bs-target": `#${id}`, "aria-controls": id })
-              .text(field.subsection)
+              .text(title)
               .prepend(
                 $(/* HTML */ `<i></i>`)
-                  .addClass(`fa-solid ${fieldIcon(field.subsection)} fa-fw me-2`)
+                  .addClass(`fa-solid ${fieldIcon(title)} fa-fw me-2`)
                   .attr("aria-hidden", "true")
               );
-            $(/* HTML */ `<h3 class="accordion-header fs-6 m-0"></h3>`).append(heading).appendTo(subsection);
+            $(document.createElement("h" + Math.min(6, path.length + 1)))
+              .addClass("accordion-header fs-6 m-0")
+              .append(heading)
+              .appendTo(subsection);
             const content = $(/* HTML */ `<div class="subsection-collapse collapse"></div>`)
-              .attr({ id, "aria-labelledby": `${id}-toggle`, "data-config-subsection": field.subsection })
+              .attr({ id, "aria-labelledby": `${id}-toggle`, "data-config-subsection": title })
               .appendTo(subsection);
             subsections.set(key, $(/* HTML */ `<div class="px-3 pt-3 pb-1"></div>`).appendTo(content));
           }
           container = subsections.get(key);
+        }
+        if (field.compact) {
+          let grid = container.children(".spacing-grid");
+          if (!grid.length) grid = $(/* HTML */ `<div class="spacing-grid"></div>`).appendTo(container);
+          container = grid;
         }
         const widget = !["switch", "select", "entries", "mapping"].includes(field.type) || (field.type === "select" && (field.choiceButtons || Object.keys(field.options).length <= 3));
         const label = $(
@@ -872,7 +971,7 @@
         let control;
         if (field.type === "select") {
           control = $(/* HTML */ `<select class="form-select"></select>`);
-          for (const [value, title] of Object.entries(field.options)) $(/* HTML */ `<option></option>`).val(value).text(title).appendTo(control);
+          for (const [value, title] of Object.entries(field.options)) control[0].add(new Option(title, value));
         } else if (["textarea", "timezones"].includes(field.type)) {
           control = $(/* HTML */ `<textarea class="form-control"></textarea>`).attr("rows", field.rows || 3);
         } else {
@@ -888,7 +987,13 @@
         }
         if (field.type !== "switch") control.addClass("rounded-0 bg-body-secondary border-secondary-subtle");
         // These named controls remain the serialization source even when widgets replace their UI.
-        control.attr({ name, id: field.id || `field-${name}`, "data-title": field.label, "data-description": field.description || "" });
+        control.attr({
+          name,
+          "data-parameter": field.parameter || name,
+          id: field.id || `field-${name}`,
+          "data-title": field.label,
+          "data-description": field.description || ""
+        });
         for (const key of ["min", "max", "maxlength", "placeholder"]) if (field[key] !== undefined && field[key] !== Infinity) control.attr(key, field[key]);
         if (field.optional && !field.placeholder) control.attr("placeholder", field.default === "" ? "Off" : String(field.default));
         if (field.image || widget) caption.attr("for", control.attr("id"));
@@ -909,9 +1014,7 @@
       }
     }
 
-    // ==========
-    // ==== URL GENERATION AND PREVIEW ====
-    // ==========
+    // ===== URL GENERATION AND PREVIEW =====
     /**
      * Validate the active form/JSON input and update its overlay URL and preview.
      * Commit accepted values to settings, build a sparse readable URL, then optionally compress it.
@@ -952,11 +1055,12 @@
       byStream.applyParameters(parameterRules, settings, values);
       // Always derive compression from the same sparse readable URL used by ordinary links.
       const readableURL = settingsURL(resource, settings);
+      syncAppearancePreset?.(readableURL.searchParams);
       let url = readableURL;
       let summary = `${url.href.length.toLocaleString()} characters. Parameters remain readable.`;
       const scope = $('input[name="compression-scope"]:checked').val();
       const selected = $("[data-compress-field]:checked")
-        .map((_, input) => input.value)
+        .map((_, input) => parameterRules[input.value].parameter || input.value)
         .get()
         .filter((name) => readableURL.searchParams.has(name));
       if ($("#short-url").prop("checked") && scope === "selected" && !selected.length) {
@@ -997,9 +1101,19 @@
         let value = typeof settings[name] === "object" ? JSON.stringify(settings[name]) : String(settings[name]);
         if (field.type === "color") value = value.replace(/^#/, "");
         if (value.startsWith("dr:") || value.startsWith("raw:")) value = `raw:${value}`;
-        preferenceValues.set(name, value);
+        preferenceValues.set(field.parameter || name, value);
       }
-      savePreferences(preferenceValues.toString());
+      const query = preferenceValues.toString();
+      if (operation) {
+        if (operation.previous !== query || operation.action === "resource_loaded") operation.finish?.();
+      } else {
+        for (const [name, edit] of edits) {
+          if (edit.previous !== JSON.stringify(settings[name])) edit.finish();
+        }
+      }
+      edits.clear();
+      operation = null;
+      savePreferences(query);
       if (!urlEdited) $("#overlay-url").val(url.href);
       $("#url-summary").text(summary);
       $("#preview-url").attr("href", url.href);
@@ -1013,6 +1127,7 @@
       return true;
     }
 
+    // ===== JSON EDITOR =====
     /**
      * Validate the complete JSON draft before changing any controls or accepted settings.
      * Use resource field IDs and native values; missing keys reset to resource defaults when loaded.
@@ -1026,12 +1141,18 @@
         const data = JSON.parse(jsonInput.value);
         if (!data || typeof data !== "object" || Array.isArray(data)) throw new Error("Enter a JSON object with setting IDs as keys.");
         values = new URLSearchParams();
-        for (const [name, value] of Object.entries(data)) {
+        const published = new Map(Object.entries(parameterRules).map(([name, field]) => [field.parameter || name, name]));
+        for (const [name, field] of Object.entries(parameterRules)) if (field.legacyParameter) published.set(field.legacyParameter, name);
+        for (const [key, value] of Object.entries(data)) {
+          const name = published.get(key) || key;
           const rule = Object.hasOwn(parameterRules, name) ? parameterRules[name] : null;
           if (!rule && !resource.legacyFields?.includes(name)) throw new Error(`Unknown setting: ${name}.`);
           if (value === null || (rule && typeof value === "object" && typeof rule.default !== "object")) throw new Error(`Invalid value for ${rule?.label || name} (${name}).`);
-          values.set(name, typeof value === "object" ? JSON.stringify(value) : String(value));
+          // Older full exports included defaults for the container alongside the user's item settings.
+          if (key === name && rule?.legacyParameter && Object.hasOwn(data, rule.legacyParameter) && String(value) === String(rule.default)) continue;
+          values.set(key, typeof value === "object" ? JSON.stringify(value) : String(value));
         }
+        values = byStream.internalParameters(parameterRules, values);
         resource.normalizeParameters?.(values);
         for (const [name, value] of values) {
           if (!Object.hasOwn(parameterRules, name)) continue;
@@ -1059,7 +1180,7 @@
      */
     function prepareJSON() {
       const included = settingsURL(resource, settings).searchParams;
-      const entries = Object.keys(parameterRules).map((name) => [name, settings[name]]);
+      const entries = Object.entries(parameterRules).map(([name, rule]) => [rule.parameter || name, settings[name]]);
       preparedJSON = {
         overrides: JSON.stringify(Object.fromEntries(entries.filter(([name]) => included.has(name))), null, 2),
         all: JSON.stringify(Object.fromEntries(entries), null, 2)
@@ -1150,6 +1271,7 @@
       loadSettings(parameters.values);
       loadCompressionOptions(url.search, url.search ? parameters.compressedFields : new Set());
       $("#url-load-error").text(parameters.error).prop("hidden", !parameters.error);
+      if (parameters.error) operation = null;
       return generateURL(automatic);
     }
 
@@ -1180,12 +1302,14 @@
      * @returns {Promise<void>}
      */
     async function copyURL() {
+      const copied = global.bySiteAnalytics?.begin("resource_copied");
       const url = await currentOverlayURL();
       if (!url) return;
       const jqOutput = $("#overlay-url");
       jqOutput.val(url.href);
       try {
         await navigator.clipboard.writeText(url.href);
+        copied?.();
         $("#copy-url .copy-label").text("Copied!");
         setMessage("#copy-status", "Copied!");
       } catch {
@@ -1194,9 +1318,7 @@
       }
     }
 
-    // ==========
-    // ==== SELECT2 CONTROLS ====
-    // ==========
+    // ===== SELECT2 CONTROLS =====
 
     /** Pair the canonical number box with an unnamed slider whose travel has practical bounds. */
     function initNumberRange(input, rule) {
@@ -1208,7 +1330,7 @@
       const jqInput = $(input);
       const row = $(/* HTML */ `<div class="number-range d-flex align-items-center gap-2"></div>`).insertBefore(jqInput);
       const slider = $(/* HTML */ `<input type="range" class="form-range m-0 flex-grow-1" />`)
-        .attr({ min, max: Math.max(min, max), step: rule.step === "any" ? 0.1 : rule.step || 1, "aria-label": `${rule.label} slider`, "aria-controls": input.id, "data-number-field": input.name })
+        .attr({ min, max: Math.max(min, max), step: rule.step === "any" ? 1 : rule.step || 1, "aria-label": `${rule.label} slider`, "aria-controls": input.id, "data-number-field": input.name })
         .appendTo(row);
       jqInput.addClass("range-value flex-shrink-0").appendTo(row);
       /** Reflect accepted source values/availability without replacing an incomplete numeric draft. */
@@ -1361,9 +1483,7 @@
       });
     }
 
-    // ==========
-    // ==== SHARED IMAGE INPUTS ====
-    // ==========
+    // ===== SHARED IMAGE INPUTS =====
 
     /** Enforce the separate 16 KiB embedding limit without restricting manual remote paths. */
     function imageValueAllowed(value) {
@@ -1383,7 +1503,10 @@
     function setImageStatus(status, state, message = "") {
       clearTimeout(status.data("dismissTimer"));
       status.removeData("dismissTimer").empty().prop("hidden", !state).removeClass("text-success text-danger text-body-secondary");
-      status.attr({ role: state === "error" ? "alert" : "status", "aria-live": state === "error" ? "assertive" : "polite" });
+      status.attr({
+        role: state === "error" ? "alert" : "status",
+        "aria-live": state === "error" ? "assertive" : "polite"
+      });
       if (!state) return;
       const icon = state === "loading" ? "fa-spinner fa-spin" : state === "success" ? "fa-check" : "fa-triangle-exclamation";
       status.addClass(state === "error" ? "text-danger" : state === "success" ? "text-success" : "text-body-secondary");
@@ -1461,7 +1584,12 @@
           const body = new FormData();
           body.append("provider", selected);
           body.append("fileToUpload", file);
-          const response = await fetch(imageUploadEndpoint, { method: "POST", body, signal, credentials: "omit" });
+          const response = await fetch(imageUploadEndpoint, {
+            method: "POST",
+            body,
+            signal,
+            credentials: "omit"
+          });
           const responseText = await response.text();
           const value = responseText.trim();
           if (!response.ok || !/^https:\/\//i.test(value) || !byStream.safeImage(value)) {
@@ -1563,7 +1691,14 @@
           if (current()) setImageStatus(status, "success", selected === "base64" ? "Image embedded as Base64." : "Image uploaded. URL applied.");
         } catch (error) {
           if (current()) {
-            console.error(`Image ${selected === "base64" ? "conversion" : "upload"} failed:`, error, error.upload || { provider: selected, endpoint: selected === "base64" ? undefined : imageUploadEndpoint });
+            console.error(
+              `Image ${selected === "base64" ? "conversion" : "upload"} failed:`,
+              error,
+              error.upload || {
+                provider: selected,
+                endpoint: selected === "base64" ? undefined : imageUploadEndpoint
+              }
+            );
             setImageStatus(status, "error", `${selected === "base64" ? "Conversion" : "Upload"} failed: ${signal.aborted ? "Request timed out. No automatic retry was made." : uploadError(error)}`);
           }
         } finally {
@@ -1614,9 +1749,7 @@
       sync();
     }
 
-    // ==========
-    // ==== ORDERED LIST AND MAP EDITORS ====
-    // ==========
+    // ===== ORDERED LIST AND MAP EDITORS =====
 
     const platformIcons = new Map();
     /**
@@ -1822,9 +1955,7 @@
       reset();
     }
 
-    // ==========
-    // ==== APPEARANCE, TIMESTAMP, AND REGIONAL WIDGETS ====
-    // ==========
+    // ===== APPEARANCE, TIMESTAMP, AND REGIONAL WIDGETS =====
 
     /**
      * Convert the datetime-local editor value to the absolute UTC string stored in settings.
@@ -1856,28 +1987,42 @@
       $(/* HTML */ `<span class="field-caption small"></span>`).text("Appearance preset").prepend($(/* HTML */ `<i class="fa-solid fa-palette fa-fw text-primary me-2" aria-hidden="true"></i>`)).appendTo(jqLabel);
       const jqSelect = $(/* HTML */ `<select class="form-select rounded-0 bg-body-secondary border-secondary-subtle"></select>`).appendTo(jqLabel);
       for (const [value, title] of [
-        ["", "Custom"],
         ["bonyur", "BONYUR"],
         ["studio", "Studio"],
         ["minimal", "Minimal"],
-        ["light", "Light ink"]
+        ["light", "Light ink"],
+        ["", "Custom..."]
       ])
         $(/* HTML */ `<option></option>`).val(value).text(title).appendTo(jqSelect);
+      const defaults = Object.fromEntries(Object.entries(parameterRules).map(([name, rule]) => [name, rule.default]));
+      const colors = ["backgroundColor", "textColor", "accentColor"].filter((name) => parameterRules[name]?.type === "color");
       const presets = {
-        bonyur: { backgroundColor: "#11111166", textColor: "#EEEEEE", accentColor: "#660000" },
+        bonyur: Object.fromEntries(colors.map((name) => [name, defaults[name]])),
         studio: { backgroundColor: "#202020E6", textColor: "#FFFFFF", accentColor: "#D9D9D9" },
         minimal: { backgroundColor: "#00000000", textColor: "#FFFFFF", accentColor: "#D9D9D9" },
         light: { backgroundColor: "#FFFFFFE6", textColor: "#202020", accentColor: "#404040" }
       };
+      const defaultParams = settingsURL(resource, defaults).searchParams;
+      const colorParams = new Set(colors.map((name) => parameterRules[name].parameter || name));
+      const style = document.createElement("span").style;
+      function cssColor(value) {
+        style.color = value;
+        return style.color;
+      }
+      syncAppearancePreset = (params) => {
+        const custom = [...params].some(([name, value]) => !colorParams.has(name) && defaultParams.get(name) !== value);
+        const matches = (id) => presets[id] && colors.every((name) => !fieldEnabled(parameterRules, settings, name) || cssColor(settings[name]) === cssColor(presets[id][name]));
+        const selected = jqSelect.val();
+        const next = custom ? "" : matches(selected) ? selected : Object.keys(presets).find(matches) || "";
+        if (next !== selected) jqSelect.val(next).trigger("change.select2");
+      };
       jqSelect.on("change", () => {
+        if (presets[jqSelect.val()]) groupEdit("resource_selected");
         for (const [name, value] of Object.entries(presets[jqSelect.val()] || {})) {
           const field = form.elements[name];
           if (!field) continue;
           $(field).val(value).trigger("change");
         }
-      });
-      jqForm.on("input", (event) => {
-        if (event.target !== jqSelect[0]) jqSelect.val("").trigger("change.select2");
       });
     }
 
@@ -1939,7 +2084,12 @@
      */
     function regionalLabel(value, locale) {
       if (locale) {
-        const description = new Intl.DisplayNames("en", { type: "language", languageDisplay: "standard" }).of(new Intl.Locale(value).baseName).replace(/\s\((.*)\)$/, " - $1");
+        const description = new Intl.DisplayNames("en", {
+          type: "language",
+          languageDisplay: "standard"
+        })
+          .of(new Intl.Locale(value).baseName)
+          .replace(/\s\((.*)\)$/, " - $1");
         return `${value} (${description})`;
       }
       const offset = new Intl.DateTimeFormat("en", { timeZone: value, timeZoneName: "longOffset" }).formatToParts().find((part) => part.type === "timeZoneName").value;
@@ -2024,22 +2174,14 @@
       sync();
     }
 
-    // ==========
-    // ==== THEME, ACCESSIBILITY, AND COLORS ====
-    // ==========
+    // ===== THEME, ACCESSIBILITY, AND COLORS =====
 
     /**
      * Persist the editor preference; byCommon applies the theme and button state.
      * @returns {void}
      */
     function initTheme() {
-      let theme = "dark";
-      try {
-        const saved = localStorage.getItem("stream.html.theme");
-        if (["light", "dark"].includes(saved)) theme = saved;
-      } catch {
-        // Storage can be unavailable for local files.
-      }
+      const theme = savedEditorTheme();
       $("html").attr("data-bs-theme", theme);
       if (!window.byCommon) {
         $("#theme-toggle").attr("title", "Theme controls could not load. Reload when connected.");
@@ -2121,9 +2263,7 @@
       }
     }
 
-    // ==========
-    // ==== EDITOR PREFERENCES AND COMPRESSION ====
-    // ==========
+    // ===== EDITOR PREFERENCES AND COMPRESSION =====
 
     /**
      * Persist UI state with the last valid generated query unless a new valid query is supplied.
@@ -2203,9 +2343,7 @@
       syncCompressionOptions();
     }
 
-    // ==========
-    // ==== HELP DIALOG AND PARAMETER REFERENCE ====
-    // ==========
+    // ===== HELP DIALOG AND PARAMETER REFERENCE =====
 
     /**
      * Build one help modal, generate parameter documentation, and bind editor shortcuts/hash navigation.
@@ -2316,6 +2454,7 @@
                   <div class="help-parameters"></div>
                 </section>
                 <section data-panel="advanced" hidden>
+                  <button type="button" class="btn btn-outline-secondary mb-3" data-target="#privacy-controls" data-privacy-settings hidden>Privacy settings</button>
                   <h3 class="h5 mb-3">URL options</h3>
                   <div class="form-check form-switch d-flex align-items-center gap-3 p-0 mb-2">
                     <input id="short-url" class="form-check-input fs-4 float-none m-0 flex-shrink-0" type="checkbox" role="switch" aria-describedby="short-url-help url-summary" />
@@ -2370,7 +2509,14 @@
         .appendTo("body");
       const modal = bootstrap.Modal.getOrCreateInstance(jqDialog[0]);
       const helpButton = $("#compression-help");
-      const popover = typeof global.Popper?.createPopper === "function" ? bootstrap.Popover.getOrCreateInstance(helpButton[0], { trigger: "focus", container: jqDialog[0], animation: false }) : null;
+      const popover =
+        typeof global.Popper?.createPopper === "function"
+          ? bootstrap.Popover.getOrCreateInstance(helpButton[0], {
+              trigger: "focus",
+              container: jqDialog[0],
+              animation: false
+            })
+          : null;
       if (!popover) helpButton.removeAttr("data-bs-toggle").attr("title", helpButton.attr("data-bs-content"));
       helpButton.on("keydown", (event) => {
         if (event.key !== "Escape" || !popover || !helpButton.attr("aria-describedby")) return;
@@ -2400,12 +2546,19 @@
               .attr("aria-hidden", "true")
           )
           .appendTo(label);
-        $(/* HTML */ `<code class="d-block small"></code>`).text(name).appendTo(caption);
+        $(/* HTML */ `<code class="d-block small"></code>`)
+          .text(rule.parameter || name)
+          .appendTo(caption);
       });
-      jqDialog.on("change", '#short-url, input[name="compression-scope"], [data-compress-field]', () => {
+      jqDialog.on("change", '#short-url, input[name="compression-scope"], [data-compress-field]', (event) => {
+        const control = event.target;
+        const field = control.id === "short-url" ? "short_url" : control.name === "compression-scope" ? "compression_scope" : "compression_fields";
+        const finish = event.originalEvent && global.bySiteAnalytics?.begin("configuration_changed", field);
         syncCompressionOptions();
         savePreferences();
-        generateURL();
+        generateURL().then((valid) => {
+          if (valid && finish) finish();
+        });
       });
       // Factory reset clears persisted state and reloads; normal form Reset keeps the opening baseline.
       $("#restore-defaults").on("click", () => {
@@ -2458,59 +2611,67 @@
       jqDialog.find(".help-dimensions").text(`The preview uses ${previewSize.width} x ${previewSize.height} pixels. Use those source dimensions as a starting point and adjust them to your layout.`);
       // Generate defaults, constraints, and examples from live rules so help stays aligned with resources.
       const jqParameters = jqDialog.find(".help-parameters");
-      const acceptedTypes = {
-        color: "Hex color: 3, 4, 6, or 8 digits; omit # in URLs",
-        url: "URL or relative asset path",
-        font: "Font family or CSS font stack",
-        datetime: "Absolute ISO 8601 timestamp",
-        timezone: "IANA time zone; empty uses the local zone",
-        timezones: "Up to three IANA time zones, separated by newlines",
-        locale: "BCP 47 locale tag; empty uses the browser locale",
-        entries: "JSON matching this field's default structure",
-        mapping: "Input mapping JSON array"
-      };
-      for (const name of Object.keys(parameterRules)) {
-        const rule = parameterRules[name] || {};
-        const [title, defaultValue, values, example] = [
-          rule.label || name,
-          rule.type === "color" ? String(rule.default).replace(/^#/, "") : typeof rule.default === "object" ? JSON.stringify(rule.default) : (rule.default ?? "Empty"),
-          (rule.options && Object.keys(rule.options).join(", ")) || (rule.min !== undefined ? `${rule.min} to ${rule.max}` : acceptedTypes[rule.type] || "Text"),
-          rule.type === "color" ? String($(form.elements.namedItem(name)).val()).replace(/^#/, "") : ($(form.elements.namedItem(name)).val() ?? "")
-        ];
-        const jqDefinition = $(/* HTML */ `<section class="definition border mb-3 p-3 bg-body-tertiary"></section>`).appendTo(jqParameters);
-        $(/* HTML */ `<h3 class="h5 mb-2 d-flex flex-wrap align-items-center gap-2"></h3>`)
-          .text(title)
-          .prepend(
-            $(/* HTML */ `<i></i>`)
-              .addClass(`fa-solid ${fieldIcon(name, rule)} fa-fw`)
-              .attr("aria-hidden", "true")
-          )
-          .append($(/* HTML */ `<code class="d-inline-block bg-secondary-subtle text-primary border p-1"></code>`).text(`${name}=`))
-          .appendTo(jqDefinition);
-        $(/* HTML */ `<div class="codeblock bg-black text-white border p-2 mb-3 font-monospace text-break lh-lg"></div>`)
-          .text(`${location.pathname.split("/").pop() || "index.html"}?${new URLSearchParams({ [name]: example })}`)
-          .appendTo(jqDefinition);
-        const jqList = $(/* HTML */ `<ul class="list-unstyled mb-0"></ul>`).appendTo(jqDefinition);
-        for (const [label, value] of [
-          ["Default: ", defaultValue],
-          ["Accepted: ", values],
-          ["", rule.description]
-        ]) {
-          $(/* HTML */ `<li class="mb-2 text-break"></li>`).append($(/* HTML */ `<strong></strong>`).text(label), $(/* HTML */ `<span></span>`).text(value)).appendTo(jqList);
+      function buildParameterReference() {
+        if (jqParameters.children().length) return;
+        const acceptedTypes = {
+          color: "Hex color: 3, 4, 6, or 8 digits; omit # in URLs",
+          url: "URL or relative asset path",
+          font: "Font family or CSS font stack",
+          datetime: "Absolute ISO 8601 timestamp",
+          timezone: "IANA time zone; empty uses the local zone",
+          timezones: "Up to three IANA time zones, separated by newlines",
+          locale: "BCP 47 locale tag; empty uses the browser locale",
+          entries: "JSON matching this field's default structure",
+          mapping: "Input mapping JSON array"
+        };
+        for (const name of Object.keys(parameterRules)) {
+          const rule = parameterRules[name] || {};
+          const [title, defaultValue, values, example] = [
+            rule.label || name,
+            rule.type === "color" ? String(rule.default).replace(/^#/, "") : typeof rule.default === "object" ? JSON.stringify(rule.default) : (rule.default ?? "Empty"),
+            (rule.options && Object.keys(rule.options).join(", ")) || (rule.min !== undefined ? `${rule.min} to ${rule.max}` : acceptedTypes[rule.type] || "Text"),
+            rule.type === "color" ? String($(form.elements.namedItem(name)).val()).replace(/^#/, "") : ($(form.elements.namedItem(name)).val() ?? "")
+          ];
+          const jqDefinition = $(/* HTML */ `<section class="definition border mb-3 p-3 bg-body-tertiary"></section>`).appendTo(jqParameters);
+          $(/* HTML */ `<h3 class="h5 mb-2 d-flex flex-wrap align-items-center gap-2"></h3>`)
+            .text(title)
+            .prepend(
+              $(/* HTML */ `<i></i>`)
+                .addClass(`fa-solid ${fieldIcon(name, rule)} fa-fw`)
+                .attr("aria-hidden", "true")
+            )
+            .append($(/* HTML */ `<code class="d-inline-block bg-secondary-subtle text-primary border p-1"></code>`).text(`${rule.parameter || name}=`))
+            .appendTo(jqDefinition);
+          $(/* HTML */ `<div class="codeblock bg-black text-white border p-2 mb-3 font-monospace text-break lh-lg"></div>`)
+            .text(`${location.pathname.split("/").pop() || "index.html"}?${new URLSearchParams({ [rule.parameter || name]: example })}`)
+            .appendTo(jqDefinition);
+          const jqList = $(/* HTML */ `<ul class="list-unstyled mb-0"></ul>`).appendTo(jqDefinition);
+          for (const [label, value] of [
+            ["Default: ", defaultValue],
+            ["Accepted: ", values],
+            ["", rule.description]
+          ]) {
+            $(/* HTML */ `<li class="mb-2 text-break"></li>`).append($(/* HTML */ `<strong></strong>`).text(label), $(/* HTML */ `<span></span>`).text(value)).appendTo(jqList);
+          }
         }
       }
 
-      const titles = { info: "About", obs: "Use with OBS", params: "Parameters", advanced: "Advanced options" };
+      const titles = {
+        info: "About",
+        obs: "Use with OBS",
+        params: "Parameters",
+        advanced: "Advanced options"
+      };
       initResourceHelp?.(jqDialog[0], titles, closeHelp);
       jqDialog.find('[data-panel="info"]').append(/* HTML */ `
         <section class="small mt-4 pt-3 border-top border-secondary-subtle" aria-labelledby="release-contributions-title">
           <h3 id="release-contributions-title" class="h6 mb-3"><i class="fa-brands fa-github me-2" aria-hidden="true"></i>Early access &amp; contributions</h3>
           <p>
             <i class="fa-solid fa-triangle-exclamation me-1" aria-hidden="true"></i>
-            All overlays are prerelease. Alpha means early testing; Beta means broader testing. Features may change, and bugs are expected. Try your setup before going live.
+            TBD resources include working demos while their live integrations are being defined. Alpha means early testing and Beta means broader testing. Try your setup before going live.
           </p>
           <p class="mb-0">
-            Help improve stream.html on GitHub:
+            Help improve stream.HTML on GitHub:
             <a href="https://github.com/byuwur/stream.html/pulls" target="_blank" rel="noopener"><i class="fa-solid fa-code-pull-request me-1" aria-hidden="true"></i>contribute a pull request</a> or
             <a href="https://github.com/byuwur/stream.html/issues" target="_blank" rel="noopener"><i class="fa-solid fa-bug me-1" aria-hidden="true"></i>report an issue</a>. Bug reports, ideas, and fixes are welcome.
           </p>
@@ -2524,6 +2685,7 @@
        * @returns {Promise<void>} Resolves after selecting the requested page or a newer request supersedes it.
        */
       async function showSection(section) {
+        if (section === "params") buildParameterReference();
         if (jqDialog.hasClass("show") && jqDialog.find('[data-section][aria-current="page"]').data("section") === section) return;
         const generation = ++helpSectionGeneration;
         popover?.hide();
@@ -2632,10 +2794,34 @@
 
       const jqLinks = $(/* HTML */ `<p class="small m-0"></p>`).appendTo(".footer-links");
       $(/* HTML */ `<a></a>`, { href: homeURL, text: "Home", class: "link-body-emphasis" }).appendTo(jqLinks);
+      let previousSection;
       jqDialog.find(".modal-header [data-section]").each((_, tab) => {
         const section = tab.dataset.section;
-        jqLinks.append(" · ");
+        jqLinks.append(previousSection === "advanced" ? " | " : " · ");
+        previousSection = section;
         $(/* HTML */ `<a></a>`, { href: `#${section}`, text: section === "params" ? "Parameter reference" : tab.textContent.trim(), class: "link-body-emphasis" }).appendTo(jqLinks);
+        if (section === "advanced") {
+          jqLinks.append(
+            " | ",
+            $("<a>", {
+              href: "https://byuwur.co/privacy/stream.html",
+              text: "Privacy",
+              class: "link-body-emphasis",
+              target: "_blank",
+              rel: "noopener"
+            })
+          );
+          jqLinks.append(
+            " · ",
+            $("<a>", {
+              href: "https://byuwur.co/cookies/stream.html",
+              text: "Cookies",
+              class: "link-body-emphasis",
+              target: "_blank",
+              rel: "noopener"
+            })
+          );
+        }
       });
       $(document).on("click", 'a[href^="#"]', function (event) {
         const section = $(this).attr("href").slice(1);
@@ -2646,9 +2832,7 @@
       });
     }
 
-    // ==========
-    // ==== TOOL NAVIGATION ====
-    // ==========
+    // ===== TOOL NAVIGATION =====
 
     /**
      * Search and navigate the homepage's tool order without adding navigation to overlay settings.
@@ -2699,14 +2883,13 @@
       jqSelect.on("change", () => {
         const value = jqSelect.val();
         if (value && value !== current) {
+          global.bySiteAnalytics?.selectTool(value);
           location.assign(new URL(`${value}/${location.protocol === "file:" ? "index.html" : ""}`, byConfigurator.catalog.root).href);
         }
       });
     }
 
-    // ==========
-    // ==== EDITOR MOTION, FIELD VISIBILITY AND VALIDATION ====
-    // ==========
+    // ===== EDITOR MOTION, FIELD VISIBILITY AND VALIDATION =====
 
     /**
      * Ease newly visible field groups with the optional shared transition helper.
@@ -2765,14 +2948,13 @@
       imageInputs.forEach((widget) => widget.sync());
       // Hide empty headings too, so disabled descendants do not leave blank groups in the form.
       jqForm.find(".field-subsection, [data-config-section]").each((_, container) => {
-        const empty = !$(container)
-          .find("[name]")
-          .toArray()
-          .some((input) => !input.disabled);
+        const empty = !container.querySelector("[name]:enabled");
         const target = $(container).is("[data-config-section]") ? $(container).closest(".accordion-item") : $(container);
         changes.push([target, !empty]);
       });
-      setVisibility(changes);
+      if (acceptedGeneration < 0) {
+        for (const [wrapper, visible] of changes) wrapper.prop({ hidden: !visible, inert: !visible });
+      } else setVisibility(changes);
     }
 
     /**
@@ -2861,9 +3043,7 @@
       });
     }
 
-    // ==========
-    // ==== EDITOR STARTUP AND EVENT HANDLERS ====
-    // ==========
+    // ===== EDITOR STARTUP AND EVENT HANDLERS =====
 
     /**
      * Replace settings from defaults plus an imported URL/JSON object, retaining widget lifetimes and Reset.
@@ -2873,7 +3053,10 @@
     function loadSettings(values) {
       cancelImageInputs();
       resource.normalizeParameters?.(values);
-      const loaded = { ...resource.constants, ...Object.fromEntries(Object.entries(parameterRules).map(([name, field]) => [name, structuredClone(field.default)])) };
+      const loaded = {
+        ...resource.constants,
+        ...Object.fromEntries(Object.entries(parameterRules).map(([name, field]) => [name, structuredClone(field.default)]))
+      };
       byStream.applyParameters(parameterRules, loaded, values);
       Object.assign(settings, loaded);
       setFields(settings);
@@ -2895,10 +3078,13 @@
         platforms: byStream.platforms,
         initSelect2
       };
-      const { initResourceHelp } = byConfigurator.configureResource?.(resource, editor) || {};
-      for (const [name, field] of Object.entries(resource.fields)) {
-        if (field.type === "number") initNumberRange(form.elements[name], field);
-        if (field.type === "select") initChoiceButtons(form.elements[name], field);
+      const configureResource = resource.configureResource || byConfigurator.configureResource;
+      const { initResourceHelp } = configureResource?.(resource, editor) || {};
+      for (const input of fields) {
+        const name = input.name;
+        const field = resource.fields[name];
+        if (field.type === "number" && !field.compact) initNumberRange(input, field);
+        if (field.type === "select") initChoiceButtons(input, field);
         if (field.entries)
           initEntryEditor(name, settings[name], {
             ...field.entries,
@@ -2993,6 +3179,7 @@
         });
       });
       $("#json-all-fields").on("change", async function () {
+        const finish = global.bySiteAnalytics?.begin("configuration_changed", "json_all_fields");
         const checked = this.checked;
         if (!(await currentOverlayURL())) {
           this.checked = !checked;
@@ -3000,10 +3187,12 @@
         }
         jsonEdited = false;
         syncJSON();
+        finish?.();
       });
       $(jsonInput)
         .on("input", (event) => {
           cancelImageInputs();
+          groupEdit("configuration_changed", "configuration_json");
           jsonEdited = true;
           urlEdited = false;
           setMessage("#json-status", "");
@@ -3019,9 +3208,11 @@
           syncJSON();
         });
       $("#copy-json").on("click", async () => {
+        const copied = global.bySiteAnalytics?.begin("resource_copied");
         if (!(await currentOverlayURL())) return;
         try {
           await navigator.clipboard.writeText(jsonInput.value);
+          copied?.();
           setMessage("#json-status", "Copied!");
         } catch {
           $(jsonInput).trigger("focus").trigger("select");
@@ -3043,6 +3234,12 @@
         })
         .on("shown.bs.collapse hidden.bs.collapse", ".accordion-collapse", () => savePreferences())
         .on("input change", (event) => {
+          const name = event.target.name;
+          if (operation && (jsonEdited || urlEdited) && Object.hasOwn(parameterRules, name)) operation = null;
+          if (acceptedGeneration >= 0 && !operation && Object.hasOwn(parameterRules, name) && !edits.has(name)) {
+            const finish = global.bySiteAnalytics?.begin("configuration_changed", name);
+            if (finish) edits.set(name, { previous: JSON.stringify(settings[name]), finish });
+          }
           urlEdited = false;
           jsonEdited = false;
           const generation = ++urlGeneration;
@@ -3056,6 +3253,7 @@
           form.reportValidity();
         })
         .on("reset", () => {
+          groupEdit("configuration_changed", "configuration_reset");
           jsonEdited = false;
           urlEdited = false;
           urlGeneration++;
@@ -3075,6 +3273,7 @@
       $("#overlay-url")
         .on("input", function (event) {
           cancelImageInputs();
+          groupEdit("resource_loaded");
           urlEdited = true;
           jsonEdited = false;
           urlGeneration++;
@@ -3108,6 +3307,385 @@
     }
   };
 
+  /* Optional analytics for this project's public website. */
+  function initSiteAnalytics() {
+    "use strict";
+    // ===== WEBSITE AND ELIGIBLE ROUTES =====
+    const project = "stream_html";
+    const site = "stream.HTML";
+    const hosts = ["stream.byuwur.co", "controller.byuwur.co"];
+    const measurement = "G-YBLWBPK758";
+    const preference = "byuwur_analytics";
+    const lifetime = 180 * 86400;
+    const disable = "ga-disable-" + measurement;
+    const production = location.protocol === "https:" && hosts.includes(location.host);
+    const local = ["localhost", "127.0.0.1", "[::1]"].includes(location.hostname) || location.protocol === "file:";
+    if (window.top !== window || (!production && !local) || window.bySiteAnalytics) return;
+    const siteRoot = root;
+
+    const actions = ["configuration_changed", "resource_selected", "resource_loaded", "content_processed", "resource_exported", "resource_copied"];
+    function isTool(id) {
+      return window.byConfigurator?.catalog.availableTools.some((tool) => tool.id === id);
+    }
+    function route(url, referrerOnly = false) {
+      const path = url.pathname.replace(/\/index\.html$/, "/").replace(/\/$/, "") || "/";
+      const alias = url.hostname === "controller.byuwur.co";
+      if (!alias && path === "/") return { path: "/", surface: "landing", resource: "catalog" };
+      const tool = alias && path === "/" ? "controller" : path.slice(1);
+      if (!isTool(tool) || (alias && tool !== "controller")) return;
+      if (!referrerOnly && (!document.querySelector("form[data-configurator]") || window.byStreamOverlay)) return;
+      if (url.search && !url.hash) return;
+      return { path: path === "/" ? path : path + "/", surface: "configurator", resource: tool };
+    }
+
+    // ===== CONSENT AND REFERRERS =====
+    function choice() {
+      const values = document.cookie.split("; ").filter((part) => part.startsWith(preference + "="));
+      if (values.length !== 1) return "";
+      const match = /^byuwur_analytics=v1\.(yes|no)\.(\d{10})$/.exec(values[0]);
+      const age = Date.now() / 1000 - Number(match?.[2]);
+      return match && age >= 0 && age < lifetime && !(blockedChoice && match[1] === "yes") ? match[1] : "";
+    }
+
+    function safeReferrer(value) {
+      try {
+        const url = new URL(value);
+        if (!["https:", "http:"].includes(url.protocol)) return "";
+        if (hosts.includes(url.host)) {
+          const page = route(url, true);
+          if (page) return url.origin + page.path;
+        }
+        // A browser may supply a same-operator route. Retain only published path names.
+        const path = url.pathname.replace(/\/$/, "") || "/";
+        if (["byuwur.co", "www.byuwur.co"].includes(url.host) && /^\/(?:en|es|ja|(?:privacy|cookies)(?:\/(?:dotview|stream\.html|stream\.fgc|files\.host))?|v1(?:\/(?:en|es|ja))?)$/.test(path)) return url.origin + path;
+        if (url.host === "spa.byuwur.co") return "";
+        if (
+          url.host === "stream.byuwur.co" &&
+          /^\/(?:main|controller|keyboard|popup|clock|timer|webcam|ticker|watermark|lower-thirds|qr|reminder|badge|credits|schedule|sponsors|info|effects|hud|timeline|randomizer|quotes|shortcuts|chat|counter|now-playing)$/.test(path)
+        )
+          return url.origin + path + "/";
+        return url.origin + "/";
+      } catch {
+        return "";
+      }
+    }
+
+    // ===== GOOGLE TAG LIFECYCLE =====
+    const denied = { ad_storage: "denied", ad_user_data: "denied", ad_personalization: "denied" };
+    // Own the tag's browsing context so withdrawal can cancel Google's pending batch
+    // without navigating away from unsaved work or changing the application's network policy.
+    const frameTemplate = document.getElementById("site-analytics-frame");
+    const pending = [];
+    let frame,
+      frameReady = false,
+      page,
+      controls,
+      loadingControls = false,
+      configured = false;
+    function tag(...args) {
+      if (frameReady) frame.contentWindow.gtag(...frame.contentWindow.structuredClone(args));
+      else pending.push(args);
+    }
+    let blockedChoice = false,
+      expiryTimer;
+    let previous = "",
+      referrer = safeReferrer(document.referrer),
+      generation = 0;
+    if (production) window[disable] = true;
+
+    function stop(clear) {
+      if (!window[disable]) generation++;
+      window[disable] = true;
+      clearTimeout(expiryTimer);
+      if (frameReady) {
+        frame.contentWindow[disable] = true;
+        const block = frame.contentDocument.createElement("meta");
+        block.httpEquiv = "Content-Security-Policy";
+        block.content = "default-src 'none'";
+        frame.contentDocument.head.append(block);
+        tag("consent", "update", { ...denied, analytics_storage: "denied" });
+      }
+      frame?.remove();
+      frame = null;
+      frameReady = false;
+      pending.length = 0;
+      configured = false;
+      previous = "";
+      if (clear && /(?:^|; )_ga(?:_YBLWBPK758)?=/.test(document.cookie)) {
+        for (const name of ["_ga", "_ga_YBLWBPK758"]) {
+          for (const domain of ["", "; Domain=" + location.hostname, "; Domain=byuwur.co"]) document.cookie = name + "=; Max-Age=0; Path=/; Secure; SameSite=Lax" + domain;
+        }
+      }
+    }
+
+    // ===== USAGE COUNTS AND SYNCHRONIZATION =====
+    let countedPath = "";
+    function countUsage(action, resource = page?.resource) {
+      if (!production || !page || (page.surface === "configurator" && !controls)) return;
+      if (action !== "page_view" && (blockedChoice || choice() === "no")) return;
+      fetch("https://byuwur.co/usage.php", {
+        method: "POST",
+        body: [action, page.surface, resource].join("|"),
+        credentials: "omit",
+        referrerPolicy: "no-referrer",
+        keepalive: true,
+        redirect: "error",
+        cache: "no-store"
+      }).catch(() => {}); // Measurement must never interrupt the tool.
+    }
+
+    function sync() {
+      if (page?.surface === "configurator" && !controls) return;
+      const saved = production ? choice() : undefined;
+      controls?.update(Boolean(page), saved);
+      if (!production) return;
+      if (!page) countedPath = "";
+      else if (page.path !== countedPath) {
+        countedPath = page.path;
+        countUsage("page_view");
+      }
+      if (!page || saved !== "yes") {
+        stop(saved !== "yes");
+        return;
+      }
+      window[disable] = false;
+      if (!frame) {
+        if (!frameTemplate) return;
+        frame = document.createElement("iframe");
+        frame.hidden = true;
+        frame.title = "Google Analytics";
+        frame.referrerPolicy = "no-referrer";
+        const owner = frame;
+        owner.onload = () => {
+          if (owner !== frame) return;
+          if (choice() !== "yes" || !page) {
+            stop(false);
+            return;
+          }
+          owner.onload = null;
+          const doc = owner.contentDocument;
+          try {
+            // GA4 needs an HTTPS document. Drop the parent URL parameters before running the tag.
+            doc.open();
+            owner.contentWindow.history.replaceState(null, "", "/");
+            doc.write("<!doctype html>" + frameTemplate.innerHTML);
+            doc.close();
+          } catch {
+            stop(false);
+            return;
+          }
+          if (typeof owner.contentWindow.gtag !== "function") {
+            stop(false);
+            return;
+          }
+          frameReady = true;
+          for (const args of pending.splice(0)) tag(...args);
+          const script = owner.contentDocument.createElement("script");
+          script.async = true;
+          script.referrerPolicy = "origin";
+          script.onerror = () => {
+            if (frame === owner) stop(false);
+          };
+          script.src = "https://www.googletagmanager.com/gtag/js?id=" + measurement;
+          owner.contentDocument.head.append(script);
+        };
+        owner.srcdoc = "<!doctype html>";
+        document.body.append(owner);
+      }
+      if (frameReady) frame.contentWindow[disable] = false;
+      const locationID = location.origin + page.path;
+      if (configured && previous === locationID) {
+        scheduleExpiry();
+        return;
+      }
+      const context = {
+        project,
+        surface: page.surface,
+        resource: page.resource,
+        page_location: locationID,
+        page_title: site + " · " + page.surface,
+        page_referrer: previous || referrer
+      };
+      tag("set", {
+        ...context,
+        send_page_view: false,
+        allow_google_signals: false,
+        allow_ad_personalization_signals: false
+      });
+      if (!configured) {
+        tag("consent", "default", { ...denied, analytics_storage: "granted" });
+        tag("js", new Date());
+        tag("config", measurement, {
+          ...context,
+          send_page_view: false,
+          cookie_domain: "byuwur.co",
+          cookie_path: "/",
+          allow_google_signals: false,
+          allow_ad_personalization_signals: false
+        });
+        configured = true;
+      }
+      tag("event", "page_view", { ...context, send_to: measurement });
+      previous = locationID;
+      scheduleExpiry();
+    }
+    function scheduleExpiry() {
+      // Long timeouts overflow in browsers. Recheck the cookie daily and at its actual expiry.
+      clearTimeout(expiryTimer);
+      const savedAt = Number(document.cookie.match(/(?:^|; )byuwur_analytics=v1\.yes\.(\d{10})(?:;|$)/)?.[1]);
+      expiryTimer = setTimeout(sync, Math.min(86400000, Math.max(100, (savedAt + lifetime) * 1000 - Date.now())));
+    }
+
+    // ===== TOOL ACTIONS =====
+    function begin(action, field) {
+      if (!production || !page || !controls || blockedChoice || choice() === "no") return;
+      if (!actions.includes(action) || (field && (action !== "configuration_changed" || !validField(field)))) return;
+      const detailed = choice() === "yes" && !window[disable];
+      const start = generation;
+      const current = page.path;
+      return () => {
+        if (start !== generation || page?.path !== current) return;
+        countUsage(action);
+        if (!detailed) return;
+        if (choice() !== "yes") {
+          if (frame) sync();
+          return;
+        }
+        if (start !== generation || page?.path !== current || !configured || window[disable]) return;
+        tag("event", "tool_used", {
+          send_to: measurement,
+          project,
+          surface: page.surface,
+          resource: page.resource,
+          action,
+          ...(field
+            ? {
+                field_id: field
+                  .replace(/([a-z0-9])([A-Z])/g, "$1_$2")
+                  .replaceAll("-", "_")
+                  .toLowerCase()
+              }
+            : {})
+        });
+      };
+    }
+    function validField(field) {
+      return ["configuration_reset", "configuration_json", "short_url", "compression_scope", "compression_fields", "json_all_fields"].includes(field) || Object.hasOwn(window.byStreamResource?.fields || {}, field);
+    }
+    function selectTool(tool) {
+      if (!isTool(tool)) return;
+      countUsage("resource_selected", tool);
+      if (choice() !== "yes") {
+        if (frame) sync();
+        return;
+      }
+      if (configured && page)
+        tag("event", "tool_used", {
+          send_to: measurement,
+          project,
+          surface: page.surface,
+          resource: tool,
+          action: "resource_selected"
+        });
+    }
+    if (production) window.bySiteAnalytics = { begin, settings: () => controls?.open(), selectTool };
+
+    // ===== PRIVACY CONTROLS =====
+    function saveChoice(value) {
+      blockedChoice = value === "no";
+      if (blockedChoice) stop(true);
+      document.cookie = preference + "=v1." + value + "." + Math.floor(Date.now() / 1000) + "; Max-Age=" + lifetime + "; Domain=byuwur.co; Path=/; Secure; SameSite=Lax";
+      if (value === "no" && document.cookie.includes(preference + "=v1.no.")) blockedChoice = false;
+      sync();
+    }
+    function mount() {
+      if (!page || controls || loadingControls) return;
+      const initialize = () => {
+        loadingControls = false;
+        if (!page) return;
+        controls = window.byCommon.initPrivacyControls({
+          policyURL: "https://byuwur.co/privacy/stream.html",
+          cookiesURL: "https://byuwur.co/cookies/stream.html",
+          message: "We count page views and selected actions by project and, when available, country, without browser identifiers. Accept adds Google Analytics cookies across the listed sites. Reject keeps only the basic page-view count.",
+          dismissalDomain: production ? "byuwur.co" : undefined,
+          onChoice: production ? saveChoice : undefined
+        });
+        const advanced = document.querySelector("[data-privacy-settings]");
+        if (advanced) advanced.hidden = false;
+        sync();
+      };
+      if (window.byCommon?.initPrivacyControls) {
+        initialize();
+        return;
+      }
+      loadingControls = true;
+      const script = document.createElement("script");
+      script.referrerPolicy = "no-referrer";
+      script.src = "https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.17/_privacy.min.js";
+      script.onload = initialize;
+      script.onerror = () => {
+        loadingControls = false;
+      };
+      document.head.append(script);
+    }
+    // ===== NAVIGATION AND LINK CLICKS =====
+    function navigate() {
+      const url = new URL(location.href);
+      if (!production) {
+        const base = siteRoot.pathname.replace(/\/$/, "");
+        if (url.pathname === base || url.pathname.startsWith(base + "/")) url.pathname = url.pathname.slice(base.length) || "/";
+      }
+      const next = route(url);
+      if (page?.path !== next?.path) generation++;
+      page = next;
+      mount();
+      const advanced = document.querySelector("[data-privacy-settings]");
+      if (advanced) advanced.hidden = !page || !controls;
+      sync();
+    }
+
+    const links = new Map([
+      ["https://stream.byuwur.co/", ["open_project", "project_stream_html"]],
+      ["https://github.com/byuwur/stream.html", ["open_github", "github_repository"]]
+    ]);
+    function click(event) {
+      if (!event.isTrusted || (event.type === "auxclick" && event.button !== 1) || !page) return;
+      const link = event.target.closest?.("a[href]");
+      if (!link || link.closest("[contenteditable], [data-legal-document], #editor, #preview-panel")) return;
+      if (link.matches(".home-tool[data-tool]") && page.surface === "landing") {
+        selectTool(link.dataset.tool);
+        return;
+      }
+      const target = links.get(link.href);
+      if (!target) return;
+      countUsage(target[0], target[1]);
+      if (choice() !== "yes") {
+        if (frame) sync();
+        return;
+      }
+      if (configured)
+        tag("event", "resource_clicked", {
+          send_to: measurement,
+          project,
+          surface: page.surface,
+          action: target[0],
+          resource: target[1]
+        });
+    }
+    document.addEventListener("click", click, true);
+    document.addEventListener("auxclick", click, true);
+    navigate();
+    window.addEventListener("focus", sync);
+    window.addEventListener("pageshow", sync);
+    document.addEventListener("visibilitychange", () => {
+      if (!document.hidden) sync();
+    });
+    window.cookieStore?.addEventListener("change", (event) => {
+      if ([...event.changed, ...event.deleted].some((cookie) => cookie.name === preference)) sync();
+    });
+  }
+
+  // ===== STARTUP =====
   async function startConfigurator() {
     // Resource handlers may still be decoding compressed settings when DOMContentLoaded reaches us.
     await byStream.ready;
@@ -3116,8 +3694,14 @@
     compressedFields = location.search ? parameters?.compressedFields || new Set() : new Set();
     byConfigurator.init();
   }
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", startConfigurator);
+  if (landing) {
+    // Only the landing page loads its catalog before the deferred jQuery and Select2 scripts.
+    document.addEventListener("DOMContentLoaded", () => {
+      $ = global.jQuery;
+    });
+  } else if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", startConfigurator);
   else startConfigurator();
 
+  if (!preferenceResource && document.getElementById("site-analytics-frame") && !global.byStreamResource) initSiteAnalytics();
   byConfigurator.initialized = true;
 })(window);
