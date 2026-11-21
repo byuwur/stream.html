@@ -1,3 +1,4 @@
+/* ===== ALERT THEME ===== */
 :root {
   /*   Global variables */
   --widthType: inline-block;
@@ -7,17 +8,17 @@
   --xOffset: 0px;
   --yOffset: 0px;
   /*   Main Text variables */
-  --mainColor: #000000;
+  --mainColor: #000;
   --mainFS: 48px;
   --mainFW: 700;
-  --mainBg: #ffffff;
+  --mainBg: #fff;
   --mainTransform: left center;
   --mainBgOpacity: calc(100 * 0.01);
   /*   Alt Text variables */
-  --altColor: #ffffff;
+  --altColor: #fff;
   --altFS: 32px;
   --altFW: 700;
-  --altBg: #000000;
+  --altBg: #000;
   --altTransform: left center;
   --altBgOpacity: calc(100 * 0.01);
 }
@@ -29,6 +30,7 @@ body {
   text-align: var(--textAlign);
   animation: 10s alert-animation ease-in-out forwards;
 }
+/* ===== ALERT ANIMATION ===== */
 @keyframes alert-animation {
   0% {
     opacity: 0;
@@ -52,6 +54,7 @@ body {
   font-size: 0;
   opacity: 1;
 }
+/* ===== ALIGNMENT ===== */
 .left {
   left: var(--xOffset);
 }
@@ -89,8 +92,8 @@ body {
   line-height: var(--mainFS);
   font-weight: var(--mainFW);
   transform-origin: var(--mainTransform);
-  border-top: 0px solid #006688;
-  border-bottom: 10px solid #006688;
+  border-top: 0 solid #068;
+  border-bottom: 10px solid #068;
 }
 .alt {
   color: var(--altColor);
@@ -115,6 +118,7 @@ body {
   background: var(--altBg);
   opacity: var(--altBgOpacity);
 }
+/* ===== ALERT MESSAGES ===== */
 #mainText,
 .altText {
   z-index: 999;
