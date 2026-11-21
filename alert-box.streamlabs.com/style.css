@@ -12,16 +12,15 @@
   --mainFS: {mainFS}px;
   --mainFW: {mainFW};
   --mainBg: {mainBg};
-  --mainTransform: {mainTransform};
   --mainBgOpacity: calc({mainBgOpacity} * .01);  
 /*   Alt Text variables */
   --altColor: {altColor};
   --altFS: {altFS}px;
   --altFW: {altFW};
   --altBg: {altBg};
-  --altTransform: {mainTransform};
   --altBgOpacity: calc({altBgOpacity} * .01);
 }
+/* ===== ALERT LAYOUT ===== */
 html,body {
   padding: 0;
   margin: 0;
@@ -56,6 +55,7 @@ html,body {
   position: relative;
   word-wrap: break-word;
 }
+/* ===== MESSAGE TEXT ===== */
 #mainText img {
   height: var(--mainFS);
   width: auto;
@@ -68,7 +68,6 @@ html,body {
   font-size: var(--mainFS);
   line-height: var(--mainFS);
   font-weight: var(--mainFW);
-  transform-origin: var(--mainTransform);
   border-top: {topBH}px solid {borderColor};
   border-bottom: {botBH}px solid {borderColor};
 }
@@ -77,7 +76,6 @@ html,body {
   font-size: var(--altFS);
   line-height: var(--altFS);
   font-weight: var(--altFW);
-  transform-origin: var(--altTransform);
 }
 .bg {
   position: absolute;
@@ -87,6 +85,7 @@ html,body {
   height: 100%;
   z-index: 1;
 }
+/* ===== MESSAGE BACKGROUNDS ===== */
 #main .bg {
   background: var(--mainBg);
   opacity: var(--mainBgOpacity);
@@ -108,7 +107,7 @@ html,body {
   visibility: hidden;
 }
 #messageHolder {
-  color: #FFF;
+  color: #fff;
   text-shadow: 0 0 2px #000, 0 0 4px #000, 0 0 6px #000;
   position: relative;
   top: 10px;
