@@ -596,6 +596,66 @@ test("the progress ring fits its panel and paints elapsed time at automatic and 
   }
 });
 
+test("custom social account effects wait for the container to resize before their entrance", async (t) => {
+  const browser = await launchBrowser();
+  t.after(() => browser.close());
+  const page = await browser.newPage();
+  await serve(page, await loadAssets(runtimeAssets), true);
+  for (const [name, owner, selector, times] of [
+    ["main", "social", "#social", [0.15, 9.85, 11.15]],
+    ["popup", "overlay", "#socialHolder", [0.15, 1.47, 1.76]]
+  ]) {
+    const params = new URLSearchParams({
+      accounts: JSON.stringify([
+        { platform: "twitch", handle: "A", heading: "One" },
+        { platform: "youtube", handle: "LongerSocialAccountName", heading: "Two" }
+      ]),
+      pauseTime: 1,
+      resizeDuration: 2500,
+      [owner + ".container.entrance"]: "fadeIn",
+      [owner + ".entrance"]: "zoomIn"
+    });
+    await page.goto(`https://stream.test/${name}/?` + params);
+    await page.waitForFunction(() => window.gsap?.globalTimeline.getChildren().some((child) => child.repeat() === -1));
+    const states = await page.locator(selector).evaluate(async (node, times) => {
+      const carousel = gsap.globalTimeline
+        .getChildren()
+        .find((child) => child.repeat() === -1)
+        .pause();
+      const states = [];
+      for (const time of times) {
+        carousel.time(time, false);
+        await new Promise(requestAnimationFrame);
+        await new Promise(requestAnimationFrame);
+        const resize = node.getAnimations().find((animation) => animation.id === "stream-resize");
+        if (resize) resize.currentTime = resize.effect.getTiming().duration / 2;
+        states.push({
+          width: node.offsetWidth,
+          motion: node.getAnimations().map((animation) => animation.id),
+          child: node.getAnimations({ subtree: true }).some((animation) => animation.effect.target !== node && animation.id === "stream-entrance")
+        });
+      }
+      const item = node.querySelector("[data-stream-await-size]");
+      const hidden = item && getComputedStyle(item).visibility === "hidden";
+      carousel.play();
+      const heldTime = carousel.time();
+      await new Promise(requestAnimationFrame);
+      await new Promise(requestAnimationFrame);
+      const pausedForResize = carousel.time() === heldTime;
+      for (const motion of document.getAnimations()) if (motion.id === "stream-resize") motion.finish();
+      while (node.querySelector("[data-stream-await-size]")) await new Promise(requestAnimationFrame);
+      await new Promise(requestAnimationFrame);
+      await new Promise(requestAnimationFrame);
+      states.push({ hidden, pausedForResize, child: node.getAnimations({ subtree: true }).some((motion) => motion.effect.target !== node && motion.id === "stream-entrance") });
+      return states;
+    }, times);
+    assert.ok(states[0].child && states[0].motion.includes("stream-entrance"), name);
+    assert.ok(states[1].motion.includes("stream-exit"), name);
+    assert.deepEqual(states[3], { hidden: true, pausedForResize: true, child: true }, name);
+    assert.ok(states[2].width > states[0].width && !states[2].child && states[2].motion.includes("stream-resize"), name + " " + JSON.stringify(states));
+  }
+});
+
 test("particle effects replay on successive flights in both directions", async (t) => {
   const browser = await launchBrowser();
   t.after(() => browser.close());
@@ -629,6 +689,145 @@ test("particle effects replay on successive flights in both directions", async (
         return phases;
       }, reverse);
     assert.ok(phases[0].includes("stream-entrance") && phases[1].includes("stream-exit") && phases[3].includes("stream-entrance"), JSON.stringify(phases));
+  }
+});
+
+test("popup account effects follow the active name and icon through each swap", async (t) => {
+  const browser = await launchBrowser();
+  t.after(() => browser.close());
+  const page = await browser.newPage();
+  await serve(page, await loadAssets(runtimeAssets), true);
+  await page.goto("https://stream.test/popup/?pauseTime=1&resizeDuration=0&overlay.entrance=fadeIn");
+  await page.waitForFunction(() => window.gsap?.globalTimeline.getChildren().some((child) => child.repeat() === -1));
+  const result = await page.evaluate(() => {
+    const timeline = gsap.globalTimeline.getChildren().find((child) => child.repeat() === -1);
+    timeline.pause();
+    return [0.15, 1.45, 1.75].map((at) => {
+      timeline.time(at, false);
+      return [...document.querySelectorAll("#nameHolder .name,#icons > i")].filter((node) => node.getAnimations().length).map((node) => [Array.from(node.parentElement.children).indexOf(node), node.getAnimations()[0].id]);
+    });
+  });
+  assert.deepEqual(
+    result,
+    ["entrance", "exit", "entrance"].map((phase, i) => Array.from({ length: 2 }, () => [i === 2 ? 1 : 0, "stream-" + phase]))
+  );
+});
+
+test("the default popup keeps playing while the next account enters and the tiles resize", async (t) => {
+  const browser = await launchBrowser();
+  t.after(() => browser.close());
+  const page = await browser.newPage();
+  await serve(page, await loadAssets(runtimeAssets), true);
+  const accounts = [
+    { platform: "twitch", handle: "A" },
+    { platform: "youtube", handle: "LongerSocialAccountName" },
+    { platform: "twitch", handle: "B" }
+  ];
+  const query = new URLSearchParams({ accounts: JSON.stringify(accounts), pauseTime: 1, resizeDuration: 1200 });
+  await page.goto("https://stream.test/popup/?" + query);
+  await page.waitForFunction(() => window.gsap?.globalTimeline.getChildren().some((child) => child.repeat() === -1));
+  assert.equal(await page.evaluate(() => byStreamResource.settings["icon.entrance"]), "fadeInUp");
+  for (const index of [1, 2]) {
+    await page.waitForFunction(
+      (index) => {
+        const carousel = gsap.globalTimeline.getChildren().find((child) => child.repeat() === -1);
+        const name = document.querySelectorAll("#nameHolder .name")[index];
+        const icon = document.querySelectorAll("#icons > i")[index];
+        const entrance = icon.getAnimations().find((motion) => motion.id === "stream-entrance");
+        const resize = document
+          .querySelector("#socialHolder")
+          .getAnimations()
+          .find((motion) => motion.id === "stream-resize");
+        return carousel.timeScale() > 0 && name.offsetWidth && getComputedStyle(name).visibility === "visible" && entrance?.currentTime > 50 && resize?.playState === "running";
+      },
+      index,
+      { timeout: 6500 }
+    );
+  }
+});
+
+test("the default popup keeps the handle against the tile and displays one padded icon per account", async (t) => {
+  const browser = await launchBrowser();
+  t.after(() => browser.close());
+  const page = await browser.newPage();
+  const assets = await loadAssets([...runtimeAssets, "css/fontawesome.min.css", "css/webfonts/fa-brands-400.woff2"]);
+  for (const [url, asset] of assets)
+    if (url.endsWith(".woff2")) {
+      asset.contentType = "font/woff2";
+      asset.headers = { "Access-Control-Allow-Origin": "*" };
+    }
+  await serve(page, assets, true);
+  for (const [mode, size, fontSize, padding] of [
+    ["left", 0, 64, 0],
+    ["right", 96, 64, 12],
+    ["left", 24, 80, 28]
+  ]) {
+    const query = new URLSearchParams({
+      mode,
+      fontSize,
+      pauseTime: 1,
+      resizeDuration: 0,
+      "icon.fontSize": size,
+      "overlay.entrance": "default",
+      "overlay.matchExit": "yes",
+      accounts: JSON.stringify([
+        { platform: "twitch", handle: "A" },
+        { platform: "youtube", handle: "@byUwUr" }
+      ])
+    });
+    if (padding) query.set("textPadding", padding);
+    await page.goto("https://stream.test/popup/?" + query);
+    await page.waitForFunction(() => window.gsap?.globalTimeline.getChildren().some((child) => child.repeat() === -1));
+    const states = await page.evaluate(async (mode) => {
+      const timeline = gsap.globalTimeline
+        .getChildren()
+        .find((child) => child.repeat() === -1)
+        .pause();
+      await document.fonts.ready;
+      const { reveal, close } = timeline.labels;
+      const text = document.querySelector("#textBox");
+      const rect = (selector) => document.querySelector(selector).getBoundingClientRect();
+      const direction = mode === "right" ? 1 : -1;
+      const visible = (selector) => [...document.querySelectorAll(selector)].filter((node) => node.getClientRects().length);
+      return [reveal - 0.5, reveal + 0.12, reveal + 1, close - 0.4, close + 0.22, timeline.duration() + timeline.repeatDelay() + reveal + 1].map((at) => {
+        timeline.totalTime(at, false);
+        const tile = rect("#svg"),
+          iconBox = rect("#iconBox"),
+          box = text.getBoundingClientRect();
+        const icon = visible("#icons > i")[0],
+          name = visible("#nameHolder .name")[0];
+        const glyph = icon.getBoundingClientRect();
+        const inset = tile.width / 7;
+        const edge = mode === "right" ? tile.right - inset : tile.left + inset;
+        const onText = (x) => document.elementsFromPoint(x, box.top + box.height / 2).includes(text);
+        return {
+          icons: visible("#icons > i").map((node) => node.classList[1]),
+          iconSize: parseFloat(getComputedStyle(icon, "::before").fontSize),
+          tileHeight: (tile.height * 100) / 140,
+          handles: visible("#nameHolder .name").map((node) => node.textContent),
+          textHeight: text.offsetHeight,
+          extraWidth: text.offsetWidth - name.offsetWidth,
+          iconPadding: Math.min(glyph.left - iconBox.left, iconBox.right - glyph.right, glyph.top - iconBox.top, iconBox.bottom - glyph.bottom),
+          textPaddingY: (text.offsetHeight - name.offsetHeight) / 2,
+          centerVisible: onText(box.left + box.width / 2),
+          joined: document.querySelector("#square").isPointInFill(new DOMPoint(mode === "right" ? 119 : 21, 70)) && onText(edge + direction * 2)
+        };
+      });
+    }, mode);
+    assert.equal(states[0].centerVisible, false, mode);
+    for (const [index, state] of states.entries()) {
+      const second = index === 3 || index === 4;
+      assert.deepEqual(state.icons, [second ? "fa-youtube" : "fa-twitch"]);
+      const height = Math.max(size || 72, fontSize) + 32;
+      assert.ok(Math.abs(state.tileHeight - height) < 0.1);
+      assert.equal(state.iconSize, size || 72);
+      assert.deepEqual(state.handles, [second ? "@byUwUr" : "A"]);
+      assert.equal(state.textHeight, height);
+      assert.equal(state.extraWidth, 2 * Math.max(16, padding));
+      assert.ok(state.textPaddingY >= 16);
+      assert.ok(state.iconPadding >= 15.98, mode + " icon padding at sample " + index + ": " + state.iconPadding);
+      if (index) assert.ok(state.joined, mode + " tile and handle at sample " + index);
+    }
   }
 });
 

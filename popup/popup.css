@@ -1,11 +1,14 @@
+/* ===== POPUP VARIABLES ===== */
 /* Match popup.js defaults; inline settings override these values. */
 :root {
-  --iconBoxColor: #66000066;
-  --textBoxColor: #11111166;
+  --iconBoxColor: #6006;
+  --textBoxColor: #1116;
   --iconColor: #eee;
   --fontColor: #eee;
   --font-family: "Courier New", Courier, monospace;
-  --font-size: 48px;
+  --font-size: 72px;
+  --icon-size: 72px;
+  --tile-padding: 16px;
   --font-weight: 600;
   --text-offset: 0px;
 }
@@ -17,7 +20,9 @@ body {
   overflow: hidden;
   background: transparent;
 }
+/* ===== POPUP PLACEMENT ===== */
 #socialHolder {
+  --tile-min-size: calc(max(var(--font-size), var(--icon-size)) + 2 * var(--tile-padding));
   position: absolute;
   top: 0;
   opacity: 0;
@@ -34,70 +39,69 @@ body {
   transform-origin: right top;
 }
 #holder {
-  position: absolute;
-  height: 100px;
-  line-height: 100px;
+  position: relative;
+  display: flex;
+  line-height: 1;
 }
-.right #holder {
-  right: 0;
-}
-.left #holder {
-  left: 0;
-}
+/* ===== ACCOUNT TEXT ===== */
 #textBox {
+  display: grid;
+  align-content: center;
   overflow: hidden;
-  height: 100px;
+  box-sizing: border-box;
+  min-height: var(--tile-min-size);
   background: var(--textBoxColor);
   color: var(--fontColor);
 }
 #nameHolder {
-  padding: 0 10px;
+  padding-inline: var(--tile-padding);
+  padding-block: calc(var(--tile-padding) + max(var(--text-offset), calc(0px - var(--text-offset))));
 }
 .name {
-  display: block;
-  height: 100px;
-  line-height: 100px;
+  display: none;
+  width: max-content;
   white-space: nowrap;
   position: relative;
   top: var(--text-offset);
 }
+/* ===== PLATFORM ICONS ===== */
 /* The square sits inside a larger SVG so its curves have room to stretch. */
 #iconBox {
-  position: absolute;
-  top: -20px;
-  width: 140px;
-  height: 140px;
+  position: relative;
+  z-index: 1;
+  flex: none;
+  min-width: var(--tile-min-size);
+  box-sizing: border-box;
+  display: grid;
   color: var(--iconColor);
 }
 .left #iconBox {
-  right: -120px;
-}
-.right #iconBox {
-  left: -120px;
+  order: 1;
 }
 #svg {
   position: absolute;
-  width: 140px;
-  height: 140px;
+  inset: -20%;
+  width: 140%;
+  height: 140%;
   fill: var(--iconBoxColor);
 }
 #svg path:not(#square) {
   visibility: hidden;
 }
 #iconHolder {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  width: 120px;
-  height: 120px;
-  overflow: hidden;
-  transform: scale(0.75);
+  position: relative;
+  display: grid;
+  place-items: center;
+}
+#icons {
+  padding: var(--tile-padding);
 }
 #icons > i {
-  display: flex;
+  display: none;
+  width: auto;
   align-items: center;
   justify-content: center;
-  width: 120px;
-  height: 120px;
-  font-size: 100px;
+}
+#icons > i::before {
+  line-height: 1;
 }

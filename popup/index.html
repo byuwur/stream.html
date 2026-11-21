@@ -2,12 +2,13 @@
 <html lang="en" data-tool="popup">
   <head>
     <meta charset="UTF-8" />
+    <meta name="referrer" content="origin" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Social Popups for OBS | stream.HTML</title>
     <meta name="description" content="Show your social accounts one animated popup at a time, with 90+ platforms and custom styling. A free social popup overlay for OBS by BONYUR." />
     <meta name="author" content="Andrés Trujillo [Mateus] byUwUr" />
     <meta name="robots" content="index, follow, max-image-preview:large" />
-    <meta name="theme-color" content="#660000" />
+    <meta name="theme-color" content="#600" />
     <!-- <link rel="canonical" href="https://byuwur.github.io/stream.html/popup/" /> -->
     <link rel="canonical" href="https://stream.byuwur.co/popup/" />
     <!-- <link rel="icon" href="https://byuwur.github.io/stream.html/stream.html.png" /> -->
@@ -39,6 +40,7 @@
     <!-- ===== SHARED IMPORTS: resource and configurator ===== -->
     <script type="application/json" id="shared-assets" data-source="https://cdn.jsdelivr.net/gh/byuwur/spa.js" data-spa-version="v20.17">
       [
+        { "path": "/css/animate.min.css", "optional": true },
         { "path": "/css/fontawesome.min.css", "optional": true },
         { "path": "/_fonts.min.js", "optional": false },
         { "path": "/_functions.min.js", "optional": false }
@@ -52,6 +54,7 @@
         { "path": "/js/morphSVGplugin.min.js", "optional": false }
       ]
     </script>
+    <link rel="stylesheet" href="../resources.css" data-renderer-style />
     <link rel="stylesheet" href="./popup.css" data-renderer-style />
     <script src="../resource.js" defer></script>
     <script src="./popup.js" defer></script>
@@ -61,14 +64,14 @@
         <div id="holder">
           <div id="iconBox">
             <!-- The hidden paths are targets for the visible square to morph into. -->
-            <svg id="svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 140" aria-hidden="true">
+            <svg id="svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 140" preserveAspectRatio="none" aria-hidden="true">
               <path id="square" d="M120,120H70H20V70V20h50h50v50V120z" />
-              <path id="littleLeft" d="M120,20c0,0-6.5,19-6.5,50s6.5,50,6.5,50H70H20c0,0-5.8-19-5.8-50S20,20,20,20h50H120z" />
-              <path id="littleRight" d="M20,120c0,0,6.5-19,6.5-50S20,20,20,20h50h50c0,0,5.8,19,5.8,50s-5.8,50-5.8,50H70H20z" />
-              <path id="bigRight" d="M20,120c0,0,6.6-13.1,6.6-50.2S20,20,20,20h50h50c0,0,17.9,12.7,17.9,49.8S120,120,120,120H70H20z" />
-              <path id="bigLeft" d="M120,20c0,0-6.6,13.1-6.6,50.2S120,120,120,120H70H20c0,0-17.9-12.7-17.9-49.8S20,20,20,20h50H120z" />
-              <path id="bigDown" d="M20,20c0,0,12.8,6.6,50,6.6s50-6.6,50-6.6v50v50c0,0-12.8,18.3-50,18.3S20,120,20,120V70V20z" />
-              <path id="bigUp" d="M120,120c0,0-12.8-6.6-50-6.6S20,120,20,120V70V20c0,0,12.8-18.3,50-18.3S120,20,120,20v50V120z" />
+              <path id="littleLeft" d="M120,20V70V120H70H20c0,0-5.8-19-5.8-50S20,20,20,20h50H120z" />
+              <path id="littleRight" d="M20,120V70V20h50h50c0,0,5.8,19,5.8,50s-5.8,50-5.8,50H70H20z" />
+              <path id="bigRight" d="M20,120V70V20h50h50c0,0,17.9,12.7,17.9,49.8S120,120,120,120H70H20z" />
+              <path id="bigLeft" d="M120,20V70V120H70H20c0,0-17.9-12.7-17.9-49.8S20,20,20,20h50H120z" />
+              <path id="bigDown" d="M20,20c0,0,12.8,6.6,50,6.6s50-6.6,50-6.6v50v50c0,0-12.8,10.5-50,10.5S20,120,20,120V70V20z" />
+              <path id="bigUp" d="M120,120c0,0-12.8-6.6-50-6.6S20,120,20,120V70V20c0,0,12.8-10.5,50-10.5S120,20,120,20v50V120z" />
             </svg>
             <div id="iconHolder" aria-hidden="true">
               <div id="icons"></div>
@@ -89,7 +92,6 @@
           { "path": "/css/pickr.min.css", "optional": false },
           { "path": "/_common.min.css", "optional": false },
           { "path": "/css/select2.min.css", "optional": false },
-          { "path": "/css/animate.min.css", "optional": false },
           { "path": "/js/jquery.min.js", "optional": false },
           { "path": "/js/select2.full.min.js", "optional": false },
           { "path": "/js/popper.min.js", "optional": false },
