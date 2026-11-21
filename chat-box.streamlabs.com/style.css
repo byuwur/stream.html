@@ -2,6 +2,7 @@
 * {
     box-sizing: border-box;
 }
+/* ===== CHAT LAYOUT ===== */
 html, body {
     height: 100%;
     overflow: hidden;
@@ -12,7 +13,7 @@ body {
     font-family: '{chatFont}';
     font-weight: {fontWeight};
     font-size: {font_size};
-    line-height: 1.5em;
+    line-height: 1.5;
     color: {text_color};
   	text-align: {textAlignment};
 }
@@ -34,24 +35,25 @@ body {
 #log>div.deleted {
     visibility: hidden;
 }
+/* ===== EMOTES AND MESSAGES ===== */
 #log .emote {
     background-repeat: no-repeat;
     background-position: center;
     background-size: contain;
-    padding: 0.4em 0.2em;
+    padding: calc({font_size} * 0.375) calc({font_size} * 0.25);
     position: relative;
 }
 #log .emote img {
     display: inline-block;
-    height: 1em;
+    height: {font_size};
     opacity: 0;
 }
 #log .message,#log .meta {
     vertical-align: top;
-    padding-bottom: 0.1em;
+    padding-bottom: calc({font_size} * 0.125);
 }
 #log .meta {
-    padding-right: 0.1em;
+    padding-right: calc({font_size} * 0.125);
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
@@ -61,11 +63,11 @@ body {
 }
 .badge {
     display: inline-block;
-    margin-right: 0.2em;
+    margin-right: calc({font_size} * 0.25);
     position: relative;
-    height: 1em;
+    height: {font_size};
     vertical-align: middle;
-    top: -0.1em;
+    top: calc({font_size} * -0.125);
 }
 /* Custom Coderino 
 **********************************************************
@@ -99,6 +101,7 @@ body {
 .shiftGlitch {
   position: relative;
 }
+/* ===== GLITCH ANIMATION ===== */
 .shiftGlitch:after {
   position: absolute;
   left: 2px;
