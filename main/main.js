@@ -6,9 +6,7 @@
 
 document.addEventListener("DOMContentLoaded", async () => {
   await byStream.assetsReady;
-  // ==========
-  // ==== RESOURCE DEFINITION ====
-  // ==========
+  // ===== RESOURCE DEFINITION =====
 
   // Defaults, URL constraints, and the field metadata consumed by the optional editor.
   const resource = {
@@ -17,8 +15,55 @@ document.addEventListener("DOMContentLoaded", async () => {
     description: "Starting, BRB, ending, and intermission scenes.",
     preview: [1920, 1080],
     urlRequired: ["sceneTitle"],
-    sectionIcons: { Scene: "fa-solid fa-clapperboard", Appearance: "fa-solid fa-palette", "Social accounts": "fa-solid fa-users", Schedule: "fa-solid fa-calendar-days" },
+    fieldDefaults: {
+      "overlay.children.entrance": "fadeInUp",
+      "social.entrance": "default",
+      "countdown.entrance": "fadeInUp",
+      "countdownMessage.entrance": "fadeInUp",
+      "countdownEnd.entrance": "fadeInUp",
+      "countdownEnd.entranceDelay": 300
+    },
+    sectionIcons: { Scene: "fa-solid fa-clapperboard", "Social accounts": "fa-solid fa-users", Schedule: "fa-solid fa-calendar-days" },
     previewAllow: "autoplay; gamepad *",
+    contrastLayers: [
+      { surface: "#scene", layer: "#bg" },
+      { surface: "#scene", layer: "#image img" },
+      { surface: "#scene", layer: "#bg #overlay" }
+    ],
+    elements: {
+      overlay: { label: "Appearance", selector: "#scene" },
+      background: { label: "Background", selector: "#bg", fields: ["backgroundColor"] },
+      media: { label: "Media", selector: "#bg :is(#image, #video)", parent: "background", fields: ["displayBackground", "backgroundType", "backgroundUrl", "backgroundBlur", "backgroundScale"], when: ["displayBackground", "yes"] },
+      tint: { label: "Tint", selector: "#bg #overlay", parent: "background", fields: ["backgroundTint", "backgroundOverlay", "backgroundOverlayOpacity", "backgroundBlendMode"], when: ["backgroundTint", "yes"] },
+      frame: { label: "Frame", selector: "#frame", fields: ["frameColor", "frameWidth", "frameInset"] },
+      logo: { label: "Logo", selector: "#brandImg", fields: ["displayBranding", "logoUrl", "logoScale", "logoOpacity"], when: ["displayBranding", "yes"] },
+      title: { label: "Title", selector: "#title", fields: ["sceneTitle", "titleSize", "titleVerticalOffset"] },
+      subtitle: { label: "Subtitle", selector: "#subtitle", fields: ["tagline", "subtitleSize", "subtitleVerticalOffset"] },
+      social: { label: "Social accounts", premade: "timeline", motionItem: "socialCard", selector: "#social", fields: ["displaySocial", "accounts", "animationSpeed", "socialPosition", "socialMediaScale"], when: ["displaySocial", "yes"] },
+      socialCard: { label: "Account card", container: true, selector: "#social .network", parent: "social", fields: ["socialDirection", "socialGap", "socialWrap"] },
+      socialHeading: { label: "Heading", selector: "#social .socialHead", parent: "social" },
+      socialName: { label: "Account name", selector: "#social .socialName", parent: "social" },
+      socialIcon: { label: "Icon", selector: "#social .icon", parent: "social", textOverflow: false },
+      socialCopy: { label: "Account details", container: true, selector: "#social .inner", parent: "social" },
+      schedule: {
+        label: "Schedule",
+        motionItem: "scheduleCard",
+        selector: "#schedule",
+        fields: ["displaySchedule", "scheduleEntries", "schedulePosition", "scheduleScale", "weekDirection", "weekGap", "weekWrap"],
+        when: ["displaySchedule", "yes"]
+      },
+      scheduleCard: { label: "Day card", container: true, selector: "#schedule .day", gap: true, parent: "schedule" },
+      scheduleDay: { label: "Day", selector: "#schedule .scheduleHead", parent: "schedule" },
+      scheduleTime: { label: "Time", selector: "#schedule .scheduleTime", parent: "schedule" },
+      events: { label: "Event labels", motionItem: "eventCard", selector: "#list", fields: ["displayLabels", "eventsPosition", "labelsScale"], when: ["displayLabels", "yes"] },
+      eventCard: { label: "Event card", container: true, selector: "#list .event", parent: "events" },
+      eventHeading: { label: "Heading", selector: "#list .type", parent: "events", fields: ["labelOneHeading", "labelTwoHeading", "labelThreeHeading", "labelFourHeading"] },
+      eventName: { label: "Name", selector: "#list .name", parent: "events" },
+      timerGroup: { label: "Countdown", selector: "#countdown", fields: ["displayCountdown", "countdownTime", "countdownFormat", "countdownScale", "countdownPosition"], when: ["displayCountdown", "yes"] },
+      countdown: { label: "Time", selector: "#time", parent: "timerGroup" },
+      countdownMessage: { label: "Message", selector: "#message", parent: "timerGroup", fields: ["countdownMessage"] },
+      countdownEnd: { label: "Finished message", selector: "#endMessage", parent: "timerGroup", fields: ["countdownOverMessage"] }
+    },
     fields: {
       sceneTitle: {
         type: "textarea",
@@ -468,42 +513,20 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   };
 
-  // Keep each component's placement, typography, surfaces, and effects under its own section.
-  for (const [name, field] of Object.entries(resource.fields)) {
-    const owner = /^(social|socialMedia|accounts)/.test(name) ? "Social accounts" : /^(schedule|week)/.test(name) ? "Schedule" : /^(event|label)/.test(name) ? "Event labels" : /^countdown/.test(name) ? "Countdown" : null;
-    if (!owner || ["displaySocial", "displaySchedule", "displayLabels", "displayCountdown"].includes(name)) continue;
-    if (field.section !== owner) {
-      const group = field.section === "Size & placement" ? "Placement" : field.section === "Animation" ? "Animation" : field.section;
-      field.subsection = group === "Placement" ? group : field.subsection && field.subsection !== group ? `${group} · ${field.subsection}` : group;
-      field.section = owner;
-    }
-  }
-
+  // ===== FIELD DEFAULTS =====
   const fieldDefaults = {
     socialCardRadius: 4,
     socialCardBorderWidth: 0,
     socialCardBorderStyle: "solid",
     socialCardBorderColor: "#EEEEEE1A",
-    socialCardShadow: "no",
-    socialCardShadowColor: "#00000014",
-    socialCardShadowBlur: 12,
-    socialCardShadowY: 3,
     scheduleCardRadius: 6,
     scheduleCardBorderWidth: 1,
     scheduleCardBorderStyle: "solid",
     scheduleCardBorderColor: "#EEEEEE1A",
-    scheduleCardShadow: "no",
-    scheduleCardShadowColor: "#00000014",
-    scheduleCardShadowBlur: 12,
-    scheduleCardShadowY: 3,
     eventCardRadius: 6,
     eventCardBorderWidth: 1,
     eventCardBorderStyle: "solid",
     eventCardBorderColor: "#EEEEEE1A",
-    eventCardShadow: "no",
-    eventCardShadowColor: "#00000014",
-    eventCardShadowBlur: 12,
-    eventCardShadowY: 3,
     sceneFrameRadius: 32,
     socialCardPadding: 12,
     socialCardBackdropMode: "none",
@@ -515,27 +538,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     eventCardBackdropMode: "custom",
     eventCardBackdropBlur: 12,
     socialGap: 12,
-    titleTextShadow: "yes",
-    titleTextShadowColor: "#00000066",
-    titleTextShadowBlur: 16,
-    subtitleTextShadow: "yes",
-    subtitleTextShadowColor: "#00000066",
-    subtitleTextShadowBlur: 16,
     socialHeadingFontSize: 16,
     socialNameFontSize: 24,
     socialIconFontSize: 40,
     countdownFontSize: 48,
-    countdownTextShadow: "yes",
-    countdownTextShadowColor: "#00000066",
-    countdownTextShadowBlur: 16,
     countdownMessageFontSize: 24,
-    countdownMessageTextShadow: "yes",
-    countdownMessageTextShadowColor: "#00000066",
-    countdownMessageTextShadowBlur: 16,
     countdownEndFontSize: 48,
-    countdownEndTextShadow: "yes",
-    countdownEndTextShadowColor: "#00000066",
-    countdownEndTextShadowBlur: 16,
     sceneFilterMode: "custom",
     countdownLineHeight: 54,
     countdownMessageLineHeight: 27,
@@ -562,7 +570,16 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
   resource.fields.weekGap.zeroIsDefault = true;
 
-  const dayLabels = { monday: "Lunes", tuesday: "Martes", wednesday: "Miércoles", thursday: "Jueves", friday: "Viernes", saturday: "Sábado", sunday: "Domingo" };
+  // ===== SCHEDULE ENTRIES =====
+  const dayLabels = {
+    monday: "Lunes",
+    tuesday: "Martes",
+    wednesday: "Miércoles",
+    thursday: "Jueves",
+    friday: "Viernes",
+    saturday: "Sábado",
+    sunday: "Domingo"
+  };
 
   /**
    * An explicit empty schedule hides the section; invalid input retains defaults.
@@ -585,6 +602,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
+  // ===== SCENE RENDERING =====
   /**
    * Apply scene settings, then run the countdown and rotate visible cards.
    * @returns {void}
@@ -729,37 +747,50 @@ document.addEventListener("DOMContentLoaded", async () => {
       time.textContent = byStream.formatDuration(remaining, settings.countdownFormat, false);
       if (remaining === 0) {
         clearInterval(countdownTimer);
-        time.hidden = true;
-        document.getElementById("message").hidden = true;
-        document.getElementById("endMessage").hidden = false;
+        byStream.setElementVisible(time, false);
+        byStream.setElementVisible(document.getElementById("message"), false);
+        byStream.setElementVisible(document.getElementById("endMessage"), true);
       }
     }
 
     const items = [...document.querySelectorAll("#social .item")];
     const animation = items.length ? gsap.timeline({ repeat: -1, paused: true }) : null;
-    items.forEach((item) => {
+    const resizeSocial = byStream.timelineResize(animation);
+    items.forEach((item, index) => {
       const border = item.querySelectorAll(".borderTop");
       const icon = item.querySelector(".icon");
       const details = item.querySelectorAll(".socialHead, .socialName, .scheduleHead, .scheduleTime");
       const card = gsap.timeline();
-      if (settings.animate === "no") {
-        // Keep carousel timing without running entrance/exit motion or delaying the first account.
-        card.set(item, { autoAlpha: 1, clipPath: "none" }).set(item, { autoAlpha: 0 }, 10);
-        animation.add(card, animation.duration() ? "+=1" : 0);
-        return;
+      const entrance = byStream.elementTimeline(resource, settings, item, "social", "entrance");
+      const exit = byStream.elementTimeline(resource, settings, item, "social", "exit");
+      const nativeIn = byStream.elementMotion(settings, "social", "entrance").name === "default";
+      const nativeOut = byStream.elementMotion(settings, "social", "exit").name === "default";
+      const end = Math.max(10, Math.max(entrance.duration(), nativeIn ? 1.3 : 0) + Math.max(exit.duration(), nativeOut ? 1.3 : 0));
+      if (items.length > 1) card.set(items[(index + items.length - 1) % items.length], { display: "none" }, 0);
+      card.set(item, { display: "block", autoAlpha: 1, clipPath: "none" }, 0);
+      card.call(() => resizeSocial([item], nativeIn || nativeOut || entrance.duration() || exit.duration()), [], 0);
+      if (nativeOut || nativeIn) {
+        card.set(border, { clipPath: nativeIn ? "inset(0 100% 0 0)" : "inset(0)" }, 0).set(details, { x: nativeIn ? -60 : 0, opacity: nativeIn ? 0 : 1 }, 0);
+        if (icon) card.set(icon, { x: nativeIn ? -40 : 0, opacity: nativeIn ? 0 : 1 }, 0);
+      }
+      if (nativeIn) {
+        card
+          .fromTo(item, { clipPath: "inset(-2px 100% 0 0)" }, { clipPath: "inset(-2px 0% 0 0)", duration: 0.6 }, 0)
+          .fromTo(border, { clipPath: "inset(0 100% 0 0)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 0.5 }, 0)
+          .fromTo(details, { x: "-60px", opacity: 0 }, { x: 0, opacity: 1, duration: 0.7, stagger: { amount: 0.2 } }, 0.4);
+        if (icon) card.fromTo(icon, { x: "-40px", opacity: 0 }, { x: 0, opacity: 1, duration: 0.6 }, 0.4);
+      }
+      if (nativeOut) {
+        card
+          .to(details, { x: "-60px", opacity: 0, duration: 0.7, stagger: { amount: 0.2 } }, end - 1.3)
+          .to(border, { clipPath: "inset(0 100% 0 0)", duration: 0.5 }, end - 0.5)
+          .to(item, { clipPath: "inset(-2px 100% 0 0)", duration: 0.6 }, end - 0.6);
+        if (icon) card.to(icon, { x: "-40px", opacity: 0, duration: 0.6 }, end - 1);
       }
       card
-        .set(item, { autoAlpha: 1 })
-        .fromTo(item, { clipPath: "inset(-2px 100% 0 0)" }, { clipPath: "inset(-2px 0% 0 0)", duration: 0.6 }, 0)
-        .fromTo(border, { scaleX: 0, transformOrigin: "left center" }, { scaleX: 1, duration: 0.5 }, 0)
-        .fromTo(details, { x: "-60px", opacity: 0 }, { x: 0, opacity: 1, duration: 0.7, stagger: { amount: 0.2 } }, 0.4)
-        .to(details, { x: "-60px", opacity: 0, duration: 0.7, stagger: { amount: 0.2 } }, 8.7)
-        .to(border, { scaleX: 0, duration: 0.5 }, 9.5)
-        .to(item, { clipPath: "inset(-2px 100% 0 0)", duration: 0.6 }, 9.4)
-        .set(item, { autoAlpha: 0 }, 10);
-      if (icon) {
-        card.fromTo(icon, { x: "-40px", opacity: 0 }, { x: 0, opacity: 1, duration: 0.6 }, 0.4).to(icon, { x: "-40px", opacity: 0, duration: 0.6 }, 9);
-      }
+        .add(entrance, 0)
+        .add(exit, end - exit.duration())
+        .set(item, { autoAlpha: 0 }, end);
       animation.add(card, animation.duration() ? "+=1" : 0);
     });
     animation?.timeScale(settings.animationSpeed / 100);
@@ -785,6 +816,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     start();
   }
 
+  // ===== OVERLAY INITIALIZATION =====
   const settings = await byStream.initResource(resource);
   if (byStreamOverlay) renderMain();
 });

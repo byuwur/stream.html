@@ -2,12 +2,13 @@
 <html lang="en" data-tool="main">
   <head>
     <meta charset="UTF-8" />
+    <meta name="referrer" content="origin" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Starting, BRB &amp; Ending Scenes for OBS | stream.HTML</title>
     <meta name="description" content="Make your starting, BRB, ending, and intermission scenes your own with branding, countdowns, and social accounts. Free OBS overlays by BONYUR." />
     <meta name="author" content="Andrés Trujillo [Mateus] byUwUr" />
     <meta name="robots" content="index, follow, max-image-preview:large" />
-    <meta name="theme-color" content="#660000" />
+    <meta name="theme-color" content="#600" />
     <!-- <link rel="canonical" href="https://byuwur.github.io/stream.html/main/" /> -->
     <link rel="canonical" href="https://stream.byuwur.co/main/" />
     <!-- <link rel="icon" href="https://byuwur.github.io/stream.html/stream.html.png" /> -->
@@ -39,6 +40,7 @@
     <!-- ===== SHARED IMPORTS: resource and configurator ===== -->
     <script type="application/json" id="shared-assets" data-source="https://cdn.jsdelivr.net/gh/byuwur/spa.js" data-spa-version="v20.17">
       [
+        { "path": "/css/animate.min.css", "optional": true },
         { "path": "/css/fontawesome.min.css", "optional": true },
         { "path": "/_fonts.min.js", "optional": false },
         { "path": "/_functions.min.js", "optional": false }
@@ -49,6 +51,7 @@
     <script type="application/json" id="resource-assets" data-source="https://cdn.jsdelivr.net/gh/byuwur/spa.js" data-spa-version="v20.17">
       [{ "path": "/js/gsap.min.js", "optional": false }]
     </script>
+    <link rel="stylesheet" href="../resources.css" data-renderer-style />
     <link rel="stylesheet" href="./main.css" data-renderer-style />
     <script src="../resource.js" defer></script>
     <script src="./main.js" defer></script>
@@ -120,7 +123,6 @@
           { "path": "/css/pickr.min.css", "optional": false },
           { "path": "/_common.min.css", "optional": false },
           { "path": "/css/select2.min.css", "optional": false },
-          { "path": "/css/animate.min.css", "optional": false },
           { "path": "/js/jquery.min.js", "optional": false },
           { "path": "/js/select2.full.min.js", "optional": false },
           { "path": "/js/popper.min.js", "optional": false },

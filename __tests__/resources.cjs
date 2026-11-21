@@ -68,6 +68,42 @@ test("element spacing, legacy typography and entrances compose on a standalone o
   assert.deepEqual(await page.locator(".primary").evaluate((node) => node.getAnimations().map((animation) => animation.id)), ["stream-transform"]);
 });
 
+test("Main socials rotate with Off, their built-in animation, or matched Animate.css effects", async (t) => {
+  const browser = await launchBrowser();
+  t.after(() => browser.close());
+  const page = await browser.newPage();
+  await serve(page, await loadAssets(runtimeAssets), true);
+  for (const effect of ["none", "default", "slideInLeft"]) {
+    const query = new URLSearchParams({ displaySocial: "yes", resizeDuration: 0, "overlay.children.entrance": "none" });
+    if (effect !== "default") query.set("social.entrance", effect);
+    await page.goto("https://stream.test/main/?" + query);
+    await page.waitForFunction(() => window.gsap?.globalTimeline.getChildren().some((child) => child.repeat() === -1));
+    const states = await page.evaluate(() => {
+      const carousel = gsap.globalTimeline.getChildren().find((child) => child.repeat() === -1);
+      const node = document.querySelector("#social .item");
+      carousel.pause();
+      return [0.15, 9.85, 11.15, 20.85].map((time) => {
+        carousel.time(time, false);
+        const active = time < 10 ? node : node.nextElementSibling;
+        return {
+          clip: node.style.clipPath,
+          next: node.nextElementSibling.style.visibility,
+          container: document.getElementById("social").getAnimations().length,
+          motion: active.getAnimations().map((animation) => [animation.id, animation.effect.getTiming().duration, animation.effect.getTiming().easing])
+        };
+      });
+    });
+    assert.deepEqual(states[0].motion, effect === "slideInLeft" ? [["stream-entrance", 300, "ease"]] : []);
+    assert.deepEqual(states[1].motion, effect === "slideInLeft" ? [["stream-exit", 300, "ease"]] : []);
+    assert.equal(states[0].clip.startsWith("inset("), effect === "default");
+    assert.equal(states[1].clip.startsWith("inset("), effect === "default");
+    assert.equal(states[2].next, "inherit");
+    assert.deepEqual(states[2].motion, states[0].motion);
+    assert.deepEqual(states[3].motion, states[1].motion);
+    assert.ok(states.every((state) => state.container === 0));
+  }
+});
+
 test("quote changes animate the quote and author while preserving the heading and panel", async (t) => {
   const browser = await launchBrowser();
   t.after(() => browser.close());

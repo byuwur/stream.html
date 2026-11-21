@@ -1,13 +1,14 @@
+/* ===== SCENE VARIABLES ===== */
 /* Match main.js defaults; inline settings override these values. */
 :root {
   --font-family: "Courier New", Courier, monospace;
   --primary-color: #eee;
-  --secondary-color: #eeeeeeb3;
+  --secondary-color: #eeeb;
   --accent-color: #600;
   --frame-color: #300;
-  --content-background: #11111166;
-  --background-color: #00000000;
-  --background-tint: #36353a;
+  --content-background: #1116;
+  --background-color: #0000;
+  --background-tint: #333;
   --frame-width: 6px;
   --logo-opacity: 0.04;
   --logo-scale: 1;
@@ -46,8 +47,8 @@ html,
 body {
   margin: 0;
   padding: 0;
-  width: 1920px;
-  height: 1080px;
+  width: 100%;
+  height: 100%;
   overflow: hidden;
   font-family: var(--font-family);
   font-weight: 600;
@@ -58,8 +59,13 @@ body {
 #overlay {
   position: absolute;
   inset: 0;
-  width: 1920px;
-  height: 1080px;
+  width: 100%;
+  height: 100%;
+}
+#scene,
+#bg {
+  min-width: 100%;
+  min-height: 100%;
 }
 #scene {
   background: var(--background-color);
@@ -69,6 +75,7 @@ body {
   inset: 0;
   isolation: isolate;
 }
+/* ===== OVERLAY FRAME ===== */
 #frame {
   position: absolute;
   inset: 24px;
@@ -77,30 +84,29 @@ body {
 #video video,
 #image img {
   position: absolute;
-  min-width: 1920px;
-  min-height: 1080px;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
   filter: blur(var(--background-blur));
   transform: scale(var(--background-scale));
-}
-#video video {
-  width: 1920px;
-  height: 1080px;
 }
 #overlay {
   background: var(--background-tint);
   opacity: var(--background-opacity);
   mix-blend-mode: var(--background-blend, normal);
 }
+/* ===== BRANDING ===== */
 /* Logo, title, and subtitle. */
 #branding {
   position: absolute;
+  width: 100%;
   top: 50%;
   margin-top: -250px;
   text-align: center;
 }
 #brandImg {
   position: absolute;
-  width: 1920px;
+  width: 100%;
   height: 500px;
   background: center / contain no-repeat;
   opacity: var(--logo-opacity);
@@ -109,7 +115,9 @@ body {
 #title,
 #subtitle {
   position: absolute;
-  width: 1920px;
+  inset-inline: 0;
+  margin-inline: auto;
+  width: 100%;
 }
 #title {
   margin-top: 142px;
@@ -130,6 +138,7 @@ body {
   transform-origin: left top;
 }
 .item {
+  display: none;
   position: relative;
   grid-area: 1 / 1;
   opacity: 0;
@@ -141,6 +150,7 @@ body {
   position: relative;
   background: var(--content-background);
 }
+/* ===== SOCIAL ACCOUNTS ===== */
 .network {
   display: flex;
   flex-direction: row;
@@ -189,6 +199,7 @@ body {
   padding: 10px;
   text-align: center;
 }
+/* ===== SCHEDULE ===== */
 .scheduleTime {
   padding-top: 2px;
 }
@@ -233,6 +244,7 @@ body {
   font-size: var(--countdownTimeSize);
   transform: translateY(var(--countdownTimeVerticalOffset));
 }
+/* ===== SCENE MESSAGES ===== */
 #message {
   color: var(--secondary-color);
   font-size: var(--countdownMessageSize);
@@ -257,6 +269,7 @@ body {
 .scene-corner[data-corner^="top"] {
   top: var(--corner-inset);
 }
+/* ===== CORNER LAYOUT ===== */
 .scene-corner[data-corner^="bottom"] {
   bottom: var(--corner-inset);
   align-items: flex-end;
