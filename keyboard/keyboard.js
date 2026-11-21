@@ -14,20 +14,37 @@ async function initKeyboardResource() {
   await byStream.assetsReady;
   const layouts = byKeyboardLayouts;
   const keyOptions = Object.fromEntries(Object.entries(layouts.keys).map(([code, value]) => [code, `${code} · ${value.label}`]));
-  const toggle = { type: "switch", checkedValue: "yes", uncheckedValue: "no", options: { yes: "On", no: "Off" } };
-  const keyboardFields = { section: "Input", when: (settings) => ["keyboard", "both"].includes(settings.mode), retainInactive: true };
-  const labelFields = { section: "Input", when: (settings) => keyboardFields.when(settings) || (settings.showHistory === "yes" && settings.historySource !== "mouse"), retainInactive: true };
+  // ===== KEYBOARD CONFIGURATION =====
+  const toggle = {
+    type: "switch",
+    checkedValue: "yes",
+    uncheckedValue: "no",
+    options: { yes: "On", no: "Off" }
+  };
+  const keyboardFields = {
+    section: "Input",
+    when: (settings) => ["keyboard", "both"].includes(settings.mode),
+    retainInactive: true
+  };
+  const labelFields = {
+    section: "Input",
+    when: (settings) => keyboardFields.when(settings) || (settings.showHistory === "yes" && settings.historySource !== "mouse"),
+    retainInactive: true
+  };
   const appearance = { section: "Appearance", retainInactive: true };
+  // ===== RESOURCE CONFIGURATION =====
   const resource = {
     version: "1.1", // 2026-11-15
     title: "Keyboard & Mouse",
     description: "Live browser-focused keyboard, mouse, and optional ephemeral Input History. Use OBS Interact to receive input; this cannot capture other applications.",
     preview: [1280, 720],
     urlRequired: ["mode"],
-    sectionIcons: { Input: "fa-solid fa-keyboard", "Input History": "fa-solid fa-clock-rotate-left" },
-    legacyFields: ["shellImage", "keyImage"],
+    sectionOrder: ["General", "Keyboard", "Mouse", "Appearance", "Input History", "Whole overlay"],
+    sectionIcons: { Mouse: "fa-solid fa-computer-mouse", "Input History": "fa-solid fa-clock-rotate-left" },
+    legacyFields: ["historyAnimation", "shellImage", "keyImage"],
     /** Resolve the former surface-specific URLs and tint choices into the shared image controls. */
     normalizeParameters(values) {
+      byStream.inputHistory.migrateAnimation(values);
       if (!values.has("imageUrl")) {
         const image = values.get(values.get("imageTarget") === "keys" ? "keyImage" : "shellImage") || values.get("keyImage");
         if (image) values.set("imageUrl", image);
@@ -43,7 +60,32 @@ async function initKeyboardResource() {
       values.delete("shellImage");
       values.delete("keyImage");
     },
+    elements: {
+      stage: { label: "Whole overlay", selector: "#keyboard-overlay", container: true },
+      overlay: { label: "Appearance", selector: "#input-scene" },
+      keyboard: {
+        label: "Keyboard",
+        selector: "#keyboard",
+        fields: ["layout", "platform", "standard", "displayedKeys", "layoutDensity", "keySpacing", "keyboardScale", "keyboardX", "keyboardY"],
+        groups: ["Key groups"],
+        when: ["mode", "both", "keyboard"]
+      },
+      keys: { label: "Keys", selector: "#keyboard .input-key", parent: "keyboard", box: false, fields: ["keycapStyle", "variant", "keyColor", "pressedColor", "keySize", "keyProportion", "pressEffect", "releaseDuration"] },
+      legend: { label: "Key legends", selector: "#keyboard :is(.key-text,.key-legend)", parent: "keys", box: false, fields: ["legends", "keyLabels", "legendColor", "pressedLegendColor"], textOverflow: ".key-label-text" },
+      action: { label: "Key action", selector: "#keyboard .key-action", parent: "keys", box: false, fields: ["keyActions", "showActions"], textOverflow: ".key-action-text" },
+      keyboardShell: { label: "Shell", selector: "#keyboard :is(.keyboard-shell,.shell-highlight)", parent: "keyboard", box: false, fields: ["shell", "shellColor"] },
+      texture: { label: "Image background", selector: "#keyboard .keyboard-texture", parent: "keyboard", box: false, groups: ["Image background"] },
+      mouse: { label: "Mouse", selector: "#mouse", groups: ["Mouse"], when: ["mode", "both", "mouse"] },
+      mouseButtons: { label: "Buttons", selector: "#mouse .mouse-button", parent: "mouse", box: false, fields: ["mouseButtonColor", "mousePressedColor"] },
+      movement: { label: "Movement indicator", selector: "#mouse .mouse-movement", parent: "mouse", box: false, fields: ["mouseMovement"] },
+      history: { label: "Input History", selector: ".input-history", motionItem: "historyEntry", premade: true, groups: ["Input History"], when: ["showHistory", "yes"] },
+      historyEntry: { label: "History entry", selector: ".history-entry", parent: "history" },
+      historyPrompt: { label: "Input prompt", selector: ".history-prompt", parent: "historyEntry", textOverflow: ".history-prompt:not(:has(svg))" },
+      historySourceLabel: { label: "Input source label", selector: ".history-prompts > small", parent: "historyEntry", textOverflow: true },
+      historyCount: { label: "Press multiplier", selector: ".history-count", parent: "historyEntry", textOverflow: true }
+    },
     fields: {
+      source: { type: "select", default: "browser", label: "Input source", section: "Input", options: { browser: "Browser", helper: "OBS helper (TBD)" }, description: "Native snapshots require a future OBS helper." },
       mode: {
         type: "select",
         default: "both",
@@ -52,7 +94,7 @@ async function initKeyboardResource() {
         description: "Hidden leaves only the optional Input History.",
         options: { keyboard: "Keyboard only", mouse: "Mouse only", both: "Keyboard + Mouse", hidden: "Hidden" }
       },
-      layout: { ...labelFields, type: "select", default: "full", label: "Layout preset", options: layouts.presets },
+      layout: { ...labelFields, type: "select", default: "60", label: "Layout preset", options: layouts.presets },
       platform: { ...labelFields, type: "select", default: "windows", label: "Platform labels", options: { windows: "Windows", mac: "macOS" } },
       standard: { ...labelFields, type: "select", default: "ansi", label: "Physical layout", options: { ansi: "ANSI", iso: "ISO" } },
       legends: { ...labelFields, type: "select", default: "qwerty", label: "Legend layout", options: { qwerty: "QWERTY (US)", qwertz: "QWERTZ (German)", azerty: "AZERTY (French)" } },
@@ -106,14 +148,57 @@ async function initKeyboardResource() {
           international: "International keys"
         }).map(([group, label]) => [`group${group}`, { ...keyboardFields, ...toggle, default: "yes", label, subsection: "Key groups" }])
       ),
-      layoutDensity: { ...appearance, type: "select", default: "regular", label: "Layout", when: keyboardFields.when, options: { regular: "Regular", compact: "Compact" } },
+      layoutDensity: { ...appearance, type: "select", default: "compact", label: "Layout", when: keyboardFields.when, options: { regular: "Regular", compact: "Compact" } },
       shell: {
         ...appearance,
         type: "select",
-        default: "full",
+        default: "minimal",
         label: "Keyboard shell",
         when: keyboardFields.when,
         options: { full: "Complete shell", minimal: "Minimal shell", none: "Floating keys", outline: "Outline only", gaming: "Compact gaming" }
+      },
+      imageTarget: {
+        ...appearance,
+        type: "select",
+        default: "none",
+        label: "Image surfaces",
+        subsection: "Image background",
+        when: keyboardFields.when,
+        choiceButtons: true,
+        options: { none: "Off", shell: "Shell", keys: "Keys", all: "All" }
+      },
+      imageUrl: {
+        ...appearance,
+        type: "text",
+        default: "",
+        label: "Image URL",
+        subsection: "Image background",
+        image: true,
+        maxlength: 65536,
+        validate: imageValue,
+        when: ["imageTarget", "shell", "keys", "all"]
+      },
+      imageFit: { ...appearance, type: "select", default: "cover", label: "Image fit", subsection: "Image background", when: ["imageTarget", "shell", "keys", "all"], options: { cover: "Cover", contain: "Contain", stretch: "Stretch" } },
+      imageScale: { ...appearance, type: "number", default: 100, label: "Image scale (%)", subsection: "Image background", when: ["imageTarget", "shell", "keys", "all"], min: 25, max: 300 },
+      imageOpacity: { ...appearance, type: "number", default: 100, label: "Image opacity (%)", subsection: "Image background", when: ["imageTarget", "shell", "keys", "all"], min: 0, max: 100 },
+      imageTint: {
+        ...appearance,
+        ...toggle,
+        default: "no",
+        label: "Image tint",
+        subsection: "Image background",
+        when: ["imageTarget", "shell", "keys", "all"]
+      },
+      imageTintColor: { ...appearance, type: "color", default: "#ffffff", label: "Tint color", subsection: "Image background", maxlength: 9, when: ["imageTint", "yes"] },
+      imageTintStrength: { ...appearance, type: "number", default: 0, label: "Tint strength (%)", subsection: "Image background", min: 0, max: 100, when: ["imageTint", "yes"] },
+      imageBlendMode: {
+        ...appearance,
+        type: "select",
+        default: "multiply",
+        label: "Blend mode",
+        subsection: "Image background",
+        options: { multiply: "Multiply", overlay: "Overlay", "soft-light": "Soft-light", color: "Color", fill: "Fill" },
+        when: ["imageTint", "yes"]
       },
       keycapStyle: { ...appearance, type: "select", default: "filled", label: "Keycap surface", when: keyboardFields.when, options: { filled: "Filled", outline: "Outline only" } },
       variant: {
@@ -142,49 +227,6 @@ async function initKeyboardResource() {
       shadowIntensity: { ...appearance, type: "number", default: 16, label: "Shadows (%)", subsection: "Vector details", min: 0, max: 100 },
       pressEffect: { ...appearance, type: "select", default: "fill", label: "Pressed effect", subsection: "Input feedback", options: { fill: "Fill", invert: "Invert", depth: "Fill + depth", glow: "Fill + glow" } },
       releaseDuration: { ...appearance, type: "number", default: 100, label: "Smooth release (ms)", subsection: "Input feedback", min: 0, max: 500, when: (settings) => settings.animate !== "no" },
-      imageTarget: {
-        ...appearance,
-        type: "select",
-        default: "none",
-        label: "Image surfaces",
-        subsection: "Image backgrounds",
-        when: keyboardFields.when,
-        choiceButtons: true,
-        options: { none: "Off", shell: "Shell", keys: "Keys", all: "All" }
-      },
-      imageUrl: {
-        ...appearance,
-        type: "text",
-        default: "",
-        label: "Image URL",
-        subsection: "Image backgrounds",
-        image: true,
-        maxlength: 65536,
-        validate: imageValue,
-        when: ["imageTarget", "shell", "keys", "all"]
-      },
-      imageFit: { ...appearance, type: "select", default: "cover", label: "Image fit", subsection: "Image backgrounds", when: ["imageTarget", "shell", "keys", "all"], options: { cover: "Cover", contain: "Contain", stretch: "Stretch" } },
-      imageScale: { ...appearance, type: "number", default: 100, label: "Image scale (%)", subsection: "Image backgrounds", when: ["imageTarget", "shell", "keys", "all"], min: 25, max: 300 },
-      imageOpacity: { ...appearance, type: "number", default: 100, label: "Image opacity (%)", subsection: "Image backgrounds", when: ["imageTarget", "shell", "keys", "all"], min: 0, max: 100 },
-      imageTint: {
-        ...appearance,
-        ...toggle,
-        default: "no",
-        label: "Image tint",
-        subsection: "Image backgrounds",
-        when: ["imageTarget", "shell", "keys", "all"]
-      },
-      imageTintColor: { ...appearance, type: "color", default: "#ffffff", label: "Tint color", subsection: "Image backgrounds", maxlength: 9, when: ["imageTint", "yes"] },
-      imageTintStrength: { ...appearance, type: "number", default: 0, label: "Tint strength (%)", subsection: "Image backgrounds", min: 0, max: 100, when: ["imageTint", "yes"] },
-      imageBlendMode: {
-        ...appearance,
-        type: "select",
-        default: "multiply",
-        label: "Blend mode",
-        subsection: "Image backgrounds",
-        options: { multiply: "Multiply", overlay: "Overlay", "soft-light": "Soft-light", color: "Color", fill: "Fill" },
-        when: ["imageTint", "yes"]
-      },
       mouseIndependent: { ...appearance, ...toggle, default: "no", label: "Independent mouse colors", subsection: "Mouse", when: (settings) => ["mouse", "both"].includes(settings.mode) },
       mouseColor: { ...appearance, type: "color", default: "#111111", label: "Mouse surface", subsection: "Mouse", maxlength: 9, when: ["mouseIndependent", "yes"] },
       mouseButtonColor: { ...appearance, type: "color", default: "#282828", label: "Mouse buttons", subsection: "Mouse", maxlength: 9, when: ["mouseIndependent", "yes"] },
@@ -255,7 +297,14 @@ async function initKeyboardResource() {
 
   /** Declare independent component placement without adding another configuration owner. */
   function componentFields(name, label, when) {
-    const common = { type: "number", section: "Size & placement", subsection: label, when, retainInactive: true, step: "any" };
+    const common = {
+      type: "number",
+      section: "Size & placement",
+      subsection: label,
+      when,
+      retainInactive: true,
+      step: "any"
+    };
     return {
       [`${name}Scale`]: { ...common, default: 100, label: `${label} scale (%)`, min: -500, max: 500 },
       [`${name}X`]: { ...common, default: 0, label: `${label} horizontal offset (px)`, min: -3840, max: 3840 },
@@ -263,6 +312,7 @@ async function initKeyboardResource() {
     };
   }
 
+  // ===== OVERLAY INITIALIZATION =====
   const settings = await byStream.initResource(resource);
   if (!byStreamOverlay) return;
   const root = document.getElementById("keyboard-overlay");
@@ -277,7 +327,7 @@ async function initKeyboardResource() {
   root.style.padding = `${settings.edgePadding}px`;
   root.dataset.effect = settings.pressEffect;
   root.style.setProperty("--release", `${settings.releaseDuration}ms`);
-  const history = byStream.inputHistory.create(settings);
+  const history = byStream.inputHistory.create(settings, document.getElementById("keyboard-overlay"));
   const events = new AbortController();
   const requests = new AbortController();
   const pressed = new Set();
@@ -298,6 +348,7 @@ async function initKeyboardResource() {
   );
   const ns = "http://www.w3.org/2000/svg";
 
+  // ===== SVG ARTWORK =====
   /** Create a native SVG element with trusted names/attributes; labels use textContent. */
   function svg(tag, attributes = {}, parent) {
     const node = document.createElementNS(ns, tag);
@@ -311,7 +362,18 @@ async function initKeyboardResource() {
   const measure = svg("g", {}, definitions);
   if (settings.outlineWidth > 0 && settings.outlineWidth < 1) {
     // Thin the original hollow ring from both edges; the default keeps its exact native contours.
-    const filter = svg("filter", { id: "keyboard-thin-outline", x: -4, y: -4, width: 72, height: 72, filterUnits: "userSpaceOnUse" }, defs);
+    const filter = svg(
+      "filter",
+      {
+        id: "keyboard-thin-outline",
+        x: -4,
+        y: -4,
+        width: 72,
+        height: 72,
+        filterUnits: "userSpaceOnUse"
+      },
+      defs
+    );
     svg("feMorphology", { operator: "erode", radius: (1 - settings.outlineWidth) * 1.5 }, filter);
     root.style.setProperty("--outline-filter", "url(#keyboard-thin-outline)");
   }
@@ -327,7 +389,9 @@ async function initKeyboardResource() {
     const pending = (async () => {
       let source;
       try {
-        const response = await fetch(new URL(`./keys/${asset}.svg`, keyboardResourceURL), { signal: requests.signal });
+        const response = await fetch(new URL(`./keys/${asset}.svg`, keyboardResourceURL), {
+          signal: requests.signal
+        });
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const document = new DOMParser().parseFromString(await response.text(), "image/svg+xml");
         if (document.querySelector("parsererror")) throw new Error("Invalid SVG");
@@ -374,36 +438,81 @@ async function initKeyboardResource() {
     return pending;
   }
 
+  function keyText(node, text, width, height, { action = false, fallback = false } = {}) {
+    const baseSize = fallback ? 12 : height * (action ? 0.16 : 0.35);
+    const className = action ? "key-text key-action" : "key-text";
+    if (settings[action ? "actionOverflow" : "legendOverflow"] === "layout") {
+      const label = svg(
+        "text",
+        {
+          x: width / 2,
+          y: height * (action ? 0.86 : 0.5),
+          class: className,
+          "text-anchor": "middle",
+          ...(!action && { "dominant-baseline": "central" }),
+          "font-size": fallback ? baseSize : Math.min(baseSize, (width / Math.max(2, text.length)) * (action ? 1.4 : 1.5))
+        },
+        node
+      );
+      label.textContent = text;
+      return;
+    }
+    // HTML supplies wrapping and ellipsis inside the SVG key's own coordinate system.
+    const box = svg("foreignObject", { x: 2, y: action ? height * 0.68 : 0, width: width - 4, height: action ? height * 0.3 : height, class: className }, node);
+    const frame = document.createElement("div");
+    frame.className = "key-text-frame";
+    const label = document.createElement("div");
+    label.className = action ? "key-action-text" : "key-label-text";
+    label.style.fontSize = baseSize + "px";
+    label.textContent = text;
+    frame.append(label);
+    box.append(frame);
+  }
+
   /** Draw a mounted key from shared source contours; only its state class changes during input. */
   function keyArtwork(info, artwork, width, height, id = "") {
-    const node = svg("svg", { viewBox: `-2 -2 ${width + 4} ${height + 4}`, width, height, class: "input-key", role: "img", "aria-label": `${info.label}${info.action ? `: ${info.action}` : ""}` });
+    const node = svg("svg", {
+      viewBox: `-2 -2 ${width + 4} ${height + 4}`,
+      width,
+      height,
+      class: "input-key",
+      role: "img",
+      "aria-label": `${info.label}${info.action ? `: ${info.action}` : ""}`
+    });
     if (id) node.dataset.code = id;
     const title = svg("title", {}, node);
     title.textContent = info.action ? `${info.label} · ${info.action}` : info.label;
     if (!artwork) {
       // A missing pack remains usable and clearly identified; normal rendering always uses Kenney paths.
       svg("rect", { width, height, rx: 5, class: "key-surface" }, node);
-      const label = svg("text", { x: width / 2, y: height / 2, class: "key-text", "text-anchor": "middle", "dominant-baseline": "central", "font-size": 12 }, node);
-      label.textContent = info.label;
+      keyText(node, info.label, width, height, { fallback: true });
       return node;
     }
     const { box, id: assetId } = artwork;
     const transform = `scale(${width / box.width} ${height / box.height}) translate(${-box.x} ${-box.y})`;
     const cap = svg("g", { transform, class: "key-cap" }, node);
     svg("use", { href: `#${assetId}-surface`, class: "key-surface" }, cap);
-    svg("use", { href: `#${assetId}-surface`, class: "key-light" }, cap);
-    svg("use", { href: `#${assetId}-surface`, class: "key-pressed-fill" }, cap);
+    if (id) {
+      svg("use", { href: `#${assetId}-surface`, class: "key-light" }, cap);
+      svg("use", { href: `#${assetId}-surface`, class: "key-pressed-fill" }, cap);
+    }
     svg("use", { href: `#${assetId}-outline`, class: "key-outline" }, cap);
     if (!info.customLabel) {
       const scale = Math.min(width / box.width, height / box.height);
-      svg("use", { href: `#${assetId}-legend`, transform: `translate(${width / 2} ${height / 2}) scale(${scale}) translate(${-box.x - box.width / 2} ${-box.y - box.height / 2})`, class: "key-legend" }, node);
+      svg(
+        "use",
+        {
+          href: `#${assetId}-legend`,
+          transform: `translate(${width / 2} ${height / 2}) scale(${scale}) translate(${-box.x - box.width / 2} ${-box.y - box.height / 2})`,
+          class: "key-legend"
+        },
+        node
+      );
     } else {
-      const label = svg("text", { x: width / 2, y: height / 2, "text-anchor": "middle", "dominant-baseline": "central", "font-size": Math.min(height * 0.35, (width / Math.max(2, info.label.length)) * 1.5), class: "key-text" }, node);
-      label.textContent = info.label;
+      keyText(node, info.label, width, height);
     }
     if (settings.showActions === "yes" && info.action) {
-      const label = svg("text", { x: width / 2, y: height * 0.86, "text-anchor": "middle", "font-size": Math.min(height * 0.16, (width / Math.max(2, info.action.length)) * 1.4), class: "key-text key-action" }, node);
-      label.textContent = info.action;
+      keyText(node, info.action, width, height, { action: true });
     }
     return node;
   }
@@ -411,7 +520,15 @@ async function initKeyboardResource() {
   /** Put a configured image in shared SVG definitions; failure leaves vector surfaces visible. */
   function imageDefinition(id, value) {
     if (!value) return;
-    const symbol = svg("svg", { id, viewBox: "0 0 100 100", preserveAspectRatio: { cover: "xMidYMid slice", contain: "xMidYMid meet", stretch: "none" }[settings.imageFit] }, defs);
+    const symbol = svg(
+      "svg",
+      {
+        id,
+        viewBox: "0 0 100 100",
+        preserveAspectRatio: { cover: "xMidYMid slice", contain: "xMidYMid meet", stretch: "none" }[settings.imageFit]
+      },
+      defs
+    );
     const image = svg("image", { width: 100, height: 100, preserveAspectRatio: "none" }, symbol);
     if (settings.imageTint === "yes" && settings.imageTintStrength > 0) image.setAttribute("filter", "url(#keyboard-image-tint)");
     const loader = new Image();
@@ -455,21 +572,84 @@ async function initKeyboardResource() {
   if (!keyboard.hidden) {
     const width = Math.max(1, ...slots.map((slot) => (slot.x + slot.width) * unitX - keySpacing)) + padding * 2;
     const height = Math.max(1, ...slots.map((slot) => (slot.y + slot.height) * unitY - keySpacing)) + padding * 2;
-    const board = svg("svg", { viewBox: `0 0 ${width} ${height}`, width, height, role: "img", "aria-label": layouts.presets[settings.layout], "data-shell": settings.shell }, keyboard);
+    const board = svg(
+      "svg",
+      {
+        viewBox: `0 0 ${width} ${height}`,
+        width,
+        height,
+        role: "img",
+        "aria-label": layouts.presets[settings.layout],
+        "data-shell": settings.shell
+      },
+      keyboard
+    );
     const clip = svg("clipPath", { id: "keyboard-shell-clip" }, defs);
     svg("rect", { width: width - 2, height: height - 2, x: 1, y: 1, rx: settings.shell === "full" ? 10 : 5 }, clip);
-    svg("rect", { x: 1, y: 1, width: width - 2, height: height - 2, rx: settings.shell === "full" ? 10 : 5, class: "keyboard-shell", "stroke-width": settings.outlineWidth * 1.5 }, board);
+    svg(
+      "rect",
+      {
+        x: 1,
+        y: 1,
+        width: width - 2,
+        height: height - 2,
+        rx: settings.shell === "full" ? 10 : 5,
+        class: "keyboard-shell",
+        "stroke-width": settings.outlineWidth * 1.5
+      },
+      board
+    );
     const imageKeys = ["keys", "all"].includes(settings.imageTarget);
     const hasShell = !["none", "outline"].includes(settings.shell);
     board.dataset.imageKeys = String(imageKeys);
     let imageMask;
     if (settings.imageTarget !== "none" && settings.imageUrl) {
       // Mounted key contours form the mask, including holes beneath transparent keycaps.
-      imageMask = svg("mask", { id: "keyboard-image-mask", maskUnits: "userSpaceOnUse", x: 0, y: 0, width, height, "mask-type": "luminance" }, defs);
-      svg("rect", { width, height, fill: hasShell && settings.imageTarget !== "keys" ? "white" : "black", "fill-opacity": settings.shell === "minimal" ? 0.5 : 1 }, imageMask);
-      const clipped = svg("g", { ...(hasShell ? { "clip-path": "url(#keyboard-shell-clip)" } : {}), mask: "url(#keyboard-image-mask)", class: "keyboard-texture" }, board);
+      imageMask = svg(
+        "mask",
+        {
+          id: "keyboard-image-mask",
+          maskUnits: "userSpaceOnUse",
+          x: 0,
+          y: 0,
+          width,
+          height,
+          "mask-type": "luminance"
+        },
+        defs
+      );
+      svg(
+        "rect",
+        {
+          width,
+          height,
+          fill: hasShell && settings.imageTarget !== "keys" ? "white" : "black",
+          "fill-opacity": settings.shell === "minimal" ? 0.5 : 1
+        },
+        imageMask
+      );
+      const clipped = svg(
+        "g",
+        {
+          ...(hasShell ? { "clip-path": "url(#keyboard-shell-clip)" } : {}),
+          mask: "url(#keyboard-image-mask)",
+          class: "keyboard-texture"
+        },
+        board
+      );
       const scale = settings.imageScale / 100;
-      svg("use", { href: "#keyboard-image", width: width * scale, height: height * scale, x: (width * (1 - scale)) / 2, y: (height * (1 - scale)) / 2, class: "surface-image" }, clipped);
+      svg(
+        "use",
+        {
+          href: "#keyboard-image",
+          width: width * scale,
+          height: height * scale,
+          x: (width * (1 - scale)) / 2,
+          y: (height * (1 - scale)) / 2,
+          class: "surface-image"
+        },
+        clipped
+      );
     }
     if (settings.shell === "full") svg("path", { d: `M12 4 H${Math.max(12, width - 12)}`, class: "shell-highlight" }, board);
     for (const slot of slots) {
@@ -510,24 +690,40 @@ async function initKeyboardResource() {
     if (settings[`${name}Scale`] < 0) element.style.scale = "-1";
   }
   if (settings.mouseIndependent === "yes") {
-    for (const [name, value] of Object.entries({ shell: settings.mouseColor, key: settings.mouseButtonColor, outline: settings.mouseOutlineColor, pressed: settings.mousePressedColor })) mouse.style.setProperty(`--${name}`, value);
+    for (const [name, value] of Object.entries({
+      shell: settings.mouseColor,
+      key: settings.mouseButtonColor,
+      outline: settings.mouseOutlineColor,
+      pressed: settings.mousePressedColor
+    }))
+      mouse.style.setProperty(`--${name}`, value);
   }
 
-  /** Fit the natural composition once on mount and when the viewport dimensions change. */
+  const drawings = [...scene.querySelectorAll("#keyboard > svg, #mouse > svg")];
+
+  /** Size the SVG viewports directly so key legends and mouse details rasterize at their displayed resolution. */
   function fit() {
-    const width = scene.offsetWidth;
-    const height = scene.offsetHeight;
+    for (const drawing of drawings) {
+      drawing.style.removeProperty("width");
+      drawing.style.removeProperty("height");
+    }
+    scene.style.gap = settings.componentGap + "px";
+    const width = scene.offsetWidth,
+      height = scene.offsetHeight;
     const padding = settings.edgePadding;
-    const area = (width && height ? history?.available(width, height, padding) : null) || { x: padding, y: padding, width: Math.max(0, innerWidth - padding * 2), height: Math.max(0, innerHeight - padding * 2) };
-    scene.style.left = `${area.x + area.width / 2}px`;
-    scene.style.top = `${area.y + area.height / 2}px`;
-    const scale = settings.fit === "yes" ? Math.max(0, Math.min(1, area.width / Math.max(1, width), area.height / Math.max(1, height))) : 1;
-    scene.style.transform = `translate(-50%, -50%) scale(${scale})`;
+    const scale = settings.fit === "yes" ? Math.max(0, Math.min(1, (innerWidth - padding * 2) / Math.max(1, width), (innerHeight - padding * 2) / Math.max(1, height))) : 1;
+    for (const drawing of drawings) {
+      drawing.style.width = drawing.width.baseVal.value * scale + "px";
+      drawing.style.height = drawing.height.baseVal.value * scale + "px";
+    }
+    scene.style.gap = settings.componentGap * scale + "px";
+    scene.style.left = Math.round((innerWidth - scene.offsetWidth) / 2) + "px";
+    scene.style.top = Math.round((innerHeight - scene.offsetHeight) / 2) + "px";
   }
-  history?.onResize(fit);
   fit();
   window.addEventListener("resize", fit, { signal: events.signal });
 
+  // ===== MOUSE LAYOUT =====
   /** Draw the original Kenney mouse with independent button interiors and mounted direction prompts. */
   function mountMouse() {
     const artwork = loaded.get("mouse");
@@ -552,7 +748,16 @@ async function initKeyboardResource() {
       const parts = loaded.get(asset)?.parts || [];
       const side = parts.filter((part) => part.box.x < 18 && part.box.width >= 7 && part.box.width < 10 && part.box.height >= 14).sort((a, b) => (code === "Mouse3" ? b.box.y - a.box.y : a.box.y - b.box.y))[0];
       if (!side) continue;
-      const node = svg("path", { d: side.d, class: "mouse-button mouse-side", "data-code": code, transform: "translate(-2 0)" }, drawing);
+      const node = svg(
+        "path",
+        {
+          d: side.d,
+          class: "mouse-button mouse-side",
+          "data-code": code,
+          transform: "translate(-2 0)"
+        },
+        drawing
+      );
       mouseNodes.set(code, node);
     }
     for (const [code, name] of [
@@ -583,7 +788,15 @@ async function initKeyboardResource() {
         prompt: () => keyArtwork(info, loaded.get(info.asset), 48, 48)
       };
     }
-    const prompts = { Mouse0: ["LMB", "lmb"], Mouse1: ["MMB", "wheel"], Mouse2: ["RMB", "rmb"], Mouse3: ["MB4", "mb4"], Mouse4: ["MB5", "mb5"], WheelUp: ["Wheel up", "scrollup"], WheelDown: ["Wheel down", "scrolldown"] };
+    const prompts = {
+      Mouse0: ["LMB", "lmb"],
+      Mouse1: ["MMB", "wheel"],
+      Mouse2: ["RMB", "rmb"],
+      Mouse3: ["MB4", "mb4"],
+      Mouse4: ["MB5", "mb5"],
+      WheelUp: ["Wheel up", "scrollup"],
+      WheelDown: ["Wheel down", "scrolldown"]
+    };
     const prompt = prompts[code];
     if (!prompt) return null;
     return {
@@ -591,10 +804,12 @@ async function initKeyboardResource() {
       source: "local",
       label: prompt[0],
       prompt: () => {
-        const drawing = svg("svg", { viewBox: "0 0 64 64" });
         const artwork = loaded.get(prompt[1]);
         if (!artwork) return null;
-        svg("path", { d: artwork.source, fill: "currentColor" }, drawing);
+        const id = artwork.id + "-prompt";
+        if (!document.getElementById(id)) svg("path", { id, d: artwork.source }, defs);
+        const drawing = svg("svg", { viewBox: "0 0 64 64" });
+        svg("use", { href: "#" + id, fill: "currentColor" }, drawing);
         return drawing;
       }
     };
@@ -614,8 +829,9 @@ async function initKeyboardResource() {
     return settings.historyInclusion === "all" || (mouseCode ? mouseNodes.has(code) : keyNodes.has(code));
   }
 
+  // ===== INPUT EVENTS =====
   /** Update exactly one mounted control and the one authoritative live pressed set. */
-  function setPressed(code, down) {
+  function setPressed(code, down, batch) {
     if (pressed.has(code) === down) return;
     if (down) pressed.add(code);
     else pressed.delete(code);
@@ -624,7 +840,9 @@ async function initKeyboardResource() {
     if (!down) history?.release(code);
     else if (include(code)) {
       const input = token(code);
-      if (input) history.press(input);
+      if (!input) return;
+      if (batch) batch.push(input);
+      else history.press(input);
     }
   }
 
@@ -655,8 +873,12 @@ async function initKeyboardResource() {
 
   /** Briefly highlight scroll direction with one replaceable timer, never an accumulating queue. */
   function wheelInput(event) {
-    if (!eligible(event) || !event.deltaY) return;
-    const code = event.deltaY < 0 ? "WheelUp" : "WheelDown";
+    if (eligible(event)) scroll(event.deltaY);
+  }
+
+  function scroll(delta) {
+    if (!delta) return;
+    const code = delta < 0 ? "WheelUp" : "WheelDown";
     mouseNodes.get(code)?.classList.add("pressed");
     clearTimeout(timers.get(code));
     timers.set(
@@ -681,10 +903,13 @@ async function initKeyboardResource() {
       [4, 16]
     ])
       if (pressed.has(`Mouse${button}`) && !(event.buttons & bit)) setPressed(`Mouse${button}`, false);
-    if (mouse.hidden || settings.mouseMovement !== "yes") return;
-    if (movementFrame) return;
-    const x = Math.max(-4, Math.min(4, event.movementX));
-    const y = Math.max(-4, Math.min(4, event.movementY));
+    move(event.movementX, event.movementY);
+  }
+
+  function move(dx, dy) {
+    if ((!dx && !dy) || mouse.hidden || settings.mouseMovement !== "yes" || movementFrame) return;
+    const x = Math.max(-4, Math.min(4, dx));
+    const y = Math.max(-4, Math.min(4, dy));
     movementFrame = requestAnimationFrame(() => {
       movementFrame = 0;
       mouse.style.setProperty("--move-x", `${x}px`);
@@ -704,6 +929,10 @@ async function initKeyboardResource() {
   /** Clear interrupted holds and transient visuals on blur, hiding, and teardown. */
   function clearInput() {
     for (const code of [...pressed]) setPressed(code, false);
+    clearMouseEffects();
+  }
+
+  function clearMouseEffects() {
     for (const timer of timers.values()) clearTimeout(timer);
     timers.clear();
     cancelAnimationFrame(movementFrame);
@@ -712,6 +941,7 @@ async function initKeyboardResource() {
     mouse.classList.remove("moving");
   }
 
+  // ===== CLEANUP =====
   /** Dispose requests, input handlers, animation work, and ephemeral history together. */
   function destroy() {
     disposed = true;
@@ -728,6 +958,45 @@ async function initKeyboardResource() {
 
   const captureKeyboard = !keyboard.hidden || (history && settings.historySource !== "mouse" && settings.historyInclusion === "all");
   const captureMouse = !mouse.hidden || (history && settings.historySource !== "keyboard" && settings.historyInclusion === "all");
+  if (settings.source === "helper") {
+    const sync = (previous, next) => {
+      const batch = [];
+      for (const code of previous) if (!next.has(code)) setPressed(code, false);
+      for (const code of next) setPressed(code, true, batch);
+      if (batch.length) history.pressMany(batch);
+    };
+    if (captureKeyboard)
+      byStream.subscribeNative(
+        "keyboard",
+        (state) => {
+          const keys = new Set(state?.keys.filter((code) => Object.hasOwn(layouts.keys, code)));
+          sync(
+            [...pressed].filter((code) => !code.startsWith("Mouse")),
+            keys
+          );
+        },
+        events.signal
+      );
+    if (captureMouse)
+      byStream.subscribeNative(
+        "mouse",
+        (state, first) => {
+          const buttons = new Set(state?.buttons.map((id) => "Mouse" + id));
+          sync(
+            [...pressed].filter((code) => code.startsWith("Mouse")),
+            buttons
+          );
+          if (!state) clearMouseEffects();
+          else if (!first) {
+            scroll(state.wheel);
+            move(state.dx, state.dy);
+          }
+        },
+        events.signal
+      );
+    root.dataset.ready = "yes";
+    return;
+  }
   if (captureKeyboard) {
     window.addEventListener("keydown", keyboardInput, { signal: events.signal });
     window.addEventListener("keyup", keyboardInput, { signal: events.signal });
@@ -785,16 +1054,57 @@ function applyPalette(root, settings) {
 /** Tint the shared image against an opaque copy, then restore its original alpha exactly once. */
 function createImageTint(defs, settings, svg) {
   if (settings.imageTint !== "yes" || settings.imageTintStrength === 0) return;
-  const filter = svg("filter", { id: "keyboard-image-tint", "color-interpolation-filters": "sRGB", x: 0, y: 0, width: "100%", height: "100%" }, defs);
+  const filter = svg(
+    "filter",
+    {
+      id: "keyboard-image-tint",
+      "color-interpolation-filters": "sRGB",
+      x: 0,
+      y: 0,
+      width: "100%",
+      height: "100%"
+    },
+    defs
+  );
   const opaque = svg("feComponentTransfer", { in: "SourceGraphic", result: "opaque-image" }, filter);
   svg("feFuncA", { type: "linear", slope: 0, intercept: 1 }, opaque);
-  svg("feFlood", { "flood-color": settings.imageTintColor, "flood-opacity": settings.imageTintStrength / 100, result: "tint" }, filter);
-  svg("feBlend", { in: "tint", in2: "opaque-image", mode: settings.imageBlendMode === "fill" ? "normal" : settings.imageBlendMode }, filter);
+  svg(
+    "feFlood",
+    {
+      "flood-color": settings.imageTintColor,
+      "flood-opacity": settings.imageTintStrength / 100,
+      result: "tint"
+    },
+    filter
+  );
+  svg(
+    "feBlend",
+    {
+      in: "tint",
+      in2: "opaque-image",
+      mode: settings.imageBlendMode === "fill" ? "normal" : settings.imageBlendMode
+    },
+    filter
+  );
   svg("feComposite", { in2: "SourceAlpha", operator: "in" }, filter);
 }
 
 /** Embedded ephemeral input history; capture and teardown belong to this resource. */
 (() => {
+  /** Read the retired entry-only switch from saved URLs and JSON. */
+  function migrateAnimation(values) {
+    const legacy = values.get("historyAnimation");
+    values.delete("historyAnimation");
+    const effect = values.get("history.entrance");
+    if (!["slide", "fade", "none"].includes(legacy) || (effect && effect !== "default")) return;
+    values.set("history.entrance", { slide: "default", fade: "fadeIn", none: "none" }[legacy]);
+    if (legacy === "fade") {
+      if (!values.has("history.entranceDuration")) values.set("history.entranceDuration", "140");
+      if (!values.has("history.entranceEasing")) values.set("history.entranceEasing", "ease-out");
+    }
+    if (!values.has("history.matchExit")) values.set("history.matchExit", "no");
+  }
+
   /** Return ordinary resource fields; no input content enters the settings schema. */
   function fields() {
     const section = "Input History";
@@ -806,7 +1116,6 @@ function createImageTint(defs, settings, svg) {
       historyOrder: { ...active, type: "select", default: "first", label: "Newest entry", options: { first: "First (top / left)", last: "Last (bottom / right)" } },
       historyGroupWindow: { ...active, type: "number", default: 60, label: "Combination window (ms)", min: 0, max: 250, step: 1 },
       historyAggregate: { ...active, type: "switch", default: "yes", label: "Count consecutive presses", checkedValue: "yes", uncheckedValue: "no", options: { yes: "On", no: "Off" } },
-      historyAnimation: { ...active, type: "select", default: "slide", label: "Entry animation", options: { slide: "Slide", fade: "Fade", none: "Off" }, when: (settings) => settings.showHistory === "yes" && settings.animate !== "no" },
       historyPosition: {
         ...active,
         type: "select",
@@ -828,16 +1137,26 @@ function createImageTint(defs, settings, svg) {
       ["Opacity", "Opacity (%)", 100, 0, 100]
     ]) {
       const id = `history${name}`;
-      result[id] = { ...active, type: "number", default: value, label, min, max, step: "any", subsection: "Size & placement" };
+      result[id] = {
+        ...active,
+        type: "number",
+        default: value,
+        label,
+        min,
+        max,
+        step: "any",
+        subsection: "Size & placement"
+      };
       if (name === "Width" || name === "Height") {
-        result[id].description = "0 sizes automatically for the selected orientation.";
+        const fillOrientation = name === "Width" ? "horizontal" : "vertical";
+        result[id].description = `0 fills the parent in ${fillOrientation} history and otherwise fits the entries.`;
         result[`${id}Mode`] = {
           ...active,
           type: "switch",
           default: "auto",
           label: "Fill parent",
           subsection: "Size & placement",
-          when: [id, "0"],
+          when: (s) => s.showHistory === "yes" && Number(s[id]) === 0 && s.historyOrientation !== fillOrientation,
           checkedValue: "fill",
           uncheckedValue: "auto",
           options: { fill: "Fill parent", auto: "Automatic" }
@@ -850,68 +1169,27 @@ function createImageTint(defs, settings, svg) {
       ["EntryColor", "Entry surface", "#111111CC"],
       ["BorderColor", "Entry outline", "#EEEEEE33"]
     ]) {
-      result[`history${name}`] = { ...active, type: "color", default: value, label, maxlength: 9, subsection: "Colors" };
+      result[`history${name}`] = {
+        ...active,
+        type: "color",
+        default: value,
+        label,
+        maxlength: 9,
+        subsection: "Colors"
+      };
     }
     return result;
   }
 
+  // ===== KEYBOARD LAYOUTS =====
   /**
    * Mount a history, or return null while disabled. Nothing is persisted or transmitted.
    * @param {Object} settings Validated resource settings.
    * @param {HTMLElement} [parent=document.body] Overlay-owned mount.
-   * @returns {Object|null} press/release/update/pulse/clear/destroy; destroy releases observers and frames.
+   * @returns {Object|null} press/pressMany/release/update/pulse/clear/destroy; destroy releases observers and frames.
    */
   function create(settings, parent = document.body) {
     if (settings.showHistory !== "yes") return null;
-    const style = document.createElement("style");
-    style.textContent = `
-.input-history-position {
-  position: absolute;
-  inset: 16px;
-  display: flex;
-  align-items: flex-end;
-  justify-content: flex-start;
-  pointer-events: none;
-}
-.input-history-position[data-position^="top"] { align-items: flex-start; }
-.input-history-position[data-position$="right"] { justify-content: flex-end; }
-.input-history-position[data-position="center"] { align-items: center; justify-content: center; }
-.input-history {
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: var(--history-gap);
-  padding: var(--history-padding);
-  border-radius: 6px;
-  overflow: hidden;
-  background: var(--history-background);
-  color: var(--history-ink);
-  font: 600 var(--history-size)/1.2 "Courier New", monospace;
-  contain: layout paint;
-}
-.input-history[data-orientation="horizontal"] { flex-direction: row; align-items: flex-start; }
-.history-entry {
-  box-sizing: border-box;
-  display: flex;
-  align-items: center;
-  flex: 0 0 auto;
-  gap: 0.2em;
-  max-width: 100%;
-  min-height: 1.5em;
-  overflow: hidden;
-  padding: 0.12em 0.25em;
-  border: 1px solid var(--history-border);
-  border-radius: 5px;
-  background: var(--history-entry);
-  white-space: nowrap;
-}
-.history-entry small { font-size: 0.45em; }
-.history-prompt { display: inline-flex; min-width: 0; flex-shrink: 1; }
-.history-prompt svg { display: block; width: 1.5em; height: 1.5em; overflow: hidden; }
-.history-count { font: inherit; font-size: 0.65em; }
-.history-count:empty { display: none; }
-`;
     const position = document.createElement("div");
     position.className = "input-history-position";
     position.dataset.position = settings.historyPosition;
@@ -923,16 +1201,14 @@ function createImageTint(defs, settings, svg) {
     root.dataset.orientation = settings.historyOrientation;
     root.dataset.order = settings.historyOrder;
     const horizontal = settings.historyOrientation === "horizontal";
-    const keyHeight = settings.historySize * (settings.historyStyle === "svg" ? 1.5 : 1.2);
-    const entryHeight = Math.max(settings.historySize * 1.5, keyHeight + settings.historySize * 0.24 + 2);
-    const narrow = !horizontal && settings.historyWidth === 0 && settings.historyWidthMode !== "fill";
-    root.style.width = settings.historyWidth ? `${settings.historyWidth}px` : !narrow ? "100%" : "max-content";
-    root.style.height = settings.historyHeight ? `${settings.historyHeight}px` : !horizontal || settings.historyHeightMode === "fill" ? "100%" : `${Math.ceil(entryHeight + settings.historyPadding * 2)}px`;
+    if (settings.historyWidth) root.style.width = settings.historyWidth + "px";
+    else if (settings.historyWidthMode === "fill") root.style.width = "100%";
+    if (settings.historyHeight) root.style.height = settings.historyHeight + "px";
+    else if (settings.historyHeightMode === "fill") root.style.height = "100%";
     const scale = settings.historyScale / 100;
-    const maximumHeight = `calc((100vh - 32px) / ${Math.abs(scale) || 1})`;
     root.style.maxWidth = `calc((100vw - 32px) / ${Math.abs(scale) || 1})`;
-    root.style.maxHeight = maximumHeight;
-    root.style.transform = `scale(${scale})`;
+    root.style.maxHeight = `calc((100vh - 32px) / ${Math.abs(scale) || 1})`;
+    if (scale !== 1) root.style.transform = `scale(${scale})`;
     root.style.transformOrigin = settings.historyPosition === "center" ? "center" : settings.historyPosition.replace("-", " ");
     root.style.opacity = settings.historyOpacity / 100;
     for (const [name, value] of Object.entries({
@@ -945,7 +1221,7 @@ function createImageTint(defs, settings, svg) {
       border: settings.historyBorderColor
     }))
       root.style.setProperty(`--history-${name}`, value);
-    position.append(style, root);
+    position.append(root);
     parent.append(position);
     // Only active controls and mounted rows are retained. The oldest row is always at rows[0].
     const held = new Map();
@@ -953,46 +1229,32 @@ function createImageTint(defs, settings, svg) {
     const events = new AbortController();
     let frame = 0;
     let disposed = false;
-    let layoutChanged;
 
-    /** Subscribe the visualization's existing fit function to changes in the history's occupied area. */
-    function onResize(callback) {
-      layoutChanged = callback;
+    const animateOut = ["history", "historyEntry.children", "historyPrompt", "historyCount"].some((id) => byStream.elementMotion(settings, id, "exit").name !== "none");
+
+    function playDefault(node, phase) {
+      const offset = settings.historyOrder === "first" ? -10 : 10;
+      const transform = horizontal ? `translateX(${offset}px)` : `translateY(${offset}px)`;
+      return node.animate(
+        [
+          { filter: "opacity(0)", transform },
+          { filter: "opacity(1)", transform: "none" }
+        ],
+        {
+          id: "stream-" + phase,
+          duration: 140,
+          easing: "ease-out",
+          composite: "add",
+          direction: phase === "exit" ? "reverse" : "normal",
+          fill: phase === "exit" ? "forwards" : "backwards"
+        }
+      );
     }
 
-    /**
-     * Return the largest useful viewport rectangle outside this history, for the source's own fit function.
-     * @param {number} width Natural visualization width in pixels.
-     * @param {number} height Natural visualization height in pixels.
-     * @param {number} [padding=16] Viewport inset in pixels.
-     * @returns {Object} x/y/width/height rectangle; capture/render ownership stays with the resource.
-     */
-    function available(width, height, padding = 16) {
-      const area = { x: padding, y: padding, width: Math.max(0, innerWidth - padding * 2), height: Math.max(0, innerHeight - padding * 2) };
-      root.style.maxHeight = maximumHeight;
-      let box = root.getBoundingClientRect();
-      if (box.right <= area.x || box.left >= innerWidth - padding || box.bottom <= area.y || box.top >= innerHeight - padding || settings.historyScale === 0) return area;
-      const gap = 12;
-      // A fully filled history still leaves a usable band for the visualization.
-      const maxHeight = Math.max(0, area.height - Math.min(height, area.height / 2) - gap);
-      if (box.width > area.width / 2 && box.height > maxHeight) {
-        root.style.maxHeight = `${maxHeight / (Math.abs(scale) || 1)}px`;
-        box = root.getBoundingClientRect();
-      }
-      const candidates = [
-        { ...area, height: Math.max(0, box.top - gap - area.y) },
-        { ...area, y: Math.max(area.y, box.bottom + gap), height: Math.max(0, innerHeight - padding - box.bottom - gap) },
-        { ...area, width: Math.max(0, box.left - gap - area.x) },
-        { ...area, x: Math.max(area.x, box.right + gap), width: Math.max(0, innerWidth - padding - box.right - gap) }
-      ];
-      const score = (candidate) => Math.min(candidate.width / Math.max(1, width), candidate.height / Math.max(1, height));
-      candidates.sort((a, b) => score(b) - score(a) || b.width * b.height - a.width * a.height);
-      return candidates[0];
-    }
-
-    /** Measure once per input frame/resize and immediately remove displaced rows and their records. */
+    /** Retire displaced rows at their last visible position while new rows take their place in the list. */
     function trim() {
       frame = 0;
+      if (!rows.length) return;
       const horizontal = settings.historyOrientation === "horizontal";
       const limit = (horizontal ? root.clientWidth : root.clientHeight) - settings.historyPadding * 2;
       if (limit <= 0 || root.clientHeight <= 0 || root.clientWidth <= 0) return clear();
@@ -1000,9 +1262,17 @@ function createImageTint(defs, settings, svg) {
       let used = sizes.reduce((sum, size) => sum + size, 0) + Math.max(0, rows.length - 1) * settings.historyGap;
       while (rows.length > 1 && used > limit + 0.5) {
         used -= sizes.shift() + settings.historyGap;
-        const oldest = rows.shift().node;
-        for (const animation of oldest.getAnimations()) animation.cancel();
-        oldest.remove();
+        const oldest = rows.shift();
+        if (oldest.slot) {
+          Object.assign(oldest.node.style, oldest.slot, { position: "absolute", zIndex: 1 });
+          byStream.removeWithMotion(oldest.node, settings, "history", rows.length, playDefault);
+        } else oldest.node.remove();
+      }
+      if (animateOut) {
+        for (const row of rows) {
+          const node = row.node;
+          row.slot = { left: node.offsetLeft + "px", top: node.offsetTop + "px", width: node.offsetWidth + "px", height: node.offsetHeight + "px" };
+        }
       }
     }
 
@@ -1011,20 +1281,19 @@ function createImageTint(defs, settings, svg) {
       if (!frame && !disposed) frame = requestAnimationFrame(trim);
     }
 
-    /** Paint a row's current combination using safe labels and source-owned SVG clones. */
-    function paint(row) {
-      const content = document.createDocumentFragment();
-      if (row.sourceLabel) {
-        const source = document.createElement("small");
-        source.textContent = row.sourceLabel;
-        content.append(source);
-      }
-      row.tokens.forEach((token, index) => {
-        if (index) {
-          const plus = document.createElement("span");
-          plus.textContent = "+";
-          content.append(plus);
+    /** Extend the existing chord without replacing earlier prompts or restarting their animations. */
+    function appendPrompts(row, tokens) {
+      const prompts = document.createDocumentFragment();
+      for (const token of tokens) {
+        if (row.ids.has(token.id)) continue;
+        if (row.ids.size) {
+          const separator = document.createElement("span");
+          separator.className = "history-separator";
+          separator.setAttribute("aria-hidden", "true");
+          separator.textContent = "+";
+          prompts.append(separator);
         }
+        row.ids.add(token.id);
         const prompt = settings.historyStyle === "svg" ? token.prompt?.() : null;
         const cap = document.createElement("span");
         cap.className = "history-prompt";
@@ -1033,44 +1302,30 @@ function createImageTint(defs, settings, svg) {
           prompt.setAttribute("aria-label", token.label);
           cap.append(prompt);
         } else cap.textContent = token.label;
-        content.append(cap);
-      });
-      const count = document.createElement("b");
-      count.className = "history-count";
-      count.textContent = row.count > 1 ? `×${row.count}` : "";
-      content.append(count);
-      row.node.replaceChildren(content);
-      row.signature = row.tokens
-        .map((token) => token.id)
-        .sort()
-        .join("|");
+        prompts.append(cap);
+      }
+      row.prompts.append(prompts);
       scheduleTrim();
     }
 
-    /**
-     * Record a new physical press; repeat events and still-held inputs are ignored.
-     * @param {Object} token Stable id, label, source, optional modifier/sourceLabel and SVG prompt factory.
-     */
-    function press(token) {
-      if (disposed || document.hidden || held.has(token.id)) return;
-      const modifiers = [...held.values()].filter((input) => input.modifier && input.source === token.source);
+    /** Record the new presses from a single event or device snapshot as one chord. */
+    function pressMany(pressed) {
+      if (!pressed.length || disposed || document.hidden) return;
+      const { source, sourceLabel } = pressed[0];
+      const modifiers = [...held.values()].filter((input) => input.modifier && input.source === source);
+      const tokens = [...modifiers, ...pressed];
       const now = performance.now();
-      let last = rows.at(-1);
-      const overlap = last?.tokens.some((input) => held.has(input.id));
-      held.set(token.id, token);
+      const last = rows.at(-1);
+      const previous = last ? [...last.ids] : [];
+      const overlap = previous.some((id) => held.has(id));
       // A long-held modifier joins the next action instead of leaving a redundant solo modifier row.
-      const modifierRow = last && last.count === 1 && last.tokens.every((input) => input.modifier && held.has(input.id));
-      if (last && last.source === token.source && last.count === 1 && !last.tokens.some((input) => input.id === token.id) && ((overlap && now - last.time <= settings.historyGroupWindow) || modifierRow)) {
-        last.tokens = [...new Map([...last.tokens, ...modifiers, token].map((input) => [input.id, input])).values()];
-        paint(last);
+      const modifierRow = previous.every((id) => held.get(id)?.modifier);
+      for (const token of pressed) held.set(token.id, token);
+      if (last?.source === source && last.count === 1 && pressed.every((token) => !last.ids.has(token.id)) && ((overlap && now - last.time <= settings.historyGroupWindow) || modifierRow)) {
+        appendPrompts(last, tokens);
         return;
       }
-      const tokens = [...modifiers, token];
-      const signature = tokens
-        .map((input) => input.id)
-        .sort()
-        .join("|");
-      if (settings.historyAggregate === "yes" && last?.signature === signature) {
+      if (settings.historyAggregate === "yes" && last?.source === source && last.ids.size === tokens.length && tokens.every((token) => last.ids.has(token.id))) {
         last.count++;
         last.time = now;
         const count = last.node.querySelector(".history-count");
@@ -1080,22 +1335,27 @@ function createImageTint(defs, settings, svg) {
       }
       const node = document.createElement("div");
       node.className = "history-entry";
-      last = { node, tokens, source: token.source, sourceLabel: token.sourceLabel, count: 1, time: now };
-      rows.push(last);
+      const prompts = document.createElement("span");
+      prompts.className = "history-prompts";
+      if (sourceLabel) {
+        const label = document.createElement("small");
+        label.textContent = sourceLabel;
+        prompts.append(label);
+      }
+      const count = document.createElement("b");
+      count.className = "history-count";
+      node.append(prompts, count);
+      const row = { node, prompts, ids: new Set(), source, count: 1, time: now };
+      appendPrompts(row, tokens);
+      rows.push(row);
       if (settings.historyOrder === "first") root.prepend(node);
       else root.append(node);
-      paint(last);
-      if (settings.animate !== "no" && settings.historyAnimation !== "none") {
-        const offset = settings.historyOrder === "first" ? -10 : 10;
-        const transform = settings.historyOrientation === "horizontal" ? `translateX(${offset}px)` : `translateY(${offset}px)`;
-        node.animate(
-          [
-            { opacity: 0, transform: settings.historyAnimation === "slide" ? transform : "none" },
-            { opacity: 1, transform: "none" }
-          ],
-          { duration: 140, easing: "ease-out" }
-        );
-      }
+      if (rows.length === 1) window.byStreamResource.playEntrance?.(root, false);
+      byStream.enterListItem(node, settings, "history", animateOut && rows.length > 1, playDefault);
+    }
+
+    function press(token) {
+      if (!held.has(token.id)) pressMany([token]);
     }
 
     /** Release one physical ID; no recorded text or release log is retained. */
@@ -1107,7 +1367,7 @@ function createImageTint(defs, settings, svg) {
     function update(source, tokens) {
       const next = new Set(tokens.map((token) => token.id));
       for (const [id, token] of held) if (token.source === source && !next.has(id)) release(id);
-      for (const token of tokens) press(token);
+      pressMany(tokens.filter((token) => !held.has(token.id)));
     }
 
     /** Record one instantaneous wheel/directional action. */
@@ -1128,27 +1388,30 @@ function createImageTint(defs, settings, svg) {
 
     /** End this overlay-owned history's lifetime; safe to call more than once. */
     function destroy() {
+      if (disposed) return;
       disposed = true;
-      layoutChanged = undefined;
-      clear();
+      cancelAnimationFrame(frame);
       observer.disconnect();
       events.abort();
-      position.remove();
+      held.clear();
+      rows.length = 0;
+      const exits = window.byStreamResource.playExit?.(root) || [];
+      if (exits.length) Promise.allSettled(exits.map((motion) => motion.finished)).then(() => position.remove());
+      else position.remove();
     }
 
-    const observer = new ResizeObserver(() => {
-      scheduleTrim();
-      layoutChanged?.();
-    });
+    const observer = new ResizeObserver(scheduleTrim);
     observer.observe(root);
-    window.addEventListener("blur", () => held.clear(), { signal: events.signal });
-    document.addEventListener(
-      "visibilitychange",
-      () => {
-        if (document.hidden) held.clear();
-      },
-      { signal: events.signal }
-    );
+    if (settings.source !== "helper") {
+      window.addEventListener("blur", () => held.clear(), { signal: events.signal });
+      document.addEventListener(
+        "visibilitychange",
+        () => {
+          if (document.hidden) held.clear();
+        },
+        { signal: events.signal }
+      );
+    }
     window.addEventListener(
       "pagehide",
       (event) => {
@@ -1157,10 +1420,10 @@ function createImageTint(defs, settings, svg) {
       },
       { signal: events.signal }
     );
-    return { press, release, update, pulse, clear, destroy, available, onResize };
+    return { press, pressMany, release, update, pulse, clear, destroy };
   }
 
-  byStream.inputHistory = { fields, create };
+  byStream.inputHistory = { fields, create, migrateAnimation };
 })();
 
 /** Physical slots, Kenney artwork names, and preset geometry in key units.
@@ -1173,7 +1436,12 @@ function createImageTint(defs, settings, svg) {
     keys[`Digit${number}`] = { label: String(number), asset: String(number), group: "numbers" };
     keys[`Numpad${number}`] = { label: `Num ${number}`, asset: String(number), group: "numpad" };
   }
-  for (let number = 1; number <= 24; number++) keys[`F${number}`] = { label: `F${number}`, asset: number <= 12 ? `f${number}` : "any", group: "function" };
+  for (let number = 1; number <= 24; number++)
+    keys[`F${number}`] = {
+      label: `F${number}`,
+      asset: number <= 12 ? `f${number}` : "any",
+      group: "function"
+    };
   for (const [code, label, asset, group] of [
     ["Escape", "Esc", "escape", "function"],
     ["Backquote", "`", "tilde", "punctuation"],
@@ -1343,7 +1611,19 @@ function createImageTint(defs, settings, svg) {
     if (!original) return null;
     const result = { ...original, code };
     const variant = settings;
-    const swaps = variant.legends === "qwertz" ? { KeyY: "KeyZ", KeyZ: "KeyY" } : variant.legends === "azerty" ? { KeyQ: "KeyA", KeyA: "KeyQ", KeyW: "KeyZ", KeyZ: "KeyW", KeyM: "Comma", Semicolon: "KeyM" } : {};
+    const swaps =
+      variant.legends === "qwertz"
+        ? { KeyY: "KeyZ", KeyZ: "KeyY" }
+        : variant.legends === "azerty"
+          ? {
+              KeyQ: "KeyA",
+              KeyA: "KeyQ",
+              KeyW: "KeyZ",
+              KeyZ: "KeyW",
+              KeyM: "Comma",
+              Semicolon: "KeyM"
+            }
+          : {};
     if (swaps[code]) Object.assign(result, { label: keys[swaps[code]].label, asset: keys[swaps[code]].asset });
     const punctuation =
       variant.legends === "qwertz"
@@ -1375,7 +1655,11 @@ function createImageTint(defs, settings, svg) {
     if (Object.hasOwn(punctuation, code)) result.label = punctuation[code];
     if (variant.platform === "mac") {
       if (code.startsWith("Meta")) Object.assign(result, { label: code.endsWith("Left") ? "L Cmd" : "R Cmd", asset: "cmd" });
-      if (code.startsWith("Alt")) Object.assign(result, { label: code.endsWith("Left") ? "L Option" : "R Option", asset: "option" });
+      if (code.startsWith("Alt"))
+        Object.assign(result, {
+          label: code.endsWith("Left") ? "L Option" : "R Option",
+          asset: "option"
+        });
       if (code === "Backspace") result.label = "Delete";
       if (code === "NumLock") result.label = "Clear";
       if (code === "ContextMenu") Object.assign(result, { label: "Fn", asset: "fn" });

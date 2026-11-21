@@ -390,7 +390,9 @@ Use `imageUrl` with `imageTarget=none|shell|keys|all` to mask a background to th
 
 #### Input history
 
-Keyboard and Controller can show recent presses as icons or text. History is off by default. Choose orientation, order, dimensions, animation and input scope. A zero dimension sizes automatically or can fill the parent. Entries stay until displaced. Simultaneous presses form combinations (60 ms by default), held modifiers join the next action, and repeated presses share a counter.
+Keyboard and Controller can show recent presses as icons or text. History is off by default and floats over the device at the selected position. With horizontal history, a width of 0 fills the available width. With vertical history, a height of 0 fills the available height. A zero size on the other axis fits the entries unless **Fill parent** is enabled. **Newest entry** pins the latest press to the selected edge even while the history is partly empty.
+
+Under Input History, **Animation in** plays on each new entry and **Animation out** plays when it is displaced. Simultaneous presses appear side by side (60 ms by default). Keyboard combos show a small `+` between keys. Held modifiers join the next action, and repeated presses show a small multiplier beneath the buttons.
 
 Keyboard history can include every received input or just displayed controls. Controller history requires one displayed player and clears when multiple controllers mount. Focus loss clears held inputs. History stays in memory and records physical controls rather than typed text.
 
@@ -404,7 +406,7 @@ Keyboard history can include every received input or just displayed controls. Co
 | `skin` | `xseries` Xbox Series (default), `ds5` DualSense, `fgc` Fight Stick (8 buttons), `fgc6` (6 buttons), `fgc4` (4 buttons), `xone` Xbox One, `ds4` DualShock 4, `x360` Xbox 360, `ds3` DualShock 3, `gcn` GameCube, `n64` Nintendo 64, `snes` SNES, `nes` NES. |
 | `showPlayerIndicators` | `no` (default) hides player lamps, including Xbox 360 guide segments; `yes` shows them. |
 | `layout`, `buttonLabels` | `full` (default) or `minimal`; `icons` (default), `letters`, or `none`. |
-| `pressEffect`, `releaseDuration` | `invert` (default), `fill`, `depth` (Fill + depth), or `glow` (Fill + glow); smooth release `0`-`500` ms (default `100`). Fill uses crimson while analog triggers retain proportional pressure. Animate Off keeps feedback immediate and disables depth/glow motion. |
+| `pressEffect`, `releaseDuration` | Invert (default) reverses the button face color. Smooth release fades the face back over `0`–`500` ms (default `100`) while custom guide artwork keeps its color and detail. Fill uses crimson, Fill + depth shades the edge, and Fill + glow lights the face. Analog triggers retain proportional pressure. Animate Off makes feedback immediate. |
 | `variant` | A palette supported by that model, such as PS2 `silver` or `white`; Default (`original`) uses its SVG base palette. The picker lists only that skin's variants. Changing Skin preserves Default and Sequential (all); a named palette resets to Default. Sequential (all) (`sequential`) cycles Default and the available palettes across visible controllers, repeating as needed; a single controller uses Default. Solid shell tint preserves the selected palette. |
 | `shellAppearance` | `off` (default) retains the original shell; `solid` tints its authored plastics; `image` applies the shell image. The former Custom colors switch is removed; its saved values migrate. |
 | `tintControls` | Default `no`. Adds a 20% tint to control surfaces while retaining markings and input feedback; in Image mode it also enables the shell image tint controls. |

@@ -95,6 +95,18 @@ test("generated distributions initialize with application networks blocked", { t
       return { page, errors, unexpected, svgRequests, warnings };
     }
 
+    async function waitForPackagedArtwork(page, resource) {
+      if (resource === "controller") {
+        await page.locator("#gamepads .controller svg").first().waitFor({ state: "attached" });
+        return;
+      }
+      await page.waitForFunction(() => {
+        const surface = document.querySelector("#keyboard .input-key use.key-surface");
+        const reference = surface?.getAttribute("href");
+        return reference?.startsWith("#") && document.getElementById(reference.slice(1)) && surface.getBBox().width > 0;
+      });
+    }
+
     async function ready(page, overlay) {
       await page.waitForFunction((expected) => !!window.byStreamResource && window.byStreamOverlay === expected, overlay);
       if (overlay) assert.ok(await page.locator("html[data-overlay]").count());
@@ -231,10 +243,7 @@ test("generated distributions initialize with application networks blocked", { t
           assert.equal(new URL(url).protocol, "file:");
           await page.goto(url);
           await ready(page, true);
-          await page
-            .locator(asset.resource === "controller" ? "#gamepads .controller svg" : "#keyboard svg path")
-            .first()
-            .waitFor({ state: "attached" });
+          await waitForPackagedArtwork(page, asset.resource);
           if (asset.format === "full-zip") {
             await page.keyboard.press("F2");
             await ready(page, false);
@@ -265,10 +274,7 @@ test("generated distributions initialize with application networks blocked", { t
           assert.deepEqual(errors, []);
           assert.deepEqual(unexpected, []);
           if (["embedded", "full-embedded"].includes(asset.format)) {
-            await page
-              .locator(asset.resource === "controller" ? "#gamepads .controller svg" : "#keyboard svg path")
-              .first()
-              .waitFor({ state: "attached" });
+            await waitForPackagedArtwork(page, asset.resource);
             assert.deepEqual(svgRequests, [], "Downloaded embedded resources must use inline artwork");
             if (asset.format === "full-embedded") {
               await page.keyboard.press("F2");

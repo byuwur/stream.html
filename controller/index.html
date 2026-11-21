@@ -2,12 +2,13 @@
 <html lang="en" data-tool="controller">
   <head>
     <meta charset="UTF-8" />
+    <meta name="referrer" content="origin" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Controller Overlay for OBS | stream.HTML</title>
     <meta name="description" content="Show input in OBS with 32 controller models, compact speedrun layouts, vector customization, and custom mapping. Free controller overlay by BONYUR." />
     <meta name="author" content="Andrés Trujillo [Mateus] byUwUr" />
     <meta name="robots" content="index, follow, max-image-preview:large" />
-    <meta name="theme-color" content="#660000" />
+    <meta name="theme-color" content="#600" />
     <!-- <link rel="canonical" href="https://byuwur.github.io/stream.html/controller/" /> -->
     <link rel="canonical" href="https://stream.byuwur.co/controller/" />
     <!-- <link rel="icon" href="https://byuwur.github.io/stream.html/stream.html.png" /> -->
@@ -38,10 +39,14 @@
   <body>
     <!-- ===== SHARED IMPORTS: resource and configurator ===== -->
     <script type="application/json" id="shared-assets" data-source="https://cdn.jsdelivr.net/gh/byuwur/spa.js" data-spa-version="v20.17">
-      [{ "path": "/_functions.min.js", "optional": false }]
+      [
+        { "path": "/css/animate.min.css", "optional": true },
+        { "path": "/_functions.min.js", "optional": false }
+      ]
     </script>
 
     <!-- ===== RESOURCE ===== -->
+    <link rel="stylesheet" href="../resources.css" data-renderer-style />
     <link rel="stylesheet" href="./controller.css" data-renderer-style />
     <script src="../resource.js" defer></script>
     <script src="./controller.js" defer></script>
@@ -56,9 +61,11 @@
           </filter>
         </defs>
       </svg>
-      <div class="container" id="gamepads">
-        <div class="controller disconnected"></div>
-      </div>
+      <main id="controller-overlay" aria-label="Controller input">
+        <div class="container" id="gamepads">
+          <div class="controller disconnected"></div>
+        </div>
+      </main>
     </template>
 
     <!-- ===== CONFIGURATOR ===== -->
@@ -70,7 +77,6 @@
           { "path": "/_common.min.css", "optional": false },
           { "path": "/css/fontawesome.min.css", "optional": true },
           { "path": "/css/select2.min.css", "optional": false },
-          { "path": "/css/animate.min.css", "optional": false },
           { "path": "/js/jquery.min.js", "optional": false },
           { "path": "/js/select2.full.min.js", "optional": false },
           { "path": "/js/popper.min.js", "optional": false },
@@ -84,13 +90,15 @@
       <script src="../configurator.js" defer></script>
       <script>
         byConfigurator.appendControllerCredits = (help) => {
-          $(help).find('[data-panel="info"]').append(
-            /* HTML */ `<p class="small mt-3">
-                Controller input is based on <a href="https://github.com/html5rocks/www.html5rocks.com/tree/master/content/tutorials/doodles/gamepad/static/gamepad-tester" target="_blank" rel="noopener">Gamepad.js and Tester.js</a> by
-                Marcin Wichary.
-              </p>
-              <p class="small mt-3">Controller SVGs by <a href="https://mimicrymedia.itch.io/controller-pack" target="_blank" rel="noopener">MimicryMedia</a>.</p>`
-          );
+          $(help)
+            .find('[data-panel="info"]')
+            .append(
+              /* HTML */ `<p class="small mt-3">
+                  Controller input is based on <a href="https://github.com/html5rocks/www.html5rocks.com/tree/master/content/tutorials/doodles/gamepad/static/gamepad-tester" target="_blank" rel="noopener">Gamepad.js and Tester.js</a> by
+                  Marcin Wichary.
+                </p>
+                <p class="small mt-3">Controller SVGs by <a href="https://mimicrymedia.itch.io/controller-pack" target="_blank" rel="noopener">MimicryMedia</a>.</p>`
+            );
         };
       </script>
       <script src="./mapping.js" defer></script>

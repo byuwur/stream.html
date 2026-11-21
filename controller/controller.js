@@ -27,9 +27,7 @@ async function initControllerResource() {
     document.body.appendChild(message);
     return;
   }
-  // ==========
-  // ==== RESOURCE DEFINITION ====
-  // ==========
+  // ===== RESOURCE DEFINITION =====
 
   // Defaults, URL constraints, and the field metadata consumed by the optional editor.
   const resource = {
@@ -38,11 +36,13 @@ async function initControllerResource() {
     description: "Gamepad or keyboard input with 32 controller models.",
     preview: [1280, 720],
     urlRequired: ["player", "skin"],
-    sectionIcons: { Input: "fa-solid fa-gamepad" },
+    sectionOrder: ["General", "Appearance", "Shell", "Guide button", "Screen opening", "Player indicators", "Controller buttons", "Analog sticks", "Input History", "Whole overlay"],
+    sectionIcons: { "Input History": "fa-solid fa-clock-rotate-left" },
     previewAllow: "autoplay; gamepad *",
-    legacyFields: ["customColors", "shellTintColor"],
+    legacyFields: ["historyAnimation", "customColors", "shellTintColor"],
     /** Migrate retired appearance controls and signed image angles before validating current fields. */
     normalizeParameters(values) {
+      byStream.inputHistory.migrateAnimation(values);
       const appearance = values.get("shellAppearance");
       const legacyColors = values.get("customColors");
       // Old color switches and Image + tint links resolve to the new appearance controls.
@@ -60,7 +60,29 @@ async function initControllerResource() {
       values.delete("customColors");
       values.delete("shellTintColor");
     },
+    elements: {
+      stage: { label: "Whole overlay", selector: "#controller-overlay", container: true },
+      overlay: { label: "Appearance", selector: ".controller" },
+      shell: { label: "Shell", box: false, selector: '[id$="shell-surfaces"]', groups: ["Shell texture"] },
+      guide: { label: "Guide button", box: false, selector: "[data-guide-symbol]", groups: ["Guide button"] },
+      screen: { label: "Screen opening", box: false, selector: ".screen-surface", fields: ["screenOpacity"] },
+      indicator: { label: "Player indicators", box: false, selector: ".player-leds-layer", fields: ["showPlayerIndicators"] },
+      buttons: { label: "Controller buttons", selector: ".controller .control-layer[data-input]:not([data-axes])", box: false },
+      sticks: { label: "Analog sticks", selector: ".controller .control-layer[data-axes]", box: false },
+      history: { label: "Input History", selector: ".input-history", motionItem: "historyEntry", premade: true, groups: ["Input History"], when: ["showHistory", "yes"] },
+      historyEntry: { label: "History entry", selector: ".history-entry", parent: "history" },
+      historyPrompt: { label: "Input prompt", selector: ".history-prompt", parent: "historyEntry", textOverflow: ".history-prompt:not(:has(svg))" },
+      historyCount: { label: "Press multiplier", selector: ".history-count", parent: "historyEntry", textOverflow: true }
+    },
     fields: {
+      source: {
+        type: "select",
+        default: "browser",
+        label: "Input source",
+        section: "Input",
+        options: { browser: "Browser", helper: "OBS helper (TBD)" },
+        description: "Native snapshots require a future OBS helper. Custom mapping capture uses browser input."
+      },
       player: {
         type: "select",
         default: "1",
@@ -319,9 +341,9 @@ async function initControllerResource() {
         when: ["guideColorMode", "tint"],
         retainInactive: true
       },
-      guideScale: { type: "number", default: 100, label: "Logo scale (%)", section: "Appearance", subsection: "Guide button", min: 50, max: 150, step: 1, when: ["customGuide", "yes"], retainInactive: true },
-      guideOffsetX: { type: "number", default: 0, label: "Logo position X (%)", section: "Appearance", subsection: "Guide button", min: -25, max: 25, step: 1, when: ["customGuide", "yes"], retainInactive: true },
-      guideOffsetY: { type: "number", default: 0, label: "Logo position Y (%)", section: "Appearance", subsection: "Guide button", min: -25, max: 25, step: 1, when: ["customGuide", "yes"], retainInactive: true },
+      guideScale: { type: "number", default: 100, label: "Logo scale (%)", section: "Appearance", subsection: "Guide button", min: 50, max: 150, step: "any", when: ["customGuide", "yes"], retainInactive: true },
+      guideOffsetX: { type: "number", default: 0, label: "Logo position X (%)", section: "Appearance", subsection: "Guide button", min: -25, max: 25, step: "any", when: ["customGuide", "yes"], retainInactive: true },
+      guideOffsetY: { type: "number", default: 0, label: "Logo position Y (%)", section: "Appearance", subsection: "Guide button", min: -25, max: 25, step: "any", when: ["customGuide", "yes"], retainInactive: true },
       screenOpacity: {
         type: "number",
         default: 0,
@@ -573,12 +595,10 @@ async function initControllerResource() {
       gamepadSupport.frame = requestAnimationFrame(gamepadSupport.tick);
     },
     pollGamepads() {
+      this.applyGamepads(Array.from(navigator.getGamepads?.() ?? []).filter((pad) => pad && pad.connected !== false));
+    },
+    applyGamepads(pads) {
       const previous = this.gamepads;
-      const pads = Array.from(navigator.getGamepads?.() ?? []).filter((pad) => {
-        if (!pad) return false;
-        const { connected = true } = pad;
-        return connected;
-      });
       for (const [index, slot] of this.slots) {
         if (!pads.some((pad) => pad.index === index && pad.id === previous[slot]?.id)) this.slots.delete(index);
       }
@@ -631,6 +651,7 @@ async function initControllerResource() {
     }
   };
 
+  // ===== INPUT HISTORY =====
   /** Read the same model-specific digital value for artwork and history from the mapped pad. */
   function digitalValue(pad, id) {
     if (settings.skin === "nes" && id >= 12 && id <= 15 && pad.buttons[id] === undefined) return [-(pad.axes[1] ?? 0), pad.axes[1] ?? 0, -(pad.axes[0] ?? 0), pad.axes[0] ?? 0][id - 12];
@@ -647,19 +668,23 @@ async function initControllerResource() {
 
   /** Diff only selected players' mapped inputs, using the existing poll; no second loop/listeners. */
   function updateControllerHistory() {
-    for (let player = 1; player <= 9; player++) {
+    for (const [player, controls] of tester.controls) {
       const source = `p${player}`;
-      const controls = tester.controls.get(player);
       const pad = gamepadSupport.gamepads[player === 9 ? 9 : player - 1];
       const tokens = [];
-      if (controls && pad) {
+      if (pad) {
         byControllerArtwork.names.forEach((name, id) => {
           const control = controls.get(name);
           if (!control || control.node.dataset.stickClick === "no") return;
           const threshold = id === 6 || id === 7 ? tester.DIGITAL_THRESHOLD : settings.skin === "n64" && id >= 18 && id <= 21 ? tester.ANALOGUE_STICK_THRESHOLD : tester.ANALOGUE_BUTTON_THRESHOLD;
           if (buttonValue(digitalValue(pad, id)) <= threshold) return;
           const label = control.node.dataset.label || control.node.getAttribute("aria-label") || name;
-          tokens.push({ id: `${source}:${name}`, source, label, prompt: () => controllerHistoryPrompt(control.node) });
+          tokens.push({
+            id: `${source}:${name}`,
+            source,
+            label,
+            prompt: () => controllerHistoryPrompt(control)
+          });
         });
         for (const [index, name] of [
           [0, "stick-1"],
@@ -677,7 +702,7 @@ async function initControllerResource() {
             id: `${source}:${name}:${label}`,
             source,
             label: digital ? label : `${index ? "RS" : "LS"} ${label}`,
-            prompt: () => controllerHistoryPrompt(control.node, direction)
+            prompt: () => controllerHistoryPrompt(control, direction)
           });
         }
       }
@@ -686,29 +711,26 @@ async function initControllerResource() {
   }
 
   let historyPromptId = 0;
-  /** Clone/crop native controls with private IDs; optional stick direction is in eighth-turn units. */
+  /** Copy the visible face only. The mounted skin already provides its styles and static SVG definitions. */
   function controllerHistoryPrompt(control, direction = null) {
-    const box = control.getBBox();
+    const node = control.node;
+    const box = control.historyBounds || node.getBBox();
     if (!box.width || !box.height) return null;
-    const prompt = control.cloneNode(true);
+    control.historyBounds = box;
+    const prompt = node.cloneNode(false);
     prompt.setAttribute("viewBox", `${box.x - 2} ${box.y - 2} ${box.width + 4} ${box.height + 4}`);
     prompt.removeAttribute("class");
     prompt.removeAttribute("style");
     prompt.removeAttribute("id");
-    const prefix = `history-${++historyPromptId}-`;
-    const references = new Map([...prompt.querySelectorAll("[id]")].map((node) => [node.id, `${prefix}${node.id}`]));
-    for (const node of prompt.querySelectorAll("*")) {
-      if (node.id) node.id = references.get(node.id);
-      for (const attribute of [...node.attributes]) {
-        if (attribute.name === "id") continue;
-        let value = attribute.value;
-        for (const [original, replacement] of references) {
-          value = value.replaceAll(`url(#${original})`, `url(#${replacement})`);
-          if (value === `#${original}`) value = `#${replacement}`;
-        }
-        if (value !== attribute.value) node.setAttribute(attribute.name, value);
-      }
-      if (node.localName === "style") node.textContent = node.textContent.replace(/#([\w-]+)/g, (match, name) => (references.has(name) ? `#${references.get(name)}` : match));
+    const face = node.querySelector(".layout-position").cloneNode(true);
+    for (const part of face.querySelectorAll("[id]")) part.removeAttribute("id");
+    prompt.append(face);
+    // Keep the trigger at its recorded pressure when the live control is released.
+    if (control.fill) {
+      const clip = control.fill.parentNode.cloneNode(true);
+      clip.id = `history-pressure-${++historyPromptId}`;
+      face.querySelector(".trigger-active").setAttribute("clip-path", `url(#${clip.id})`);
+      prompt.append(clip);
     }
     if (direction !== null) {
       const arrow = document.createElementNS(prompt.namespaceURI, "path");
@@ -721,8 +743,6 @@ async function initControllerResource() {
     }
     return prompt;
   }
-
-  // ==========
 
   /**
    * File: controller/controller.tester.js
@@ -778,6 +798,9 @@ async function initControllerResource() {
         tester.keys.delete(event.keyCode);
         tester.keyCodes.delete(event.code);
       }
+      tester.updateKeyboardState();
+    },
+    updateKeyboardState() {
       bySettingsKB.keys = [...tester.keyCodes];
       bySettingsKB.buttons = bySettingsKB.btns.map((key) => Number(tester.keys.has(key)));
       bySettingsKB.axes = [0, 1, 2, 3].map((axis) => Number(tester.keys.has(bySettingsKB.axesBtns[axis * 2 + 1])) - Number(tester.keys.has(bySettingsKB.axesBtns[axis * 2])));
@@ -825,7 +848,7 @@ async function initControllerResource() {
       if (control.x === x && control.y === y) return;
       control.x = x;
       control.y = y;
-      stick.style.translate = `${x}px ${y}px`;
+      stick.style.translate = `calc(${x}px * var(--controller-fit, 1)) calc(${y}px * var(--controller-fit, 1))`;
       if (control.shaft) {
         const scale = stick.dataset.layout === "minimal" ? Number(stick.dataset.compactScale) : 1;
         control.shaft.setAttribute("x2", String(control.shaft.x1.baseVal.value + x / scale));
@@ -835,8 +858,6 @@ async function initControllerResource() {
     }
   };
 
-  // ==========
-
   /**
    * File: controller/controller.js
    * @file Controller parameter validation and gamepad remapping.
@@ -844,6 +865,7 @@ async function initControllerResource() {
    * @author mateus@byuwur.co (Andres Trujillo Mateus)
    */
 
+  // ===== CONTROLLER BINDINGS =====
   /**
    * Parse binding arrays or prior wrapped URLs; invalid JSON leaves settings unchanged.
    * @param {unknown} value Value supplied by the caller.
@@ -933,7 +955,16 @@ async function initControllerResource() {
       if (!binding || !["buttons", "axes", "dpad"].includes(binding.targetType)) continue;
       if (binding.targetType === "dpad") {
         const value = sourceValue(binding, pad, true);
-        const positions = { up: [12], down: [13], left: [14], right: [15], upright: [12, 15], downright: [13, 15], downleft: [13, 14], upleft: [12, 14] };
+        const positions = {
+          up: [12],
+          down: [13],
+          left: [14],
+          right: [15],
+          upright: [12, 15],
+          downright: [13, 15],
+          downleft: [13, 14],
+          upleft: [12, 14]
+        };
         for (const id of [12, 13, 14, 15]) result.buttons[id] = { value: 0, pressed: false };
         if (!binding.disabled) {
           for (const [direction, ids] of Object.entries(positions)) {
@@ -968,7 +999,12 @@ async function initControllerResource() {
    * @returns {void}
    */
   let controllerEvents;
+  // ===== CONTROLLER INITIALIZATION =====
   function initController() {
+    changeControllers(renderControllers);
+  }
+
+  function renderControllers() {
     controllerEvents?.abort();
     controllerEvents = new AbortController();
     const container = document.getElementById("gamepads");
@@ -984,7 +1020,7 @@ async function initControllerResource() {
     }
     // Connection changes replace the history too, so multiple mounted players never record inputs.
     history?.destroy();
-    history = players.length === 1 ? byStream.inputHistory.create(settings) : null;
+    history = players.length === 1 ? byStream.inputHistory.create(settings, document.getElementById("controller-overlay")) : null;
     container.replaceChildren();
     container.dataset.gamepadCount = gamepadSupport.connectedCount;
     tester.controls.clear();
@@ -994,6 +1030,8 @@ async function initControllerResource() {
     function mountController(player, index) {
       const active = document.createElement("div");
       active.className = "controller active";
+      active.setAttribute("data-stream-viewport", "");
+      if (settings.mirror === "yes") active.style.scale = "-1 1";
       active.id = `gamepad-${player}`;
       active.setAttribute("aria-label", player === 9 ? "Keyboard" : `Player ${player}`);
       container.append(active);
@@ -1005,6 +1043,7 @@ async function initControllerResource() {
       active.style.opacity = settings.opacity / 100;
       active.style.setProperty("--screen-opacity", settings.screenOpacity / 100);
       customizeControllerAppearance(active, settings);
+      if (settings.pressEffect === "invert") prepareInvertedFaces(active);
       customizeControllerShell(active, settings, controllerEvents.signal);
       function updatePlayerIndicators() {
         const litLeds = [[], [1], [2], [3], [4], [1, 4], [2, 4], [3, 4], [1, 3, 4], [1, 2, 3, 4]][player];
@@ -1027,7 +1066,13 @@ async function initControllerResource() {
         const fillArtwork = node.querySelector(".trigger-active");
         const clip = fillArtwork?.getAttribute("clip-path").slice(5, -1);
         const shaft = active.querySelector(`.fixed-layer[data-for="${node.dataset.input}"] .stick-shaft`);
-        controls.set(node.dataset.name, { node, shaft, fillArtwork, fillBounds: triggerBounds(node, fillArtwork), fill: clip ? node.querySelector(`[id="${clip}"] .trigger-fill-rect`) : null });
+        controls.set(node.dataset.name, {
+          node,
+          shaft,
+          fillArtwork,
+          fillBounds: triggerBounds(node, fillArtwork),
+          fill: clip ? node.querySelector(`[id="${clip}"] .trigger-fill-rect`) : null
+        });
       }
       active.addEventListener(
         "controller-layout",
@@ -1035,6 +1080,7 @@ async function initControllerResource() {
           updatePlayerIndicators();
           customizeControllerShell(active, settings, controllerEvents.signal);
           for (const control of controls.values()) {
+            control.historyBounds = null;
             control.pressure = undefined;
             control.x = control.y = undefined;
             if (control.fillArtwork) control.fillBounds = triggerBounds(control.node, control.fillArtwork);
@@ -1055,28 +1101,27 @@ async function initControllerResource() {
     tester.STICK_CURVING = settings.curve === "1";
 
     function fitController() {
-      const naturalWidth = Math.max(1, ...controllers.map((active) => active.offsetWidth));
-      const naturalHeight = Math.max(1, ...controllers.map((active) => active.offsetHeight));
-      const area = (controllers.length ? history?.available(naturalWidth, naturalHeight, settings.fitMargin) : null) || { x: 0, y: 0, width: innerWidth, height: innerHeight };
-      const columns = Math.max(1, Math.min(controllers.length, Math.ceil(Math.sqrt((controllers.length * area.width) / Math.max(1, area.height)))));
+      const viewports = controllers.map((active) => active.querySelector(".controller-background").viewBox.baseVal);
+      const columns = Math.max(1, Math.min(controllers.length, Math.ceil(Math.sqrt((controllers.length * innerWidth) / Math.max(1, innerHeight)))));
       const rows = Math.max(1, Math.ceil(controllers.length / columns));
       controllers.forEach((active, index) => {
-        // Layout changes move the cap's rotation center as well as its artwork.
+        const view = viewports[index];
+        const cellWidth = innerWidth / columns,
+          cellHeight = innerHeight / rows;
+        const fit = Math.max(0, Math.min((cellWidth - settings.fitMargin * 2) / view.width, (cellHeight - settings.fitMargin * 2) / view.height));
+        const width = view.width * fit,
+          height = view.height * fit;
+        active.style.width = width + "px";
+        active.style.height = height + "px";
+        active.style.setProperty("--player-left", Math.round(cellWidth * ((index % columns) + 0.5) - width / 2) + "px");
+        active.style.setProperty("--player-top", Math.round(cellHeight * (Math.floor(index / columns) + 0.5) - height / 2) + "px");
+        active.style.setProperty("--controller-fit", fit);
         for (const stick of active.querySelectorAll(".control-layer.stick")) {
           const box = stick.getBBox();
-          const viewport = stick.viewBox.baseVal;
-          stick.style.transformOrigin = `${box.x + box.width / 2 - viewport.x}px ${box.y + box.height / 2 - viewport.y}px`;
+          stick.style.transformOrigin = `${(box.x + box.width / 2 - view.x) * fit}px ${(box.y + box.height / 2 - view.y) * fit}px`;
         }
-        const margin = settings.fitMargin;
-        const cellWidth = area.width / columns,
-          cellHeight = area.height / rows;
-        const scale = Math.max(0, Math.min((cellHeight - margin * 2) / active.offsetHeight, (cellWidth - margin * 2) / active.offsetWidth));
-        active.style.setProperty("--player-left", `${area.x + cellWidth * ((index % columns) + 0.5)}px`);
-        active.style.setProperty("--player-top", `${area.y + cellHeight * (Math.floor(index / columns) + 0.5)}px`);
-        active.style.transform = `translate(-50%, -50%) scale(${settings.mirror === "yes" ? -scale : scale}, ${scale})`;
       });
     }
-    history?.onResize(fitController);
     fitController();
     // Fitting resolves the initial artwork styles before enabling release transitions.
     for (const active of controllers) {
@@ -1098,13 +1143,71 @@ async function initControllerResource() {
     return artwork?.getBBox();
   }
 
+  // ===== OVERLAY INITIALIZATION =====
   const settings = await byStream.initResource(resource, { gamepadSupport, buttonValue, copyGamepad });
   let history = null;
+  const gamepads = document.getElementById("gamepads");
+  const changeControllers = byStreamOverlay && byStream.changeItems(gamepads, settings, "overlay", () => gamepads.querySelectorAll(".controller.active"), undefined, gamepads.parentElement);
   if (byStreamOverlay) await byControllerArtwork.loadGuideSymbol(settings);
-  gamepadSupport.init();
-  if (byStreamOverlay) {
-    byStream.preventOverlayInputDefaults();
+  if (byStreamOverlay && settings.source === "helper") {
+    const events = new AbortController();
+    let pads = [];
+    function refresh() {
+      gamepadSupport.applyGamepads(pads);
+      for (const player of tester.controls.keys()) gamepadSupport.updateDisplay(player === 9 ? 9 : player - 1);
+      if (history) updateControllerHistory();
+    }
     initController();
+    byStream.subscribeNative(
+      "controller",
+      (state) => {
+        pads = state?.pads || [];
+        refresh();
+      },
+      events.signal
+    );
+    byStream.subscribeNative(
+      "keyboard",
+      (state) => {
+        // Bridge physical codes to the existing editable numeric browser defaults. Custom bindings use codes directly.
+        const legacy = {
+          Tab: 9,
+          Escape: 27,
+          Space: 32,
+          ArrowLeft: 37,
+          ArrowUp: 38,
+          ArrowRight: 39,
+          ArrowDown: 40
+        };
+        tester.keyCodes = new Set(state?.keys);
+        tester.keys.clear();
+        for (const code of tester.keyCodes) {
+          if (/^Key[A-Z]$|^Digit[0-9]$/.test(code)) tester.keys.add(code.charCodeAt(code.length - 1));
+          else if (Object.hasOwn(legacy, code)) tester.keys.add(legacy[code]);
+        }
+        gamepadSupport.kb = !!state;
+        tester.updateKeyboardState();
+        refresh();
+      },
+      events.signal
+    );
+    window.addEventListener(
+      "pagehide",
+      (event) => {
+        if (!event.persisted) {
+          events.abort();
+          controllerEvents.abort();
+          history?.destroy();
+        }
+      },
+      { signal: events.signal }
+    );
+  } else {
+    gamepadSupport.init();
+    if (byStreamOverlay) {
+      byStream.preventOverlayInputDefaults();
+      initController();
+    }
   }
 }
 
@@ -1112,6 +1215,23 @@ async function initControllerResource() {
  * File: controller/artwork.js (inline section)
  * @file Mount editable SVG documents. Geometry and per-model bindings belong to controllers/<id>.svg.
  */
+// ===== CONTROL FEEDBACK AND TINTS =====
+function prepareInvertedFaces(controller) {
+  for (const control of controller.querySelectorAll(".control-layer:not(.analog-trigger)")) {
+    const faces = [...control.querySelectorAll(".button-face, .gcn-face, .button-detail.stock-plastic")].filter((face) => !face.closest("defs, .guide-logo-original"));
+    // Some stock guide buttons consist entirely of a painted emblem until a custom housing is enabled.
+    if (!faces.some((face) => !face.classList.contains("guide-custom-housing"))) {
+      faces.push(...control.querySelectorAll(".guide-logo-original [fill]"));
+    }
+    for (const face of faces) {
+      const fill = getComputedStyle(face).fill;
+      if (!CSS.supports("color", fill)) continue;
+      face.classList.add("invert-face");
+      face.style.setProperty("--inverted-fill", `rgb(from ${fill} calc(255 - r) calc(255 - g) calc(255 - b) / alpha)`);
+    }
+  }
+}
+
 /**
  * Subtly tint control surfaces without changing their markings, lighting, or input filters.
  * @param {HTMLElement} controller Mounted controller.
@@ -1281,6 +1401,7 @@ function customizeControllerAppearance(controller, settings) {
   reveal();
 }
 
+// ===== SHELL ARTWORK =====
 /**
  * Fill only authored shell plastics with a stable SVG texture, leaving strokes and paint order intact.
  * Native pattern fills use the existing paths as their exact clipping geometry, including holes.
@@ -1347,28 +1468,30 @@ function customizeControllerShell(controller, settings, signal) {
     definitions.append(composition);
   }
   const fills = surfaces.map((surface, index) => {
+    const box = surface.getBBox();
     const pattern = document.createElementNS(ns, "pattern");
     pattern.id = `${prefix}-${index}`;
     pattern.setAttribute("patternUnits", "userSpaceOnUse");
-    pattern.setAttribute("x", x);
-    pattern.setAttribute("y", y);
-    pattern.setAttribute("width", width);
-    pattern.setAttribute("height", height);
-    // An explicit viewBox keeps tile content in root coordinates even when its origin is nonzero.
-    pattern.setAttribute("viewBox", `${x} ${y} ${width} ${height}`);
+    // One tile covers this entire path in its own coordinates, including rotated shell panels.
+    pattern.setAttribute("x", box.x);
+    pattern.setAttribute("y", box.y);
+    pattern.setAttribute("width", box.width);
+    pattern.setAttribute("height", box.height);
+    pattern.setAttribute("viewBox", `${box.x} ${box.y} ${box.width} ${box.height}`);
     pattern.setAttribute("preserveAspectRatio", "none");
-    pattern.setAttribute("patternTransform", toRoot.multiply(surface.getCTM()).inverse().toString());
     const base = document.createElementNS(ns, "rect");
-    base.setAttribute("x", x);
-    base.setAttribute("y", y);
-    base.setAttribute("width", width);
-    base.setAttribute("height", height);
+    base.setAttribute("x", box.x);
+    base.setAttribute("y", box.y);
+    base.setAttribute("width", box.width);
+    base.setAttribute("height", box.height);
     base.setAttribute("fill", getComputedStyle(surface).fill);
     if (solid && filter) base.setAttribute("filter", `url(#${filter.id})`);
     pattern.append(base);
     if (!solid) {
       const texture = document.createElementNS(ns, "use");
       texture.setAttribute("href", `#${prefix}`);
+      const { a, b, c, d, e, f } = toRoot.multiply(surface.getCTM()).inverse();
+      texture.setAttribute("transform", `matrix(${a} ${b} ${c} ${d} ${e} ${f})`);
       pattern.append(texture);
     }
     definitions.append(pattern);
@@ -1410,6 +1533,7 @@ function customizeControllerShell(controller, settings, signal) {
   image.setAttribute("href", new URL(settings.shellImage, location.href).href);
 }
 
+// ===== ARTWORK LOADING =====
 async function loadControllerArtwork(requiredSkin, fixedSkin) {
   // Discovery/order only. Names, bindings, geometry, and layouts belong to the SVGs.
   const families = [
@@ -1495,7 +1619,10 @@ async function loadControllerArtwork(requiredSkin, fixedSkin) {
   const selected = families.includes(requiredSkin) || ["fgc6", "fgc4"].includes(requiredSkin) ? requiredSkin : "xseries";
   const required = ["fgc6", "fgc4"].includes(selected) ? "fgc" : selected;
   await loadFamilies(fixedSkin ? [required] : families);
-  if (!skins[selected]) throw new Error(`Unable to load controller model ${required}.svg.`, { cause: failures[required] });
+  if (!skins[selected])
+    throw new Error(`Unable to load controller model ${required}.svg.`, {
+      cause: failures[required]
+    });
 
   async function loadFamilies(ids) {
     const responses = await Promise.allSettled(
@@ -1539,7 +1666,15 @@ async function loadControllerArtwork(requiredSkin, fixedSkin) {
     const skin = skins[settings.skin];
     if (!skin?.guide || settings.customGuide !== "yes" || settings.guideSource === "image") return;
     const symbol = settings.guideSymbol === "original" ? skin.defaultSymbol : settings.guideSymbol;
-    const owner = { xbox: "xone", circle: "xone", diamond: "xone", star: "xone", playstation: "ds3", steam: "steam", home: "wii" }[symbol];
+    const owner = {
+      xbox: "xone",
+      circle: "xone",
+      diamond: "xone",
+      star: "xone",
+      playstation: "ds3",
+      steam: "steam",
+      home: "wii"
+    }[symbol];
     if (owner && !guideSymbols[symbol] && !skins[owner] && !failures[owner]) await loadFamilies([owner]);
   }
 
@@ -1548,7 +1683,10 @@ async function loadControllerArtwork(requiredSkin, fixedSkin) {
     const id = svg.dataset.controller;
     const controls = [...svg.querySelectorAll(".control[data-input]")];
     for (const symbol of svg.querySelectorAll("[data-guide-symbol]")) {
-      guideSymbols[symbol.dataset.guideSymbol] = { markup: new XMLSerializer().serializeToString(symbol), bounds: symbol.dataset.symbolBounds.split(" ").map(Number) };
+      guideSymbols[symbol.dataset.guideSymbol] = {
+        markup: new XMLSerializer().serializeToString(symbol),
+        bounds: symbol.dataset.symbolBounds.split(" ").map(Number)
+      };
     }
     skins[id] = {
       id,
@@ -1703,13 +1841,30 @@ async function loadControllerArtwork(requiredSkin, fixedSkin) {
         if (node.localName === "style") node.textContent = node.textContent.replace(/#([\w-]+)/g, (match, name) => (ids.has(name) ? `#${ids.get(name)}` : match));
       }
     }
-    return { ...size, markup: [...mount.children].map((node) => serializer.serializeToString(node)).join("") };
+    return {
+      ...size,
+      markup: [...mount.children].map((node) => serializer.serializeToString(node)).join("")
+    };
   }
   return { skins, names, render, setLayout, sources, guideSymbols, loadGuideSymbol };
 }
 
 /** Embedded ephemeral input history; capture and teardown belong to this resource. */
 (() => {
+  /** Read the retired entry-only switch from saved URLs and JSON. */
+  function migrateAnimation(values) {
+    const legacy = values.get("historyAnimation");
+    values.delete("historyAnimation");
+    const effect = values.get("history.entrance");
+    if (!["slide", "fade", "none"].includes(legacy) || (effect && effect !== "default")) return;
+    values.set("history.entrance", { slide: "default", fade: "fadeIn", none: "none" }[legacy]);
+    if (legacy === "fade") {
+      if (!values.has("history.entranceDuration")) values.set("history.entranceDuration", "140");
+      if (!values.has("history.entranceEasing")) values.set("history.entranceEasing", "ease-out");
+    }
+    if (!values.has("history.matchExit")) values.set("history.matchExit", "no");
+  }
+
   /** Return ordinary resource fields; no input content enters the settings schema. */
   function fields() {
     const section = "Input History";
@@ -1732,7 +1887,6 @@ async function loadControllerArtwork(requiredSkin, fixedSkin) {
       historyOrder: { ...active, type: "select", default: "first", label: "Newest entry", options: { first: "First (top / left)", last: "Last (bottom / right)" } },
       historyGroupWindow: { ...active, type: "number", default: 60, label: "Combination window (ms)", min: 0, max: 250, step: 1 },
       historyAggregate: { ...active, type: "switch", default: "yes", label: "Count consecutive presses", checkedValue: "yes", uncheckedValue: "no", options: { yes: "On", no: "Off" } },
-      historyAnimation: { ...active, type: "select", default: "slide", label: "Entry animation", options: { slide: "Slide", fade: "Fade", none: "Off" }, when: (settings) => settings.showHistory === "yes" && settings.animate !== "no" },
       historyPosition: {
         ...active,
         type: "select",
@@ -1754,16 +1908,26 @@ async function loadControllerArtwork(requiredSkin, fixedSkin) {
       ["Opacity", "Opacity (%)", 100, 0, 100]
     ]) {
       const id = `history${name}`;
-      result[id] = { ...active, type: "number", default: value, label, min, max, step: "any", subsection: "Size & placement" };
+      result[id] = {
+        ...active,
+        type: "number",
+        default: value,
+        label,
+        min,
+        max,
+        step: "any",
+        subsection: "Size & placement"
+      };
       if (name === "Width" || name === "Height") {
-        result[id].description = "0 sizes automatically for the selected orientation.";
+        const fillOrientation = name === "Width" ? "horizontal" : "vertical";
+        result[id].description = `0 fills the parent in ${fillOrientation} history and otherwise fits the entries.`;
         result[`${id}Mode`] = {
           ...active,
           type: "switch",
           default: "auto",
           label: "Fill parent",
           subsection: "Size & placement",
-          when: [id, "0"],
+          when: (s) => s.showHistory === "yes" && Number(s[id]) === 0 && s.historyOrientation !== fillOrientation,
           checkedValue: "fill",
           uncheckedValue: "auto",
           options: { fill: "Fill parent", auto: "Automatic" }
@@ -1776,7 +1940,14 @@ async function loadControllerArtwork(requiredSkin, fixedSkin) {
       ["EntryColor", "Entry surface", "#111111CC"],
       ["BorderColor", "Entry outline", "#EEEEEE33"]
     ]) {
-      result[`history${name}`] = { ...active, type: "color", default: value, label, maxlength: 9, subsection: "Colors" };
+      result[`history${name}`] = {
+        ...active,
+        type: "color",
+        default: value,
+        label,
+        maxlength: 9,
+        subsection: "Colors"
+      };
     }
     return result;
   }
@@ -1789,54 +1960,6 @@ async function loadControllerArtwork(requiredSkin, fixedSkin) {
    */
   function create(settings, parent = document.body) {
     if (settings.showHistory !== "yes") return null;
-    const style = document.createElement("style");
-    style.textContent = `
-.input-history-position {
-  position: absolute;
-  inset: 16px;
-  display: flex;
-  align-items: flex-end;
-  justify-content: flex-start;
-  pointer-events: none;
-}
-.input-history-position[data-position^="top"] { align-items: flex-start; }
-.input-history-position[data-position$="right"] { justify-content: flex-end; }
-.input-history-position[data-position="center"] { align-items: center; justify-content: center; }
-.input-history {
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: var(--history-gap);
-  padding: var(--history-padding);
-  border-radius: 6px;
-  overflow: hidden;
-  background: var(--history-background);
-  color: var(--history-ink);
-  font: 600 var(--history-size)/1.2 "Courier New", monospace;
-  contain: layout paint;
-}
-.input-history[data-orientation="horizontal"] { flex-direction: row; align-items: flex-start; }
-.history-entry {
-  box-sizing: border-box;
-  display: flex;
-  align-items: center;
-  flex: 0 0 auto;
-  gap: 0.2em;
-  max-width: 100%;
-  min-height: 1.5em;
-  overflow: hidden;
-  padding: 0.12em 0.25em;
-  border: 1px solid var(--history-border);
-  border-radius: 5px;
-  background: var(--history-entry);
-  white-space: nowrap;
-}
-.history-prompt { display: inline-flex; min-width: 0; flex-shrink: 1; }
-.history-prompt svg { display: block; width: 1.5em; height: 1.5em; overflow: hidden; }
-.history-count { font: inherit; font-size: 0.65em; }
-.history-count:empty { display: none; }
-`;
     const position = document.createElement("div");
     position.className = "input-history-position";
     position.dataset.position = settings.historyPosition;
@@ -1848,16 +1971,14 @@ async function loadControllerArtwork(requiredSkin, fixedSkin) {
     root.dataset.orientation = settings.historyOrientation;
     root.dataset.order = settings.historyOrder;
     const horizontal = settings.historyOrientation === "horizontal";
-    const keyHeight = settings.historySize * (settings.historyStyle === "svg" ? 1.5 : 1.2);
-    const entryHeight = Math.max(settings.historySize * 1.5, keyHeight + settings.historySize * 0.24 + 2);
-    const narrow = !horizontal && settings.historyWidth === 0 && settings.historyWidthMode !== "fill";
-    root.style.width = settings.historyWidth ? `${settings.historyWidth}px` : !narrow ? "100%" : "max-content";
-    root.style.height = settings.historyHeight ? `${settings.historyHeight}px` : !horizontal || settings.historyHeightMode === "fill" ? "100%" : `${Math.ceil(entryHeight + settings.historyPadding * 2)}px`;
+    if (settings.historyWidth) root.style.width = settings.historyWidth + "px";
+    else if (settings.historyWidthMode === "fill") root.style.width = "100%";
+    if (settings.historyHeight) root.style.height = settings.historyHeight + "px";
+    else if (settings.historyHeightMode === "fill") root.style.height = "100%";
     const scale = settings.historyScale / 100;
-    const maximumHeight = `calc((100vh - 32px) / ${Math.abs(scale) || 1})`;
     root.style.maxWidth = `calc((100vw - 32px) / ${Math.abs(scale) || 1})`;
-    root.style.maxHeight = maximumHeight;
-    root.style.transform = `scale(${scale})`;
+    root.style.maxHeight = `calc((100vh - 32px) / ${Math.abs(scale) || 1})`;
+    if (scale !== 1) root.style.transform = `scale(${scale})`;
     root.style.transformOrigin = settings.historyPosition === "center" ? "center" : settings.historyPosition.replace("-", " ");
     root.style.opacity = settings.historyOpacity / 100;
     for (const [name, value] of Object.entries({
@@ -1870,7 +1991,7 @@ async function loadControllerArtwork(requiredSkin, fixedSkin) {
       border: settings.historyBorderColor
     }))
       root.style.setProperty(`--history-${name}`, value);
-    position.append(style, root);
+    position.append(root);
     parent.append(position);
     // Only active controls and mounted rows are retained. The oldest row is always at rows[0].
     const held = new Map();
@@ -1878,46 +1999,32 @@ async function loadControllerArtwork(requiredSkin, fixedSkin) {
     const events = new AbortController();
     let frame = 0;
     let disposed = false;
-    let layoutChanged;
 
-    /** Subscribe the visualization's existing fit function to changes in the history's occupied area. */
-    function onResize(callback) {
-      layoutChanged = callback;
+    const animateOut = ["history", "historyEntry.children", "historyPrompt", "historyCount"].some((id) => byStream.elementMotion(settings, id, "exit").name !== "none");
+
+    function playDefault(node, phase) {
+      const offset = settings.historyOrder === "first" ? -10 : 10;
+      const transform = horizontal ? `translateX(${offset}px)` : `translateY(${offset}px)`;
+      return node.animate(
+        [
+          { filter: "opacity(0)", transform },
+          { filter: "opacity(1)", transform: "none" }
+        ],
+        {
+          id: "stream-" + phase,
+          duration: 140,
+          easing: "ease-out",
+          composite: "add",
+          direction: phase === "exit" ? "reverse" : "normal",
+          fill: phase === "exit" ? "forwards" : "backwards"
+        }
+      );
     }
 
-    /**
-     * Return the largest useful viewport rectangle outside this history, for the source's own fit function.
-     * @param {number} width Natural visualization width in pixels.
-     * @param {number} height Natural visualization height in pixels.
-     * @param {number} [padding=16] Viewport inset in pixels.
-     * @returns {Object} x/y/width/height rectangle; capture/render ownership stays with the resource.
-     */
-    function available(width, height, padding = 16) {
-      const area = { x: padding, y: padding, width: Math.max(0, innerWidth - padding * 2), height: Math.max(0, innerHeight - padding * 2) };
-      root.style.maxHeight = maximumHeight;
-      let box = root.getBoundingClientRect();
-      if (box.right <= area.x || box.left >= innerWidth - padding || box.bottom <= area.y || box.top >= innerHeight - padding || settings.historyScale === 0) return area;
-      const gap = 12;
-      // A fully filled history still leaves a usable band for the visualization.
-      const maxHeight = Math.max(0, area.height - Math.min(height, area.height / 2) - gap);
-      if (box.width > area.width / 2 && box.height > maxHeight) {
-        root.style.maxHeight = `${maxHeight / (Math.abs(scale) || 1)}px`;
-        box = root.getBoundingClientRect();
-      }
-      const candidates = [
-        { ...area, height: Math.max(0, box.top - gap - area.y) },
-        { ...area, y: Math.max(area.y, box.bottom + gap), height: Math.max(0, innerHeight - padding - box.bottom - gap) },
-        { ...area, width: Math.max(0, box.left - gap - area.x) },
-        { ...area, x: Math.max(area.x, box.right + gap), width: Math.max(0, innerWidth - padding - box.right - gap) }
-      ];
-      const score = (candidate) => Math.min(candidate.width / Math.max(1, width), candidate.height / Math.max(1, height));
-      candidates.sort((a, b) => score(b) - score(a) || b.width * b.height - a.width * a.height);
-      return candidates[0];
-    }
-
-    /** Measure once per input frame/resize and immediately remove displaced rows and their records. */
+    /** Retire displaced rows at their last visible position while new rows take their place in the list. */
     function trim() {
       frame = 0;
+      if (!rows.length) return;
       const horizontal = settings.historyOrientation === "horizontal";
       const limit = (horizontal ? root.clientWidth : root.clientHeight) - settings.historyPadding * 2;
       if (limit <= 0 || root.clientHeight <= 0 || root.clientWidth <= 0) return clear();
@@ -1925,9 +2032,17 @@ async function loadControllerArtwork(requiredSkin, fixedSkin) {
       let used = sizes.reduce((sum, size) => sum + size, 0) + Math.max(0, rows.length - 1) * settings.historyGap;
       while (rows.length > 1 && used > limit + 0.5) {
         used -= sizes.shift() + settings.historyGap;
-        const oldest = rows.shift().node;
-        for (const animation of oldest.getAnimations()) animation.cancel();
-        oldest.remove();
+        const oldest = rows.shift();
+        if (oldest.slot) {
+          Object.assign(oldest.node.style, oldest.slot, { position: "absolute", zIndex: 1 });
+          byStream.removeWithMotion(oldest.node, settings, "history", rows.length, playDefault);
+        } else oldest.node.remove();
+      }
+      if (animateOut) {
+        for (const row of rows) {
+          const node = row.node;
+          row.slot = { left: node.offsetLeft + "px", top: node.offsetTop + "px", width: node.offsetWidth + "px", height: node.offsetHeight + "px" };
+        }
       }
     }
 
@@ -1936,15 +2051,12 @@ async function loadControllerArtwork(requiredSkin, fixedSkin) {
       if (!frame && !disposed) frame = requestAnimationFrame(trim);
     }
 
-    /** Paint a row's current combination using safe labels and source-owned SVG clones. */
-    function paint(row) {
-      const content = document.createDocumentFragment();
-      row.tokens.forEach((token, index) => {
-        if (index) {
-          const plus = document.createElement("span");
-          plus.textContent = "+";
-          content.append(plus);
-        }
+    /** Build only the new prompts, keeping the artwork already visible in a growing combo. */
+    function appendPrompts(row, tokens) {
+      const prompts = document.createDocumentFragment();
+      for (const token of tokens) {
+        if (row.ids.has(token.id)) continue;
+        row.ids.add(token.id);
         const prompt = settings.historyStyle === "svg" ? token.prompt?.() : null;
         const cap = document.createElement("span");
         cap.className = "history-prompt";
@@ -1953,44 +2065,28 @@ async function loadControllerArtwork(requiredSkin, fixedSkin) {
           prompt.setAttribute("aria-label", token.label);
           cap.append(prompt);
         } else cap.textContent = token.label;
-        content.append(cap);
-      });
-      const count = document.createElement("b");
-      count.className = "history-count";
-      count.textContent = row.count > 1 ? `×${row.count}` : "";
-      content.append(count);
-      row.node.replaceChildren(content);
-      row.signature = row.tokens
-        .map((token) => token.id)
-        .sort()
-        .join("|");
+        prompts.append(cap);
+      }
+      row.prompts.append(prompts);
       scheduleTrim();
     }
 
-    /**
-     * Record a new physical press; repeat events and still-held inputs are ignored.
-     * @param {Object} token Stable id, label, source, optional modifier and SVG prompt factory.
-     */
-    function press(token) {
-      if (disposed || document.hidden || held.has(token.id)) return;
-      const modifiers = [...held.values()].filter((input) => input.modifier && input.source === token.source);
+    /** Buttons first seen in the same poll share a timestamp and a single history entry. */
+    function record(source, pressed) {
+      if (!pressed.length || disposed || document.hidden) return;
       const now = performance.now();
-      let last = rows.at(-1);
-      const overlap = last?.tokens.some((input) => held.has(input.id));
-      held.set(token.id, token);
-      // A long-held modifier joins the next action instead of leaving a redundant solo modifier row.
-      const modifierRow = last && last.count === 1 && last.tokens.every((input) => input.modifier && held.has(input.id));
-      if (last && last.source === token.source && last.count === 1 && !last.tokens.some((input) => input.id === token.id) && ((overlap && now - last.time <= settings.historyGroupWindow) || modifierRow)) {
-        last.tokens = [...new Map([...last.tokens, ...modifiers, token].map((input) => [input.id, input])).values()];
-        paint(last);
+      const last = rows.at(-1);
+      const modifiers = [...held.values()].filter((input) => input.modifier && input.source === source);
+      const tokens = [...modifiers, ...pressed];
+      const previous = last ? [...last.ids] : [];
+      const overlap = previous.some((id) => held.has(id));
+      const modifierRow = previous.every((id) => held.get(id)?.modifier);
+      for (const token of pressed) held.set(token.id, token);
+      if (last?.source === source && last.count === 1 && pressed.every((token) => !last.ids.has(token.id)) && ((overlap && now - last.time <= settings.historyGroupWindow) || modifierRow)) {
+        appendPrompts(last, tokens);
         return;
       }
-      const tokens = [...modifiers, token];
-      const signature = tokens
-        .map((input) => input.id)
-        .sort()
-        .join("|");
-      if (settings.historyAggregate === "yes" && last?.signature === signature) {
+      if (settings.historyAggregate === "yes" && last?.source === source && last.ids.size === tokens.length && tokens.every((token) => last.ids.has(token.id))) {
         last.count++;
         last.time = now;
         const count = last.node.querySelector(".history-count");
@@ -2000,22 +2096,23 @@ async function loadControllerArtwork(requiredSkin, fixedSkin) {
       }
       const node = document.createElement("div");
       node.className = "history-entry";
-      last = { node, tokens, source: token.source, count: 1, time: now };
-      rows.push(last);
+      const prompts = document.createElement("span");
+      prompts.className = "history-prompts";
+      const count = document.createElement("b");
+      count.className = "history-count";
+      node.append(prompts, count);
+      const row = { node, prompts, ids: new Set(), source, count: 1, time: now };
+      appendPrompts(row, tokens);
+      rows.push(row);
       if (settings.historyOrder === "first") root.prepend(node);
       else root.append(node);
-      paint(last);
-      if (settings.animate !== "no" && settings.historyAnimation !== "none") {
-        const offset = settings.historyOrder === "first" ? -10 : 10;
-        const transform = settings.historyOrientation === "horizontal" ? `translateX(${offset}px)` : `translateY(${offset}px)`;
-        node.animate(
-          [
-            { opacity: 0, transform: settings.historyAnimation === "slide" ? transform : "none" },
-            { opacity: 1, transform: "none" }
-          ],
-          { duration: 140, easing: "ease-out" }
-        );
-      }
+      if (rows.length === 1) window.byStreamResource.playEntrance?.(root, false);
+      byStream.enterListItem(node, settings, "history", animateOut && rows.length > 1, playDefault);
+    }
+
+    /** Record an individual press between snapshots. */
+    function press(token) {
+      if (!held.has(token.id)) record(token.source, [token]);
     }
 
     /** Release one physical ID; no recorded text or release log is retained. */
@@ -2027,7 +2124,10 @@ async function loadControllerArtwork(requiredSkin, fixedSkin) {
     function update(source, tokens) {
       const next = new Set(tokens.map((token) => token.id));
       for (const [id, token] of held) if (token.source === source && !next.has(id)) release(id);
-      for (const token of tokens) press(token);
+      record(
+        source,
+        tokens.filter((token) => !held.has(token.id))
+      );
     }
 
     /** Record one instantaneous wheel/directional action. */
@@ -2048,27 +2148,30 @@ async function loadControllerArtwork(requiredSkin, fixedSkin) {
 
     /** End this overlay-owned history's lifetime; safe to call more than once. */
     function destroy() {
+      if (disposed) return;
       disposed = true;
-      layoutChanged = undefined;
-      clear();
+      cancelAnimationFrame(frame);
       observer.disconnect();
       events.abort();
-      position.remove();
+      held.clear();
+      rows.length = 0;
+      const exits = window.byStreamResource.playExit?.(root) || [];
+      if (exits.length) Promise.allSettled(exits.map((motion) => motion.finished)).then(() => position.remove());
+      else position.remove();
     }
 
-    const observer = new ResizeObserver(() => {
-      scheduleTrim();
-      layoutChanged?.();
-    });
+    const observer = new ResizeObserver(scheduleTrim);
     observer.observe(root);
-    window.addEventListener("blur", () => held.clear(), { signal: events.signal });
-    document.addEventListener(
-      "visibilitychange",
-      () => {
-        if (document.hidden) held.clear();
-      },
-      { signal: events.signal }
-    );
+    if (settings.source !== "helper") {
+      window.addEventListener("blur", () => held.clear(), { signal: events.signal });
+      document.addEventListener(
+        "visibilitychange",
+        () => {
+          if (document.hidden) held.clear();
+        },
+        { signal: events.signal }
+      );
+    }
     window.addEventListener(
       "pagehide",
       (event) => {
@@ -2077,8 +2180,8 @@ async function loadControllerArtwork(requiredSkin, fixedSkin) {
       },
       { signal: events.signal }
     );
-    return { press, release, update, pulse, clear, destroy, available, onResize };
+    return { press, release, update, pulse, clear, destroy };
   }
 
-  byStream.inputHistory = { fields, create };
+  byStream.inputHistory = { fields, create, migrateAnimation };
 })();

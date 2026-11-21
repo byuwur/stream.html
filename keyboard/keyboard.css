@@ -1,3 +1,4 @@
+/* ===== INPUT SCENE ===== */
 html,
 body {
   margin: 0;
@@ -10,6 +11,8 @@ body {
   display: none !important;
 }
 #keyboard-overlay {
+  min-width: 100%;
+  min-height: 100%;
   position: absolute;
   inset: 0;
   box-sizing: border-box;
@@ -22,7 +25,6 @@ body {
   display: flex;
   align-items: center;
   width: max-content;
-  transform: translate(-50%, -50%);
 }
 #keyboard,
 #mouse {
@@ -45,6 +47,7 @@ body {
 [data-shell="minimal"] .keyboard-shell {
   fill-opacity: 0.5;
 }
+/* ===== KEYBOARD SHELL ===== */
 [data-shell="none"] :is(.keyboard-shell, .shell-highlight) {
   display: none;
 }
@@ -68,6 +71,7 @@ body {
 #keyboard-overlay[data-image-ready="yes"] [data-image-keys="true"] .key-surface {
   fill: transparent;
 }
+/* ===== KEY APPEARANCE ===== */
 .key-outline,
 .mouse-outline {
   fill: var(--outline);
@@ -87,6 +91,18 @@ body {
 .key-action {
   opacity: 0.8;
 }
+.key-text-frame {
+  height: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-content: center;
+  color: var(--legend);
+  text-align: center;
+  line-height: 1.1;
+}
+.input-key.pressed .key-text-frame {
+  color: var(--pressed-legend);
+}
 .key-light {
   fill: var(--highlight);
   opacity: var(--highlight-opacity);
@@ -102,6 +118,7 @@ body {
   pointer-events: none;
   transition: opacity var(--release) ease-out;
 }
+/* ===== PRESSED KEY EFFECTS ===== */
 .input-key.pressed .key-pressed-fill {
   opacity: 0.9;
   transition: none;
@@ -118,21 +135,19 @@ body {
 [data-effect="invert"] .input-key.pressed .key-pressed-fill {
   opacity: 0;
 }
-[data-effect="depth"] .input-key {
-  transform-box: fill-box;
-  transform-origin: center;
-  transition: transform var(--release) ease-out;
+html:not([data-animate="no"]) [data-effect="depth"] .input-key.pressed .key-outline {
+  fill: color-mix(in srgb, var(--pressed) 55%, black);
+  stroke: color-mix(in srgb, var(--pressed) 55%, black);
 }
-html:not([data-animate="no"]) [data-effect="depth"] .input-key.pressed {
-  transform: translateY(1px) scale(0.97);
-  transition: none;
-}
-html:not([data-animate="no"]) [data-effect="glow"] .input-key.pressed {
+html:not([data-animate="no"]) [data-effect="glow"] .input-key.pressed .key-outline {
+  fill: color-mix(in srgb, var(--pressed) 45%, white);
+  stroke: color-mix(in srgb, var(--pressed) 45%, white);
   filter: drop-shadow(0 0 3px var(--pressed));
 }
 .surface-image {
   opacity: var(--image-opacity);
 }
+/* ===== MOUSE ===== */
 .mouse-shell {
   fill: var(--shell);
 }
@@ -168,10 +183,22 @@ html:not([data-animate="no"]) [data-effect="glow"] .input-key.pressed {
   opacity: 1;
   transform: translate(var(--move-x), var(--move-y));
 }
+/* ===== INPUT HISTORY ===== */
+.history-entry {
+  contain: layout paint;
+}
 .input-history .input-key {
   --key: var(--history-entry);
   --outline: var(--history-ink);
   --legend: var(--history-ink);
-  --highlight-opacity: 0;
-  --shadow-opacity: 0;
+  filter: none;
+}
+
+.history-entry small {
+  font-size: calc(var(--history-size) * 0.5);
+}
+.history-separator {
+  flex: none;
+  font-size: calc(var(--history-size) * 0.55);
+  line-height: 1;
 }

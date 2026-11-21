@@ -16,6 +16,7 @@
             $(`[name="${name}"]`).val(fields[name].default).trigger("input").trigger("change");
         });
       const initialVariant = settings.variant;
+      // ===== CONTROLLER VARIANTS =====
       function updateVariants(value = settings.variant) {
         const variants = byControllerArtwork.skins[$("#skin-input").val()]?.variants || {};
         const choices = { original: "Default", ...variants };
@@ -103,6 +104,7 @@
       let capture = null;
       let rowID = 0;
       let dialog;
+      // ===== INPUT DEVICES =====
       const selectedPad = () => {
         const player = Number($("#player-base").val());
         return gamepadSupport.gamepadsRaw[player === 9 ? 9 : player - 1];
@@ -151,6 +153,7 @@
         $("#mapping-status").text(selectedPad() ? "Choose an output below, then record a button or move a stick. Escape cancels recording." : "Press a controller button to connect it, or choose keyboard.");
         $("#mappings .mapping-row").each((_, row) => refreshRow($(row)));
       }
+      // ===== MAPPING ROWS =====
       function outputButtons() {
         const id = String($("#skin-input").val() || settings.skin),
           skin = byControllerArtwork.skins[id];
@@ -289,6 +292,7 @@
         }
         for (const binding of bindings) addRow(binding);
       }
+      // ===== INPUT CAPTURE =====
       function beginCapture(row, button) {
         cancelCapture();
         const pad = selectedPad();
@@ -298,7 +302,16 @@
         const kind = row.find(".mapping-kind").val(),
           pair = kind === "axes" && row.find(".mapping-source-mode").val() === "buttons";
         if (button.dataset.slot === "direction" && row.data("primary")?.choiceType !== "axes") return message(row, "Record the hat axis first.", true);
-        capture = { row, button, kind, pair, slot: button.dataset.slot, direction: button.dataset.direction, snapshot: copyGamepad(pad), timeout: setTimeout(() => cancelCapture("Recording timed out. Try again."), 10000) };
+        capture = {
+          row,
+          button,
+          kind,
+          pair,
+          slot: button.dataset.slot,
+          direction: button.dataset.direction,
+          snapshot: copyGamepad(pad),
+          timeout: setTimeout(() => cancelCapture("Recording timed out. Try again."), 10000)
+        };
         gamepadSupport.captureKeyboard = Number($("#player-base").val()) === 9;
         $(button).text("Listening...");
         $("#cancel-mapping-capture").removeClass("d-none");
@@ -337,6 +350,7 @@
         }
         cancelCapture("Input recorded. Apply mapping to update the preview.");
       }
+      // ===== BINDING SERIALIZATION =====
       function bindings() {
         const result = [],
           targets = new Set();
@@ -345,7 +359,11 @@
           const row = $(element),
             targetType = row.find(".mapping-kind").val(),
             target = Number(row.find(".mapping-target").val());
-          const binding = { targetType, ...(targetType !== "dpad" ? { target } : {}), disabled: row.find(".mapping-disabled").prop("checked") };
+          const binding = {
+            targetType,
+            ...(targetType !== "dpad" ? { target } : {}),
+            disabled: row.find(".mapping-disabled").prop("checked")
+          };
           const key = targetType === "dpad" ? "dpad" : `${targetType}:${target}`;
           message(row, "");
           const overlapsHat = targetType === "dpad" ? [12, 13, 14, 15].some((id) => targets.has(`buttons:${id}`)) : targetType === "buttons" && target >= 12 && target <= 15 && targets.has("dpad");
@@ -385,7 +403,11 @@
                 valid = false;
                 return message(row, "Use two different, finite range values.", true);
               }
-              binding.axesConfig = { type: row.find(".calibration-enabled").prop("checked") ? row.find(".range-type").val() : "stick", lowValue, highValue };
+              binding.axesConfig = {
+                type: row.find(".calibration-enabled").prop("checked") ? row.find(".range-type").val() : "stick",
+                lowValue,
+                highValue
+              };
               if (binding.choiceType === "axes") delete binding.choiceOperand;
             }
           }

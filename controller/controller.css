@@ -1,3 +1,4 @@
+/* ===== CONTROLLER LAYOUT ===== */
 html {
   font-size: 16px;
 }
@@ -6,10 +7,16 @@ body {
   overflow: hidden;
   background: transparent;
 }
+#controller-overlay {
+  position: absolute;
+  inset: 0;
+  min-width: 100%;
+  min-height: 100%;
+}
 .controller {
   position: absolute;
-  top: 50%;
-  left: 50%;
+  top: var(--player-top, 50%);
+  left: var(--player-left, 50%);
   display: none;
 }
 .controller.active {
@@ -32,6 +39,7 @@ body {
   height: 100%;
   overflow: visible;
 }
+/* ===== ARTWORK LAYERS ===== */
 .controller .controller-background {
   position: relative;
 }
@@ -45,40 +53,42 @@ body {
 .player-leds-layer[data-layout="full"][data-native-leds="true"] {
   display: none;
 }
+/* ===== PLAYER INDICATORS ===== */
 .controller .player-indicator {
-  fill: #24342a;
-  stroke: #111111;
+  fill: #232;
+  stroke: #111;
   stroke-width: 0.6;
 }
 .player-leds .player-indicator {
   stroke-width: 0.4;
 }
 .controller .player-indicator.lit {
-  fill: #65e374;
-  filter: drop-shadow(0 0 0.6px #65e374);
+  fill: #6d7;
+  filter: drop-shadow(0 0 0.625px #6d7);
 }
-/* Independent SVG roots keep pressed filters working in WebKit. */
-.controller .control {
-  transition: filter var(--release) ease-out;
+/* ===== INPUT EFFECTS ===== */
+/* Interpolating invert() on a complete button turns every pixel gray at the midpoint. */
+.controller[data-effect="invert"] .invert-face {
+  transition: fill var(--release) ease-out;
 }
-.controller[data-effect="invert"] .control.pressed:not(.analog-trigger) {
-  filter: invert(1);
-}
-.controller .control.pressed {
+.controller[data-effect="invert"] .control.pressed .invert-face {
+  fill: var(--inverted-fill) !important;
   transition: none;
 }
 .controller[data-effect]:not([data-effect="invert"]) .control :is(.button-face, .gcn-face, .button-detail.stock-plastic) {
-  transition: fill var(--release) ease-out;
+  transition:
+    fill var(--release) ease-out,
+    stroke var(--release) ease-out;
 }
 /* Keep the trigger's base untouched; its existing clip still owns pressure. */
 .controller[data-effect]:not([data-effect="invert"]) .control.pressed:not(.analog-trigger) :is(.button-face, .gcn-face, .button-detail.stock-plastic),
 .controller[data-effect]:not([data-effect="invert"]) .trigger-active :is(.button-face, .gcn-face) {
-  fill: #990000 !important;
+  fill: #900 !important;
   transition: none;
 }
 .controller[data-effect]:not([data-effect="invert"]) .control.pressed {
-  --button-label-color: #ffffff;
-  --face-label-color: #ffffff;
+  --button-label-color: #fff;
+  --face-label-color: #fff;
 }
 .controller .trigger-fill-rect {
   transition:
@@ -89,16 +99,11 @@ body {
 .controller .control.pressed .trigger-fill-rect {
   transition: none;
 }
-/* Animate inside the control so stick travel and curving keep their own transforms. */
-.controller[data-effect="depth"] .control:not(.analog-trigger) .press-visual {
-  transform-box: fill-box;
-  transform-origin: center;
-  transition: transform var(--release) ease-out;
+/* Color the existing edges. Button symbols and the pressure artwork retain their geometry. */
+html:not([data-animate="no"]) .controller[data-effect="depth"] .control.pressed:not(.analog-trigger) :is(.button-face, .gcn-face, .button-detail.stock-plastic) {
+  stroke: #480000 !important;
 }
-html:not([data-animate="no"]) .controller[data-effect="depth"] .control.pressed:not(.analog-trigger) .press-visual {
-  transform: translateY(1px) scale(0.95);
-  transition: none;
-}
-html:not([data-animate="no"]) .controller[data-effect="glow"] .control.pressed {
-  filter: drop-shadow(0 0 3px #990000);
+html:not([data-animate="no"]) .controller[data-effect="glow"] .control.pressed:not(.analog-trigger) :is(.button-face, .gcn-face, .button-detail.stock-plastic) {
+  stroke: #ffb6b6 !important;
+  filter: drop-shadow(0 0 3px #900);
 }

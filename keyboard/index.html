@@ -2,12 +2,13 @@
 <html lang="en" data-tool="keyboard">
   <head>
     <meta charset="UTF-8" />
+    <meta name="referrer" content="origin" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Keyboard &amp; Mouse for OBS | stream.HTML</title>
     <meta name="description" content="Live keyboard, mouse, and ephemeral Input History overlays with Kenney SVG artwork. Browser-focused input for OBS by BONYUR." />
     <meta name="author" content="Andrés Trujillo [Mateus] byUwUr" />
     <meta name="robots" content="index, follow, max-image-preview:large" />
-    <meta name="theme-color" content="#660000" />
+    <meta name="theme-color" content="#600" />
     <!-- <link rel="canonical" href="https://byuwur.github.io/stream.html/keyboard/" /> -->
     <link rel="canonical" href="https://stream.byuwur.co/keyboard/" />
     <!-- <link rel="icon" href="https://byuwur.github.io/stream.html/stream.html.png" /> -->
@@ -38,16 +39,20 @@
   <body>
     <!-- ===== SHARED IMPORTS: resource and configurator ===== -->
     <script type="application/json" id="shared-assets" data-source="https://cdn.jsdelivr.net/gh/byuwur/spa.js" data-spa-version="v20.17">
-      [{ "path": "/_functions.min.js", "optional": false }]
+      [
+        { "path": "/css/animate.min.css", "optional": true },
+        { "path": "/_functions.min.js", "optional": false }
+      ]
     </script>
 
     <!-- ===== RESOURCE ===== -->
+    <link rel="stylesheet" href="../resources.css" data-renderer-style />
     <link rel="stylesheet" href="./keyboard.css" data-renderer-style />
     <script src="../resource.js" defer></script>
     <script src="./keyboard.js" defer></script>
     <template id="overlay-markup">
       <main id="keyboard-overlay" aria-label="Keyboard and mouse input">
-        <div id="input-scene">
+        <div id="input-scene" data-stream-viewport>
           <div id="keyboard"></div>
           <div id="mouse"></div>
         </div>
@@ -62,7 +67,6 @@
           { "path": "/css/pickr.min.css", "optional": false },
           { "path": "/_common.min.css", "optional": false },
           { "path": "/css/select2.min.css", "optional": false },
-          { "path": "/css/animate.min.css", "optional": false },
           { "path": "/js/jquery.min.js", "optional": false },
           { "path": "/js/select2.full.min.js", "optional": false },
           { "path": "/js/popper.min.js", "optional": false },
