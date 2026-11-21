@@ -14,6 +14,7 @@ const php = process.env.PHP_BINARY || "php";
 const hostedURL = "https://images.example.test/view?id=sample";
 const successBody = JSON.stringify({ url: hostedURL });
 
+// ===== PHP FIXTURES =====
 /** Run PHP without Xdebug logging, preserving the owning installation's extensions. */
 function runPHP(code, env = process.env) {
   return execFileSync(php, ["-d", "xdebug.mode=off", "-r", code], { env, encoding: "utf8" });
@@ -88,7 +89,12 @@ test("PHP upload disables Catbox and supports developer-configured image hosts",
   await new Promise((resolve) => socket.listen(0, "127.0.0.1", resolve));
   const port = socket.address().port;
   await new Promise((resolve) => socket.close(resolve));
-  const env = { ...process.env, STREAM_UPLOAD_RATE_DIR: path.join(temp, "rate"), STREAM_TEST_MODE: mode, STREAM_TEST_CAPTURE: capture };
+  const env = {
+    ...process.env,
+    STREAM_UPLOAD_RATE_DIR: path.join(temp, "rate"),
+    STREAM_TEST_MODE: mode,
+    STREAM_TEST_CAPTURE: capture
+  };
   const server = spawn(
     php,
     [
@@ -121,6 +127,7 @@ test("PHP upload disables Catbox and supports developer-configured image hosts",
     logs += data;
   });
   const url = `http://127.0.0.1:${port}/upload_image.php`;
+  // ===== UPLOAD REQUESTS =====
   /** Set a deterministic upstream response and clear only this external fixture's limiter. */
   async function reset(value = { body: successBody }) {
     await fs.writeFile(mode, JSON.stringify({ defaultProvider: "custom", ...value }));
@@ -161,6 +168,7 @@ test("PHP upload disables Catbox and supports developer-configured image hosts",
       runPHP(`$image=imagecreatetruecolor(2,2); $result=[]; foreach(['png','jpeg','webp','gif'] as $type) { ob_start(); ('image'.$type)($image); $result[$type]=base64_encode(ob_get_clean()); } echo json_encode($result);`)
     );
     const png = Buffer.from(images.png, "base64");
+    // ===== ENDPOINT BEHAVIOR =====
     await t.test("the shipped endpoint disables every upload host, including direct Catbox requests", async () => {
       for (const [defaultProvider, fields, status] of [
         ["", {}, 503],
@@ -179,14 +187,26 @@ test("PHP upload disables Catbox and supports developer-configured image hosts",
       const get = await fetch(url);
       assert.equal(get.status, 405);
       assert.equal(get.headers.get("allow"), "POST, OPTIONS");
-      const preflight = await fetch(url, { method: "OPTIONS", headers: { Origin: "null", "Access-Control-Request-Method": "POST" } });
+      const preflight = await fetch(url, {
+        method: "OPTIONS",
+        headers: { Origin: "null", "Access-Control-Request-Method": "POST" }
+      });
       assert.equal(preflight.status, 204);
       assert.equal(preflight.headers.get("access-control-allow-origin"), "*");
       assert.equal(preflight.headers.get("access-control-expose-headers"), "Retry-After, X-Upload-Diagnostic");
       assert.equal(preflight.headers.get("access-control-allow-credentials"), null);
       assert.equal((await fetch(url, { method: "POST" })).status, 400);
       assert.equal((await fetch(url, { method: "POST", body: new FormData() })).status, 400);
-      assert.equal((await fetch(url, { method: "POST", body: "broken", headers: { "Content-Type": "multipart/form-data; boundary=absent" } })).status, 400);
+      assert.equal(
+        (
+          await fetch(url, {
+            method: "POST",
+            body: "broken",
+            headers: { "Content-Type": "multipart/form-data; boundary=absent" }
+          })
+        ).status,
+        400
+      );
       const nested = new FormData();
       nested.append("fileToUpload[]", new Blob([png], { type: "image/png" }), "image.png");
       assert.equal((await fetch(url, { method: "POST", body: nested })).status, 400);
@@ -211,7 +231,7 @@ test("PHP upload disables Catbox and supports developer-configured image hosts",
         assert.equal(forwarded.verifyHost, 2);
         assert.equal(forwarded.redirects, false);
         assert.equal(forwarded.http11, true, "Upstream uploads avoid the observed HTTP/2 stream failure");
-        assert.equal(forwarded.userAgent, "stream.html (https://stream.byuwur.co/)", "Requests identify the uploader");
+        assert.equal(forwarded.userAgent, "stream.HTML (https://stream.byuwur.co/)", "Requests identify the uploader");
         assert.ok(forwarded.connectTimeout > 0 && forwarded.timeout <= 40);
       }
     });
@@ -340,7 +360,15 @@ test("PHP upload disables Catbox and supports developer-configured image hosts",
     });
     await t.test("per-client limiter ignores forwarded IPs, expires, and fails closed on corruption", async () => {
       await reset();
-      for (let attempt = 0; attempt < 10; attempt++) assert.equal((await upload(png, "image/png", "image.png", { headers: { "X-Forwarded-For": `192.0.2.${attempt}` } })).response.status, 200);
+      for (let attempt = 0; attempt < 10; attempt++)
+        assert.equal(
+          (
+            await upload(png, "image/png", "image.png", {
+              headers: { "X-Forwarded-For": `192.0.2.${attempt}` }
+            })
+          ).response.status,
+          200
+        );
       const limited = await upload(png);
       assert.equal(limited.response.status, 429);
       assert.equal(limited.response.headers.get("x-upload-diagnostic"), null, "Local rate limiting is distinct from a provider rejection");

@@ -12,13 +12,15 @@ declare(strict_types=1);
 
 ini_set('display_errors', '0');
 
-// --- CONFIGURATION ---
+// ===== CONFIGURATION =====
 
 const IMAGE_UPLOAD_DEFAULT_PROVIDER = '';
 const IMAGE_UPLOAD_BYTES = 8388608;
 const IMAGE_UPLOAD_PIXELS = 16000000;
 const IMAGE_UPLOAD_WINDOW = 600;
 const IMAGE_UPLOAD_REQUESTS = 10;
+
+// ===== UPLOAD PROVIDERS =====
 
 /** Resolve a developer-owned provider definition. Disabled hosts cannot receive requests. */
 function image_upload_provider(string $name): ?array
@@ -40,7 +42,7 @@ function image_upload_provider(string $name): ?array
   return $provider;
 }
 
-// --- RESPONSE AND VALIDATION ---
+// ===== RESPONSE AND VALIDATION =====
 
 /** Finish with a public plain-text response, following Academyapp's endpoint guard clauses. */
 function image_upload_response(int $status, string $message): never
@@ -50,6 +52,8 @@ function image_upload_response(int $status, string $message): never
   echo $message;
   exit;
 }
+
+// ===== REQUEST LIMITS =====
 
 /**
  * Consume one attempt per REMOTE_ADDR, under an exclusive lock. No forwarded headers are trusted.
@@ -122,7 +126,7 @@ function image_upload_type(string $path): array
   return [$mime, $formats[$mime]];
 }
 
-// --- PROVIDER RESPONSE PARSERS ---
+// ===== PROVIDER RESPONSE PARSERS =====
 
 /** Extract only canonical HTTPS raster URLs from Catbox's plain-text response. */
 function image_upload_catbox_response(string $response): ?string
@@ -131,7 +135,9 @@ function image_upload_catbox_response(string $response): ?string
   return preg_match('~\Ahttps://files\.catbox\.moe/[a-zA-Z0-9_-]+\.(?:png|jpe?g|webp|gif)\z~i', $url) === 1 ? $url : null;
 }
 
-// --- UPSTREAM REQUEST ---
+// ===== UPSTREAM REQUEST =====
+
+// ===== HTTP REQUESTS =====
 
 /**
  * Standalone multipart adaptation of spa.php/_functions.php make_http_request().
@@ -152,7 +158,7 @@ function make_http_request(string $url, array $post): array
     // Keep multipart uploads on the existing HTTP/1.1 transport.
     CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
     // Identify the application to the configured host.
-    CURLOPT_USERAGENT => 'stream.html (https://stream.byuwur.co/)',
+    CURLOPT_USERAGENT => 'stream.HTML (https://stream.byuwur.co/)',
     CURLOPT_CONNECTTIMEOUT => 10,
     CURLOPT_TIMEOUT => 40,
     CURLOPT_RETURNTRANSFER => true,
@@ -185,6 +191,8 @@ function make_http_request(string $url, array $post): array
   ], JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE));
   return [$response, $error, $status, $error_text];
 }
+
+// ===== PROVIDER REQUESTS =====
 
 /**
  * Forward original bytes using a resolved provider and the local HTTP helper.
@@ -225,7 +233,7 @@ function image_upload_forward(string $path, string $mime, string $extension, arr
   return [$status, $message, $diagnostic];
 }
 
-// --- HTTP ENTRY POINT ---
+// ===== HTTP ENTRY POINT =====
 
 /** Handle the anonymous HTTP boundary; all responses include credential-free CORS headers. */
 function upload_image(): void
