@@ -15,19 +15,30 @@ import { chromium } from "playwright";
 import { dist } from "../scripts/build.mjs";
 
 const candidate = path.join(dist, "assets", "controller.standalone.embedded.html");
+// ===== RELEASE ARCHIVE =====
 const manifest = JSON.parse(await fs.readFile(path.join(dist, "assets", "manifest.json"), "utf8"));
 const archive = manifest.assets.find((asset) => asset.resource === "controller" && asset.format === "standalone-zip");
 const entries = unzipSync(await fs.readFile(path.join(dist, "assets", archive.file)));
 const artwork = Object.entries(entries).filter(([file]) => file.endsWith(".svg"));
-const sizes = { htmlBytes: (await fs.stat(candidate)).size, artworkBytes: artwork.reduce((sum, [, bytes]) => sum + bytes.length, 0), artworkCount: artwork.length };
+const sizes = {
+  htmlBytes: (await fs.stat(candidate)).size,
+  artworkBytes: artwork.reduce((sum, [, bytes]) => sum + bytes.length, 0),
+  artworkCount: artwork.length
+};
 const server = http.createServer((request, response) => {
   const pathname = new URL(request.url, "http://localhost").pathname.slice(1);
   const body = entries[pathname];
-  response.writeHead(body ? 200 : 404, { "content-type": pathname.endsWith(".svg") ? "image/svg+xml" : "text/html" });
+  response.writeHead(body ? 200 : 404, {
+    "content-type": pathname.endsWith(".svg") ? "image/svg+xml" : "text/html"
+  });
   response.end(body || "Not found");
 });
 await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
-const browser = await chromium.launch({ channel: process.env.BROWSER_CHANNEL || undefined, executablePath: process.env.CHROMIUM_EXECUTABLE_PATH || undefined });
+const browser = await chromium.launch({
+  channel: process.env.BROWSER_CHANNEL || undefined,
+  executablePath: process.env.CHROMIUM_EXECUTABLE_PATH || undefined
+});
+// ===== BROWSER MEASUREMENTS =====
 const report = { browser: browser.version(), experimental: true, sizes, measurements: {} };
 try {
   for (const mode of ["packaged", "embedded"]) {
@@ -42,7 +53,12 @@ try {
       });
       await page.route("https://**", (route) => route.abort());
       await page.addInitScript(() => {
-        window.testPad = { id: "Release experiment", index: 0, buttons: Array.from({ length: 40 }, () => ({ value: 0 })), axes: [0, 0, 0, 0] };
+        window.testPad = {
+          id: "Release experiment",
+          index: 0,
+          buttons: Array.from({ length: 40 }, () => ({ value: 0 })),
+          axes: [0, 0, 0, 0]
+        };
         Object.defineProperty(navigator, "getGamepads", { value: () => [testPad] });
       });
       const url = mode === "embedded" ? pathToFileURL(candidate).href : `http://127.0.0.1:${server.address().port}/controller/index.html`;
@@ -76,10 +92,20 @@ try {
       const metrics = Object.fromEntries((await session.send("Performance.getMetrics")).metrics.map((item) => [item.name, item.value]));
       const parse = await page.evaluate(() => {
         const navigation = performance.getEntriesByType("navigation")[0];
-        return { domContentLoadedMs: navigation.domContentLoadedEventEnd - navigation.startTime, domInteractiveMs: navigation.domInteractive - navigation.startTime };
+        return {
+          domContentLoadedMs: navigation.domContentLoadedEventEnd - navigation.startTime,
+          domInteractiveMs: navigation.domInteractive - navigation.startTime
+        };
       });
       if (iteration)
-        samples.push({ initializedMs, ...parse, allModelsRenderMs: switching.reduce((sum, value) => sum + value, 0), maxModelRenderMs: Math.max(...switching), jsHeapBytes: metrics.JSHeapUsedSize, scriptSeconds: metrics.ScriptDuration });
+        samples.push({
+          initializedMs,
+          ...parse,
+          allModelsRenderMs: switching.reduce((sum, value) => sum + value, 0),
+          maxModelRenderMs: Math.max(...switching),
+          jsHeapBytes: metrics.JSHeapUsedSize,
+          scriptSeconds: metrics.ScriptDuration
+        });
       assert.deepEqual(errors, []);
       if (mode === "embedded") assert.deepEqual(svgRequests, [], "Embedded artwork must not fetch SVGs");
       await page.goto(`${url}?player=9&skin=fgc6&customColors=yes&controllerColor=123456`);

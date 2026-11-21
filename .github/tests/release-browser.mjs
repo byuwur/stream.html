@@ -12,8 +12,18 @@ import { SPA_HOST, config, dependencyReader, dist, hosted, root } from "../scrip
 const assetDir = path.join(dist, "assets");
 const manifest = JSON.parse(await fs.readFile(path.join(assetDir, "manifest.json"), "utf8"));
 const dependencies = await dependencyReader();
-const contentTypes = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml", ".png": "image/png", ".jpg": "image/jpeg" };
-const options = { channel: process.env.BROWSER_CHANNEL || undefined, executablePath: process.env.CHROMIUM_EXECUTABLE_PATH || undefined };
+const contentTypes = {
+  ".html": "text/html",
+  ".js": "text/javascript",
+  ".css": "text/css",
+  ".svg": "image/svg+xml",
+  ".png": "image/png",
+  ".jpg": "image/jpeg"
+};
+const options = {
+  channel: process.env.BROWSER_CHANNEL || undefined,
+  executablePath: process.env.CHROMIUM_EXECUTABLE_PATH || undefined
+};
 
 test("generated distributions initialize with application networks blocked", { timeout: 300000 }, async (t) => {
   const packages = new Map();
@@ -30,7 +40,9 @@ test("generated distributions initialize with application networks blocked", { t
         const file = path.resolve(assetDir, `.${pathname}`);
         if (path.dirname(file) === path.resolve(assetDir)) body = await fs.readFile(file);
       }
-      response.writeHead(body ? 200 : 404, { "content-type": contentTypes[path.extname(pathname)] || "application/octet-stream" });
+      response.writeHead(body ? 200 : 404, {
+        "content-type": contentTypes[path.extname(pathname)] || "application/octet-stream"
+      });
       response.end(body || "Not found");
     } catch {
       response.writeHead(404);
@@ -60,12 +72,22 @@ test("generated distributions initialize with application networks blocked", { t
           const relative = decodeURIComponent(url.pathname.slice(new URL(cdn).pathname.length));
           if (Object.values(config.dynamicDependencies).some((entry) => relative.startsWith(`${entry.directory}/`) && relative.endsWith(entry.extension))) {
             svgRequests.push(url.href);
-            return route.fulfill({ body: await fs.readFile(path.join(root, relative)), contentType: "image/svg+xml" });
+            return route.fulfill({
+              body: await fs.readFile(path.join(root, relative)),
+              contentType: "image/svg+xml"
+            });
           }
-          if (format === "online") return route.fulfill({ body: await fs.readFile(path.join(root, relative)), contentType: contentTypes[path.extname(relative)] });
+          if (format === "online")
+            return route.fulfill({
+              body: await fs.readFile(path.join(root, relative)),
+              contentType: contentTypes[path.extname(relative)]
+            });
         }
         if (format === "online" && url.href.startsWith(`${SPA_HOST}/`) && !config.externalStyles.includes(url.href)) {
-          return route.fulfill({ body: await dependencies.read(url), contentType: contentTypes[path.extname(url.pathname)] });
+          return route.fulfill({
+            body: await dependencies.read(url),
+            contentType: contentTypes[path.extname(url.pathname)]
+          });
         }
         if (["script", "stylesheet"].includes(route.request().resourceType()) && !config.externalStyles.includes(url.href) && url.hostname !== "fonts.googleapis.com") unexpected.push(url.href);
         return route.abort();
@@ -91,6 +113,7 @@ test("generated distributions initialize with application networks blocked", { t
           const { page, errors, unexpected, warnings, svgRequests } = await pageFor(format, resource.id);
           try {
             const file = `${origin}/${asset.file}`;
+            // ===== BROWSER INTERACTIONS =====
             await page.goto(file);
             const standalone = ["standalone", "embedded"].includes(format);
             await ready(page, standalone);
@@ -105,7 +128,12 @@ test("generated distributions initialize with application networks blocked", { t
               assert.deepEqual(await page.evaluate(() => Object.fromEntries(byStream.settingsURL(byStreamResource, byStreamResource.settings).searchParams)), defaults);
               if (standalone) {
                 const before = page.url();
-                await Promise.all([page.waitForEvent("console", { predicate: (message) => message.type() === "warning" && message.text().includes("configurator is not included") }), page.keyboard.press("F2")]);
+                await Promise.all([
+                  page.waitForEvent("console", {
+                    predicate: (message) => message.type() === "warning" && message.text().includes("configurator is not included")
+                  }),
+                  page.keyboard.press("F2")
+                ]);
                 assert.equal(page.url(), before);
                 assert.ok(warnings[0].includes(`Configure this resource online: ${hosted}`));
                 assert.equal(await page.locator("#configurator, #configurator-assets, #configurator-warning").count(), 0);

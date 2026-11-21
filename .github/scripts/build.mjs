@@ -18,6 +18,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { parseArgs } from "node:util";
 import { parse, serialize } from "parse5";
 import { format } from "prettier";
+import { parsers } from "prettier/plugins/babel";
 
 export const root = fileURLToPath(new URL("../../", import.meta.url));
 export const SPA_VERSION = (await fs.readFile(path.join(root, "resource.js"), "utf8")).match(/byStream\.SPA_VERSION = "([^"]+)"/)[1];
@@ -56,6 +57,7 @@ export const dist = path.join(root, "dist");
  */
 export const sha256 = (body) => createHash("sha256").update(body).digest("hex");
 
+// ===== RELEASE TAGS AND NOTES =====
 /**
  * Validate the release version recorded in provenance and history.
  * @param {string} tag One-, two-, or three-part version with a v prefix and optional prerelease/build identifiers.
@@ -70,6 +72,7 @@ export function validateTag(tag) {
   return tag;
 }
 
+// ===== HTML TRAVERSAL =====
 /**
  * @param {Object} tree parse5 document or element.
  * @returns {Array<Object>} All nodes, including inert template contents.
@@ -122,6 +125,7 @@ export function textContent(node, text) {
 }
 export { parse, serialize };
 
+// ===== HTML FORMATTING =====
 /**
  * Format generated HTML while preserving script/style payloads, including multiline string whitespace.
  * @param {Object} tree Parsed HTML document whose embedded text is temporarily replaced with markers.
@@ -147,7 +151,12 @@ export async function formatHTML(tree) {
     let index = parent.childNodes.indexOf(node);
     if (!/\n[\t ]*$/.test(parent.childNodes[index - 1]?.value || "")) parent.childNodes.splice(index, 0, { nodeName: "#text", value: "\n", parentNode: parent });
     index = parent.childNodes.indexOf(node);
-    if (!/^[\t ]*\n/.test(parent.childNodes[index + 1]?.value || "")) parent.childNodes.splice(index + 1, 0, { nodeName: "#text", value: "\n", parentNode: parent });
+    if (!/^[\t ]*\n/.test(parent.childNodes[index + 1]?.value || ""))
+      parent.childNodes.splice(index + 1, 0, {
+        nodeName: "#text",
+        value: "\n",
+        parentNode: parent
+      });
   }
   const html = await format(serialize(tree), {
     parser: "html",
@@ -204,6 +213,7 @@ export function expandAssets(tree, entry, includeLoader = true) {
   return tree;
 }
 
+// ===== OVERLAY RESOURCE DISCOVERY =====
 /**
  * Discover authored resource entry points from overlay-markup templates and matching data-tool IDs.
  * @returns {Promise<Array<{id: string, entry: string, name: string, source: Buffer}>>} Resources sorted by folder name.
@@ -251,6 +261,7 @@ export async function resources() {
   return result;
 }
 
+// ===== DEPENDENCY RESOLUTION =====
 /**
  * @param {string} relative Path relative to the repository root.
  * @returns {URL} Local file URL.
@@ -346,7 +357,11 @@ export async function dependencyReader(updateLock = false) {
         if (updateLock) lock[url.href] = sha256(body);
         assert.equal(sha256(body), lock[url.href], `Dependency content changed: ${url}`);
       }
-      used.set(url.href, { source: url.protocol === "file:" ? path.relative(root, fileURLToPath(url)).split(path.sep).join("/") : url.href, sha256: sha256(body), bytes: body.length });
+      used.set(url.href, {
+        source: url.protocol === "file:" ? path.relative(root, fileURLToPath(url)).split(path.sep).join("/") : url.href,
+        sha256: sha256(body),
+        bytes: body.length
+      });
       return body;
     })();
     pending.set(url.href, request);
@@ -377,7 +392,11 @@ export async function dependencyReader(updateLock = false) {
       if (pending.has(key)) return pending.get(key);
       const result = (async () => {
         try {
-          const committed = execFileSync("git", ["show", `${commit}:${relative}`], { cwd: directory, maxBuffer: 20 * 1024 * 1024, stdio: ["ignore", "pipe", "ignore"] });
+          const committed = execFileSync("git", ["show", `${commit}:${relative}`], {
+            cwd: directory,
+            maxBuffer: 20 * 1024 * 1024,
+            stdio: ["ignore", "pipe", "ignore"]
+          });
           // Edited and untracked files must use their current local contents.
           if (committed.toString().replaceAll("\r\n", "\n") !== source.toString().replaceAll("\r\n", "\n")) return null;
         } catch {
@@ -425,6 +444,7 @@ export function downloadURL(filename) {
   return `https://github.com/${config.repository}/releases/latest/download/${filename}`;
 }
 
+// ===== CHANGELOG =====
 /**
  * Read committed changes since the nearest reachable version tag, excluding the release being built.
  * @param {string} tag Current release or preview tag.
@@ -459,7 +479,7 @@ export function releaseChangelog(tag, directory = root) {
  */
 export function releaseNotes(manifest) {
   const formats = ["original", "online", "standalone", "bundle", "standalone-zip", "full-zip", "embedded", "full-embedded"];
-  const lines = [`# stream.html ${manifest.tag}`, "", "Configurable browser overlays for OBS, generated from the tagged source."];
+  const lines = [`# stream.HTML ${manifest.tag}`, "", "Configurable browser overlays for OBS, generated from the tagged source."];
   if (manifest.changelog) {
     const { previousTag, ref, commits } = manifest.changelog;
     const repository = `https://github.com/${config.repository}`;
@@ -510,6 +530,31 @@ export function releaseNotes(manifest) {
   return lines.join("\n");
 }
 
+// ===== ARTWORK SCRIPT EXPRESSIONS =====
+/** Locate executable expressions by their JavaScript syntax and retain their original source offsets. */
+export function findScriptExpressions(source, expression) {
+  const parseProgram = (text) => parsers.babel.parse(text, {}).program;
+  const expected = parseProgram(expression).body[0].expression;
+  // Formatting, comments and parser locations do not affect the expression being packaged.
+  const metadata = new Set(["start", "end", "loc", "extra", "leadingComments", "innerComments", "trailingComments"]);
+  const signature = (node) => JSON.stringify(node, (key, value) => (metadata.has(key) ? undefined : value));
+  const expectedSignature = signature(expected);
+  const matches = [];
+
+  function visit(node) {
+    if (!node?.type) return;
+    if (node.type === expected.type && signature(node) === expectedSignature) matches.push(node);
+    for (const child of Object.values(node)) {
+      if (Array.isArray(child)) child.forEach(visit);
+      else if (child?.type) visit(child);
+    }
+  }
+
+  visit(parseProgram(source));
+  return matches;
+}
+
+// ===== RELEASE BUILD =====
 /**
  * Build all distributions in a staging directory and replace the previous owned asset inventory.
  * @param {string} tag Validated release or local preview version.
@@ -615,26 +660,37 @@ async function buildRelease(tag, options) {
         let preferred = dynamic && artworkMode !== "remote" ? null : await dependencies.minified(url, bytes, manifest.changelog.commit);
         let source = (preferred || bytes).toString();
         if (dynamic) {
-          if (!source.includes(dynamic.baseExpression)) {
+          let bases = findScriptExpressions(source, dynamic.baseExpression);
+          if (preferred && bases.length !== 1) {
             source = bytes.toString();
             preferred = null;
+            bases = findScriptExpressions(source, dynamic.baseExpression);
           }
-          assert.ok(source.includes(dynamic.baseExpression), `Asset base changed in ${relative}; review the build transform`);
+          assert.equal(bases.length, 1, `Asset base changed in ${relative}; review the build transform`);
           const base = artworkMode === "packaged" ? "document.baseURI" : JSON.stringify(`${cdn}${relative}`);
-          source = source.replace(dynamic.baseExpression, base);
+          source = source.slice(0, bases[0].start) + base + source.slice(bases[0].end);
           if (artworkMode === "embedded" || artworkMode === "packaged") {
-            assert.equal(source.split(dynamic.requestExpression).length, 2, `Artwork request changed in ${relative}; review the build transform`);
+            const requests = findScriptExpressions(source, dynamic.requestExpression);
+            assert.equal(requests.length, 1, `Artwork request changed in ${relative}; review the build transform`);
+            const { start, end } = requests[0];
             const response = `new Response(streamEmbeddedArtwork[${dynamic.artworkKey}])`;
-            const request = artworkMode === "embedded" ? response : `(location.protocol === "file:" ? ${response} : ${dynamic.requestExpression})`;
+            const request = artworkMode === "embedded" ? response : `(location.protocol === "file:" ? ${response} : ${source.slice(start, end)})`;
             const artworkId = `${path.dirname(dynamic.directory)}-artwork`;
-            source = `const streamEmbeddedArtwork = JSON.parse(document.getElementById(${JSON.stringify(artworkId)}).textContent);\n${source.replace(dynamic.requestExpression, request)}`;
+            source = source.slice(0, start) + request + source.slice(end);
+            source = `const streamEmbeddedArtwork = JSON.parse(document.getElementById(${JSON.stringify(artworkId)}).textContent);\n${source}`;
           }
         }
-        if (preferred || /\.min\.js$/.test(url.pathname)) {
+        if (preferred || url.pathname.endsWith(".min.js")) {
           return source.replace(/\r?\n\/\/[#@]\s*sourceMappingURL=[^\r\n]*\s*$/, "").replace(/<\/script/gi, "<\\/script");
         }
         // Transform each fallback classic script independently: global names and execution boundaries survive.
-        const output = await transform(source, { loader: "js", minify: true, target: "es2022", legalComments: "inline", sourcefile: relative || url.href });
+        const output = await transform(source, {
+          loader: "js",
+          minify: true,
+          target: "es2022",
+          legalComments: "inline",
+          sourcefile: relative || url.href
+        });
         return output.code.replace(/<\/script/gi, "<\\/script");
       })();
       jsCache.set(key, result);
@@ -651,7 +707,12 @@ async function buildRelease(tag, options) {
       if (!registration) return [];
       const files = (await fs.readdir(path.join(root, registration.directory))).filter((file) => file.endsWith(registration.extension)).sort();
       assert.ok(files.length, `No artwork for ${resource.id}`);
-      return Promise.all(files.map(async (file) => ({ file, body: await dependencies.read(localURL(`${registration.directory}/${file}`)) })));
+      return Promise.all(
+        files.map(async (file) => ({
+          file,
+          body: await dependencies.read(localURL(`${registration.directory}/${file}`))
+        }))
+      );
     }
 
     /**
@@ -671,7 +732,11 @@ async function buildRelease(tag, options) {
       const editorNodes = new Set(editor ? nodes(editor) : []);
       if (format !== "online") {
         const head = all.find((node) => node.tagName === "head");
-        head.childNodes.push({ nodeName: "#comment", data: `\n${projectLicense}\nThird-party notices remain in their embedded assets.\n`, parentNode: head });
+        head.childNodes.push({
+          nodeName: "#comment",
+          data: `\n${projectLicense}\nThird-party notices remain in their embedded assets.\n`,
+          parentNode: head
+        });
       }
       if (format === "standalone") {
         for (const node of all.filter((node) => ["configurator-assets", "configurator"].includes(attr(node, "id")))) remove(node);
@@ -705,7 +770,12 @@ async function buildRelease(tag, options) {
           }
         } else if (node.tagName === "script" && format !== "online" && (!attr(node, "type") || attr(node, "type") === "text/javascript")) {
           const source = node.childNodes.map((child) => child.value || "").join("");
-          const output = await transform(source, { loader: "js", minify: true, target: "es2022", legalComments: "inline" });
+          const output = await transform(source, {
+            loader: "js",
+            minify: true,
+            target: "es2022",
+            legalComments: "inline"
+          });
           setAttr(node, "data-source", resource.entry);
           textContent(node, `\n${output.code.replace(/<\/script/gi, "<\\/script").trimEnd()}\n`);
         } else if (node.tagName === "link" && attr(node, "rel") === "icon") {
@@ -731,7 +801,12 @@ async function buildRelease(tag, options) {
             if (format === "online" || node.tagName === "a") setAttr(node, key, publicURL(url));
             else if (["img", "source", "video", "image"].includes(node.tagName)) {
               const bytes = await dependencies.read(url);
-              const mime = { ".png": "image/png", ".jpg": "image/jpeg", ".svg": "image/svg+xml", ".webp": "image/webp" }[path.extname(url.pathname)];
+              const mime = {
+                ".png": "image/png",
+                ".jpg": "image/jpeg",
+                ".svg": "image/svg+xml",
+                ".webp": "image/webp"
+              }[path.extname(url.pathname)];
               assert.ok(mime, `Unsupported embedded asset: ${url}`);
               setAttr(node, key, `data:${mime};base64,${bytes.toString("base64")}`);
             }
@@ -780,7 +855,9 @@ async function buildRelease(tag, options) {
         for (const format of ["online", "standalone", "bundle"]) await save(`${resource.id}.${format}.html`, await generate(resource, format), resource.id, format);
         if (images.length) {
           for (const format of ["standalone", "bundle"]) {
-            const entries = { [`${resource.id}/index.html`]: await generate(resource, format, "packaged", images) };
+            const entries = {
+              [`${resource.id}/index.html`]: await generate(resource, format, "packaged", images)
+            };
             const artworkDirectory = path.basename(config.dynamicDependencies[`${resource.id}/${resource.id}.js`].directory);
             for (const image of images) entries[`${resource.id}/${artworkDirectory}/${image.file}`] = image.body;
             const archive = zipSync(Object.fromEntries(Object.entries(entries).map(([name, body]) => [name, [new Uint8Array(body), { mtime: new Date(1980, 0, 1) }]])), { level: 9 });
@@ -807,7 +884,13 @@ async function buildRelease(tag, options) {
     await dependencies.saveLock();
     await save("RELEASE_NOTES.md", Buffer.from(releaseNotes(manifest)), null, "documentation");
     await fs.writeFile(path.join(assetDir, "manifest.json"), `${JSON.stringify(manifest, null, 2)}\n`);
-    const checksums = [...manifest.assets, { file: "manifest.json", sha256: sha256(await fs.readFile(path.join(assetDir, "manifest.json"))) }].sort((a, b) => a.file.localeCompare(b.file, "en"));
+    const checksums = [
+      ...manifest.assets,
+      {
+        file: "manifest.json",
+        sha256: sha256(await fs.readFile(path.join(assetDir, "manifest.json")))
+      }
+    ].sort((a, b) => a.file.localeCompare(b.file, "en"));
     await fs.writeFile(path.join(assetDir, "SHA256SUMS"), `${checksums.map((asset) => `${asset.sha256}  ${asset.file}`).join("\n")}\n`);
     for (const file of previousFiles) await fs.unlink(path.join(finalAssets, file));
     try {
@@ -857,6 +940,7 @@ async function checkRelease() {
   console.log(`Validated ${tag} at ${commit} on ${config.branch}`);
 }
 
+// ===== RELEASE PUBLICATION =====
 /**
  * Upload the tested inventory into a matching draft, verify remote asset digests, and publish it.
  * Only the tag-publishing job supplies live GitHub access. Tests inject a mock HTTP implementation.
@@ -895,7 +979,11 @@ export async function publishRelease({ request = fetch, environment = process.en
   const marker = `<!-- stream.html release builder ${tag} ${environment.GITHUB_SHA} ${sha256(rawManifest)} -->`;
   const body = `${bodies.get("RELEASE_NOTES.md").toString()}\n${marker}\n`;
   const base = `https://api.github.com/repos/${config.repository}`;
-  const headers = { Authorization: `Bearer ${environment.GH_TOKEN}`, Accept: "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28" };
+  const headers = {
+    Authorization: `Bearer ${environment.GH_TOKEN}`,
+    Accept: "application/vnd.github+json",
+    "X-GitHub-Api-Version": "2022-11-28"
+  };
   /**
    * Send an authenticated GitHub JSON request for this publication.
    * @param {string} url API endpoint.
@@ -905,14 +993,29 @@ export async function publishRelease({ request = fetch, environment = process.en
    * @throws {Error} Rejects HTTP failures and invalid JSON responses.
    */
   async function api(url, method = "GET", data) {
-    const response = await request(url, { method, headers: { ...headers, "content-type": "application/json" }, body: data === undefined ? undefined : JSON.stringify(data), signal: AbortSignal.timeout(30000) });
+    const response = await request(url, {
+      method,
+      headers: { ...headers, "content-type": "application/json" },
+      body: data === undefined ? undefined : JSON.stringify(data),
+      signal: AbortSignal.timeout(30000)
+    });
     if (!response.ok) throw new Error(`${method} ${url}: HTTP ${response.status} ${(await response.text()).slice(0, 500)}`);
     return response.status === 204 ? null : response.json();
   }
-  const lookup = await request(`${base}/releases/tags/${encodeURIComponent(tag)}`, { headers, signal: AbortSignal.timeout(30000) });
+  const lookup = await request(`${base}/releases/tags/${encodeURIComponent(tag)}`, {
+    headers,
+    signal: AbortSignal.timeout(30000)
+  });
   let release;
   if (lookup.status === 404) {
-    release = await api(`${base}/releases`, "POST", { tag_name: tag, target_commitish: environment.GITHUB_SHA, name: tag, body, draft: true, prerelease: tag.split("+")[0].includes("-") });
+    release = await api(`${base}/releases`, "POST", {
+      tag_name: tag,
+      target_commitish: environment.GITHUB_SHA,
+      name: tag,
+      body,
+      draft: true,
+      prerelease: tag.split("+")[0].includes("-")
+    });
   } else {
     assert.ok(lookup.ok, `Release lookup failed: HTTP ${lookup.status}`);
     release = await lookup.json();
@@ -966,9 +1069,18 @@ export async function publishRelease({ request = fetch, environment = process.en
   console.log(`Published ${config.repository} ${tag} with ${files.length} verified assets`);
 }
 
+// ===== COMMAND LINE =====
 if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) {
   // Accept --embedded-controller from earlier commands; every build includes the embedded artifact.
-  const { values } = parseArgs({ options: { tag: { type: "string" }, "update-dependencies": { type: "boolean" }, "embedded-controller": { type: "boolean" }, check: { type: "boolean" }, publish: { type: "boolean" } } });
+  const { values } = parseArgs({
+    options: {
+      tag: { type: "string" },
+      "update-dependencies": { type: "boolean" },
+      "embedded-controller": { type: "boolean" },
+      check: { type: "boolean" },
+      publish: { type: "boolean" }
+    }
+  });
   assert.ok(!(values.check && values.publish), "Choose either --check or --publish");
   if (values.check) await checkRelease();
   else if (values.publish) await publishRelease();

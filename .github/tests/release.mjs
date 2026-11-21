@@ -8,11 +8,32 @@ import test from "node:test";
 import { pathToFileURL } from "node:url";
 import { Script } from "node:vm";
 import { parse as parseYAML } from "yaml";
-import { SPA_HOST, assertPinned, attr, config, dependencyReader, dist, downloadURL, expandAssets, formatHTML, localURL, nodes, parse, releaseChangelog, releaseNotes, resources, root, sha256, validateTag } from "../scripts/build.mjs";
+import {
+  SPA_HOST,
+  assertPinned,
+  attr,
+  config,
+  dependencyReader,
+  dist,
+  downloadURL,
+  expandAssets,
+  findScriptExpressions,
+  formatHTML,
+  localURL,
+  nodes,
+  parse,
+  releaseChangelog,
+  releaseNotes,
+  resources,
+  root,
+  sha256,
+  validateTag
+} from "../scripts/build.mjs";
 
 const assetDir = path.join(dist, "assets");
 const manifest = JSON.parse(await fs.readFile(path.join(assetDir, "manifest.json"), "utf8"));
 
+// ===== TEST FIXTURES =====
 /**
  * Create an isolated Git history outside the repository and remove it after the test.
  * @param {import("node:test").TestContext} t Test owning the temporary checkout.
@@ -30,6 +51,7 @@ async function gitFixture(t) {
   return { directory, git };
 }
 
+// ===== RELEASE ARTIFACTS TESTS =====
 test("changelogs cover first releases, legacy tags, tagged releases, and local previews", async (t) => {
   const { directory, git } = await gitFixture(t);
   git("commit", "--quiet", "--allow-empty", "-m", "Initial commit");
@@ -91,7 +113,13 @@ test("CDN minification uses matching committed source, caches bytes, and falls b
   assert.equal(await reader.minified(url, Buffer.from("window.answer=99;"), commit, { directory, request }), null);
   assert.equal(requests, 1);
   const missing = pathToFileURL(path.join(directory, "missing.css"));
-  assert.equal(await reader.minified(missing, css, commit, { directory, request: async () => new Response("", { status: 404 }) }), null);
+  assert.equal(
+    await reader.minified(missing, css, commit, {
+      directory,
+      request: async () => new Response("", { status: 404 })
+    }),
+    null
+  );
   const offline = await dependencyReader();
   const unavailable = async () => {
     throw new Error("Offline");
@@ -101,7 +129,13 @@ test("CDN minification uses matching committed source, caches bytes, and falls b
   const available = pathToFileURL(path.join(directory, "available.css"));
   const availableRemote = `https://cdn.jsdelivr.net/gh/${config.repository}@${commit}/available.min.css`;
   t.after(() => fs.rm(path.join(os.tmpdir(), "stream-html-release-cache", `${sha256(availableRemote)}.min.json`), { force: true }));
-  assert.deepEqual(await offline.minified(available, css, commit, { directory, request: async () => new Response(css) }), css);
+  assert.deepEqual(
+    await offline.minified(available, css, commit, {
+      directory,
+      request: async () => new Response(css)
+    }),
+    css
+  );
   await fs.writeFile(cacheFile, '{"sha256":');
   const retry = await dependencyReader();
   assert.deepEqual(await retry.minified(url, source, commit, { directory, request }), minified);
@@ -184,6 +218,22 @@ test("release CLI dispatches build, validation, and publishing without accepting
   }
 });
 
+test("artwork matching follows executable requests across formatting changes", () => {
+  for (const registration of Object.values(config.dynamicDependencies)) {
+    const request = registration.requestExpression;
+    const formatted = request.replace("fetch(", "fetch(\n    /* artwork */ ").replace(", { signal: requests.signal }", ",\n  {\n    signal: requests.signal,\n  },");
+    const decoys = `const example = ${JSON.stringify(request)}; // ${request}\n`;
+    const source = decoys + formatted;
+    const matches = findScriptExpressions(source, request);
+    assert.deepEqual(
+      matches.map(({ start, end }) => source.slice(start, end)),
+      [formatted]
+    );
+    assert.equal(findScriptExpressions(source + ";\n" + request, request).length, 2);
+    assert.equal(findScriptExpressions(decoys + formatted.replace(".svg", ".png"), request).length, 0);
+  }
+});
+
 test("dependency resolution rejects floating URLs, outside files, missing files, and unregistered downloads", async () => {
   assert.doesNotThrow(() => assertPinned(new URL(`${SPA_HOST}/_functions.min.js`)));
   for (const url of ["http://cdn.jsdelivr.net/gh/a/b@v1.0.0/a.js", "https://cdn.jsdelivr.net/gh/a/b@latest/a.js", "https://cdn.jsdelivr.net/gh/a/b@next/a.js", "https://example.com/a.js"]) assert.throws(() => assertPinned(new URL(url)));
@@ -256,7 +306,7 @@ function validateHTML(html, format, id) {
       const code = script.childNodes.map((node) => node.value || "").join("");
       assert.match(code, /^\n[\s\S]*\n[\t ]*$/, `${id}: script tags must surround the code on separate lines`);
       assert.doesNotThrow(() => new Script(code), `${id}: invalid embedded JavaScript`);
-      assert.ok(!/sourceMappingURL/.test(code), "Unresolved source map");
+      assert.ok(!code.includes("sourceMappingURL"), "Unresolved source map");
       if (standalone) assert.ok(!/global\.byConfigurator\s*=|jQuery JavaScript Library|Bootstrap v|Pickr v/.test(code), `${id}: editor dependency included`);
     }
   }

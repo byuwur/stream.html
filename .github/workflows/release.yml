@@ -15,9 +15,11 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # ===== SOURCE CHECKS =====
   source_checks:
     uses: ./.github/workflows/tests.yml
 
+  # ===== RESOURCE DISTRIBUTIONS =====
   distributions:
     needs: source_checks
     if: github.event_name != 'push' || github.ref_type != 'tag'
@@ -53,6 +55,7 @@ jobs:
       - run: npm --prefix .github run release:test
         timeout-minutes: 3
 
+  # ===== DISTRIBUTION VALIDATION =====
   validate:
     if: github.event_name == 'push' && github.ref_type == 'tag'
     runs-on: ubuntu-latest
@@ -73,6 +76,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: node .github/scripts/build.mjs --check
 
+  # ===== BUILD RELEASE ARTIFACTS =====
   build:
     needs: [validate, source_checks]
     runs-on: ubuntu-24.04
@@ -121,6 +125,7 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
+  # ===== PUBLISH THE RELEASE =====
   publish:
     if: github.event_name == 'push' && github.ref_type == 'tag'
     needs: [validate, source_checks, build]
