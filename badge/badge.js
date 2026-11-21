@@ -1,9 +1,7 @@
 // Stream Badge: validated URL settings and an native renderer with shared URL setup.
 document.addEventListener("DOMContentLoaded", async () => {
   await byStream.assetsReady;
-  // ==========
-  // ==== RESOURCE DEFINITION ====
-  // ==========
+  // ===== RESOURCE DEFINITION =====
 
   // Defaults, URL constraints, and the field metadata consumed by the optional editor.
   const resource = {
@@ -13,6 +11,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     preview: [960, 540],
     urlRequired: ["label"],
     presets: true,
+    sectionOrder: ["General", "Badge text", "Badge icon", "Status dot", "Appearance"],
+    elements: {
+      overlay: { label: "Appearance", selector: "#overlay .panel" },
+      badgeText: { label: "Badge text", selector: "#overlay .primary", fields: ["label"] },
+      badgeIcon: { label: "Badge icon", selector: "#overlay .badge-icon", fields: ["showIcon", "icon"], when: ["showIcon", "yes"] },
+      dot: { label: "Status dot", selector: "#overlay .status-dot", fields: ["dot"], when: ["dot", "yes"] }
+    },
     fields: {
       label: {
         type: "text",
@@ -227,14 +232,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   };
 
+  // ===== FIELD DEFAULTS =====
   const fieldDefaults = {
     panelBorderWidth: 0,
     panelBorderStyle: "solid",
     panelBorderColor: "#EEEEEE66",
-    panelShadow: "yes",
-    panelShadowColor: "#00000066",
-    panelShadowBlur: 16,
-    panelShadowY: 4,
     backdropFilterMode: "none",
     backdropFilterBlur: 12,
     badgeTextTracking: 2,
@@ -252,6 +254,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
   resource.fields.contentGap.zeroIsDefault = true;
 
+  // ===== OVERLAY INITIALIZATION =====
   const settings = await byStream.initResource(resource);
   if (!byStreamOverlay) return;
   const root = document.getElementById("overlay");

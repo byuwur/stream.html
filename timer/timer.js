@@ -1,9 +1,7 @@
-// Timer / Countdown: validated URL settings and an native renderer with shared URL setup.
+// Timer / Countdown: validated URL settings and a native renderer with shared URL setup.
 document.addEventListener("DOMContentLoaded", async () => {
   await byStream.assetsReady;
-  // ==========
-  // ==== RESOURCE DEFINITION ====
-  // ==========
+  // ===== RESOURCE DEFINITION =====
 
   // Defaults, URL constraints, and the field metadata consumed by the optional editor.
   const resource = {
@@ -13,6 +11,24 @@ document.addEventListener("DOMContentLoaded", async () => {
     preview: [960, 540],
     urlRequired: ["mode", "startTime", "endTime"],
     presets: true,
+    fieldDefaults: { "overlay.children.entrance": "fadeInDown" },
+    legacyFields: ["animation", "completionDuration"],
+    normalizeParameters(values) {
+      if (!["animation", "completionDuration", "completionPulses"].some((key) => values.has(key))) return;
+      if (!values.has("digits.entrance") && !values.has("digits.exit")) {
+        values.set("digits.entrance", values.get("animation") === "none" ? "none" : "default");
+        if (!values.has("digits.entranceDuration")) values.set("digits.entranceDuration", String(Number(values.get("completionDuration") || 1) * 1000));
+      }
+      values.delete("animation");
+      values.delete("completionDuration");
+    },
+    elements: {
+      overlay: { label: "Appearance", selector: "#overlay .panel" },
+      heading: { label: "Heading", selector: "#overlay .eyebrow", fields: ["label"] },
+      digits: { label: "Timer digits", premade: "custom", selector: "#overlay .timer-digits", fields: ["completion", "format", "days", "milliseconds", "completionPulses"] },
+      message: { label: "Message", selector: "#overlay .secondary", fields: ["elapsedLabel", "remainingLabel", "restartLabel"] },
+      bar: { label: "Progress bar", selector: "#overlay progress", fields: ["progress", "progressColor", "trackColor"], when: ["progress", "yes"] }
+    },
     fields: {
       mode: {
         type: "select",
@@ -156,7 +172,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       backgroundColor: {
         type: "color",
-        default: "#11111133",
+        default: "#0006",
         label: "Panel background",
         section: "Appearance",
         maxlength: 80
@@ -298,39 +314,16 @@ document.addEventListener("DOMContentLoaded", async () => {
         styleProperty: "margin-top",
         styleUnit: "px"
       },
-      animation: {
-        type: "select",
-        default: "pulse",
-        label: "Completion animation",
-        section: "Animation",
-        options: { none: "none", pulse: "pulse" }
-      },
-      completionDuration: {
-        type: "number",
-        default: 1,
-        optional: true,
-        label: "Completion pulse duration (s)",
-        section: "Animation",
-        when: ["animation", "pulse"],
-        min: 0.1,
-        max: 120,
-        step: "any",
-        styleSelector: "#overlay .timer-digits.complete",
-        styleProperty: "animation-duration",
-        styleUnit: "s"
-      },
       completionPulses: {
         type: "number",
         default: 3,
         optional: true,
         label: "Completion pulse count",
         section: "Animation",
-        when: ["animation", "pulse"],
+        when: (values) => values.animate === "yes" && (values["digits.entrance"] === "default" || (values["digits.matchExit"] === "no" && values["digits.exit"] === "default")),
         min: 0,
         max: 100,
-        step: "any",
-        styleSelector: "#overlay .timer-digits.complete",
-        styleProperty: "animation-iteration-count"
+        step: "any"
       },
       ...byStream.textFields({
         heading: ["Heading", "#overlay .eyebrow"],
@@ -343,14 +336,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   };
 
+  // ===== FIELD DEFAULTS =====
   const fieldDefaults = {
     panelBorderWidth: 1,
     panelBorderStyle: "solid",
     panelBorderColor: "#EEEEEE1A",
-    panelShadow: "yes",
-    panelShadowColor: "#00000033",
-    panelShadowBlur: 16,
-    panelShadowY: 4,
     backdropFilterMode: "none",
     backdropFilterBlur: 12,
     headingFontSize: 24,
@@ -367,6 +357,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     delete field.styleDefault;
   }
 
+  // ===== OVERLAY INITIALIZATION =====
   const settings = await byStream.initResource(resource);
   if (!byStreamOverlay) return;
   const root = document.getElementById("overlay");
@@ -386,6 +377,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   }))
     root.style.setProperty(`--${name}`, value);
   panel.style.maxWidth = settings.width === 0 ? "none" : `${settings.width}px`;
+
+  // ===== TIMER DISPLAY ELEMENTS =====
   /**
    * Create an element, assign its classes and text, and append it to the resource-owned parent.
    * @param {string} tag HTML tag to create.
@@ -405,14 +398,31 @@ document.addEventListener("DOMContentLoaded", async () => {
   element("p", "eyebrow", settings.label);
   const display = element("div", "primary timer-digits");
   const message = element("p", "secondary");
+  const showDigits = byStream.changingText(display, settings, "digits", (node, phase, timing) => {
+    if (node.textContent !== settings.completion) return;
+    return node.animate([{ filter: "opacity(1)" }, { filter: "opacity(0.45)" }, { filter: "opacity(1)" }], { ...timing, iterations: settings.completionPulses });
+  });
+  const showMessage = byStream.changingText(message, settings, "message");
   const bar = element("progress", "");
   bar.max = 1;
   bar.hidden = settings.progress === "no";
+
+  // ===== TIMER PROGRESS AND UPDATES =====
   const start = settings.useStartTime === "yes" ? Date.parse(settings.startTime) : Date.now();
   const end = settings.mode === "deadline" ? Date.parse(settings.endTime) : start + settings.duration * 1000;
   const zone = settings.timeZone ? { timeZone: settings.timeZone } : {};
-  const startDate = byStream.dateTimeFormatter(settings.dateFormat, settings.locale, { ...zone, year: "numeric", month: "numeric", day: "numeric" });
-  const startTime = byStream.dateTimeFormatter(settings.timeFormat, settings.locale, { ...zone, hour: "numeric", minute: "2-digit", second: "2-digit" });
+  const startDate = byStream.dateTimeFormatter(settings.dateFormat, settings.locale, {
+    ...zone,
+    year: "numeric",
+    month: "numeric",
+    day: "numeric"
+  });
+  const startTime = byStream.dateTimeFormatter(settings.timeFormat, settings.locale, {
+    ...zone,
+    hour: "numeric",
+    minute: "2-digit",
+    second: "2-digit"
+  });
   // Paint continuous wall-clock progress without rebuilding the timer text on every frame.
   function paintProgress(now = Date.now()) {
     bar.value = settings.mode === "elapsed" ? Math.min(1, Math.max(0, now - start) / (settings.duration * 1000)) : Math.min(1, Math.max(0, (now - start) / Math.max(1, end - start)));
@@ -428,18 +438,20 @@ document.addEventListener("DOMContentLoaded", async () => {
     const total = elapsed || settings.milliseconds === "yes" ? Math.floor(raw / 1000) : Math.ceil(raw / 1000);
     const result = byStream.formatDuration(total, settings.format, settings.days === "yes", settings.milliseconds === "yes" ? Math.floor(raw % 1000) : null);
     const complete = !elapsed && now >= end;
-    display.textContent = complete ? settings.completion : result;
-    message.textContent = complete
-      ? ""
-      : now < start
-        ? `Starts at ${startDate.format(new Date(start))} ${startTime.format(new Date(start))}`
-        : elapsed
-          ? settings.elapsedLabel
-          : settings.mode === "restart"
-            ? settings.restartLabel
-            : settings.remainingLabel;
+    showDigits(complete ? settings.completion : result, complete);
+    if (complete) {
+      showMessage("");
+    } else if (now < start) {
+      const date = new Date(start);
+      showMessage(`Starts at ${startDate.format(date)} ${startTime.format(date)}`);
+    } else if (elapsed) {
+      showMessage(settings.elapsedLabel);
+    } else if (settings.mode === "restart") {
+      showMessage(settings.restartLabel);
+    } else {
+      showMessage(settings.remainingLabel);
+    }
     paintProgress(now);
-    display.classList.toggle("complete", complete && settings.animation === "pulse");
     root.dataset.complete = String(complete);
     return !complete;
   }

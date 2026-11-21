@@ -1,9 +1,7 @@
 // QR / Link Card: validated URL settings and an native renderer with shared URL setup.
 document.addEventListener("DOMContentLoaded", async () => {
   await byStream.assetsReady;
-  // ==========
-  // ==== RESOURCE DEFINITION ====
-  // ==========
+  // ===== RESOURCE DEFINITION =====
 
   // Defaults, URL constraints, and the field metadata consumed by the optional editor.
   const resource = {
@@ -13,6 +11,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     preview: [960, 540],
     urlRequired: ["content"],
     presets: true,
+    sectionIcons: { "QR code": "fa-solid fa-qrcode" },
+    elements: {
+      overlay: { label: "Appearance", selector: "#overlay .panel" },
+      code: { label: "QR code", selector: "#overlay .qr-code", fields: ["content", "correction", "margin", "foreground", "qrBackground", "size"] },
+      logo: { label: "Logo", selector: "#overlay .qr-logo", fields: ["showLogo", "logoUrl"], when: ["showLogo", "yes"] },
+      title: { label: "Title", selector: "#overlay .primary", fields: ["title"] },
+      subtitle: { label: "Subtitle", selector: "#overlay .qr-subtitle", fields: ["subtitle"] },
+      notice: { label: "Size notice", selector: "#overlay .qr-notice" }
+    },
     fields: {
       content: {
         type: "textarea",
@@ -138,7 +145,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         description: "Expands to keep whole modules at least 3 px.",
         min: 180,
         max: 1000,
-        step: 1
+        step: "any"
       },
       width: {
         type: "number",
@@ -274,14 +281,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   };
 
+  // ===== FIELD DEFAULTS =====
   const fieldDefaults = {
     panelBorderWidth: 1,
     panelBorderStyle: "solid",
     panelBorderColor: "#EEEEEE1A",
-    panelShadow: "yes",
-    panelShadowColor: "#00000066",
-    panelShadowBlur: 16,
-    panelShadowY: 4,
     backdropFilterMode: "custom",
     backdropFilterBlur: 4,
     subtitleFontSize: 12,
@@ -297,6 +301,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     delete field.styleDefault;
   }
 
+  // ===== CONTENT AND CONTRAST =====
   /**
    * Bound both visible text length and UTF-8 payload bytes before QR encoding.
    * @param {string} value Content supplied by the URL or form.
@@ -325,6 +330,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     return l !== null && l >= 0.8 ? value : null;
   }
 
+  // ===== OVERLAY INITIALIZATION =====
   const settings = await byStream.initResource(resource);
   if (!byStreamOverlay) return;
   const root = document.getElementById("overlay");
@@ -389,6 +395,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   for (let y = 0; y < qr.size; y++) for (let x = 0; x < qr.size; x++) if (qr.getModule(x, y)) ctx.fillRect((x + settings.margin) * scale, (y + settings.margin) * scale, scale, scale);
   element("p", "secondary qr-subtitle", settings.subtitle);
   const notice = element("p", "secondary qr-notice", "Increase the card width or OBS source dimensions for a readable QR code.");
+  canvas.hidden = notice.hidden = true;
+  // ===== QR SIZING =====
   /**
    * Resize the QR canvas using whole modules; hide it when the available size is unreadable.
    * @returns {void}
@@ -407,12 +415,13 @@ document.addEventListener("DOMContentLoaded", async () => {
       pixels(panelStyle.paddingTop) +
       pixels(panelStyle.paddingBottom) +
       20;
-    const availableWidth = panel.clientWidth - pixels(panelStyle.paddingLeft) - pixels(panelStyle.paddingRight);
+    const canvasWidth = root.clientWidth - pixels(rootStyle.paddingLeft) - pixels(rootStyle.paddingRight);
+    const availableWidth = Math.min(canvasWidth, settings.width || canvasWidth) - pixels(panelStyle.paddingLeft) - pixels(panelStyle.paddingRight) - pixels(panelStyle.borderLeftWidth) - pixels(panelStyle.borderRightWidth);
     const availableHeight = root.clientHeight - pixels(rootStyle.paddingTop) - pixels(rootStyle.paddingBottom) - extraHeight;
     const displaySize = Math.min(canvas.width, Math.floor(Math.min(availableWidth, availableHeight) / modules) * modules);
     const readable = displaySize >= modules * 3;
-    canvas.hidden = !readable;
-    notice.hidden = readable;
+    byStream.setElementVisible(readable ? notice : canvas, false);
+    byStream.setElementVisible(readable ? canvas : notice, true);
     if (readable) {
       canvas.style.width = `${displaySize}px`;
       canvas.style.height = `${displaySize}px`;

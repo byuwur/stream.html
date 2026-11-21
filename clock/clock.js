@@ -1,9 +1,7 @@
-// Clock: validated URL settings and an native renderer with shared URL setup.
+// Clock: validated URL settings and a native renderer with shared URL setup.
 document.addEventListener("DOMContentLoaded", async () => {
   await byStream.assetsReady;
-  // ==========
-  // ==== RESOURCE DEFINITION ====
-  // ==========
+  // ===== RESOURCE DEFINITION =====
 
   // Defaults, URL constraints, and the field metadata consumed by the optional editor.
   const resource = {
@@ -13,6 +11,28 @@ document.addEventListener("DOMContentLoaded", async () => {
     preview: [960, 540],
     urlRequired: ["layout"],
     presets: true,
+    legacyFields: ["flipDuration"],
+    normalizeParameters(values) {
+      if (!values.has("flipDuration")) return;
+      if (!values.has("time.entrance")) values.set("time.entrance", "default");
+      if (!values.has("time.entranceDuration")) values.set("time.entranceDuration", values.get("flipDuration"));
+      values.delete("flipDuration");
+    },
+    elements: {
+      overlay: { label: "Appearance", selector: "#overlay .panel" },
+      heading: { label: "Heading", selector: "#overlay .eyebrow", fields: ["label"] },
+      clocks: { label: "Clocks", selector: "#overlay .clocks" },
+      face: { label: "Clock face", selector: "#overlay .clock", parent: "clocks", container: true },
+      time: { label: "Time", motionItem: "flap", premade: "flip", motionLabel: "time value", selector: "#overlay .time", fields: ["hourFormat", "seconds", "period", "timeFormat"], textOverflow: "#overlay:not([data-layout=flip]) .time" },
+      flap: { label: "Flip card", selector: "#overlay .flap", parent: "time", when: ["layout", "flip"], textOverflow: true },
+      date: { label: "Date", selector: "#overlay .secondary", fields: ["date", "weekday", "dateFormat"], when: ["date", "yes"] },
+      zone: { label: "Time zone label", selector: "#overlay .zone", fields: ["showZones"], when: ["showZones", "yes"] },
+      dial: { label: "Analog dial", selector: "#overlay .dial", fields: ["dialColor"], when: ["layout", "analog"] },
+      hourHand: { label: "Hour hand", selector: "#overlay .hand.hour", parent: "dial" },
+      minuteHand: { label: "Minute hand", selector: "#overlay .hand.minute", parent: "dial" },
+      secondHand: { label: "Second hand", selector: "#overlay .hand.second", parent: "dial", fields: ["secondHandColor"] },
+      ticks: { label: "Tick marks", selector: "#overlay .tick", parent: "dial" }
+    },
     fields: {
       layout: {
         type: "select",
@@ -70,7 +90,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       period: {
         type: "switch",
-        default: "yes",
+        default: "no",
         label: "Show AM / PM",
         section: "Date & time",
         when: ["timeFormat", "locale"],
@@ -90,7 +110,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       weekday: {
         type: "switch",
-        default: "yes",
+        default: "no",
         label: "Show weekday",
         section: "Date & time",
         when: ["date", "yes"],
@@ -108,7 +128,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         validate: byStream.parseLocale,
         maxlength: 160
       },
-      ...byStream.dateTimeFields({ dateWhen: ["date", "yes"] }),
+      ...byStream.dateTimeFields({ dateFormat: "dd.MM.yyyy", dateWhen: ["date", "yes"] }),
       fontFamily: {
         type: "font",
         default: "Courier New",
@@ -149,7 +169,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       backgroundColor: {
         type: "color",
-        default: "#22111111",
+        default: "#6660",
         label: "Panel background",
         section: "Appearance",
         maxlength: 80
@@ -326,7 +346,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         styleProperty: "opacity",
         styleUnit: "%"
       },
-      flipDuration: { type: "number", default: 300, label: "Flip duration (ms)", section: "Animation", when: ["layout", "flip"], min: 0, max: 5000, step: "any" },
       ...byStream.textFields(
         {
           heading: ["Heading", "#overlay .eyebrow"],
@@ -343,30 +362,22 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   };
 
+  // ===== FIELD DEFAULTS =====
   const fieldDefaults = {
+    panelFilterShadow: "yes",
+    panelFilterShadowColor: "#00000099",
+    panelFilterShadowBlur: 0,
+    panelFilterShadowX: 1,
+    panelFilterShadowY: 1,
     panelBorderWidth: 0,
     panelBorderStyle: "solid",
     panelBorderColor: "#EEEEEE66",
-    panelShadow: "no",
-    panelShadowColor: "#00000014",
-    panelShadowBlur: 12,
-    panelShadowY: 3,
     backdropFilterMode: "none",
     backdropFilterBlur: 12,
     headingFontSize: 24,
     headingTracking: 1.8,
     dateFontSize: 24,
     zoneFontSize: 18,
-    timeTextShadow: "yes",
-    timeTextShadowColor: "#00000066",
-    timeTextShadowBlur: 2,
-    timeTextShadowX: 2,
-    timeTextShadowY: 2,
-    dateTextShadow: "yes",
-    dateTextShadowColor: "#00000066",
-    dateTextShadowBlur: 2,
-    dateTextShadowX: 2,
-    dateTextShadowY: 2,
     contentGap: 24,
     headingLineHeight: 27,
     timeFontSize: 32,
@@ -383,6 +394,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
   for (const name of ["contentGap", "dialBorderWidth", "flapRadius"]) resource.fields[name].zeroIsDefault = true;
 
+  // ===== OVERLAY INITIALIZATION =====
   const settings = await byStream.initResource(resource);
   if (!byStreamOverlay) return;
   const root = document.getElementById("overlay");
@@ -402,6 +414,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   }))
     root.style.setProperty(`--${name}`, value);
   panel.style.maxWidth = settings.width === 0 ? "none" : `${settings.width}px`;
+
+  // ===== CLOCK DISPLAY ELEMENTS =====
   /**
    * Create an element, assign its classes and text, and append it to the resource-owned parent.
    * @param {string} tag HTML tag to create.
@@ -465,9 +479,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
     const display = element("div", "time", undefined, view);
     const date = element("p", "secondary", undefined, view);
+    date.hidden = settings.date === "no" && settings.weekday === "no";
     if (settings.showZones === "yes" && zones.length > 1) element("p", "zone", zone || Intl.DateTimeFormat().resolvedOptions().timeZone, view);
-    return { timeFormat, faceFormat, dateFormat, weekdayFormat, dial, display, date };
+    return { timeFormat, faceFormat, dateFormat, weekdayFormat, dial, display, date, flaps: [], showTime: byStream.changingText(display, settings, "time"), showDate: byStream.changingText(date, settings, "date") };
   });
+  // ===== CLOCK SIZING AND UPDATES =====
   /**
    * Shrink the single-line layout to its available width while retaining unzoomed measurements.
    * @returns {void}
@@ -475,7 +491,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   function fitLine() {
     if (content === panel) return;
     const style = getComputedStyle(panel);
-    const width = panel.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
+    const canvas = getComputedStyle(root);
+    const available = root.clientWidth - parseFloat(canvas.paddingLeft) - parseFloat(canvas.paddingRight);
+    const width = Math.min(available, settings.width || available) - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight) - parseFloat(style.borderLeftWidth) - parseFloat(style.borderRightWidth);
     content.style.zoom = Math.min(1, width / content.offsetWidth);
   }
   if (content !== panel) {
@@ -501,22 +519,17 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (settings.layout === "flip") {
           const values = parts.filter((x) => ["hour", "minute", "second", "dayPeriod"].includes(x.type));
           values.forEach((part, index) => {
-            let node = view.display.children[index];
-            if (!node) {
-              node = document.createElement("span");
-              node.className = "flap";
-              view.display.append(node);
+            if (!view.flaps[index]) {
+              const flap = element("span", "flap", undefined, view.display);
+              view.flaps[index] = byStream.changingText(flap, settings, "time");
             }
-            if (node.textContent === part.value) return;
-            node.textContent = part.value;
-            if (settings.animate !== "no") node.animate([{ transform: "perspective(500px) rotateX(-25deg)" }, { transform: "perspective(500px) rotateX(0)" }], { duration: settings.flipDuration });
+            view.flaps[index](part.value);
           });
-        } else view.display.textContent = text;
+        } else view.showTime(text);
       }
-      view.date.hidden = settings.date === "no" && settings.weekday === "no";
       if (!view.date.hidden) {
         const date = settings.dateFormat === "locale" ? view.dateFormat.format(now) : [settings.weekday === "yes" ? view.weekdayFormat.format(now) : "", settings.date === "yes" ? view.dateFormat.format(now) : ""].filter(Boolean).join(", ");
-        if (view.date.textContent !== date) view.date.textContent = date;
+        view.showDate(date);
       }
       if (view.dial) {
         const p = Object.fromEntries(view.faceFormat.formatToParts(now).map((x) => [x.type, x.value]));

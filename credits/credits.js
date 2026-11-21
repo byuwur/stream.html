@@ -1,9 +1,7 @@
 // Credits Roll: validated URL settings and an native renderer with shared URL setup.
 document.addEventListener("DOMContentLoaded", async () => {
   await byStream.assetsReady;
-  // ==========
-  // ==== RESOURCE DEFINITION ====
-  // ==========
+  // ===== RESOURCE DEFINITION =====
 
   // Defaults, URL constraints, and the field metadata consumed by the optional editor.
   const resource = {
@@ -13,6 +11,16 @@ document.addEventListener("DOMContentLoaded", async () => {
     preview: [960, 540],
     urlRequired: ["entries"],
     presets: true,
+    sectionOrder: ["General", "Credits roll", "Appearance"],
+    sectionIcons: { "Credits roll": "fa-solid fa-scroll" },
+    elements: {
+      overlay: { label: "Appearance", selector: "#overlay .panel" },
+      roll: { label: "Credits roll", motionLabel: "credit line", selector: "#overlay .credits-roll", gap: true, fields: ["speed", "loop", "rollDirection", "rollDelay"] },
+      title: { label: "Opening title", selector: "#overlay .credits-title", parent: "roll" },
+      category: { label: "Category", selector: "#overlay .credits-category", parent: "roll", fields: ["categoryGap"] },
+      name: { label: "Name", selector: "#overlay .credit-name", parent: "roll" },
+      closing: { label: "Closing line", selector: "#overlay .credits-closing", parent: "roll" }
+    },
     fields: {
       entries: {
         type: "entries",
@@ -261,6 +269,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   };
 
+  // ===== FIELD DEFAULTS =====
   const fieldDefaults = {
     titleFontSize: 32,
     categoryFontSize: 16,
@@ -274,23 +283,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     categoryTracking: 0.72,
     categoryLineHeight: 18,
     nameLineHeight: 27,
-    closingLineHeight: 27,
-    titleTextShadow: "yes",
-    titleTextShadowColor: "#000000cc",
-    titleTextShadowBlur: 2,
-    titleTextShadowY: 2,
-    categoryTextShadow: "yes",
-    categoryTextShadowColor: "#000000cc",
-    categoryTextShadowBlur: 2,
-    categoryTextShadowY: 2,
-    nameTextShadow: "yes",
-    nameTextShadowColor: "#000000cc",
-    nameTextShadowBlur: 2,
-    nameTextShadowY: 2,
-    closingTextShadow: "yes",
-    closingTextShadowColor: "#000000cc",
-    closingTextShadowBlur: 2,
-    closingTextShadowY: 2
+    closingLineHeight: 27
   };
   for (const [name, value] of Object.entries(fieldDefaults)) {
     const field = resource.fields[name];
@@ -317,6 +310,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
+  // ===== OVERLAY INITIALIZATION =====
   const settings = await byStream.initResource(resource);
   if (!byStreamOverlay) return;
   const root = document.getElementById("overlay");
@@ -373,6 +367,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   roll.classList.toggle("credits-loop", loop);
   roll.style.setProperty("--roll-delay", `${settings.rollDelay}s`);
 
+  const measureItems = byStream.scrollItems(panel, roll, settings, "roll", false, down);
   // Keep speed in pixels per second when font loading or the viewport changes the roll distance.
   const resize = () => {
     roll.querySelectorAll(".credits-group[aria-hidden]").forEach((copy) => copy.remove());
@@ -380,15 +375,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (!height) return;
     const viewportHeight = panel.clientHeight;
     if (loop) {
+      roll.style.setProperty("--group-height", height + "px");
       const copies = Math.ceil(viewportHeight / height);
       for (let i = 0; i < copies; i++) {
         const copy = group.cloneNode(true);
         copy.setAttribute("aria-hidden", "true");
+        copy.style.setProperty("--copy", (i + 1) * (down ? -1 : 1));
         if (down) roll.prepend(copy);
         else roll.append(copy);
       }
-      // Keep the original group anchored when copies precede it on a downward roll.
-      if (down) roll.style.top = `${-copies * height}px`;
     }
     const top = roll.offsetTop + group.offsetTop;
     const above = -height - top;
@@ -406,6 +401,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       roll.style.setProperty("--entry-duration", `${entryDuration}s`);
       roll.style.setProperty("--loop-delay", `${settings.rollDelay + entryDuration}s`);
     }
+    measureItems();
   };
   const observer = new ResizeObserver(resize);
   observer.observe(panel);

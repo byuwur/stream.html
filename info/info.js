@@ -1,9 +1,7 @@
 // Info Board: validated URL settings and an native renderer with shared URL setup.
 document.addEventListener("DOMContentLoaded", async () => {
   await byStream.assetsReady;
-  // ==========
-  // ==== RESOURCE DEFINITION ====
-  // ==========
+  // ===== RESOURCE DEFINITION =====
 
   // Defaults, URL constraints, and the field metadata consumed by the optional editor.
   const resource = {
@@ -13,6 +11,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     preview: [960, 540],
     urlRequired: ["entries"],
     presets: true,
+    sectionOrder: ["General", "Info board", "Appearance"],
+    elements: {
+      overlay: { label: "Appearance", selector: "#overlay .panel" },
+      title: { label: "Title", selector: "#overlay .eyebrow", fields: ["title"] },
+      board: { label: "Info board", motionItem: "card", selector: "#overlay .info-board", gap: true, fields: ["entries", "layout", "columns", "spacing"] },
+      card: { label: "Info card", selector: "#overlay .info-card", parent: "board" },
+      cardHeading: { label: "Heading", selector: "#overlay .info-heading", parent: "card" },
+      cardText: { label: "Body text", selector: "#overlay .info-card .primary", parent: "card" }
+    },
     fields: {
       entries: {
         type: "entries",
@@ -108,7 +115,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       width: {
         type: "number",
         default: 0,
-        contentSized: false,
         label: "Maximum width (px)",
         description: "0 removes the limit.",
         section: "Size & placement",
@@ -205,16 +211,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   };
 
+  // ===== FIELD DEFAULTS =====
   const fieldDefaults = {
     cardHeadingFontSize: 16,
     titleFontSize: 16,
     panelBorderWidth: 1,
     panelBorderStyle: "solid",
     panelBorderColor: "#EEEEEE11",
-    panelShadow: "yes",
-    panelShadowColor: "#00000066",
-    panelShadowBlur: 16,
-    panelShadowY: 4,
     backdropFilterMode: "none",
     backdropFilterBlur: 12,
     titleTracking: 1.92,
@@ -250,6 +253,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
+  // ===== OVERLAY INITIALIZATION =====
   const settings = await byStream.initResource(resource);
   if (!byStreamOverlay) return;
   const root = document.getElementById("overlay");
@@ -289,6 +293,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const board = element("div", "info-board");
   if (settings.layout === "grid" && settings.columns === 0) board.style.gridTemplateColumns = "repeat(auto-fit, minmax(min(100%, 240px), 1fr))";
   else board.style.setProperty("--columns", settings.layout === "list" ? 1 : settings.columns);
+  board.classList.toggle("content-grid", settings.widthMode === "content" && settings.columns === 0 && settings.layout === "grid");
   board.style.gap = `${settings.spacing}px`;
   for (const [heading, text] of Object.entries(settings.entries)) {
     const card = element("section", "info-card", undefined, board);

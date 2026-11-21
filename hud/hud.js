@@ -1,9 +1,7 @@
 // Camera HUD: validated URL settings and an native renderer with shared URL setup.
 document.addEventListener("DOMContentLoaded", async () => {
   await byStream.assetsReady;
-  // ==========
-  // ==== RESOURCE DEFINITION ====
-  // ==========
+  // ===== RESOURCE DEFINITION =====
 
   // Defaults, URL constraints, and the field metadata consumed by the optional editor.
   const resource = {
@@ -13,6 +11,16 @@ document.addEventListener("DOMContentLoaded", async () => {
     preview: [1280, 720],
     urlRequired: ["style"],
     presets: true,
+    elements: {
+      overlay: { label: "Appearance", selector: "#overlay .panel" },
+      status: { label: "Recording status", selector: "#overlay .hud-rec", fields: ["rec", "recordingText", "standbyText", "blink", "blinkDuration"] },
+      label: { label: "Camera label", selector: "#overlay .hud-label", fields: ["label"] },
+      time: { label: "Timestamp", selector: "#overlay .hud-time", fields: ["timestamp", "timeZone", "dateFormat", "timeFormat", "locale"], when: ["timestamp", "yes"] },
+      battery: { label: "Battery", selector: "#overlay .battery", fields: ["showBattery", "batteryText"], when: ["showBattery", "yes"] },
+      crosshair: { label: "Crosshair", selector: "#overlay .crosshair", fields: ["showCrosshair", "crosshairText"], when: ["showCrosshair", "yes"] },
+      frame: { label: "Viewfinder frame", selector: "#overlay .hud::before" },
+      texture: { label: "Texture", selector: "#overlay .hud-noise", fields: ["grain", "scanlines"] }
+    },
     fields: {
       style: {
         type: "select",
@@ -238,7 +246,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   };
 
+  // ===== FIELD DEFAULTS =====
   const fieldDefaults = {
+    panelFilterShadow: "yes",
+    panelFilterShadowColor: "#00000099",
+    panelFilterShadowBlur: 0,
+    panelFilterShadowX: 1,
+    panelFilterShadowY: 1,
     statusFontSize: 24,
     statusLineHeight: 27,
     labelFontSize: 24,
@@ -252,6 +266,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   };
   for (const [name, value] of Object.entries(fieldDefaults)) resource.fields[name].default = value;
 
+  // ===== OVERLAY INITIALIZATION =====
   const settings = await byStream.initResource(resource);
   if (!byStreamOverlay) return;
   const root = document.getElementById("overlay");
@@ -288,6 +303,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
   // One scheduler owns updates, stops while hidden, and restores correctly from the back/forward cache.
   panel.className = "panel hud";
+  panel.classList.toggle("fit-labels", settings.widthMode === "content" || settings["overlay.heightMode"] === "content");
   root.dataset.style = settings.style;
   panel.style.setProperty("--inset", `${settings.inset}px`);
   panel.style.setProperty("--scanlines", settings.scanlines / 100);
@@ -303,8 +319,19 @@ document.addEventListener("DOMContentLoaded", async () => {
   panel.style.setProperty("--hud-font", byFont.family(settings.fontFamily, "monospace"));
   if (settings.timestamp === "yes") {
     const zone = settings.timeZone ? { timeZone: settings.timeZone } : {};
-    const date = byStream.dateTimeFormatter(settings.dateFormat, settings.locale, { ...zone, year: "numeric", month: "2-digit", day: "2-digit" });
-    const time = byStream.dateTimeFormatter(settings.timeFormat, settings.locale, { ...zone, hour: "2-digit", minute: "2-digit", second: "2-digit", hourCycle: "h23" });
+    const date = byStream.dateTimeFormatter(settings.dateFormat, settings.locale, {
+      ...zone,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit"
+    });
+    const time = byStream.dateTimeFormatter(settings.timeFormat, settings.locale, {
+      ...zone,
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hourCycle: "h23"
+    });
     byStream.watch(() => {
       const now = new Date();
       stamp.textContent = `${date.format(now)} ${time.format(now)}`;

@@ -1,9 +1,7 @@
 // Screen Effects: validated URL settings and an native renderer with shared URL setup.
 document.addEventListener("DOMContentLoaded", async () => {
   await byStream.assetsReady;
-  // ==========
-  // ==== RESOURCE DEFINITION ====
-  // ==========
+  // ===== RESOURCE DEFINITION =====
 
   // Defaults, URL constraints, and the field metadata consumed by the optional editor.
   const resource = {
@@ -13,6 +11,16 @@ document.addEventListener("DOMContentLoaded", async () => {
     preview: [960, 540],
     urlRequired: ["effect"],
     presets: true,
+    sectionOrder: ["General", "Particles", "Appearance"],
+    elements: {
+      overlay: { label: "Appearance", selector: "#overlay .panel" },
+      particle: {
+        label: "Particles",
+        selector: "#overlay .particle",
+        fields: ["density", "speed", "motion", "wind", "motionDirection", "sizeVariation", "speedVariation", "minimumOpacity", "maximumOpacity", "spin", "rainWidth", "rainLength", "fontSize"]
+      },
+      symbol: { label: "Symbol", selector: '#overlay[data-effect="symbols"] .particle', parent: "particle", fields: ["symbol", "fontFamily"], when: ["effect", "symbols"] }
+    },
     fields: {
       effect: {
         type: "select",
@@ -223,6 +231,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   };
 
+  // ===== FIELD DEFAULTS =====
   const fieldDefaults = {
     symbolFontSize: 10,
     symbolLineHeight: 11
@@ -233,6 +242,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   resource.fields.symbolFontSize.styleValue = () => "";
   resource.fields.symbolLineHeight.styleValue = () => "";
 
+  // ===== OVERLAY INITIALIZATION =====
   const settings = await byStream.initResource(resource);
   if (!byStreamOverlay) return;
   const root = document.getElementById("overlay");
@@ -272,6 +282,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   panel.style.maxWidth = "none";
   root.style.padding = 0;
   root.dataset.effect = settings.effect;
+  root.dataset.performance = settings.performance;
   // A seeded generator keeps particle placement reproducible when the same overlay URL reloads.
   let state = settings.seed;
   const random = () => {
@@ -296,8 +307,46 @@ document.addEventListener("DOMContentLoaded", async () => {
     particle.style.color = i % 2 ? settings.accentColor : settings.textColor;
     particle.style.backgroundColor = settings.effect === "symbols" ? "transparent" : particle.style.color;
     particle.style.opacity = (settings.minimumOpacity + random() * (settings.maximumOpacity - settings.minimumOpacity)) / 100;
-    if (settings.performance === "standard" && settings.effect === "particles") particle.style.filter = "blur(1px)";
   }
   // The overlay's Motion setting controls the broadcast, independent of the viewer's OS preference.
   panel.classList.toggle("still", settings.motion === "off");
+  const parts = ["overlay.children", "particle", ...(settings.effect === "symbols" ? ["symbol"] : [])];
+  const effects = parts.flatMap((id) => ["entrance", "exit"].map((phase) => byStream.elementMotion(settings, id, phase)));
+  if (settings.motion === "off" || !effects.some((effect) => effect.frames?.length)) return;
+  const exits = parts.map((id) => byStream.elementMotion(settings, id, "exit"));
+  const exitTime = Math.max(0, ...exits.filter((effect) => effect.frames?.length).map(({ timing }) => timing.delay + timing.duration));
+  const particles = [...panel.children].map((node) => ({ node, path: node.getAnimations().find((animation) => animation.animationName), phase: "" }));
+  let width, height, travel;
+  function measureParticles() {
+    width = panel.clientWidth;
+    height = panel.clientHeight;
+    travel = innerHeight * 2.2;
+    for (const item of particles) {
+      const node = item.node;
+      Object.assign(item, { left: node.offsetLeft, top: node.offsetTop, width: node.offsetWidth, height: node.offsetHeight });
+    }
+  }
+  new ResizeObserver(measureParticles).observe(panel);
+
+  // Follow the CSS flight path. A selected slide on the particle must not change its own visibility trigger.
+  function paintParticles() {
+    for (const item of particles) {
+      const timing = item.path?.effect.getComputedTiming();
+      if (timing?.progress == null) continue;
+      const { node } = item;
+      const reverse = settings.motionDirection === "reverse" || (settings.motionDirection === "alternate" && timing.currentIteration % 2 === 1);
+      const y = item.top + (timing.progress - 0.5) * travel;
+      const x = item.left + timing.progress * settings.wind;
+      const visible = x < width && x + item.width > 0 && y < height && y + item.height > 0;
+      const vertical = (reverse ? y + item.height : height - y) / travel;
+      const drift = settings.wind * (reverse ? -1 : 1);
+      const horizontal = drift ? (drift > 0 ? width - x : x + item.width) / Math.abs(drift) : Infinity;
+      const phase = !visible ? "" : Math.min(vertical, horizontal) * timing.duration <= exitTime ? "exit" : "entrance";
+      if (phase === item.phase) continue;
+      item.phase = phase;
+      if (phase === "entrance") window.byStreamResource.playEntrance?.(node);
+      if (phase === "exit") window.byStreamResource.playExit?.(node);
+    }
+  }
+  byStream.watch(measureParticles, 1000, paintParticles);
 });

@@ -8,6 +8,66 @@ const test = require("node:test");
 const { runtimeAssets, launchBrowser, loadAssets, resourceNames, serve } = require("./browser.cjs");
 const coreOnly = process.env.STREAM_CORE_ONLY === "1";
 
+test("element spacing, legacy typography and entrances compose on a standalone overlay", async (t) => {
+  const browser = await launchBrowser();
+  t.after(() => browser.close());
+  const page = await browser.newPage();
+  await serve(page, await loadAssets(runtimeAssets), true);
+  const params = new URLSearchParams({
+    label: "Live",
+    badgeTextFontSize: "28",
+    "badgeText.fontSize": "32",
+    "badgeText.marginLeft": "-6",
+    "badgeText.paddingTop": "0",
+    "badgeText.perspective": "760",
+    "badgeText.rotateY": "24",
+    "badgeText.skewX": "8",
+    "badgeText.entrance": "fadeInRight",
+    "badgeText.entranceDuration": "3000",
+    "badgeText.entranceDelay": "250",
+    "badgeText.entranceTravel": "50"
+  });
+  await page.goto("https://stream.test/badge/?" + params);
+  await page.waitForFunction(() =>
+    document
+      .querySelector(".primary")
+      ?.getAnimations()
+      .some((animation) => animation.id === "stream-entrance")
+  );
+  const result = await page.locator(".primary").evaluate((node) => {
+    const entrance = node.getAnimations().find((animation) => animation.id === "stream-entrance");
+    const frames = entrance.effect.getKeyframes(),
+      timing = entrance.effect.getTiming();
+    entrance.finish();
+    const style = getComputedStyle(node);
+    return {
+      size: style.fontSize,
+      left: style.marginLeft,
+      top: style.paddingTop,
+      transform: style.transform,
+      travel: frames[0].transform,
+      duration: timing.duration,
+      delay: timing.delay,
+      url: byStream.settingsURL(byStreamResource, byStreamResource.settings).search
+    };
+  });
+  assert.equal(result.size, "32px");
+  assert.equal(result.left, "-6px");
+  assert.equal(result.top, "0px");
+  assert.match(result.transform, /matrix3d/);
+  assert.match(result.travel, /50%/);
+  assert.deepEqual([result.duration, result.delay], [3000, 250]);
+  const saved = new URLSearchParams(result.url);
+  assert.equal(saved.has("badgeTextFontSize"), false);
+  assert.equal(saved.get("badgeText.fontSize"), "32");
+  assert.equal(saved.get("badgeText.paddingTop"), "0");
+  assert.equal(saved.has("badgeText.paddingLeft"), false);
+  saved.set("animate", "no");
+  await page.goto("https://stream.test/badge/?" + saved);
+  await page.locator(".primary").waitFor();
+  assert.deepEqual(await page.locator(".primary").evaluate((node) => node.getAnimations().map((animation) => animation.id)), ["stream-transform"]);
+});
+
 test("quote changes animate the quote and author while preserving the heading and panel", async (t) => {
   const browser = await launchBrowser();
   t.after(() => browser.close());
@@ -374,6 +434,97 @@ test("automatic panels wrap and animate both dimensions under a maximum width", 
     assert.ok(result.long[1] > result.short[1]);
     assert.deepEqual(result.final, result.short);
     assert.deepEqual([result.grow, result.shrink], ["ease", 1]);
+  }
+});
+
+test("scrolling credits and ticker replay child effects on each pass in either direction", async (t) => {
+  const browser = await launchBrowser();
+  t.after(() => browser.close());
+  const page = await browser.newPage();
+  await serve(page, await loadAssets(runtimeAssets), true);
+  for (const [name, horizontal, target] of [
+    ["credits", false, ".credit-name"],
+    ["ticker", true, ".ticker-message"]
+  ]) {
+    for (const reverse of [false, true]) {
+      const params = new URLSearchParams(
+        name === "credits" ? { loop: "yes", rollDirection: reverse ? "reverse" : "normal", "roll.entrance": "fadeIn" } : { mode: "scroll", scrollDirection: reverse ? "reverse" : "normal", "message.entrance": "fadeIn" }
+      );
+      await page.goto("https://stream.test/" + name + "/?" + params);
+      await page.locator("[data-stream-scroll]").waitFor();
+      const result = await page.evaluate(
+        async ({ horizontal, target, reverse }) => {
+          const viewport = document.querySelector("[data-stream-scroll]"),
+            track = viewport.firstElementChild;
+          const node = track.querySelector(target),
+            axis = horizontal ? "left" : "top",
+            size = horizontal ? "width" : "height";
+          const frame = () => new Promise(requestAnimationFrame);
+          await frame();
+          await frame();
+          track.style.animation = "none";
+          const origin = node.getBoundingClientRect()[axis] - viewport.getBoundingClientRect()[axis];
+          const extent = viewport.getBoundingClientRect()[size],
+            length = node.getBoundingClientRect()[size];
+          const move = async (start) => {
+            track.style.transform = (horizontal ? "translateX(" : "translateY(") + (start - origin) + "px)";
+            await frame();
+            await frame();
+            return node
+              .getAnimations()
+              .filter((animation) => animation.id.startsWith("stream-"))
+              .map((animation) => animation.id);
+          };
+          const outside = reverse ? -length - 10 : extent + 10;
+          const entering = reverse ? Math.min(0, extent - length) - 3 : extent - 3;
+          const exiting = reverse ? extent - 3 : -length + 3;
+          await move(outside);
+          const first = await move(entering),
+            out = await move(exiting);
+          await move(outside);
+          const repeat = await move(entering);
+          return [first, out, repeat, track.getAnimations().length];
+        },
+        { horizontal, target, reverse }
+      );
+      assert.deepEqual(result, [["stream-entrance"], ["stream-exit"], ["stream-entrance"], 0], name + " reverse=" + reverse);
+    }
+  }
+});
+
+test("particle effects replay on successive flights in both directions", async (t) => {
+  const browser = await launchBrowser();
+  t.after(() => browser.close());
+  const page = await browser.newPage();
+  await serve(page, await loadAssets(runtimeAssets), true);
+  for (const reverse of [false, true]) {
+    const params = new URLSearchParams({ density: 1, wind: 0, speed: 10, speedVariation: 0, motionDirection: reverse ? "reverse" : "normal", "particle.entrance": "fadeIn", "particle.entranceDuration": 1200 });
+    await page.goto("https://stream.test/effects/?" + params);
+    const phases = await page
+      .locator(".particle")
+      .first()
+      .evaluate(async (node, reverse) => {
+        const flight = node.getAnimations().find((motion) => motion.animationName === "fall");
+        flight.pause();
+        const { delay, duration } = flight.effect.getTiming();
+        const height = node.parentElement.clientHeight,
+          travel = innerHeight * 2.2;
+        const phases = [];
+        for (const y of reverse ? [height * 0.65, 8, -node.offsetHeight - 2, height * 0.65] : [height * 0.35, height - 8, height + 2, height * 0.35]) {
+          const progress = (y - node.offsetTop) / travel + 0.5;
+          flight.currentTime = delay + duration * (1 + (reverse ? 1 - progress : progress));
+          await new Promise(requestAnimationFrame);
+          await new Promise(requestAnimationFrame);
+          phases.push(
+            node
+              .getAnimations()
+              .filter((motion) => motion.id.startsWith("stream-"))
+              .map((motion) => motion.id)
+          );
+        }
+        return phases;
+      }, reverse);
+    assert.ok(phases[0].includes("stream-entrance") && phases[1].includes("stream-exit") && phases[3].includes("stream-entrance"), JSON.stringify(phases));
   }
 });
 
