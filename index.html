@@ -2,21 +2,22 @@
 <html lang="en" class="stream-home" data-bs-theme="dark">
   <head>
     <meta charset="UTF-8" />
+    <meta name="referrer" content="origin" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>stream.html | free stream overlays for OBS</title>
+    <title>stream.HTML | free stream overlays for OBS</title>
     <meta name="description" content="Free OBS browser overlays: controller input, social popups, clocks, timers, webcam frames, and more. Configure a tool and copy its URL." />
     <meta name="author" content="Andrés Trujillo [Mateus] byUwUr" />
     <meta name="robots" content="index, follow, max-image-preview:large" />
-    <meta name="theme-color" content="#660000" />
+    <meta name="theme-color" content="#600" />
     <!-- <link rel="canonical" href="https://byuwur.github.io/stream.html/" /> -->
     <link rel="canonical" href="https://stream.byuwur.co/" />
     <!-- <link rel="icon" href="https://byuwur.github.io/stream.html/stream.html.png" /> -->
     <link rel="icon" href="./stream.html.png" />
     <!-- SEO -->
     <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="stream.html" />
+    <meta property="og:site_name" content="stream.HTML" />
     <meta property="og:locale" content="en_US" />
-    <meta property="og:title" content="stream.html | free stream overlays for OBS" />
+    <meta property="og:title" content="stream.HTML | free stream overlays for OBS" />
     <meta property="og:description" content="Free OBS browser overlays: controller input, social popups, clocks, timers, webcam frames, and more. Configure a tool and copy its URL." />
     <!-- <meta property="og:url" content="https://byuwur.github.io/stream.html/" /> -->
     <meta property="og:url" content="https://stream.byuwur.co/" />
@@ -25,38 +26,38 @@
     <meta property="og:image:type" content="image/jpeg" />
     <meta property="og:image:width" content="1920" />
     <meta property="og:image:height" content="1080" />
-    <meta property="og:image:alt" content="stream.html by BONYUR: free OBS overlays for controller input, social popups, and stream scenes." />
+    <meta property="og:image:alt" content="stream.HTML by BONYUR: free OBS overlays for controller input, social popups, and stream scenes." />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:creator" content="@byUwUr" />
-    <meta name="twitter:title" content="stream.html | free stream overlays for OBS" />
+    <meta name="twitter:title" content="stream.HTML | free stream overlays for OBS" />
     <meta name="twitter:description" content="Free OBS browser overlays: controller input, social popups, clocks, timers, webcam frames, and more. Configure a tool and copy its URL." />
     <!-- <meta name="twitter:image" content="https://byuwur.github.io/stream.html/prev.jpg" /> -->
     <meta name="twitter:image" content="https://stream.byuwur.co/prev.jpg" />
-    <meta name="twitter:image:alt" content="stream.html by BONYUR: free OBS overlays for controller input, social popups, and stream scenes." />
-    <script id="spa-loader" src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.17/_load.min.js"></script>
-    <script>
-      const HOST = new URL(".", document.getElementById("spa-loader").src).href;
-      const SPA_STYLES = [
-        { path: "/css/bootstrap.min.css", optional: false },
-        { path: "/css/fontawesome.min.css", optional: true },
-        { path: "/_common.min.css", optional: false },
-        { path: "/_transitions.min.css", optional: true },
-        { path: "/css/animate.min.css", optional: false },
-        { path: "/css/select2.min.css", optional: false }
-      ];
-      const spaReady = byLoad(SPA_STYLES, { host: HOST, before: document.getElementById("spa-loader"), defer: false }).catch(console.error);
-    </script>
-    <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.17/_transitions.min.js" defer></script>
+    <meta name="twitter:image:alt" content="stream.HTML by BONYUR: free OBS overlays for controller input, social popups, and stream scenes." />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.17/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.17/css/fontawesome.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.17/_common.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.17/_transitions.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.17/css/animate.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.17/css/select2.min.css" />
+    <script src="./resource.js" defer></script>
+    <script id="catalog-script" src="./configurator.js" defer></script>
     <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.17/js/jquery.min.js" defer></script>
     <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.17/_common.min.js" defer></script>
     <script src="https://cdn.jsdelivr.net/gh/byuwur/spa.js@v20.17/js/select2.full.min.js" defer></script>
   </head>
 
   <body class="d-flex flex-column min-vh-100 bg-dark text-white light-links">
+    <template id="site-analytics-frame">
+      <meta name="referrer" content="no-referrer" />
+      <script>
+        window.dataLayer = [];
+        function gtag() {
+          window.dataLayer.push(arguments);
+        }
+      </script>
+    </template>
     <!-- ===== HOMEPAGE ===== -->
-    <script src="./resource.js" defer></script>
-    <script src="./configurator.js" defer></script>
-
     <!-- Shared tool categories and icons. -->
     <!-- ===== RESOURCE ===== -->
     <main class="home-layout row g-0 flex-md-nowrap flex-grow-1 overflow-hidden">
@@ -75,7 +76,7 @@
           <h1 id="site-title" class="display-2 fw-medium lh-1 m-0 d-flex align-items-center gap-2">
             <!-- <img class="inline-logo m-0 flex-shrink-0" src="https://byuwur.github.io/stream.html/stream.html.png" alt="" /> -->
             <img class="inline-logo m-0 flex-shrink-0" src="./stream.html.png" alt="" />
-            <span class="text-nowrap">stream<span class="fw-light">.html</span></span>
+            <span class="text-nowrap">stream<span class="fw-light">.HTML</span></span>
           </h1>
           <p class="home-description lead fw-normal m-0"><span id="tool-count">Browser overlays</span> for your stream. Choose a tool, make it yours, and copy its URL into OBS.</p>
           <p class="home-motto small fw-semibold text-uppercase m-0">Simple is complicated enough.</p>
@@ -94,11 +95,11 @@
         </div>
       </section>
 
-      <nav class="home-tools animate__animated animate__fadeIn col-12 col-md-8 overflow-y-auto" aria-label="Stream tools">
-        <p id="catalog-empty" class="p-4" role="status" hidden>No matching overlays.</p>
+      <nav class="home-tools col-12 col-md-8 overflow-y-auto overflow-x-hidden" aria-label="Stream tools">
+        <p id="catalog-empty" class="p-4" role="status">Loading overlays…</p>
       </nav>
       <template id="home-tool-template">
-        <a class="home-tool d-flex flex-column gap-2 p-4 text-white has-background-cover has-overlay bg-pos-top">
+        <a class="home-tool animate__animated d-flex flex-column gap-2 p-4 text-white has-background-cover has-overlay bg-pos-top">
           <div class="overlay" aria-hidden="true"></div>
           <div class="home-tool-top d-flex align-items-center justify-content-between gap-3">
             <span class="small fw-semibold text-uppercase text-wrap text-break"></span>
@@ -120,6 +121,7 @@
         <a class="link-light text-decoration-underline" href="https://byuwur.co" target="_blank" rel="noopener">BONYUR @byUwUr</a>
       </p>
       <div class="d-flex flex-wrap gap-3">
+        <a class="link-light text-decoration-underline" href="https://byuwur.co/privacy/stream.html">Privacy</a> · <a class="link-light text-decoration-underline" href="https://byuwur.co/cookies/stream.html">Cookies</a> |
         <a class="link-light text-decoration-underline" href="https://github.com/byuwur/stream.html/blob/main/LICENSE.md">MIT license</a>
         <a class="link-light text-decoration-underline" href="https://github.com/byuwur/stream.html">Source &amp; contributions <i class="fa-solid fa-arrow-up-right-from-square ms-1" aria-hidden="true"></i></a>
         <a class="link-light text-decoration-underline" href="https://ko-fi.com/byuwur">Buy me a Pandebono <i class="fa-brands fa-ko-fi ms-1" aria-hidden="true"></i></a>
@@ -127,7 +129,7 @@
     </footer>
 
     <style>
-      /* ========== HOMEPAGE LAYOUT AND FILTERS ========== */
+      /* ===== HOMEPAGE LAYOUT AND FILTERS ===== */
       .home-layout,
       .home-intro,
       .home-tools {
@@ -138,11 +140,11 @@
         position: relative;
       }
       #site-title {
-        font-size: clamp(1.75rem, 3.5vw, 4.5rem);
+        font-size: clamp(1.75rem, 3.3vw, 4.5rem);
       }
       #site-title .inline-logo {
-        width: 1em;
-        max-height: 1em;
+        width: 1cap;
+        max-height: none;
       }
       .home-tools {
         display: grid;
@@ -162,10 +164,10 @@
       }
       .home-tool-title {
         font-size: clamp(1.75rem, 2.5vw, 2.5rem);
-        line-height: 1.2;
+        line-height: 1.25;
       }
       .resource-status {
-        font-size: 0.65rem;
+        font-size: 0.625rem;
         color: inherit;
         background: color-mix(in srgb, currentColor 8%, transparent);
         border-color: color-mix(in srgb, currentColor 40%, transparent) !important;
@@ -197,7 +199,7 @@
         height: auto !important;
         min-height: 2.375rem;
         background: var(--dark-color);
-        border: 0.05rem solid var(--bs-secondary);
+        border: 0.0625rem solid var(--bs-secondary);
         border-radius: var(--bs-border-radius);
       }
       .stream-home .select2-selection--single .select2-selection__rendered {
@@ -212,7 +214,7 @@
       .stream-home .select2-container--focus .select2-selection,
       .stream-home .select2-container--open .select2-selection {
         border-color: var(--primary-foreground);
-        box-shadow: 0 0 0 0.2rem color-mix(in srgb, var(--primary-foreground) 25%, transparent);
+        box-shadow: 0 0 0 0.25rem color-mix(in srgb, var(--primary-foreground) 25%, transparent);
       }
       .stream-home .home-category-dropdown {
         background: var(--dark-color);
@@ -231,7 +233,7 @@
         background-size: 0% 100%;
         transition:
           background-size 0.3s ease,
-          color 0.3s ease-out !important;
+          color 0.3s ease !important;
       }
       .stream-home .home-category-dropdown .select2-results__option--selected {
         background-color: var(--bs-secondary-bg);
@@ -242,35 +244,40 @@
         background-position: left center;
         color: var(--light-color);
       }
-      /* ========== LANDING MOTION AND CARD INTERACTIONS ========== */
-      /* Keep brief fades enabled even when Animate.css applies its reduced-motion rule. */
-      .stream-home .animate__animated {
-        --animate-duration: 0.4s;
-        animation-duration: var(--animate-duration) !important;
-        translate: 0;
-        transition: translate 0.3s ease-out !important;
-        @starting-style {
-          translate: -0.5rem;
+      /* ===== LANDING MOTION AND CARD INTERACTIONS ===== */
+      @keyframes card-rise {
+        from {
+          translate: 0 0.75rem;
+        }
+        to {
+          translate: 0 0;
         }
       }
-      .stream-home .home-category-dropdown.animate__fadeIn {
-        animation: fadeIn 0.3s ease-out 1 both !important;
+      .home-tool.is-rising {
+        animation-name: card-rise;
       }
-      .stream-home .animate__fadeOut {
-        animation: fadeOut 0.3s ease-out 1 both !important;
+      .home-tool.is-rising.animate__fadeIn {
+        animation-name: card-rise, fadeIn;
+      }
+      @media screen {
+        /* Animate.css shortens both timings under reduced motion. The site switch controls them here. */
+        .stream-home:not(.no-motion) .animate__animated {
+          animation-duration: 0.3s !important;
+          animation-timing-function: ease;
+          transition-duration: 0.3s !important;
+        }
+      }
+      .stream-home:not(.no-motion) .animate__fadeOut {
         translate: -0.5rem;
-        transition: translate 0.3s ease-out !important;
+        transition: translate 0.3s ease !important;
       }
       .stream-home .motion-enter {
         translate: -0.5rem;
         transition: none !important;
       }
-      .stream-home .motion-enter.animate__fadeIn {
+      .stream-home:not(.no-motion) .motion-enter.animate__fadeIn {
         translate: 0;
-        transition: translate 0.3s ease-out !important;
-      }
-      .stream-home .home-tools {
-        --animate-duration: 0.24s;
+        transition: translate 0.3s ease !important;
       }
       .stream-home a:hover,
       .stream-home a:hover * {
@@ -288,7 +295,7 @@
         z-index: -10;
         pointer-events: none;
         backdrop-filter: none;
-        transition: backdrop-filter 0.2s ease !important;
+        transition: backdrop-filter 0.3s ease !important;
       }
       .home-tool:is(:hover, :focus-visible)::before {
         backdrop-filter: blur(0.25rem);
@@ -296,9 +303,9 @@
       .home-tool > .overlay {
         box-shadow:
           inset 0 0 2.5rem #0009,
-          inset 0 0 0 0.05rem #ffffff20;
+          inset 0 0 0 0.0625rem #fff2;
         opacity: 0.8;
-        transition: box-shadow 0.2s ease !important;
+        transition: box-shadow 0.3s ease !important;
       }
       .home-tool-action,
       .home-tool-action i,
@@ -308,8 +315,8 @@
       .portfolio-link img,
       .home-source {
         transition:
-          transform 0.2s ease,
-          background-color 0.2s ease !important;
+          transform 0.3s ease,
+          background-color 0.3s ease !important;
       }
       .stream-home:not(.no-motion) :is(#site-title .inline-logo, .portfolio-link img):hover {
         transform: translateY(-0.125rem) rotate(8deg);
@@ -318,7 +325,7 @@
         transform: translateY(-0.125rem);
       }
       .home-tool:is(:hover, :focus-visible) .home-tool-info {
-        transform: translateX(0.15rem);
+        transform: translateX(0.125rem);
       }
       .home-tool:is(:hover, :focus-visible) .home-tool-top > i {
         transform: rotate(-7.5deg) scale(1.1);
@@ -327,11 +334,11 @@
       .home-tool:hover > .overlay {
         box-shadow:
           inset 0 0 2.5rem #0009,
-          inset 0 0 0 0.125rem #ffffff80;
+          inset 0 0 0 0.125rem #fff8;
       }
       .home-tool:focus-visible .home-tool-action,
       .home-tool:hover .home-tool-action {
-        transform: translateY(-0.2rem);
+        transform: translateY(-0.25rem);
         background-color: var(--light-color);
         border-color: var(--light-color);
       }
@@ -341,10 +348,10 @@
       }
       .home-tool:focus-visible .home-tool-action i,
       .home-tool:hover .home-tool-action i {
-        transform: translateX(0.3rem);
+        transform: translateX(0.25rem);
       }
       .home-tool:active .home-tool-action {
-        transform: translateY(-0.05rem) scale(0.99);
+        transform: translateY(-0.0625rem) scale(0.99);
       }
       .home-tool:focus-visible {
         outline: currentColor solid 0.125rem;
@@ -352,9 +359,14 @@
       }
       /* The explicit accessibility toggle still disables landing motion. */
       .stream-home.no-motion *,
+      .stream-home.no-motion .select2-container *,
       .stream-home.no-motion .home-tool::before {
         animation: none !important;
         transition: none !important;
+      }
+      .stream-home.no-motion .home-tool {
+        width: auto !important;
+        height: auto !important;
       }
       @media (min-width: 48rem) {
         .stream-home body {
@@ -417,129 +429,154 @@
           min-height: 32rem;
         }
         #site-title {
-          font-size: clamp(2.5rem, 11vw, 4.5rem);
+          font-size: clamp(2.375rem, 11vw, 4.5rem);
         }
       }
     </style>
     <script>
-      document.addEventListener("DOMContentLoaded", async () => {
-        // Deferred imports finish before this event; dynamically loaded styles still need awaiting.
-        await spaReady;
-        if (typeof jQuery === "undefined" && !window.jQuery) console.error("Init index.html FAILED. No jQuery found.");
-        else
-          window.jQuery(function () {
-            const $ = window.jQuery;
-            byCommon.init();
-            // ==========
-            // ==== SHARED TOOL METADATA ====
-            // ==========
+      // Render as soon as the local catalog is available, before the deferred CDN enhancements.
+      document.getElementById("catalog-script").addEventListener("load", () => {
+        const { categories, availableTools, root } = byConfigurator.catalog;
+        const gallery = document.querySelector(".home-tools");
+        const category = document.getElementById("tool-category");
+        const search = document.getElementById("tool-search");
+        const status = document.getElementById("catalog-empty");
+        const template = document.getElementById("home-tool-template").content.firstElementChild;
+        const fragment = document.createDocumentFragment();
 
-            const jqCategory = $("#tool-category").on("change", filterTools);
-            const jqGallery = $(".home-tools");
-            const tools = byConfigurator.catalog.availableTools;
-            $("#tool-count").text(`${tools.length} browser overlay${tools.length === 1 ? "" : "s"}`);
-            byConfigurator.catalog.categories.forEach((group) => {
-              $(/* HTML */ `<option></option>`, { value: group.id, text: group.name }).attr("data-icon", group.icon).appendTo(jqCategory);
-            });
-            tools.forEach((tool, index) => {
-              const jqCard = $($("#home-tool-template").prop("content").firstElementChild).clone();
-              const group = byConfigurator.catalog.categories.find((group) => group.id === tool.category);
-              jqCard
-                .attr({
-                  "data-tool": tool.id,
-                  "data-category": tool.category,
-                  "aria-label": `Configure ${tool.name} (${tool.status})`,
-                  href: new URL(`${tool.id}/${location.protocol === "file:" ? "index.html" : ""}`, byConfigurator.catalog.root).href
-                })
-                .css({
-                  backgroundImage: `url("${new URL(`${tool.id}/prev.jpg`, byConfigurator.catalog.root).href}")`
-                });
-              jqCard.find("[data-home-title]").text(tool.name);
-              jqCard.find(".resource-status").text(tool.status);
-              jqCard.find("p").text(tool.description);
-              jqCard.find(".home-tool-top span").text(`${String(index + 1).padStart(2, "0")} | ${group.name}`);
-              jqCard.find(".home-tool-top i").attr("class", `fa-solid ${tool.icon} flex-shrink-0 lh-1 m-0`);
-              jqCard.find("[data-home-cta]").text(byCommon.randomCTAMessage());
-              jqCard.find(".overlay").css("background", byCommon.randomAccentColor({ tone: "dark", gradient: true, angle: 180 }));
-              jqCard.appendTo(jqGallery);
-            });
+        for (const group of categories) {
+          const option = new Option(group.name, group.id);
+          option.dataset.icon = group.icon;
+          category.add(option);
+        }
+        const cards = availableTools.map((tool, index) => {
+          const card = template.cloneNode(true);
+          const group = categories.find((group) => group.id === tool.category);
+          card.dataset.tool = tool.id;
+          card.dataset.category = tool.category;
+          card.href = new URL(`${tool.id}/${location.protocol === "file:" ? "index.html" : ""}`, root).href;
+          card.setAttribute("aria-label", `Configure ${tool.name} (${tool.status})`);
+          card.style.backgroundImage = `url("${new URL(`${tool.id}/prev.jpg`, root).href}")`;
+          card.querySelector("[data-home-title]").textContent = tool.name;
+          card.querySelector(".resource-status").textContent = tool.status;
+          card.querySelector("p").textContent = tool.description;
+          card.querySelector(".home-tool-top span").textContent = `${String(index + 1).padStart(2, "0")} | ${group.name}`;
+          card.querySelector(".home-tool-top i").classList.add("fa-solid", tool.icon);
+          fragment.append(card);
+          return card;
+        });
+        gallery.append(fragment);
+        status.textContent = "No matching overlays.";
+        document.getElementById("tool-count").textContent = `${cards.length} browser overlay${cards.length === 1 ? "" : "s"}`;
+        document.getElementById("year-txt").textContent = new Date().getFullYear();
 
-            // ==========
-            // ==== SEARCH AND CATEGORY FILTERS ====
-            // ==========
-
-            /**
-             * Filter matching cards and ease the updated gallery with the shared helper.
-             * @param {boolean} [animate=true] Animate.
-             * @returns {void}
-             */
-            function filterTools(animate = true) {
-              const update = () => {
-                const query = $("#tool-search").val().trim().toLocaleLowerCase();
-                const category = jqCategory.val();
-                let count = 0;
-                jqGallery.find(".home-tool").each(function () {
-                  const jqCard = $(this);
-                  const matchesQuery = jqCard.text().toLocaleLowerCase().includes(query);
-                  const matchesCategory = category === "all" || jqCard.attr("data-category") === category;
-                  jqCard.prop("hidden", !matchesQuery || !matchesCategory);
-                  if (matchesQuery && matchesCategory) jqCard.attr("data-result-index", ++count);
-                });
-                $("#catalog-empty").prop("hidden", count > 0);
-                jqGallery.attr("data-result-count", count).scrollTop(0);
-              };
-              if (!animate || typeof byTransition !== "function") return update();
-              byTransition(jqGallery[0], update, { children: true });
+        // ===== SEARCH AND CATEGORY FILTERS =====
+        gallery.addEventListener("animationend", (event) => {
+          if (event.animationName === "card-rise") event.target.classList.remove("is-rising", "animate__fadeIn");
+        });
+        function filterTools() {
+          const query = search.value.trim().toLocaleLowerCase();
+          const matches = cards.filter((card) => (category.value === "all" || card.dataset.category === category.value) && card.textContent.toLocaleLowerCase().includes(query));
+          gallery.scrollTop = 0;
+          const previousCount = gallery.dataset.resultCount;
+          if (previousCount === String(matches.length) && matches.every((card) => !card.hidden)) return;
+          const motion = previousCount !== undefined && !document.documentElement.classList.contains("no-motion") && matchMedia("screen").matches;
+          const retained = motion ? matches.filter((card) => !card.hidden) : [];
+          const sizes = retained.map((card) => ({ card, before: card.getBoundingClientRect() }));
+          for (const animation of gallery.getAnimations({ subtree: true })) {
+            if (animation.id === "card-resize") animation.cancel();
+          }
+          for (const card of cards) {
+            if (matches.includes(card)) continue;
+            card.hidden = true;
+            card.classList.remove("is-rising", "animate__fadeIn");
+          }
+          matches.forEach((card, index) => {
+            const position = String(index + 1);
+            if (motion && (card.hidden || card.dataset.resultIndex !== position)) {
+              card.classList.add("is-rising");
+              card.classList.toggle("animate__fadeIn", card.hidden);
             }
-
-            /**
-             * Keep category labels as text; Font Awesome icons are declared on the native options.
-             * @param {Object} option Select2 option data.
-             * @returns {unknown}
-             */
-            function categoryOption(option) {
-              if (!option.id) return option.text;
-              const icon = $(option.element).attr("data-icon") || "fa-layer-group";
-              const label = $(/* HTML */ `<span></span>`);
-              $(/* HTML */ `<i></i>`, { class: `fa-solid ${icon} fa-fw me-2`, "aria-hidden": "true" }).appendTo(label);
-              label.append($(/* HTML */ `<span></span>`).text(option.text));
-              return label;
-            }
-
-            $("#tool-search").on("input", filterTools);
-            if ($.fn.select2) {
-              jqCategory.select2({
-                width: "100%",
-                dropdownAutoWidth: true,
-                minimumResultsForSearch: Infinity,
-                dropdownCssClass: "home-category-dropdown",
-                templateResult: categoryOption,
-                templateSelection: categoryOption
-              });
-              byConfigurator.initSelect2Motion(jqCategory);
-              const widget = jqCategory.data("select2");
-              /**
-               * Show every category when it fits; keep scrolling within the available viewport space.
-               * @returns {void}
-               */
-              function fitCategoryDropdown() {
-                if (!widget.isOpen()) return;
-                const bounds = widget.$container[0].getBoundingClientRect();
-                const space = Math.max(bounds.top, innerHeight - bounds.bottom);
-                widget.$results.css("max-height", Math.max(0, space - 12));
-                widget.dropdown._positionDropdown();
-              }
-              jqCategory.on("select2:open", fitCategoryDropdown);
-              $(window).on("resize.homeCategory", fitCategoryDropdown);
-              // Keep the menu outside the scrolling intro, capped to the whole filter row as it resizes.
-              new ResizeObserver(([entry]) => {
-                widget.dropdown.$dropdown.css("max-width", entry.contentRect.width);
-                fitCategoryDropdown();
-              }).observe(jqCategory.closest(".catalog-filter")[0]);
-            }
-            filterTools(false);
-            $("#year-txt").text(new Date().getFullYear());
+            card.dataset.resultIndex = position;
+            card.hidden = false;
           });
+          status.hidden = matches.length > 0;
+          gallery.dataset.resultCount = matches.length;
+
+          // Measure every final grid cell before animating any card's actual dimensions.
+          for (const size of sizes) size.after = size.card.getBoundingClientRect();
+          for (const { card, before, after } of sizes) {
+            if (before.width === after.width && before.height === after.height) continue;
+            card.animate(
+              {
+                width: [`${before.width}px`, `${after.width}px`],
+                height: [`${before.height}px`, `${after.height}px`],
+                minHeight: ["0px", "0px"]
+              },
+              { id: "card-resize", duration: 300, easing: "ease" }
+            );
+          }
+        }
+        search.addEventListener("input", filterTools);
+        // Select2 also invokes the native onchange handler for its selection events.
+        category.onchange = filterTools;
+        filterTools();
+
+        document.addEventListener("DOMContentLoaded", () => {
+          const $ = window.jQuery;
+          if (window.byCommon?.initialized) {
+            byCommon.init();
+            for (const card of cards) {
+              card.querySelector("[data-home-cta]").textContent = byCommon.randomCTAMessage();
+              card.querySelector(".overlay").style.background = byCommon.randomAccentColor({ tone: "dark", gradient: true, angle: 180 });
+            }
+            if (search.value) filterTools();
+          }
+          if (!$?.fn.select2) return;
+          const jqCategory = $(category);
+          /**
+           * Keep category labels as text; Font Awesome icons are declared on the native options.
+           * @param {Object} option Select2 option data.
+           * @returns {unknown}
+           */
+          function categoryOption(option) {
+            if (!option.id) return option.text;
+            const icon = $(option.element).attr("data-icon") || "fa-layer-group";
+            const label = $(/* HTML */ `<span></span>`);
+            $(/* HTML */ `<i></i>`, { class: `fa-solid ${icon} fa-fw me-2`, "aria-hidden": "true" }).appendTo(label);
+            label.append($(/* HTML */ `<span></span>`).text(option.text));
+            return label;
+          }
+
+          jqCategory.select2({
+            width: "100%",
+            dropdownAutoWidth: true,
+            minimumResultsForSearch: Infinity,
+            dropdownCssClass: "home-category-dropdown",
+            templateResult: categoryOption,
+            templateSelection: categoryOption
+          });
+          byConfigurator.initSelect2Motion(jqCategory);
+          const widget = jqCategory.data("select2");
+          /**
+           * Show every category when it fits; keep scrolling within the available viewport space.
+           * @returns {void}
+           */
+          function fitCategoryDropdown() {
+            if (!widget.isOpen()) return;
+            const bounds = widget.$container[0].getBoundingClientRect();
+            const space = Math.max(bounds.top, innerHeight - bounds.bottom);
+            widget.$results.css("max-height", Math.max(0, space - 12));
+            widget.dropdown._positionDropdown();
+          }
+          jqCategory.on("select2:open", fitCategoryDropdown);
+          $(window).on("resize.homeCategory", fitCategoryDropdown);
+          // Keep the menu outside the scrolling intro, capped to the whole filter row as it resizes.
+          new ResizeObserver(([entry]) => {
+            widget.dropdown.$dropdown.css("max-width", entry.contentRect.width);
+            fitCategoryDropdown();
+          }).observe(jqCategory.closest(".catalog-filter")[0]);
+        });
       });
     </script>
   </body>

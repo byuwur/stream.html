@@ -26,6 +26,84 @@ const editorAssets = [
   "_fonts.css"
 ];
 
+test("catalog links and filters work while deferred enhancements are still downloading", async (t) => {
+  const browser = await launchBrowser();
+  t.after(() => browser.close());
+  const page = await browser.newPage();
+  page.setDefaultTimeout(5000);
+  const base = "https://stream.test/catalog/";
+  await serve(page, await loadAssets(editorAssets), false, base);
+  let resume;
+  const paused = new Promise((resolve) => {
+    resume = resolve;
+  });
+  await page.route("**/js/jquery.min.js", async (route) => {
+    await paused;
+    await route.fallback();
+  });
+  await page.goto(base, { waitUntil: "commit" });
+
+  const card = page.locator(".home-tool[data-tool=controller]");
+  await card.waitFor();
+  assert.equal(await page.evaluate(() => typeof window.jQuery), "undefined");
+  assert.equal(await card.getAttribute("href"), base + "controller/");
+  await page.locator("#tool-category").selectOption("interaction");
+  await page.locator("#tool-search").fill("Gamepad or keyboard input");
+  assert.equal(await page.locator(".home-tool:visible").count(), 1);
+  assert.ok(await card.isVisible());
+
+  resume();
+  await page.locator(".select2-selection").waitFor();
+  assert.equal(await page.locator(".home-tool:visible").count(), 1);
+  await page.locator("#tool-search").fill("");
+  await page.locator(".select2-selection").click();
+  await page.getByRole("option", { name: "All tools" }).click();
+  assert.equal(await page.locator(".home-tool:visible").count(), await page.locator(".home-tool").count());
+});
+
+test("catalog activates privacy controls and counts each selected resource until rejection", async (t) => {
+  const browser = await launchBrowser();
+  t.after(() => browser.close());
+  const page = await browser.newPage();
+  page.setDefaultTimeout(8000);
+  await serve(page, await loadAssets(editorAssets), false, "https://stream.byuwur.co/");
+  // Exercise the host contract independently of the published SPA component.
+  await page.route("**/_privacy.min.js", (route) =>
+    route.fulfill({
+      contentType: "text/javascript",
+      body: `window.byCommon.initPrivacyControls = ({ onChoice }) => {
+      const button = document.createElement("button");
+      button.textContent = "Reject";
+      button.onclick = () => onChoice("no");
+      document.body.append(button);
+      return { update(active, saved) { button.hidden = !active || !!saved; } };
+    };`
+    })
+  );
+  const visits = [];
+  await page.route("https://byuwur.co/usage.php", (route) => {
+    visits.push(route.request().postData());
+    return route.fulfill({ status: 204, headers: { "Access-Control-Allow-Origin": "https://stream.byuwur.co" } });
+  });
+  await page.goto("https://stream.byuwur.co/");
+  const reject = page.getByRole("button", { name: "Reject", exact: true });
+  await reject.waitFor();
+  const card = page.locator("a.home-tool[data-tool=timer]");
+  // Keep the catalog open so both clicks exercise the same mounted component.
+  await page.evaluate(() =>
+    document.addEventListener("click", (event) => {
+      if (event.target.closest("a.home-tool")) event.preventDefault();
+    })
+  );
+  await Promise.all([page.waitForRequest((request) => request.postData() === "resource_selected|landing|timer"), card.click()]);
+  await reject.click();
+  await reject.waitFor({ state: "hidden" });
+  await card.press("Enter");
+  await Promise.all([page.waitForResponse((response) => response.request().postData() === "page_view|landing|catalog"), page.reload()]);
+  await card.waitFor();
+  assert.deepEqual(visits, ["page_view|landing|catalog", "resource_selected|landing|timer", "page_view|landing|catalog"]);
+});
+
 test("a dropdown label focuses its visible control without opening a picker", async (t) => {
   const browser = await launchBrowser();
   t.after(() => browser.close());

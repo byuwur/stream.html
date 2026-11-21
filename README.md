@@ -1,8 +1,8 @@
-# Stream.html
+# stream.HTML
 
 Browser overlays for OBS. Configure a resource, copy its URL, and add it to your scene.
 
-![Stream.html preview](prev.jpg)
+![stream.HTML preview](prev.jpg)
 
 ## Index
 
@@ -26,7 +26,7 @@ Browser overlays for OBS. Configure a resource, copy its URL, and add it to your
 
 ## Try it
 
-[Open Stream.html](https://stream.byuwur.co/) · [Try the configurator demo](https://stream.byuwur.co/configurator.html)
+[Open stream.HTML](https://stream.byuwur.co/) · [Try the configurator demo](https://stream.byuwur.co/configurator.html)
 
 Open any resource to edit its fields and preview it. Use 1920 × 1080 for Main and size Controller or Social popup to your OBS layout.
 
