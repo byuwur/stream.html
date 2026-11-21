@@ -1,9 +1,7 @@
 // Keyboard Shortcut Sheet: validated URL settings and an native renderer with shared URL setup.
 document.addEventListener("DOMContentLoaded", async () => {
   await byStream.assetsReady;
-  // ==========
-  // ==== RESOURCE DEFINITION ====
-  // ==========
+  // ===== RESOURCE DEFINITION =====
 
   // Defaults, URL constraints, and the field metadata consumed by the optional editor.
   const resource = {
@@ -13,6 +11,21 @@ document.addEventListener("DOMContentLoaded", async () => {
     preview: [960, 540],
     urlRequired: ["entries"],
     presets: true,
+    sectionOrder: ["General", "Shortcut list", "Appearance"],
+    elements: {
+      overlay: { label: "Appearance", selector: "#overlay .panel" },
+      title: { label: "Title", selector: "#overlay .eyebrow", fields: ["title"] },
+      list: { label: "Shortcut list", motionItem: "row", selector: "#overlay .shortcut-list", gap: true, fields: ["entries", "columns", "spacing"] },
+      row: { label: "Shortcut row", selector: "#overlay .shortcut-row", parent: "list" },
+      keys: { label: "Keys", selector: "#overlay .shortcut-keys", parent: "row", fields: ["keyGap"] },
+      key: { label: "Shortcut key", selector: "#overlay .shortcut-key", parent: "keys" },
+      description: { label: "Description", selector: "#overlay .shortcut-description", parent: "row" },
+      keyLayout: { label: "Visual keyboard", selector: "#overlay .visual-keyboard", fields: ["keyboard"], when: ["keyboard", "yes"] },
+      keyRow: { label: "Keyboard row", selector: "#overlay .keyboard-row", parent: "keyLayout", container: true },
+      keyboard: { label: "Keyboard key", selector: "#overlay .keyboard-key:not(.bound)", parent: "keyLayout" },
+      boundKey: { label: "Assigned key", selector: "#overlay .keyboard-key.bound", parent: "keyLayout" },
+      keySurface: { label: "Key surface", selector: "#overlay .keyboard-key", parent: "keyLayout" }
+    },
     fields: {
       entries: {
         type: "entries",
@@ -45,8 +58,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       keyboard: {
         type: "switch",
-        default: "no",
+        default: "yes",
         label: "Show visual keyboard",
+        description: "Highlights assigned keys on a 60% US keyboard.",
         section: "Content & behavior",
         checkedValue: "yes",
         uncheckedValue: "no",
@@ -173,10 +187,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         styleUnit: "px"
       },
       ...byStream.placementFields("#overlay .panel"),
-      columns: { type: "number", default: 0, label: "Shortcut columns", description: "0 fits columns to the shortcuts and available width.", section: "Composition", min: 0, max: 4, step: 1 },
+      columns: { type: "number", default: 2, label: "Shortcut columns", description: "0 fits columns to the shortcuts and available width.", section: "Composition", min: 0, max: 4, step: 1 },
       spacing: {
         type: "number",
-        default: 16,
+        default: 4,
         label: "Row spacing (px)",
         section: "Composition",
         min: 0,
@@ -192,13 +206,13 @@ document.addEventListener("DOMContentLoaded", async () => {
         min: 0,
         max: 1000,
         step: "any",
-        styleSelector: "#overlay .shortcut-keys, #overlay .keyboard-row",
-        styleProperty: "gap",
+        styleSelector: "#overlay",
+        styleProperty: "--key-gap",
         styleUnit: "px"
       },
       keyboardGap: {
         type: "number",
-        default: 0,
+        default: 4,
         optional: true,
         label: "Keyboard row gap (px)",
         section: "Composition",
@@ -212,7 +226,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       keyboardMargin: {
         type: "number",
-        default: 0,
+        default: 8,
         optional: true,
         label: "Space above keyboard (px)",
         section: "Composition",
@@ -246,17 +260,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   };
 
+  // ===== FIELD DEFAULTS =====
   const fieldDefaults = {
     descriptionFontSize: 16,
     keyFontSize: 16,
     titleFontSize: 16,
     panelBorderWidth: 1,
     panelBorderStyle: "solid",
-    panelBorderColor: "#EEEEEE11",
     panelShadow: "yes",
-    panelShadowColor: "#00000066",
-    panelShadowBlur: 16,
-    panelShadowY: 4,
+    panelBorderColor: "#EEEEEE11",
     backdropFilterMode: "none",
     backdropFilterBlur: 12,
     contentGap: 20,
@@ -295,6 +307,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
+  // ===== OVERLAY INITIALIZATION =====
   const settings = await byStream.initResource(resource);
   if (!byStreamOverlay) return;
   const root = document.getElementById("overlay");
@@ -330,24 +343,77 @@ document.addEventListener("DOMContentLoaded", async () => {
     return node;
   }
 
+  const legends = new Map();
+  for (const [name, symbol, ...aliases] of [
+    ["Escape", "⎋", "Esc"],
+    ["Backspace", "⌫"],
+    ["Tab", "⇥"],
+    ["Caps Lock", "⇪", "CapsLock"],
+    ["Enter", "↵", "Return"],
+    ["Shift", "⇧"],
+    ["Ctrl", "⌃", "Control"],
+    ["Alt", "⎇"],
+    ["Meta", "⊞", "Win", "Windows", "Super"],
+    ["Menu", "☰", "ContextMenu"],
+    ["Space", "␣", "Spacebar"]
+  ]) {
+    const legend = { name, symbol };
+    for (const alias of [name, symbol, ...aliases]) legends.set(alias.toLowerCase(), legend);
+  }
+
+  /** Keep the full key name accessible while displaying the same legend on the sheet and keyboard. */
+  function keycap(parent, className, key, legend) {
+    const cap = element("kbd", className, legend?.symbol ?? key, parent);
+    cap.title = legend?.name ?? key;
+    if (legend) cap.setAttribute("aria-label", legend.name);
+    return cap;
+  }
+
   element("h1", "eyebrow", settings.title);
   const list = element("div", "shortcut-list");
-  list.style.gridTemplateColumns = settings.columns === 0 ? "repeat(auto-fit, minmax(min(100%, 240px), 1fr))" : `repeat(${settings.columns}, minmax(0, 1fr))`;
-  list.style.gap = `${settings.spacing}px`;
+  const assigned = new Set();
+  list.classList.toggle("content-grid", settings.widthMode === "content" && settings.columns === 0);
+  const aligned = settings.columns > 0 && ["none", "row"].includes(settings.contentDirection) && settings.contentWrap !== "wrap";
+  list.classList.toggle("aligned-shortcuts", aligned);
+  const tracks = aligned ? "auto minmax(0, 1fr)" : "minmax(0, 1fr)";
+  list.style.gridTemplateColumns = settings.columns === 0 ? "repeat(auto-fit, minmax(min(100%, 240px), 1fr))" : `repeat(${settings.columns}, ${tracks})`;
+  list.style.rowGap = `${settings.spacing}px`;
   for (const [shortcut, text] of Object.entries(settings.entries)) {
     const row = element("div", "shortcut-row", undefined, list);
     const keys = element("div", "shortcut-keys", undefined, row);
-    for (const key of shortcut.split("+").slice(0, 12)) element("kbd", "shortcut-key", key.trim(), keys);
+    for (const [index, part] of shortcut.split("+").entries()) {
+      const key = part.trim();
+      const legend = legends.get(key.toLowerCase());
+      assigned.add((legend?.name ?? key).toLowerCase());
+      if (index < 12) keycap(keys, "shortcut-key", key, legend);
+    }
     element("p", "primary shortcut-description", text, row);
   }
   if (settings.keyboard === "yes") {
     const keyboard = element("div", "visual-keyboard");
-    const configured = new Set(Object.keys(settings.entries).flatMap((keys) => keys.split("+").map((key) => key.trim().toUpperCase())));
-    for (const keys of [["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"], ["A", "S", "D", "F", "G", "H", "J", "K", "L"], ["SHIFT", "Z", "X", "C", "V", "B", "N", "M"], ["SPACE"]]) {
+    const rows = [
+      ["Escape", ..."1234567890-=", ["Backspace", 2]],
+      [["Tab", 1.5], ..."QWERTYUIOP[]", ["\\", 1.5]],
+      [["Caps Lock", 1.75], ..."ASDFGHJKL;'", ["Enter", 2.25]],
+      [["Shift", 2.25], ..."ZXCVBNM,./", ["Shift", 2.75]],
+      [
+        ["Ctrl", 1.25],
+        ["Meta", 1.25],
+        ["Alt", 1.25],
+        ["Space", 6.25],
+        ["Alt", 1.25],
+        ["Meta", 1.25],
+        ["Menu", 1.25],
+        ["Ctrl", 1.25]
+      ]
+    ];
+    for (const keys of rows) {
       const row = element("div", "keyboard-row", undefined, keyboard);
       for (const key of keys) {
-        const node = element("kbd", "keyboard-key", key, row);
-        node.classList.toggle("bound", configured.has(key));
+        const [name, units] = Array.isArray(key) ? key : [key, 1];
+        const cap = keycap(row, "keyboard-key", name, legends.get(name.toLowerCase()));
+        if (units !== 1) cap.style.setProperty("--key-units", units);
+        cap.classList.toggle("bound", assigned.has(name.toLowerCase()));
       }
     }
   }

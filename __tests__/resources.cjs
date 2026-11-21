@@ -596,6 +596,60 @@ test("particle effects replay on successive flights in both directions", async (
   }
 });
 
+test("shortcut sheet fits a 60% keyboard and highlights the keys named in a shortcut", async (t) => {
+  const browser = await launchBrowser();
+  t.after(() => browser.close());
+  const page = await browser.newPage({ viewport: { width: 320, height: 540 } });
+  await serve(page, await loadAssets(runtimeAssets), true);
+  const entries = { "Control + Shift + [": "Select", Spacebar: "Jump", Custom: "Other" };
+  const query = new URLSearchParams({ keyboard: "yes", entries: JSON.stringify(entries) });
+  await page.goto("https://stream.test/shortcuts/?" + query);
+  const keyboard = page.locator(".visual-keyboard");
+  await keyboard.waitFor();
+  assert.equal(await keyboard.locator(".keyboard-row").count(), 5);
+  assert.equal(await keyboard.locator("kbd").count(), 61);
+  assert.deepEqual(await page.locator(".shortcut-key").allTextContents(), ["⌃", "⇧", "[", "␣", "Custom"]);
+  const badgeWidths = await page.locator(".shortcut-key").evaluateAll((keys) => keys.map((key) => key.getBoundingClientRect().width));
+  assert.deepEqual([...new Set(badgeWidths)], [32], "shortcut badges share one width, including Space and custom labels");
+  const bound = await keyboard.locator(".bound").evaluateAll((keys) => keys.map((key) => key.title).sort());
+  assert.deepEqual(bound, ["Ctrl", "Ctrl", "Shift", "Shift", "Space", "["]);
+  const geometry = await keyboard.evaluate((node) => {
+    const keys = [...node.querySelectorAll("kbd")];
+    const width = (title) => keys.find((key) => key.title === title).offsetWidth;
+    return {
+      divider: parseFloat(getComputedStyle(node).borderTopWidth),
+      wideSpace: width("Space") > 4 * width("A"),
+      fits: [...node.children].every((row) => row.scrollWidth <= row.clientWidth + 1),
+      legendsFit: keys.every((key) => {
+        const range = document.createRange();
+        range.selectNodeContents(key);
+        return range.getClientRects().length === 1 && range.getBoundingClientRect().width <= key.clientWidth + 1;
+      })
+    };
+  });
+  assert.ok(geometry.divider > 0 && geometry.wideSpace && geometry.fits && geometry.legendsFit, JSON.stringify(geometry));
+
+  await page.setViewportSize({ width: 1280, height: 540 });
+  for (const columns of [0, 1, 2, 3, 4]) {
+    await page.goto(`https://stream.test/shortcuts/?keyboard=yes&columns=${columns}&spacing=4`);
+    await keyboard.waitFor();
+    const widths = await keyboard.locator('kbd[title="Q"], kbd[title="A"], kbd[title="Z"], kbd[title="Space"]').evaluateAll((keys) => keys.map((key) => key.getBoundingClientRect().width));
+    assert.deepEqual(widths, [24, 24, 24, 171], "key widths at " + columns + " columns");
+    const rows = await page.locator(".shortcut-row").evaluateAll((nodes) =>
+      nodes.map((row) => {
+        const box = row.getBoundingClientRect();
+        return { left: box.left, right: box.right, label: row.querySelector(".shortcut-description").getBoundingClientRect().left };
+      })
+    );
+    if (columns > 1) assert.ok(Math.abs(rows[1].left - rows[0].right - 32) <= 1, "column gutter");
+    if (columns)
+      assert.ok(
+        rows.every((row, i) => Math.abs(row.label - rows[i % columns].label) <= 1),
+        "left-aligned action labels"
+      );
+  }
+});
+
 /** Sample premultiplied RGB and alpha at fractional positions in the element. */
 async function renderedPixels(page, locator, points) {
   const screenshots = [];

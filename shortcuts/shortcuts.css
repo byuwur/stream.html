@@ -1,113 +1,16 @@
-html,
-body {
-  margin: 0;
-  width: 100%;
-  height: 100%;
-  background: transparent;
-  overflow: hidden;
-}
-* {
-  box-sizing: border-box;
-}
-[hidden] {
-  display: none !important;
-}
+/* ===== RESOURCE DEFAULTS ===== */
 #overlay {
-  --font-size: 48px;
-  --base-size: min(var(--font-size), 12vw);
-  --heading-size: max(12px, var(--base-size) * 0.67);
-  --secondary-size: calc(var(--base-size) * 0.75);
-  --text: #eee;
-  --accent: #600;
-  --background: #11111166;
-  --radius: 6px;
   --padding: 10px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-  height: 100%;
-  padding: 16px;
-  font-family: "Courier New", Courier, monospace;
-  color: var(--text);
-  font-weight: 400;
-  font-size: var(--base-size);
-  text-align: center;
+  --key-gap: 4px;
 }
 .panel {
   max-height: 100%;
   overflow: auto;
-  width: 100%;
-  max-width: 800px;
-  min-width: 0;
-  padding: var(--padding);
-  border-radius: var(--radius);
-  background: var(--background);
-  overflow-wrap: anywhere;
 }
-h1,
-h2,
-h3,
-p {
-  margin: 0;
-  font: inherit;
-}
-.eyebrow {
-  font-weight: 600;
-  color: var(--accent);
-  font-size: var(--heading-size);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  margin-bottom: calc(var(--heading-size) * 0.8);
-}
-.secondary {
-  opacity: 0.72;
-  font-size: var(--secondary-size);
-  margin-top: calc(var(--secondary-size) * 0.65);
-  white-space: pre-wrap;
-}
-.primary {
-  white-space: pre-wrap;
-  line-height: 1.2;
-}
-progress {
-  display: block;
-  width: 100%;
-  height: 6px;
-  border: 0;
-  margin-top: 20px;
-  border-radius: 10px;
-  overflow: hidden;
-  background: #ffffff20;
-  accent-color: var(--accent);
-}
-progress::-webkit-progress-bar {
-  background: #ffffff20;
-}
-progress::-webkit-progress-value {
-  background: var(--accent);
-}
-img {
-  max-width: 100%;
-  object-fit: contain;
-}
-@keyframes reveal {
-  from {
-    opacity: 0;
-    transform: translateY(12px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-@keyframes pulse {
-  50% {
-    opacity: 0.45;
-  }
-}
+/* ===== SHORTCUTS LAYOUT ===== */
 .shortcut-list {
   display: grid;
+  column-gap: 32px;
   max-height: 45vh;
   overflow: auto;
 }
@@ -117,40 +20,65 @@ img {
   align-items: center;
   gap: 20px;
 }
+.aligned-shortcuts > .shortcut-row {
+  /* Share the key and action tracks down each column, including when a custom gap is set. */
+  display: grid !important;
+  grid-column: span 2;
+  grid-template-columns: subgrid;
+}
 .shortcut-keys {
   display: flex;
-  gap: 5px;
+  gap: var(--key-gap);
   flex-wrap: wrap;
   min-width: 35%;
+}
+.content-grid .shortcut-keys,
+.aligned-shortcuts .shortcut-keys {
+  min-width: 0;
 }
 .shortcut-key,
 .keyboard-key {
   font: inherit;
-  font-size: calc(var(--base-size) * 0.55);
-  border: 1px solid #ffffff30;
+  font-size: calc(var(--base-size) * 0.5);
+  border: 1px solid #fff3;
   border-bottom-width: 3px;
   border-radius: 5px;
-  background: #ffffff08;
-  padding: calc(var(--base-size) * 0.22) calc(var(--base-size) * 0.33);
+  background: #fff1;
+  padding: calc(var(--base-size) * 0.25) calc(var(--base-size) * 0.375);
+  white-space: nowrap;
+}
+.shortcut-key {
+  flex: none;
+  width: 2em;
+  padding-inline: 0;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .shortcut-description {
-  font-size: calc(var(--base-size) * 0.65);
+  font-size: calc(var(--base-size) * 0.625);
 }
 .visual-keyboard {
   display: grid;
-  gap: 8px;
-  margin-top: 30px;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 4px;
+  margin-top: 8px;
+  border-top: 1px solid color-mix(in srgb, currentColor 35%, transparent);
+  padding-top: 8px;
 }
 .keyboard-row {
   display: flex;
-  justify-content: center;
-  gap: 5px;
+  width: max-content;
+  max-width: 100%;
+  gap: var(--key-gap);
 }
 .keyboard-key {
-  flex: 1;
+  /* A wide key spans the regular keys and the gaps between them. */
+  width: calc((24px + var(--key-gap)) * var(--key-units, 1) - var(--key-gap));
+  min-width: 0;
+  padding-inline: 0;
   text-align: center;
-  font-size: max(12px, var(--base-size) * 0.35);
-  max-width: calc(max(12px, var(--base-size) * 0.35) * 4);
+  font-size: max(12px, var(--base-size) * 0.375);
 }
 .keyboard-key.bound {
   color: var(--accent);
