@@ -1,9 +1,7 @@
 // Webcam Frame: validated URL settings and an native renderer with shared URL setup.
 document.addEventListener("DOMContentLoaded", async () => {
   await byStream.assetsReady;
-  // ==========
-  // ==== RESOURCE DEFINITION ====
-  // ==========
+  // ===== RESOURCE DEFINITION =====
 
   // Defaults, URL constraints, and the field metadata consumed by the optional editor.
   const resource = {
@@ -13,6 +11,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     preview: [960, 540],
     urlRequired: ["shape"],
     presets: true,
+    elements: {
+      overlay: { label: "Appearance", selector: "#overlay .panel" },
+      label: { label: "Camera label", selector: "#overlay .camera-label", fields: ["label", "labelPosition"] },
+      corner: { label: "Corner decoration", selector: "#overlay .corner", fields: ["corner"] },
+      frame: { label: "Frame", selector: "#overlay .camera-frame", fields: ["shape", "border", "gradient", "secondColor", "animation", "animationDuration", "gradientAngle"] }
+    },
     fields: {
       shape: {
         type: "select",
@@ -161,7 +165,19 @@ document.addEventListener("DOMContentLoaded", async () => {
         section: "Size & placement",
         options: { left: "left", center: "center", right: "right" }
       },
-      edgePadding: { type: "number", default: 16, optional: true, label: "Viewport edge padding (px)", section: "Size & placement", min: 0, max: 1000, step: "any", styleSelector: "#overlay", styleProperty: "padding", styleUnit: "px" },
+      edgePadding: {
+        type: "number",
+        default: 16,
+        optional: true,
+        label: "Viewport edge padding (px)",
+        section: "Size & placement",
+        min: 0,
+        max: 1000,
+        step: "any",
+        styleSelector: "#overlay",
+        styleProperty: "--edge-padding",
+        styleUnit: "px"
+      },
       labelPosition: {
         type: "select",
         default: "bottom",
@@ -283,11 +299,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   };
 
+  // ===== FIELD DEFAULTS =====
   const fieldDefaults = {
-    panelShadow: "yes",
-    panelShadowColor: "#00000066",
-    panelShadowBlur: 16,
-    panelShadowY: 8,
     labelSurfaceRadius: 16,
     labelSurfaceBorderWidth: 2,
     labelSurfaceBorderColor: "#ffffff66",
@@ -295,10 +308,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     labelSurfacePadding: 8,
     labelBackdropMode: "custom",
     labelBackdropBlur: 8,
-    labelTextShadow: "yes",
-    labelTextShadowColor: "#00000066",
-    labelTextShadowBlur: 8,
-    labelTextShadowY: 2,
     panelBorderWidth: 2,
     panelBorderColor: "#FFFFFF66",
     panelBorderStyle: "solid",
@@ -311,6 +320,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     delete field.styleDefault;
   }
 
+  // ===== OVERLAY INITIALIZATION =====
   const settings = await byStream.initResource(resource);
   if (!byStreamOverlay) return;
   const root = document.getElementById("overlay");
@@ -347,11 +357,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   panel.className = "panel camera-frame";
+  panel.classList.toggle("fit-label", settings.widthMode === "content");
   panel.style.width = settings.width === 0 ? "100%" : `${settings.width}px`;
-  panel.style.height = `min(${settings.height}px, calc(100vh - 32px))`;
+  panel.style.height = `min(${settings.height}px, 100%)`;
   root.dataset.shape = settings.shape;
   if (settings.shape === "circle") {
-    panel.style.width = `min(${settings.width === 0 ? "100%" : `${settings.width}px`}, ${settings.height}px, calc(100vh - 80px))`;
+    panel.style.width = `min(${settings.width === 0 ? "100%" : `${settings.width}px`}, ${settings.height}px, 100cqh, calc(100vh - 80px))`;
     panel.style.height = "auto";
   }
 
@@ -364,5 +375,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   label.dataset.position = settings.labelPosition;
   label.hidden = !settings.label;
   label.style.left = { left: "10%", center: "50%", right: "90%" }[settings.align];
+  if (!label.hidden && !panel.classList.contains("fit-label")) {
+    const edges = settings.position === "center" ? ["top", "bottom"] : [settings.labelPosition];
+    const reserveLabelSpace = () => {
+      for (const edge of edges) root.style.setProperty("--label-space-" + edge, Math.ceil(label.offsetHeight / 2) + "px");
+    };
+    reserveLabelSpace();
+    new ResizeObserver(reserveLabelSpace).observe(label);
+  }
   if (settings.shape === "decorative") for (let i = 0; i < 4; i++) element("i", `corner corner-${i}`);
 });

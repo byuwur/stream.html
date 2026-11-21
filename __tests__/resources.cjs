@@ -251,6 +251,24 @@ test("lower thirds animate the painted panel and its configured children across 
   }
 });
 
+test("webcam labels straddle the frame and remain visible at both viewport edges", async (t) => {
+  const browser = await launchBrowser();
+  t.after(() => browser.close());
+  const page = await browser.newPage({ viewport: { width: 640, height: 360 } });
+  await serve(page, await loadAssets(runtimeAssets), true);
+  for (const position of ["top", "bottom"]) {
+    await page.goto("https://stream.test/webcam/?shape=rounded&position=" + position + "&labelPosition=" + position);
+    const visible = await page.locator(".camera-label").evaluate((label, position) => {
+      const bounds = label.getBoundingClientRect(),
+        frame = label.parentElement.getBoundingClientRect();
+      const edge = frame[position],
+        x = bounds.left + bounds.width / 2;
+      return bounds.top < edge && bounds.bottom > edge && [bounds.top + 2, bounds.bottom - 2].every((y) => document.elementsFromPoint(x, y).includes(label));
+    }, position);
+    assert.ok(visible, position + " label");
+  }
+});
+
 test("Randomizer finishes the old draw, resizes with the new text hidden, then enters with a short slide", async (t) => {
   const browser = await launchBrowser();
   t.after(() => browser.close());
