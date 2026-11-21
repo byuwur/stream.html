@@ -3,18 +3,18 @@
  * Desc: Browser fixtures shared by independent resource and configurator suites; no tests run on import.
  */
 
-// --- DEPENDENCIES ---
+// ===== DEPENDENCIES =====
 const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
 const path = require("node:path");
 const { readFileSync } = require("node:fs");
 const { chromium, firefox, webkit } = require("playwright");
 
-// --- PINNED DEPENDENCIES AND BROWSER OPTIONS ---
+// ===== PINNED DEPENDENCIES AND BROWSER OPTIONS =====
 const root = path.join(__dirname, "..");
 const spaVersion = readFileSync(path.join(root, "resource.js"), "utf8").match(/byStream\.SPA_VERSION = "([^"]+)"/)[1];
 const spaBase = `https://cdn.jsdelivr.net/gh/byuwur/spa.js@${spaVersion}/`;
-const runtimeAssets = ["_load.min.js", "_functions.min.js", "_fonts.min.js", "js/gsap.min.js", "js/morphSVGplugin.min.js"];
+const runtimeAssets = ["css/animate.min.css", "_load.min.js", "_functions.min.js", "_fonts.min.js", "js/gsap.min.js", "js/morphSVGplugin.min.js"];
 const engine = process.env.BROWSER_ENGINE || "chromium";
 assert.ok(["chromium", "firefox", "webkit"].includes(engine), "Unsupported BROWSER_ENGINE");
 
@@ -23,10 +23,18 @@ assert.ok(["chromium", "firefox", "webkit"].includes(engine), "Unsupported BROWS
  * @returns {Promise<import("playwright").Browser>} Browser owned and closed by the calling suite.
  */
 function launchBrowser() {
-  return { chromium, firefox, webkit }[engine].launch({ timeout: 10000, ...(engine === "chromium" ? { channel: process.env.BROWSER_CHANNEL, executablePath: process.env.CHROMIUM_EXECUTABLE_PATH } : {}) });
+  return { chromium, firefox, webkit }[engine].launch({
+    timeout: 10000,
+    ...(engine === "chromium"
+      ? {
+          channel: process.env.BROWSER_CHANNEL,
+          executablePath: process.env.CHROMIUM_EXECUTABLE_PATH
+        }
+      : {})
+  });
 }
 
-// --- LOCAL DEPENDENCY FIXTURES ---
+// ===== LOCAL DEPENDENCY FIXTURES =====
 /**
  * Read real SPA.js assets from its local checkout behind the resource's declared URLs.
  * @param {string[]} files Relative SPA.js asset paths required by this suite.
@@ -43,12 +51,15 @@ async function loadAssets(files) {
       if (error.code !== "ENOENT") throw error;
       body = await fs.readFile(path.join(directory, file.replace(/\.min(?=\.(?:css|js)$)/, "")));
     }
-    assets.set(`${spaBase}${file}`, { body, contentType: file.endsWith(".css") ? "text/css" : "text/javascript" });
+    assets.set(`${spaBase}${file}`, {
+      body,
+      contentType: file.endsWith(".css") ? "text/css" : "text/javascript"
+    });
   }
   return assets;
 }
 
-// --- RESOURCE DISCOVERY ---
+// ===== RESOURCE DISCOVERY =====
 // Discover resource pages by their template so missing renderer scripts still fail their checks.
 async function resourceNames() {
   const folders = await fs.readdir(root, { withFileTypes: true });
@@ -65,7 +76,7 @@ async function resourceNames() {
   return names;
 }
 
-// --- STANDALONE PAGE FIXTURE ---
+// ===== STANDALONE PAGE FIXTURE =====
 // Remove the optional editor imports to exercise the supported renderer-only entry point.
 function standaloneHTML(html) {
   const boundary = html.indexOf("<!-- ===== CONFIGURATOR ===== -->");
@@ -73,7 +84,7 @@ function standaloneHTML(html) {
   return html.replace(/<template id="configurator-assets">[\s\S]*?<\/template>/, "").replace(/<div id="configurator"><\/div>/, "");
 }
 
-// --- REQUEST ROUTING ---
+// ===== REQUEST ROUTING =====
 /**
  * Serve local sources and preloaded CDN assets; unrelated external requests are aborted.
  * @param {import("playwright").Page} page Page whose requests belong to this fixture.
@@ -109,10 +120,18 @@ async function serve(page, assets, standalone = false, baseURL = "https://stream
       throw error;
     }
     if (standalone && file.endsWith(".html")) body = standaloneHTML(body.toString());
-    const contentType = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml", ".png": "image/png", ".jpg": "image/jpeg" }[path.extname(file)] || "application/octet-stream";
+    const contentType =
+      {
+        ".html": "text/html",
+        ".js": "text/javascript",
+        ".css": "text/css",
+        ".svg": "image/svg+xml",
+        ".png": "image/png",
+        ".jpg": "image/jpeg"
+      }[path.extname(file)] || "application/octet-stream";
     return route.fulfill({ body, contentType });
   });
 }
 
-// --- SUITE FIXTURES ---
+// ===== SUITE FIXTURES =====
 module.exports = { root, runtimeAssets, launchBrowser, loadAssets, resourceNames, standaloneHTML, serve };

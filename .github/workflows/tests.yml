@@ -6,10 +6,10 @@ on:
   workflow_dispatch:
     inputs:
       browser:
-        description: Browser for this run
+        description: Browsers to test
         type: choice
-        options: [chromium, firefox, webkit]
-        default: chromium
+        options: [all, chromium, firefox, webkit]
+        default: all
       extended:
         description: Include appearance and layout checks
         type: boolean
@@ -24,9 +24,18 @@ concurrency:
 
 jobs:
   browser:
+    name: browser (${{ matrix.browser }})
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: >-
+          ${{ fromJSON(
+            (inputs.browser || 'all') == 'all' && '["chromium","firefox","webkit"]'
+            || format('["{0}"]', inputs.browser)
+          ) }}
     uses: ./.github/workflows/browser-check.yml
     with:
-      browser: ${{ inputs.browser || 'chromium' }}
+      browser: ${{ matrix.browser }}
       extended: ${{ inputs.extended || false }}
 
   uploads:

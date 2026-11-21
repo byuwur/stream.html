@@ -532,7 +532,7 @@ php -l upload_image.php
 node --test __tests__/upload-php.cjs
 ```
 
-Omit `STREAM_CORE_ONLY` to include appearance checks. [CI](.github/workflows/tests.yml) checks resource startup, URL settings, input, configurators and uploads. Manual runs can select Firefox, WebKit or extended appearance checks.
+Omit `STREAM_CORE_ONLY` to include appearance checks. [CI](.github/workflows/tests.yml) checks resource startup, URL settings, input and configurators in Chromium, Firefox and WebKit by default. PHP upload checks run once. Manual runs can target one browser or include extended appearance checks.
 
 Build and test a local release preview:
 
