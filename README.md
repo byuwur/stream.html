@@ -49,43 +49,35 @@ For Controller and Keyboard on disk, extract the ZIP with its SVG artwork or use
 
 ## Resources
 
-1. [Keyboard & Mouse](#keyboard--mouse)
-2. [Controller](#controller)
-3. [Social popup](#social-popup)
-4. [Main scene](#main-scene)
+1. [Controller](#controller)
+2. [Keyboard & Mouse](#keyboard--mouse)
+3. [Now Playing](#now-playing)
+4. [Chat](#chat)
 5. [Clock](#clock)
-6. [Timer / Countdown](#timer--countdown)
-7. [Webcam Frame](#webcam-frame)
-8. [Ticker](#ticker)
-9. [Watermark](#watermark)
-10. [Lower Thirds](#lower-thirds)
-11. [QR / Link Card](#qr--link-card)
-12. [Periodic Reminder](#periodic-reminder)
-13. [Stream Badge](#stream-badge)
-14. [Credits Roll](#credits-roll)
-15. [Schedule](#schedule)
-16. [Sponsor Carousel](#sponsor-carousel)
-17. [Info Board](#info-board)
-18. [Screen Effects](#screen-effects)
-19. [Camera HUD](#camera-hud)
-20. [Progress Timeline](#progress-timeline)
-21. [Randomizer](#randomizer)
-22. [Quote Display](#quote-display)
-23. [Keyboard Shortcut Sheet](#keyboard-shortcut-sheet)
-24. [Now Playing](#now-playing)
-25. [Chat](#chat)
-26. [Counter](#counter)
-27. [Stream Panels](#stream-panels)
+6. [Counter](#counter)
+7. [Social popup](#social-popup)
+8. [Main scene](#main-scene)
+9. [Timer / Countdown](#timer--countdown)
+10. [Webcam Frame](#webcam-frame)
+11. [Ticker](#ticker)
+12. [Watermark](#watermark)
+13. [Lower Thirds](#lower-thirds)
+14. [Stream Panels](#stream-panels)
+15. [QR / Link Card](#qr--link-card)
+16. [Periodic Reminder](#periodic-reminder)
+17. [Stream Badge](#stream-badge)
+18. [Credits Roll](#credits-roll)
+19. [Schedule](#schedule)
+20. [Sponsor Carousel](#sponsor-carousel)
+21. [Info Board](#info-board)
+22. [Screen Effects](#screen-effects)
+23. [Camera HUD](#camera-hud)
+24. [Progress Timeline](#progress-timeline)
+25. [Randomizer](#randomizer)
+26. [Quote Display](#quote-display)
+27. [Keyboard Shortcut Sheet](#keyboard-shortcut-sheet)
 
 TBD resources have usable demos while their live integrations are being defined. Alpha resources are in early testing. Beta resources are in broader testing.
-
-### Keyboard & Mouse
-
-Live keyboard/mouse SVG input and optional ephemeral Input History. **Alpha.**
-
-![Keyboard & Mouse overlay preview](keyboard/prev.jpg)
-
-[Configure Keyboard & Mouse](https://stream.byuwur.co/keyboard/) · [Local entry point](keyboard/index.html) · [Keyboard and input history](#keyboard-and-input-history)
 
 ### Controller
 
@@ -96,6 +88,50 @@ Thanks to [MimicryMedia](https://mimicrymedia.itch.io/controller-pack) for the c
 ![Controller overlay preview](controller/prev.jpg)
 
 [Configure Controller](https://stream.byuwur.co/controller/) · [Local entry point](controller/index.html) · [Controller settings](#controller-settings)
+
+### Keyboard & Mouse
+
+Live keyboard/mouse SVG input and optional ephemeral Input History. **Alpha.**
+
+![Keyboard & Mouse overlay preview](keyboard/prev.jpg)
+
+[Configure Keyboard & Mouse](https://stream.byuwur.co/keyboard/) · [Local entry point](keyboard/index.html) · [Keyboard and input history](#keyboard-and-input-history)
+
+### Now Playing
+
+**TBD.** Configure a local track, cover, playback state and timeline. Classic, Compact, Simple, Card and Vinyl share the same settings. Auto accent samples the dominant artwork color and falls back to the manual accent when pixels are unavailable. The demo plays no audio. Windows media sessions require a future OBS helper.
+
+Use **Previous** and **Next** in the Now Playing preview to cycle through your configured track and two sample songs. Enable **Show track buttons on the overlay** to use them in a standalone demo. The Classic demo opens with “Girl Like Me” by PinkPantheress from _Fancy That_, at 0:23 of 2:26. **Cover background → Blurred cover background** is on by default. It tints the artwork behind the track details or across the Card. The demo uses its built-in illustration if the default album cover is unavailable.
+
+![Now Playing demo preview](now-playing/prev.jpg)
+
+[Configure Now Playing](https://stream.byuwur.co/now-playing/) · [Local entry point](now-playing/index.html)
+
+### Chat
+
+**TBD.** Edit local Twitch, YouTube, Kick and TikTok sample messages in stacked, inline or bubble layouts. The intended connection flow uses your platform account directly, without a separate stream.HTML account. Platform authorization and delivery are still to be designed. The four Connect buttons are disabled. Integration mode starts empty. Chat is independent of the native OBS input receiver.
+
+For an OBS custom browser dock, choose **Appearance → OBS dock background** and paste the generated URL into the dock. For example, `/chat/?dockBg=dark` sets the body to `#222`. The default `off` keeps it transparent. Other choices are `black`, `white`, `light`, `slate`, `navy`, and `custom` with a `dockColor` hex value. Panel and message backgrounds have their own controls.
+
+![Chat demo preview](chat/prev.jpg)
+
+[Configure Chat](https://stream.byuwur.co/chat/) · [Local entry point](chat/index.html)
+
+### Clock
+
+Digital, analog, split-flap, and minimal clocks. **Alpha.**
+
+![Clock overlay preview](clock/prev.jpg)
+
+[Configure Clock](https://stream.byuwur.co/clock/) · [Local entry point](clock/index.html)
+
+### Counter
+
+**TBD.** Focus the overlay or use OBS Interact. F9 increases and F10 decreases by the configured positive step. Reset defaults to Off. Bind physical codes such as `KeyW` or `F11`. F1 and F2 stay reserved. A held key counts once. Opposing bindings on one press or native snapshot cancel, and a reset press takes priority. Optional bounds clamp the starting value and every change. Reload restores the configured start. Losing focus or native input preserves the number.
+
+![Counter demo preview](counter/prev.jpg)
+
+[Configure Counter](https://stream.byuwur.co/counter/) · [Local entry point](counter/index.html)
 
 ### Social popup
 
@@ -112,14 +148,6 @@ Starting/BRB/ending scenes with branding, countdown, accounts, and schedule. **B
 ![Main scene overlay preview](main/prev.jpg)
 
 [Configure Main scene](https://stream.byuwur.co/main/) · [Local entry point](main/index.html) · [Scene settings](#main-scene-settings)
-
-### Clock
-
-Digital, analog, split-flap, and minimal clocks. **Alpha.**
-
-![Clock overlay preview](clock/prev.jpg)
-
-[Configure Clock](https://stream.byuwur.co/clock/) · [Local entry point](clock/index.html)
 
 ### Timer / Countdown
 
@@ -160,6 +188,14 @@ Broadcast cards for guests, games, and moments. **Alpha.**
 ![Lower Thirds overlay preview](lower-thirds/prev.jpg)
 
 [Configure Lower Thirds](https://stream.byuwur.co/lower-thirds/) · [Local entry point](lower-thirds/index.html)
+
+### Stream Panels
+
+Design matching channel panels from a shared layout. **Beta.** Set the width and height (360 × 120 px by default), then add or duplicate entries. Each entry has a label, artwork and an optional filename. Choose a platform icon, a Font Awesome class, a custom image or no artwork. The generated overlay URL restores the set.
+
+![Stream Panels configurator and preview](panels/prev.jpg)
+
+[Configure Stream Panels](https://stream.byuwur.co/panels/) · [Local entry point](panels/index.html)
 
 ### QR / Link Card
 
@@ -264,42 +300,6 @@ Editable shortcut guide without keyboard monitoring. **Alpha.**
 ![Keyboard Shortcut Sheet overlay preview](shortcuts/prev.jpg)
 
 [Configure Keyboard Shortcut Sheet](https://stream.byuwur.co/shortcuts/) · [Local entry point](shortcuts/index.html)
-
-### Now Playing
-
-**TBD.** Configure a local track, cover, playback state and timeline. Classic, Compact, Simple, Card and Vinyl share the same settings. Auto accent samples the dominant artwork color and falls back to the manual accent when pixels are unavailable. The demo plays no audio. Windows media sessions require a future OBS helper.
-
-Use **Previous** and **Next** in the Now Playing preview to cycle through your configured track and two sample songs. Enable **Show track buttons on the overlay** to use them in a standalone demo. The Classic demo opens with “Girl Like Me” by PinkPantheress from _Fancy That_, at 0:23 of 2:26. **Cover background → Blurred cover background** is on by default. It tints the artwork behind the track details or across the Card. The demo uses its built-in illustration if the default album cover is unavailable.
-
-![Now Playing demo preview](now-playing/prev.jpg)
-
-[Configure Now Playing](https://stream.byuwur.co/now-playing/) · [Local entry point](now-playing/index.html)
-
-### Chat
-
-**TBD.** Edit local Twitch, YouTube, Kick and TikTok sample messages in stacked, inline or bubble layouts. The intended connection flow uses your platform account directly, without a separate stream.HTML account. Platform authorization and delivery are still to be designed. The four Connect buttons are disabled. Integration mode starts empty. Chat is independent of the native OBS input receiver.
-
-For an OBS custom browser dock, choose **Appearance → OBS dock background** and paste the generated URL into the dock. For example, `/chat/?dockBg=dark` sets the body to `#222`. The default `off` keeps it transparent. Other choices are `black`, `white`, `light`, `slate`, `navy`, and `custom` with a `dockColor` hex value. Panel and message backgrounds have their own controls.
-
-![Chat demo preview](chat/prev.jpg)
-
-[Configure Chat](https://stream.byuwur.co/chat/) · [Local entry point](chat/index.html)
-
-### Counter
-
-**TBD.** Focus the overlay or use OBS Interact. F9 increases and F10 decreases by the configured positive step. Reset defaults to Off. Bind physical codes such as `KeyW` or `F11`. F1 and F2 stay reserved. A held key counts once. Opposing bindings on one press or native snapshot cancel, and a reset press takes priority. Optional bounds clamp the starting value and every change. Reload restores the configured start. Losing focus or native input preserves the number.
-
-![Counter demo preview](counter/prev.jpg)
-
-[Configure Counter](https://stream.byuwur.co/counter/) · [Local entry point](counter/index.html)
-
-### Stream Panels
-
-Design matching channel panels from a shared layout. **Beta.** Set the width and height (360 × 120 px by default), then add or duplicate entries. Each entry has a label, artwork and an optional filename. Choose a platform icon, a Font Awesome class, a custom image or no artwork. The generated overlay URL restores the set.
-
-![Stream Panels configurator and preview](panels/prev.jpg)
-
-[Configure Stream Panels](https://stream.byuwur.co/panels/) · [Local entry point](panels/index.html)
 
 ### Image downloads
 

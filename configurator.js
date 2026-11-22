@@ -388,6 +388,42 @@
         ready: true
       },
       {
+        id: "now-playing",
+        name: "Now Playing",
+        description: "Display cover art, track details, and progress from an editable demo. Windows media integration is TBD.",
+        icon: "fa-record-vinyl",
+        category: "information",
+        status: "TBD",
+        ready: true
+      },
+      {
+        id: "chat",
+        name: "Chat",
+        description: "Style a four-platform chat demo. Platform connections are TBD.",
+        icon: "fa-comments",
+        category: "interaction",
+        status: "TBD",
+        ready: true
+      },
+      {
+        id: "clock",
+        name: "Clock",
+        description: "Digital, analog, split-flap, and minimal clocks.",
+        icon: "fa-clock",
+        category: "time",
+        status: "Alpha",
+        ready: true
+      },
+      {
+        id: "counter",
+        name: "Counter",
+        description: "Count focused key presses with configurable steps and bounds. Native OBS input is TBD.",
+        icon: "fa-hashtag",
+        category: "interaction",
+        status: "TBD",
+        ready: true
+      },
+      {
         id: "popup",
         name: "Social popup",
         description: "Animated social accounts from 90+ platforms.",
@@ -403,15 +439,6 @@
         icon: "fa-clapperboard",
         category: "scenes",
         status: "Beta",
-        ready: true
-      },
-      {
-        id: "clock",
-        name: "Clock",
-        description: "Digital, analog, split-flap, and minimal clocks.",
-        icon: "fa-clock",
-        category: "time",
-        status: "Alpha",
         ready: true
       },
       {
@@ -583,33 +610,6 @@
         icon: "fa-keyboard",
         category: "interaction",
         status: "Alpha",
-        ready: true
-      },
-      {
-        id: "now-playing",
-        name: "Now Playing",
-        description: "Display cover art, track details, and progress from an editable demo. Windows media integration is TBD.",
-        icon: "fa-record-vinyl",
-        category: "information",
-        status: "TBD",
-        ready: true
-      },
-      {
-        id: "chat",
-        name: "Chat",
-        description: "Style a four-platform chat demo. Platform connections are TBD.",
-        icon: "fa-comments",
-        category: "interaction",
-        status: "TBD",
-        ready: true
-      },
-      {
-        id: "counter",
-        name: "Counter",
-        description: "Count focused key presses with configurable steps and bounds. Native OBS input is TBD.",
-        icon: "fa-hashtag",
-        category: "interaction",
-        status: "TBD",
         ready: true
       }
     ],
