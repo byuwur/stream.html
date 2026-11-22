@@ -705,7 +705,11 @@ document.addEventListener("DOMContentLoaded", async () => {
         wrapper.style.height = `${element.offsetHeight * Math.abs(scale)}px`;
       }
     }
-    const cornerObserver = new ResizeObserver(fitCornerItems);
+    let cornerFrame;
+    const cornerObserver = new ResizeObserver(() => {
+      cancelAnimationFrame(cornerFrame);
+      cornerFrame = requestAnimationFrame(fitCornerItems);
+    });
     for (const [id, position, scale] of [
       ["countdown", settings.countdownPosition, settings.countdownScale / 100],
       ["social", settings.socialPosition, settings.socialMediaScale / 100],
@@ -805,6 +809,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       clearInterval(countdownTimer);
       animation?.pause();
       cornerObserver.disconnect();
+      cancelAnimationFrame(cornerFrame);
     });
     window.addEventListener("pageshow", (event) => {
       if (event.persisted) {

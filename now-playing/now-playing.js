@@ -318,13 +318,21 @@ document.addEventListener("DOMContentLoaded", async () => {
   panel.style.setProperty("--cover", (settings.coverSize || (details.hidden ? 128 : 0)) + "px");
   if (!settings.coverSize && !details.hidden && settings.layout !== "compact" && (settings.showArtwork === "yes" || settings.layout === "vinyl")) {
     panel.dataset.autoCover = "";
+    let frame;
     const observer = new ResizeObserver(([entry]) => {
-      if (details.hasAttribute("data-stream-resizing")) return;
+      cancelAnimationFrame(frame);
       const height = entry.borderBoxSize[0].blockSize;
-      if (height > 0) panel.style.setProperty("--cover", height + "px");
+      if (height > 0 && !details.hasAttribute("data-stream-resizing")) frame = requestAnimationFrame(() => panel.style.setProperty("--cover", height + "px"));
     });
     observer.observe(details, { box: "border-box" });
-    events.signal.addEventListener("abort", () => observer.disconnect(), { once: true });
+    events.signal.addEventListener(
+      "abort",
+      () => {
+        observer.disconnect();
+        cancelAnimationFrame(frame);
+      },
+      { once: true }
+    );
   }
   panel.style.setProperty("--gap", settings.spacing + "px");
   panel.style.setProperty("--radius", settings.radius + "px");
