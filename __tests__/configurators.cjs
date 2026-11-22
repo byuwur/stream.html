@@ -976,7 +976,13 @@ test("panel downloads preserve artwork, duplicate names and the shared layout", 
   const page = await browser.newPage();
   await serve(page, await loadAssets(editorAssets));
   await page.route("https://byuwur.github.io/img/logo.png", (route) => route.fulfill({ path: require.resolve("../stream.html.png"), contentType: "image/png", headers: { "Access-Control-Allow-Origin": "*" } }));
-  await page.goto("https://stream.test/panels/?fontFamily=Arial#configure");
+  const panels = [
+    { label: "Discord", artwork: "discord" },
+    { label: "Buy me a Pandebono", artwork: "ko-fi" },
+    { label: "Portfolio", artwork: "image", image: "https://byuwur.github.io/img/logo.png" }
+  ];
+  const params = new URLSearchParams({ fontFamily: "Arial", panels: JSON.stringify(panels) });
+  await page.goto(`https://stream.test/panels/?${params}#configure`);
   const entries = page.locator(".entry-row");
   const row = entries.first();
   await row.locator("select").first().selectOption("image", { force: true });

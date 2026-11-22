@@ -63,9 +63,15 @@ document.addEventListener("DOMContentLoaded", async () => {
         section: "Panels",
         addLabel: "Add panel",
         default: [
+          { ...blank, label: "byuwur.co", artwork: "image", icon: "fa-solid fa-briefcase", image: "https://byuwur.github.io/img/logo.png" },
           { ...blank, label: "Discord", artwork: "discord" },
+          { ...blank, label: "/byuwur", artwork: "youtube" },
+          { ...blank, label: "@byuwur", artwork: "instagram" },
+          { ...blank, label: "Sponsor", artwork: "github" },
+          { ...blank, label: "Subscribe", artwork: "twitch" },
           { ...blank, label: "Buy me a Pandebono", artwork: "ko-fi" },
-          { ...blank, label: "Portfolio", artwork: "image", icon: "fa-solid fa-briefcase", image: "https://byuwur.github.io/img/logo.png" }
+          { ...blank, label: "Donate", artwork: "icon", icon: "fa-brands fa-paypal" },
+          { ...blank, label: "Tips", artwork: "icon", icon: "fa-solid fa-hand-holding-heart" }
         ],
         maxlength: 240000,
         validate: parsePanels,
@@ -96,7 +102,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       artColor: { type: "color", label: "Icon color", section: "Artwork", default: "#FFFFFF" },
       alignment: { type: "select", label: "Text alignment", section: "Text", default: "left", options: { left: "Left", center: "Center", right: "Right" } },
       textPadding: pixels("Text padding", 16, 400, "Text"),
-      fontFamily: { type: "font", label: "Font family", section: "Text", default: "Concert One", maxlength: 100 },
+      fontFamily: { type: "font", label: "Font family", section: "Text", default: "Google Sans Code", maxlength: 100 },
       fontWeight: { type: "select", label: "Font weight", section: "Text", default: "800", options: { 300: "Light", 400: "Regular", 500: "Medium", 600: "Semibold", 700: "Bold", 800: "Extra bold", 900: "Black" } },
       fontSize: pixels("Font size", 36, 400, "Text", 1),
       tracking: pixels("Letter spacing", 0, 100, "Text", -20),
@@ -107,12 +113,12 @@ document.addEventListener("DOMContentLoaded", async () => {
       ...byStream.shadowFields("labelShadow", "Text", label, "text-shadow", "Text")
     },
     fieldDefaults: {
-      panelBackground: "#002",
-      panelRadius: 8,
+      panelBackground: "#001",
+      panelRadius: 32,
       panelBorderWidth: 2,
       panelBorderColor: "#300",
       panelBorderStyle: "double",
-      accentBackground: "#330000",
+      accentBackground: "#220000",
       artShadow: "yes",
       artShadowColor: "#000000",
       artShadowBlur: 0,
