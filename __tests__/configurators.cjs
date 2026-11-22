@@ -381,41 +381,33 @@ test("Now Playing demo buttons cycle three tracks through the preview and option
   for (const url of [heavenCover, hellCover]) {
     await page.route(url, (route) => route.fulfill({ path: require.resolve("../stream.html.png"), contentType: "image/png", headers: { "Access-Control-Allow-Origin": "*" } }));
   }
-  await page.goto("https://stream.test/now-playing/?title=My%20song&overlay.entrance=fadeIn&overlay.entranceDuration=8000#configure");
+  await page.goto("https://stream.test/now-playing/?title=My%20song&overlay.entrance=fadeIn&overlay.entranceDuration=1500#configure");
   const preview = page.frameLocator("#overlay-preview");
   const next = page.getByRole("button", { name: "Next track" });
   const previous = page.getByRole("button", { name: "Previous track" });
-  const title = preview.locator(".track");
-  await preview.getByText("My song", { exact: true }).waitFor();
-  const finishExit = () =>
-    title.evaluate(async (node) => {
-      const panel = node.closest(".panel");
-      for (const motion of panel.getAnimations({ subtree: true })) if (motion.id === "stream-exit") motion.finish();
-      await new Promise(requestAnimationFrame);
-    });
-  await next.click();
-  assert.equal(await title.textContent(), "My song");
-  assert.equal(await title.evaluate((node) => node.getAnimations()[0].id), "stream-exit");
-  await next.click();
-  await finishExit();
-  assert.equal(await title.textContent(), "Break it off (Bonus)");
+  const waitForTrack = (name) => preview.getByText(name, { exact: true }).waitFor();
+  await waitForTrack("My song");
+  const frame = await (await page.locator("#overlay-preview").elementHandle()).contentFrame();
+  await next.dblclick();
+  await frame.waitForFunction(() => {
+    const track = document.querySelector(".track");
+    return track.textContent === "My song" && track.getAnimations().some((motion) => motion.id === "stream-exit");
+  });
+  await waitForTrack("Break it off (Bonus)");
   assert.equal(await preview.locator(".artist").textContent(), "PinkPantheress");
   assert.equal(await preview.locator(".album").textContent(), "to hell with it");
   assert.equal(await preview.locator(".total").textContent(), "1:37");
   await preview.locator(`img.cover[src="${hellCover}"]`).waitFor();
   await previous.click();
-  await finishExit();
-  assert.equal(await title.textContent(), "Bury me (feat. Kelela)");
+  await waitForTrack("Bury me (feat. Kelela)");
   assert.equal(await preview.locator(".artist").textContent(), "PinkPantheress");
   assert.equal(await preview.locator(".album").textContent(), "Heaven knows");
   assert.equal(await preview.locator(".total").textContent(), "2:05");
   await preview.locator(`img.cover[src="${heavenCover}"]`).waitFor();
   await previous.click();
-  await finishExit();
-  assert.equal(await title.textContent(), "My song");
+  await waitForTrack("My song");
   await previous.click();
-  await finishExit();
-  assert.equal(await title.textContent(), "Break it off (Bonus)");
+  await waitForTrack("Break it off (Bonus)");
   const url = new URL(await page.locator("#overlay-url").inputValue());
   assert.equal(url.searchParams.get("title"), "My song");
   await page.goto(url.href);
