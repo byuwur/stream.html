@@ -102,9 +102,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         uncheckedValue: "no",
         options: { yes: "yes", no: "no" }
       },
-      elapsedLabel: { type: "text", default: "ELAPSED", label: "Elapsed message", section: "Content & behavior", when: ["mode", "elapsed"], subsection: "Status labels", maxlength: 160 },
-      remainingLabel: { type: "text", default: "Up next", label: "Remaining message", section: "Content & behavior", when: ["mode", "duration", "deadline"], subsection: "Status labels", maxlength: 160 },
-      restartLabel: { type: "text", default: "RESTARTS ON LOAD", label: "Restart message", section: "Content & behavior", when: ["mode", "restart"], subsection: "Status labels", maxlength: 160 },
+      elapsedLabel: { type: "text", default: "ELAPSED", label: "Elapsed message", section: "Content & behavior", when: ["mode", "elapsed"], maxlength: 160 },
+      remainingLabel: { type: "text", default: "Up next", label: "Remaining message", section: "Content & behavior", when: ["mode", "duration", "deadline"], maxlength: 160 },
+      restartLabel: { type: "text", default: "RESTARTS ON LOAD", label: "Restart message", section: "Content & behavior", when: ["mode", "restart"], maxlength: 160 },
       format: {
         type: "select",
         default: "stopwatch",
