@@ -3,6 +3,54 @@ document.addEventListener("DOMContentLoaded", async () => {
   await byStream.assetsReady;
   // ===== RESOURCE DEFINITION =====
 
+  const legends = new Map();
+  for (const [name, symbol, ...aliases] of [
+    ["Escape", "⎋", "Esc"],
+    ["Backspace", "⌫"],
+    ["Tab", "⇥"],
+    ["Caps Lock", "⇪", "CapsLock"],
+    ["Enter", "↵", "Return"],
+    ["Shift", "⇧"],
+    ["Ctrl", "⌃", "Control"],
+    ["Alt", "⎇"],
+    ["Meta", "⊞", "Win", "Windows", "Super", "Cmd", "Command"],
+    ["Menu", "☰", "ContextMenu"],
+    ["Space", "␣", "Spacebar", "Space Bar"]
+  ]) {
+    const legend = { name, symbol };
+    for (const alias of [name, symbol, ...aliases]) legends.set(alias.toLowerCase(), legend);
+  }
+
+  const keyChoices = [
+    ...new Set([...legends.values()].map((legend) => legend.name)),
+    ..."ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
+    ...Array.from({ length: 24 }, (_, i) => "F" + (i + 1)),
+    ..."`-=[]\\;',./+",
+    "ArrowUp",
+    "ArrowDown",
+    "ArrowLeft",
+    "ArrowRight",
+    "Home",
+    "End",
+    "PageUp",
+    "PageDown",
+    "Insert",
+    "Delete",
+    "PrintScreen",
+    "ScrollLock",
+    "Pause",
+    "NumLock",
+    ...Array.from({ length: 10 }, (_, i) => "Numpad" + i),
+    "NumpadAdd",
+    "NumpadSubtract",
+    "NumpadMultiply",
+    "NumpadDivide",
+    "NumpadDecimal",
+    "NumpadEnter"
+  ];
+  const keyNames = new Map(keyChoices.map((key) => [key.toLowerCase(), key]));
+  for (const [alias, legend] of legends) keyNames.set(alias, legend.name);
+
   // Defaults, URL constraints, and the field metadata consumed by the optional editor.
   const resource = {
     version: "1.4",
@@ -29,22 +77,20 @@ document.addEventListener("DOMContentLoaded", async () => {
     fields: {
       entries: {
         type: "entries",
-        default: {
-          "W + A + S + D": "Move",
-          Space: "Jump",
-          Shift: "Sprint",
-          E: "Interact"
-        },
+        default: [
+          { keys: ["W", "A", "S", "D"], text: "Move" },
+          { keys: ["Space"], text: "Jump" },
+          { keys: ["Shift"], text: "Sprint" },
+          { keys: ["E"], text: "Interact" }
+        ],
         label: "Shortcuts",
         section: "Content & behavior",
         validate: parseEntries,
-        maxlength: 8000,
+        maxlength: 32000,
         entries: {
-          textFields: [
-            ["keys", "Keys (separate with +)"],
-            ["text", "Action"]
-          ],
-          newEntry: ["", ""],
+          keyChoices,
+          textFields: [["text", "Action"]],
+          newEntry: { keys: [""], text: "" },
           limit: 40
         },
         addLabel: "Add entry"
@@ -296,12 +342,23 @@ document.addEventListener("DOMContentLoaded", async () => {
    * @returns {Array<unknown>|Object|null}
    */
   function parseEntries(value) {
-    if (value.length > 8000) return null;
+    if (value.length > 32000) return null;
     try {
-      const entries = JSON.parse(value);
-      return entries && typeof entries === "object" && !Array.isArray(entries) && Object.keys(entries).length <= 40 && Object.entries(entries).every(([key, text]) => key.length <= 160 && typeof text === "string" && text.length <= 160)
-        ? entries
-        : null;
+      const data = JSON.parse(value);
+      if (!data || typeof data !== "object") return null;
+      const rows = Array.isArray(data) ? data : Object.entries(data).map(([chord, text]) => ({ keys: chord.split("+"), text }));
+      if (rows.length > 40) return null;
+      const result = [];
+      for (const row of rows) {
+        if (!row || !Array.isArray(row.keys) || row.keys.length > 160 || typeof row.text !== "string" || row.text.length > 160) return null;
+        if (!row.keys.every((key) => typeof key === "string" && key.length <= 160)) return null;
+        const keys = row.keys
+          .map((key) => key.trim())
+          .filter(Boolean)
+          .map((key) => keyNames.get(key.toLowerCase()) || key);
+        result.push({ keys, text: row.text });
+      }
+      return result;
     } catch {
       return null;
     }
@@ -343,24 +400,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     return node;
   }
 
-  const legends = new Map();
-  for (const [name, symbol, ...aliases] of [
-    ["Escape", "⎋", "Esc"],
-    ["Backspace", "⌫"],
-    ["Tab", "⇥"],
-    ["Caps Lock", "⇪", "CapsLock"],
-    ["Enter", "↵", "Return"],
-    ["Shift", "⇧"],
-    ["Ctrl", "⌃", "Control"],
-    ["Alt", "⎇"],
-    ["Meta", "⊞", "Win", "Windows", "Super"],
-    ["Menu", "☰", "ContextMenu"],
-    ["Space", "␣", "Spacebar"]
-  ]) {
-    const legend = { name, symbol };
-    for (const alias of [name, symbol, ...aliases]) legends.set(alias.toLowerCase(), legend);
-  }
-
   /** Keep the full key name accessible while displaying the same legend on the sheet and keyboard. */
   function keycap(parent, className, key, legend) {
     const cap = element("kbd", className, legend?.symbol ?? key, parent);
@@ -378,14 +417,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   const tracks = aligned ? "auto minmax(0, 1fr)" : "minmax(0, 1fr)";
   list.style.gridTemplateColumns = settings.columns === 0 ? "repeat(auto-fit, minmax(min(100%, 240px), 1fr))" : `repeat(${settings.columns}, ${tracks})`;
   list.style.rowGap = `${settings.spacing}px`;
-  for (const [shortcut, text] of Object.entries(settings.entries)) {
+  for (const { keys: shortcut, text } of settings.entries) {
     const row = element("div", "shortcut-row", undefined, list);
     const keys = element("div", "shortcut-keys", undefined, row);
-    for (const [index, part] of shortcut.split("+").entries()) {
-      const key = part.trim();
+    for (const key of shortcut) {
       const legend = legends.get(key.toLowerCase());
       assigned.add((legend?.name ?? key).toLowerCase());
-      if (index < 12) keycap(keys, "shortcut-key", key, legend);
+      keycap(keys, "shortcut-key", key, legend);
     }
     element("p", "primary shortcut-description", text, row);
   }

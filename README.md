@@ -295,7 +295,7 @@ Rotating quotes, tips, and trivia. **Alpha.**
 
 ### Keyboard Shortcut Sheet
 
-Editable shortcut guide without keyboard monitoring. **Alpha.**
+Each shortcut has an action and an ordered list of keys. Select a key, use **Add key** for combinations, and use the arrows to reorder keys within the shortcut. **Alpha.**
 
 ![Keyboard Shortcut Sheet overlay preview](shortcuts/prev.jpg)
 

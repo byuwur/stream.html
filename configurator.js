@@ -1882,11 +1882,12 @@
      * @param {string} options.choiceKey Entry property that stores the chosen ID.
      * @param {string} [options.choiceLabel] Accessible name for the choice control.
      * @param {Array<Array<string>>} options.textFields Entry property names paired with their labels.
+     * @param {string[]} [options.keyChoices] Available keys for each shortcut row's ordered key selectors.
      * @param {Object} options.newEntry Initial value for a newly added entry.
      * @param {number} [options.limit=100] Maximum number of accepted entries.
      * @returns {void}
      */
-    function initEntryEditor(name, entries, { choices, choiceKey, choiceLabel = choiceKey === "platform" ? "Platform" : "Day", textFields, newEntry, limit = 100, duplicate = false }) {
+    function initEntryEditor(name, entries, { choices, choiceKey, choiceLabel = choiceKey === "platform" ? "Platform" : "Day", textFields, keyChoices, newEntry, limit = 100, duplicate = false }) {
       const jqOutput = $(form.elements[name]);
       const jqSection = jqOutput.closest(".entry-editor");
       const jqEditor = jqSection.find(".entry-list");
@@ -1896,6 +1897,71 @@
       const map = !Array.isArray(initial);
       const strings = typeof newEntry === "string";
       jqOutput.prop("defaultValue", JSON.stringify(initial));
+
+      function destroyEntrySelects(container) {
+        container.find("select").each(function () {
+          if ($(this).data("select2")) $(this).off(".streamMotion").select2("close").select2("destroy");
+        });
+      }
+
+      function addKeyList(row, keys) {
+        const group = $('<div class="mb-2" role="group" aria-label="Shortcut keys"></div>').appendTo(row);
+        const list = $('<div class="entry-keys"></div>').appendTo(group);
+        const add = $('<button type="button" class="btn btn-sm btn-outline-primary w-100"><i class="fa-solid fa-plus me-1" aria-hidden="true"></i>Add key</button>').appendTo(group);
+        const select = $('<select class="form-select rounded-0 bg-body-secondary border-secondary-subtle"></select>').append(new Option("Choose a key", ""));
+        for (const key of keyChoices) select.append(new Option(key, key));
+
+        function appendKey(value) {
+          const item = $('<div class="entry-key d-flex gap-1 mb-1"></div>').appendTo(list);
+          const input = select.clone().appendTo($('<div class="flex-grow-1 overflow-hidden"></div>').appendTo(item));
+          const buttons = $('<div class="btn-group flex-shrink-0" role="group" aria-label="Key controls"></div>').appendTo(item);
+          if (value && !keyChoices.includes(value)) input.append(new Option(value, value));
+          input.val(value);
+          for (const [action, label, icon] of [
+            ["up", "Move key up", "arrow-up"],
+            ["down", "Move key down", "arrow-down"],
+            ["remove", "Remove key", "xmark"]
+          ]) {
+            $('<button type="button" class="btn btn-sm btn-outline-primary"></button>')
+              .attr({ "data-key-action": action, "aria-label": label, title: label })
+              .append($('<i class="fa-solid" aria-hidden="true"></i>').addClass("fa-" + icon))
+              .appendTo(buttons);
+          }
+          return item;
+        }
+        function refresh() {
+          const items = list.children();
+          items.each((i, item) => {
+            $(item)
+              .find("select")
+              .attr("aria-label", "Key " + (i + 1));
+            $(item)
+              .find('[data-key-action="up"]')
+              .prop("disabled", i === 0);
+            $(item)
+              .find('[data-key-action="down"]')
+              .prop("disabled", i === items.length - 1);
+          });
+          add.prop("disabled", items.length >= 160);
+        }
+        for (const key of keys) appendKey(key);
+        refresh();
+        add.on("click", () => {
+          const item = appendKey("");
+          refresh();
+          item.find("select").trigger("focus");
+        });
+        list.on("click", "[data-key-action]", function () {
+          const item = $(this).closest(".entry-key");
+          const action = this.dataset.keyAction;
+          if (action === "up") item.insertBefore(item.prev());
+          else if (action === "down") item.insertAfter(item.next());
+          else item.remove();
+          refresh();
+          sync();
+          generateURL();
+        });
+      }
 
       /**
        * Append one editable entry row and bind its changes to the canonical serialized field.
@@ -1932,6 +1998,7 @@
         if (choiceKey === "artwork") jqRow.find(".entry-icon").removeClass("fa-calendar-days").addClass("fa-icons");
         Object.entries(choices || {}).forEach(([value, title]) => $(/* HTML */ `<option></option>`).val(value).text(title).appendTo(jqSelect));
         jqSelect.val(map ? entry[0] : strings ? entry : entry[choiceKey]);
+        if (keyChoices) addKeyList(jqRow, entry.keys);
         textFields.forEach(([key, title, type = "text", whenChoice], index) => {
           const value = map ? entry[choices ? 1 : index] : strings ? entry : entry[key];
           const input = $(type === "textarea" ? "<textarea></textarea>" : "<input />", {
@@ -2001,6 +2068,12 @@
             ];
           if (strings) return jqRow.find(choices ? "select" : "[data-field]").val();
           const entry = choices ? { [choiceKey]: jqRow.find("select").val() } : {};
+          if (keyChoices)
+            entry.keys = jqRow
+              .find(".entry-key select")
+              .get()
+              .map((select) => select.value)
+              .filter(Boolean);
           jqRow.find("[data-field]").each(function () {
             const jqInput = $(this);
             const value = jqInput.val();
@@ -2022,9 +2095,7 @@
       function reset(entries = initial) {
         const height = jqEditor[0].getBoundingClientRect().height;
         // Bypass the deferred exit during destruction so Select2 releases its positioning listeners.
-        jqEditor.find("select").each(function () {
-          if ($(this).data("select2")) $(this).off(".streamMotion").select2("close").select2("destroy");
-        });
+        destroyEntrySelects(jqEditor);
         jqEditor.find(".image-url").each((_, input) => imageInputs.get(input)?.destroy());
         jqEditor.empty();
         (map ? Object.entries(entries) : entries).forEach(addRow);
@@ -2039,8 +2110,7 @@
           jqRow.find("input, textarea, select, button").prop("disabled", true);
           setVisible(jqRow, false).then((finished) => {
             if (!finished) return;
-            const jqSelect = jqRow.find("select");
-            if (jqSelect.data("select2")) jqSelect.off(".streamMotion").select2("close").select2("destroy");
+            destroyEntrySelects(jqRow);
             jqRow.remove();
             sync();
           });
@@ -3258,7 +3328,10 @@
       initHelpDialog(initResourceHelp);
       initColorPickers();
       byConfigurator.initImageExport?.(resource, editor);
-      jqForm.find("select:not(.image-provider)").each((_, select) => initSelect2(select));
+      jqForm
+        .find("select")
+        .not(".image-provider, .entry-key select")
+        .each((_, select) => initSelect2(select));
       for (const input of fields) initFieldRestore(input, parameterRules[input.name]);
       // View requests also supersede earlier clicks while asynchronous validation is pending.
       let settingsViewGeneration = 0;

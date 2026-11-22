@@ -371,6 +371,35 @@ test("TBD configurators export demos, restore conditional drafts and round-trip 
   assert.deepEqual(errors, []);
 });
 
+test("shortcut keys can be selected, added, reordered and removed independently of their shortcuts", async (t) => {
+  const browser = await launchBrowser();
+  t.after(() => browser.close());
+  const page = await browser.newPage();
+  await serve(page, await loadAssets(editorAssets));
+  const legacy = { "control + spacebar": "Jump", Custom: "Other" };
+  await page.goto("https://stream.test/shortcuts/?" + new URLSearchParams({ entries: JSON.stringify(legacy), animate: "no" }) + "#configure");
+  const section = page.getByRole("button", { name: "Shortcut list", exact: true });
+  if ((await section.getAttribute("aria-expanded")) !== "true") await section.click();
+  const rows = page.locator(".entry-list > .entry-row");
+  const first = rows.first();
+  const keys = first.locator(".entry-key select");
+  assert.deepEqual(await keys.evaluateAll((inputs) => inputs.map((input) => input.value)), ["Ctrl", "Space"]);
+  assert.equal(await rows.nth(1).locator(".entry-key select").inputValue(), "Custom");
+  await first.getByRole("button", { name: "Add key" }).click();
+  await keys.nth(2).selectOption("1");
+  await first.getByRole("button", { name: "Move key up" }).nth(2).click();
+  await first.getByRole("button", { name: "Remove key" }).nth(2).click();
+  await first.getByRole("button", { name: "Move entry down" }).click();
+  await page.waitForFunction(() => {
+    const value = JSON.parse(new URL(document.querySelector("#overlay-url").value).searchParams.get("entries"));
+    return value[1]?.text === "Jump" && value[1].keys.join(",") === "Ctrl,1";
+  });
+  await page.goto(await page.locator("#overlay-url").inputValue());
+  const caps = page.locator(".shortcut-row").nth(1).locator("kbd");
+  await caps.first().waitFor();
+  assert.deepEqual(await caps.evaluateAll((nodes) => nodes.map((node) => node.title)), ["Ctrl", "1"]);
+});
+
 test("key binding fields capture combinations, cancel, and round-trip through Counter", async (t) => {
   const browser = await launchBrowser();
   t.after(() => browser.close());
