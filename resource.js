@@ -71,6 +71,7 @@
  * @property {string[]} [legacyFields] Retired URL keys accepted only for normalizeParameters().
  * @property {Object<string, ResourceValue>} [constants] Renderer-only defaults excluded from URL fields.
  * @property {string[]} [sectionOrder] Leading editor sections. Remaining sections follow in their usual order.
+ * @property {Array<{section?: string, subsection: string|string[], prefixLabels?: boolean}>} [inlineGroups] Promote a subsection's controls and child groups to their parent. Nested paths start at the section.
  * @property {Object<string, string>} [sectionIcons] Explicit icons for top-level sections.
  * @property {boolean|Object} [presets] Whether the editor exposes shared or resource-specific appearance presets.
  * @property {string} [previewAllow] iframe permissions required by this resource.
@@ -1899,6 +1900,14 @@
       }
       Object.assign(fields, motionFields);
       if (itemLabel) Object.assign(fields, animationFields(id + ".container", section, [...nested, "Container"], enabled, "Effect for the whole container"));
+    }
+    for (const { section, subsection, prefixLabels } of resource.inlineGroups || []) {
+      const path = [subsection].flat();
+      for (const field of Object.values(fields)) {
+        if ((section && field.section !== section) || !path.every((group, index) => field.subsection[index] === group)) continue;
+        field.subsection = [...path.slice(0, -1), ...field.subsection.slice(path.length)];
+        if (prefixLabels) field.label = `${path.at(-1)} · ${field.label}`;
+      }
     }
   }
 

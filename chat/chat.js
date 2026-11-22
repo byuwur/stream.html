@@ -47,16 +47,21 @@ document.addEventListener("DOMContentLoaded", async () => {
     preview: [960, 540],
     urlRequired: ["layout"],
     presets: true,
+    inlineGroups: [
+      { section: "Message row", subsection: "Surface" },
+      { section: "Message row", subsection: "Identity", prefixLabels: true }
+    ],
     elements: {
       overlay: { label: "Appearance", selector: "#overlay .panel", gap: true },
       bubble: { label: "Message row", premade: "vertical", slideDistance: -4, selector: "#overlay .row", fields: ["messages"] },
       message: { label: "Message text", selector: "#overlay .body", parent: "bubble" },
-      identity: { label: "Identity", selector: "#overlay .identity", parent: "bubble", textOverflow: false },
-      name: { label: "Display name", selector: "#overlay .name", parent: "identity", fields: ["nameMode", "nameColor", "showUsernames"], when: ["showUsernames", "yes"] },
-      stamp: { label: "Timestamp", selector: "#overlay .stamp", parent: "identity", fields: ["showTimestamps"], when: ["showTimestamps", "yes"], textOverflow: true },
-      avatar: { label: "Avatar", selector: "#overlay .avatar", parent: "identity", fields: ["showAvatars"], when: ["showAvatars", "yes"], textOverflow: "#overlay .avatar:not(:has(img))" },
-      badge: { label: "Badge", selector: "#overlay .badge", parent: "identity", fields: ["showBadges"], when: ["showBadges", "yes"], textOverflow: true },
-      platform: { label: "Platform", selector: "#overlay .platform", parent: "identity", fields: ["showPlatforms"], when: ["showPlatforms", "yes"] },
+      // Wrapper styles still apply to the complete identity line.
+      identity: { label: "Identity", selector: "#overlay .identity", parent: "bubble", container: true, textOverflow: false },
+      name: { label: "Display name", selector: "#overlay .name", parent: "bubble", fields: ["nameMode", "nameColor", "showUsernames"], when: ["showUsernames", "yes"] },
+      stamp: { label: "Timestamp", selector: "#overlay .stamp", parent: "bubble", fields: ["showTimestamps"], when: ["showTimestamps", "yes"], textOverflow: true },
+      avatar: { label: "Avatar", selector: "#overlay .avatar", parent: "bubble", fields: ["showAvatars"], when: ["showAvatars", "yes"], textOverflow: "#overlay .avatar:not(:has(img))" },
+      badge: { label: "Badge", selector: "#overlay .badge", parent: "bubble", fields: ["showBadges"], when: ["showBadges", "yes"], textOverflow: true },
+      platform: { label: "Platform", selector: "#overlay .platform", parent: "bubble", fields: ["showPlatforms"], when: ["showPlatforms", "yes"] },
       waitingText: { label: "Waiting message", selector: "#overlay .waiting", fields: ["waiting"], when: ["waiting", "yes"] }
     },
     fields: {
@@ -267,6 +272,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       ...byStream.textFields({
         message: ["Message", "#overlay .body"],
         name: ["Display name", "#overlay .name", ["size"]],
+        stamp: ["Timestamp", "#overlay .stamp"],
+        avatar: ["Avatar initials", "#overlay .avatar"],
+        badge: ["Badge", "#overlay .badge"],
         identity: ["Timestamp and badges", "#overlay .identity"],
         waitingText: ["Waiting message", "#overlay .waiting"]
       }),
