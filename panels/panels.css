@@ -1,0 +1,56 @@
+/* ============================================================
+   PANEL SET AND EXPORT BOUNDS
+   ============================================================ */
+#overlay {
+  display: block;
+  padding: 0;
+  overflow: auto;
+}
+.panel-list {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: start;
+  align-items: start;
+  gap: 12px;
+}
+.panel-sheet {
+  flex: none;
+  width: var(--panel-width);
+  height: var(--panel-height);
+  padding: min(var(--panel-inset), calc(var(--panel-height) / 2), calc(var(--panel-width) / 2));
+  overflow: hidden;
+}
+.stream-panel {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+.panel-accent {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: min(var(--panel-block), 100%);
+  height: 100%;
+  overflow: hidden;
+}
+.panel-art {
+  display: block;
+  transform: translate(var(--panel-x), var(--panel-y));
+  font-size: var(--panel-art);
+}
+img.panel-art {
+  width: var(--panel-art);
+  height: var(--panel-art);
+}
+.panel-label {
+  flex: 1;
+  min-width: 0;
+  padding: 0 var(--panel-gap);
+  font-size: var(--panel-size);
+  line-height: 1.05;
+  letter-spacing: var(--panel-tracking);
+  overflow: hidden;
+  overflow-wrap: anywhere;
+}

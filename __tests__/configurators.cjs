@@ -952,6 +952,80 @@ test("configurator smoke", { timeout: 60000 }, async (t) => {
   });
 });
 
+test("panel downloads preserve artwork, duplicate names and the shared layout", { timeout: 60000 }, async (t) => {
+  const browser = await launchBrowser();
+  t.after(() => browser.close());
+  const page = await browser.newPage();
+  await serve(page, await loadAssets(editorAssets));
+  await page.route("https://byuwur.github.io/img/logo.png", (route) => route.fulfill({ path: require.resolve("../stream.html.png"), contentType: "image/png", headers: { "Access-Control-Allow-Origin": "*" } }));
+  await page.goto("https://stream.test/panels/?fontFamily=Arial#configure");
+  const entries = page.locator(".entry-row");
+  const row = entries.first();
+  await row.locator("select").first().selectOption("image", { force: true });
+  const image = await page.evaluate(() => {
+    const canvas = document.createElement("canvas");
+    canvas.width = canvas.height = 8;
+    const ctx = canvas.getContext("2d");
+    ctx.fillStyle = "#00ff00";
+    ctx.fillRect(0, 0, 8, 8);
+    return canvas.toDataURL();
+  });
+  await row.locator('[data-field="image"]').fill(image);
+  await row.locator('[data-field="filename"]').fill("My logo");
+  await row.getByRole("button", { name: "Duplicate panel" }).click();
+  assert.equal(await entries.count(), 4);
+  await entries.nth(1).locator('[data-field="label"]').fill("Another logo");
+  const form = page.locator("#overlay-form");
+  assert.match(await form.locator(":scope > section").last().innerText(), /Export image/);
+  const toggle = page.locator("#export-toggle");
+  assert.equal(await toggle.getAttribute("aria-expanded"), "false");
+  await toggle.click();
+  const files = [];
+  page.on("download", (download) => files.push(download));
+  const finalDownload = page.waitForEvent("download", { predicate: (file) => file.suggestedFilename() === "portfolio.png" });
+  await page.locator("#export-download").click();
+  await finalDownload;
+  await page.waitForFunction(() => document.querySelector("#export-status").textContent.includes("4 downloads requested"));
+  assert.deepEqual(
+    files.map((file) => file.suggestedFilename()),
+    ["My logo.png", "My logo-2.png", "buy-me-a-pandebono.png", "portfolio.png"]
+  );
+  const file = await require("node:fs/promises").readFile(await files[0].path());
+  assert.deepEqual([file.readUInt32BE(16), file.readUInt32BE(20)], [360, 120]);
+  const pixels = await page.evaluate(async (bytes) => {
+    const img = new Image();
+    img.src = "data:image/png;base64," + bytes;
+    await img.decode();
+    const canvas = document.createElement("canvas");
+    canvas.width = img.width;
+    canvas.height = img.height;
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(img, 0, 0);
+    return [
+      [0, 0],
+      [40, 40]
+    ].map(([x, y]) => [...ctx.getImageData(x, y, 1, 1).data]);
+  }, file.toString("base64"));
+  assert.deepEqual(pixels[0], [0, 0, 0, 0]);
+  const [red, green, blue, alpha] = pixels[1];
+  assert.ok(red <= 2 && green >= 253 && blue <= 2 && alpha === 255, "Custom artwork must remain opaque green");
+
+  await page.locator("#export-size").selectOption("720", { force: true });
+  await page.locator("#export-format").selectOption("jpeg", { force: true });
+  const waiting = page.waitForEvent("download");
+  await entries.nth(1).locator("[data-export-row]").click();
+  const single = await waiting;
+  assert.equal(single.suggestedFilename(), "My logo-2.jpg");
+  const jpg = await require("node:fs/promises").readFile(await single.path());
+  assert.equal(jpg.readUInt16BE(), 0xffd8);
+  assert.match(await page.locator("#export-status").textContent(), /1280 × 427/);
+  const url = await page.locator("#overlay-url").inputValue();
+  await page.goto(url);
+  await page.locator(".panel-label").last().waitFor();
+  assert.deepEqual(await page.locator(".panel-label").allTextContents(), ["Discord", "Another logo", "Buy me a Pandebono", "Portfolio"]);
+  assert.equal(await page.locator("#export-toggle").count(), 0);
+});
+
 test("image export preserves the full frame, trims alpha and downloads whole QR modules", { timeout: 60000 }, async (t) => {
   const browser = await launchBrowser();
   t.after(() => browser.close());

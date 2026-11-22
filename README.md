@@ -75,6 +75,7 @@ For Controller and Keyboard on disk, extract the ZIP with its SVG artwork or use
 24. [Now Playing](#now-playing)
 25. [Chat](#chat)
 26. [Counter](#counter)
+27. [Stream Panels](#stream-panels)
 
 TBD resources have usable demos while their live integrations are being defined. Alpha resources are in early testing. Beta resources are in broader testing.
 
@@ -292,11 +293,19 @@ For an OBS custom browser dock, choose **Appearance → OBS dock background** an
 
 [Configure Counter](https://stream.byuwur.co/counter/) · [Local entry point](counter/index.html)
 
+### Stream Panels
+
+Design matching channel panels from a shared layout. **Beta.** Set the width and height (360 × 120 px by default), then add or duplicate entries. Each entry has a label, artwork and an optional filename. Choose a platform icon, a Font Awesome class, a custom image or no artwork. The generated overlay URL restores the set.
+
+![Stream Panels configurator and preview](panels/prev.jpg)
+
+[Configure Stream Panels](https://stream.byuwur.co/panels/) · [Local entry point](panels/index.html)
+
 ### Image downloads
 
 Open **Export image** at the bottom of a supported configurator. Save the current preview as PNG or JPEG at its original size or in a frame from 360p to 4K. The preview keeps its proportions. **Crop transparent edges** trims the frame to visible pixels before applying the JPEG background color. PNG preserves transparency. Preview filenames include the resource name and local date and time.
 
-QR / Link Card also offers a square, code-only image with its quiet margin.
+Panels can also save individual images at their panel proportions. Leave a filename blank to use the label. **Download all panels** requests one named file per entry. Allow multiple downloads if your browser prompts. QR / Link Card also offers a square, code-only image with its quiet margin.
 
 Image export uses the browser and the live preview on the same HTTP(S) origin. External artwork and fonts must allow the browser to read their bytes. Use Browse to embed a small custom image when its host blocks export.
 

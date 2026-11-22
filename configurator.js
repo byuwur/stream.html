@@ -460,6 +460,15 @@
         ready: true
       },
       {
+        id: "panels",
+        name: "Stream Panels",
+        description: "Design matching channel panels and download named PNG or JPEG images.",
+        icon: "fa-table-cells-large",
+        category: "branding",
+        status: "Beta",
+        ready: true
+      },
+      {
         id: "qr",
         name: "QR / Link Card",
         description: "Locally generated QR codes and link cards.",
@@ -1823,7 +1832,7 @@
      * @param {number} [options.limit=100] Maximum number of accepted entries.
      * @returns {void}
      */
-    function initEntryEditor(name, entries, { choices, choiceKey, choiceLabel = choiceKey === "platform" ? "Platform" : "Day", textFields, newEntry, limit = 100 }) {
+    function initEntryEditor(name, entries, { choices, choiceKey, choiceLabel = choiceKey === "platform" ? "Platform" : "Day", textFields, newEntry, limit = 100, duplicate = false }) {
       const jqOutput = $(form.elements[name]);
       const jqSection = jqOutput.closest(".entry-editor");
       const jqEditor = jqSection.find(".entry-list");
@@ -1857,13 +1866,19 @@
             </div>
           </div>
         `);
+        const controls = jqRow.find(".btn-group");
+        if (duplicate)
+          $('<button type="button" class="btn btn-sm btn-outline-primary" data-action="duplicate" aria-label="Duplicate panel" title="Duplicate panel"><i class="fa-solid fa-copy" aria-hidden="true"></i></button>').prependTo(controls);
+        if (byConfigurator.initImageExport && resource.imageExport?.field === name)
+          $('<button type="button" class="btn btn-sm btn-outline-primary" data-export-row aria-label="Download panel" title="Download panel"><i class="fa-solid fa-download" aria-hidden="true"></i></button>').prependTo(controls);
         const jqSelect = jqRow.find("select");
         if (!choices) jqRow.find("select, .entry-icon").remove();
         if (choiceKey === "platform") jqRow.find(".entry-icon").remove();
         if (strings && choices) jqRow.find(".entry-icon").remove();
+        if (choiceKey === "artwork") jqRow.find(".entry-icon").removeClass("fa-calendar-days").addClass("fa-icons");
         Object.entries(choices || {}).forEach(([value, title]) => $(/* HTML */ `<option></option>`).val(value).text(title).appendTo(jqSelect));
         jqSelect.val(map ? entry[0] : strings ? entry : entry[choiceKey]);
-        textFields.forEach(([key, title, type = "text"], index) => {
+        textFields.forEach(([key, title, type = "text", whenChoice], index) => {
           const value = map ? entry[choices ? 1 : index] : strings ? entry : entry[key];
           const input = $(type === "textarea" ? "<textarea></textarea>" : "<input />", {
             type: type === "textarea" ? undefined : type === "image" ? "text" : type,
@@ -1877,6 +1892,15 @@
           })
             .val(type === "datetime-local" ? localTimestamp(value) : value)
             .appendTo(jqRow);
+          if (whenChoice) {
+            const syncChoice = () => {
+              const enabled = jqSelect.val() === whenChoice;
+              input.prop("disabled", !enabled).parent().prop("hidden", !enabled);
+              imageInputs.get(input[0])?.sync();
+            };
+            jqSelect.on("change", syncChoice);
+            input.data("syncChoice", syncChoice);
+          }
           if (type === "image") {
             initImageInput(input[0]);
             input.parent().addClass("mb-1");
@@ -1892,6 +1916,7 @@
             .insertBefore(input);
         });
         jqRow.appendTo(jqEditor);
+        jqRow.find("[data-field]").each((_, input) => $(input).data("syncChoice")?.());
         jqRow.find(".image-url").each((_, input) => imageInputs.get(input)?.sync());
         if (choiceKey === "platform") {
           initSelect2(jqSelect, { templateResult: platformOption, templateSelection: platformOption });
@@ -1909,6 +1934,7 @@
         // Serialize DOM order back into the original map, string-array, or object-array shape.
         const values = jqRows.get().map((row, index) => {
           const jqRow = $(row);
+          jqRow.find('[data-action="duplicate"]').prop("disabled", jqRows.length >= limit);
           jqRow.find('[data-action="up"]').prop("disabled", index === 0);
           jqRow.find('[data-action="down"]').prop("disabled", index === jqRows.length - 1);
           if (map)
@@ -1964,6 +1990,11 @@
             jqRow.remove();
             sync();
           });
+        } else if (action === "duplicate") {
+          const rows = jqEditor.children(":not([inert])");
+          if (rows.length >= limit) return;
+          const entry = JSON.parse(jqOutput.val())[rows.index(jqRow)];
+          addRow(entry).insertAfter(jqRow).find("[data-field]").first().trigger("focus");
         } else if (action === "up") jqRow.insertBefore(jqRow.prevAll(":not([inert])").first());
         else jqRow.insertAfter(jqRow.nextAll(":not([inert])").first());
         sync();
