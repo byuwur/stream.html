@@ -425,7 +425,7 @@
       },
       {
         id: "popup",
-        name: "Social popup",
+        name: "Social Popups",
         description: "Animated social accounts from 90+ platforms.",
         icon: "fa-comment",
         category: "branding",
@@ -434,7 +434,7 @@
       },
       {
         id: "main",
-        name: "Main scene",
+        name: "Main Scenes",
         description: "Starting, BRB, ending, and intermission scenes.",
         icon: "fa-clapperboard",
         category: "scenes",
