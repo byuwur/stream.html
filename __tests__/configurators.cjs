@@ -513,6 +513,49 @@ test("Now Playing demo buttons cycle three tracks through the preview and option
   assert.equal(await page.getByRole("button", { name: "Next track" }).count(), 0);
 });
 
+test("Now Playing simulates pause, resume, and stop through the media transitions", async (t) => {
+  const browser = await launchBrowser();
+  t.after(() => browser.close());
+  const page = await browser.newPage();
+  await serve(page, await loadAssets(editorAssets));
+  await page.goto("https://stream.test/now-playing/?position=43&paused=hide&waiting=yes&overlay.entrance=fadeIn&overlay.entranceDuration=300#configure");
+  const preview = page.frameLocator("#overlay-preview");
+  const toggle = page.getByRole("button", { name: "Play / Pause" });
+  const stop = page.getByRole("button", { name: "Stop", exact: true });
+  await preview.locator(".track").waitFor();
+  const url = await page.locator("#overlay-url").inputValue();
+  await toggle.click();
+  await preview.locator(".panel").waitFor({ state: "hidden" });
+  await preview.locator(".waiting").waitFor();
+  await toggle.click();
+  await preview.locator(".track").waitFor();
+  assert.ok(parseFloat(await preview.locator(".panel").evaluate((panel) => panel.style.getPropertyValue("--progress"))) >= (43 / 146) * 100);
+  await stop.click();
+  await preview.locator(".panel").waitFor({ state: "hidden" });
+  await preview.locator(".waiting").waitFor();
+  await toggle.click();
+  await preview.getByText("0:00", { exact: true }).waitFor();
+  assert.equal(await page.locator("#overlay-url").inputValue(), url);
+
+  await page.clock.install();
+  await page.goto("https://stream.test/now-playing/?layout=vinyl&demoControls=yes&animate=no&playback=paused&textContrast=manual");
+  await page.locator(".panel[data-spinning=false]").waitFor();
+  assert.equal(await page.evaluate(() => byStreamResource.settings.textContrast), "manual");
+  await toggle.click();
+  await page.locator(".panel[data-spinning=true]").waitFor();
+  await page.clock.fastForward(4000);
+  await toggle.click();
+  const paused = await page.locator(".elapsed").textContent();
+  assert.ok(Number(paused.split(":")[1]) >= 27);
+  await page.clock.fastForward(4000);
+  assert.equal(await page.locator(".elapsed").textContent(), paused);
+  await stop.click();
+  await page.locator(".panel").waitFor({ state: "hidden" });
+  await toggle.click();
+  await page.locator(".panel[data-spinning=true]").waitFor();
+  assert.equal(await page.locator(".elapsed").textContent(), "0:00");
+});
+
 test("shrinking Now Playing clears the previous card edge in the scaled preview", { timeout: 45000 }, async (t) => {
   const browser = await launchBrowser();
   t.after(() => browser.close());

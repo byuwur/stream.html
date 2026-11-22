@@ -44,14 +44,14 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       demoControls: {
         type: "switch",
-        label: "Show track buttons on the overlay",
+        label: "Show demo controls on the overlay",
         default: "no",
         section: "Demo track",
         when: ["source", "demo"],
         checkedValue: "yes",
         uncheckedValue: "no",
         options: { yes: "On", no: "Off" },
-        description: "Previous and Next are always available in the demo preview."
+        description: "Track and playback controls are always available in the demo preview."
       },
       title: { type: "text", label: "Title", default: "Girl Like Me", section: "Demo track", when: ["source", "demo"], maxlength: 512 },
       artist: { type: "text", label: "Artist", default: "PinkPantheress", section: "Demo track", when: ["source", "demo"], maxlength: 512 },
@@ -269,7 +269,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     for (const button of controls.querySelectorAll("button")) {
       button.className = "btn btn-outline-secondary";
       button.addEventListener("click", () => {
-        frame.contentWindow.postMessage({ type: "stream-demo-track", step: Number(button.dataset.step) }, location.protocol === "file:" ? "*" : location.origin);
+        const command = button.dataset.step ? { step: Number(button.dataset.step) } : { playback: button.dataset.playback };
+        frame.contentWindow.postMessage({ type: "stream-demo-track", ...command }, location.protocol === "file:" ? "*" : location.origin);
       });
     }
     const update = () => {
@@ -279,6 +280,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     frame.addEventListener("load", update);
     update();
     document.getElementById("preview-url").before(controls);
+    controls.parentElement.classList.add("flex-wrap", "gap-1");
   }
   const settings = await byStream.initResource(resource, { configureResource });
   if (!byStreamOverlay) return;
@@ -462,8 +464,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   function format(seconds) {
     return Math.floor(seconds / 60) + ":" + String(Math.floor(seconds % 60)).padStart(2, "0");
   }
+  function elapsedPosition(state, since) {
+    return Math.min(state.duration, state.position + (state.playback === "playing" ? (performance.now() - since) / 1000 : 0));
+  }
   function paint() {
-    const elapsed = Math.min(track.duration, track.position + (track.playback === "playing" ? (performance.now() - received) / 1000 : 0));
+    const elapsed = elapsedPosition(track, received);
     panel.style.setProperty("--progress", (track.duration ? (elapsed / track.duration) * 100 : 0) + "%");
     const position = format(elapsed),
       duration = format(track.duration);
@@ -528,8 +533,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       cover: settings.cover || sampleCover(),
       fallbackCover: settings.cover === resource.fields.cover.default ? sampleCover : undefined
     };
-    const showTrack = (entry) => display({ ...entry, available: true, playback: settings.playback });
-    showTrack(first);
+    display({ ...first, available: true, playback: settings.playback });
     const preview = window.parent !== window;
     if (preview || settings.demoControls === "yes") {
       const tracks = [
@@ -554,9 +558,18 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
       ];
       let index = 0;
-      function skip(step) {
-        index = (index + step + tracks.length) % tracks.length;
-        showTrack(tracks[index]);
+      function simulate(command) {
+        const step = Number(command.step);
+        if (step === 1 || step === -1) {
+          index = (index + step + tracks.length) % tracks.length;
+          display({ ...tracks[index], available: true, playback: latest.playback });
+        } else if (command.playback === "stop") {
+          display({ ...latest, playback: "stopped", position: 0 });
+        } else if (command.playback === "toggle") {
+          const playback = latest.playback === "playing" ? "paused" : "playing";
+          const position = latest.playback === "stopped" ? 0 : elapsedPosition(latest, receivedAt);
+          display({ ...latest, playback, position });
+        }
       }
       if (preview)
         window.addEventListener(
@@ -564,14 +577,14 @@ document.addEventListener("DOMContentLoaded", async () => {
           (event) => {
             const message = event.data;
             const sameOrigin = event.origin === location.origin || (location.protocol === "file:" && event.origin === "null");
-            if (event.source === window.parent && sameOrigin && message?.type === "stream-demo-track" && [1, -1].includes(message.step)) skip(message.step);
+            if (event.source === window.parent && sameOrigin && message?.type === "stream-demo-track") simulate(message);
           },
           { signal: events.signal }
         );
       if (settings.demoControls === "yes") {
         const controls = root.querySelector(".demo-controls");
         controls.hidden = false;
-        for (const button of controls.querySelectorAll("button")) button.addEventListener("click", () => skip(Number(button.dataset.step)), { signal: events.signal });
+        for (const button of controls.querySelectorAll("button")) button.addEventListener("click", () => simulate(button.dataset), { signal: events.signal });
       }
     }
   } else {
