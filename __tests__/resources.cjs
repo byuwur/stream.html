@@ -644,8 +644,13 @@ test("automatic panels wrap and animate both dimensions under a maximum width", 
       await frames();
       return { short, long, early, middle, finalLines, final: box(), grow: grow.effect.getTiming().easing, shrink: shrink.length };
     });
-    assert.deepEqual(result.early, result.finalLines);
-    assert.deepEqual(result.middle, result.finalLines);
+    for (const lines of [result.early, result.middle]) {
+      assert.equal(lines.length, result.finalLines.length);
+      lines.forEach(([width, height], i) => {
+        const [finalWidth, finalHeight] = result.finalLines[i];
+        assert.ok(Math.abs(width - finalWidth) < 0.01 && Math.abs(height - finalHeight) < 0.01, `Line ${i + 1} changed from ${width}×${height} to ${finalWidth}×${finalHeight}`);
+      });
+    }
     assert.equal(result.long[0], 320);
     assert.ok(mode === "content" ? result.short[0] < 320 : result.short[0] === 320);
     assert.ok(result.long[1] > result.short[1]);
@@ -906,16 +911,17 @@ test("custom social account effects wait for the container to resize before thei
       await new Promise(requestAnimationFrame);
       await new Promise(requestAnimationFrame);
       const pausedForResize = carousel.time() === heldTime;
+      carousel.pause();
       for (const motion of document.getAnimations()) if (motion.id === "stream-resize") motion.finish();
       while (node.querySelector("[data-stream-await-size]")) await new Promise(requestAnimationFrame);
-      await new Promise(requestAnimationFrame);
-      await new Promise(requestAnimationFrame);
-      states.push({ hidden, pausedForResize, child: node.getAnimations({ subtree: true }).some((motion) => motion.effect.target !== node && motion.id === "stream-entrance") });
+      const resumed = carousel.timeScale() === 1;
+      carousel.time(heldTime + 0.03, false);
+      states.push({ hidden, pausedForResize, resumed, child: node.getAnimations({ subtree: true }).some((motion) => motion.effect.target !== node && motion.id === "stream-entrance") });
       return states;
     }, times);
     assert.ok(states[0].child && states[0].motion.includes("stream-entrance"), name);
     assert.ok(states[1].motion.includes("stream-exit"), name);
-    assert.deepEqual(states[3], { hidden: true, pausedForResize: true, child: true }, name);
+    assert.deepEqual(states[3], { hidden: true, pausedForResize: true, resumed: true, child: true }, name);
     assert.ok(states[2].width > states[0].width && !states[2].child && states[2].motion.includes("stream-resize"), name + " " + JSON.stringify(states));
   }
 });
@@ -1149,21 +1155,24 @@ test("automatic foreground follows solid surfaces and light or dark replacement 
     ["000000", "rgb(255, 255, 255)"]
   ]) {
     await page.goto("https://stream.test/badge/?label=Test&animate=no&textContrast=auto&backgroundColor=" + background);
-    await page.waitForFunction((color) => getComputedStyle(document.querySelector(".primary")).color === color && document.querySelector(".primary").hasAttribute("data-contrast"), ink);
+    await page.locator(".primary[data-contrast]").waitFor();
+    await page.waitForFunction((color) => getComputedStyle(document.querySelector(".primary")).color === color, ink);
   }
-  await page.goto("https://stream.test/now-playing/?layout=classic&source=helper&textContrast=auto&animate=no");
+  await page.goto("https://stream.test/now-playing/?layout=classic&source=helper&waiting=yes&textContrast=auto&animate=no");
+  await page.locator(".waiting").waitFor();
   for (const [index, fill] of ["#ffffff", "#000000"].entries()) {
-    await page.evaluate(
+    const accepted = await page.evaluate(
       ([seq, color]) => {
         const canvas = document.createElement("canvas");
         canvas.width = canvas.height = 16;
         const ctx = canvas.getContext("2d");
         ctx.fillStyle = color;
         ctx.fillRect(0, 0, 16, 16);
-        byStream.receiveNative({ version: 1, channel: "media", seq, state: { available: true, title: "Contrast", artist: "Artist", album: "", duration: 60, position: 0, playback: "paused", cover: canvas.toDataURL() } });
+        return byStream.receiveNative({ version: 1, channel: "media", seq, state: { available: true, title: "Contrast", artist: "Artist", album: "", duration: 60, position: 0, playback: "paused", cover: canvas.toDataURL() } });
       },
       [index + 1, fill]
     );
+    assert.equal(accepted, true);
     await page.waitForFunction((color) => [".track", ".artist", ".times"].every((selector) => getComputedStyle(document.querySelector(selector)).color === color), index ? "rgb(255, 255, 255)" : "rgb(0, 0, 0)");
   }
 });

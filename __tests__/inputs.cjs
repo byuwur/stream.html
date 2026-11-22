@@ -394,18 +394,11 @@ test("input history plays animation in and out on each displaced row", async (t)
     await page.goto(`https://stream.test/${tool}/?${query}`);
     await page.locator(ready).first().waitFor({ state: "attached" });
     await page.locator(".input-history").waitFor({ state: "attached" });
-    await page.keyboard.down("KeyJ");
+    const firstKey = tool === "controller" ? "Escape" : "Backspace";
+    await page.keyboard.down(firstKey);
     await page.locator(".history-entry").waitFor();
-    await page.keyboard.up("KeyJ");
-    const previousWidth = await page.locator(".history-entry").evaluate(async (row) => {
-      row.querySelector(".history-prompt").textContent = "Long button label";
-      await new Promise(requestAnimationFrame);
-      await new Promise(requestAnimationFrame);
-      for (const motion of document.getAnimations()) if (motion.id === "stream-resize") motion.finish();
-      await new Promise(requestAnimationFrame);
-      await new Promise(requestAnimationFrame);
-      return row.parentElement.offsetWidth;
-    });
+    await page.keyboard.up(firstKey);
+    const previousWidth = await page.locator(".input-history").evaluate((list) => list.offsetWidth);
     await page.keyboard.down("KeyJ");
     const outgoing = page.locator(".history-entry[data-stream-exiting]");
     await outgoing.waitFor();

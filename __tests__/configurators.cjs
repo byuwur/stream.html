@@ -112,7 +112,7 @@ test("a dropdown label focuses its visible control without opening a picker", as
   const page = await browser.newPage();
   page.setDefaultTimeout(6000);
   await serve(page, await loadAssets(editorAssets));
-  await page.goto("https://stream.test/now-playing/?layout=classic#configure");
+  await page.goto("https://stream.test/badge/?label=LIVE#configure");
   const caption = page.getByText("Appearance preset", { exact: true });
   const preset = page.locator("label").filter({ has: caption });
   const control = preset.getByRole("combobox");
