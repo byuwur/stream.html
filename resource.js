@@ -1361,7 +1361,8 @@
           .map((node) => resizeBoxes.get(node)?.animation)
           .concat(pending())
           .filter((motion) => motion && motion.playState !== "finished" && motion.playState !== "idle");
-        if (!motions.length) break;
+        // Releasing an outgoing row can change the box before ResizeObserver starts its animation.
+        if (!motions.length && !boxes.some(changingSize)) break;
         await Promise.allSettled(motions.map((motion) => motion.finished));
       }
       release();
