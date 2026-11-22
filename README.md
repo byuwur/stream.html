@@ -695,13 +695,13 @@ The build writes diagnostic sizes to `dist/experimental/sizes.json`. `release:ex
 
 ## Other assets
 
-| Folder / file                                              | Use                                                                 |
-| ---------------------------------------------------------- | ------------------------------------------------------------------- |
-| `alert-box.streamlabs.com/`, `chat-box.streamlabs.com/`    | Service widgets: copy HTML/CSS/JS and fields into Streamlabs.       |
-| `dashboard.twitch.tv/`, `deckboard.app/`                   | Twitch alert templates and Deckboard exports.                       |
-| `InputOverlay.OBS/`                                        | OBS Input Overlay plugin artwork/layouts, separate from Controller. |
-| `obs-studio/`, `foobar2000.org/`                           | Personal profiles/configurations; not portable installations.       |
-| `_byuwur.OBS/`, `_generic.OBS/`, `_overlays.OBS/`, `_art/` | Branding, transitions, backgrounds, and editable media.             |
+| Folder / file                                               | Use                                                                 |
+| ----------------------------------------------------------- | ------------------------------------------------------------------- |
+| `__alert-box.streamlabs.com/`, `__chat-box.streamlabs.com/` | Service widgets: copy HTML/CSS/JS and fields into Streamlabs.       |
+| `__dashboard.twitch.tv/`, `__deckboard.app/`                | Twitch alert templates and Deckboard exports.                       |
+| `_InputOverlay.OBS/`                                        | OBS Input Overlay plugin artwork/layouts, separate from Controller. |
+| `_obs-studio_/`, `__foobar2000.org/`                        | Personal profiles/configurations; not portable installations.       |
+| `_byuwur.OBS/`, `_generic.OBS/`, `_overlays.OBS/`, `_art/`  | Branding, transitions, backgrounds, and editable media.             |
 
 Back up before importing. Replace devices, paths, and account settings; keep stream keys, WebSocket passwords, and private widget URLs out of shared exports.
 
