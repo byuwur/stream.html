@@ -55,6 +55,16 @@ test("TBD input demos and same-document native snapshots", { timeout: 60000 }, a
     await page.reload();
     assert.equal(await count(), "-1");
 
+    await open("counter/?animate=no&source=helper&increase=Ctrl%2BShift%2BKeyK&decrease=F9&resetKey=KeyA%2BKeyB", "output");
+    await key(0, "ControlRight", "ShiftLeft", "KeyK");
+    await key(1, "ControlRight", "ShiftLeft");
+    await key(2, "ControlRight", "ShiftLeft", "KeyK");
+    await key(3, "ControlRight", "ShiftLeft", "KeyK");
+    assert.equal(await count(), "1");
+    await key(4, "KeyA");
+    await key(5, "KeyA", "KeyB", "F9");
+    assert.equal(await count(), "0");
+
     await open("counter/?start=3&resetKey=KeyR&animate=no", "output");
     await page.keyboard.down("F9");
     await page.keyboard.down("F9");

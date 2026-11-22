@@ -16,7 +16,7 @@
  * Field metadata is shared by URL validation, native styling, and the optional editor.
  * Resource scripts own defaults and order; widgets enhance this same contract.
  * @typedef {Object} ResourceField
- * @property {string} type Control/value kind: text, multiline, number, select, switch, color, font, entries, mapping, timestamp, locale, timezone, or timezones.
+ * @property {string} type Control/value kind: text, multiline, number, select, switch, color, font, entries, mapping, keybinding, timestamp, locale, timezone, or timezones.
  * @property {ResourceValue} [default] Resource default; missing/empty scalars receive a neutral default before use.
  * @property {string} label Human-readable control label.
  * @property {boolean|function(ResourceSettings): boolean} [image] Image input; a predicate limits uploads in mixed media fields.
@@ -534,6 +534,52 @@
       if (!field.retainInactive && !fieldEnabled(fields, settings, name)) settings[name] = field.type === "switch" ? field.uncheckedValue : structuredClone(field.default);
     }
   }
+
+  // ============================================================
+  // PHYSICAL KEY BINDINGS
+  // ============================================================
+  const keyModifiers = [
+    ["Ctrl", "Control", "ctrlKey"],
+    ["Alt", "Alt", "altKey"],
+    ["Shift", "Shift", "shiftKey"],
+    ["Meta", "Meta", "metaKey"]
+  ];
+  const keyBinding = {
+    parse(value) {
+      if (typeof value !== "string" || value.length > 160) return null;
+      if (value.trim() === "Off") return "Off";
+      const codes = value.split("+").map((part) => {
+        const code = part.trim();
+        if (code === "Control") return "Ctrl";
+        if (/^[a-z]$/i.test(code)) return "Key" + code.toUpperCase();
+        if (/^[0-9]$/.test(code)) return "Digit" + code;
+        return code;
+      });
+      if (codes.some((code) => !/^[A-Za-z][A-Za-z0-9]{0,39}$/.test(code) || ["Off", "F1", "F2", "Unidentified"].includes(code)) || new Set(codes).size !== codes.length) return null;
+      const modifiers = keyModifiers.filter(([alias]) => codes.includes(alias));
+      const keys = codes.filter((key) => !modifiers.some(([alias, code]) => key === alias || key === code + "Left" || key === code + "Right"));
+      const binding = [...modifiers.map(([alias]) => alias), ...keys].join("+");
+      return binding.length <= 160 ? binding : null;
+    },
+    // Browser flags also cover modifiers that were held before the overlay gained focus.
+    keys(codes, event) {
+      const keys = new Set(codes);
+      for (const [alias, code, flag] of keyModifiers) {
+        if (event ? event[flag] : keys.has(code + "Left") || keys.has(code + "Right")) keys.add(alias);
+        else {
+          keys.delete(alias);
+          keys.delete(code + "Left");
+          keys.delete(code + "Right");
+        }
+      }
+      return keys;
+    },
+    pressed(binding, before, after) {
+      if (binding === "Off") return false;
+      const keys = binding.split("+");
+      return keys.every((key) => after.has(key)) && keys.some((key) => !before.has(key)) && keyModifiers.every(([alias, code]) => !after.has(alias) || keys.includes(alias) || keys.includes(code + "Left") || keys.includes(code + "Right"));
+    }
+  };
 
   // ===== FIELD DEFINITIONS =====
   function generatedFields(prefix, fields, scope = prefix) {
@@ -1639,6 +1685,12 @@
    */
   function initializeDefaults(fields) {
     for (const [name, field] of Object.entries(fields)) {
+      if (field.type === "keybinding") {
+        field.validate ??= keyBinding.parse;
+        field.maxlength ??= 160;
+        field.default = keyBinding.parse(field.default) ?? "Off";
+        field.description ??= "Capture or type a combination such as Ctrl+Shift+K. Escape cancels capture. Use Off to disable. F1 and F2 are reserved.";
+      }
       if (["text", "textarea"].includes(field.type) && !field.styleProperty && !field.validate && typeof field.default === "string" && !field.default.trim()) {
         field.default = "";
         continue;
@@ -3329,6 +3381,7 @@
     fieldEnabled,
     platforms,
     validParameter,
+    keyBinding,
     applyParameters,
     settingsURL,
     whenFields,

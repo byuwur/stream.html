@@ -286,6 +286,7 @@
     };
     if (properties[field.styleProperty]) return properties[field.styleProperty];
     const types = {
+      keybinding: "fa-keyboard",
       color: "fa-palette",
       font: "fa-font",
       datetime: "fa-calendar-days",
@@ -1427,6 +1428,45 @@
       });
       jqInput.on("sync.controls", () => button.prop("disabled", input.disabled));
       button.prop("disabled", input.disabled);
+    }
+
+    /** Record a chord on its first key release. The text field still owns typing, restore, and URL edits. */
+    function initKeyBinding(input, rule) {
+      const jqInput = $(input).wrap('<div class="input-group"></div>');
+      const button = $('<button type="button" class="btn btn-outline-secondary"></button>').insertAfter(jqInput);
+      const keys = new Set();
+      let recording = false;
+      function setRecording(active) {
+        recording = active;
+        keys.clear();
+        button.text(active ? "Press keys…" : "Capture").attr("aria-label", `${active ? "Cancel capture for" : "Capture"} ${rule.label}`);
+      }
+      setRecording(false);
+      button
+        .on("click", () => {
+          button[0].focus();
+          setRecording(!recording);
+        })
+        .on("blur", () => setRecording(false));
+      button.on("keydown keyup", (event) => {
+        if (!recording) return;
+        event.preventDefault();
+        event.stopPropagation();
+        const key = event.originalEvent;
+        if (key.repeat || key.isComposing) return;
+        if (key.code === "Escape") return setRecording(false);
+        if (key.type === "keydown") {
+          for (const code of byStream.keyBinding.keys([key.code], key)) keys.add(code);
+          const value = byStream.keyBinding.parse([...keys].join("+"));
+          if (!value) return setRecording(false);
+          button.text(value);
+        } else if (keys.size) {
+          const value = byStream.keyBinding.parse([...keys].join("+"));
+          setRecording(false);
+          jqInput.val(value).trigger("change");
+        }
+      });
+      jqInput.on("sync.controls", () => button.prop("disabled", input.disabled));
     }
 
     /** Enhance a small native select with keyboard-accessible segmented buttons; the select stays authoritative. */
@@ -2688,6 +2728,7 @@
       function buildParameterReference() {
         if (jqParameters.children().length) return;
         const acceptedTypes = {
+          keybinding: "Off, a physical key code, or a combination joined by +",
           color: "Hex color: 3, 4, 6, or 8 digits; omit # in URLs",
           url: "URL or relative asset path",
           font: "Font family or CSS font stack",
@@ -3172,6 +3213,7 @@
         const name = input.name;
         const field = resource.fields[name];
         if (field.type === "number" && !field.compact) initNumberRange(input, field);
+        if (field.type === "keybinding") initKeyBinding(input, field);
         if (field.type === "select") initChoiceButtons(input, field);
         if (field.entries)
           initEntryEditor(name, settings[name], {

@@ -1,12 +1,6 @@
 document.addEventListener("DOMContentLoaded", async () => {
   await byStream.assetsReady;
-  const binding = {
-    type: "text",
-    section: "Key bindings",
-    maxlength: 40,
-    description: "Use a physical key code or Off. F1 and F2 are reserved. Opposing actions cancel and reset takes priority.",
-    validate: (value) => (/^[A-Za-z][A-Za-z0-9]{0,39}$/.test(value) && !["F1", "F2"].includes(value) ? value : null)
-  };
+  const binding = { type: "keybinding", section: "Content & behavior" };
   // ===== RESOURCE CONFIGURATION =====
   const resource = {
     version: "1.1",
@@ -181,12 +175,19 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   showCount(String(count));
 
-  function applyPress(keys) {
-    const delta = Number(keys.has(settings.increase)) - Number(keys.has(settings.decrease));
-    const value = keys.has(settings.resetKey) ? start : clamp(count + delta * settings.step);
-    if (count === value) return;
-    count = value;
-    showCount(String(count));
+  function updateKeys(codes, press, event) {
+    const next = byStream.keyBinding.keys(codes, event);
+    const triggered = (binding) => press && byStream.keyBinding.pressed(binding, held, next);
+    const increase = triggered(settings.increase);
+    const decrease = triggered(settings.decrease);
+    const reset = triggered(settings.resetKey);
+    held = next;
+    const value = reset ? start : clamp(count + (Number(increase) - Number(decrease)) * settings.step);
+    if (count !== value) {
+      count = value;
+      showCount(String(count));
+    }
+    return increase || decrease || reset;
   }
 
   const events = new AbortController();
@@ -196,37 +197,28 @@ document.addEventListener("DOMContentLoaded", async () => {
       "keyboard",
       (state, first) => {
         const next = new Set(state?.keys.filter((key) => key !== "Off"));
-        if (state && !first) applyPress(new Set([...next].filter((key) => !held.has(key))));
-        held = next;
+        updateKeys(next, !!state && !first);
       },
       signal
     );
   } else {
-    const bindings = new Set([settings.increase, settings.decrease, settings.resetKey]);
-    bindings.delete("Off");
     window.addEventListener(
       "keydown",
       (event) => {
-        if (
-          !bindings.has(event.code) ||
-          event.repeat ||
-          held.has(event.code) ||
-          event.isComposing ||
-          event.defaultPrevented ||
-          event.ctrlKey ||
-          event.altKey ||
-          event.metaKey ||
-          event.shiftKey ||
-          event.target?.closest?.("input, textarea, select, button, a, [contenteditable]:not([contenteditable='false'])")
-        )
-          return;
-        event.preventDefault();
-        held.add(event.code);
-        applyPress(new Set([event.code]));
+        if (event.repeat || event.isComposing || event.defaultPrevented || event.target?.closest?.("input, textarea, select, button, a, [contenteditable]:not([contenteditable='false'])")) return;
+        if (updateKeys(new Set(held).add(event.code), true, event)) event.preventDefault();
       },
       { signal }
     );
-    window.addEventListener("keyup", (event) => held.delete(event.code), { signal });
+    window.addEventListener(
+      "keyup",
+      (event) => {
+        const next = new Set(held);
+        next.delete(event.code);
+        updateKeys(next, false, event);
+      },
+      { signal }
+    );
     window.addEventListener("blur", () => held.clear(), { signal });
     document.addEventListener(
       "visibilitychange",

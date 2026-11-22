@@ -371,6 +371,47 @@ test("TBD configurators export demos, restore conditional drafts and round-trip 
   assert.deepEqual(errors, []);
 });
 
+test("key binding fields capture combinations, cancel, and round-trip through Counter", async (t) => {
+  const browser = await launchBrowser();
+  t.after(() => browser.close());
+  const page = await browser.newPage();
+  await serve(page, await loadAssets(editorAssets));
+  await page.goto("https://stream.test/counter/?animate=no#configure");
+  const general = page.locator('[data-config-section="General"]');
+  await general.locator('[name="increase"]').waitFor();
+  assert.equal(await general.locator('[data-config-subsection="Key bindings"]').count(), 0);
+  for (const [name, value] of [["increase", "F9"], ["decrease", "F10"], ["resetKey", "Off"]]) {
+    const input = general.locator('[name="' + name + '"]');
+    assert.equal(await input.inputValue(), value);
+    assert.equal(await input.evaluate((node) => node.closest("[data-config-subsection]") === null), true);
+  }
+  const increase = page.locator('[name="increase"]');
+  const capture = page.getByRole("button", { name: "Capture Increase key", exact: true });
+  await capture.click();
+  await page.keyboard.press("Control+Shift+k");
+  assert.equal(await increase.inputValue(), "Ctrl+Shift+KeyK");
+  await capture.click();
+  await page.keyboard.press("Escape");
+  assert.equal(await increase.inputValue(), "Ctrl+Shift+KeyK");
+  await capture.click();
+  await page.keyboard.press("F2");
+  assert.equal(await increase.inputValue(), "Ctrl+Shift+KeyK");
+  await page.locator('[name="decrease"]').fill("KeyA+KeyB");
+  await page.waitForFunction(() => new URL(document.querySelector("#overlay-url").value).searchParams.get("decrease") === "KeyA+KeyB");
+  await page.goto(await page.locator("#overlay-url").inputValue());
+  await page.locator("output").waitFor();
+  await page.keyboard.press("Control+k");
+  assert.equal(await page.locator("output").textContent(), "0");
+  await page.keyboard.press("Control+Shift+k");
+  assert.equal(await page.locator("output").textContent(), "1");
+  await page.keyboard.down("a");
+  await page.keyboard.down("b");
+  await page.keyboard.down("b");
+  await page.keyboard.up("b");
+  await page.keyboard.up("a");
+  assert.equal(await page.locator("output").textContent(), "0");
+});
+
 test("Now Playing demo buttons cycle three tracks through the preview and optional standalone controls", async (t) => {
   const browser = await launchBrowser();
   t.after(() => browser.close());

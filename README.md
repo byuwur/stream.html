@@ -127,7 +127,7 @@ Digital, analog, split-flap, and minimal clocks. **Alpha.**
 
 ### Counter
 
-**TBD.** Focus the overlay or use OBS Interact. F9 increases and F10 decreases by the configured positive step. Reset defaults to Off. Bind physical codes such as `KeyW` or `F11`. F1 and F2 stay reserved. A held key counts once. Opposing bindings on one press or native snapshot cancel, and a reset press takes priority. Optional bounds clamp the starting value and every change. Reload restores the configured start. Losing focus or native input preserves the number.
+**TBD.** Focus the overlay or use OBS Interact. F9 increases and F10 decreases by the configured positive step. Reset defaults to Off. Choose **Capture**, hold the keys together, then release to save. Escape cancels capture. You can also type a physical code such as `KeyW`, a shortcut such as `Ctrl+Shift+K`, or a combination such as `KeyA+KeyB`. F1 and F2 stay reserved. A held combination counts once. Opposing bindings on one press or native snapshot cancel, and a reset press takes priority. Optional bounds clamp the starting value and every change. Reload restores the configured start. Losing focus or native input preserves the number.
 
 ![Counter demo preview](counter/prev.jpg)
 
@@ -620,6 +620,8 @@ The runtime exposes `byStream.ready`, the same promise returned by `initResource
 Define valid defaults in `resource.fields`. Resource dimensions and offsets use pixels. Maximum width or height of zero means automatic sizing. Mark fields with `zeroIsDefault` when clearing them or entering zero should restore their declared default. Keep optional text empty. Use explicit Off values for optional features.
 
 Use `subsection` and `when` for conditional fields. Inactive fields keep editor drafts and stay out of generated URLs. Use `retainInactive` for accepted values that need to survive. Declare styles with `styleSelector`, `styleProperty` and `styleUnit` or `styleValue(settings)`. Use `normalizeParameters(values)` for legacy inputs before validation.
+
+Declare a shortcut with `{ type: "keybinding", label: "Increase key", default: "F9" }`. The configurator provides capture and manual entry. Omit the default to start at `Off`. In the renderer, build each held-key snapshot with `byStream.keyBinding.keys(codes, event)` (omit the event for native snapshots). On a press, call `byStream.keyBinding.pressed(settings.increase, previous, current)` to detect a newly completed combination. Counter uses this same path for browser and helper input.
 
 Shared `dateTimeFields()` and `dateTimeFormatter()` helpers support presets such as `yyyy/MM/dd`, `dd/MM/yyyy`, `HH:mm`, and `hh:mm:ss a`. Numeric dates use the Gregorian calendar; month names follow the locale. `timezone`, `timezones`, and `locale` field types use searchable Select2 controls with UTC offsets or language/region labels; extra-zone selection preserves order and allows up to three zones. `durationFormats` and `formatDuration()` format elapsed seconds without wrapping total-minute/second modes at midnight. Rotating resources use `changeItems()` to play Animation out on the outgoing item before showing its replacement with Animation in. These helpers remain in the shared framework for resources to opt into.
 
