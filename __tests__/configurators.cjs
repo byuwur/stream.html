@@ -524,6 +524,11 @@ test("Now Playing simulates pause, resume, and stop through the media transition
   const stop = page.getByRole("button", { name: "Stop", exact: true });
   await preview.locator(".track").waitFor();
   const url = await page.locator("#overlay-url").inputValue();
+  assert.equal(await page.locator('[name="textContrast"]').inputValue(), "auto");
+  assert.equal(await page.locator('[name="overlay.container.matchExit"]').isChecked(), false);
+  assert.equal(await page.locator('[name="overlay.container.exit"]').inputValue(), "fadeOut");
+  assert.equal(await page.locator('[name="waitingText.entrance"]').inputValue(), "fadeIn");
+  assert.equal(await page.locator('[name="waitingText.matchExit"]').isChecked(), false);
   await toggle.click();
   await preview.locator(".panel").waitFor({ state: "hidden" });
   await preview.locator(".waiting").waitFor();

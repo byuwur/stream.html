@@ -103,7 +103,7 @@ Live keyboard/mouse SVG input and optional ephemeral Input History. **Alpha.**
 
 Use **Previous** and **Next** in the Now Playing preview to cycle through your configured track and two sample songs. **Play / Pause** pauses or resumes at the current position. **Stop** tests the idle transition and resets the track to the beginning. Enable **Show demo controls on the overlay** to use the same buttons in a standalone demo.
 
-The Classic demo opens with “Girl Like Me” by PinkPantheress from _Fancy That_, at 0:23 of 2:26. **Cover background → Blurred cover background** is on by default. It tints the artwork behind the track details or across the Card. The demo uses its built-in illustration if the default album cover is unavailable.
+The Classic demo opens with “Girl Like Me” by PinkPantheress from _Fancy That_, at 0:23 of 2:26. Text contrast is automatic by default. **Cover background → Blurred cover background** is on by default. It tints the artwork behind the track details or across the Card. The demo uses its built-in illustration if the default album cover is unavailable.
 
 ![Now Playing demo preview](now-playing/prev.jpg)
 

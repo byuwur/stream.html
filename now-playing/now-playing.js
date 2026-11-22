@@ -243,13 +243,18 @@ document.addEventListener("DOMContentLoaded", async () => {
       ...byStream.filterFields("backdropFilter", "Panel backdrop", "#overlay .panel", true)
     },
     fieldDefaults: {
+      textContrast: "auto",
+      "overlay.container.matchExit": "no",
+      "overlay.container.exit": "fadeOut",
       "artwork.entrance": "fadeInLeft",
       "coverBackdrop.entrance": "fadeInRight",
       "title.entrance": "fadeInDown",
       "artist.entrance": "fadeInDown",
       "album.entrance": "fadeInDown",
       "timeline.entrance": "fadeInUp",
-      "time.entrance": "fadeInUp"
+      "time.entrance": "fadeInUp",
+      "waitingText.entrance": "fadeIn",
+      "waitingText.matchExit": "no"
     }
   };
   resource.fields.albumStyle.default = "italic";
