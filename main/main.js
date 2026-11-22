@@ -15,6 +15,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     description: "Starting, BRB, ending, and intermission scenes.",
     preview: [1920, 1080],
     urlRequired: ["sceneTitle"],
+    inlineGroups: [
+      { section: "Background", subsection: "Tint", prefixLabels: true },
+      { section: "Frame", subsection: "Placement" },
+      { section: "Frame", subsection: "Surface" },
+      { section: "Social accounts", subsection: ["Account card", "Surface"] },
+      { section: "Schedule", subsection: ["Layout", "Week layout"] },
+      { section: "Schedule", subsection: ["Day card", "Surface"] }
+    ],
     fieldDefaults: {
       "overlay.children.entrance": "fadeInUp",
       "social.entrance": "default",
@@ -33,8 +41,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     elements: {
       overlay: { label: "Appearance", selector: "#scene" },
       background: { label: "Background", selector: "#bg", fields: ["backgroundColor"] },
-      media: { label: "Media", selector: "#bg :is(#image, #video)", parent: "background", fields: ["displayBackground", "backgroundType", "backgroundUrl", "backgroundBlur", "backgroundScale"], when: ["displayBackground", "yes"] },
-      tint: { label: "Tint", selector: "#bg #overlay", parent: "background", fields: ["backgroundTint", "backgroundOverlay", "backgroundOverlayOpacity", "backgroundBlendMode"], when: ["backgroundTint", "yes"] },
+      media: {
+        label: "Media",
+        selector: "#bg :is(#image, #video)",
+        parent: "background",
+        fields: ["displayBackground", "backgroundType", "backgroundUrl", "backgroundScale", "backgroundBlur", "backgroundTint", "backgroundOverlay", "backgroundOverlayOpacity", "backgroundBlendMode"],
+        when: ["displayBackground", "yes"]
+      },
+      tint: { label: "Tint", selector: "#bg #overlay", parent: "background", when: (settings) => settings.backgroundTint === "yes" },
       frame: { label: "Frame", selector: "#frame", fields: ["frameColor", "frameWidth", "frameInset"] },
       logo: { label: "Logo", selector: "#brandImg", fields: ["displayBranding", "logoUrl", "logoScale", "logoOpacity"], when: ["displayBranding", "yes"] },
       title: { label: "Title", selector: "#title", fields: ["sceneTitle", "titleSize", "titleVerticalOffset"] },
@@ -59,7 +73,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       eventCard: { label: "Event card", container: true, selector: "#list .event", parent: "events" },
       eventHeading: { label: "Heading", selector: "#list .type", parent: "events", fields: ["labelOneHeading", "labelTwoHeading", "labelThreeHeading", "labelFourHeading"] },
       eventName: { label: "Name", selector: "#list .name", parent: "events" },
-      timerGroup: { label: "Countdown", selector: "#countdown", fields: ["displayCountdown", "countdownTime", "countdownFormat", "countdownScale", "countdownPosition"], when: ["displayCountdown", "yes"] },
+      timerGroup: { label: "Countdown", selector: "#countdown", fields: ["displayCountdown", "countdownTime", "countdownFormat", "countdownPosition", "countdownScale"], when: ["displayCountdown", "yes"] },
       countdown: { label: "Time", selector: "#time", parent: "timerGroup" },
       countdownMessage: { label: "Message", selector: "#message", parent: "timerGroup", fields: ["countdownMessage"] },
       countdownEnd: { label: "Finished message", selector: "#endMessage", parent: "timerGroup", fields: ["countdownOverMessage"] }
@@ -165,13 +179,12 @@ document.addEventListener("DOMContentLoaded", async () => {
         step: "any",
         icon: "fa-hashtag"
       },
-      backgroundTint: { type: "switch", default: "yes", label: "Background tint", section: "Background", subsection: "Tint", checkedValue: "yes", uncheckedValue: "no", options: { yes: "On", no: "Off" } },
+      backgroundTint: { type: "switch", default: "yes", label: "Background tint", section: "Background", checkedValue: "yes", uncheckedValue: "no", options: { yes: "On", no: "Off" } },
       backgroundOverlay: {
         type: "color",
         default: "#300",
         label: "Tint color",
         section: "Background",
-        subsection: "Tint",
         when: ["backgroundTint", "yes"],
         maxlength: 160,
         icon: "fa-palette"
@@ -181,7 +194,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         default: 1,
         label: "Tint strength (%)",
         section: "Background",
-        subsection: "Tint",
         when: ["backgroundTint", "yes"],
         description: "0% transparent; 100% opaque.",
         min: 0,
@@ -194,7 +206,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         default: "fill",
         label: "Blend mode",
         section: "Background",
-        subsection: "Tint",
         when: ["backgroundTint", "yes"],
         options: { multiply: "Multiply", overlay: "Overlay", "soft-light": "Soft-light", color: "Color", fill: "Fill" }
       },
@@ -416,40 +427,37 @@ document.addEventListener("DOMContentLoaded", async () => {
       ...byStream.placementFields("#scene"),
       titleVerticalOffset: { type: "number", default: 0, label: "Title vertical offset (px)", section: "Size & placement", subsection: "Title and subtitle position", min: -1080, max: 1080, step: "any" },
       subtitleVerticalOffset: { type: "number", default: 64, label: "Subtitle vertical offset (px)", section: "Size & placement", subsection: "Title and subtitle position", min: -1080, max: 1080, step: "any" },
-      countdownScale: { type: "number", default: 100, label: "Countdown scale (%)", section: "Size & placement", when: ["displayCountdown", "yes"], subsection: "Countdown position", min: -500, max: 500, step: "any" },
-      socialMediaScale: { type: "number", default: 100, label: "Social scale (%)", section: "Size & placement", when: ["displaySocial", "yes"], subsection: "Social accounts position", min: -500, max: 500, step: "any" },
-      scheduleScale: { type: "number", default: 125, label: "Schedule scale (%)", section: "Size & placement", when: ["displaySchedule", "yes"], subsection: "Schedule position", min: -500, max: 500, step: "any" },
       labelsScale: { type: "number", default: 125, label: "Event labels scale (%)", section: "Size & placement", when: ["displayLabels", "yes"], subsection: "Event labels position", min: -500, max: 500, step: "any" },
       ...byStream.whenFields(["displaySchedule", "yes"], byStream.layoutFields("#week", {}, "week")),
       ...byStream.whenFields(["displaySocial", "yes"], byStream.layoutFields("#social .network", { socialIcon: ["Social icon", "#social .icon"], socialCopy: ["Account text", "#social .inner"] }, "social")),
-      animationSpeed: { type: "number", default: 100, label: "Social animation speed (%)", section: "Animation", when: ["displaySocial", "yes"], min: 0, max: 500, step: "any" },
+      animationSpeed: { type: "number", default: 100, label: "Social animation speed (%)", section: "Social accounts", when: ["displaySocial", "yes"], min: 0, max: 500, step: "any" },
       countdownPosition: {
         type: "select",
         default: "bottom-right",
         label: "Corner",
         section: "Countdown",
-        subsection: "Placement",
         when: ["displayCountdown", "yes"],
         options: { "top-left": "Top left", "top-right": "Top right", "bottom-left": "Bottom left", "bottom-right": "Bottom right" }
       },
+      countdownScale: { type: "number", default: 100, label: "Countdown scale (%)", section: "Countdown", when: ["displayCountdown", "yes"], min: -500, max: 500, step: "any" },
       socialPosition: {
         type: "select",
         default: "top-left",
         label: "Corner",
         section: "Social accounts",
-        subsection: "Placement",
         when: ["displaySocial", "yes"],
         options: { "top-left": "Top left", "top-right": "Top right", "bottom-left": "Bottom left", "bottom-right": "Bottom right" }
       },
+      socialMediaScale: { type: "number", default: 100, label: "Social scale (%)", section: "Social accounts", when: ["displaySocial", "yes"], min: -500, max: 500, step: "any" },
       schedulePosition: {
         type: "select",
         default: "top-left",
         label: "Corner",
         section: "Schedule",
-        subsection: "Placement",
         when: ["displaySchedule", "yes"],
         options: { "top-left": "Top left", "top-right": "Top right", "bottom-left": "Bottom left", "bottom-right": "Bottom right" }
       },
+      scheduleScale: { type: "number", default: 125, label: "Schedule scale (%)", section: "Schedule", when: ["displaySchedule", "yes"], min: -500, max: 500, step: "any" },
       eventsPosition: {
         type: "select",
         default: "bottom-left",
