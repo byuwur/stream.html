@@ -719,7 +719,7 @@
                   <img src="${new URL("stream.html.png", root).href}" alt="" />
                 </a>
                 <div class="tool-switcher position-relative flex-shrink-0 me-2" data-tool="template">
-                  <select id="tool-picker" class="form-select rounded-0" aria-label="Choose a tool" aria-keyshortcuts="Alt+Shift+M"></select>
+                  <select id="tool-picker" class="form-select rounded-0" aria-label="Choose a tool..." aria-keyshortcuts="Alt+Shift+M"></select>
                 </div>
               </div>
               <p class="config-credit d-none d-md-block m-0 ms-auto text-end small text-white">
@@ -1908,7 +1908,7 @@
         const group = $('<div class="mb-2" role="group" aria-label="Shortcut keys"></div>').appendTo(row);
         const list = $('<div class="entry-keys"></div>').appendTo(group);
         const add = $('<button type="button" class="btn btn-sm btn-outline-primary w-100"><i class="fa-solid fa-plus me-1" aria-hidden="true"></i>Add key</button>').appendTo(group);
-        const select = $('<select class="form-select rounded-0 bg-body-secondary border-secondary-subtle"></select>').append(new Option("Choose a key", ""));
+        const select = $('<select class="form-select rounded-0 bg-body-secondary border-secondary-subtle"></select>').append(new Option("Choose a key...", ""));
         for (const key of keyChoices) select.append(new Option(key, key));
 
         function appendKey(value) {
@@ -2291,7 +2291,7 @@
       const locale = parameterRules[name].type === "locale";
       const multiple = parameterRules[name].type === "timezones";
       const validate = locale ? parseLocale : parseZone;
-      const placeholder = multiple ? "Choose up to three time zones" : locale ? "Browser locale" : "OBS computer time zone";
+      const placeholder = multiple ? "Choose up to three time zones..." : locale ? "Browser locale" : "OBS computer time zone";
       // Build display labels once per picker kind; URLs still contain only the original locale/zone IDs.
       if (!regionalChoices.has(locale)) {
         const codes = locale
@@ -3027,7 +3027,8 @@
       $(".home-link").attr("href", homeURL);
       const jqSelect = $("#tool-picker").empty();
       if (!jqSelect.length) return;
-      $(/* HTML */ `<option></option>`).val("").text("Choose a tool").appendTo(jqSelect);
+      const placeholder = jqSelect.attr("aria-label");
+      $(/* HTML */ `<option></option>`).val("").text(placeholder).appendTo(jqSelect);
       byConfigurator.catalog.availableTools.forEach((tool) => {
         $(/* HTML */ `<option></option>`)
           .val(tool.id)
@@ -3060,7 +3061,7 @@
         return label;
       }
       initSelect2(jqSelect, {
-        placeholder: "Choose a tool",
+        placeholder,
         selectionCssClass: "bg-transparent border border-light rounded-0 h-auto",
         templateResult: toolResult,
         templateSelection: toolOption
