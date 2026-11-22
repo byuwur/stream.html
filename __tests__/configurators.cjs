@@ -346,15 +346,19 @@ test("TBD configurators export demos, restore conditional drafts and round-trip 
   await page.locator('[data-layout="card"] .track', { hasText: long }).waitFor();
   await page.goto(compressed + "#configure");
   assert.equal(await title.inputValue(), long);
+  await page.frameLocator("#overlay-preview").getByText(long, { exact: true }).waitFor();
   const slowURL = "https://stream.test/now-playing/?layout=classic&title=Loading";
   const { promise: gate, resolve: release } = Promise.withResolvers();
-  const isSlowImport = (request) => request.url().endsWith("/_load.min.js") && request.frame().url() === slowURL;
-  await page.route("**/_load.min.js", async (route) => {
-    if (isSlowImport(route.request())) await gate;
-    await route.fallback();
-  });
+  await page.route(
+    "**/_load.min.js",
+    async (route) => {
+      await gate;
+      await route.fallback();
+    },
+    { times: 1 }
+  );
   try {
-    const loading = page.waitForRequest(isSlowImport);
+    const loading = page.waitForRequest("**/_load.min.js");
     await url.fill(slowURL);
     await url.press("Enter");
     await loading;
