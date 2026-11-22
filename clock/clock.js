@@ -18,6 +18,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (!values.has("time.entranceDuration")) values.set("time.entranceDuration", values.get("flipDuration"));
       values.delete("flipDuration");
     },
+    inlineGroups: [{ subsection: "Date & time" }],
     elements: {
       overlay: { label: "Appearance", selector: "#overlay .panel" },
       heading: { label: "Heading", selector: "#overlay .eyebrow", fields: ["label"] },
