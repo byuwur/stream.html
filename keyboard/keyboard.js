@@ -232,7 +232,7 @@ async function initKeyboardResource() {
       mouseButtonColor: { ...appearance, type: "color", default: "#282828", label: "Mouse buttons", subsection: "Mouse", maxlength: 9, when: ["mouseIndependent", "yes"] },
       mouseOutlineColor: { ...appearance, type: "color", default: "#EEEEEE88", label: "Mouse outlines", subsection: "Mouse", maxlength: 9, when: ["mouseIndependent", "yes"] },
       mousePressedColor: { ...appearance, type: "color", default: "#990000", label: "Pressed mouse buttons", subsection: "Mouse", maxlength: 9, when: ["mouseIndependent", "yes"] },
-      mouseMovement: { ...appearance, ...toggle, default: "yes", label: "Movement indicator", subsection: "Mouse", when: (settings) => ["mouse", "both"].includes(settings.mode) },
+      mouseMovement: { ...appearance, ...toggle, default: "yes", label: "Movement indicator", when: (settings) => ["mouse", "both"].includes(settings.mode) },
       ...byStream.inputHistory.fields(),
       historySource: {
         type: "select",
