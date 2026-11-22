@@ -533,19 +533,21 @@ test("inline chat text stays on its line when a neighboring icon moves it", asyn
   );
 });
 
-test("whole player and child effects finish independently, then the panel resizes to the latest track", async (t) => {
+test("Now Playing keeps the panel visible between tracks and fades it out for the waiting message", async (t) => {
   const browser = await launchBrowser();
   t.after(() => browser.close());
   const page = await browser.newPage();
   await serve(page, await loadAssets(runtimeAssets), true);
   const params = new URLSearchParams({
     source: "helper",
+    waiting: "yes",
     showArtwork: "no",
     showTime: "no",
     showTimeline: "no",
     resizeDuration: 3000,
     "overlay.container.entrance": "fadeIn",
     "overlay.container.entranceDuration": 7000,
+    "overlay.container.exitDuration": 4000,
     "title.entrance": "zoomIn",
     "title.entranceDuration": 5000
   });
@@ -553,19 +555,20 @@ test("whole player and child effects finish independently, then the panel resize
   const result = await page.locator(".panel").evaluate(async (panel) => {
     const title = panel.querySelector(".track");
     const frame = () => new Promise(requestAnimationFrame);
-    const send = (seq, title) => byStream.receiveNative({ version: 1, channel: "media", seq, state: { available: true, title, artist: "", album: "", cover: "", duration: 75, position: 0, playback: "playing" } });
+    const send = (seq, title, playback = "playing") => byStream.receiveNative({ version: 1, channel: "media", seq, state: { available: true, title, artist: "", album: "", cover: "", duration: 75, position: 0, playback } });
     const effect = (node, id) => node.getAnimations().find((animation) => animation.id === "stream-" + id);
     send(1, "A");
     await frame();
     await frame();
     const first = panel.offsetWidth;
+    const initialEntrance = effect(panel, "entrance").effect.getTiming().duration;
+    effect(panel, "entrance").finish();
     send(2, "Skipped");
     send(3, "A considerably longer song title");
-    const timings = [effect(panel, "exit"), effect(title, "exit")].map((motion) => motion.effect.getTiming().duration);
-    effect(title, "exit").finish();
-    await frame();
+    const timings = [initialEntrance, !!effect(panel, "exit"), effect(title, "exit").effect.getTiming().duration];
     const before = title.textContent;
-    effect(panel, "exit").finish();
+    effect(panel, "exit")?.finish();
+    effect(title, "exit").finish();
     await frame();
     await frame();
     const resize = effect(panel, "resize");
@@ -577,6 +580,7 @@ test("whole player and child effects finish independently, then the panel resize
     while (title.hasAttribute("data-stream-await-size")) await frame();
     const wide = panel.offsetWidth;
     const after = [title.textContent, resize.effect.getTiming().duration, held, effect(title, "entrance").effect.getTiming().duration];
+    const replayedEntrance = !!effect(panel, "entrance");
     send(4, "B");
     for (const motion of panel.getAnimations({ subtree: true })) if (motion.id === "stream-exit") motion.finish();
     await frame();
@@ -584,9 +588,23 @@ test("whole player and child effects finish independently, then the panel resize
     const shrink = !!effect(panel, "resize");
     for (const motion of panel.getAnimations({ subtree: true })) if (motion.id === "stream-resize") motion.finish();
     await frame();
-    return { timings, before, after, first, wide, midway, last: panel.offsetWidth, shrink };
+    const last = panel.offsetWidth;
+    send(5, "Another track");
+    send(6, "Another track", "stopped");
+    const exit = effect(panel, "exit");
+    const stopDuration = exit?.effect.getTiming().duration;
+    const waiting = document.querySelector(".waiting");
+    const waitingDuringExit = !waiting.hidden;
+    for (const motion of panel.getAnimations({ subtree: true })) if (motion.id === "stream-exit") motion.finish();
+    await frame();
+    await frame();
+    return { timings, before, after, replayedEntrance, first, wide, midway, last, shrink, stopDuration, waitingDuringExit, stopped: panel.hidden && !waiting.hidden };
   });
-  assert.deepEqual(result.timings, [7000, 5000]);
+  assert.deepEqual(result.timings, [7000, false, 5000]);
+  assert.equal(result.replayedEntrance, false);
+  assert.equal(result.stopDuration, 4000);
+  assert.equal(result.waitingDuringExit, false);
+  assert.equal(result.stopped, true);
   assert.equal(result.before, "A");
   assert.deepEqual(result.after, ["A considerably longer song title", 3000, true, 5000]);
   assert.ok(result.first < result.midway && result.midway < result.wide, JSON.stringify(result));

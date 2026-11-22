@@ -65,7 +65,7 @@
  * @property {Array<number>} preview Preview width and height in pixels.
  * @property {ResourceFields} fields Parameter definitions in display order.
  * @property {ResourceSettings} [fieldDefaults] Resource-specific defaults for generated fields, keyed by field name.
- * @property {Object<string, {label: string, selector?: string, parent?: string, fields?: string[], groups?: string[], box?: boolean, container?: boolean, gap?: boolean, textOverflow?: boolean|string, when?: string[]|Function, motionItem?: string, motionLabel?: string}>} [elements] Visual parts in display order. A collection's motionItem identifies the child that animates for each entry.
+ * @property {Object<string, {label: string, selector?: string, parent?: string, fields?: string[], groups?: string[], box?: boolean, container?: boolean, gap?: boolean, textOverflow?: boolean|string, when?: string[]|Function, motionItem?: string, motionLabel?: string, animateContainerOnChange?: boolean}>} [elements] Visual parts in display order. A collection's motionItem identifies the child that animates for each entry.
  * @property {Array<string>} urlRequired Active parameters retained even at defaults to enable overlay mode and preserve anchors/content.
  * @property {function(URLSearchParams): void} [normalizeParameters] Migrate decoded legacy parameters before validation, including editor imports.
  * @property {Object<string, [string, number, number?, string?]>} [legacyOffsets] Retired offset mapped to its transform field, absolute limit, optional baseline and former published parameter.
@@ -1477,10 +1477,11 @@
   /**
    * Replace a displayed item after its children finish animating out. Requests during an exit
    * share that exit and commit only the latest render. With effects off the update is synchronous.
-   * getItems selects the changing nodes, leaving surrounding headings, controls and panels in place.
+   * getItems selects the changing nodes. A persistent panel can set animateContainerOnChange to false
+   * to play its own motion only when the whole panel appears or disappears.
    */
   function changeItems(surface, settings, id, getItems = () => [surface], playDefault, container = surface) {
-    const { premade: preset } = global.byStreamResource.elements[id];
+    const { premade: preset, animateContainerOnChange = true } = global.byStreamResource.elements[id];
     const incoming = elementMotion(settings, id, "entrance", preset);
     const outgoing = elementMotion(settings, id, "exit", preset);
     let shown = false;
@@ -1500,6 +1501,7 @@
         const parents = new Set();
         for (const item of items) {
           for (let parent = item.parentElement; parent && container.contains(parent); parent = parent.parentElement) {
+            if (!wholeSurface && !animateContainerOnChange && parent === surface) break;
             if (!wholeSurface || !surface.contains(parent)) parents.add(parent);
           }
         }
@@ -1521,8 +1523,10 @@
       const items = Array.from(getItems());
       const boxes = layoutPath([container, ...items]);
       const resource = global.byStreamResource;
-      if (boxes.some(changingSize) && (animatedExit || interrupted || incoming.name !== "none" || items.some((node) => resource.hasEntrance?.(node)) || boxes.some((node) => resource.hasEntrance?.(node, false)))) {
-        const contents = resource.hasEntrance?.(surface, false) && !items.includes(surface) ? [...new Set([...items, ...surface.children])] : items;
+      const animateSurface = appear || animateContainerOnChange;
+      const hasBoxEntrance = (node) => (node !== surface || animateSurface) && resource.hasEntrance?.(node, false);
+      if (boxes.some(changingSize) && (animatedExit || interrupted || incoming.name !== "none" || items.some((node) => resource.hasEntrance?.(node)) || boxes.some(hasBoxEntrance))) {
+        const contents = animateSurface && resource.hasEntrance?.(surface, false) && !items.includes(surface) ? [...new Set([...items, ...surface.children])] : items;
         held = afterLayout(contents, boxes, () => {
           held = null;
           entering = play("entrance", appear);
@@ -1533,23 +1537,37 @@
     }
 
     return (render, show = true) => {
-      if (!render && requested === show) return leaving;
+      if (!render && requested === show) return leaving?.done;
       requested = show;
       nextRender = render;
-      if (leaving) return leaving;
-      if (held) return commit();
-      for (const animation of entering) animation.cancel();
+      if (leaving) {
+        if (animateContainerOnChange || leaving.show === show) return leaving.done;
+        // A visibility change supersedes the pending item transition.
+        for (const animation of leaving.animations) animation.cancel();
+        leaving = null;
+      }
+      if (held) {
+        if (show || animateContainerOnChange) return commit();
+        held();
+        held = null;
+      }
+      for (const animation of entering) {
+        if (!show || animateContainerOnChange || animation.effect.target !== surface) animation.cancel();
+      }
       entering = [];
       const animations = shown ? play("exit", !show) : [];
       const previous = !shown && show ? siblingExits(surface) : [];
       if (!animations.length && !previous.length) return commit();
       const done = !show && animations.length ? trackDeparture(surface, animations) : Promise.allSettled([...animations, ...previous].map((animation) => animation.finished));
-      leaving = done.then(() => {
+      const exit = { show, animations };
+      leaving = exit;
+      exit.done = done.then(() => {
+        if (leaving !== exit) return;
         for (const animation of animations) animation.cancel();
         leaving = null;
         return commit(!show, true);
       });
-      return leaving;
+      return exit.done;
     };
   }
 

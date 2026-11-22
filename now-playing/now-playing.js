@@ -10,7 +10,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     presets: true,
     contrastLayers: [{ surface: ".cover-surface", layer: ".background-cover" }],
     elements: {
-      overlay: { label: "Appearance", motionLabel: "track detail", selector: "#overlay .panel", gap: true },
+      overlay: { label: "Appearance", motionLabel: "track detail", animateContainerOnChange: false, selector: "#overlay .panel", gap: true },
       artwork: { label: "Artwork", motionLabel: "cover", selector: "#overlay .sleeve", fields: ["coverSize", "showArtwork"], when: (s) => s.layout !== "compact" && (s.layout === "vinyl" || s.showArtwork === "yes") },
       coverImage: { label: "Cover image", selector: "#overlay img.cover", parent: "artwork", fields: ["cover"], when: (s) => s.layout !== "compact" && s.showArtwork === "yes" },
       disc: { label: "Record", container: true, selector: "#overlay .disc", parent: "artwork", fields: ["vinylDetails", "spin"], when: ["layout", "vinyl"] },
