@@ -231,10 +231,12 @@ test("unit sliders step by one and number fields preserve typed fractions", { ti
       await page.locator("#" + toggle).click();
     const slider = page.locator(`[data-number-field="${name}"]`);
     assert.equal(await slider.getAttribute("step"), "1", name);
-    await number.fill("32.25");
+    await number.fill("0.14");
     await number.press("ArrowUp");
-    assert.equal(await number.inputValue(), "33.25", name);
-    await page.waitForFunction((key) => new URL(document.getElementById("overlay-url").value).searchParams.get(byStreamResource.fields[key].parameter || key) === "33.25", name);
+    assert.equal(await number.inputValue(), "1.14", name);
+    await page.waitForFunction((key) => new URL(document.getElementById("overlay-url").value).searchParams.get(byStreamResource.fields[key].parameter || key) === "1.14", name);
+    await number.press("ArrowDown");
+    assert.equal(await number.inputValue(), "0.14", name);
     const previous = Number(await slider.inputValue());
     await slider.press("ArrowRight");
     assert.equal(Number(await number.inputValue()), previous + 1, name);

@@ -1379,6 +1379,19 @@
         event.stopPropagation();
         jqInput.val(this.value).trigger(event.type);
       });
+      if (input.step === "any")
+        jqInput.on("keydown", (event) => {
+          if (!["ArrowUp", "ArrowDown"].includes(event.key) || !Number.isFinite(input.valueAsNumber)) return;
+          event.preventDefault();
+          // Use the typed decimal as the native step base for this one-unit increment.
+          const stepper = document.createElement("input");
+          stepper.type = "number";
+          stepper.defaultValue = input.value;
+          if (event.key === "ArrowUp") stepper.stepUp();
+          else stepper.stepDown();
+          input.valueAsNumber = Math.min(rule.max ?? Infinity, Math.max(rule.min ?? -Infinity, stepper.valueAsNumber));
+          jqInput.trigger("input").trigger("change");
+        });
       jqInput.on("input change sync.controls", sync);
       sync();
     }
