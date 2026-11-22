@@ -397,9 +397,9 @@ byConfigurator.initImageExport = function (resource, editor) {
         const pad = (n) => String(n).padStart(2, "0");
         const date = [now.getFullYear(), pad(now.getMonth() + 1), pad(now.getDate())].join("-");
         const time = [pad(now.getHours()), pad(now.getMinutes()), pad(now.getSeconds()), String(now.getMilliseconds()).padStart(3, "0")].join("-");
-        const name = tool + "_" + date + " " + time + "." + extension;
+        const name = tool + "_" + date + "_" + time + "." + extension;
         save(result.blob, name);
-        status.text(name + " · " + result.width + " × " + result.height);
+        status.text(name + " · " + result.width + " x " + result.height);
       }
     } catch (error) {
       status.text(

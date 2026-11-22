@@ -1059,7 +1059,7 @@ test("image export preserves the full frame, trims alpha and downloads whole QR 
     const waiting = page.waitForEvent("download", { timeout: 15000 });
     await page.locator("#export-download").click();
     const file = await waiting;
-    assert.match(file.suggestedFilename(), /^qr_\d{4}-\d\d-\d\d \d\d-\d\d-\d\d-\d{3}\.png$/);
+    assert.match(file.suggestedFilename(), /^qr_\d{4}-\d\d-\d\d_\d\d-\d\d-\d\d-\d{3}\.png$/);
     const data = await require("node:fs/promises").readFile(await file.path());
     return [data.readUInt32BE(16), data.readUInt32BE(20)];
   };
