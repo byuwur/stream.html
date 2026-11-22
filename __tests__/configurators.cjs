@@ -1002,6 +1002,7 @@ test("panel downloads preserve artwork, duplicate names and the shared layout", 
   const toggle = page.locator("#export-toggle");
   assert.equal(await toggle.getAttribute("aria-expanded"), "false");
   await toggle.click();
+  await page.locator("#export-options.show").waitFor();
   const files = [];
   page.on("download", (download) => files.push(download));
   const finalDownload = page.waitForEvent("download", { predicate: (file) => file.suggestedFilename() === "portfolio.png" });
@@ -1055,6 +1056,7 @@ test("image export preserves the full frame, trims alpha and downloads whole QR 
   await serve(page, await loadAssets(editorAssets));
   await page.goto("https://stream.test/qr/?content=Example&showLogo=no#configure");
   await page.locator("#export-toggle").click();
+  await page.locator("#export-options.show").waitFor();
   const download = async () => {
     const waiting = page.waitForEvent("download", { timeout: 15000 });
     await page.locator("#export-download").click();
@@ -1086,6 +1088,7 @@ test("keyboard image export keeps instance colors on shared SVG key shapes", { t
   await page.goto("https://stream.test/keyboard/?animate=no&customColors=yes&keyColor=00AA00&legendColor=FF00FF#configure");
   await page.frameLocator("#overlay-preview").locator("use.key-legend").first().waitFor({ state: "attached" });
   await page.locator("#export-toggle").click();
+  await page.locator("#export-options.show").waitFor();
   const waiting = page.waitForEvent("download");
   await page.locator("#export-download").click();
   const file = await waiting;
