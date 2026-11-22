@@ -68,6 +68,7 @@
  * @property {Object<string, {label: string, selector?: string, parent?: string, fields?: string[], groups?: string[], box?: boolean, container?: boolean, gap?: boolean, textOverflow?: boolean|string, when?: string[]|Function, motionItem?: string, motionLabel?: string}>} [elements] Visual parts in display order. A collection's motionItem identifies the child that animates for each entry.
  * @property {Array<string>} urlRequired Active parameters retained even at defaults to enable overlay mode and preserve anchors/content.
  * @property {function(URLSearchParams): void} [normalizeParameters] Migrate decoded legacy parameters before validation, including editor imports.
+ * @property {Object<string, [string, number, number?, string?]>} [legacyOffsets] Retired offset mapped to its transform field, absolute limit, optional baseline and former published parameter.
  * @property {string[]} [legacyFields] Retired URL keys accepted only for normalizeParameters().
  * @property {Object<string, ResourceValue>} [constants] Renderer-only defaults excluded from URL fields.
  * @property {string[]} [sectionOrder] Leading editor sections. Remaining sections follow in their usual order.
@@ -304,6 +305,32 @@
       } else decoded.append(name, value);
     }
     return { values: decoded, compressedFields: selectedFields, error: errorMessage };
+  }
+
+  /** Fold retired component offsets into the same transform field for URLs and JSON imports. */
+  function migrateOffsets(resource) {
+    const normalize = resource.normalizeParameters;
+    const offsets = Object.entries(resource.legacyOffsets).map(([old, [name, limit, baseline = 0, parameter]]) => {
+      const field = resource.fields[name];
+      const { min, max } = field;
+      field.min -= limit + baseline;
+      field.max += limit - baseline;
+      return { old, name, min, max, limit, baseline, parameter };
+    });
+    resource.legacyFields = [...(resource.legacyFields || []), ...offsets.flatMap(({ old, parameter }) => (parameter ? [old, parameter] : [old]))];
+    resource.normalizeParameters = (values) => {
+      normalize?.(values);
+      for (const { old, name, min, max, limit, baseline, parameter } of offsets) {
+        const offset = (parameter && values.get(parameter)) ?? values.get(old);
+        if (offset == null) continue;
+        values.delete(old);
+        if (parameter) values.delete(parameter);
+        if (!offset.trim() || !Number.isFinite(Number(offset))) continue;
+        const shift = Number(values.get(name));
+        const current = Number.isFinite(shift) ? Math.max(min, Math.min(max, shift)) : 0;
+        values.set(name, String(current + Math.max(-limit, Math.min(limit, Number(offset))) - baseline));
+      }
+    };
   }
 
   // Stored platform IDs stay separate from display names and Font Awesome icon lookup.
@@ -2911,6 +2938,7 @@
     }
     initializeDefaults(resource.fields);
     if (resource.elements) organizeElements(resource);
+    if (resource.legacyOffsets) migrateOffsets(resource);
     for (const [name, value] of Object.entries(resource.fieldDefaults || {})) resource.fields[name].default = value;
     for (const field of Object.values(resource.fields)) {
       if (field.type === "number" && ["font-size", "line-height"].includes(field.styleProperty) && field.default > 0) field.zeroIsDefault = true;

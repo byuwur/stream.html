@@ -45,6 +45,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     description: "Create a matching set of channel panels. Duplicate a panel to reuse its artwork and text.",
     preview: [960, 540],
     urlRequired: ["panels"],
+    legacyOffsets: { artX: ["artwork.translateX", 2160], artY: ["artwork.translateY", 2160] },
     imageExport: { field: "panels", selector: ".panel-sheet" },
     sectionOrder: ["Panels", "Layout", "Panel", "Artwork block", "Artwork", "Text", "Appearance"],
     sectionIcons: { Panels: "fa-solid fa-table-cells-large" },
@@ -53,7 +54,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       overlay: { label: "Layout", selector: ".panel-list", box: false, groups: ["Layout"] },
       panel: { label: "Panel", selector: surface, box: false },
       accent: { label: "Artwork block", selector: accent, box: false, fields: ["side", "blockWidth"] },
-      artwork: { label: "Artwork", selector: graphic, box: false, groups: ["Artwork"], fields: ["artSize", "artX", "artY", "imageFit"] },
+      artwork: { label: "Artwork", selector: graphic, box: false, groups: ["Artwork"], fields: ["artSize", "imageFit"] },
       label: { label: "Text", selector: label, box: false, groups: ["Text"] }
     },
     fields: {
@@ -96,8 +97,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       side: { type: "select", label: "Artwork position", section: "Layout", default: "left", options: { left: "Left", right: "Right" } },
       blockWidth: pixels("Artwork block width", 120, 2160, "Layout"),
       artSize: pixels("Artwork size", 80, 2160, "Layout"),
-      artX: pixels("Artwork horizontal offset", 0, 2160, "Layout", -2160),
-      artY: pixels("Artwork vertical offset", 0, 2160, "Layout", -2160),
       imageFit: { type: "select", label: "Image fit", section: "Layout", default: "contain", options: { contain: "Contain", cover: "Cover" } },
       artColor: { type: "color", label: "Icon color", section: "Artwork", default: "#FFFFFF" },
       alignment: { type: "select", label: "Text alignment", section: "Text", default: "left", options: { left: "Left", center: "Center", right: "Right" } },
@@ -145,8 +144,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     inset: settings.inset,
     block: settings.blockWidth,
     art: settings.artSize,
-    x: settings.artX,
-    y: settings.artY,
     gap: settings.textPadding,
     size: settings.fontSize,
     tracking: settings.tracking

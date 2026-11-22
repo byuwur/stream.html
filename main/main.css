@@ -20,9 +20,7 @@
   --scheduleScale: 1.25;
   --countdownScale: 1;
   --titleSize: 72px;
-  --titleVerticalOffset: -32px;
   --subtitleSize: 40px;
-  --subtitleVerticalOffset: 56px;
   --labelNameSize: 24px;
   --labelNameVerticalOffset: 0px;
   --labelHeaderSize: 18px;
@@ -122,14 +120,12 @@ body {
 #title {
   margin-top: 142px;
   font-size: var(--titleSize);
-  transform: translateY(var(--titleVerticalOffset));
   white-space: pre-line;
 }
 #subtitle {
-  top: 290px;
+  top: 354px;
   color: var(--secondary-color);
   font-size: var(--subtitleSize);
-  transform: translateY(var(--subtitleVerticalOffset));
 }
 /* Social accounts and schedule; GSAP owns their entrance, exit, and rotation. */
 #social {

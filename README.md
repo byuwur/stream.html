@@ -436,7 +436,7 @@ Whole-query decoding is capped at one MiB. Individual values use the field's UTF
 
 #### Older URLs
 
-Replace `controller.html`, `popup.html`, or `main.html` with its tool folder. Rebuild retired settings in the form: Controller `scale`; Popup `fontSizeRem`/`textYOffsetRem` (now `fontSize`/`textYOffset` in pixels), per-platform handles/account counts; Main scene `mode`, `showBG`, `hideCountdown`, and weekday fields.
+Replace `controller.html`, `popup.html`, or `main.html` with its tool folder. Rebuild retired settings in the form: Controller `scale`; Popup `fontSizeRem`/`textYOffsetRem` (now `fontSize`/`accountName.translateY` in pixels), per-platform handles/account counts; Main scene `mode`, `showBG`, `hideCountdown`, and weekday fields.
 
 Current URLs use percentages for opacity, deadzone, and scale: `100` means 100%, and `25` means 25%. Replace older fractional values explicitly; they are not converted. Social accounts use ordered rows so platforms may repeat; Main schedule entries use weekday maps. Unsupported list shapes retain defaults rather than being migrated. The form and Parameters dialog show the current fields and accepted values.
 
@@ -517,7 +517,7 @@ Keyboard history can include every received input or just displayed controls. Co
 | `rotation` | Maximum steering-wheel rotation, `0`-`360` degrees; default `120`. |
 | `mapping` | Custom Mapping binding array; `[]` uses defaults. Legacy `{"mapping":[...]}` works. |
 | `mirror`, `fitMargin` | Mirror artwork horizontally; viewport fit margin in pixels (default `16`). |
-| `horizontalPosition`, `verticalPosition` | Signed pixel offsets from the viewport center; both default to `0`. |
+| `overlay.visualOffsetX`, `overlay.visualOffsetY` | Signed pixel offsets from each player’s viewport position. Both default to `0`. |
 
 - Nintendo: `nes`, `famicom`, `snes`, `superfamicom`, `n64`, `gcn`, `wii`, `wiinunchuk`, `wiiclassic`, `wiiupro`, `wiiu`, `joycon`, `switchpro`.
 - PlayStation: `ps`, `ds2`, `ds3`, `ds4`, `ds5`.
@@ -564,7 +564,7 @@ Choose platforms, handles, and order. Repeated platforms are allowed. Brand icon
 | `scale` | `-500`-`500`%, anchored to the selected top corner; `100` keeps the original size. |
 | `iconBoxColor`, `textBoxColor`, `iconColor`, `fontColor` | Hex colors without `#`; defaults use deep red `#600`, off-white `#eee`, and translucent charcoal. |
 | `primaryFont`, `fontWeight` | Font family and weight `100`-`900`, step `100` (default `600`); Courier/monospace fallback. |
-| `fontSize`, `textYOffset` | Size `8`-`100` px (default `48`); offset `-100`-`100` px. |
+| `fontSize`, `accountName.translateY` | Text size `8`–`100` px (default `48`). Move vertically under Account name → Transforms. |
 | `opacity`, `cornerInset`, `textPadding` | Optional opacity `0`-`100`%, signed corner inset on both axes, and horizontal text padding in pixels. |
 
 Invalid JSON/platforms retain the two byUwUr default accounts; blank handles keep their slots. Font readiness and remeasurement keep animation aligned. Separate account-name and icon typography, text-box borders/shadows, placement, and filters are available in the form.

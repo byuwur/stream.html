@@ -37,7 +37,6 @@
 }
 .panel-art {
   display: block;
-  transform: translate(var(--panel-x), var(--panel-y));
   font-size: var(--panel-art);
 }
 img.panel-art {

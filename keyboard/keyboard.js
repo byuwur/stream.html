@@ -42,6 +42,12 @@ async function initKeyboardResource() {
     sectionOrder: ["General", "Keyboard", "Mouse", "Appearance", "Input History", "Whole overlay"],
     sectionIcons: { Mouse: "fa-solid fa-computer-mouse", "Input History": "fa-solid fa-clock-rotate-left" },
     legacyFields: ["historyAnimation", "shellImage", "keyImage"],
+    legacyOffsets: {
+      keyboardX: ["keyboard.translateX", 3840],
+      keyboardY: ["keyboard.translateY", 2160],
+      mouseX: ["mouse.translateX", 3840],
+      mouseY: ["mouse.translateY", 2160]
+    },
     /** Resolve the former surface-specific URLs and tint choices into the shared image controls. */
     normalizeParameters(values) {
       byStream.inputHistory.migrateAnimation(values);
@@ -66,7 +72,7 @@ async function initKeyboardResource() {
       keyboard: {
         label: "Keyboard",
         selector: "#keyboard",
-        fields: ["layout", "platform", "standard", "displayedKeys", "layoutDensity", "keySpacing", "keyboardScale", "keyboardX", "keyboardY"],
+        fields: ["layout", "platform", "standard", "displayedKeys", "layoutDensity", "keySpacing", "keyboardScale"],
         groups: ["Key groups"],
         when: ["mode", "both", "keyboard"]
       },
@@ -262,8 +268,8 @@ async function initKeyboardResource() {
       edgePadding: { type: "number", default: 16, label: "Viewport edge padding (px)", section: "Size & placement", min: 0, max: 1000 },
       opacity: { type: "number", default: 100, label: "Visualization opacity (%)", section: "Size & placement", min: 0, max: 100 },
       ...byStream.placementFields("#input-scene"),
-      ...componentFields("keyboard", "Keyboard", keyboardFields.when),
-      ...componentFields("mouse", "Mouse", (settings) => ["mouse", "both"].includes(settings.mode)),
+      keyboardScale: { ...keyboardFields, type: "number", section: "Size & placement", default: 100, label: "Keyboard scale (%)", min: -500, max: 500, step: "any" },
+      mouseScale: { type: "number", section: "Size & placement", subsection: "Mouse", default: 100, label: "Mouse scale (%)", min: -500, max: 500, step: "any", when: ["mode", "both", "mouse"], retainInactive: true },
       ...byStream.filterFields("artworkFilter", "Artwork", "#input-scene")
     }
   };
@@ -293,23 +299,6 @@ async function initKeyboardResource() {
   /** Accept the same safe image values used by the shared upload control. */
   function imageValue(value) {
     return value.length <= 65536 && (!value || byStream.safeImage(value)) ? value : null;
-  }
-
-  /** Declare independent component placement without adding another configuration owner. */
-  function componentFields(name, label, when) {
-    const common = {
-      type: "number",
-      section: "Size & placement",
-      subsection: label,
-      when,
-      retainInactive: true,
-      step: "any"
-    };
-    return {
-      [`${name}Scale`]: { ...common, default: 100, label: `${label} scale (%)`, min: -500, max: 500 },
-      [`${name}X`]: { ...common, default: 0, label: `${label} horizontal offset (px)`, min: -3840, max: 3840 },
-      [`${name}Y`]: { ...common, default: 0, label: `${label} vertical offset (px)`, min: -2160, max: 2160 }
-    };
   }
 
   // ===== OVERLAY INITIALIZATION =====
@@ -685,7 +674,6 @@ async function initKeyboardResource() {
     ["keyboard", keyboard],
     ["mouse", mouse]
   ]) {
-    element.style.transform = `translate(${settings[`${name}X`]}px, ${settings[`${name}Y`]}px)`;
     element.style.zoom = Math.abs(settings[`${name}Scale`]) / 100;
     if (settings[`${name}Scale`] < 0) element.style.scale = "-1";
   }
@@ -1130,8 +1118,8 @@ function createImageTint(defs, settings, svg) {
       ["Height", "Height (px)", 0, 0, 2160],
       ["Size", "Prompt / text size (px)", 32, 12, 160],
       ["Scale", "Scale (%)", 100, -500, 500],
-      ["X", "Horizontal offset (px)", 0, -3840, 3840],
-      ["Y", "Vertical offset (px)", 0, -2160, 2160],
+      ["X", "Viewport horizontal offset (px)", 0, -3840, 3840],
+      ["Y", "Viewport vertical offset (px)", 0, -2160, 2160],
       ["Gap", "Entry spacing (px)", 6, 0, 100],
       ["Padding", "Padding (px)", 8, 0, 100],
       ["Opacity", "Opacity (%)", 100, 0, 100]

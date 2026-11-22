@@ -10,6 +10,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     description: "A transparent frame for your camera.",
     preview: [960, 540],
     urlRequired: ["shape"],
+    legacyOffsets: { labelOffsetX: ["label.translateX", 2000, 0, "labelOffset.x"], labelOffsetY: ["label.translateY", 2000, 0, "labelOffset.y"] },
     presets: true,
     elements: {
       overlay: { label: "Appearance", selector: "#overlay .panel" },
@@ -182,12 +183,11 @@ document.addEventListener("DOMContentLoaded", async () => {
         type: "select",
         default: "bottom",
         label: "Label placement",
-        section: "Size & placement",
+        section: "Camera label",
         when: ["label"],
         options: { top: "top", bottom: "bottom" }
       },
       ...byStream.placementFields("#overlay .panel"),
-      ...byStream.whenFields(["label"], byStream.offsetFields("labelOffset", "Label offset", "#overlay .camera-label")),
       gradientAngle: {
         type: "number",
         default: 0,

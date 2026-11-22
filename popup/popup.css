@@ -10,7 +10,7 @@
   --icon-size: 72px;
   --tile-padding: 16px;
   --font-weight: 600;
-  --text-offset: 0px;
+  --text-clearance: 0px;
 }
 html {
   font-size: 16px;
@@ -55,14 +55,13 @@ body {
 }
 #nameHolder {
   padding-inline: var(--tile-padding);
-  padding-block: calc(var(--tile-padding) + max(var(--text-offset), calc(0px - var(--text-offset))));
+  padding-block: calc(var(--tile-padding) + var(--text-clearance));
 }
 .name {
   display: none;
   width: max-content;
   white-space: nowrap;
   position: relative;
-  top: var(--text-offset);
 }
 /* ===== PLATFORM ICONS ===== */
 /* The square sits inside a larger SVG so its curves have room to stretch. */

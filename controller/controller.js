@@ -39,6 +39,7 @@ async function initControllerResource() {
     sectionOrder: ["General", "Appearance", "Shell", "Guide button", "Screen opening", "Player indicators", "Controller buttons", "Analog sticks", "Input History", "Whole overlay"],
     sectionIcons: { "Input History": "fa-solid fa-clock-rotate-left" },
     previewAllow: "autoplay; gamepad *",
+    legacyOffsets: { horizontalPosition: ["visualOffsetX", 2000], verticalPosition: ["visualOffsetY", 2000] },
     legacyFields: ["historyAnimation", "customColors", "shellTintColor"],
     /** Migrate retired appearance controls and signed image angles before validating current fields. */
     normalizeParameters(values) {
@@ -464,33 +465,6 @@ async function initControllerResource() {
         styleSelector: ".controller",
         styleProperty: "--disconnected-opacity",
         styleValue: (settings) => settings.disconnectedOpacity / 100
-      },
-      horizontalPosition: {
-        type: "number",
-        default: 0,
-        optional: true,
-        label: "Horizontal position (px)",
-        description: "Offset from the viewport center.",
-        section: "Size & placement",
-        min: -2000,
-        max: 2000,
-        step: "any",
-        styleSelector: ".controller",
-        styleProperty: "left",
-        styleValue: (settings) => `calc(var(--player-left, 50%) + ${settings.horizontalPosition}px)`
-      },
-      verticalPosition: {
-        type: "number",
-        default: 0,
-        label: "Vertical position (px)",
-        section: "Size & placement",
-        description: "Offset from the viewport center.",
-        min: -2000,
-        max: 2000,
-        step: "any",
-        styleSelector: ".controller",
-        styleProperty: "top",
-        styleValue: (settings) => `calc(var(--player-top, 50%) + ${settings.verticalPosition}px)`
       },
       fitMargin: { type: "number", default: 16, label: "Fit margin (px)", section: "Size & placement", min: 0, max: 1000, step: "any" },
       ...byStream.inputHistory.fields(),
@@ -1894,8 +1868,8 @@ async function loadControllerArtwork(requiredSkin, fixedSkin) {
       ["Height", "Height (px)", 0, 0, 2160],
       ["Size", "Prompt / text size (px)", 32, 12, 160],
       ["Scale", "Scale (%)", 100, -500, 500],
-      ["X", "Horizontal offset (px)", 0, -3840, 3840],
-      ["Y", "Vertical offset (px)", 0, -2160, 2160],
+      ["X", "Viewport horizontal offset (px)", 0, -3840, 3840],
+      ["Y", "Viewport vertical offset (px)", 0, -2160, 2160],
       ["Gap", "Entry spacing (px)", 6, 0, 100],
       ["Padding", "Padding (px)", 8, 0, 100],
       ["Opacity", "Opacity (%)", 100, 0, 100]

@@ -23,6 +23,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       { section: "Schedule", subsection: ["Layout", "Week layout"] },
       { section: "Schedule", subsection: ["Day card", "Surface"] }
     ],
+    legacyOffsets: { titleVerticalOffset: ["title.translateY", 1080], subtitleVerticalOffset: ["subtitle.translateY", 1080, 64] },
     fieldDefaults: {
       "overlay.children.entrance": "fadeInUp",
       "social.entrance": "default",
@@ -51,8 +52,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       tint: { label: "Tint", selector: "#bg #overlay", parent: "background", when: (settings) => settings.backgroundTint === "yes" },
       frame: { label: "Frame", selector: "#frame", fields: ["frameColor", "frameWidth", "frameInset"] },
       logo: { label: "Logo", selector: "#brandImg", fields: ["displayBranding", "logoUrl", "logoScale", "logoOpacity"], when: ["displayBranding", "yes"] },
-      title: { label: "Title", selector: "#title", fields: ["sceneTitle", "titleSize", "titleVerticalOffset"] },
-      subtitle: { label: "Subtitle", selector: "#subtitle", fields: ["tagline", "subtitleSize", "subtitleVerticalOffset"] },
+      title: { label: "Title", selector: "#title", fields: ["sceneTitle", "titleSize"] },
+      subtitle: { label: "Subtitle", selector: "#subtitle", fields: ["tagline", "subtitleSize"] },
       social: { label: "Social accounts", premade: "timeline", motionItem: "socialCard", selector: "#social", fields: ["displaySocial", "accounts", "animationSpeed", "socialPosition", "socialMediaScale"], when: ["displaySocial", "yes"] },
       socialCard: { label: "Account card", container: true, selector: "#social .network", parent: "social", fields: ["socialDirection", "socialGap", "socialWrap"] },
       socialHeading: { label: "Heading", selector: "#social .socialHead", parent: "social" },
@@ -425,8 +426,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       opacity: { type: "number", default: 100, optional: true, label: "Scene opacity (%)", section: "Appearance", min: 0, max: 100, step: "any", styleSelector: "#scene", styleProperty: "opacity", styleUnit: "%" },
       frameInset: { type: "number", default: 16, optional: true, label: "Frame inset (px)", section: "Size & placement", min: -1000, max: 1000, step: "any", styleSelector: "#frame", styleProperty: "inset", styleUnit: "px" },
       ...byStream.placementFields("#scene"),
-      titleVerticalOffset: { type: "number", default: 0, label: "Title vertical offset (px)", section: "Size & placement", subsection: "Title and subtitle position", min: -1080, max: 1080, step: "any" },
-      subtitleVerticalOffset: { type: "number", default: 64, label: "Subtitle vertical offset (px)", section: "Size & placement", subsection: "Title and subtitle position", min: -1080, max: 1080, step: "any" },
       labelsScale: { type: "number", default: 125, label: "Event labels scale (%)", section: "Size & placement", when: ["displayLabels", "yes"], subsection: "Event labels position", min: -500, max: 500, step: "any" },
       ...byStream.whenFields(["displaySchedule", "yes"], byStream.layoutFields("#week", {}, "week")),
       ...byStream.whenFields(["displaySocial", "yes"], byStream.layoutFields("#social .network", { socialIcon: ["Social icon", "#social .icon"], socialCopy: ["Account text", "#social .inner"] }, "social")),
@@ -618,7 +617,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   function renderMain() {
     const { accounts, scheduleEntries } = settings;
     const rootStyle = document.documentElement.style;
-    // CSS owns appearance; settings only provide its colors, sizes, and offsets.
+    // CSS owns appearance; settings provide its colors and sizes.
     const styles = {
       "font-family": byFont.family(settings.primaryFont || "Courier New", '"Courier New", Courier, monospace'),
       "primary-color": settings.primaryTextColor,
@@ -638,7 +637,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     };
     for (const [name, value] of Object.entries(styles)) rootStyle.setProperty(`--${name}`, value);
     for (const [name, value] of Object.entries(settings)) {
-      if (name.endsWith("Size") || name.endsWith("Offset")) rootStyle.setProperty(`--${name}`, `${value}px`);
+      if (name.endsWith("Size")) rootStyle.setProperty(`--${name}`, `${value}px`);
     }
     for (const name of ["socialMediaScale", "labelsScale", "scheduleScale", "countdownScale"]) rootStyle.setProperty(`--${name}`, settings[name] / 100);
 

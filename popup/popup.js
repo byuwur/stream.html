@@ -16,6 +16,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     preview: [1280, 360],
     urlRequired: ["accounts"],
     fieldDefaults: { "overlay.entrance": "default", "accountName.entrance": "fadeInDown", "icon.entrance": "fadeInUp" },
+    legacyOffsets: { textYOffset: ["accountName.translateY", 100] },
     legacyFields: ["accountNameFont", "accountNameWeight", "visualScale"],
     normalizeParameters(values) {
       // Former text overrides took precedence only when they differed from their neutral defaults.
@@ -39,7 +40,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     contrastLayers: [{ surface: "#iconBox", layer: "#square" }],
     elements: {
       overlay: { label: "Appearance", motionLabel: "social account", premade: "timeline", selector: "#socialHolder" },
-      accountName: { label: "Account name", selector: "#nameHolder .name", fields: ["primaryFont", "fontSize", "fontWeight", "fontColor", "textYOffset", "textPadding"] },
+      accountName: { label: "Account name", selector: "#nameHolder .name", fields: ["primaryFont", "fontSize", "fontWeight", "fontColor", "textPadding"] },
       iconBox: { label: "Icon box", selector: "#iconBox", fields: ["iconBoxColor"] },
       icon: { label: "Social icon", selector: "#icons > i", parent: "iconBox", fields: ["iconColor"], textOverflow: false },
       textBox: { label: "Text box", container: true, selector: "#textBox", fields: ["textBoxColor"] },
@@ -201,16 +202,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         styleProperty: "padding-inline",
         styleUnit: "px"
       },
-      textYOffset: {
-        type: "number",
-        default: 0,
-        label: "Text vertical offset (px)",
-        section: "Size & placement",
-        min: -100,
-        max: 100,
-        step: "any",
-        icon: "fa-font"
-      },
       ...byStream.placementFields("#socialHolder"),
       ...byStream.textFields({ accountName: ["Account name", "#nameHolder .name", []] }),
       ...byStream.textFields({
@@ -267,7 +258,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     popup.style.setProperty("--font-size", `${settings.fontSize}px`);
     popup.style.setProperty("--icon-size", `${settings.iconFontSize}px`);
     popup.style.setProperty("--font-weight", settings.fontWeight);
-    popup.style.setProperty("--text-offset", `${settings.textYOffset}px`);
+    popup.style.setProperty("--text-clearance", `${Math.abs(settings["accountName.translateY"])}px`);
     for (const { platform, handle } of accounts) {
       const name = document.createElement("span");
       name.className = "name";

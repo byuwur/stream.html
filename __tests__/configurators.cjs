@@ -787,8 +787,14 @@ test("configurator smoke", { timeout: 60000 }, async (t) => {
       assert.equal(await page.locator('[name="imageBlendMode"]').inputValue(), "fill");
       await page.waitForFunction(() => new URL(document.getElementById("overlay-url").value).searchParams.get("history.entranceDuration") === "550");
       assert.equal(await page.locator('[name="history.entrance"]').inputValue(), "zoomIn");
-      await page.goto("https://stream.test/main/?displayCountdown=yes&displaySocial=yes&displaySchedule=yes&displayLabels=yes#configure", { waitUntil: "commit" });
+      await page.goto(
+        "https://stream.test/main/?displayCountdown=yes&displaySocial=yes&displaySchedule=yes&displayLabels=yes&titleVerticalOffset=1080&title.translateY=5000&subtitleVerticalOffset=-1080&subtitle.translateY=-5000#configure",
+        { waitUntil: "commit" }
+      );
       await page.locator('[name="socialPosition"]').waitFor({ state: "attached", timeout: 15000 });
+      assert.equal(await page.locator('[name="title.translateY"]').inputValue(), "6080");
+      assert.equal(await page.locator('[name="subtitle.translateY"]').inputValue(), "-6144");
+      assert.doesNotMatch(await page.locator("#overlay-url").inputValue(), /VerticalOffset/);
       assert.equal(await page.locator('[name="countdownRight"], [name="updatesLeft"], [name="eventsBottom"]').count(), 0);
       assert.equal(await page.locator('[name="socialHeadingFontSize"]').evaluate((input) => input.closest("[data-config-section]").dataset.configSection), "Social accounts");
       assert.equal(await page.locator('[name="countdownFontSize"]').evaluate((input) => input.closest("[data-config-section]").dataset.configSection), "Countdown");
