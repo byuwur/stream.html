@@ -11,6 +11,7 @@ import { zipSync } from "fflate";
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
+import { readFileSync } from "node:fs";
 import * as fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
@@ -473,7 +474,7 @@ export function releaseChangelog(tag, directory = root) {
 }
 
 /**
- * Render linked commit hashes with plain subjects, the download table, format guidance, and experimental labels.
+ * Render linked commit hashes with plain subjects, downloads in configurator order, format guidance, and experimental labels.
  * @param {Object} manifest Release inventory with resources, assets, and optional changelog data.
  * @returns {string} Markdown used by RELEASE_NOTES.md and the GitHub Release description.
  */
@@ -517,7 +518,13 @@ export function releaseNotes(manifest) {
     "| Resource | Original | Online | Standalone | Bundle | Standalone ZIP | Full ZIP | Standalone embedded [EXPERIMENTAL] | Full embedded [EXPERIMENTAL] |",
     "| --- | --- | --- | --- | --- | --- | --- | --- | --- |"
   );
-  for (const resource of manifest.resources) {
+  const source = readFileSync(path.join(root, "configurator.js"), "utf8");
+  const [catalog] = findScriptNodes(source, (node) => node.type === "AssignmentExpression" && node.left.object?.name === "byConfigurator" && node.left.property?.name === "catalog");
+  const tools = catalog?.right.properties?.find((property) => property.key?.name === "tools")?.value.elements;
+  assert.ok(tools?.length, "Missing byConfigurator.catalog.tools in configurator.js");
+  const catalogOrder = new Map(tools.map((tool, index) => [tool.properties.find((property) => property.key?.name === "id").value.value, index]));
+  const rank = (resource) => catalogOrder.get(resource.id) ?? catalogOrder.size;
+  for (const resource of manifest.resources.toSorted((a, b) => rank(a) - rank(b) || a.id.localeCompare(b.id, "en"))) {
     const cells = formats.map((format) => {
       const asset = manifest.assets.find((item) => item.resource === resource.id && item.format === format);
       return asset ? `[Download](${downloadURL(asset.file)})` : "-";
@@ -531,27 +538,30 @@ export function releaseNotes(manifest) {
 }
 
 // ===== ARTWORK SCRIPT EXPRESSIONS =====
-/** Locate executable expressions by their JavaScript syntax and retain their original source offsets. */
-export function findScriptExpressions(source, expression) {
-  const parseProgram = (text) => parsers.babel.parse(text, {}).program;
-  const expected = parseProgram(expression).body[0].expression;
-  // Formatting, comments and parser locations do not affect the expression being packaged.
-  const metadata = new Set(["start", "end", "loc", "extra", "leadingComments", "innerComments", "trailingComments"]);
-  const signature = (node) => JSON.stringify(node, (key, value) => (metadata.has(key) ? undefined : value));
-  const expectedSignature = signature(expected);
+function findScriptNodes(source, matchesNode) {
   const matches = [];
 
   function visit(node) {
     if (!node?.type) return;
-    if (node.type === expected.type && signature(node) === expectedSignature) matches.push(node);
+    if (matchesNode(node)) matches.push(node);
     for (const child of Object.values(node)) {
       if (Array.isArray(child)) child.forEach(visit);
       else if (child?.type) visit(child);
     }
   }
 
-  visit(parseProgram(source));
+  visit(parsers.babel.parse(source, {}).program);
   return matches;
+}
+
+/** Locate executable expressions by their JavaScript syntax and retain their original source offsets. */
+export function findScriptExpressions(source, expression) {
+  const expected = parsers.babel.parse(expression, {}).program.body[0].expression;
+  // Formatting, comments and parser locations do not affect the expression being packaged.
+  const metadata = new Set(["start", "end", "loc", "extra", "leadingComments", "innerComments", "trailingComments"]);
+  const signature = (node) => JSON.stringify(node, (key, value) => (metadata.has(key) ? undefined : value));
+  const expectedSignature = signature(expected);
+  return findScriptNodes(source, (node) => node.type === expected.type && signature(node) === expectedSignature);
 }
 
 // ===== RELEASE BUILD =====

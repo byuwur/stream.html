@@ -374,6 +374,7 @@ test("release descriptions link to the generated inventory", async () => {
   const links = [...notes.matchAll(/\]\((https:\/\/github\.com\/[^)]+\/releases\/latest\/download\/[^)]+)\)/g)].map((match) => match[1]);
   assert.deepEqual(new Set(links), new Set([...manifest.assets.filter((item) => item.resource).map((item) => downloadURL(item.file)), downloadURL("manifest.json"), downloadURL("SHA256SUMS")]));
   assert.equal(notes, releaseNotes(manifest));
+  assert.equal(notes, releaseNotes({ ...manifest, resources: manifest.resources.toReversed() }), "Download order must be independent of inventory order");
   assert.equal(downloadURL("manifest.json"), `https://github.com/${config.repository}/releases/latest/download/manifest.json`);
   for (const tag of ["v1.0", "v2.0"]) {
     const current = releaseNotes({ ...manifest, tag });
