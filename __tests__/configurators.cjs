@@ -736,7 +736,10 @@ test("configurator smoke", { timeout: 60000 }, async (t) => {
       await page.goto("https://stream.test/keyboard/?mode=keyboard&imageTarget=all#configure");
       const image = page.locator('[name="imageUrl"]');
       await image.waitFor({ state: "attached" });
-      assert.deepEqual(await page.locator("form > section > h2").allTextContents(), ["General", "Keyboard", "Mouse", "Appearance", "Input History", "Whole overlay"]);
+      assert.deepEqual(
+        (await page.locator("form > section > h2").allTextContents()).map((title) => title.trim()),
+        ["General", "Keyboard", "Mouse", "Appearance", "Input History", "Whole overlay", "Export image"]
+      );
       assert.equal(await page.locator('[name="historyAnimation"], [name="historyEntry.entrance"], [name="historyEntry.exit"]').count(), 0);
       assert.equal(await page.locator('[name="shellImage"], [name="keyImage"]').count(), 0);
       const choices = page.locator('[name="imageTarget"] + .choice-buttons button');
@@ -947,4 +950,68 @@ test("configurator smoke", { timeout: 60000 }, async (t) => {
       await page.close();
     }
   });
+});
+
+test("image export preserves the full frame, trims alpha and downloads whole QR modules", { timeout: 60000 }, async (t) => {
+  const browser = await launchBrowser();
+  t.after(() => browser.close());
+  const page = await browser.newPage();
+  await serve(page, await loadAssets(editorAssets));
+  await page.goto("https://stream.test/qr/?content=Example&showLogo=no#configure");
+  await page.locator("#export-toggle").click();
+  const download = async () => {
+    const waiting = page.waitForEvent("download", { timeout: 15000 });
+    await page.locator("#export-download").click();
+    const file = await waiting;
+    assert.match(file.suggestedFilename(), /^qr_\d{4}-\d\d-\d\d \d\d-\d\d-\d\d-\d{3}\.png$/);
+    const data = await require("node:fs/promises").readFile(await file.path());
+    return [data.readUInt32BE(16), data.readUInt32BE(20)];
+  };
+  for (const height of [360, 480, 720, 1080, 1440, 2160]) {
+    await page.locator("#export-size").selectOption(String(height), { force: true });
+    assert.deepEqual(await download(), [height, height]);
+  }
+  await page.locator("#export-source").selectOption("frame", { force: true });
+  await page.locator("#export-size").selectOption("360", { force: true });
+  assert.deepEqual(await download(), [640, 360]);
+  await page.locator("#export-crop").check();
+  const [width, height] = await download();
+  assert.ok(width > 0 && width < 640 && height > 0 && height < 360);
+  await page.goto("https://stream.test/popup/?pauseTime=2#configure");
+  await page.locator("#overlay-form").waitFor();
+  assert.equal(await page.locator("#export-toggle").count(), 0);
+});
+
+test("keyboard image export keeps instance colors on shared SVG key shapes", { timeout: 30000 }, async (t) => {
+  const browser = await launchBrowser();
+  t.after(() => browser.close());
+  const page = await browser.newPage();
+  await serve(page, await loadAssets(editorAssets));
+  await page.goto("https://stream.test/keyboard/?animate=no&customColors=yes&keyColor=00AA00&legendColor=FF00FF#configure");
+  await page.frameLocator("#overlay-preview").locator("use.key-legend").first().waitFor({ state: "attached" });
+  await page.locator("#export-toggle").click();
+  const waiting = page.waitForEvent("download");
+  await page.locator("#export-download").click();
+  const file = await waiting;
+  const bytes = await require("node:fs/promises").readFile(await file.path());
+  const colors = await page.evaluate(async (data) => {
+    const image = new Image();
+    image.src = "data:image/png;base64," + data;
+    await image.decode();
+    const canvas = document.createElement("canvas");
+    canvas.width = image.width;
+    canvas.height = image.height;
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(image, 0, 0);
+    const pixels = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+    let keys = 0,
+      legends = 0;
+    for (let i = 0; i < pixels.length; i += 4) {
+      if (pixels[i + 3] < 250) continue;
+      if (pixels[i] < 40 && pixels[i + 1] > 140 && pixels[i + 2] < 40) keys++;
+      if (pixels[i] > 200 && pixels[i + 1] < 50 && pixels[i + 2] > 200) legends++;
+    }
+    return { keys, legends };
+  }, bytes.toString("base64"));
+  assert.ok(colors.keys > 1000 && colors.legends > 100, JSON.stringify(colors));
 });

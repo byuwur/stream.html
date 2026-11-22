@@ -3100,6 +3100,20 @@
       // Resource editor extensions reuse these services instead of creating separate widget/URL lifecycles.
       const editor = {
         generateURL,
+        async currentPreview() {
+          const url = await currentOverlayURL();
+          if (!url || !sameResourceURL(url)) throw new Error("Apply valid settings for this resource before exporting.");
+          const frame = document.getElementById("overlay-preview");
+          const target = previewURL;
+          const deadline = performance.now() + 12000;
+          while (target === previewURL && performance.now() < deadline) {
+            const view = frame.contentWindow;
+            if (!frame.contentDocument) throw new Error("Open the configurator over HTTP or HTTPS to export its preview.");
+            if (view.location.href === target && view.byStreamOverlay && view.document.readyState === "complete") return view;
+            await new Promise((resolve) => setTimeout(resolve, 50));
+          }
+          throw new Error("The preview changed or is still loading. Try exporting again.");
+        },
         initEntryEditor,
         initAppearancePresets,
         initTimestampFields,
@@ -3156,6 +3170,7 @@
       initFontPickers();
       initHelpDialog(initResourceHelp);
       initColorPickers();
+      byConfigurator.initImageExport?.(resource, editor);
       jqForm.find("select:not(.image-provider)").each((_, select) => initSelect2(select));
       for (const input of fields) initFieldRestore(input, parameterRules[input.name]);
       // View requests also supersede earlier clicks while asynchronous validation is pending.

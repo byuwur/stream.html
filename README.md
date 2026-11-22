@@ -292,6 +292,14 @@ For an OBS custom browser dock, choose **Appearance → OBS dock background** an
 
 [Configure Counter](https://stream.byuwur.co/counter/) · [Local entry point](counter/index.html)
 
+### Image downloads
+
+Open **Export image** at the bottom of a supported configurator. Save the current preview as PNG or JPEG at its original size or in a frame from 360p to 4K. The preview keeps its proportions. **Crop transparent edges** trims the frame to visible pixels before applying the JPEG background color. PNG preserves transparency. Preview filenames include the resource name and local date and time.
+
+QR / Link Card also offers a square, code-only image with its quiet margin.
+
+Image export uses the browser and the live preview on the same HTTP(S) origin. External artwork and fonts must allow the browser to read their bytes. Use Browse to embed a small custom image when its host blocks export.
+
 ## Shortcuts
 
 | Shortcut            | Action                                          |

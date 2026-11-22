@@ -386,6 +386,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const canvas = element("canvas", "qr-code");
   const scale = Math.max(3, Math.floor(settings.size / modules));
   canvas.width = canvas.height = modules * scale;
+  canvas.dataset.modules = modules;
   canvas.setAttribute("role", "img");
   canvas.setAttribute("aria-label", `QR code: ${settings.content}`);
   const ctx = canvas.getContext("2d");
