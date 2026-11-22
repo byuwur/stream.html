@@ -318,7 +318,9 @@ test("TBD configurators export demos, restore conditional drafts and round-trip 
   const source = page.locator('form [name="source"]');
   await source.selectOption("helper", { force: true });
   await page.waitForFunction(() => document.querySelector('form [name="title"]').disabled);
+  await page.waitForFunction(() => document.getElementById("overlay-preview").contentWindow.byStreamResource?.settings?.source === "helper");
   await source.selectOption("demo", { force: true });
+  await page.frameLocator("#overlay-preview").getByText("Evening edit").waitFor();
   assert.equal(await title.inputValue(), "Evening edit");
   await page.getByRole("button", { name: "Cover image", exact: true }).click();
   const cover = page.locator('form [name="cover"]');
@@ -333,17 +335,35 @@ test("TBD configurators export demos, restore conditional drafts and round-trip 
   const long = "Echo ".repeat(60).trim();
   await page.locator("#settings-json").fill(JSON.stringify({ layout: "card", title: long }));
   await page.frameLocator("#overlay-preview").getByText(long).waitFor();
+  const previewURL = () => page.locator("#overlay-preview").evaluate((frame) => frame.contentWindow.location.href);
+  const readablePreview = await previewURL();
   await page.locator("#advanced-options").click();
   await page.locator("#short-url").check();
   await page.waitForFunction(() => new URL(document.getElementById("overlay-url").value).searchParams.has("data"));
+  assert.equal(await previewURL(), readablePreview);
   const compressed = await url.inputValue();
   await page.goto(compressed);
   await page.locator('[data-layout="card"] .track', { hasText: long }).waitFor();
   await page.goto(compressed + "#configure");
   assert.equal(await title.inputValue(), long);
-  await url.fill("https://stream.test/now-playing/?layout=vinyl&title=FromURL");
-  await url.press("Enter");
-  await page.frameLocator("#overlay-preview").locator('[data-layout="vinyl"] .track', { hasText: "FromURL" }).waitFor();
+  const slowURL = "https://stream.test/now-playing/?layout=classic&title=Loading";
+  const { promise: gate, resolve: release } = Promise.withResolvers();
+  const isSlowImport = (request) => request.url().endsWith("/_load.min.js") && request.frame().url() === slowURL;
+  await page.route("**/_load.min.js", async (route) => {
+    if (isSlowImport(route.request())) await gate;
+    await route.fallback();
+  });
+  try {
+    const loading = page.waitForRequest(isSlowImport);
+    await url.fill(slowURL);
+    await url.press("Enter");
+    await loading;
+    await url.fill("https://stream.test/now-playing/?layout=vinyl&title=FromURL");
+    await url.press("Enter");
+    await page.frameLocator("#overlay-preview").locator('[data-layout="vinyl"] .track', { hasText: "FromURL" }).waitFor();
+  } finally {
+    release();
+  }
   assert.deepEqual(errors, []);
 });
 

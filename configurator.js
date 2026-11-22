@@ -1158,7 +1158,8 @@
       $("#copy-url").prop("disabled", false);
       prepareJSON();
       acceptedGeneration = generation;
-      updateOverlayPreview(url.href);
+      // Changing share-link compression alone should not reload the live overlay.
+      updateOverlayPreview(readableURL.href);
       syncJSON();
       return true;
     }
@@ -3385,7 +3386,9 @@
           // Invalidate asynchronous work while leaving the document, including before bfcache storage.
           urlGeneration++;
         })
-        .on("pageshow", generateURL);
+        .on("pageshow", (event) => {
+          if (event.originalEvent.persisted && !urlEdited) generateURL();
+        });
       byCommon.init();
       generateURL();
       revealFields(jqForm);

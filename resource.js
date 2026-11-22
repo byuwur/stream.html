@@ -96,7 +96,7 @@
   function assetHost(list) {
     return `${list.dataset.source}@${byStream.SPA_VERSION || list.dataset.spaVersion}`;
   }
-  byStream.assetsReady = (async () => {
+  async function loadResourceAssets() {
     if (!sharedImports && !resourceImports) return;
     if (typeof global.byLoad !== "function") {
       await new Promise((resolve, reject) => {
@@ -119,7 +119,20 @@
       await global.byLoad(JSON.parse(resourceImports.textContent), {
         host: assetHost(resourceImports)
       });
-  })();
+  }
+  // Browsers can abort imports before pagehide. Keep the outgoing renderer from starting.
+  byStream.assetsReady = new Promise((resolve, reject) => {
+    let leaving = false;
+    function markLeaving() {
+      leaving = true;
+    }
+    global.addEventListener("beforeunload", markLeaving, { once: true });
+    loadResourceAssets()
+      .then(resolve, (error) => {
+        if (!leaving) reject(error);
+      })
+      .finally(() => global.removeEventListener("beforeunload", markLeaving));
+  });
   // Resource handlers replace this before the optional editor's DOMContentLoaded handler awaits it.
   byStream.ready = byStream.assetsReady;
   const editorReady = (async () => {
