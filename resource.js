@@ -1877,12 +1877,13 @@
 
     for (const [id, element] of Object.entries(elements)) {
       if (!element.selector) continue;
+      const { box = true } = element;
       const [section, ...nested] = paths.get(id);
       const rootPlacement = id === "overlay" && !!fields.tilt;
       const when = availability.get(id);
       const shared = { section, subsection: [...nested, "Transforms"], ...(when ? { when } : {}) };
-      const container = id === "overlay" || element.container || element.box === false || element.motionItem || element.motionLabel || Object.values(elements).some((child) => child.parent === id);
-      if (container && element.box !== false && !element.selector.includes("::") && id !== "history") {
+      const container = id === "overlay" || element.container || !box || element.motionItem || element.motionLabel || Object.values(elements).some((child) => child.parent === id);
+      if (container && box && !element.selector.includes("::") && id !== "history") {
         for (const axis of ["width", "height"]) {
           if (id === "overlay" && fields[axis]) continue;
           const key = id + "." + axis + "Mode";
@@ -1899,7 +1900,7 @@
           };
         }
       }
-      if (element.box !== false) {
+      if (box) {
         const spacing = { ...shared, subsection: [...nested, "Spacing"], compact: true };
         if (element.gap || sideFields.has(element.selector + ":gap")) {
           for (const [suffix, property, icon] of [
@@ -3301,17 +3302,10 @@
       };
     }
     if (channel === "media") {
-      if (state.available === false) return { available: false };
       const { available, title, artist, album, cover, duration, position, playback } = state;
-      if (
-        available !== true ||
-        ![title, artist, album].every((s) => boundedText(s, 512)) ||
-        !boundedText(cover, 65536) ||
-        !safeImage(cover) ||
-        !finite(duration, 0, 604800) ||
-        !finite(position, 0, 604800) ||
-        !["playing", "paused", "stopped"].includes(playback)
-      )
+      if (typeof available !== "boolean") return null;
+      if (!available) return { available };
+      if (![title, artist, album].every((s) => boundedText(s, 512)) || !boundedText(cover, 65536) || !safeImage(cover) || !finite(duration, 0, 604800) || !finite(position, 0, 604800) || !["playing", "paused", "stopped"].includes(playback))
         return null;
       return {
         available,
