@@ -175,13 +175,42 @@ test("HTML formatting preserves embedded minified source and multiline string wh
   const javascript = "const label=`first\n  second`;window.label=label;";
   const css = '.label:before{content:"first  second"}';
   const html = await formatHTML(
-    parse(`<!doctype html><html><head><style data-source="label.css">\n${css}\n</style><style data-source="other.css">\na{display:block}\n</style></head><body><script data-source="label.js">\n${javascript}\n</script></body></html>`)
+    parse(
+      /* HTML */ `<!doctype html>
+        <html>
+          <head>
+            <style data-source="label.css">
+              ${css}
+            </style>
+            <style data-source="other.css">
+              a {
+                display: block;
+              }
+            </style>
+          </head>
+          <body>
+            <script data-source="label.js">
+              ${javascript};
+            </script>
+          </body>
+        </html>`
+    )
   );
   const all = nodes(parse(html));
   assert.equal(all.find((node) => node.tagName === "script").childNodes[0].value.trim(), javascript);
   assert.equal(all.find((node) => node.tagName === "style").childNodes[0].value.trim(), css);
-  assert.ok(html.includes('\n  <head>\n    <style data-source="label.css">\n'));
-  assert.ok(html.includes('\n    </style>\n    <style data-source="other.css">\n'));
+  assert.ok(
+    html.includes(`
+  <head>
+    <style data-source="label.css">
+`)
+  );
+  assert.ok(
+    html.includes(`
+    </style>
+    <style data-source="other.css">
+`)
+  );
   assert.equal(await formatHTML(parse(html)), html);
 });
 

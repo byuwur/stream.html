@@ -1640,7 +1640,7 @@ test("TBD layouts and live-data boundaries", { timeout: 60000 }, async (t) => {
         id: "one",
         platform: "kick",
         name: "界🌙",
-        text: "<b>hello</b> 🌙",
+        text: /* HTML */ `<b>hello</b> 🌙`,
         timestamp: 1,
         badges: ["mod"]
       };
@@ -1648,7 +1648,7 @@ test("TBD layouts and live-data boundaries", { timeout: 60000 }, async (t) => {
       return [api.receive(msg), api.receive(msg), api.receive({ ...msg, id: "bad", avatar: "javascript:bad" }), api.receive({ ...msg, id: "bad", platform: "other" })];
     });
     assert.deepEqual(results, [true, false, false, false]);
-    assert.equal(await page.locator(".body").textContent(), "<b>hello</b> 🌙");
+    assert.equal(await page.locator(".body").textContent(), /* HTML */ `<b>hello</b> 🌙`);
     assert.equal(await page.locator(".body b, .avatar, .badge").count(), 0);
     assert.equal(
       await page.evaluate(() => {

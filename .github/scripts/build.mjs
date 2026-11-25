@@ -198,7 +198,7 @@ export function expandAssets(tree, entry, includeLoader = true) {
       const url = filePath.startsWith("/") ? new URL(`${host}${filePath}`) : new URL(filePath, localURL(entry));
       const stylesheet = url.pathname.endsWith(".css");
       assert.ok(stylesheet || url.pathname.endsWith(".js"), `Unsupported dependency in ${entry}: ${filePath}`);
-      const node = nodes(parse(stylesheet ? '<link rel="stylesheet">' : "<script defer></script>")).find((item) => item.tagName === (stylesheet ? "link" : "script"));
+      const node = nodes(parse(stylesheet ? /* HTML */ `<link rel="stylesheet" />` : /* HTML */ `<script defer></script>`)).find((item) => item.tagName === (stylesheet ? "link" : "script"));
       setAttr(node, stylesheet ? "href" : "src", url.href);
       if (file.optional || config.externalStyles.includes(url.href)) setAttr(node, "data-load-optional", "");
       if (stylesheet && !runtime) {
@@ -752,7 +752,7 @@ async function buildRelease(tag, options) {
         for (const node of all.filter((node) => ["configurator-assets", "configurator"].includes(attr(node, "id")))) remove(node);
       }
       if (artworkMode === "embedded" || artworkMode === "packaged") {
-        const script = nodes(parse(`<script type="application/json" id="${resource.id}-artwork"></script>`)).find((node) => node.tagName === "script");
+        const script = nodes(parse(/* HTML */ `<script type="application/json" id="${resource.id}-artwork"></script>`)).find((node) => node.tagName === "script");
         textContent(script, `\n${JSON.stringify(Object.fromEntries(images.map((image) => [path.basename(image.file, ".svg"), image.body.toString()]))).replaceAll("<", "\\u003c")}\n`);
         script.parentNode = body;
         body.childNodes.unshift(script);
@@ -986,7 +986,7 @@ export async function publishRelease({ request = fetch, environment = process.en
     assert.ok(bodies.has(file), `Unknown checksum file: ${file}`);
     assert.equal(sha256(bodies.get(file)), hash, `Checksum mismatch: ${file}`);
   }
-  const marker = `<!-- stream.html release builder ${tag} ${environment.GITHUB_SHA} ${sha256(rawManifest)} -->`;
+  const marker = /* HTML */ `<!-- stream.html release builder ${tag} ${environment.GITHUB_SHA} ${sha256(rawManifest)} -->`;
   const body = `${bodies.get("RELEASE_NOTES.md").toString()}\n${marker}\n`;
   const base = `https://api.github.com/repos/${config.repository}`;
   const headers = {

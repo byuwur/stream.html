@@ -79,7 +79,7 @@ async function resourceNames() {
 // ===== STANDALONE PAGE FIXTURE =====
 // Remove the optional editor imports to exercise the supported renderer-only entry point.
 function standaloneHTML(html) {
-  const boundary = html.indexOf("<!-- ===== CONFIGURATOR ===== -->");
+  const boundary = html.indexOf(/* HTML */ `<!-- ===== CONFIGURATOR ===== -->`);
   assert.ok(boundary >= 0, "Resource must mark its optional configurator imports");
   return html.replace(/<template id="configurator-assets">[\s\S]*?<\/template>/, "").replace(/<div id="configurator"><\/div>/, "");
 }

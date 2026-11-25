@@ -291,9 +291,27 @@ test("PHP upload disables Catbox and supports developer-configured image hosts",
         [{ status: 412, body: "Invalid uploader." }, 412, "transport=0; upstream=412"],
         [{ status: 412, body: "No files given." }, 412, "transport=0; upstream=412"],
         [{ status: 412, body: "" }, 412, "transport=0; upstream=412"],
-        [{ status: 500, body: "<html>Provider failure</html>" }, 500, "transport=0; upstream=500"],
+        [
+          {
+            status: 500,
+            body: /* HTML */ `<html>
+              Provider failure
+            </html>`
+          },
+          500,
+          "transport=0; upstream=500"
+        ],
         [{ status: 500, body: successBody }, 500, "transport=0; upstream=500"],
-        [{ status: 403, body: "<script>window.providerExecuted = true</script>" }, 403, "transport=0; upstream=403"],
+        [
+          {
+            status: 403,
+            body: /* HTML */ `<script>
+              window.providerExecuted = true;
+            </script>`
+          },
+          403,
+          "transport=0; upstream=403"
+        ],
         [{ status: 429, body: "Slow down." }, 429, "transport=0; upstream=429"],
         [{ errno: 6, status: 0 }, 502, "transport=6; upstream=0"],
         [{ errno: 7, status: 0 }, 502, "transport=7; upstream=0"],
@@ -304,7 +322,9 @@ test("PHP upload disables Catbox and supports developer-configured image hosts",
         [{ status: 302, body: hostedURL }, 502, "transport=0; upstream=302"],
         [{ errno: 23, body: "x".repeat(65537) }, 502, "transport=23; upstream=200"],
         ...[
-          "<html>Provider error</html>",
+          /* HTML */ `<html>
+            Provider error
+          </html>`,
           "",
           ...["http://images.example.test/image.png", "https://user@images.example.test/image.png", "https://user:password@images.example.test/image.png", "javascript:alert(1)", "/relative/image.png"].map((url) => JSON.stringify({ url }))
         ].map((body) => [{ body }, 502, "transport=0; upstream=200; response=invalid"])
@@ -340,7 +360,15 @@ test("PHP upload disables Catbox and supports developer-configured image hosts",
       assert.equal(explicit.text, "Invalid uploader.", "Client fields cannot disable the operator's provider setting");
       for (const [value, status] of [
         [{ status: 412, body: "Invalid uploader. private-provider-detail" }, 412],
-        [{ status: 500, body: "<html>private-provider-detail</html>" }, 500],
+        [
+          {
+            status: 500,
+            body: /* HTML */ `<html>
+              private-provider-detail
+            </html>`
+          },
+          500
+        ],
         [{ status: 200, body: "Invalid reply: private-provider-detail" }, 502],
         [{ errno: 56, status: 0, error: "Private transport detail", body: "Partial private-provider-detail" }, 502],
         [{ errno: 28, status: 0, error: "Private timeout detail", body: "Partial private-provider-detail" }, 504]

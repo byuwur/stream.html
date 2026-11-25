@@ -409,7 +409,11 @@ test("key binding fields capture combinations, cancel, and round-trip through Co
   const general = page.locator('[data-config-section="General"]');
   await general.locator('[name="increase"]').waitFor();
   assert.equal(await general.locator('[data-config-subsection="Key bindings"]').count(), 0);
-  for (const [name, value] of [["increase", "F9"], ["decrease", "F10"], ["resetKey", "Off"]]) {
+  for (const [name, value] of [
+    ["increase", "F9"],
+    ["decrease", "F10"],
+    ["resetKey", "Off"]
+  ]) {
     const input = general.locator('[name="' + name + '"]');
     assert.equal(await input.inputValue(), value);
     assert.equal(await input.evaluate((node) => node.closest("[data-config-subsection]") === null), true);
@@ -1041,7 +1045,14 @@ test("configurator smoke", { timeout: 60000 }, async (t) => {
       for (const failure of [
         { status: 412, body: "Invalid uploader.", diagnostic: "transport=0; upstream=412" },
         { status: 502, body: "Upload transport failed (cURL 56): Recv failure\nPartial provider response", diagnostic: "transport=56; upstream=0" },
-        { status: 200, body: "<script>window.providerExecuted=true</script>" + "x".repeat(1000), diagnostic: "transport=0; upstream=200" },
+        {
+          status: 200,
+          body: /* HTML */ `<script>
+              window.providerExecuted = true;
+            </script>
+            ${"x".repeat(1000)}`,
+          diagnostic: "transport=0; upstream=200"
+        },
         { status: 500, body: "", diagnostic: "transport=0; upstream=500" },
         { networkError: true }
       ]) {
