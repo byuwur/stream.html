@@ -138,7 +138,7 @@
         for (const [index, pad] of Object.entries(pads)) {
           const player = Number(index) === 9 ? 9 : Number(index) + 1;
           if (player < 1 || player > 9) continue;
-          $("<option></option>")
+          $(/* HTML */ `<option></option>`)
             .val(player)
             .text(player === 9 ? "Keyboard" : `Player ${player} - ${pad.id}`)
             .appendTo(input);
@@ -148,7 +148,7 @@
           .toArray()
           .find((option) => option.value === (previous || settings.player));
         if (preferred) input.val(preferred.value);
-        if (!input.children().length) $("<option></option>").val("").text("Connect a controller").appendTo(input);
+        if (!input.children().length) $(/* HTML */ `<option></option>`).val("").text("Connect a controller").appendTo(input);
         input.trigger("change.select2");
         $("#mapping-status").text(selectedPad() ? "Choose an output below, then record a button or move a stick. Escape cancels recording." : "Press a controller button to connect it, or choose keyboard.");
         $("#mappings .mapping-row").each((_, row) => refreshRow($(row)));
@@ -169,7 +169,7 @@
         const options = kind === "axes" ? (skin.axes || []).map((id) => [id, axisNames[id]]) : outputButtons();
         if (selected !== undefined && !options.some(([id]) => id === Number(selected))) options.push([Number(selected), `${buttonNames[selected] || `Output ${selected}`} (not shown on this skin)`]);
         options.forEach(([id, name]) =>
-          $("<option></option>")
+          $(/* HTML */ `<option></option>`)
             .val(id)
             .text(name[0]?.toUpperCase() + name.slice(1))
             .appendTo(target)
@@ -261,16 +261,16 @@
           row.find(".range-type").val(binding.axesConfig.type);
         }
         for (const direction of directions) {
-          const group = $("<div class='col-6 col-lg-3'></div>");
-          $("<label class='form-label small'></label>")
+          const group = $(/* HTML */ `<div class="col-6 col-lg-3"></div>`);
+          $(/* HTML */ `<label class="form-label small"></label>`)
             .text(direction.replace("right", " right").replace("left", " left"))
             .append(
-              $("<input class='form-control' type='number' step='any' />")
+              $(`<input class="form-control" type="number" step="any" />`)
                 .attr("data-direction", direction)
                 .val(binding.positions?.[direction] ?? "")
             )
             .appendTo(group);
-          $("<button type='button' class='mapping-record btn btn-outline-secondary btn-sm' data-slot='direction'>Record</button>").attr("data-direction", direction).appendTo(group);
+          $(/* HTML */ `<button type="button" class="mapping-record btn btn-outline-secondary btn-sm" data-slot="direction">Record</button>`).attr("data-direction", direction).appendTo(group);
           row.find(".hat-positions").append(group);
         }
         row.appendTo("#mappings");
@@ -537,10 +537,10 @@
         initResourceHelp(help, titles) {
           dialog = help;
           titles.remap = "Custom Mapping";
-          $("<section data-panel='remap' hidden></section>").append(section.find("article").contents()).appendTo($(help).find("article"));
+          $(/* HTML */ `<section data-panel="remap" hidden></section>`).append(section.find("article").contents()).appendTo($(help).find("article"));
           section.remove();
           window.byConfigurator.appendControllerCredits(help);
-          $("<button type='button' data-section='remap' class='btn btn-sm btn-outline-light border-0'><i class='fa-solid fa-gamepad me-2' aria-hidden='true'></i>Custom Mapping</button>").insertBefore($(help).find(".help-close"));
+          $(/* HTML */ `<button type="button" data-section="remap" class="btn btn-sm btn-outline-light border-0"><i class="fa-solid fa-gamepad me-2" aria-hidden="true"></i>Custom Mapping</button>`).insertBefore($(help).find(".help-close"));
           initSelect2($("#player-base"));
           $("#mappings select").each((_, select) => initSelect2(select));
           $(help).on("close hidden.bs.modal", () => cancelCapture());

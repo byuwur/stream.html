@@ -654,15 +654,16 @@
     const localEditor = ["localhost", "127.0.0.1", "[::1]"].includes(location.hostname);
     const siteEditor = !preferenceResource && window.top === window && (localEditor || (location.protocol === "https:" && ["stream.byuwur.co", "controller.byuwur.co"].includes(location.host)));
     if (siteEditor) {
+      const endScript = "</" + "script>";
       document.body.insertAdjacentHTML(
         "beforeend",
-        `
+        /* HTML */ `
         <template id="site-analytics-frame">
           <meta name="referrer" content="no-referrer">
-          <script>
+          ${`<script>
             window.dataLayer = [];
             function gtag() { window.dataLayer.push(arguments); }
-          <\/script>
+          ${endScript}`}
         </template>`
       );
       initSiteAnalytics();
@@ -771,7 +772,7 @@
                 data-section="advanced"
                 data-bs-toggle="tooltip"
                 data-bs-placement="bottom"
-                data-bs-fallback-placements='["bottom"]'
+                data-bs-fallback-placements="[&quot;bottom&quot;]"
                 title="Advanced options"
                 aria-label="Advanced options"
                 aria-keyshortcuts="Alt+Shift+A"
@@ -1012,7 +1013,7 @@
         } else if (["textarea", "timezones"].includes(field.type)) {
           control = $(/* HTML */ `<textarea class="form-control"></textarea>`).attr("rows", field.rows || 3);
         } else {
-          control = $(/* HTML */ `<input class="form-control" />`).attr("type", field.type === "number" ? "number" : field.type === "switch" ? "checkbox" : ["entries", "mapping"].includes(field.type) ? "hidden" : "text");
+          control = $(`<input class="form-control" />`).attr("type", field.type === "number" ? "number" : field.type === "switch" ? "checkbox" : ["entries", "mapping"].includes(field.type) ? "hidden" : "text");
           if (field.type === "number") control.attr("step", field.step || "any");
           if (field.type === "switch") {
             label.addClass("form-switch ps-0");
@@ -1367,7 +1368,7 @@
       const max = Math.min(rule.max ?? Infinity, rule.sliderMax ?? (seconds ? 60 : degrees ? 360 : Math.max(100, Math.abs(Number(rule.default) || 0) * 2)));
       const jqInput = $(input);
       const row = $(/* HTML */ `<div class="number-range d-flex align-items-center gap-2"></div>`).insertBefore(jqInput);
-      const slider = $(/* HTML */ `<input type="range" class="form-range m-0 flex-grow-1" />`)
+      const slider = $(`<input type="range" class="form-range m-0 flex-grow-1" />`)
         .attr({ min, max: Math.max(min, max), step: rule.step === "any" ? 1 : rule.step || 1, "aria-label": `${rule.label} slider`, "aria-controls": input.id, "data-number-field": input.name })
         .appendTo(row);
       jqInput.addClass("range-value flex-shrink-0").appendTo(row);
@@ -1432,8 +1433,8 @@
 
     /** Record a chord on its first key release. The text field still owns typing, restore, and URL edits. */
     function initKeyBinding(input, rule) {
-      const jqInput = $(input).wrap('<div class="input-group"></div>');
-      const button = $('<button type="button" class="btn btn-outline-secondary"></button>').insertAfter(jqInput);
+      const jqInput = $(input).wrap(/* HTML */ `<div class="input-group"></div>`);
+      const button = $(/* HTML */ `<button type="button" class="btn btn-outline-secondary"></button>`).insertAfter(jqInput);
       const keys = new Set();
       let recording = false;
       function setRecording(active) {
@@ -1633,7 +1634,7 @@
       const browse = $(/* HTML */ `<button type="button" class="image-browse btn bg-body-secondary text-body border border-secondary-subtle"><i class="fa-solid fa-folder-open me-1" aria-hidden="true"></i>Browse...</button>`)
         .attr("aria-label", `Browse ${title}`)
         .appendTo(actions);
-      const picker = $(/* HTML */ `<input type="file" accept="image/png,image/jpeg,image/webp,image/gif" hidden />`).appendTo(component);
+      const picker = $(`<input type="file" accept="image/png,image/jpeg,image/webp,image/gif" hidden />`).appendTo(component);
       const status = $(/* HTML */ `<small class="image-status" role="status" aria-live="polite" aria-atomic="true" hidden></small>`).appendTo(component);
       let revision = 0;
       let controller;
@@ -1905,16 +1906,16 @@
       }
 
       function addKeyList(row, keys) {
-        const group = $('<div class="mb-2" role="group" aria-label="Shortcut keys"></div>').appendTo(row);
-        const list = $('<div class="entry-keys"></div>').appendTo(group);
-        const add = $('<button type="button" class="btn btn-sm btn-outline-primary w-100"><i class="fa-solid fa-plus me-1" aria-hidden="true"></i>Add key</button>').appendTo(group);
-        const select = $('<select class="form-select rounded-0 bg-body-secondary border-secondary-subtle"></select>').append(new Option("Choose a key...", ""));
+        const group = $(/* HTML */ `<div class="mb-2" role="group" aria-label="Shortcut keys"></div>`).appendTo(row);
+        const list = $(/* HTML */ `<div class="entry-keys"></div>`).appendTo(group);
+        const add = $(/* HTML */ `<button type="button" class="btn btn-sm btn-outline-primary w-100"><i class="fa-solid fa-plus me-1" aria-hidden="true"></i>Add key</button>`).appendTo(group);
+        const select = $(/* HTML */ `<select class="form-select rounded-0 bg-body-secondary border-secondary-subtle"></select>`).append(new Option("Choose a key...", ""));
         for (const key of keyChoices) select.append(new Option(key, key));
 
         function appendKey(value) {
-          const item = $('<div class="entry-key d-flex gap-1 mb-1"></div>').appendTo(list);
-          const input = select.clone().appendTo($('<div class="flex-grow-1 overflow-hidden"></div>').appendTo(item));
-          const buttons = $('<div class="btn-group flex-shrink-0" role="group" aria-label="Key controls"></div>').appendTo(item);
+          const item = $(/* HTML */ `<div class="entry-key d-flex gap-1 mb-1"></div>`).appendTo(list);
+          const input = select.clone().appendTo($(/* HTML */ `<div class="flex-grow-1 overflow-hidden"></div>`).appendTo(item));
+          const buttons = $(/* HTML */ `<div class="btn-group flex-shrink-0" role="group" aria-label="Key controls"></div>`).appendTo(item);
           if (value && !keyChoices.includes(value)) input.append(new Option(value, value));
           input.val(value);
           for (const [action, label, icon] of [
@@ -1922,9 +1923,9 @@
             ["down", "Move key down", "arrow-down"],
             ["remove", "Remove key", "xmark"]
           ]) {
-            $('<button type="button" class="btn btn-sm btn-outline-primary"></button>')
+            $(/* HTML */ `<button type="button" class="btn btn-sm btn-outline-primary"></button>`)
               .attr({ "data-key-action": action, "aria-label": label, title: label })
-              .append($('<i class="fa-solid" aria-hidden="true"></i>').addClass("fa-" + icon))
+              .append($(/* HTML */ `<i class="fa-solid" aria-hidden="true"></i>`).addClass("fa-" + icon))
               .appendTo(buttons);
           }
           return item;
@@ -1988,9 +1989,9 @@
         `);
         const controls = jqRow.find(".btn-group");
         if (duplicate)
-          $('<button type="button" class="btn btn-sm btn-outline-primary" data-action="duplicate" aria-label="Duplicate panel" title="Duplicate panel"><i class="fa-solid fa-copy" aria-hidden="true"></i></button>').prependTo(controls);
+          $(/* HTML */ `<button type="button" class="btn btn-sm btn-outline-primary" data-action="duplicate" aria-label="Duplicate panel" title="Duplicate panel"><i class="fa-solid fa-copy" aria-hidden="true"></i></button>`).prependTo(controls);
         if (byConfigurator.initImageExport && resource.imageExport?.field === name)
-          $('<button type="button" class="btn btn-sm btn-outline-primary" data-export-row aria-label="Download panel" title="Download panel"><i class="fa-solid fa-download" aria-hidden="true"></i></button>').prependTo(controls);
+          $(/* HTML */ `<button type="button" class="btn btn-sm btn-outline-primary" data-export-row aria-label="Download panel" title="Download panel"><i class="fa-solid fa-download" aria-hidden="true"></i></button>`).prependTo(controls);
         const jqSelect = jqRow.find("select");
         if (!choices) jqRow.find("select, .entry-icon").remove();
         if (choiceKey === "platform") jqRow.find(".entry-icon").remove();
@@ -2001,7 +2002,7 @@
         if (keyChoices) addKeyList(jqRow, entry.keys);
         textFields.forEach(([key, title, type = "text", whenChoice], index) => {
           const value = map ? entry[choices ? 1 : index] : strings ? entry : entry[key];
-          const input = $(type === "textarea" ? "<textarea></textarea>" : "<input />", {
+          const input = $(type === "textarea" ? /* HTML */ `<textarea></textarea>` : `<input />`, {
             type: type === "textarea" ? undefined : type === "image" ? "text" : type,
             rows: type === "textarea" ? 3 : undefined,
             step: type === "datetime-local" ? "1" : undefined,
@@ -2221,7 +2222,7 @@
         const title = jqField.closest(".config-field").find(".field-caption").first().text() || name;
         // The visible picker uses local wall time; the named hidden input keeps absolute UTC for URLs.
         jqField.attr({ type: "hidden", "data-title": title });
-        const jqPicker = $(/* HTML */ `<input type="datetime-local" step="1" required />`)
+        const jqPicker = $(`<input type="datetime-local" step="1" required />`)
           .attr({ class: `${jqField.attr("class")} timestamp-picker`, "aria-label": title })
           .insertBefore(jqField);
         const jqNote = $(/* HTML */ `<small class="text-body-secondary"></small>`).text("Choose in this computer's time zone. The URL stores an absolute time.").insertAfter(jqPicker);
@@ -2719,7 +2720,7 @@
           groups.set(section, group);
         }
         const label = $(/* HTML */ `<label class="compression-field d-flex align-items-start gap-2 mb-2"></label>`).appendTo(groups.get(section));
-        $(/* HTML */ `<input class="form-check-input float-none m-0 mt-1 flex-shrink-0" type="checkbox" data-compress-field />`)
+        $(`<input class="form-check-input float-none m-0 mt-1 flex-shrink-0" type="checkbox" data-compress-field />`)
           .attr({ id: `compress-field-${index}`, value: name })
           .appendTo(label);
         const caption = $(/* HTML */ `<span class="text-break"></span>`)
@@ -2988,7 +2989,7 @@
         if (section === "advanced") {
           jqLinks.append(
             " | ",
-            $("<a>", {
+            $(`<a>`, {
               href: "https://byuwur.co/privacy/stream.html",
               text: "Privacy",
               class: "link-body-emphasis",
@@ -2998,7 +2999,7 @@
           );
           jqLinks.append(
             " · ",
-            $("<a>", {
+            $(`<a>`, {
               href: "https://byuwur.co/cookies/stream.html",
               text: "Cookies",
               class: "link-body-emphasis",
@@ -3675,7 +3676,7 @@
             // GA4 needs an HTTPS document. Drop the parent URL parameters before running the tag.
             doc.open();
             owner.contentWindow.history.replaceState(null, "", "/");
-            doc.write("<!doctype html>" + frameTemplate.innerHTML);
+            doc.write(/* HTML */ `<!doctype html>${frameTemplate.innerHTML}`);
             doc.close();
           } catch {
             stop(false);
@@ -3696,7 +3697,7 @@
           script.src = "https://www.googletagmanager.com/gtag/js?id=" + measurement;
           owner.contentDocument.head.append(script);
         };
-        owner.srcdoc = "<!doctype html>";
+        owner.srcdoc = /* HTML */ `<!doctype html>`;
         document.body.append(owner);
       }
       if (frameReady) frame.contentWindow[disable] = false;

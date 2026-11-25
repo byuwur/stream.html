@@ -1008,7 +1008,7 @@ async function initControllerResource() {
       container.append(active);
       const variant = settings.variant === "sequential" ? variants[index % variants.length] : settings.variant;
       const artwork = byControllerArtwork.render(settings.skin, settings.layout, settings.buttonLabels, variant, `p${player}`);
-      active.innerHTML = `<div class="controller-layers">${artwork.markup}</div>`;
+      active.innerHTML = /* HTML */ `<div class="controller-layers">${artwork.markup}</div>`;
       active.style.width = `${artwork.width}px`;
       active.style.height = `${artwork.height}px`;
       active.style.opacity = settings.opacity / 100;
@@ -1791,7 +1791,7 @@ async function loadControllerArtwork(requiredSkin, fixedSkin) {
     leds.dataset.nativeLeds = String(id === "x360" || !!svg.querySelector(".player-indicator[data-player]"));
     const lamps = document.createElementNS(svg.namespaceURI, "g");
     lamps.classList.add("layout-position", "player-leds");
-    lamps.innerHTML = [1, 2, 3, 4].map((lamp) => `<rect class="player-indicator" data-player="${lamp}" x="${(lamp - 1) * 15}" y="0" width="5" height="5"/>`).join("");
+    lamps.innerHTML = [1, 2, 3, 4].map((lamp) => /* HTML */ `<rect class="player-indicator" data-player="${lamp}" x="${(lamp - 1) * 15}" y="0" width="5" height="5"/>`).join("");
     leds.append(lamps);
     mount.append(leds);
     const size = setLayout(mount, layout);
