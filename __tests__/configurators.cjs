@@ -913,7 +913,9 @@ test("configurator smoke", { timeout: 60000 }, async (t) => {
         "https://stream.test/main/?displayCountdown=yes&displaySocial=yes&displaySchedule=yes&displayLabels=yes&titleVerticalOffset=1080&title.translateY=5000&subtitleVerticalOffset=-1080&subtitle.translateY=-5000#configure",
         { waitUntil: "commit" }
       );
-      await page.locator('[name="socialPosition"]').waitFor({ state: "attached", timeout: 15000 });
+      // Main attaches its form controls before the first preview is ready.
+      await page.frameLocator("#overlay-preview").locator("#scene").waitFor({ state: "attached", timeout: 15000 });
+      await page.locator('[name="socialPosition"]').waitFor({ state: "attached" });
       assert.equal(await page.locator('[name="title.translateY"]').inputValue(), "6080");
       assert.equal(await page.locator('[name="subtitle.translateY"]').inputValue(), "-6144");
       assert.doesNotMatch(await page.locator("#overlay-url").inputValue(), /VerticalOffset/);
