@@ -10,6 +10,7 @@ import { Script } from "node:vm";
 import { parse as parseYAML } from "yaml";
 import {
   SPA_HOST,
+  SPA_VERSION,
   assertPinned,
   attr,
   config,
@@ -142,12 +143,16 @@ test("CDN minification uses matching committed source, caches bytes, and falls b
   assert.equal(requests, 2);
 });
 
-test("pinned SPA dependencies can fall back to matching local minified files", async (t) => {
-  const url = new URL(`${SPA_HOST}/_functions.min.js`);
-  const existing = await dependencyReader();
-  const expected = await existing.read(url);
-  const { directory } = await gitFixture(t);
-  await fs.writeFile(path.join(directory, "_functions.min.js"), expected);
+test("SPA dependencies resolve from the configured tag on the CDN or in Git", async (t) => {
+  const { directory, git } = await gitFixture(t);
+  const file = path.join(directory, "fixture.js");
+  await fs.writeFile(file, "window.tagged = true;");
+  git("add", "fixture.js");
+  git("commit", "--quiet", "-m", "Tagged dependency");
+  git("tag", SPA_VERSION);
+  await fs.writeFile(file, "window.tagged = false;");
+  git("commit", "-qam", "Later dependency");
+
   const previousRoot = process.env.SPA_ASSETS_ROOT;
   process.env.SPA_ASSETS_ROOT = directory;
   t.after(() => {
@@ -155,15 +160,19 @@ test("pinned SPA dependencies can fall back to matching local minified files", a
     else process.env.SPA_ASSETS_ROOT = previousRoot;
   });
   t.mock.method(os, "tmpdir", () => path.join(directory, "cache"));
-  t.mock.method(globalThis, "fetch", async () => {
+  const remote = `${SPA_HOST}/cdn-only.js`;
+  const fetch = t.mock.method(globalThis, "fetch", async (url) => {
+    if (url.href === remote) return new Response("window.cdn = true;");
     throw new Error("Offline dependency request");
   });
   const reader = await dependencyReader();
-  assert.deepEqual(await reader.read(url), expected);
-  await fs.unlink(path.join(os.tmpdir(), "stream-html-release-cache", sha256(url.href)));
-  await fs.writeFile(path.join(directory, "_functions.min.js"), "Wrong pinned version");
-  const mismatched = await dependencyReader();
-  await assert.rejects(mismatched.read(url), /Offline dependency request/);
+  assert.equal((await reader.read(remote)).toString(), "window.cdn = true;");
+  const cached = await dependencyReader();
+  assert.equal((await cached.read(remote)).toString(), "window.cdn = true;");
+  assert.equal(fetch.mock.callCount(), 1);
+  assert.equal((await reader.read(`${SPA_HOST}/fixture.js`)).toString(), "window.tagged = true;");
+  assert.match((await reader.read(`${SPA_HOST}/fixture.min.js`)).toString(), /window\.tagged=(?:true|!0)/);
+  await assert.rejects(reader.read(`${SPA_HOST}/missing.js`), /Offline dependency request/);
 });
 
 test("release tags accept established version forms and reject malformed or unsafe input", () => {
@@ -263,14 +272,14 @@ test("artwork matching follows executable requests across formatting changes", (
   }
 });
 
-test("dependency resolution rejects floating URLs, outside files, missing files, and unregistered downloads", async () => {
+test("dependency resolution requires the configured SPA tag and rejects outside or missing files", async () => {
   assert.doesNotThrow(() => assertPinned(new URL(`${SPA_HOST}/_functions.min.js`)));
   for (const url of ["http://cdn.jsdelivr.net/gh/a/b@v1.0.0/a.js", "https://cdn.jsdelivr.net/gh/a/b@latest/a.js", "https://cdn.jsdelivr.net/gh/a/b@next/a.js", "https://example.com/a.js"]) assert.throws(() => assertPinned(new URL(url)));
   const reader = await dependencyReader();
   await assert.rejects(reader.read(new URL("../../README.md", localURL("resource.js"))));
   await assert.rejects(reader.read(localURL(".git/config")), /Invalid source dependency/);
   await assert.rejects(reader.read(localURL("not-a-release-source.js")), /ENOENT/);
-  await assert.rejects(reader.read(new URL(`${SPA_HOST}/not-in-the-lock.js`)), /Unregistered dependency/);
+  await assert.rejects(reader.read(new URL("https://cdn.jsdelivr.net/gh/byuwur/spa.js@v1/asset.js")), /Expected an asset from/);
   await assert.rejects(reader.read(new URL(config.externalStyles[0])), /Font Awesome/);
 });
 
@@ -424,6 +433,8 @@ test("release descriptions link to the generated inventory", async () => {
 test("publication is restricted to tags and gated by successful mandatory checks", async () => {
   const release = parseYAML(await fs.readFile(path.join(root, ".github/workflows/release.yml"), "utf8"));
   const ci = release.jobs.distributions;
+  const runtime = await fs.readFile(path.join(root, "resource.js"), "utf8");
+  assert.ok(runtime.includes(`byStream.SPA_VERSION = "${SPA_VERSION}"`));
   const source = parseYAML(await fs.readFile(path.join(root, ".github/workflows/tests.yml"), "utf8"));
   assert.deepEqual(release.on.push, { branches: [config.branch], tags: ["v*"] });
   assert.ok(release.on.pull_request !== undefined);

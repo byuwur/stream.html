@@ -85,7 +85,7 @@
   global.byStream = global.byStream || {};
   const byStream = global.byStream;
   if (byStream.initialized) return;
-  byStream.SPA_VERSION = "v20.17";
+  byStream.SPA_VERSION = "v20.18";
   const sharedImports = document.getElementById("shared-assets");
   const editorImports = document.getElementById("configurator-assets");
   const resourceImports = document.getElementById("resource-assets");

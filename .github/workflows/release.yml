@@ -37,7 +37,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: byuwur/spa.js
-          ref: v20.17
+          ref: v20.18
           path: spa.js
           persist-credentials: false
       - name: Trust the project checkout in the build container
@@ -95,7 +95,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: byuwur/spa.js
-          ref: v20.17
+          ref: v20.18
           path: spa.js
           persist-credentials: false
       - name: Trust the project checkout in the build container

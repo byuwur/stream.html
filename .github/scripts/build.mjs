@@ -2,7 +2,6 @@
  * @file Build portable resource HTML, Controller/Keyboard ZIPs, manifests, checksums, and release notes.
  * Run from the repository root with node .github/scripts/build.mjs --tag <version>.
  * Every build includes full and standalone embedded Controller and Keyboard editions marked [EXPERIMENTAL].
- * --update-dependencies refreshes pinned dependency hashes for review.
  * --check validates a pushed tag. --publish uploads the tested inventory and publishes its verified draft.
  * Build outputs live in dist/assets. Size and performance diagnostics live in dist/experimental.
  */
@@ -10,7 +9,7 @@ import { build, transform } from "esbuild";
 import { zipSync } from "fflate";
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
-import { createHash } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import { readFileSync } from "node:fs";
 import * as fs from "node:fs/promises";
 import os from "node:os";
@@ -20,9 +19,10 @@ import { parseArgs } from "node:util";
 import { parse, serialize } from "parse5";
 import { format } from "prettier";
 import { parsers } from "prettier/plugins/babel";
+import releaseDependencies from "./release-dependencies.json" with { type: "json" };
 
 export const root = fileURLToPath(new URL("../../", import.meta.url));
-export const SPA_VERSION = (await fs.readFile(path.join(root, "resource.js"), "utf8")).match(/byStream\.SPA_VERSION = "([^"]+)"/)[1];
+export const SPA_VERSION = validateTag(releaseDependencies["spa.js"]);
 export const SPA_HOST = `https://cdn.jsdelivr.net/gh/byuwur/spa.js@${SPA_VERSION}`;
 export const config = {
   repository: "byuwur/stream.html",
@@ -286,36 +286,93 @@ export async function containedFile(url) {
 }
 
 /**
- * Require an HTTPS jsDelivr GitHub URL pinned to a version or full commit hash.
  * @param {URL} url Remote dependency URL.
- * @returns {void}
- * @throws {Error} Rejects floating, unversioned, or unsupported URLs.
+ * @throws {Error} Rejects URLs outside the configured SPA.js release.
  */
 export function assertPinned(url) {
-  assert.equal(url.protocol, "https:", `Dependencies must use HTTPS: ${url}`);
-  assert.ok(!/@(?:latest|main|master)(?:[/?#]|$)/i.test(url.href), `Floating dependency: ${url}`);
-  assert.ok(url.hostname === "cdn.jsdelivr.net" && /^\/gh\/[^/]+\/[^/@]+@[^/]+\//.test(url.pathname), `Unregistered or unversioned dependency: ${url}`);
-  const ref = decodeURIComponent(url.pathname.match(/@([^/]+)\//)[1]);
-  assert.match(ref, /^(?:v?\d+(?:\.\d+){0,2}(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?|[0-9a-f]{40})$/, `Dependency must name a version or full commit: ${url}`);
+  assert.ok(url.href.startsWith(`${SPA_HOST}/`), `Expected an asset from ${SPA_HOST}: ${url}`);
 }
 
 /**
- * Resolve dependencies for one build with pinned hashes, cached downloads, and local fallback.
- * @param {boolean} [updateLock=false] Refresh remote digests for an intentional dependency update.
- * @returns {Promise<Object>} Reader with read(), minified(), used inventory, and saveLock().
+ * Read the tagged Git blob when the CDN is unavailable. jsDelivr also serves
+ * generated .min.js and .min.css URLs for files tracked only as source.
+ * @param {URL} url Asset from the configured SPA.js release.
+ * @returns {Promise<Buffer>} Tagged bytes or their minified equivalent.
  */
-export async function dependencyReader(updateLock = false) {
-  const lockFile = fileURLToPath(new URL("./release-dependencies.json", import.meta.url));
-  const lock = updateLock ? {} : JSON.parse(await fs.readFile(lockFile, "utf8"));
+async function readTaggedAsset(url) {
+  const directory = process.env.SPA_ASSETS_ROOT || path.join(root, "../spa.js");
+  const file = decodeURIComponent(url.pathname.slice(new URL(SPA_HOST).pathname.length + 1));
+  const readBlob = (name) =>
+    execFileSync("git", ["show", `refs/tags/${SPA_VERSION}:${name}`], {
+      cwd: directory,
+      maxBuffer: 20 * 1024 * 1024,
+      stdio: ["ignore", "pipe", "ignore"]
+    });
+  try {
+    return readBlob(file);
+  } catch (error) {
+    const source = file.replace(/\.min(?=\.(js|css)$)/, "");
+    if (source === file) throw error;
+    const { code } = await transform(readBlob(source), { loader: path.extname(source).slice(1), minify: true, target: "es2022", legalComments: "inline" });
+    return Buffer.from(code);
+  }
+}
+
+/**
+ * Read a cached CDN download, or use the tagged checkout when the CDN is unavailable.
+ * @param {URL} url SPA asset URL.
+ * @param {string} cache Directory shared by release builds.
+ * @returns {Promise<Buffer>} Dependency bytes.
+ */
+async function readSPAAsset(url, cache) {
+  assertPinned(url);
+  const cacheFile = path.join(cache, sha256(url.href));
+  try {
+    return await fs.readFile(cacheFile);
+  } catch (error) {
+    if (error.code !== "ENOENT") throw error;
+  }
+
+  let body;
+  try {
+    const response = await fetch(url, { signal: AbortSignal.timeout(30000), redirect: "error" });
+    assert.ok(response.ok, `Unable to resolve ${url}: HTTP ${response.status}`);
+    assert.ok(!/text\/html/i.test(response.headers.get("content-type") || ""), `Expected dependency, received HTML: ${url}`);
+    body = Buffer.from(await response.arrayBuffer());
+    assert.ok(body.length && body.length <= 20 * 1024 * 1024, `Invalid dependency size: ${url}`);
+  } catch (error) {
+    try {
+      return await readTaggedAsset(url);
+    } catch {
+      throw error;
+    }
+  }
+
+  // Concurrent builds must only see complete downloads.
+  const temporary = `${cacheFile}.${randomUUID()}`;
+  try {
+    await fs.writeFile(temporary, body);
+    await fs.rename(temporary, cacheFile);
+  } finally {
+    await fs.rm(temporary, { force: true });
+  }
+  return body;
+}
+
+/**
+ * Resolve tagged CDN assets and local files for one build.
+ * @returns {Promise<Object>} Reader with read(), minified(), and the used inventory.
+ */
+export async function dependencyReader() {
   const used = new Map();
   const pending = new Map();
   const cache = path.join(os.tmpdir(), "stream-html-release-cache");
   await fs.mkdir(cache, { recursive: true });
   /**
-   * Read source or a locked remote asset and record its digest in the build inventory.
+   * Read source or a tagged remote asset and record its digest in the build inventory.
    * @param {URL|string} url Dependency location. Remote responses are bounded to 20 MiB.
    * @returns {Promise<Buffer>} Source bytes. Matching cached requests share their result.
-   * @throws {Error} Rejects unavailable required dependencies and mismatched pinned hashes.
+   * @throws {Error} Rejects unavailable required dependencies and URLs outside the configured release.
    */
   async function read(url) {
     url = new URL(url);
@@ -323,41 +380,7 @@ export async function dependencyReader(updateLock = false) {
     if (config.externalStyles.includes(url.href) || /font-?awesome|\/fa-(?:solid|regular|brands|v4compatibility)[^/]*\.(?:woff2?|ttf|svg)/i.test(url.pathname)) throw new Error(`Font Awesome must never be downloaded or embedded: ${url}`);
     if (pending.has(url.href)) return pending.get(url.href);
     const request = (async () => {
-      let body;
-      if (url.protocol === "file:") body = await fs.readFile(await containedFile(url));
-      else {
-        assertPinned(url);
-        assert.ok(updateLock || lock[url.href], `Unregistered dependency ${url}; review and run node .github/scripts/build.mjs --tag <tag> --update-dependencies`);
-        const cacheFile = path.join(cache, sha256(url.href));
-        try {
-          body = await fs.readFile(cacheFile);
-        } catch (error) {
-          if (error.code !== "ENOENT") throw error;
-        }
-        if (body && !updateLock && sha256(body) !== lock[url.href]) body = undefined;
-        if (!body) {
-          try {
-            const response = await fetch(url, { signal: AbortSignal.timeout(30000), redirect: "error" });
-            assert.ok(response.ok, `Unable to resolve ${url}: HTTP ${response.status}`);
-            body = Buffer.from(await response.arrayBuffer());
-            assert.ok(body.length && body.length <= 20 * 1024 * 1024, `Invalid dependency size: ${url}`);
-            assert.ok(!/text\/html/i.test(response.headers.get("content-type") || ""), `Expected dependency, received HTML: ${url}`);
-          } catch (error) {
-            // A local SPA checkout is usable only when its bytes match the pinned dependency lock.
-            if (!url.href.startsWith(`${SPA_HOST}/`) || !lock[url.href]) throw error;
-            try {
-              const directory = process.env.SPA_ASSETS_ROOT || path.join(root, "../spa.js");
-              body = await fs.readFile(path.join(directory, decodeURIComponent(url.pathname.slice(new URL(SPA_HOST).pathname.length + 1))));
-              assert.equal(sha256(body), lock[url.href]);
-            } catch {
-              throw error;
-            }
-          }
-          await fs.writeFile(cacheFile, body);
-        }
-        if (updateLock) lock[url.href] = sha256(body);
-        assert.equal(sha256(body), lock[url.href], `Dependency content changed: ${url}`);
-      }
+      const body = url.protocol === "file:" ? await fs.readFile(await containedFile(url)) : await readSPAAsset(url, cache);
       used.set(url.href, {
         source: url.protocol === "file:" ? path.relative(root, fileURLToPath(url)).split(path.sep).join("/") : url.href,
         sha256: sha256(body),
@@ -429,10 +452,6 @@ export async function dependencyReader(updateLock = false) {
       })();
       pending.set(key, result);
       return result;
-    },
-    /** @returns {Promise<void>} Persist refreshed dependency hashes when updates are enabled. */
-    async saveLock() {
-      if (updateLock) await fs.writeFile(lockFile, `${JSON.stringify(Object.fromEntries(Object.entries(lock).sort()), null, 2)}\n`);
     }
   };
 }
@@ -568,13 +587,12 @@ export function findScriptExpressions(source, expression) {
 /**
  * Build all distributions in a staging directory and replace the previous owned asset inventory.
  * @param {string} tag Validated release or local preview version.
- * @param {Object} options CLI switches, including the optional dependency-lock refresh.
  * @returns {Promise<void>} Writes dist/assets, its manifest copy, and experimental size diagnostics.
  * @throws {Error} Rejects invalid sources, failed required dependencies, and unexpected existing output.
  */
-async function buildRelease(tag, options) {
+async function buildRelease(tag) {
   const cdn = `https://cdn.jsdelivr.net/gh/${config.repository}@${tag}/`;
-  const dependencies = await dependencyReader(options["update-dependencies"]);
+  const dependencies = await dependencyReader();
   const projectLicense = await fs.readFile(path.join(root, "LICENSE.md"), "utf8");
   const cssCache = new Map();
   const jsCache = new Map();
@@ -891,7 +909,6 @@ async function buildRelease(tag, options) {
       }
     }
     manifest.dependencies = [...dependencies.used.values()].sort((a, b) => a.source.localeCompare(b.source, "en"));
-    await dependencies.saveLock();
     await save("RELEASE_NOTES.md", Buffer.from(releaseNotes(manifest)), null, "documentation");
     await fs.writeFile(path.join(assetDir, "manifest.json"), `${JSON.stringify(manifest, null, 2)}\n`);
     const checksums = [
@@ -1085,7 +1102,6 @@ if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.ar
   const { values } = parseArgs({
     options: {
       tag: { type: "string" },
-      "update-dependencies": { type: "boolean" },
       "embedded-controller": { type: "boolean" },
       check: { type: "boolean" },
       publish: { type: "boolean" }
@@ -1094,5 +1110,5 @@ if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.ar
   assert.ok(!(values.check && values.publish), "Choose either --check or --publish");
   if (values.check) await checkRelease();
   else if (values.publish) await publishRelease();
-  else await buildRelease(validateTag(values.tag || process.env.RELEASE_TAG || ""), values);
+  else await buildRelease(validateTag(values.tag || process.env.RELEASE_TAG || ""));
 }
