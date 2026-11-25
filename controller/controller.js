@@ -562,7 +562,13 @@ async function initControllerResource() {
       gamepadSupport.frame = requestAnimationFrame(gamepadSupport.tick);
     },
     pollGamepads() {
-      this.applyGamepads(Array.from(navigator.getGamepads?.() ?? []).filter((pad) => pad && pad.connected !== false));
+      const pads = [];
+      for (const pad of navigator.getGamepads?.() ?? []) {
+        if (!pad) continue;
+        const { connected = true } = pad;
+        if (connected) pads.push(pad);
+      }
+      this.applyGamepads(pads);
     },
     applyGamepads(pads) {
       const previous = this.gamepads;
@@ -600,17 +606,9 @@ async function initControllerResource() {
       const pad = this.gamepads[index] || { buttons: [], axes: [] };
       const player = index === 9 ? 9 : index + 1;
       if (!tester.controls.has(player)) return;
-      const buttons = byControllerArtwork.names;
-      buttons.forEach((name, id) => {
-        // Two-axis NES adapters can expose the D-pad as axes instead of standard buttons.
-        const axis = digitalValue(pad, id);
-        tester.updateButton(axis, player, name, id === 6 || id === 7 ? tester.DIGITAL_THRESHOLD : tester.ANALOGUE_BUTTON_THRESHOLD);
+      byControllerArtwork.names.forEach((name, id) => {
+        tester.updateButton(digitalValue(pad, id), player, name, buttonThreshold(id));
       });
-      if (settings.skin === "n64") {
-        // Standard pads use the right stick for C buttons; custom bindings can override slots 18-21.
-        const cButtons = [-(pad.axes[3] ?? 0), pad.axes[3] ?? 0, -(pad.axes[2] ?? 0), pad.axes[2] ?? 0];
-        cButtons.forEach((value, id) => tester.updateButton(pad.buttons[18 + id] ?? value, player, byControllerArtwork.names[18 + id], tester.ANALOGUE_STICK_THRESHOLD));
-      }
       tester.updateTrigger(pad.buttons[6], player, "button-left-shoulder-bottom");
       tester.updateTrigger(pad.buttons[7], player, "button-right-shoulder-bottom");
       tester.updateAxis(pad.axes[0] ?? 0, pad.axes[1] ?? 0, player, "stick-1", pad.buttons);
@@ -619,6 +617,12 @@ async function initControllerResource() {
   };
 
   // ===== INPUT HISTORY =====
+  function buttonThreshold(id) {
+    if (id === 6 || id === 7) return tester.DIGITAL_THRESHOLD;
+    if (settings.skin === "n64" && id >= 18 && id <= 21) return tester.ANALOGUE_STICK_THRESHOLD;
+    return tester.ANALOGUE_BUTTON_THRESHOLD;
+  }
+
   /** Read the same model-specific digital value for artwork and history from the mapped pad. */
   function digitalValue(pad, id) {
     if (settings.skin === "nes" && id >= 12 && id <= 15 && pad.buttons[id] === undefined) return [-(pad.axes[1] ?? 0), pad.axes[1] ?? 0, -(pad.axes[0] ?? 0), pad.axes[0] ?? 0][id - 12];
@@ -643,8 +647,7 @@ async function initControllerResource() {
         byControllerArtwork.names.forEach((name, id) => {
           const control = controls.get(name);
           if (!control || control.node.dataset.stickClick === "no") return;
-          const threshold = id === 6 || id === 7 ? tester.DIGITAL_THRESHOLD : settings.skin === "n64" && id >= 18 && id <= 21 ? tester.ANALOGUE_STICK_THRESHOLD : tester.ANALOGUE_BUTTON_THRESHOLD;
-          if (buttonValue(digitalValue(pad, id)) <= threshold) return;
+          if (buttonValue(digitalValue(pad, id)) <= buttonThreshold(id)) return;
           const label = control.node.dataset.label || control.node.getAttribute("aria-label") || name;
           tokens.push({
             id: `${source}:${name}`,
@@ -801,9 +804,10 @@ async function initControllerResource() {
       const stick = control.node;
       // Arcade D-pad input and axes share one position; simultaneous input never doubles travel.
       ({ x: horizontal, y: vertical } = stickInput(stick, horizontal, vertical, buttons));
-      const active = Math.hypot(horizontal, vertical) >= this.ANALOGUE_STICK_THRESHOLD;
+      const distance = Math.hypot(horizontal, vertical);
+      const active = distance >= this.ANALOGUE_STICK_THRESHOLD;
       const travel = this.STICK_OFFSET * Number(stick.dataset.travelScale || 1) * (stick.dataset.layout === "minimal" ? Number(stick.dataset.compactScale || 1) : 1);
-      const magnitude = Math.max(1, Math.hypot(horizontal, vertical));
+      const magnitude = Math.max(1, distance);
       const x = active ? (horizontal / magnitude) * travel : 0;
       const y = active ? (vertical / magnitude) * travel : 0;
       const wheel = this.controls.get(player)?.get(`${name}-wheel`)?.node;
