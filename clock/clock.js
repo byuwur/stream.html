@@ -453,13 +453,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       minute: "2-digit",
       ...(settings.seconds === "yes" ? { second: "2-digit" } : {})
     });
-    const faceFormat = new Intl.DateTimeFormat("en-US", {
-      ...options,
-      hourCycle: "h23",
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit"
-    });
     const dateFormat = byStream.dateTimeFormatter(settings.dateFormat, locale, {
       ...options,
       ...(settings.date === "yes" ? { year: "numeric", month: "short", day: "numeric" } : {}),
@@ -467,22 +460,28 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
     const weekdayFormat = new Intl.DateTimeFormat(locale, { ...options, weekday: "long" });
     const view = element("section", "clock", undefined, clocks);
-    let dial;
+    let face;
     if (settings.layout === "analog") {
-      dial = element("div", "dial", undefined, view);
+      const dial = element("div", "dial", undefined, view);
       dial.setAttribute("aria-label", "Analog clock");
       for (let i = 0; i < 12; i++) {
         const tick = element("i", "tick", undefined, dial);
         tick.style.rotate = `${i * 30}deg`;
       }
-      for (const hand of ["hour", "minute", "second"]) element("i", `hand ${hand}`, undefined, dial);
-      dial.querySelector(".second").hidden = !showSeconds;
+      face = {
+        dial,
+        format: new Intl.DateTimeFormat("en-US", { ...options, hourCycle: "h23", hour: "2-digit", minute: "2-digit", second: "2-digit" }),
+        hour: element("i", "hand hour", undefined, dial),
+        minute: element("i", "hand minute", undefined, dial),
+        second: element("i", "hand second", undefined, dial)
+      };
+      face.second.hidden = !showSeconds;
     }
     const display = element("div", "time", undefined, view);
     const date = element("p", "secondary", undefined, view);
     date.hidden = settings.date === "no" && settings.weekday === "no";
     if (settings.showZones === "yes" && zones.length > 1) element("p", "zone", zone || Intl.DateTimeFormat().resolvedOptions().timeZone, view);
-    return { timeFormat, faceFormat, dateFormat, weekdayFormat, dial, display, date, flaps: [], showTime: byStream.changingText(display, settings, "time"), showDate: byStream.changingText(date, settings, "date") };
+    return { timeFormat, dateFormat, weekdayFormat, face, display, date, flaps: [], showTime: byStream.changingText(display, settings, "time"), showDate: byStream.changingText(date, settings, "date") };
   });
   // ===== CLOCK SIZING AND UPDATES =====
   /**
@@ -532,12 +531,13 @@ document.addEventListener("DOMContentLoaded", async () => {
         const date = settings.dateFormat === "locale" ? view.dateFormat.format(now) : [settings.weekday === "yes" ? view.weekdayFormat.format(now) : "", settings.date === "yes" ? view.dateFormat.format(now) : ""].filter(Boolean).join(", ");
         view.showDate(date);
       }
-      if (view.dial) {
-        const p = Object.fromEntries(view.faceFormat.formatToParts(now).map((x) => [x.type, x.value]));
-        view.dial.querySelector(".hour").style.rotate = `${(Number(p.hour) % 12) * 30 + Number(p.minute) * 0.5}deg`;
-        view.dial.querySelector(".minute").style.rotate = `${Number(p.minute) * 6 + Number(p.second) * 0.1}deg`;
-        view.dial.querySelector(".second").style.rotate = `${Number(p.second) * 6}deg`;
-        view.dial.setAttribute("aria-label", text);
+      if (view.face) {
+        const face = view.face;
+        const p = Object.fromEntries(face.format.formatToParts(now).map((x) => [x.type, x.value]));
+        face.hour.style.rotate = `${(Number(p.hour) % 12) * 30 + Number(p.minute) * 0.5}deg`;
+        face.minute.style.rotate = `${Number(p.minute) * 6 + Number(p.second) * 0.1}deg`;
+        face.second.style.rotate = `${Number(p.second) * 6}deg`;
+        face.dial.setAttribute("aria-label", text);
       }
     }
     fitLine();
