@@ -199,7 +199,7 @@ test("HTML formatting preserves embedded minified source and multiline string wh
           </head>
           <body>
             <script data-source="label.js">
-              ${javascript};
+              ${javascript}
             </script>
           </body>
         </html>`
