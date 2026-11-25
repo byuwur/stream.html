@@ -320,6 +320,7 @@
       [/animation|motion|pulse|effect|transition/i, "fa-wand-magic-sparkles"],
       [/loop|repeat|cycle/i, "fa-repeat"],
       [/layout|composition|align|style|mode|shape/i, "fa-layer-group"],
+      [/excluded/i, "fa-eye-slash"],
       [/show|display|visible/i, "fa-eye"],
       [/count|number|seed|round|density/i, "fa-hashtag"],
       [/name|player/i, "fa-user"]
@@ -657,9 +658,8 @@
       const endScript = "</" + "script>";
       document.body.insertAdjacentHTML(
         "beforeend",
-        /* HTML */ `
-        <template id="site-analytics-frame">
-          <meta name="referrer" content="no-referrer">
+        /* HTML */ ` <template id="site-analytics-frame">
+          <meta name="referrer" content="no-referrer" />
           ${`<script>
             window.dataLayer = [];
             function gtag() { window.dataLayer.push(arguments); }
@@ -772,7 +772,7 @@
                 data-section="advanced"
                 data-bs-toggle="tooltip"
                 data-bs-placement="bottom"
-                data-bs-fallback-placements="[&quot;bottom&quot;]"
+                data-bs-fallback-placements='["bottom"]'
                 title="Advanced options"
                 aria-label="Advanced options"
                 aria-keyshortcuts="Alt+Shift+A"
@@ -1989,7 +1989,9 @@
         `);
         const controls = jqRow.find(".btn-group");
         if (duplicate)
-          $(/* HTML */ `<button type="button" class="btn btn-sm btn-outline-primary" data-action="duplicate" aria-label="Duplicate panel" title="Duplicate panel"><i class="fa-solid fa-copy" aria-hidden="true"></i></button>`).prependTo(controls);
+          $(/* HTML */ `<button type="button" class="btn btn-sm btn-outline-primary" data-action="duplicate" aria-label="Duplicate panel" title="Duplicate panel"><i class="fa-solid fa-copy" aria-hidden="true"></i></button>`).prependTo(
+            controls
+          );
         if (byConfigurator.initImageExport && resource.imageExport?.field === name)
           $(/* HTML */ `<button type="button" class="btn btn-sm btn-outline-primary" data-export-row aria-label="Download panel" title="Download panel"><i class="fa-solid fa-download" aria-hidden="true"></i></button>`).prependTo(controls);
         const jqSelect = jqRow.find("select");

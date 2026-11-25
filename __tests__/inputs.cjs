@@ -307,6 +307,11 @@ test("gaming layouts close empty rows and columns while retaining keyboard geome
   const sparse = await layout(`layout=full&layoutDensity=compact&displayedKeys=${encodeURIComponent('["Escape","KeyA","Numpad1"]')}`);
   assert.ok(sparse.width < sparse.keys.KeyA.width * 4);
   assert.ok(sparse.keys.Numpad1.y < sparse.keys.KeyA.height * 3);
+
+  const filters = new URLSearchParams({ layout: "wasd", displayedKeys: '["KeyW","KeyA","KeyE"]', excludedKeys: '["KeyW"]' });
+  assert.deepEqual(Object.keys((await layout(filters)).keys), ["KeyA"]);
+  filters.set("excludedKeys", '["KeyW","KeyA"]');
+  assert.deepEqual((await layout(filters)).keys, {});
 });
 
 test("history groups buttons together and centers the repeat count underneath", { skip: coreOnly, timeout: 30000 }, async (t) => {

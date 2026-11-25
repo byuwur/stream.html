@@ -26,6 +26,14 @@ async function initKeyboardResource() {
     when: (settings) => ["keyboard", "both"].includes(settings.mode),
     retainInactive: true
   };
+  const physicalKeyList = {
+    ...keyboardFields,
+    type: "entries",
+    default: [],
+    validate: parseKeys,
+    maxlength: 8000,
+    entries: { choices: keyOptions, choiceLabel: "Physical key", textFields: [], newEntry: "KeyW", limit: Object.keys(layouts.keys).length }
+  };
   const labelFields = {
     section: "Input",
     when: (settings) => keyboardFields.when(settings) || (settings.showHistory === "yes" && settings.historySource !== "mouse"),
@@ -72,7 +80,7 @@ async function initKeyboardResource() {
       keyboard: {
         label: "Keyboard",
         selector: "#keyboard",
-        fields: ["layout", "platform", "standard", "displayedKeys", "layoutDensity", "keySpacing", "keyboardScale"],
+        fields: ["layout", "platform", "standard", "displayedKeys", "excludedKeys", "layoutDensity", "keySpacing", "keyboardScale"],
         groups: ["Key groups"],
         when: ["mode", "both", "keyboard"]
       },
@@ -105,16 +113,18 @@ async function initKeyboardResource() {
       standard: { ...labelFields, type: "select", default: "ansi", label: "Physical layout", options: { ansi: "ANSI", iso: "ISO" } },
       legends: { ...labelFields, type: "select", default: "qwerty", label: "Legend layout", options: { qwerty: "QWERTY (US)", qwertz: "QWERTZ (German)", azerty: "AZERTY (French)" } },
       displayedKeys: {
-        ...keyboardFields,
-        type: "entries",
-        default: [],
+        ...physicalKeyList,
         label: "Selected physical keys",
         subsection: "Displayed controls",
-        description: "Empty shows every slot in the preset. Choose physical keys from the list.",
-        validate: parseKeys,
-        maxlength: 8000,
-        entries: { choices: keyOptions, choiceLabel: "Physical key", textFields: [], newEntry: "KeyW", limit: Object.keys(layouts.keys).length },
+        description: "Leave empty to start with all keys in the preset.",
         addLabel: "Add key"
+      },
+      excludedKeys: {
+        ...physicalKeyList,
+        label: "Excluded physical keys",
+        subsection: "Excluded controls",
+        description: "Hide these keys even if they are selected under Displayed controls.",
+        addLabel: "Exclude key"
       },
       keyLabels: {
         ...labelFields,
@@ -1852,7 +1862,9 @@ function createImageTint(defs, settings, svg) {
     }
     const gaming = gamingKeys[preset] ? new Set(gamingKeys[preset]) : null;
     const selected = settings.displayedKeys?.length ? new Set(settings.displayedKeys) : null;
+    const excluded = new Set(settings.excludedKeys);
     const visible = result.filter((slot) => {
+      if (excluded.has(slot.code)) return false;
       if (gaming && !gaming.has(slot.code)) return false;
       if (preset === "arrows" && keys[slot.code].group !== "arrows") return false;
       if (preset === "function" && keys[slot.code].group !== "function") return false;

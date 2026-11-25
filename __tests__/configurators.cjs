@@ -400,6 +400,45 @@ test("shortcut keys can be selected, added, reordered and removed independently 
   assert.deepEqual(await caps.evaluateAll((nodes) => nodes.map((node) => node.title)), ["Ctrl", "1"]);
 });
 
+test("excluding a preset key updates the keyboard preview and survives reopening the overlay URL", async (t) => {
+  const browser = await launchBrowser();
+  t.after(() => browser.close());
+  const page = await browser.newPage();
+  await serve(page, await loadAssets(editorAssets));
+  await page.goto("https://stream.test/keyboard/?mode=both&layout=lol#configure");
+  const board = page.frameLocator("#overlay-preview").locator('#keyboard-overlay[data-ready="yes"] #keyboard');
+  const keyW = board.locator('[data-code="KeyW"]');
+  const keyE = board.locator('[data-code="KeyE"]');
+  await keyW.waitFor();
+
+  const keyboard = page.locator('[data-config-section="Keyboard"].show');
+  const excluded = keyboard.locator('[data-config-subsection="Excluded controls"].show');
+  async function openExcludedControls() {
+    const section = page.getByRole("button", { name: "Keyboard", exact: true });
+    if ((await section.getAttribute("aria-expanded")) !== "true") await section.click();
+    const heading = keyboard.getByRole("button", { name: "Excluded controls", exact: true });
+    if ((await heading.getAttribute("aria-expanded")) !== "true") await heading.click();
+    await excluded.waitFor();
+  }
+
+  await openExcludedControls();
+  assert.equal(await excluded.evaluate((body) => body.closest("section").previousElementSibling.querySelector("button").textContent.trim()), "Displayed controls");
+  await excluded.getByRole("button", { name: "Exclude key" }).click();
+  const url = await page.locator("#overlay-url").inputValue();
+  assert.deepEqual(JSON.parse(new URL(url).searchParams.get("excludedKeys")), ["KeyW"]);
+  await page.waitForFunction((url) => document.getElementById("overlay-preview").contentDocument?.URL === url, url);
+  await keyE.waitFor();
+  assert.equal(await keyW.count(), 0);
+
+  await page.goto(url + "#configure");
+  await keyE.waitFor();
+  assert.equal(await keyW.count(), 0);
+  await openExcludedControls();
+  assert.equal(await excluded.locator("select").inputValue(), "KeyW");
+  await excluded.getByRole("button", { name: "Remove entry" }).click();
+  await keyW.waitFor();
+});
+
 test("key binding fields capture combinations, cancel, and round-trip through Counter", async (t) => {
   const browser = await launchBrowser();
   t.after(() => browser.close());
